@@ -2,7 +2,14 @@
 {-# LANGUAGE GADTs, MultiParamTypeClasses, PolyKinds, ScopedTypeVariables    #-}
 {-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances, ViewPatterns #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults                    #-}
-module Polynomial where
+module Polynomial ( Polynomial, Monomial, MonomialOrder, Order
+                  , lex, revlex, graded, grlex, grevlex
+                  , IsPolynomial, coeff, (|*|), (|+|)
+                  , castMonomial, castPolynomial
+                  , scastMonomial, scastPolynomial
+                  , normalize, injectCoeff, varX, var
+                  , module Field, module BaseTypes
+                  ) where
 import           BaseTypes
 import           Control.Lens
 import           Data.List    (intercalate)
@@ -150,4 +157,3 @@ var vIndex = Polynomial $ M.singleton (fromList sing (buildIndex vIndex)) one
 buildIndex :: SNat (S n) -> [Int]
 buildIndex (SS SZ) = [1]
 buildIndex (SS (SS n))  = 0 : buildIndex (SS n)
-
