@@ -10,7 +10,7 @@ f = x^2 * y + x * y^2 + y^2
 f1 = x * y - 1
 f2 = y^2 - 1
 
-divPolynomial :: (Show r, IsMonomialOrder order, IsPolynomial r n, Field r)
+divPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)
                   => OrderedPolynomial r order n -> [OrderedPolynomial r order n] -> ([(OrderedPolynomial r order n, OrderedPolynomial r order n)], OrderedPolynomial r order n)
 divPolynomial f fs = loop f zero (zip (nub fs) (repeat zero))
   where
