@@ -77,11 +77,11 @@ instance Wrapped (Map (Monomial n) r) (Map (Monomial m) q) (Polynomial r n) (Pol
     wrapped = iso Polynomial terms
 
 -- | Polynomial addition, which automatically casts polynomial type.
-(|+|) :: ( IsPolynomial r (Max n m), n :<= Max n m, m :<= Max n m)
+(|+|) :: (IsPolynomial r (Max n m), n :<= Max n m, m :<= Max n m)
       => Polynomial r n -> Polynomial r m -> Polynomial r (Max n m)
 f |+| g = castPolynomial f .+. castPolynomial g
 
-(|*|) :: ( IsPolynomial r (Max n m), n :<= Max n m, m :<= Max n m)
+(|*|) :: (IsPolynomial r (Max n m), n :<= Max n m, m :<= Max n m)
       => Polynomial r n -> Polynomial r m -> Polynomial r (Max n m)
 f |*| g = castPolynomial f .*. castPolynomial g
 
