@@ -103,16 +103,17 @@ normalize = unwrapped %~ M.filter (/= zero)
 instance IsPolynomial r n => Eq (Polynomial r n) where
   (normalize -> Polynomial f) == (normalize -> Polynomial g) = f == g
 
-injectCoeff :: forall r n. (Sing n) => r -> Polynomial r n
-injectCoeff r = Polynomial $ M.singleton (fromList (sing :: SNat n) []) r
+injectCoeff :: forall r n. (NoetherianRing r, Sing n) => r -> Polynomial r n
+injectCoeff r | r == zero = Polynomial M.empty
+              | otherwise = Polynomial $ M.singleton (fromList (sing :: SNat n) []) r
 
 -- | By Hilbert's finite basis theorem, a polynomial ring over a noetherian ring is also a noetherian ring.
 instance IsPolynomial r n => NoetherianRing (Polynomial r n) where
-  (Polynomial f) .+. (Polynomial g) = Polynomial $ M.unionWith (.+.) f g
+  (Polynomial f) .+. (Polynomial g) = normalize $ Polynomial $ M.unionWith (.+.) f g
   Polynomial (M.toList -> d1) .*.  Polynomial (M.toList -> d2) =
     let dic = [ (zipWithV (+) a b, r .*. r') | (a, r) <- d1, (b, r') <- d2 ]
-    in Polynomial $ M.fromListWith (.+.) dic
-  neg = unwrapped %~ fmap neg
+    in normalize $ Polynomial $ M.fromListWith (.+.) dic
+  neg  = unwrapped %~ fmap neg
   one  = injectCoeff one
   zero = Polynomial M.empty
 
