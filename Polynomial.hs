@@ -9,7 +9,9 @@ module Polynomial ( Polynomial, Monomial, MonomialOrder, Order
                   , castMonomial, castPolynomial
                   , scastMonomial, scastPolynomial
                   , normalize, injectCoeff, varX, var
-                  , module Field, module BaseTypes
+                  , module Field, module BaseTypes, divs, tryDiv
+                  , leadingTerm, leadingMonomial, leadingCoeff
+                  , leadingTermWith, leadingMonomialWith, leadingCoeffWith
                   , OrderedMonomial(..), Grevlex, Revlex, Lex, Grlex) where
 import           BaseTypes
 import           Control.Lens
@@ -203,3 +205,37 @@ var vIndex = Polynomial $ M.singleton (fromList sing (buildIndex vIndex)) one
 buildIndex :: SNat (S n) -> [Int]
 buildIndex (SS SZ) = [1]
 buildIndex (SS (SS n))  = 0 : buildIndex (SS n)
+
+useOrder :: (IsPolynomial r n, IsOrder order) => order -> Map (Monomial n) r -> Map (OrderedMonomial order n) r
+useOrder _ = M.mapKeys OrderedMonomial
+
+leadingTermWith :: forall order r n. (IsOrder order, IsPolynomial r n)
+                => order -> Polynomial r n -> (r, Monomial n)
+leadingTermWith order (Polynomial d) =
+  case M.maxViewWithKey (useOrder order d) of
+    Just ((deg, c), _) -> (c, getMonomial deg)
+    Nothing -> (zero, fromList sing [])
+
+leadingCoeffWith :: (IsPolynomial r n, IsOrder order) => order -> Polynomial r n -> r
+leadingCoeffWith order = fst . leadingTermWith order
+
+leadingMonomialWith :: (IsPolynomial r n, IsOrder order) => order -> Polynomial r n -> Monomial n
+leadingMonomialWith order = snd . leadingTermWith order
+
+leadingTerm :: IsPolynomial r n => Polynomial r n -> (r, Monomial n)
+leadingTerm = leadingTermWith Grevlex
+
+leadingMonomial :: IsPolynomial r n => Polynomial r n -> Monomial n
+leadingMonomial = snd . leadingTerm
+
+leadingCoeff :: IsPolynomial r n => Polynomial r n -> r
+leadingCoeff = fst . leadingTerm
+
+divs :: Monomial n -> Monomial n -> Bool
+xs `divs` ys = and $ toList $ zipWithV (<=) xs ys
+
+tryDiv :: Field r => (r, Monomial n) -> (r, Monomial n) -> Maybe (r, Monomial n)
+tryDiv (a, f) (b, g)
+    | b == zero  = Nothing
+    | g `divs` f = Just (a .*. inv b, zipWithV (-) f g)
+    | otherwise  = Nothing
