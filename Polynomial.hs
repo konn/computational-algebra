@@ -8,7 +8,7 @@ import           Control.Lens
 import           Data.List    (intercalate)
 import           Data.Map     (Map)
 import qualified Data.Map     as M
-import Data.Maybe
+import           Data.Maybe
 import           Data.Monoid
 import           Data.Ord
 import           Field
@@ -130,7 +130,6 @@ instance (IsPolynomial r n, Show r) => Show (Polynomial r n) where
 isConstantMonomial :: (Eq a, Num a) => Vector n a -> Bool
 isConstantMonomial v = all (== 0) $ toList v
 
-
 -- | We provide Num instance to use trivial injection R into R[X].
 --   Do not use signum or abs.
 instance (IsPolynomial r n, Num r) => Num (Polynomial r n) where
@@ -139,6 +138,7 @@ instance (IsPolynomial r n, Num r) => Num (Polynomial r n) where
   fromInteger = normalize . injectCoeff . fromInteger
   signum f = if f == zero then zero else injectCoeff 1
   abs = id
+  negate = neg
 
 varX :: forall r n. (NoetherianRing r, Sing n, One :<= n) => Polynomial r n
 varX = Polynomial $ M.singleton (fromList (sing :: SNat n) [1]) one
