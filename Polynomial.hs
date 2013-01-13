@@ -1,6 +1,7 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, MultiParamTypeClasses, PolyKinds, ScopedTypeVariables    #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE StandaloneDeriving, TypeFamilies, TypeOperators                 #-}
+{-# LANGUAGE UndecidableInstances, ViewPatterns                              #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults                    #-}
 module Polynomial ( Polynomial, Monomial, MonomialOrder, Order
                   , lex, revlex, graded, grlex, grevlex
@@ -9,7 +10,7 @@ module Polynomial ( Polynomial, Monomial, MonomialOrder, Order
                   , scastMonomial, scastPolynomial
                   , normalize, injectCoeff, varX, var
                   , module Field, module BaseTypes
-                  ) where
+                  , OrderedMonomial(..), Grevlex, Revlex, Lex, Grlex) where
 import           BaseTypes
 import           Control.Lens
 import           Data.List    (intercalate)
@@ -66,8 +67,53 @@ grlex = graded lex
 grevlex :: MonomialOrder n
 grevlex = graded revlex
 
+-- | A wrapper for monomials with a certain (monomial) order.
+newtype OrderedMonomial ordering n = OrderedMonomial { getMonomial :: Monomial n }
+deriving instance (Eq (Monomial n)) => Eq (OrderedMonomial ordering n)
+
+-- | Class to lookup ordering from its (type-level) name.
+class IsOrder ordering where
+  cmpMonomial :: Proxy ordering -> MonomialOrder n
+
+-- * Names for orderings.
+--   We didn't choose to define one single type for ordering names for the extensibility.
+data Grevlex = Grevlex          -- Graded reversed lexicographical order
+               deriving (Show, Eq, Ord)
+data Lex = Lex                  -- Lexicographical order
+           deriving (Show, Eq, Ord)
+data Grlex = Grlex              -- Graded lexicographical order
+             deriving (Show, Eq, Ord)
+data Revlex = Revlex            -- Reversed lexicographical order
+              deriving (Show, Eq, Ord)
+
+-- They're all total orderings.
+instance IsOrder Grevlex where
+  cmpMonomial _ = grevlex
+
+instance IsOrder Revlex where
+  cmpMonomial _ = revlex
+
+instance IsOrder Lex where
+  cmpMonomial _ = lex
+
+instance IsOrder Grlex where
+  cmpMonomial _ = grlex
+
+-- | Class for Monomial orders.
+class IsOrder name => IsMonomialOrder name where
+
+-- Note that Revlex is not a monomial order.
+-- This distinction is important when we calculate a quotient or Groebner basis.
+instance IsMonomialOrder Grlex
+instance IsMonomialOrder Grevlex
+instance IsMonomialOrder Lex
+
+-- | Special ordering for ordered-monomials.
+instance (Eq (Monomial n), IsOrder name) => Ord (OrderedMonomial name n) where
+  OrderedMonomial m `compare` OrderedMonomial n = cmpMonomial (Proxy :: Proxy name) m n
+
+-- | For simplicity, we choose grevlex for the default monomial ordering (for the sake of efficiency).
 instance (Eq (Monomial n)) => Ord (Monomial n) where
-  -- | We choose `grevlex` for the default monomial ordering (for tha sake of efficiency).
   compare = grevlex
 
 -- | n-ary polynomial ring over some noetherian ring R.
@@ -125,8 +171,8 @@ instance IsPolynomial r n => NoetherianRing (Polynomial r n) where
   zero = Polynomial M.empty
 
 instance (IsPolynomial r n, Show r) => Show (Polynomial r n) where
-  show p@(Polynomial d)
-      | p == zero = "0"
+  show p0@(Polynomial d)
+      | p0 == zero = "0"
       | otherwise = intercalate " + " $ map showTerm $ M.toDescList d
     where
       showTerm (deg, c) = let cstr = if (c /= one || isConstantMonomial deg) then show c ++ " " else ""
