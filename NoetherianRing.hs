@@ -23,6 +23,8 @@ class Eq r => NoetherianRing r where
   (.+.) :: r -> r -> r
   -- | Multiplication
   (.*.) :: r -> r -> r
+  (.-.) :: r -> r -> r
+  a .-. b = a .+. neg b
   -- | Additive inverse
   neg   :: r -> r
   -- | Multiplicative identity

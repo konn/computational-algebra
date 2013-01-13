@@ -5,6 +5,9 @@ module BaseTypes where
 
 data Proxy a = Proxy
 
+proxy :: a -> Proxy a
+proxy _ = Proxy
+
 data Nat = Z | S Nat
 data Vector (n :: Nat) (a :: *) where
   Nil  :: Vector Z a
