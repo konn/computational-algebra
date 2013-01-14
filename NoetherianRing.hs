@@ -2,7 +2,6 @@
 module NoetherianRing (Ideal(..), NoetherianRing(..)) where
 import Data.Complex
 import Data.Ratio
-import Data.Set     (Set)
 
 class Eq r => NoetherianRing r where
   -- ^ Noetherian ring R should satisfy following equations:
@@ -34,9 +33,10 @@ class Eq r => NoetherianRing r where
 
 infixl 7 .*.
 infixl 6 .+.
+infixl 6 .-.
 
 -- | An ideal of noehterian ring R.
-newtype Ideal r = Ideal { generators :: Set r }
+newtype Ideal r = Ideal { generators :: [r] }
 
 instance NoetherianRing Int where
   (.+.) = (+)

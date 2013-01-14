@@ -5,24 +5,25 @@
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults                    #-}
 module Polynomial ( Polynomial, Monomial, MonomialOrder, Order
                   , lex, revlex, graded, grlex, grevlex
-                  , IsPolynomial, coeff, (|*|), (|+|)
-                  , castMonomial, castPolynomial, toPolynomial
+                  , IsPolynomial, coeff, (|*|), (|+|), lcmMonomial, sPolynomial
+                  , castMonomial, castPolynomial, toPolynomial, changeOrder
                   , scastMonomial, scastPolynomial, OrderedPolynomial
-                  , normalize, injectCoeff, varX, var
+                  , normalize, injectCoeff, varX, var, getTerms
                   , module Field, module BaseTypes, divs, tryDiv
                   , leadingTerm, leadingMonomial, leadingCoeff
-                  , OrderedMonomial(..), Grevlex, Revlex, Lex, Grlex
+                  , OrderedMonomial(..), Grevlex(..), Revlex(..), Lex(..), Grlex(..)
                   , IsOrder, IsMonomialOrder) where
 import           BaseTypes
+import           Control.Arrow
 import           Control.Lens
-import           Data.List    (intercalate)
-import           Data.Map     (Map)
-import qualified Data.Map     as M
+import           Data.List     (intercalate)
+import           Data.Map      (Map)
+import qualified Data.Map      as M
 import           Data.Maybe
 import           Data.Monoid
 import           Data.Ord
 import           Field
-import           Prelude      hiding (lex)
+import           Prelude       hiding (lex)
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i.
 type Monomial n = Vector n Int
@@ -77,7 +78,7 @@ instance Wrapped (Monomial n) (Monomial m) (OrderedMonomial o n) (OrderedMonomia
   wrapped = iso OrderedMonomial getMonomial
 
 -- | Class to lookup ordering from its (type-level) name.
-class IsOrder ordering where
+class IsOrder (ordering :: *) where
   cmpMonomial :: Proxy ordering -> MonomialOrder n
 
 -- * Names for orderings.
@@ -132,14 +133,9 @@ type IsPolynomial r n = (NoetherianRing r, Eq (Monomial n), Sing n)
 coeff :: (IsOrder order, IsPolynomial r n) => Monomial n -> OrderedPolynomial r order n -> r
 coeff d = M.findWithDefault zero (OrderedMonomial d) . terms
 
-instance Wrapped (Map (OrderedMonomial order n) r) (Map (OrderedMonomial order m) q)
-                 (OrderedPolynomial r order n)     (OrderedPolynomial q order m) where
+instance Wrapped (Map (OrderedMonomial order n) r) (Map (OrderedMonomial order' m) q)
+                 (OrderedPolynomial r order n)     (OrderedPolynomial q order' m) where
     wrapped = iso Polynomial  terms
-
-instance (IsPolynomial r n, IsPolynomial q m)
-    => Wrapped (Map (Monomial n) r) (Map (Monomial m) q)
-               (Polynomial r n)     (Polynomial q m) where
-    wrapped = iso (Polynomial . M.mapKeys OrderedMonomial) (M.mapKeys getMonomial . terms)
 
 -- | Polynomial addition, which automatically casts polynomial type.
 (|+|) :: ( IsPolynomial r n, IsPolynomial r m, IsPolynomial r (Max n m)
@@ -152,17 +148,20 @@ f |+| g = castPolynomial f .+. castPolynomial g
       => Polynomial r n -> Polynomial r m -> Polynomial r (Max n m)
 f |*| g = castPolynomial f .*. castPolynomial g
 
-castMonomial :: forall n m. (Sing m, n :<= m) => Monomial n -> Monomial m
-castMonomial = fromList (sing :: SNat m) . toList
+castMonomial :: (IsOrder o, IsOrder o', Sing m, n :<= m) => OrderedMonomial o n -> OrderedMonomial o' m
+castMonomial = unwrapped %~ fromList sing . toList
 
-scastMonomial :: (n :<= m) => SNat m -> Monomial n -> Monomial m
-scastMonomial snat = fromList snat . toList
+scastMonomial :: (n :<= m) => SNat m -> OrderedMonomial o n -> OrderedMonomial o m
+scastMonomial snat = unwrapped %~ fromList snat . toList
 
-castPolynomial :: (IsPolynomial r n, IsPolynomial r m, n :<= m) => Polynomial r n -> Polynomial r m
+castPolynomial :: (IsPolynomial r n, IsPolynomial r m, IsOrder o, IsOrder o', n :<= m)
+               => OrderedPolynomial r o n
+               -> OrderedPolynomial r o' m
 castPolynomial = unwrapped %~ M.mapKeys castMonomial
 
-scastPolynomial :: (IsPolynomial r n, IsPolynomial r m, n :<= m) => SNat m -> Polynomial r n -> Polynomial r m
-scastPolynomial m = unwrapped %~ M.mapKeys (scastMonomial m)
+scastPolynomial :: (IsOrder o, IsOrder o', IsPolynomial r n, IsPolynomial r m, n :<= m)
+                => SNat m -> OrderedPolynomial r o n -> OrderedPolynomial r o' m
+scastPolynomial _ = castPolynomial
 
 normalize :: (IsOrder order, IsPolynomial r n) => OrderedPolynomial r order n -> OrderedPolynomial r order n
 normalize = unwrapped %~ M.filter (/= zero)
@@ -242,3 +241,22 @@ tryDiv :: Field r => (r, Monomial n) -> (r, Monomial n) -> (r, Monomial n)
 tryDiv (a, f) (b, g)
     | g `divs` f = (a .*. inv b, zipWithV (-) f g)
     | otherwise  = error "cannot divide."
+
+lcmMonomial :: Monomial n -> Monomial n -> Monomial n
+lcmMonomial = zipWithV max
+
+sPolynomial :: (IsPolynomial k n, Field k, IsOrder order)
+            => OrderedPolynomial k order n
+            -> OrderedPolynomial k order n -> OrderedPolynomial k order n
+sPolynomial f g =
+    let h = (one, lcmMonomial (leadingMonomial f) (leadingMonomial g))
+    in toPolynomial (h `tryDiv` leadingTerm f) .*. f .-. toPolynomial (h `tryDiv` leadingTerm g) .*. g
+
+changeOrder :: (Eq (Monomial n), IsOrder o, IsOrder o', n :<= n, Sing n)
+            => o' -> OrderedPolynomial k o n -> OrderedPolynomial k o' n
+changeOrder _ = unwrapped %~ M.mapKeys castMonomial
+
+getTerms :: OrderedPolynomial k order n -> [(k, Monomial n)]
+getTerms = map (snd &&& getMonomial . fst) .  M.toDescList . terms
+
+
