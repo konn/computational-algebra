@@ -1,20 +1,18 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts     #-}
-{-# LANGUAGE MultiParamTypeClasses, RankNTypes, TypeOperators #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses, ParallelListComp, RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables, TypeOperators                  #-}
 module Algorithms where
-import Data.List
-import Polynomial
+import           Control.Lens
+import           Data.List
+import qualified Data.Map     as M
+import           Polynomial
 
-x, y, a, b, c, s, f, f1, f2 :: Polynomial Rational (S (S (S Three)))
+x, y, f, f1, f2 :: Polynomial Rational Two
 x = var sOne
 y = var sTwo
 f = x^2 * y + x * y^2 + y^2
 f1 = x * y - 1
 f2 = y^2 - 1
-
-a = var sThree
-b = var (SS sThree)
-c = var (SS (SS sThree))
-s = var (SS (SS (SS sThree)))
 
 divModPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)
                   => OrderedPolynomial r order n -> [OrderedPolynomial r order n] -> ([(OrderedPolynomial r order n, OrderedPolynomial r order n)], OrderedPolynomial r order n)
@@ -86,11 +84,37 @@ groebnerTest :: (IsPolynomial k n, Field k, IsMonomialOrder order)
              => OrderedPolynomial k order n -> [OrderedPolynomial k order n] -> Bool
 groebnerTest f fs = f `modPolynomial` fs == zero
 
-
-thEliminationIdeal :: (IsPolynomial k (n :+: m), Field k, IsMonomialOrder order, ((n :+:m) :<= (n :+: m)))
+thEliminationIdeal :: ( IsMonomialOrder ord, Field k, IsPolynomial k (n :+: m)
+                      , (n :+: m) :<= (n :+: m))
                    => SNat n
-                   -> Ideal (OrderedPolynomial k order (n :+: m))
+                   -> Ideal (OrderedPolynomial k ord (n :+: m))
                    -> Ideal (OrderedPolynomial k Lex (n :+: m))
-n `thEliminationIdeal` ideal = Ideal [f | f <- calcGroebnerBasisWith Lex ideal
-                                        , all (all (== 0) . take (toInt n) . toList . snd) $ getTerms f
-                                     ]
+n `thEliminationIdeal` ideal = toInt n `thEliminationIdeal'` ideal
+
+thEliminationIdeal' :: (IsMonomialOrder ord, Field k, IsPolynomial k n, n :<= n)
+                   => Int
+                   -> Ideal (OrderedPolynomial k ord n)
+                   -> Ideal (OrderedPolynomial k Lex n)
+n `thEliminationIdeal'` ideal = Ideal [f | f <- calcGroebnerBasisWith Lex ideal
+                                      , all (all (== 0) . take n . toList . snd) $ getTerms f
+                                      ]
+
+shiftR :: forall k r n ord. (Field r, IsPolynomial r n, IsPolynomial r (k :+: n), Sing k, IsOrder ord)
+       => SNat k -> OrderedPolynomial r ord n -> OrderedPolynomial r ord (k :+: n)
+shiftR k = transformMonomial (appendV (fromList k []))
+
+intersection :: forall r k n ord.
+                ( IsMonomialOrder ord, Field r, IsPolynomial r k, IsPolynomial r n
+                , IsPolynomial r (k :+: n), (k :+: n) :<= (k :+: n)
+                )
+             => Vector k (Ideal (OrderedPolynomial r ord n)) -> Ideal (OrderedPolynomial r Lex n)
+intersection Nil = Ideal [one]
+intersection idsv@(_ :- _) =
+    let sk = sLengthV idsv :: SNat k
+        sn = sing :: SNat n
+        k  = toInt sk
+        ts  = take k $ genVars (sk %+ sn)
+        tis = [map ((t .*.) . shiftR sk) xs| Ideal xs <- toList idsv | t <- ts]
+        j = Ideal $ (one .-. foldr (.+.) zero ts) : concat tis
+    in k `thEliminationIdeal'` j & unwrapped %~ map (transformMonomial (dropV sk))
+

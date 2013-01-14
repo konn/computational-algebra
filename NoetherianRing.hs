@@ -1,5 +1,6 @@
-{-# LANGUAGE FlexibleInstances, TypeSynonymInstances #-}
-module NoetherianRing (Ideal(..), NoetherianRing(..)) where
+{-# LANGUAGE FlexibleInstances, TypeSynonymInstances, MultiParamTypeClasses #-}
+module NoetherianRing (Ideal(..), NoetherianRing(..), (.*)) where
+import Control.Lens
 import Data.Complex
 import Data.Ratio
 
@@ -80,3 +81,10 @@ instance RealFloat r => NoetherianRing (Complex r) where
   neg   = negate
   one   = 1
   zero  = 0
+
+(.*) :: NoetherianRing r => r -> Ideal r -> Ideal r
+c .* Ideal xs = Ideal (map (c .*.) xs)
+
+instance Wrapped [a] [b] (Ideal a) (Ideal b)  where
+  wrapped = iso Ideal generators
+

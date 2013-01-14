@@ -4,13 +4,13 @@
 {-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances, ViewPatterns #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults                    #-}
 module Polynomial ( Polynomial, Monomial, MonomialOrder, Order
-                  , lex, revlex, graded, grlex, grevlex
+                  , lex, revlex, graded, grlex, grevlex, transformMonomial
                   , IsPolynomial, coeff, (|*|), (|+|), lcmMonomial, sPolynomial
                   , castMonomial, castPolynomial, toPolynomial, changeOrder
                   , scastMonomial, scastPolynomial, OrderedPolynomial
                   , normalize, injectCoeff, varX, var, getTerms
-                  , module Field, module BaseTypes, divs, tryDiv
-                  , leadingTerm, leadingMonomial, leadingCoeff
+                  , module Field, module BaseTypes, divs, tryDiv, fromList
+                  , leadingTerm, leadingMonomial, leadingCoeff, genVars, sDegree
                   , OrderedMonomial(..), Grevlex(..), Revlex(..), Lex(..), Grlex(..)
                   , IsOrder, IsMonomialOrder) where
 import           BaseTypes
@@ -71,7 +71,7 @@ grevlex :: MonomialOrder n
 grevlex = graded revlex
 
 -- | A wrapper for monomials with a certain (monomial) order.
-newtype OrderedMonomial ordering n = OrderedMonomial { getMonomial :: Monomial n }
+newtype OrderedMonomial (ordering :: *) n = OrderedMonomial { getMonomial :: Monomial n }
 deriving instance (Eq (Monomial n)) => Eq (OrderedMonomial ordering n)
 
 instance Wrapped (Monomial n) (Monomial m) (OrderedMonomial o n) (OrderedMonomial o' m) where
@@ -258,3 +258,17 @@ changeOrder _ = unwrapped %~ M.mapKeys castMonomial
 
 getTerms :: OrderedPolynomial k order n -> [(k, Monomial n)]
 getTerms = map (snd &&& getMonomial . fst) . M.toDescList . terms
+
+transformMonomial :: (IsOrder o, IsPolynomial k n, IsPolynomial k m)
+                  => (Monomial n -> Monomial m) -> OrderedPolynomial k o n -> OrderedPolynomial k o m
+transformMonomial trans (Polynomial d) = Polynomial $ M.mapKeys (OrderedMonomial . trans . getMonomial) d
+
+genVars :: forall k o n. (IsPolynomial k (S n), IsOrder o, S n :<= S n)
+        => SNat (S n) -> [OrderedPolynomial k o (S n)]
+genVars sn =
+    let n  = toInt sn
+        seed = cycle $ 1 : replicate (n - 1) 0
+    in map (\m -> Polynomial $ M.singleton (OrderedMonomial $ fromList sn $ take n (drop (n-m) seed)) one) [0..n-1]
+
+sDegree :: forall k ord n. (Sing n) => OrderedPolynomial k ord n -> SNat n
+sDegree _ = sing :: SNat n

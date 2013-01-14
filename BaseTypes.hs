@@ -1,3 +1,4 @@
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, StandaloneDeriving  #-}
 {-# LANGUAGE TypeFamilies, TypeOperators                           #-}
@@ -79,6 +80,8 @@ data SNat (n :: Nat) where
   SZ :: SNat Z
   SS :: SNat n -> SNat (S n)
 
+deriving instance Show (SNat n)
+
 lengthV :: Vector n a -> Int
 lengthV Nil       = 0
 lengthV (_ :- xs) = 1 + lengthV xs
@@ -86,6 +89,10 @@ lengthV (_ :- xs) = 1 + lengthV xs
 type family (n :: Nat) :+: (m :: Nat) :: Nat
 type instance  Z   :+: n = n
 type instance  S m :+: n = S (m :+: n)
+
+(%+) :: SNat n -> SNat m -> SNat (n :+: m)
+SZ   %+ n = n
+SS n %+ m = SS (n %+ m)
 
 appendV :: Vector n a -> Vector m a -> Vector (n :+: m) a
 appendV (x :- xs) ys = x :- appendV xs ys
@@ -132,3 +139,7 @@ splitAtV (SS n) (x :- xs) =
   case splitAtV n xs of
     (xs', ys') -> (x :- xs', ys')
 splitAtV _ _ = error "could not happen!"
+
+sLengthV :: Vector n a -> SNat n
+sLengthV Nil = SZ
+sLengthV (_ :- xs) = sOne %+ sLengthV xs
