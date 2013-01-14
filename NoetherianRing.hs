@@ -37,6 +37,7 @@ infixl 6 .-.
 
 -- | An ideal of noehterian ring R.
 newtype Ideal r = Ideal { generators :: [r] }
+    deriving (Show, Eq, Ord)
 
 instance NoetherianRing Int where
   (.+.) = (+)

@@ -72,7 +72,7 @@ instance Sing n => Sing (S n) where
   sing = SS sing
 
 class (n :: Nat) :<= (m :: Nat)
-instance Z :<= (n :: Nat)
+instance Zero :<= n
 instance (n :<= m) => S n :<= S m
 
 data SNat (n :: Nat) where
@@ -116,4 +116,19 @@ instance Eq (Vector Z a) where
 instance (Eq a, Eq (Vector n a)) => Eq (Vector (S n) a) where
   (x :- xs) == (y :- ys) = x == y && xs == ys
 
+allV :: (a -> Bool) -> Vector n a -> Bool
+allV p = foldrV ((&&) . p) False
 
+dropV :: SNat n -> Vector (n :+: m) a -> Vector m a
+dropV n = snd . splitAtV n
+
+toInt :: SNat n -> Int
+toInt SZ     = 0
+toInt (SS n) = 1 + toInt n
+
+splitAtV :: SNat n -> Vector (n :+: m) a -> (Vector n a, Vector m a)
+splitAtV SZ     xs        = (Nil, xs)
+splitAtV (SS n) (x :- xs) =
+  case splitAtV n xs of
+    (xs', ys') -> (x :- xs', ys')
+splitAtV _ _ = error "could not happen!"

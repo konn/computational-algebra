@@ -257,6 +257,4 @@ changeOrder :: (Eq (Monomial n), IsOrder o, IsOrder o', n :<= n, Sing n)
 changeOrder _ = unwrapped %~ M.mapKeys castMonomial
 
 getTerms :: OrderedPolynomial k order n -> [(k, Monomial n)]
-getTerms = map (snd &&& getMonomial . fst) .  M.toDescList . terms
-
-
+getTerms = map (snd &&& getMonomial . fst) . M.toDescList . terms

@@ -1,15 +1,20 @@
-{-# LANGUAGE ConstraintKinds, FlexibleContexts, MultiParamTypeClasses #-}
-{-# LANGUAGE RankNTypes, TypeOperators                                #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts     #-}
+{-# LANGUAGE MultiParamTypeClasses, RankNTypes, TypeOperators #-}
 module Algorithms where
 import Data.List
 import Polynomial
 
-x, y, f, f1, f2 :: Polynomial Double Two
+x, y, a, b, c, s, f, f1, f2 :: Polynomial Rational (S (S (S Three)))
 x = var sOne
 y = var sTwo
 f = x^2 * y + x * y^2 + y^2
 f1 = x * y - 1
 f2 = y^2 - 1
+
+a = var sThree
+b = var (SS sThree)
+c = var (SS (SS sThree))
+s = var (SS (SS (SS sThree)))
 
 divModPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)
                   => OrderedPolynomial r order n -> [OrderedPolynomial r order n] -> ([(OrderedPolynomial r order n, OrderedPolynomial r order n)], OrderedPolynomial r order n)
@@ -80,3 +85,12 @@ isIdealMember f ideal = groebnerTest f (calcGroebnerBasis ideal)
 groebnerTest :: (IsPolynomial k n, Field k, IsMonomialOrder order)
              => OrderedPolynomial k order n -> [OrderedPolynomial k order n] -> Bool
 groebnerTest f fs = f `modPolynomial` fs == zero
+
+
+thEliminationIdeal :: (IsPolynomial k (n :+: m), Field k, IsMonomialOrder order, ((n :+:m) :<= (n :+: m)))
+                   => SNat n
+                   -> Ideal (OrderedPolynomial k order (n :+: m))
+                   -> Ideal (OrderedPolynomial k Lex (n :+: m))
+n `thEliminationIdeal` ideal = Ideal [f | f <- calcGroebnerBasisWith Lex ideal
+                                        , all (all (== 0) . take (toInt n) . toList . snd) $ getTerms f
+                                     ]
