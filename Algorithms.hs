@@ -94,11 +94,11 @@ intersection :: forall r k n ord.
              => Vector k (Ideal (OrderedPolynomial r ord n)) -> Ideal (OrderedPolynomial r Lex n)
 intersection Nil = Ideal $ singletonV one
 intersection idsv@(_ :- _) =
-    let sk = sLengthV idsv :: SNat k
+    let sk = sLengthV idsv
         sn = sing :: SNat n
-        ts  = genVars (sk %+ sn) :: [OrderedPolynomial r ord (k :+: n)]
+        ts  = genVars (sk %+ sn)
         tis = zipWith (\ideal t -> mapIdeal ((t .*.) . shiftR sk) ideal) (toList idsv) ts
-        j = foldr appendIdeal (principalIdeal (one .-. foldr (.+.) zero ts)) tis :: Ideal (OrderedPolynomial r ord (k :+: n))
+        j = foldr appendIdeal (principalIdeal (one .-. foldr (.+.) zero ts)) tis
     in sk `thEliminationIdeal` j
 
 -- | Ideal quotient by a principal ideals.
