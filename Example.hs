@@ -19,12 +19,7 @@ type LexPolynomial r n = OrderedPolynomial r Lex n
 heron :: Ideal (LexPolynomial Double (Two :+: Two))
 heron = sTwo `thEliminationIdeal` ideal
   where
-    x = var sOne :: LexPolynomial Double (Three :+: Three)
-    y = var sTwo
-    a = var sThree
-    b = var (SS sThree)
-    c = var (SS (SS sThree))
-    s = var (SS (SS (SS sThree)))
+    [x, y, a, b, c, s] = genVars (sThree %+ sThree) :: [LexPolynomial Double (Three :+: Three)]
     ideal = toIdeal [ 2 * s - a * y
                     , b^2 - (x^2 + y^2)
                     , c^2 - ( (a-x) ^2 + y^2)
