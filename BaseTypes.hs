@@ -117,11 +117,10 @@ zipWithV _ _ _ = error "cannot happen"
 toList :: Vector n a -> [a]
 toList = foldrV (:) []
 
-instance Eq (Vector Z a) where
+instance (Eq a) => Eq (Vector n a) where
   Nil == Nil = True
-
-instance (Eq a, Eq (Vector n a)) => Eq (Vector (S n) a) where
   (x :- xs) == (y :- ys) = x == y && xs == ys
+  _ == _ = error "impossible!"
 
 allV :: (a -> Bool) -> Vector n a -> Bool
 allV p = foldrV ((&&) . p) False
@@ -143,3 +142,38 @@ splitAtV _ _ = error "could not happen!"
 sLengthV :: Vector n a -> SNat n
 sLengthV Nil = SZ
 sLengthV (_ :- xs) = sOne %+ sLengthV xs
+
+mapV :: (a -> b) -> Vector n a -> Vector n b
+mapV _ Nil       = Nil
+mapV f (x :- xs) = f x :- mapV f xs
+
+headV :: Vector (S n) a -> a
+headV (x :- _) = x
+
+tailV :: Vector (S n) a -> Vector n a
+tailV (_ :- xs) = xs
+
+data SingInstance a where
+  SingInstance :: Sing a => SingInstance a
+
+singInstance :: SNat n -> SingInstance n
+singInstance SZ = SingInstance
+singInstance (SS n) =
+  case singInstance n of
+    SingInstance -> SingInstance
+
+data LeqInstance n m where
+  LeqInstance :: (n :<= m) => LeqInstance n m
+
+leqRefl :: SNat n -> LeqInstance n n
+leqRefl SZ = LeqInstance
+leqRefl (SS n) =
+  case leqRefl n of
+    LeqInstance -> LeqInstance
+
+leqSucc :: SNat n -> LeqInstance n (S n)
+leqSucc SZ = LeqInstance
+leqSucc (SS n) =
+    case leqSucc n of
+      LeqInstance -> LeqInstance
+

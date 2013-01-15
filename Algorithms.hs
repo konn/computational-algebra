@@ -2,17 +2,8 @@
 {-# LANGUAGE MultiParamTypeClasses, ParallelListComp, RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables, TypeOperators                  #-}
 module Algorithms where
-import           Control.Lens
-import           Data.List
-import qualified Data.Map     as M
-import           Polynomial
-
-x, y, f, f1, f2 :: Polynomial Rational Two
-x = var sOne
-y = var sTwo
-f = x^2 * y + x * y^2 + y^2
-f1 = x * y - 1
-f2 = y^2 - 1
+import Data.List
+import Polynomial
 
 divModPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)
                   => OrderedPolynomial r order n -> [OrderedPolynomial r order n] -> ([(OrderedPolynomial r order n, OrderedPolynomial r order n)], OrderedPolynomial r order n)
@@ -68,9 +59,9 @@ reduceMinimalGroebnerBasis bs = filter (/= zero) $  map red bs
   where
     red x = x `modPolynomial` delete x bs
 
-calcGroebnerBasisWith :: (Field k, IsPolynomial k n, IsMonomialOrder order, IsMonomialOrder order', n :<= n)
+calcGroebnerBasisWith :: (Field k, IsPolynomial k n, IsMonomialOrder order, IsMonomialOrder order')
                       => order -> Ideal (OrderedPolynomial k order' n) -> [OrderedPolynomial k order n]
-calcGroebnerBasisWith order (Ideal gs) = calcGroebnerBasis $ Ideal $ map (changeOrder order) gs
+calcGroebnerBasisWith order i = calcGroebnerBasis $ mapIdeal (changeOrder order) i
 
 calcGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                   => Ideal (OrderedPolynomial k order n) -> [OrderedPolynomial k order n]
@@ -84,37 +75,65 @@ groebnerTest :: (IsPolynomial k n, Field k, IsMonomialOrder order)
              => OrderedPolynomial k order n -> [OrderedPolynomial k order n] -> Bool
 groebnerTest f fs = f `modPolynomial` fs == zero
 
-thEliminationIdeal :: ( IsMonomialOrder ord, Field k, IsPolynomial k (n :+: m)
-                      , (n :+: m) :<= (n :+: m))
+
+thEliminationIdeal :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (n :+: m)
+                       )
                    => SNat n
                    -> Ideal (OrderedPolynomial k ord (n :+: m))
-                   -> Ideal (OrderedPolynomial k Lex (n :+: m))
-n `thEliminationIdeal` ideal = toInt n `thEliminationIdeal'` ideal
+                   -> Ideal (OrderedPolynomial k Lex m)
+thEliminationIdeal n ideal =
+    toIdeal $ [transformMonomial (dropV n) f | f <- calcGroebnerBasisWith Lex ideal
+               , all (all (== 0) . take (toInt n) . toList . snd) $ getTerms f
+               ]
 
-thEliminationIdeal' :: (IsMonomialOrder ord, Field k, IsPolynomial k n, n :<= n)
-                   => Int
-                   -> Ideal (OrderedPolynomial k ord n)
-                   -> Ideal (OrderedPolynomial k Lex n)
-n `thEliminationIdeal'` ideal = Ideal [f | f <- calcGroebnerBasisWith Lex ideal
-                                      , all (all (== 0) . take n . toList . snd) $ getTerms f
-                                      ]
-
-shiftR :: forall k r n ord. (Field r, IsPolynomial r n, IsPolynomial r (k :+: n), Sing k, IsOrder ord)
-       => SNat k -> OrderedPolynomial r ord n -> OrderedPolynomial r ord (k :+: n)
-shiftR k = transformMonomial (appendV (fromList k []))
-
+-- | An intersection ideal of given ideals.
 intersection :: forall r k n ord.
                 ( IsMonomialOrder ord, Field r, IsPolynomial r k, IsPolynomial r n
-                , IsPolynomial r (k :+: n), (k :+: n) :<= (k :+: n)
+                , IsPolynomial r (k :+: n)
                 )
              => Vector k (Ideal (OrderedPolynomial r ord n)) -> Ideal (OrderedPolynomial r Lex n)
-intersection Nil = Ideal [one]
+intersection Nil = Ideal $ singletonV one
 intersection idsv@(_ :- _) =
     let sk = sLengthV idsv :: SNat k
         sn = sing :: SNat n
-        k  = toInt sk
-        ts  = take k $ genVars (sk %+ sn)
-        tis = [map ((t .*.) . shiftR sk) xs| Ideal xs <- toList idsv | t <- ts]
-        j = Ideal $ (one .-. foldr (.+.) zero ts) : concat tis
-    in k `thEliminationIdeal'` j & unwrapped %~ map (transformMonomial (dropV sk))
+        ts  = genVars (sk %+ sn) :: [OrderedPolynomial r ord (k :+: n)]
+        tis = zipWith (\ideal t -> mapIdeal ((t .*.) . shiftR sk) ideal) (toList idsv) ts
+        j = foldr appendIdeal (principalIdeal (one .-. foldr (.+.) zero ts)) tis :: Ideal (OrderedPolynomial r ord (k :+: n))
+    in sk `thEliminationIdeal` j
 
+-- | Ideal quotient by a principal ideals.
+quotByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
+                     => Ideal (OrderedPolynomial k ord n)
+                     -> OrderedPolynomial k ord n
+                     -> Ideal (OrderedPolynomial k Lex n)
+quotByPrincipalIdeal i g =
+    case intersection (i :- (Ideal $ singletonV g) :- Nil) of
+      Ideal gs -> Ideal $ mapV (snd . head . (`divPolynomial` [changeOrder Lex g])) gs
+
+quotIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
+          => Ideal (OrderedPolynomial k ord n)
+          -> Ideal (OrderedPolynomial k ord n)
+          -> Ideal (OrderedPolynomial k Lex n)
+quotIdeal i (Ideal g) =
+  case singInstance (sLengthV g) of
+    SingInstance ->
+        case singInstance (sLengthV g %+ (sing :: SNat n)) of
+          SingInstance -> intersection $ mapV (i `quotByPrincipalIdeal`) g
+
+-- | Saturation by a principal ideal.
+saturationByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
+                           => Ideal (OrderedPolynomial k ord n)
+                           -> OrderedPolynomial k ord n -> Ideal (OrderedPolynomial k Lex n)
+saturationByPrincipalIdeal is g =
+  case leqSucc (sDegree g) of
+    LeqInstance -> sOne `thEliminationIdeal` addToIdeal (one .-. (castPolynomial g .*. var sOne)) (mapIdeal (shiftR sOne) is)
+
+saturationIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
+                => Ideal (OrderedPolynomial k ord n)
+                -> Ideal (OrderedPolynomial k ord n)
+                -> Ideal (OrderedPolynomial k Lex n)
+saturationIdeal i (Ideal g) =
+  case singInstance (sLengthV g) of
+    SingInstance ->
+        case singInstance (sLengthV g %+ (sing :: SNat n)) of
+          SingInstance -> intersection $ mapV (i `saturationByPrincipalIdeal`) g
