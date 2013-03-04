@@ -1,7 +1,8 @@
 module ExpressionParser where
-import Control.Applicative
+import Control.Applicative   hiding (many)
 import Control.Arrow
 import Data.Char
+import Data.Maybe
 import Data.Ratio
 import MonomorphicPolynomial
 import Text.Parsec           hiding (optional, (<|>))
@@ -20,11 +21,21 @@ index = digitToInt <$> digit
     <|> read <$ symbol '{' <*> lexeme (many1 digit) <* symbol '}'
 
 monomial :: Parser [(Variable, Integer)]
-monomial = many1 variableWithPower
+monomial = many variableWithPower
 
 term :: Parser (Rational, [(Variable, Integer)])
-term = (,) <$> option 1 coefficient
-           <*> monomial
+term = signed' $ try $ (,) <$> option 1 coefficient
+                           <*> monomial
+                   <|> (,) <$> number <*> pure []
+
+signed' p = do
+  s <- optional sign
+  (c, n) <- p
+  return (fromMaybe 1 s * c, n)
+  where
+    sign = lexeme $ char '-' *> return (negate 1)
+                <|> char '+' *> return 1
+
 
 symbol :: Char -> Parser Char
 symbol = lexeme . char
@@ -46,7 +57,8 @@ coefficient = char '(' *> number <* char ')'
           <|> number
 
 number :: Parser Rational
-number = try (toRational <$> parseDouble)
+number = signed $
+              try (toRational <$> parseDouble)
           <|> try (lexeme $ (%) <$> parseInt
                          <* symbol '/'
                          <*> parseInt)
@@ -54,6 +66,15 @@ number = try (toRational <$> parseDouble)
 
 parseInt :: Parser Integer
 parseInt = lexeme $ read <$> many1 digit
+
+signed :: Num b => Parser b -> Parser b
+signed p = do
+  s <- optional sign
+  n <- p
+  return $ fromMaybe 1 s * n
+  where
+    sign = lexeme $ char '-' *> return (negate 1)
+                <|> char '+' *> return 1
 
 parseDouble :: Parser Double
 parseDouble = lexeme $ do

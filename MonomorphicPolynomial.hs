@@ -94,9 +94,11 @@ renameVars vars = map (second $ map $ first ren)
     ren v = fromMaybe v $ lookup v dic
     dic = zip (Variable 'X' Nothing : [Variable 'X' (Just i) | i <- [1..]]) vars
 
-showPolynWithVars :: [(Int, String)] -> Polyn -> String
-showPolynWithVars dic f =
+showPolyn :: Polyn -> String
+showPolyn f =
   case encodePolynomial f of
     Monomorphic f' ->
         case singInstance (sDegree f') of
           SingInstance -> showPolynomialWithVars dic f'
+  where
+    dic = zip [1..] $ map show $ buildVarsList f
