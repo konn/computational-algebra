@@ -7,7 +7,7 @@ module Polynomial ( Polynomial, Monomial, MonomialOrder, Order
                   , lex, revlex, graded, grlex, grevlex, transformMonomial
                   , IsPolynomial, coeff, lcmMonomial, sPolynomial, polynomial
                   , castMonomial, castPolynomial, toPolynomial, changeOrder
-                  , scastMonomial, scastPolynomial, OrderedPolynomial
+                  , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars
                   , normalize, injectCoeff, varX, var, getTerms, shiftR
                   , module Field, module BaseTypes, divs, tryDiv, fromList -- , genVarsV
                   , leadingTerm, leadingMonomial, leadingCoeff, genVars, sDegree
@@ -172,16 +172,26 @@ instance (IsOrder order, IsPolynomial r n) => NoetherianRing (OrderedPolynomial 
   zero = injectCoeff zero
 
 instance (IsPolynomial r n, IsOrder order, Show r) => Show (OrderedPolynomial r order n) where
-  show p0@(Polynomial d)
-      | p0 == zero = "0"
-      | otherwise = intercalate " + " $ map showTerm $ M.toDescList d
+  show = showPolynomialWithVars [(n, "X_"++ show n) | n <- [1..]]
+
+showPolynomialWithVars :: (Show a, Sing n, NoetherianRing a, IsOrder ordering) => [(Int, String)] -> OrderedPolynomial a ordering n -> String
+showPolynomialWithVars dic p0@(Polynomial d)
+    | p0 == zero = "0"
+    | otherwise = intercalate " + " $ mapMaybe showTerm $ M.toDescList d
     where
-      showTerm (getMonomial -> deg, c) =
-          let cstr = if (c /= one || isConstantMonomial deg) then show c ++ " " else ""
-          in cstr ++ unwords (mapMaybe showDeg (zip [1..] $ toList deg))
+      showTerm (getMonomial -> deg, c)
+          | c == zero = Nothing
+          | otherwise =
+              let cstr = if (c == zero .-. one)
+                         then "-"
+                         else if (c /= one || isConstantMonomial deg)
+                              then show c ++ " "
+                              else ""
+              in Just $ cstr ++ unwords (mapMaybe showDeg (zip [1..] $ toList deg))
       showDeg (n, p) | p == 0    = Nothing
-                     | p == 1    = Just $ "X_" ++ show n
-                     | otherwise = Just $ "X_" ++ show n ++ "^" ++ show p
+                     | p == 1    = Just $ showVar n
+                     | otherwise = Just $ showVar n ++ "^" ++ show p
+      showVar n = fromMaybe ("X_" ++ show n) $ lookup n dic
 
 isConstantMonomial :: (Eq a, Num a) => Vector a n -> Bool
 isConstantMonomial v = all (== 0) $ toList v

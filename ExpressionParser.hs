@@ -61,3 +61,6 @@ parseDouble = lexeme $ do
   _ <- char '.'
   float <- many1 digit
   return $ read $ int ++ '.':float
+
+parsePolyn :: String -> Either ParseError Polyn
+parsePolyn = parse expression "polynomial"

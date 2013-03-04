@@ -1,12 +1,14 @@
-{-# LANGUAGE FlexibleInstances, RecordWildCards, TypeFamilies #-}
-{-# LANGUAGE TypeSynonymInstances                             #-}
+{-# LANGUAGE FlexibleInstances, PolyKinds, RecordWildCards, TypeFamilies #-}
+{-# LANGUAGE TypeOperators, ViewPatterns                                 #-}
 {-# OPTIONS_GHC -fno-warn-orphans                             #-}
 -- | This module provides less polymorphic interface to manipulate polynomials.
 module MonomorphicPolynomial where
+import           Algorithms
 import           BaseTypes
 import           Control.Arrow
 import           Data.List
 import qualified Data.Map      as M
+import           Data.Maybe
 import           Polynomial
 import           Wrappers
 
@@ -57,3 +59,44 @@ instance Wrappable (Polynomial Rational) where
                   }
     where
       toMonom = zip $ Variable 'X' Nothing : [Variable 'X' (Just i) | i <- [1..]]
+
+newtype (:.:) f g a = Compose { getComposed :: f (g a) }
+
+uniformlyPromote :: [Polyn] -> Monomorphic (Ideal :.: Polynomial Rational)
+uniformlyPromote ps  =
+  case promote (length vars) of
+    Monomorphic dim ->
+      case singInstance dim of
+        SingInstance -> Monomorphic $ Compose $ toIdeal $ map (polynomial . M.fromList . map (OrderedMonomial . fromList dim . encodeMonomList vars . snd &&& fst)) ps
+  where
+    vars = nub $ sort $ concatMap buildVarsList ps
+
+instance Wrappable (Ideal :.: Polynomial Rational) where
+  type BasicType (Ideal :.: Polynomial Rational) = [Polyn]
+  promote = uniformlyPromote
+  demote (Monomorphic (Compose (Ideal v))) = map (polyn . demote) $ map Monomorphic $ toList v
+
+calcGroebnerBasis' :: [Polyn] -> [Polyn]
+calcGroebnerBasis' (filter (any ((/= 0).fst)) -> []) = []
+calcGroebnerBasis' j =
+  case uniformlyPromote j of
+    Monomorphic (Compose ideal) ->
+      case ideal of
+        Ideal vec ->
+          case singInstance (sDegree (head $ toList vec)) of
+            SingInstance -> map (renameVars vars . polyn . demote . Monomorphic) $ calcGroebnerBasis ideal
+  where
+    vars = nub $ sort $ concatMap buildVarsList j
+
+renameVars :: [Variable] -> Polyn -> Polyn
+renameVars vars = map (second $ map $ first ren)
+  where
+    ren v = fromMaybe v $ lookup v dic
+    dic = zip (Variable 'X' Nothing : [Variable 'X' (Just i) | i <- [1..]]) vars
+
+showPolynWithVars :: [(Int, String)] -> Polyn -> String
+showPolynWithVars dic f =
+  case encodePolynomial f of
+    Monomorphic f' ->
+        case singInstance (sDegree f') of
+          SingInstance -> showPolynomialWithVars dic f'

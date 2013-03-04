@@ -1,5 +1,5 @@
-{-# LANGUAGE ExistentialQuantification, FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses, TypeSynonymInstances  #-}
+{-# LANGUAGE DataKinds, ExistentialQuantification, FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses, TypeSynonymInstances             #-}
 module NoetherianRing ( NoetherianRing(..), Ideal(..), (.*), addToIdeal, toIdeal, appendIdeal
                       , generators, filterIdeal, mapIdeal, principalIdeal) where
 import BaseTypes
