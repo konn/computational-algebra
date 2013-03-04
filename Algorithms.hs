@@ -91,7 +91,7 @@ intersection :: forall r k n ord.
                 ( IsMonomialOrder ord, Field r, IsPolynomial r k, IsPolynomial r n
                 , IsPolynomial r (k :+: n)
                 )
-             => Vector k (Ideal (OrderedPolynomial r ord n)) -> Ideal (OrderedPolynomial r Lex n)
+             => Vector (Ideal (OrderedPolynomial r ord n)) k -> Ideal (OrderedPolynomial r Lex n)
 intersection Nil = Ideal $ singletonV one
 intersection idsv@(_ :- _) =
     let sk = sLengthV idsv

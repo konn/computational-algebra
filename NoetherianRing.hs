@@ -85,7 +85,7 @@ instance RealFloat r => NoetherianRing (Complex r) where
 (.*) :: NoetherianRing r => r -> Ideal r -> Ideal r
 c .* xs = mapIdeal (c .*.) xs
 
-data Ideal r = forall n. Ideal (Vector n r)
+data Ideal r = forall n. Ideal (Vector r n)
 
 instance Eq r => Eq (Ideal r) where
   (==) = (==) `on` generators

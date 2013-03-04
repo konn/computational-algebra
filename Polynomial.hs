@@ -5,7 +5,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults                    #-}
 module Polynomial ( Polynomial, Monomial, MonomialOrder, Order
                   , lex, revlex, graded, grlex, grevlex, transformMonomial
-                  , IsPolynomial, coeff, lcmMonomial, sPolynomial
+                  , IsPolynomial, coeff, lcmMonomial, sPolynomial, polynomial
                   , castMonomial, castPolynomial, toPolynomial, changeOrder
                   , scastMonomial, scastPolynomial, OrderedPolynomial
                   , normalize, injectCoeff, varX, var, getTerms, shiftR
@@ -26,7 +26,7 @@ import           Field
 import           Prelude       hiding (lex)
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i.
-type Monomial (n :: Nat) = Vector n Int
+type Monomial (n :: Nat) = Vector Int n
 
 -- | convert NAry list into Monomial.
 fromList :: SNat n -> [Int] -> Monomial n
@@ -153,14 +153,13 @@ scastPolynomial :: (IsOrder o, IsOrder o', IsPolynomial r n, IsPolynomial r m, n
 scastPolynomial _ = castPolynomial
 
 normalize :: (IsOrder order, IsPolynomial r n) => OrderedPolynomial r order n -> OrderedPolynomial r order n
-normalize = unwrapped %~ M.filter (/= zero)
+normalize = unwrapped %~ M.insertWith (.+.) (OrderedMonomial $ fromList sing []) zero . M.filter (/= zero)
 
 instance (IsOrder order, IsPolynomial r n) => Eq (OrderedPolynomial r order n) where
   (normalize -> Polynomial f) == (normalize -> Polynomial g) = f == g
 
 injectCoeff :: (IsPolynomial r n) => r -> OrderedPolynomial r order n
-injectCoeff r | r == zero = Polynomial M.empty
-              | otherwise = Polynomial $ M.singleton (OrderedMonomial $ fromList sing []) r
+injectCoeff r = Polynomial $ M.singleton (OrderedMonomial $ fromList sing []) r
 
 -- | By Hilbert's finite basis theorem, a polynomial ring over a noetherian ring is also a noetherian ring.
 instance (IsOrder order, IsPolynomial r n) => NoetherianRing (OrderedPolynomial r order n) where
@@ -170,7 +169,7 @@ instance (IsOrder order, IsPolynomial r n) => NoetherianRing (OrderedPolynomial 
     in normalize $ Polynomial $ M.fromListWith (.+.) dic
   neg  = unwrapped %~ fmap neg
   one  = injectCoeff one
-  zero = Polynomial M.empty
+  zero = injectCoeff zero
 
 instance (IsPolynomial r n, IsOrder order, Show r) => Show (OrderedPolynomial r order n) where
   show p0@(Polynomial d)
@@ -184,7 +183,7 @@ instance (IsPolynomial r n, IsOrder order, Show r) => Show (OrderedPolynomial r 
                      | p == 1    = Just $ "X_" ++ show n
                      | otherwise = Just $ "X_" ++ show n ++ "^" ++ show p
 
-isConstantMonomial :: (Eq a, Num a) => Vector n a -> Bool
+isConstantMonomial :: (Eq a, Num a) => Vector a n -> Bool
 isConstantMonomial v = all (== 0) $ toList v
 
 -- | We provide Num instance to use trivial injection R into R[X].
@@ -192,7 +191,7 @@ isConstantMonomial v = all (== 0) $ toList v
 instance (IsMonomialOrder order, IsPolynomial r n, Num r) => Num (OrderedPolynomial r order n) where
   (+) = (.+.)
   (*) = (.*.)
-  fromInteger = normalize . injectCoeff . fromInteger
+  fromInteger = injectCoeff . fromInteger
   signum f = if f == zero then zero else injectCoeff 1
   abs = id
   negate = neg
@@ -205,6 +204,9 @@ var vIndex = Polynomial $ M.singleton (OrderedMonomial $ fromList sing (buildInd
 
 toPolynomial :: (IsOrder order, IsPolynomial r n) => (r, Monomial n) -> OrderedPolynomial r order n
 toPolynomial (c, deg) = Polynomial $ M.singleton (OrderedMonomial deg) c
+
+polynomial :: (Sing n, NoetherianRing r, IsOrder order) => Map (OrderedMonomial order n) r -> OrderedPolynomial r order n
+polynomial dic = normalize $ Polynomial dic
 
 buildIndex :: SNat (S n) -> [Int]
 buildIndex (SS SZ) = [1]
@@ -265,5 +267,5 @@ genVars sn =
         seed = cycle $ 1 : replicate (n - 1) 0
     in map (\m -> Polynomial $ M.singleton (OrderedMonomial $ fromList sn $ take n (drop (n-m) seed)) one) [0..n-1]
 
-sDegree :: forall k ord n. (Sing n) => OrderedPolynomial k ord n -> SNat n
-sDegree _ = sing :: SNat n
+sDegree :: OrderedPolynomial k ord n -> SNat n
+sDegree (Polynomial dic) = sLengthV $ getMonomial $ fst $ M.findMin dic

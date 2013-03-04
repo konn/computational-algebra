@@ -10,12 +10,12 @@ proxy :: a -> Proxy a
 proxy _ = Proxy
 
 data Nat = Z | S Nat
-data Vector (n :: Nat) (a :: *) where
-  Nil  :: Vector Z a
-  (:-) :: a -> Vector n a -> Vector (S n) a
+data Vector (a :: *) (n :: Nat)  where
+  Nil  :: Vector a Z
+  (:-) :: a -> Vector a n -> Vector a (S n)
 
 infixr 5 :-
-deriving instance Show a => Show (Vector n a)
+deriving instance Show a => Show (Vector a n)
 
 type family Min (n :: Nat) (m :: Nat) :: Nat
 type instance Min Z Z     = Z
@@ -82,7 +82,7 @@ data SNat (n :: Nat) where
 
 deriving instance Show (SNat n)
 
-lengthV :: Vector n a -> Int
+lengthV :: Vector a n -> Int
 lengthV Nil       = 0
 lengthV (_ :- xs) = 1 + lengthV xs
 
@@ -94,63 +94,63 @@ type instance  S m :+: n = S (m :+: n)
 SZ   %+ n = n
 SS n %+ m = SS (n %+ m)
 
-appendV :: Vector n a -> Vector m a -> Vector (n :+: m) a
+appendV :: Vector a n -> Vector a m -> Vector a (n :+: m)
 appendV (x :- xs) ys = x :- appendV xs ys
 appendV Nil       ys = ys
 
-foldrV :: (a -> b -> b) -> b -> Vector n a -> b
+foldrV :: (a -> b -> b) -> b -> Vector a n -> b
 foldrV _ b Nil       = b
 foldrV f a (x :- xs) = f x (foldrV f a xs)
 
-foldlV :: (a -> b -> a) -> a -> Vector n b -> a
+foldlV :: (a -> b -> a) -> a -> Vector b n -> a
 foldlV _ a Nil       = a
 foldlV f a (b :- bs) = foldlV f (f a b) bs
 
-singletonV :: a -> Vector (S Z) a
+singletonV :: a -> Vector a (S Z)
 singletonV = (:- Nil)
 
-zipWithV :: (a -> b -> c) -> Vector n a -> Vector n b -> Vector n c
+zipWithV :: (a -> b -> c) -> Vector a n -> Vector b n -> Vector c n
 zipWithV _ Nil Nil = Nil
 zipWithV f (x :- xs) (y :- ys) = f x y :- zipWithV f xs ys
 zipWithV _ _ _ = error "cannot happen"
 
-toList :: Vector n a -> [a]
+toList :: Vector a n -> [a]
 toList = foldrV (:) []
 
-instance (Eq a) => Eq (Vector n a) where
+instance (Eq a) => Eq (Vector a n) where
   Nil == Nil = True
   (x :- xs) == (y :- ys) = x == y && xs == ys
   _ == _ = error "impossible!"
 
-allV :: (a -> Bool) -> Vector n a -> Bool
+allV :: (a -> Bool) -> Vector a  n-> Bool
 allV p = foldrV ((&&) . p) False
 
-dropV :: SNat n -> Vector (n :+: m) a -> Vector m a
+dropV :: SNat n -> Vector a (n :+: m) -> Vector a m
 dropV n = snd . splitAtV n
 
 toInt :: SNat n -> Int
 toInt SZ     = 0
 toInt (SS n) = 1 + toInt n
 
-splitAtV :: SNat n -> Vector (n :+: m) a -> (Vector n a, Vector m a)
+splitAtV :: SNat n -> Vector a (n :+: m) -> (Vector a n, Vector a m)
 splitAtV SZ     xs        = (Nil, xs)
 splitAtV (SS n) (x :- xs) =
   case splitAtV n xs of
     (xs', ys') -> (x :- xs', ys')
 splitAtV _ _ = error "could not happen!"
 
-sLengthV :: Vector n a -> SNat n
+sLengthV :: Vector a n -> SNat n
 sLengthV Nil = SZ
 sLengthV (_ :- xs) = sOne %+ sLengthV xs
 
-mapV :: (a -> b) -> Vector n a -> Vector n b
+mapV :: (a -> b) -> Vector a n -> Vector b n
 mapV _ Nil       = Nil
 mapV f (x :- xs) = f x :- mapV f xs
 
-headV :: Vector (S n) a -> a
+headV :: Vector a (S n) -> a
 headV (x :- _) = x
 
-tailV :: Vector (S n) a -> Vector n a
+tailV :: Vector a (S n) -> Vector a n
 tailV (_ :- xs) = xs
 
 data SingInstance a where
