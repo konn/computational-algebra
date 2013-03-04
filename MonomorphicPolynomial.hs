@@ -88,6 +88,23 @@ calcGroebnerBasis' j =
   where
     vars = nub $ sort $ concatMap buildVarsList j
 
+promoteList :: [Polyn] -> Monomorphic ([] :.: Polynomial Rational)
+promoteList ps =
+  case promote (length vars) of
+    Monomorphic dim ->
+      case singInstance dim of
+        SingInstance -> Monomorphic $ Compose $ map (polynomial . M.fromList . map (OrderedMonomial . fromList dim . encodeMonomList vars . snd &&& fst)) ps
+  where
+    vars = nub $ sort $ concatMap buildVarsList ps
+
+isIdealMember' :: Polyn -> [Polyn] -> Bool
+isIdealMember' f ideal =
+  case promoteList (f:ideal) of
+    Monomorphic (Compose (f':ideal')) ->
+      case singInstance (sDegree f') of
+        SingInstance -> isIdealMember f' (toIdeal ideal')
+    _ -> error "impossible happend!"
+
 renameVars :: [Variable] -> Polyn -> Polyn
 renameVars vars = map (second $ map $ first ren)
   where

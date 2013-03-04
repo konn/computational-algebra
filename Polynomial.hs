@@ -183,7 +183,7 @@ showPolynomialWithVars dic p0@(Polynomial d)
           | c == zero = Nothing
           | otherwise =
               let cstr = if (c == zero .-. one)
-                         then "-"
+                         then if any (/= zero) (toList deg) then "-" else "-1"
                          else if (c /= one || isConstantMonomial deg)
                               then show c ++ " "
                               else ""
