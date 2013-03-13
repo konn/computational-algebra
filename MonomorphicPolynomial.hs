@@ -1,5 +1,5 @@
-{-# LANGUAGE FlexibleInstances, PolyKinds, RecordWildCards, TypeFamilies #-}
-{-# LANGUAGE TypeOperators, ViewPatterns                                 #-}
+{-# LANGUAGE FlexibleInstances, GADTs, PolyKinds, RecordWildCards #-}
+{-# LANGUAGE TypeFamilies, TypeOperators, ViewPatterns            #-}
 {-# OPTIONS_GHC -fno-warn-orphans                             #-}
 -- | This module provides less polymorphic interface to manipulate polynomials.
 module MonomorphicPolynomial where
@@ -44,8 +44,8 @@ data PolynomialSetting = PolySetting { dimension :: Monomorphic SNat
                                      } deriving (Show)
 
 
-instance Wrappable (Polynomial Rational) where
-  type BasicType (Polynomial Rational) = PolynomialSetting
+instance IsMonomialOrder ord => Wrappable (OrderedPolynomial Rational ord) where
+  type BasicType (OrderedPolynomial Rational ord) = PolynomialSetting
   promote PolySetting{..} =
     case dimension of
       Monomorphic dim ->
@@ -62,7 +62,8 @@ instance Wrappable (Polynomial Rational) where
 
 newtype (:.:) f g a = Compose { getComposed :: f (g a) }
 
-uniformlyPromote :: [Polyn] -> Monomorphic (Ideal :.: Polynomial Rational)
+uniformlyPromote :: IsMonomialOrder ord
+                 => [Polyn] -> Monomorphic (Ideal :.: OrderedPolynomial Rational ord)
 uniformlyPromote ps  =
   case promote (length vars) of
     Monomorphic dim ->
@@ -71,8 +72,8 @@ uniformlyPromote ps  =
   where
     vars = nub $ sort $ concatMap buildVarsList ps
 
-instance Wrappable (Ideal :.: Polynomial Rational) where
-  type BasicType (Ideal :.: Polynomial Rational) = [Polyn]
+instance IsMonomialOrder ord => Wrappable (Ideal :.: OrderedPolynomial Rational ord) where
+  type BasicType (Ideal :.: OrderedPolynomial Rational ord) = [Polyn]
   promote = uniformlyPromote
   demote (Monomorphic (Compose (Ideal v))) = map (polyn . demote) $ map Monomorphic $ toList v
 
@@ -96,6 +97,29 @@ promoteList ps =
         SingInstance -> Monomorphic $ Compose $ map (polynomial . M.fromList . map (OrderedMonomial . fromList dim . encodeMonomList vars . snd &&& fst)) ps
   where
     vars = nub $ sort $ concatMap buildVarsList ps
+
+{-
+data Equal a b where
+  Equal :: Equal a a
+
+(%==) :: (a ~ b) => a -> b -> Equal a b
+_ %== _ = Equal
+
+thEliminationIdeal' :: Int -> [Polyn] -> [Polyn]
+thEliminationIdeal' n [] = []
+thEliminationIdeal' n ideal =
+    let dim = length $ nub $ sort $ concatMap buildVarsList ideal
+    in if n <= 0 || dim <= n
+       then error "Degree error!"
+       else case promoteList ideal of
+              Monomorphic (Compose is@(f:_))->
+                case singInstance (sDegree f) of
+                  SingInstance ->
+                      case promote n of
+                        Monomorphic sn ->
+                          case sDegree f %== (sn %+ sm) of
+                            Equal -> demote $ Monomorphic $ Compose $ sn `thEliminationIdeal` toIdeal is
+-}
 
 isIdealMember' :: Polyn -> [Polyn] -> Bool
 isIdealMember' f ideal =
