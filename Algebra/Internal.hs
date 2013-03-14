@@ -2,12 +2,19 @@
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, StandaloneDeriving  #-}
 {-# LANGUAGE TypeFamilies, TypeOperators                           #-}
-module BaseTypes where
+module Algebra.Internal ( toProxy, module Data.Proxy
+                        , Nat(..), Vector(..), SNat(..), Zero, One, Two, Three
+                        , Min, Max, sZero, sTwo, sThree, sMin, sMax
+                        , lengthV, (%+), appendV, foldrV, foldlV
+                        , singletonV, zipWithV, toList, allV
+                        , dropV, toInt, splitAtV, sLengthV, mapV
+                        , headV, tailV, SingInstance(..), singInstance
+                        , LeqInstance(..), leqRefl, leqSucc) where
+import Data.Proxy
+import Data.Type.Monomorphic
 
-data Proxy a = Proxy
-
-proxy :: a -> Proxy a
-proxy _ = Proxy
+toProxy :: a -> Proxy a
+toProxy _ = Proxy
 
 data Nat = Z | S Nat
 data Vector (a :: *) (n :: Nat)  where
@@ -81,6 +88,22 @@ data SNat (n :: Nat) where
   SS :: SNat n -> SNat (S n)
 
 deriving instance Show (SNat n)
+
+instance Monomorphicable SNat where
+  type MonomorphicRep SNat = Int
+  demote  (Monomorphic sn) = toInt sn
+  promote n
+      | n < 0     = error "negative integer!"
+      | n == 0    = Monomorphic SZ
+      | otherwise = withPolymorhic n $ \sn -> Monomorphic $ SS sn
+
+instance Monomorphicable (Vector a) where
+  type MonomorphicRep (Vector a) = [a]
+  demote (Monomorphic vec) = toList vec
+  promote [] = Monomorphic Nil
+  promote (x:xs) =
+    case promote xs of
+      Monomorphic vec -> Monomorphic $ x :- vec
 
 lengthV :: Vector a n -> Int
 lengthV Nil       = 0
