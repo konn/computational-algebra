@@ -12,7 +12,7 @@ import           Monomorphic
 calcGroebnerBasis :: [Polyn] -> [Polyn]
 calcGroebnerBasis (filter (any ((/= 0).fst)) -> []) = []
 calcGroebnerBasis j =
-  case uniformlyPromote j of
+  case uniformlyPromote j :: Monomorphic (Ideal :.: Poly.Polynomial Rational) of
     Monomorphic (Comp ideal) ->
       case ideal of
         Ideal vec ->
@@ -23,7 +23,7 @@ calcGroebnerBasis j =
 
 isIdealMember :: Polyn -> [Polyn] -> Bool
 isIdealMember f ideal =
-  case promoteList (f:ideal) of
+  case promoteList (f:ideal) :: Monomorphic ([] :.: Poly.Polynomial Rational) of
     Monomorphic (Comp (f':ideal')) ->
       case singInstance (Poly.sDegree f') of
         SingInstance -> Gr.isIdealMember f' (toIdeal ideal')

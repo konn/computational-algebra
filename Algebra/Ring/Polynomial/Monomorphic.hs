@@ -1,5 +1,5 @@
 {-# LANGUAGE DataKinds, FlexibleInstances, GADTs, PolyKinds, RecordWildCards #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, ViewPatterns                       #-}
+{-# LANGUAGE TypeFamilies, TypeOperators                                     #-}
 {-# OPTIONS_GHC -fno-warn-orphans                             #-}
 module Algebra.Ring.Polynomial.Monomorphic where
 import qualified Algebra.Algorithms.Groebner as Gr
@@ -75,7 +75,7 @@ instance Poly.IsMonomialOrder ord => Monomorphicable (Ideal :.: Poly.OrderedPoly
   promote = uniformlyPromote
   demote (Monomorphic (Comp (Ideal v))) = map (polyn . demote . Monomorphic) $ toList v
 
-promoteList :: [Polyn] -> Monomorphic ([] :.: Poly.Polynomial Rational)
+promoteList :: Poly.IsMonomialOrder ord => [Polyn] -> Monomorphic ([] :.: Poly.OrderedPolynomial Rational ord)
 promoteList ps =
   case promote (length vars) of
     Monomorphic dim ->
@@ -122,24 +122,3 @@ showPolyn f =
           SingInstance -> Poly.showPolynomialWithVars dic f'
   where
     dic = zip [1..] $ map show $ buildVarsList f
-
-
-calcGroebnerBasis :: [Polyn] -> [Polyn]
-calcGroebnerBasis (filter (any ((/= 0).fst)) -> []) = []
-calcGroebnerBasis j =
-  case uniformlyPromote j of
-    Monomorphic (Comp ideal) ->
-      case ideal of
-        Ideal vec ->
-          case singInstance (Poly.sDegree (head $ toList vec)) of
-            SingInstance -> map (renameVars vars . polyn . demote . Monomorphic) $ Gr.calcGroebnerBasis ideal
-  where
-    vars = nub $ sort $ concatMap buildVarsList j
-
-isIdealMember :: Polyn -> [Polyn] -> Bool
-isIdealMember f ideal =
-  case promoteList (f:ideal) of
-    Monomorphic (Comp (f':ideal')) ->
-      case singInstance (Poly.sDegree f') of
-        SingInstance -> Gr.isIdealMember f' (toIdeal ideal')
-    _ -> error "impossible happend!"

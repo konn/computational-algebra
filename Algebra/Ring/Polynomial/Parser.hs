@@ -1,11 +1,11 @@
-module ExpressionParser where
-import Control.Applicative   hiding (many)
+module Algebra.Ring.Polynomial.Parser where
+import Algebra.Ring.Polynomial.Monomorphic
+import Control.Applicative                 hiding (many)
 import Control.Arrow
 import Data.Char
 import Data.Maybe
 import Data.Ratio
-import MonomorphicPolynomial
-import Text.Parsec           hiding (optional, (<|>))
+import Text.Parsec                         hiding (optional, (<|>))
 import Text.Parsec.String
 
 variable :: Parser Variable
