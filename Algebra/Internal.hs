@@ -1,17 +1,14 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RankNTypes, CPP #-}
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, StandaloneDeriving  #-}
 {-# LANGUAGE TypeFamilies, TypeOperators                           #-}
-module Algebra.Internal ( toProxy, module Data.Proxy
-                        , Nat(..), Vector(..), SNat(..), Zero, One, Two, Three
-                        , Min, Max, sZero, sTwo, sThree, sMin, sMax
-                        , lengthV, (%+), appendV, foldrV, foldlV
-                        , singletonV, zipWithV, toList, allV
-                        , dropV, toInt, splitAtV, sLengthV, mapV
-                        , headV, tailV, SingInstance(..), singInstance
-                        , LeqInstance(..), leqRefl, leqSucc) where
+module Algebra.Internal where
 import Data.Proxy
+#if __GLASGOW_HASKELL__ >= 760
 import Data.Type.Monomorphic
+#else
+import Monomorphic
+#endif
 
 toProxy :: a -> Proxy a
 toProxy _ = Proxy

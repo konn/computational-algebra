@@ -1,38 +1,46 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
-{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE ConstraintKinds, NoImplicitPrelude, TypeOperators #-}
 module Example where
-import Algorithms
-import BaseTypes
-import Polynomial
+import Algebra.Algorithms.Groebner
+import Algebra.Internal
+import Algebra.Ring.Noetherian
+import Algebra.Ring.Polynomial
+import Data.Ratio
+import Numeric.Algebra
+import Prelude                     hiding (Fractional (..), Integral (..),
+                                    Num (..), (^), (^^))
 
 default (Int)
 
-x, y, f, f1, f2 :: Polynomial Double Two
+(^^) :: Unital r => r -> Natural -> r
+(^^) = pow
+
+x, y, f, f1, f2 :: Polynomial (Ratio Integer) Two
 x = var sOne
 y = var sTwo
-f = x^2 * y + x * y^2 + y^2
+f = x^^2 * y + x * y^^2 + y^^2
 f1 = x * y - 1
-f2 = y^2 - 1
+f2 = y^^2 - 1
 
 type LexPolynomial r n = OrderedPolynomial r Lex n
 
-heron :: Ideal (LexPolynomial Double (Two :+: Two))
+heron :: Ideal (LexPolynomial (Ratio Integer) (Two :+: Two))
 heron = sTwo `thEliminationIdeal` ideal
   where
-    [x, y, a, b, c, s] = genVars (sThree %+ sThree) :: [LexPolynomial Double (Three :+: Three)]
+    [x, y, a, b, c, s] = genVars (sThree %+ sThree) :: [LexPolynomial (Ratio Integer) (Three :+: Three)]
     ideal = toIdeal [ 2 * s - a * y
-                    , b^2 - (x^2 + y^2)
-                    , c^2 - ( (a-x) ^2 + y^2)
+                    , b^^2 - (x^^2 + y^^2)
+                    , c^^2 - ( (a-x) ^^ 2 + y^^2)
                     ]
 
 main :: IO ()
 main = do
   putStrLn $ unwords ["(" ++ show (x + 1) ++ ")^2", "="
-                     , show $ (x + 1) ^2 ]
+                     , show $ (x + 1) ^^2 ]
   putStrLn $ unwords ["(" ++ show (x + 1) ++ ")(" ++ show (x - 1) ++ ")", "="
                      , show $ (x + 1) * (x - 1) ]
-  putStrLn $ unwords ["(" ++ show (x - 1) ++ ")(" ++ show (y^2 + y - 1) ++ ")", "="
-                     , show $ (x - 1) * (y^2 + y- 1) ]
+  putStrLn $ unwords ["(" ++ show (x - 1) ++ ")(" ++ show (y^^2 + y - 1) ++ ")", "="
+                     , show $ (x - 1) * (y^^2 + y- 1) ]
   putStrLn ""
   putStrLn "*** deriving Heron's formula ***"
   putStrLn "Area of triangles can be determined from following equations:"

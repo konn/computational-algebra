@@ -1,9 +1,13 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, GADTs #-}
-{-# LANGUAGE MultiParamTypeClasses, ParallelListComp, RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables, TypeOperators                  #-}
-module Algorithms where
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, GADTs        #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, ParallelListComp #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeOperators             #-}
+module Algebra.Algorithms.Groebner where
+import Algebra.Internal
+import Algebra.Ring.Noetherian
+import Algebra.Ring.Polynomial
 import Data.List
-import Polynomial
+import Numeric.Algebra
+import Prelude                 hiding (Num (..), recip)
 
 divModPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)
                   => OrderedPolynomial r order n -> [OrderedPolynomial r order n] -> ([(OrderedPolynomial r order n, OrderedPolynomial r order n)], OrderedPolynomial r order n)
@@ -14,11 +18,11 @@ divModPolynomial f0 fs = loop f0 zero (zip (nub fs) (repeat zero))
         | otherwise =
             let ltP = toPolynomial $ leadingTerm p
             in case break ((`divs` leadingMonomial p) . leadingMonomial . fst) dic of
-                 (_, []) -> loop (p .-. ltP) (r .+. ltP) dic
+                 (_, []) -> loop (p - ltP) (r + ltP) dic
                  (xs, (g, old):ys) ->
                      let q = toPolynomial $ leadingTerm p `tryDiv` leadingTerm g
-                         dic' = xs ++ (g, old .+. q) : ys
-                     in loop (p .-. (q .*. g)) r dic'
+                         dic' = xs ++ (g, old + q) : ys
+                     in loop (p - (q * g)) r dic'
 
 modPolynomial :: (IsPolynomial r n, Field r, IsMonomialOrder order)
               => OrderedPolynomial r order n
@@ -51,7 +55,7 @@ minimizeGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                       => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
 minimizeGroebnerBasis = foldr step []
   where
-    step x xs =  injectCoeff (inv $ leadingCoeff x) .*. x : filter (not . (leadingMonomial x `divs`) . leadingMonomial) xs
+    step x xs =  injectCoeff (recip $ leadingCoeff x) * x : filter (not . (leadingMonomial x `divs`) . leadingMonomial) xs
 
 reduceMinimalGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                     => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
@@ -97,8 +101,8 @@ intersection idsv@(_ :- _) =
     let sk = sLengthV idsv
         sn = sing :: SNat n
         ts  = genVars (sk %+ sn)
-        tis = zipWith (\ideal t -> mapIdeal ((t .*.) . shiftR sk) ideal) (toList idsv) ts
-        j = foldr appendIdeal (principalIdeal (one .-. foldr (.+.) zero ts)) tis
+        tis = zipWith (\ideal t -> mapIdeal ((t *) . shiftR sk) ideal) (toList idsv) ts
+        j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
     in sk `thEliminationIdeal` j
 
 -- | Ideal quotient by a principal ideals.
@@ -126,7 +130,7 @@ saturationByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
                            -> OrderedPolynomial k ord n -> Ideal (OrderedPolynomial k Lex n)
 saturationByPrincipalIdeal is g =
   case leqSucc (sDegree g) of
-    LeqInstance -> sOne `thEliminationIdeal` addToIdeal (one .-. (castPolynomial g .*. var sOne)) (mapIdeal (shiftR sOne) is)
+    LeqInstance -> sOne `thEliminationIdeal` addToIdeal (one - (castPolynomial g * var sOne)) (mapIdeal (shiftR sOne) is)
 
 saturationIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
                 => Ideal (OrderedPolynomial k ord n)
