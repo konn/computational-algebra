@@ -1,14 +1,17 @@
 {-# LANGUAGE DataKinds, ExistentialQuantification, FlexibleContexts, GADTs #-}
 {-# LANGUAGE PolyKinds, RankNTypes, TypeFamilies, TypeOperators            #-}
-{-# LANGUAGE UndecidableInstances                                          #-}
-module Monomorphic ( (:.:), Monomorphic (..), Monomorphicable(..)
-                             , demote', demoteComposed, monomorphicCompose
-                             , withPolymorhic, liftPoly, viaPoly, Compose(..)
-                             ) where
+{-# LANGUAGE UndecidableInstances, CPP                                          #-}
+#if __GLASGOW_HASKELL__ >= 761
+module Monomorphic (module Data.Type.Monomorphic) where
+import Data.Type.Monomorphic
+#else
+module Monomorphic ( Monomorphic (..), Monomorphicable(..)
+                   , demote', demoteComposed, monomorphicCompose
+                   , withPolymorhic, liftPoly, viaPoly, (:.:)(..)
+                   ) where
 import Control.Arrow
-import Data.Functor.Compose
 
-type (:.:) f g = Compose f g
+newtype (:.:) f g a = Comp (f (g a))
 
 -- | A wrapper type for polymophic types.
 data Monomorphic k = forall a. Monomorphic (k a)
@@ -28,10 +31,10 @@ demote' = demote . Monomorphic
 
 -- | Demote polymorphic nested types directly into monomorphic representation.
 demoteComposed :: Monomorphicable (f :.: g) => f (g a) -> MonomorphicRep (f :.: g)
-demoteComposed = demote . Monomorphic . Compose
+demoteComposed = demote . Monomorphic . Comp
 
 monomorphicCompose :: f (g a) -> Monomorphic (f :.: g)
-monomorphicCompose = Monomorphic . Compose
+monomorphicCompose = Monomorphic . Comp
 
 -- | Apply dependently-typed function to the monomorphic representation.
 withPolymorhic :: Monomorphicable k
@@ -55,3 +58,5 @@ instance (Show (MonomorphicRep k), Monomorphicable k) => Show (Monomorphic k) wh
 
 instance (Read (MonomorphicRep k), Monomorphicable k) => Read (Monomorphic k) where
   readsPrec i = map (first promote) . readsPrec i
+#endif
+

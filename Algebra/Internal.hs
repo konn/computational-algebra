@@ -1,14 +1,10 @@
-{-# LANGUAGE RankNTypes, CPP #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, StandaloneDeriving  #-}
 {-# LANGUAGE TypeFamilies, TypeOperators                           #-}
 module Algebra.Internal where
 import Data.Proxy
-#if __GLASGOW_HASKELL__ >= 760
-import Data.Type.Monomorphic
-#else
 import Monomorphic
-#endif
 
 toProxy :: a -> Proxy a
 toProxy _ = Proxy
