@@ -4,24 +4,33 @@
 name:                computational-algebra
 version:             0.0.1.0
 synopsis:            Well-kinded computational algebra library, currently supporting Groebner basis.
--- description:         
+description:         Dependently-typed computational algebra libray for Groebner basis.
 homepage:            https://github.com/konn/computational-algebra
 license:             BSD3
 license-file:        LICENSE
 author:              Hiromi ISHII
 maintainer:          konn.jinro_at_gmail.com
--- copyright:           
+copyright:           (C) Hiromi ISHII 2013
 category:            Math
 build-type:          Simple
 cabal-version:       >=1.8
+source-repository head
+  Type: git
+  Location: git://github.com/konn/computational-algebra.git
 
 library
-  exposed-modules:     Example, Monomorphic, Algebra.Internal, Algebra.Algorithms.Groebner, Algebra.Algorithms.Groebner.Monomorphic, Algebra.Ring.Noetherian, Algebra.Ring.Polynomial, Algebra.Ring.Polynomial.Monomorphic, Algebra.Ring.Polynomial.Parser
-  -- other-modules:       
-  build-depends:       base ==4.5.*
-               ,       algebra ==3.1.*
-               ,       monomorphic ==0.0.*
-               ,       tagged ==0.4.*
-               ,       lens ==3.8.*
-               ,       containers ==0.4.*
-               ,       parsec ==3.1.*
+  exposed-modules:     Algebra.Algorithms.Groebner
+                 ,     Algebra.Algorithms.Groebner.Monomorphic
+                 ,     Algebra.Ring.Noetherian
+                 ,     Algebra.Ring.Polynomial
+                 ,     Algebra.Ring.Polynomial.Monomorphic
+                 ,     Algebra.Ring.Polynomial.Parser
+  other-modules:       Example, Monomorphic, Algebra.Internal
+  build-depends:       base             >= 2.0 && < 5
+               ,       algebra          == 3.*
+               ,       tagged           >= 0.4 && < 1
+               ,       lens             == 3.*
+               ,       containers       >= 0.4 && < 0.6
+               ,       parsec           == 3.*
+  if impl(ghc >= 7.6.1)
+    build-depends:     monomorphic      == 0.0.*
