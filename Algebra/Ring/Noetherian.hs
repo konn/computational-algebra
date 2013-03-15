@@ -10,7 +10,7 @@ import           Data.Function
 import           Data.Ord
 import           Data.Ratio
 import           Numeric.Algebra
-import           Prelude          hiding ((*), (+), (-), subtract, negate)
+import           Prelude          hiding (negate, subtract, (*), (+), (-))
 import qualified Prelude          as P
 
 class (Commutative r, Ring r) => NoetherianRing r where
