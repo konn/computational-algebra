@@ -1,6 +1,14 @@
 Computational Algebra Library
 ==============================
 
+Installation
+-------------
+```{sh}
+$ cabal install computational-algebra
+```
+
+If you once installed the same version of this package and want to reinstall, please run `cabal clean` first to avoid the GHC's bug.
+
 What is this?
 -------------
 This library provides data-types and functions to manipulate polynomials.
