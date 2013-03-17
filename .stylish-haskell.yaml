@@ -1,0 +1,12 @@
+'language_extensions': []
+'steps':
+- 'imports':
+    'align': 'group'
+- 'language_pragmas':
+    'style': 'line'
+    'remove_redundant': |-
+      true
+- 'records': {}
+- 'trailing_whitespace': {}
+'columns': |-
+  80

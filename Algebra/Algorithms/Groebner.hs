@@ -1,7 +1,17 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, GADTs        #-}
 {-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, ParallelListComp #-}
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeOperators             #-}
-module Algebra.Algorithms.Groebner where
+module Algebra.Algorithms.Groebner (
+                                   -- * Polynomial division
+                                     divModPolynomial, divPolynomial, modPolynomial
+                                   -- * Groebner basis
+                                   , calcGroebnerBasis, calcGroebnerBasisWith
+                                   , simpleBuchberger, reduceMinimalGroebnerBasis, minimizeGroebnerBasis
+                                   -- * Ideal operations
+                                   , isIdealMember, intersection, thEliminationIdeal
+                                   , quotIdeal, quotByPrincipalIdeal
+                                   , saturationIdeal, saturationByPrincipalIdeal
+                                   ) where
 import Algebra.Internal
 import Algebra.Ring.Noetherian
 import Algebra.Ring.Polynomial
@@ -9,6 +19,7 @@ import Data.List
 import Numeric.Algebra
 import Prelude                 hiding (Num (..), recip)
 
+-- | Calculate a polynomial quotient and remainder w.r.t. second argument.
 divModPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)
                   => OrderedPolynomial r order n -> [OrderedPolynomial r order n] -> ([(OrderedPolynomial r order n, OrderedPolynomial r order n)], OrderedPolynomial r order n)
 divModPolynomial f0 fs = loop f0 zero (zip (nub fs) (repeat zero))
@@ -24,12 +35,14 @@ divModPolynomial f0 fs = loop f0 zero (zip (nub fs) (repeat zero))
                          dic' = xs ++ (g, old + q) : ys
                      in loop (p - (q * g)) r dic'
 
+-- | Remainder of given polynomial w.r.t. the second argument.
 modPolynomial :: (IsPolynomial r n, Field r, IsMonomialOrder order)
               => OrderedPolynomial r order n
               -> [OrderedPolynomial r order n]
               -> OrderedPolynomial r order n
 modPolynomial = (snd .) . divModPolynomial
 
+-- | A Quotient of given polynomial w.r.t. the second argument.
 divPolynomial :: (IsPolynomial r n, Field r, IsMonomialOrder order)
               => OrderedPolynomial r order n
               -> [OrderedPolynomial r order n]
@@ -40,6 +53,7 @@ infixl 7 `divPolynomial`
 infixl 7 `modPolynomial`
 infixl 7 `divModPolynomial`
 
+-- | Apply Buchberger's algorithm and calculate Groebner basis for the given ideal.
 simpleBuchberger :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                  => Ideal (OrderedPolynomial k order n) -> [OrderedPolynomial k order n]
 simpleBuchberger ideal =
@@ -51,40 +65,46 @@ simpleBuchberger ideal =
                , let q = sPolynomial f g `modPolynomial` acc, q /= zero
                ]
 
+-- | Minimize the given groebner basis.
 minimizeGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                       => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
 minimizeGroebnerBasis = foldr step []
   where
     step x xs =  injectCoeff (recip $ leadingCoeff x) * x : filter (not . (leadingMonomial x `divs`) . leadingMonomial) xs
 
+-- | Reduce minimum Groebner basis into reduced Groebner basis.
 reduceMinimalGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                     => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
 reduceMinimalGroebnerBasis bs = filter (/= zero) $  map red bs
   where
     red x = x `modPolynomial` delete x bs
 
+-- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
 calcGroebnerBasisWith :: (Field k, IsPolynomial k n, IsMonomialOrder order, IsMonomialOrder order')
                       => order -> Ideal (OrderedPolynomial k order' n) -> [OrderedPolynomial k order n]
-calcGroebnerBasisWith order i = calcGroebnerBasis $ mapIdeal (changeOrder order) i
+calcGroebnerBasisWith ord i = calcGroebnerBasis $ mapIdeal (changeOrder ord) i
 
+-- | Caliculating reduced Groebner basis of the given ideal w.r.t. the graded reversed lexicographic order.
 calcGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                   => Ideal (OrderedPolynomial k order n) -> [OrderedPolynomial k order n]
 calcGroebnerBasis = reduceMinimalGroebnerBasis . minimizeGroebnerBasis . simpleBuchberger
 
+-- | Test if the given polynomial is the member of the ideal.
 isIdealMember :: (IsPolynomial k n, Field k, IsMonomialOrder o)
               => OrderedPolynomial k o n -> Ideal (OrderedPolynomial k o n) -> Bool
 isIdealMember f ideal = groebnerTest f (calcGroebnerBasis ideal)
 
+-- | Test if the given polynomial can be divided by the given polynomials.
 groebnerTest :: (IsPolynomial k n, Field k, IsMonomialOrder order)
              => OrderedPolynomial k order n -> [OrderedPolynomial k order n] -> Bool
 groebnerTest f fs = f `modPolynomial` fs == zero
 
-
-thEliminationIdeal :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (n :+: m)
-                       )
+-- | Calculate n-th elimination ideal.
+thEliminationIdeal :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (m :-: n)
+                      , (n :<<= m) ~ True)
                    => SNat n
-                   -> Ideal (OrderedPolynomial k ord (n :+: m))
-                   -> Ideal (OrderedPolynomial k Lex m)
+                   -> Ideal (OrderedPolynomial k ord m)
+                   -> Ideal (OrderedPolynomial k Lex (m :-: n))
 thEliminationIdeal n ideal =
     toIdeal $ [transformMonomial (dropV n) f | f <- calcGroebnerBasisWith Lex ideal
                , all (all (== 0) . take (toInt n) . toList . snd) $ getTerms f
@@ -95,7 +115,8 @@ intersection :: forall r k n ord.
                 ( IsMonomialOrder ord, Field r, IsPolynomial r k, IsPolynomial r n
                 , IsPolynomial r (k :+: n)
                 )
-             => Vector (Ideal (OrderedPolynomial r ord n)) k -> Ideal (OrderedPolynomial r Lex n)
+             => Vector (Ideal (OrderedPolynomial r ord n)) k
+             -> Ideal (OrderedPolynomial r Lex n)
 intersection Nil = Ideal $ singletonV one
 intersection idsv@(_ :- _) =
     let sk = sLengthV idsv
@@ -103,7 +124,9 @@ intersection idsv@(_ :- _) =
         ts  = genVars (sk %+ sn)
         tis = zipWith (\ideal t -> mapIdeal ((t *) . shiftR sk) ideal) (toList idsv) ts
         j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
-    in sk `thEliminationIdeal` j
+    in case plusMinusEqR sn sk of
+         Eql -> case propToBoolLeq (plusLeqL sk sn) of
+                  LeqTrueInstance -> sk `thEliminationIdeal` j
 
 -- | Ideal quotient by a principal ideals.
 quotByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
@@ -114,6 +137,7 @@ quotByPrincipalIdeal i g =
     case intersection (i :- (Ideal $ singletonV g) :- Nil) of
       Ideal gs -> Ideal $ mapV (snd . head . (`divPolynomial` [changeOrder Lex g])) gs
 
+-- | Ideal quotient by the given ideal.
 quotIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
           => Ideal (OrderedPolynomial k ord n)
           -> Ideal (OrderedPolynomial k ord n)
@@ -129,9 +153,10 @@ saturationByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
                            => Ideal (OrderedPolynomial k ord n)
                            -> OrderedPolynomial k ord n -> Ideal (OrderedPolynomial k Lex n)
 saturationByPrincipalIdeal is g =
-  case leqSucc (sDegree g) of
+  case propToClassLeq $ leqSucc (sDegree g) of
     LeqInstance -> sOne `thEliminationIdeal` addToIdeal (one - (castPolynomial g * var sOne)) (mapIdeal (shiftR sOne) is)
 
+-- | Saturation ideal
 saturationIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
                 => Ideal (OrderedPolynomial k ord n)
                 -> Ideal (OrderedPolynomial k ord n)

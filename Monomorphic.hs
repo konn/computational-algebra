@@ -59,4 +59,3 @@ instance (Show (MonomorphicRep k), Monomorphicable k) => Show (Monomorphic k) wh
 instance (Read (MonomorphicRep k), Monomorphicable k) => Read (Monomorphic k) where
   readsPrec i = map (first promote) . readsPrec i
 #endif
-

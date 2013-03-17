@@ -2,7 +2,7 @@
 -- further documentation, see http://haskell.org/cabal/users-guide/
 
 name:                computational-algebra
-version:             0.0.1.0
+version:             0.0.2.0
 synopsis:            Well-kinded computational algebra library, currently supporting Groebner basis.
 description:         Dependently-typed computational algebra libray for Groebner basis.
 homepage:            https://github.com/konn/computational-algebra
@@ -12,6 +12,7 @@ author:              Hiromi ISHII
 maintainer:          konn.jinro_at_gmail.com
 copyright:           (C) Hiromi ISHII 2013
 category:            Math
+extra-source-files:  README.md, .ghci, examples/*.hs
 build-type:          Simple
 cabal-version:       >=1.8
 source-repository head
@@ -25,7 +26,8 @@ library
                  ,     Algebra.Ring.Polynomial
                  ,     Algebra.Ring.Polynomial.Monomorphic
                  ,     Algebra.Ring.Polynomial.Parser
-  other-modules:       Example, Monomorphic, Algebra.Internal
+                 ,     Algebra.Internal
+  other-modules:       Monomorphic
   build-depends:       base             >= 2.0 && < 5
                ,       algebra          == 3.*
                ,       tagged           >= 0.4 && < 1

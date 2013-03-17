@@ -9,7 +9,7 @@ module Algebra.Ring.Polynomial
     , IsPolynomial, coeff, lcmMonomial, sPolynomial, polynomial
     , castMonomial, castPolynomial, toPolynomial, changeOrder
     , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars
-    , normalize, injectCoeff, varX, var, getTerms, shiftR
+    , normalize, injectCoeff, varX, var, getTerms, shiftR, orderedBy
     , divs, tryDiv, fromList -- , genVarsV
     , leadingTerm, leadingMonomial, leadingCoeff, genVars, sDegree
     , OrderedMonomial(..), Grevlex(..), Revlex(..), Lex(..), Grlex(..)
@@ -285,6 +285,9 @@ getTerms = map (snd &&& getMonomial . fst) . M.toDescList . terms
 transformMonomial :: (IsOrder o, IsPolynomial k n, IsPolynomial k m)
                   => (Monomial n -> Monomial m) -> OrderedPolynomial k o n -> OrderedPolynomial k o m
 transformMonomial trans (Polynomial d) = Polynomial $ M.mapKeys (OrderedMonomial . trans . getMonomial) d
+
+orderedBy :: IsOrder o => OrderedPolynomial k o n -> o -> OrderedPolynomial k o n
+p `orderedBy` _ = p
 
 shiftR :: forall k r n ord. (Field r, IsPolynomial r n, IsPolynomial r (k :+: n), IsOrder ord)
        => SNat k -> OrderedPolynomial r ord n -> OrderedPolynomial r ord (k :+: n)
