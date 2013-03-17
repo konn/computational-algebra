@@ -10,12 +10,21 @@ import           Control.Arrow
 import           Data.List
 import qualified Data.Map                as M
 import           Data.Maybe
-import           Monomorphic
 import qualified Numeric.Algebra         as NA
 
 data Variable = Variable { varName  :: Char
                          , varIndex :: Maybe Int
                          } deriving (Eq, Ord)
+
+instance (Eq r, NoetherianRing r, Num r) => Num (Polynomial r) where
+  fromInteger n = Polynomial $ M.singleton M.empty $ fromInteger n
+  (+) = (NA.+)
+  (*) = (NA.*)
+  negate = NA.negate
+  abs = id
+  signum (normalize -> f)
+                  | f == NA.zero = NA.zero
+                  | otherwise    = NA.one
 
 instance Show Variable where
   showsPrec _ v = showChar (varName v) . maybe id ((showChar '_' .) . shows) (varIndex v)
@@ -23,7 +32,7 @@ instance Show Variable where
 type Monomial = M.Map Variable Integer
 
 newtype Polynomial k = Polynomial { unPolynomial :: M.Map Monomial k }
-    deriving (Eq, Ord, Show)
+    deriving (Eq, Ord)
 
 normalize :: (Eq k, NA.Monoidal k) => Polynomial k -> Polynomial k
 normalize (Polynomial dic) =
@@ -36,7 +45,7 @@ instance (Eq r, NoetherianRing r) => NoetherianRing (Polynomial r)
 instance (Eq r, NoetherianRing r) => NA.Commutative (Polynomial r)
 instance (Eq r, NoetherianRing r) => NA.Multiplicative (Polynomial r) where
   Polynomial (M.toList -> d1) *  Polynomial (M.toList -> d2) =
-    let dic = [ (M.unionWith (NA.+) a b, r NA.* r') | (a, r) <- d1, (b, r') <- d2 ]
+    let dic = [ (M.unionWith (+) a b, r NA.* r') | (a, r) <- d1, (b, r') <- d2 ]
     in normalize $ Polynomial $ M.fromListWith (NA.+) dic
 
 instance (Eq r, NoetherianRing r) => NA.Ring (Polynomial r)
@@ -63,13 +72,13 @@ instance (Eq r, NoetherianRing r) => NA.Additive (Polynomial r) where
 buildVarsList :: Polynomial r -> [Variable]
 buildVarsList = nub . sort . concatMap M.keys . M.keys . unPolynomial
 
-encodeMonomList :: [Variable] -> [(Variable, Integer)] -> [Int]
-encodeMonomList vars mono = map (maybe 0 fromInteger . flip lookup mono) vars
+encodeMonomList :: [Variable] -> Monomial -> [Int]
+encodeMonomList vars mono = map (maybe 0 fromInteger . flip M.lookup mono) vars
 
-encodeMonomial :: [Variable] -> [(Variable, Integer)] -> Monomorphic (Vector Int)
+encodeMonomial :: [Variable] -> Monomial -> Monomorphic (Vector Int)
 encodeMonomial vars mono = promote $ encodeMonomList vars mono
 
-encodePolynomial :: (Monomorphicable (Poly.Polynomial r), MonomorphicRep (Poly.Polynomial r) ~ PolynomialSetting r)
+encodePolynomial :: (Monomorphicable (Poly.Polynomial r))
                  => Polynomial r -> Monomorphic (Poly.Polynomial r)
 encodePolynomial = promote . toPolynomialSetting
 
@@ -83,6 +92,8 @@ data PolynomialSetting r = PolySetting { dimension :: Monomorphic SNat
                                        , polyn     :: Polynomial r
                                        } deriving (Show)
 
+instance (Eq r, NoetherianRing r, Show r) => Show (Polynomial r) where
+  show = showPolynomial
 
 instance (Eq r, NoetherianRing r, Poly.IsMonomialOrder ord)
     => Monomorphicable (Poly.OrderedPolynomial r ord) where
@@ -91,7 +102,7 @@ instance (Eq r, NoetherianRing r, Poly.IsMonomialOrder ord)
     case dimension of
       Monomorphic dim ->
         case singInstance dim of
-          SingInstance -> Monomorphic $ Poly.polynomial $ M.mapKeys (Poly.OrderedMonomial . Poly.fromList dim . encodeMonomList vars . M.toAscList) $ unPolynomial polyn
+          SingInstance -> Monomorphic $ Poly.polynomial $ M.mapKeys (Poly.OrderedMonomial . Poly.fromList dim . encodeMonomList vars) $ unPolynomial polyn
     where
       vars = buildVarsList polyn
   demote (Monomorphic f) =
@@ -109,7 +120,7 @@ uniformlyPromoteWithDim d ps  =
   case promote d of
     Monomorphic dim ->
       case singInstance dim of
-        SingInstance -> Monomorphic $ Comp $ toIdeal $ map (Poly.polynomial . M.mapKeys (Poly.OrderedMonomial . Poly.fromList dim . encodeMonomList vars . M.toAscList) . unPolynomial) ps
+        SingInstance -> Monomorphic $ Comp $ toIdeal $ map (Poly.polynomial . M.mapKeys (Poly.OrderedMonomial . Poly.fromList dim . encodeMonomList vars) . unPolynomial) ps
   where
     vars = nub $ sort $ concatMap buildVarsList ps
 
@@ -137,12 +148,12 @@ promoteListWithVarOrder dic ps =
   case promote dim of
     Monomorphic sdim ->
       case singInstance sdim of
-        SingInstance -> Monomorphic $ Comp $ map (Poly.polynomial . M.mapKeys (Poly.OrderedMonomial . Poly.fromList sdim . encodeMonomList vars . M.toAscList) . unPolynomial) ps
+        SingInstance -> Monomorphic $ Comp $ map (Poly.polynomial . M.mapKeys (Poly.OrderedMonomial . Poly.fromList sdim . encodeMonomList vars) . unPolynomial) ps
   where
-    dim  = length vars
     vs0 = nub $ sort $ concatMap buildVarsList ps
-    (incs, rest) = partition (`elem` dic) vs0
-    vars = incs ++ rest
+    (_, rest) = partition (`elem` dic) vs0
+    vars = dic ++ rest
+    dim  = length vars
 
 promoteListWithDim :: (NoetherianRing r, Eq r, Poly.IsMonomialOrder ord)
                    => Int -> [Polynomial r] -> Monomorphic ([] :.: Poly.OrderedPolynomial r ord)
@@ -150,32 +161,9 @@ promoteListWithDim dim ps =
   case promote dim of
     Monomorphic sdim ->
       case singInstance sdim of
-        SingInstance -> Monomorphic $ Comp $ map (Poly.polynomial . M.mapKeys (Poly.OrderedMonomial . Poly.fromList sdim . encodeMonomList vars . M.toAscList) . unPolynomial) ps
+        SingInstance -> Monomorphic $ Comp $ map (Poly.polynomial . M.mapKeys (Poly.OrderedMonomial . Poly.fromList sdim . encodeMonomList vars) . unPolynomial) ps
   where
     vars = nub $ sort $ concatMap buildVarsList ps
-
-{-
-data Equal a b where
-  Equal :: Equal a a
-
-(%==) :: (a ~ b) => a -> b -> Equal a b
-_ %== _ = Equal
-
-thEliminationIdeal' :: Int -> [Polynomial] -> [Polynomial]
-thEliminationIdeal' n [] = []
-thEliminationIdeal' n ideal =
-    let dim = length $ nub $ sort $ concatMap buildVarsList ideal
-    in if n <= 0 || dim <= n
-       then error "Degree error!"
-       else case promoteList ideal of
-              Monomorphic (Comp is@(f:_))->
-                case singInstance (sDegree f) of
-                  SingInstance ->
-                      case promote n of
-                        Monomorphic sn ->
-                          case sDegree f %== (sn %+ sm) of
-                            Equal -> demote $ Monomorphic $ Comp $ sn `thEliminationIdeal` toIdeal is
--}
 
 renameVars :: [Variable] -> Polynomial r -> Polynomial r
 renameVars vars = Polynomial . M.mapKeys (M.mapKeys ren) . unPolynomial

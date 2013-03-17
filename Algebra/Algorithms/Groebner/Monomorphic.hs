@@ -28,7 +28,6 @@ import           Algebra.Ring.Polynomial.Monomorphic
 import           Control.Arrow
 import           Data.List
 import qualified Data.Map                            as M
-import           Monomorphic
 import           Numeric.Algebra
 import           Prelude                             hiding (Num (..))
 
@@ -48,7 +47,7 @@ intersection ps =
                  let slen = sLengthV vec
                  in case singInstance slen of
                       SingInstance ->
-                        let ids = mapV (toIdeal . map (flip orderedBy Lex . Poly.polynomial . M.mapKeys (Poly.OrderedMonomial . Poly.fromList sdim . encodeMonomList vars . M.toAscList) . unPolynomial)) vec
+                        let ids = mapV (toIdeal . map (flip orderedBy Lex . Poly.polynomial . M.mapKeys (Poly.OrderedMonomial . Poly.fromList sdim . encodeMonomList vars) . unPolynomial)) vec
                         in case singInstance (slen %+ sdim) of
                              SingInstance -> demoteComposed $ Gr.intersection ids
 
@@ -88,7 +87,9 @@ divModPolynomialWith _ f gs =
       in case singInstance sn of
            SingInstance ->
              let (q, r) = Gr.divModPolynomial f' gs'
-             in (map (polyn . demote' *** polyn . demote') q, polyn $ demote' r)
+             in (map (renameVars vars . polyn . demote' *** polyn . demote') q, polyn $ demote' r)
+  where
+    vars = nub $ sort $ concatMap buildVarsList (f:gs)
 
 divPolynomial :: Groebnerable r => Polynomial r -> [Polynomial r] -> [(Polynomial r, Polynomial r)]
 divPolynomial = (fst .) . divModPolynomial
@@ -147,7 +148,7 @@ eliminate elvs j =
                               LeqTrueInstance ->
                                 case singInstance (newDim %- sk) of
                                   SingInstance ->
-                                    demoteComposed $ sk `Gr.thEliminationIdeal` toIdeal fs'
+                                    map (renameVars rest) $ demoteComposed $ sk `Gr.thEliminationIdeal` toIdeal fs'
   where
     vars = nub $ sort $ concatMap buildVarsList j
     (els, rest) = partition (`elem` elvs) vars

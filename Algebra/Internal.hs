@@ -117,7 +117,7 @@ instance Monomorphicable SNat where
   promote n
       | n < 0     = error "negative integer!"
       | n == 0    = Monomorphic SZ
-      | otherwise = withPolymorhic n $ \sn -> Monomorphic $ SS sn
+      | otherwise = withPolymorhic (n - 1) $ \sn -> Monomorphic $ SS sn
 
 instance Monomorphicable (Vector a) where
   type MonomorphicRep (Vector a) = [a]
