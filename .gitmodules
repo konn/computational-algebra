@@ -1,0 +1,3 @@
+[submodule "wiki_docs"]
+	path = wiki_docs
+	url = git@github.com:konn/computational-algebra.wiki.git

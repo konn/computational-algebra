@@ -67,8 +67,7 @@ saturationByPrincipalIdeal j g =
   let t = freshVar (g : j)
   in eliminate [t] $ (one - g * injectVar t) : j
 
--- | Calculate saturation ideal. The saturation of an ideal I by an ideal J is defined as follows:
--- I : J^∞ = { f ∈ k[X] | ∃ n > 0 s.t. f J^n ⊆ I }
+-- | Calculate saturation ideal.
 saturationIdeal :: Groebnerable r => [Polynomial r] -> [Polynomial r] -> [Polynomial r]
 saturationIdeal i g = intersection $ map (i `saturationByPrincipalIdeal`) g
 
@@ -77,8 +76,7 @@ quotByPrincipalIdeal :: Groebnerable r => [Polynomial r] -> Polynomial r -> [Pol
 quotByPrincipalIdeal i g =
   map (snd . head . flip (divPolynomialWith Lex) [g]) $ intersection [i, [g]]
 
--- | Calculate the ideal quotient of I of J, defind as follows:
--- I : J = { f ∈ k[X] | fJ ⊆ I }
+-- | Calculate the ideal quotient of I of J.
 quotIdeal :: Groebnerable r => [Polynomial r] -> [Polynomial r] -> [Polynomial r]
 quotIdeal i g = intersection $ map (i `quotByPrincipalIdeal`) g
 
