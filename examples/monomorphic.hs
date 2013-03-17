@@ -1,13 +1,20 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
-{-# LANGUAGE ConstraintKinds, NoImplicitPrelude, TypeOperators #-}
+{-# LANGUAGE ConstraintKinds, NoImplicitPrelude, OverloadedStrings #-}
+{-# LANGUAGE TypeOperators                                         #-}
 module Example where
-import Algebra.Algorithms.Groebner.Monomorphic
-import Algebra.Ring.Polynomial.Monomorphic
-import Data.Ratio
-import Numeric.Algebra
-import Prelude                                 hiding (Fractional (..),
-                                                Integral (..), (*), (+), (-),
-                                                (^), (^^))
+import           Algebra.Algorithms.Groebner.Monomorphic
+import           Algebra.Ring.Polynomial.Monomorphic
+import           Algebra.Ring.Polynomial.Parser
+import           Data.Either
+import           Data.List                               (intercalate)
+import           Data.Ratio
+import qualified Data.Text                               as T
+import           Numeric.Algebra
+import           Prelude                                 hiding
+                                                          (Fractional (..),
+                                                          Integral (..), (*),
+                                                          (+), (-), (^), (^^))
+import           System.IO
 
 default (Int)
 
@@ -38,6 +45,9 @@ main = do
                      , show $ (x + 1) * (x - 1) ]
   putStrLn $ unwords ["(" ++ show (x - 1) ++ ")(" ++ show (y^^2 + y - 1) ++ ")", "="
                      , show $ (x - 1) * (y^^2 + y- 1) ]
+  putStrLn "\n==================================================\n"
+  idealMembershipDemo
+  putStrLn "\n==================================================\n"
   putStrLn ""
   putStrLn "*** deriving Heron's formula ***"
   putStrLn "Area of triangles can be determined from following equations:"
@@ -54,3 +64,21 @@ main = do
   putStrLn "The ideal has just one polynomial `f' as its only generator."
   putStrLn "Solving the equation `f = 0' assuming S > 0, we can get Heron's formula."
 
+idealMembershipDemo :: IO ()
+idealMembershipDemo = do
+  putStrLn "======= Ideal Membership Problem ========"
+  putStrLn "Enter ideal generators, separetated by comma."
+  putStr "enter: "
+  hFlush stdout
+  src <- getLine
+  let (ls, rs) = partitionEithers $ map (parsePolyn . T.unpack) $ T.splitOn "," $ T.pack src
+  putStrLn "Enter the polynomial which you want to know whether it's a member of ideal above or not."
+  putStr "enter: "
+  hFlush stdout
+  src <- getLine
+  let ex = parsePolyn src
+  case (ls, ex) of
+    ([], Right f)
+        | f `isIdealMember` rs -> putStrLn $ concat ["[YES!] ", show f, " ∈ 〈", intercalate ", " $ map show rs]
+        | otherwise            -> putStrLn $ concat ["[NO!] ", show f, " ∉ 〈", intercalate ", " $ map show rs]
+    _ -> putStrLn "Parse error! try again." >> idealMembershipDemo

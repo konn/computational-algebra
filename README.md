@@ -23,6 +23,11 @@ There are two interfaces:
 *Monomorphic wrapper I/F
     * Not-so-dependently-typed interface to wrap dependently-typed ones. `Algebra.Ring.Polynomial.Monomorphic` and `Algebra.Algorithms.Groebner.Monomorphic`.
 
+
+For more information, please read `examples/polymorphic.hs` and `examples/monomorphic.hs`.
+
+Known Issues
+------------
 Due to GHC 7.4.*'s bug, this library contains extra modules and functionalities as follows:
 
 * `Monomorphic` data-type and his frieds
