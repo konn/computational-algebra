@@ -38,7 +38,7 @@ Known Issues
 ------------
 Due to GHC 7.4.*'s bug, this library contains extra modules and functionalities as follows:
 
-* `Monomorphic` data-type and his frieds
+* `Monomorphic` data-type and his friends
     * This is completely separeted as [`monomorphic`](http://hackage.haskell.org/package/monomorphic) package. But due to GHC 7.4.1, which is shipped with latest Haskell Platform, I include the functionality from this library for a while.
 * Singleton types and functions
     * Because the [`singletons`](http://hackage.haskell.org/package/singletons) package is not available in GHC 7.4.1, I provide limited version of the functionalities of that package in `Algebra.Internal` module. After new HP released, I will entirely rewrite all source codes using `singletons`.
