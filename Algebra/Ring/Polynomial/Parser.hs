@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE QuasiQuotes #-}
-module Algebra.Ring.Polynomial.Parser where
+module Algebra.Ring.Polynomial.Parser ( monomial, expression, variable, variableWithPower
+                                      , number, integer, natural, parsePolyn) where
 import           Algebra.Ring.Polynomial.Monomorphic
 import           Control.Applicative                 hiding (many)
 import qualified Data.Map                            as M
