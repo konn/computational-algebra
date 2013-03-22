@@ -2,6 +2,7 @@
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, StandaloneDeriving  #-}
 {-# LANGUAGE TypeFamilies, TypeOperators                           #-}
+{-# OPTIONS_GHC -fwarn-incomplete-patterns #-}
 module Algebra.Internal ( toProxy, Nat(..), SNat(..), Vector(..), Sing(..)
                         , SingInstance(..), singInstance, toInt
                         , Min, Max, sMin, sMax, sZ, sS, (:+:), (%+), (:-:), (%-)
@@ -17,9 +18,9 @@ module Algebra.Internal ( toProxy, Nat(..), SNat(..), Vector(..), Sing(..)
                         , eqlTrans, plusZR, plusZL, eqPreservesS, plusAssociative
                         , sAndPlusOne, plusCommutative, minusCongEq, minusNilpotent
                         , eqSuccMinus, plusMinusEqL, plusMinusEqR, plusLeqL, plusLeqR
-                        , zAbsorbsMinR, zAbsorbsMinL, minLeqL, minLeqR
+                        , zAbsorbsMinR, zAbsorbsMinL, minLeqL, minLeqR, plusSR
                         , leqRhs, leqLhs, leqTrans, minComm, leqAnitsymmetric
-                        , maxZL, maxComm, maxZR, maxLeqL, maxLeqR
+                        , maxZL, maxComm, maxZR, maxLeqL, maxLeqR, plusMonotone
                         , module Monomorphic
                         ) where
 import Data.Proxy
@@ -253,6 +254,41 @@ singInstance (SS n) =
   case singInstance n of
     SingInstance -> SingInstance
 
+data Reason x y where
+  Because :: SNat y -> Eql x y -> Reason x y
+
+because :: SNat y -> Eql x y -> Reason x y
+because = Because
+
+infixl 4 ===, =~=
+infix 5 `Because`
+infix 5 `because`
+
+
+(===) :: Eql x y -> Reason y z -> Eql x z
+eq === (_ `Because` eq') = eqlTrans eq eq'
+
+(=~=) :: Eql x y -> SNat y -> Eql x y
+eq =~= _ = eq
+
+start :: SNat a -> Eql a a
+start = eqlRefl
+
+definition, byDefinition :: Sing a => Eql a a
+byDefinition = eqlRefl sing
+definition = eqlRefl sing
+
+admitted :: Reason x y
+admitted = undefined
+{-# WARNING admitted "There are some goals left yet unproven." #-}
+
+infix 4 :=:
+type a :=: b = Eql a b
+
+cong' :: (SNat m -> SNat (f m)) -> a :=: b -> f a :=: f b
+cong' _ Eql = Eql
+
+
 leqRefl :: SNat n -> Leq n n
 leqRefl SZ = ZeroLeq sZ
 leqRefl (SS n) = SuccLeqSucc $ leqRefl n
@@ -276,8 +312,9 @@ eqlTrans Eql Eql = Eql
 plusZR :: SNat n -> Eql (n :+: Z) n
 plusZR SZ     = Eql
 plusZR (SS n) =
-  case plusZR n of
-    Eql -> Eql
+ start (sS n %+ sZ)
+   =~= sS (n %+ sZ)
+   === sS n          `because` cong' sS (plusZR n)
 
 plusZL :: SNat n -> Eql (Z :+: n) n
 plusZL _ = Eql
@@ -289,26 +326,39 @@ plusAssociative :: SNat n -> SNat m -> SNat l
                 -> Eql (n :+: (m :+: l)) ((n :+: m) :+: l)
 plusAssociative SZ     _ _ = Eql
 plusAssociative (SS n) m l =
-  case plusAssociative n m l of
-    Eql -> Eql
+  start (sS n %+ (m %+ l))
+    =~= sS (n %+ (m %+ l))
+    === sS ((n %+ m) %+ l)  `because` cong' sS (plusAssociative n m l)
+    =~= sS (n %+ m) %+ l
+    =~= (sS n %+ m) %+ l
 
 sAndPlusOne :: SNat n -> Eql (S n) (n :+: One)
 sAndPlusOne SZ = Eql
 sAndPlusOne (SS n) =
-  case sAndPlusOne n of
-    Eql -> Eql
+  start (sS (sS n))
+    === sS (n %+ sOne) `because` cong' sS (sAndPlusOne n)
+    =~= sS n %+ sOne
+
+plusCongL :: SNat n -> m :=: m' -> n :+: m :=: n :+: m'
+plusCongL _ Eql = Eql
+
+plusCongR :: SNat n -> m :=: m' -> m :+: n :=: m' :+: n
+plusCongR _ Eql = Eql
 
 plusCommutative :: SNat n -> SNat m -> Eql (n :+: m) (m :+: n)
 plusCommutative SZ SZ     = Eql
 plusCommutative SZ (SS m) =
-  case plusZR (SS m) of
-    Eql -> Eql
+  start (sZ %+ sS m)
+    =~= sS m
+    === sS (m %+ sZ) `because` cong' sS (plusCommutative SZ m)
+    =~= sS m %+ sZ
 plusCommutative (SS n) m =
-  case plusCommutative n m of
-    Eql -> case sAndPlusOne (m %+ n) of
-             Eql -> case plusAssociative m n sOne of
-                      Eql -> case sAndPlusOne n of
-                               Eql -> Eql
+  start (sS n %+ m)
+    =~= sS (n %+ m)
+    === sS (m %+ n)      `because` cong' sS (plusCommutative n m)
+    === (m %+ n) %+ sOne `because` sAndPlusOne (m %+ n)
+    === m %+ (n %+ sOne) `because` eqlSymm (plusAssociative m n sOne)
+    === m %+ sS n        `because` plusCongL m (eqlSymm $ sAndPlusOne n)
 
 minusCongEq :: Eql n m -> SNat l -> Eql (n :-: l) (m :-: l)
 minusCongEq Eql _ = Eql
@@ -384,6 +434,7 @@ leqLhs (SuccLeqSucc leq) = SS $ leqLhs leq
 leqTrans :: Leq n m -> Leq m l -> Leq n l
 leqTrans (ZeroLeq _) leq = ZeroLeq $ leqRhs leq
 leqTrans (SuccLeqSucc nLeqm) (SuccLeqSucc mLeql) = SuccLeqSucc $ leqTrans nLeqm mLeql
+leqTrans _ _ = error "impossible!"
 
 minComm :: SNat n -> SNat m -> Eql (Min n m) (Min m n)
 minComm SZ     SZ = Eql
@@ -418,4 +469,19 @@ maxLeqL (SS n) (SS m) = SuccLeqSucc $ maxLeqL n m
 maxLeqR :: SNat n -> SNat m -> Leq m (Max n m)
 maxLeqR n m = case maxComm n m of
                 Eql -> maxLeqL m n
+
+plusSR :: SNat n -> SNat m -> Eql (S (n :+: m)) (n :+: S m)
+plusSR n m =
+  start (sS (n %+ m))
+    === (n %+ m) %+ sOne `because` sAndPlusOne (n %+ m)
+    === n %+ (m %+ sOne) `because` eqlSymm (plusAssociative n m sOne)
+    === n %+ sS m        `because` plusCongL n (eqlSymm $ sAndPlusOne m)
+
+plusMonotone :: Leq n m -> Leq l k -> Leq (n :+: l) (m :+: k)
+plusMonotone (ZeroLeq m) (ZeroLeq k) = ZeroLeq (m %+ k)
+plusMonotone (ZeroLeq m) (SuccLeqSucc leq) =
+  case plusSR m (leqRhs leq) of
+    Eql -> SuccLeqSucc $ plusMonotone (ZeroLeq m) leq
+plusMonotone (SuccLeqSucc leq) leq' = SuccLeqSucc $ plusMonotone leq leq'
+
 -- (m + S n) - m = S (m + n) - m

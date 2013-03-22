@@ -41,6 +41,12 @@ normalize (Polynomial dic) =
 normalizeMonom :: Monomial -> Monomial
 normalizeMonom = M.filter (/= 0)
 
+instance (Eq r, NoetherianRing r) => NA.LeftModule r (Polynomial r) where
+  c .* Polynomial d = normalize $ Polynomial $ fmap (c NA.*) d
+
+instance (Eq r, NoetherianRing r) => NA.RightModule r (Polynomial r) where
+  (*.) = flip (NA..*)
+
 instance (Eq r, NoetherianRing r) => NoetherianRing (Polynomial r)
 instance (Eq r, NoetherianRing r) => NA.Commutative (Polynomial r)
 instance (Eq r, NoetherianRing r) => NA.Multiplicative (Polynomial r) where
@@ -183,3 +189,5 @@ showPolynomial f =
 injectVar :: NA.Unital r => Variable -> Polynomial r
 injectVar var = Polynomial $ M.singleton (M.singleton var 1) NA.one
 
+injectCoeff :: r -> Polynomial r
+injectCoeff c = Polynomial $ M.singleton M.empty c
