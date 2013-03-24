@@ -5,13 +5,15 @@
 module Algebra.Ring.Noetherian ( NoetherianRing, Ideal(..), addToIdeal, toIdeal, appendIdeal
                                , generators, filterIdeal, mapIdeal, principalIdeal) where
 import           Algebra.Internal
-import           Data.Complex
+import qualified Data.Complex            as C
 import           Data.Function
 import           Data.Ord
 import           Data.Ratio
 import           Numeric.Algebra
-import           Prelude          hiding (negate, subtract, (*), (+), (-))
-import qualified Prelude          as P
+import qualified Numeric.Algebra.Complex as NA
+import           Prelude                 hiding (negate, subtract, (*), (+),
+                                          (-))
+import qualified Prelude                 as P
 
 class (Commutative r, Ring r) => NoetherianRing r where
 
@@ -19,7 +21,8 @@ instance NoetherianRing Int where
 
 instance NoetherianRing Integer where
 
-instance (Commutative (Complex r), Ring (Complex r)) => NoetherianRing (Complex r) where
+instance (Commutative (NA.Complex r), Ring (NA.Complex r)) => NoetherianRing (NA.Complex r) where
+instance (Commutative (C.Complex r), Ring (C.Complex r)) => NoetherianRing (C.Complex r) where
 instance Integral n => NoetherianRing (Ratio n)
 
 instance Division (Ratio Integer) where
