@@ -9,6 +9,9 @@ module Algebra.Algorithms.Groebner.Monomorphic
     , divModPolynomialWith, divPolynomialWith, modPolynomialWith
     -- * Groebner basis
     , calcGroebnerBasis, calcGroebnerBasisWith
+    , syzygyBuchberger, syzygyBuchbergerWith
+    , primeTestBuchberger, primeTestBuchbergerWith
+    , simpleBuchberger, simpleBuchbergerWith
     -- * Ideal operations
     , isIdealMember, intersection, thEliminationIdeal, eliminate
     , quotIdeal, quotByPrincipalIdeal
@@ -124,6 +127,54 @@ calcGroebnerBasisWith ord j =
         Ideal vec ->
           case singInstance (Poly.sDegree (head $ toList vec)) of
             SingInstance -> map (renameVars vars . polyn . demote . Monomorphic) $ Gr.calcGroebnerBasisWith ord ideal
+  where
+    vars = nub $ sort $ concatMap buildVarsList j
+
+simpleBuchberger :: (Groebnerable r) => [Polynomial r] -> [Polynomial r]
+simpleBuchberger = simpleBuchbergerWith Grevlex
+
+simpleBuchbergerWith :: forall ord r. (Groebnerable r, IsMonomialOrder ord)
+                      => ord -> [Polynomial r] -> [Polynomial r]
+simpleBuchbergerWith _ ps | any (== zero) ps = []
+simpleBuchbergerWith ord j =
+  case uniformlyPromote j :: Monomorphic (Ideal :.: Poly.OrderedPolynomial r ord) of
+    Monomorphic (Comp ideal) ->
+      case ideal of
+        Ideal vec ->
+          case singInstance (Poly.sDegree (head $ toList vec)) of
+            SingInstance -> map (renameVars vars . polyn . demote . Monomorphic) $ Gr.simpleBuchberger ideal
+  where
+    vars = nub $ sort $ concatMap buildVarsList j
+
+primeTestBuchberger :: (Groebnerable r) => [Polynomial r] -> [Polynomial r]
+primeTestBuchberger = primeTestBuchbergerWith Grevlex
+
+primeTestBuchbergerWith :: forall ord r. (Groebnerable r, IsMonomialOrder ord)
+                      => ord -> [Polynomial r] -> [Polynomial r]
+primeTestBuchbergerWith _ ps | any (== zero) ps = []
+primeTestBuchbergerWith ord j =
+  case uniformlyPromote j :: Monomorphic (Ideal :.: Poly.OrderedPolynomial r ord) of
+    Monomorphic (Comp ideal) ->
+      case ideal of
+        Ideal vec ->
+          case singInstance (Poly.sDegree (head $ toList vec)) of
+            SingInstance -> map (renameVars vars . polyn . demote . Monomorphic) $ Gr.primeTestBuchberger ideal
+  where
+    vars = nub $ sort $ concatMap buildVarsList j
+
+syzygyBuchberger :: (Groebnerable r) => [Polynomial r] -> [Polynomial r]
+syzygyBuchberger = syzygyBuchbergerWith Grevlex
+
+syzygyBuchbergerWith :: forall ord r. (Groebnerable r, IsMonomialOrder ord)
+                      => ord -> [Polynomial r] -> [Polynomial r]
+syzygyBuchbergerWith _ ps | any (== zero) ps = []
+syzygyBuchbergerWith ord j =
+  case uniformlyPromote j :: Monomorphic (Ideal :.: Poly.OrderedPolynomial r ord) of
+    Monomorphic (Comp ideal) ->
+      case ideal of
+        Ideal vec ->
+          case singInstance (Poly.sDegree (head $ toList vec)) of
+            SingInstance -> map (renameVars vars . polyn . demote . Monomorphic) $ Gr.syzygyBuchberger ideal
   where
     vars = nub $ sort $ concatMap buildVarsList j
 
