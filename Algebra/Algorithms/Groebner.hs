@@ -1,23 +1,32 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, GADTs        #-}
-{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, ParallelListComp #-}
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeOperators             #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, GADTs             #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, ParallelListComp      #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, TemplateHaskell, TypeOperators #-}
 module Algebra.Algorithms.Groebner (
                                    -- * Polynomial division
                                      divModPolynomial, divPolynomial, modPolynomial
                                    -- * Groebner basis
                                    , calcGroebnerBasis, calcGroebnerBasisWith
-                                   , simpleBuchberger, reduceMinimalGroebnerBasis, minimizeGroebnerBasis
+                                   , buchberger, syzygyBuchberger, simpleBuchberger, primeTestBuchberger
+                                   , reduceMinimalGroebnerBasis, minimizeGroebnerBasis
                                    -- * Ideal operations
                                    , isIdealMember, intersection, thEliminationIdeal
                                    , quotIdeal, quotByPrincipalIdeal
                                    , saturationIdeal, saturationByPrincipalIdeal
                                    ) where
-import Algebra.Internal
-import Algebra.Ring.Noetherian
-import Algebra.Ring.Polynomial
-import Data.List
-import Numeric.Algebra
-import Prelude                 hiding (Num (..), recip)
+import           Algebra.Internal
+import           Algebra.Ring.Noetherian
+import           Algebra.Ring.Polynomial
+import           Control.Applicative
+import           Control.Monad
+import           Control.Monad.Loops
+import           Control.Monad.ST
+import qualified Data.Foldable           as H
+import           Data.Function
+import qualified Data.Heap               as H
+import           Data.List
+import           Data.STRef
+import           Numeric.Algebra
+import           Prelude                 hiding (Num (..), recip)
 
 -- | Calculate a polynomial quotient and remainder w.r.t. second argument.
 divModPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)
@@ -53,7 +62,7 @@ infixl 7 `divPolynomial`
 infixl 7 `modPolynomial`
 infixl 7 `divModPolynomial`
 
--- | Apply Buchberger's algorithm and calculate Groebner basis for the given ideal.
+-- | The Naive buchberger's algorithm to calculate Groebner basis for the given ideal.
 simpleBuchberger :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                  => Ideal (OrderedPolynomial k order n) -> [OrderedPolynomial k order n]
 simpleBuchberger ideal =
@@ -64,6 +73,63 @@ simpleBuchberger ideal =
     calc acc = [ q | f <- acc, g <- acc, f /= g
                , let q = sPolynomial f g `modPolynomial` acc, q /= zero
                ]
+
+-- | Buchberger's algorithm slightly improved by discarding relatively prime pair.
+primeTestBuchberger :: (Field r, IsPolynomial r n, IsMonomialOrder order)
+                    => Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
+primeTestBuchberger ideal =
+  let gs = nub $ generators ideal
+  in fst $ until (null . snd) (\(ggs, acc) -> let cur = nub $ ggs ++ acc in
+                                              (cur, calc cur)) (gs, calc gs)
+  where
+    calc acc = [ q | f <- acc, g <- acc, f /= g
+               , let f0 = leadingMonomial f, let g0 = leadingMonomial g
+               , lcmMonomial f0 g0 /= zipWithV (+) f0 g0
+               , let q = sPolynomial f g `modPolynomial` acc, q /= zero
+               ]
+
+(.=) :: STRef s a -> a -> ST s ()
+x .= v = writeSTRef x v
+
+(%=) :: STRef s a -> (a -> a) -> ST s ()
+x %= f = modifySTRef x f
+
+combinations :: [a] -> [(a, a)]
+combinations xs = concat $ zipWith (map . (,)) xs $ drop 1 $ tails xs
+
+-- | Calculate Groebner basis applying (modified) Buchberger's algorithm.
+-- This function is same as 'syzygyBuchberger'.
+buchberger :: (Field r, IsPolynomial r n, IsMonomialOrder order)
+           => Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
+buchberger = syzygyBuchberger
+
+-- | Buchberger's algorithm greately improved using the syzygy theory.
+-- Utilizing priority queues, this function reduces division complexity and comparison time.
+-- If you don't have strong reason to avoid this function, this function is recommended to use.
+syzygyBuchberger :: (Field r, IsPolynomial r n, IsMonomialOrder order)
+                    => Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
+syzygyBuchberger ideal = runST $ do
+  let gens = generators ideal
+      lcmm = lcmMonomial `on` leadingMonomial
+  gs <- newSTRef $ H.fromList [H.Entry (leadingMonomial g) g | g <- gens]
+  b  <- newSTRef $ H.fromList $ [H.Entry (lcmm f g) (f, g) | (f, g) <- combinations gens]
+  whileM_ (not . H.null <$> readSTRef b) $ do
+    Just (H.Entry _ (f, g), rest) <- H.viewMin <$> readSTRef b
+    gs0 <- readSTRef gs
+    b .= rest
+    let f0 = leadingMonomial f
+        g0 = leadingMonomial g
+        l = lcmMonomial f0 g0
+        redundant = H.any (\(H.Entry _ h) -> h `notElem` [f, g]
+                                  && all (\k -> H.any ((==k) . H.payload) rest) [(f, h), (g, h), (h, f), (h, g)]
+                                  && leadingMonomial h `divs` l) gs0
+    when (l /= zipWithV (+) f0 g0 && not redundant) $ do
+          let qs = (H.toList gs0)
+              s = sPolynomial f g `modPolynomial` map H.payload qs
+          when (s /= zero) $ do
+            b %= H.union (H.fromList [H.Entry (lcmm q s) (q, s) | H.Entry _ q <- qs])
+            gs %= H.insert (H.Entry (leadingMonomial s) s)
+  map H.payload . H.toList <$> readSTRef gs
 
 -- | Minimize the given groebner basis.
 minimizeGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
@@ -84,10 +150,10 @@ calcGroebnerBasisWith :: (Field k, IsPolynomial k n, IsMonomialOrder order, IsMo
                       => order -> Ideal (OrderedPolynomial k order' n) -> [OrderedPolynomial k order n]
 calcGroebnerBasisWith ord i = calcGroebnerBasis $ mapIdeal (changeOrder ord) i
 
--- | Caliculating reduced Groebner basis of the given ideal w.r.t. the graded reversed lexicographic order.
+-- | Caliculating reduced Groebner basis of the given ideal.
 calcGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                   => Ideal (OrderedPolynomial k order n) -> [OrderedPolynomial k order n]
-calcGroebnerBasis = reduceMinimalGroebnerBasis . minimizeGroebnerBasis . simpleBuchberger
+calcGroebnerBasis = reduceMinimalGroebnerBasis . minimizeGroebnerBasis . syzygyBuchberger
 
 -- | Test if the given polynomial is the member of the ideal.
 isIdealMember :: (IsPolynomial k n, Field k, IsMonomialOrder o)
@@ -106,9 +172,10 @@ thEliminationIdeal :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolyno
                    -> Ideal (OrderedPolynomial k ord m)
                    -> Ideal (OrderedPolynomial k Lex (m :-: n))
 thEliminationIdeal n ideal =
-    toIdeal $ [transformMonomial (dropV n) f | f <- calcGroebnerBasisWith Lex ideal
-               , all (all (== 0) . take (toInt n) . toList . snd) $ getTerms f
-               ]
+    toIdeal $ [ transformMonomial (dropV n) f
+              | f <- calcGroebnerBasisWith Lex ideal
+              , all (all (== 0) . take (toInt n) . toList . snd) $ getTerms f
+              ]
 
 -- | An intersection ideal of given ideals.
 intersection :: forall r k n ord.
@@ -166,3 +233,4 @@ saturationIdeal i (Ideal g) =
     SingInstance ->
         case singInstance (sLengthV g %+ (sing :: SNat n)) of
           SingInstance -> intersection $ mapV (i `saturationByPrincipalIdeal`) g
+
