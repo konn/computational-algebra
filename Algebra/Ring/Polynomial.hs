@@ -11,7 +11,7 @@ module Algebra.Ring.Polynomial
     , transformMonomial, WeightProxy(..), weightOrder
     , IsPolynomial, coeff, lcmMonomial, sPolynomial, polynomial
     , castMonomial, castPolynomial, toPolynomial, changeOrder
-    , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars, showPolynomialWith, showRational
+    , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars, showPolynomialWith, showRational, ToWeightVectorInstance(..), weightVInstance
     , normalize, injectCoeff, varX, var, getTerms, shiftR, orderedBy
     , divs, tryDiv, fromList -- , genVarsV
     , leadingTerm, leadingMonomial, leadingCoeff, genVars, sDegree
@@ -179,6 +179,15 @@ instance (IsMonomialOrder ord, ToWeightVector ns, EliminationType n (WeightOrder
     => EliminationType (S n) (WeightOrder (One ': ns) ord)
 
 type EliminationOrder n = ProductOrder n Grevlex Grevlex
+
+data ToWeightVectorInstance n where
+  ToWeightVectorInstance :: (EliminationType n (WeightedEliminationOrder n), ToWeightVector (EWeight n)) => ToWeightVectorInstance n
+
+weightVInstance :: SNat n -> ToWeightVectorInstance n
+weightVInstance SZ = ToWeightVectorInstance
+weightVInstance (SS n) =
+  case weightVInstance n of
+    ToWeightVectorInstance -> ToWeightVectorInstance
 
 eliminationOrder :: SNat n -> EliminationOrder n
 eliminationOrder n =

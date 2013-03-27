@@ -171,8 +171,12 @@ thEliminationIdeal :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolyno
                       , (n :<<= m) ~ True)
                    => SNat n
                    -> Ideal (OrderedPolynomial k ord m)
-                   -> Ideal (OrderedPolynomial k Lex (m :-: n))
-thEliminationIdeal n = case singInstance n of SingInstance -> thEliminationIdealWith Lex n
+                   -> Ideal (OrderedPolynomial k (WeightedEliminationOrder n) (m :-: n))
+thEliminationIdeal n =
+    case singInstance n of
+      SingInstance ->
+        case weightVInstance n of
+          ToWeightVectorInstance -> thEliminationIdealWith (weightedEliminationOrder n) n
 
 -- | Calculate n-th elimination ideal using the specified n-th elimination type order.
 thEliminationIdealWith :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (m :-: n)
@@ -221,7 +225,7 @@ intersection idsv@(_ :- _) =
         j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
     in case plusMinusEqR sn sk of
          Eql -> case propToBoolLeq (plusLeqL sk sn) of
-                  LeqTrueInstance -> sk `thEliminationIdeal` j
+                  LeqTrueInstance -> thEliminationIdealWith Lex sk j
 
 -- | Ideal quotient by a principal ideals.
 quotByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
@@ -249,7 +253,7 @@ saturationByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
                            -> OrderedPolynomial k ord n -> Ideal (OrderedPolynomial k Lex n)
 saturationByPrincipalIdeal is g =
   case propToClassLeq $ leqSucc (sDegree g) of
-    LeqInstance -> sOne `thEliminationIdeal` addToIdeal (one - (castPolynomial g * var sOne)) (mapIdeal (shiftR sOne) is)
+    LeqInstance -> thEliminationIdealWith Lex sOne $ addToIdeal (one - (castPolynomial g * var sOne)) (mapIdeal (shiftR sOne) is)
 
 -- | Saturation ideal
 saturationIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
