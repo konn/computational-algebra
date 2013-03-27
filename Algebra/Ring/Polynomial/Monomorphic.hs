@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs           #-}
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, RecordWildCards, TypeFamilies #-}
-{-# LANGUAGE TypeOperators, ViewPatterns                                     #-}
+{-# LANGUAGE TypeOperators, ViewPatterns, OverlappingInstances               #-}
 {-# OPTIONS_GHC -fno-warn-orphans                             #-}
 module Algebra.Ring.Polynomial.Monomorphic where
 import           Algebra.Internal
@@ -11,6 +11,7 @@ import           Data.List
 import qualified Data.Map                as M
 import           Data.Maybe
 import qualified Numeric.Algebra         as NA
+import           Data.Ratio
 
 data Variable = Variable { varName  :: Char
                          , varIndex :: Maybe Int
@@ -96,7 +97,10 @@ toPolynomialSetting p =
 
 data PolynomialSetting r = PolySetting { dimension :: Monomorphic SNat
                                        , polyn     :: Polynomial r
-                                       } deriving (Show)
+                                       }
+
+instance (Integral a, Show a) => Show (Polynomial (Ratio a)) where
+  show = showRatPolynomial
 
 instance (Eq r, NoetherianRing r, Show r) => Show (Polynomial r) where
   show = showPolynomial
@@ -183,6 +187,15 @@ showPolynomial f =
     Monomorphic f' ->
         case singInstance (Poly.sDegree f') of
           SingInstance -> Poly.showPolynomialWithVars dic f'
+  where
+    dic = zip [1..] $ map show $ buildVarsList f
+
+showRatPolynomial :: (Integral a, Show a) => Polynomial (Ratio a) -> String
+showRatPolynomial f =
+  case encodePolynomial f of
+    Monomorphic f' ->
+        case singInstance (Poly.sDegree f') of
+          SingInstance -> Poly.showPolynomialWith dic Poly.showRational f'
   where
     dic = zip [1..] $ map show $ buildVarsList f
 

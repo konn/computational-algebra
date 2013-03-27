@@ -13,7 +13,7 @@ module Algebra.Algorithms.Groebner.Monomorphic
     , primeTestBuchberger, primeTestBuchbergerWith
     , simpleBuchberger, simpleBuchbergerWith
     -- * Ideal operations
-    , isIdealMember, intersection, thEliminationIdeal, eliminate
+    , isIdealMember, intersection, thEliminationIdeal, eliminate, thEliminationIdealWith, eliminateWith
     , quotIdeal, quotByPrincipalIdeal
     , saturationIdeal, saturationByPrincipalIdeal
     -- * Re-exports
@@ -187,8 +187,9 @@ isIdealMember f ideal =
     _ -> error "impossible happend!"
 
 -- | Computes the ideal with specified variables eliminated.
-eliminate :: forall r. Groebnerable r => [Variable] -> [Polynomial r] -> [Polynomial r]
-eliminate elvs j =
+eliminateWith :: forall r ord . (IsMonomialOrder ord, Groebnerable r)
+              => ord -> [Variable] -> [Polynomial r] -> [Polynomial r]
+eliminateWith ord elvs j =
   case promoteListWithVarOrder (els ++ rest) j :: Monomorphic ([] :.: Poly.OrderedPolynomial r Poly.Lex) of
     Monomorphic (Comp fs) ->
       case promote k of
@@ -206,14 +207,20 @@ eliminate elvs j =
                               LeqTrueInstance ->
                                 case singInstance (newDim %- sk) of
                                   SingInstance ->
-                                    map (renameVars rest) $ demoteComposed $ sk `Gr.thEliminationIdeal` toIdeal fs'
+                                    map (renameVars rest) $ demoteComposed $ Gr.unsafeThEliminationIdealWith ord sk (toIdeal fs')
   where
     vars = nub $ sort $ concatMap buildVarsList j
     (els, rest) = partition (`elem` elvs) vars
     k = length els
 
+eliminate :: forall r.  Groebnerable r => [Variable] -> [Polynomial r] -> [Polynomial r]
+eliminate = eliminateWith Lex
+
 -- | Computes nth elimination ideal.
 thEliminationIdeal :: Groebnerable r => Int -> [Polynomial r] -> [Polynomial r]
-thEliminationIdeal k j = eliminate (take k vars) j
+thEliminationIdeal = thEliminationIdealWith Lex
+
+thEliminationIdealWith :: (IsMonomialOrder ord, Groebnerable r) => ord -> Int -> [Polynomial r] -> [Polynomial r]
+thEliminationIdealWith ord k j = eliminateWith ord (take k vars) j
   where
     vars = nub $ sort $ concatMap buildVarsList j

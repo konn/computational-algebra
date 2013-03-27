@@ -9,7 +9,8 @@ module Algebra.Algorithms.Groebner (
                                    , buchberger, syzygyBuchberger, simpleBuchberger, primeTestBuchberger
                                    , reduceMinimalGroebnerBasis, minimizeGroebnerBasis
                                    -- * Ideal operations
-                                   , isIdealMember, intersection, thEliminationIdeal
+                                   , isIdealMember, intersection, thEliminationIdeal, thEliminationIdealWith
+                                   , unsafeThEliminationIdealWith
                                    , quotIdeal, quotByPrincipalIdeal
                                    , saturationIdeal, saturationByPrincipalIdeal
                                    ) where
@@ -165,17 +166,44 @@ groebnerTest :: (IsPolynomial k n, Field k, IsMonomialOrder order)
              => OrderedPolynomial k order n -> [OrderedPolynomial k order n] -> Bool
 groebnerTest f fs = f `modPolynomial` fs == zero
 
--- | Calculate n-th elimination ideal.
+-- | Calculate n-th elimination ideal using 'Lex' ordering.
 thEliminationIdeal :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (m :-: n)
                       , (n :<<= m) ~ True)
                    => SNat n
                    -> Ideal (OrderedPolynomial k ord m)
                    -> Ideal (OrderedPolynomial k Lex (m :-: n))
-thEliminationIdeal n ideal =
-    toIdeal $ [ transformMonomial (dropV n) f
-              | f <- calcGroebnerBasisWith Lex ideal
-              , all (all (== 0) . take (toInt n) . toList . snd) $ getTerms f
-              ]
+thEliminationIdeal n = case singInstance n of SingInstance -> thEliminationIdealWith Lex n
+
+-- | Calculate n-th elimination ideal using the specified n-th elimination type order.
+thEliminationIdealWith :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (m :-: n)
+                      , (n :<<= m) ~ True, EliminationType n ord, IsMonomialOrder ord')
+                   => ord
+                   -> SNat n
+                   -> Ideal (OrderedPolynomial k ord' m)
+                   -> Ideal (OrderedPolynomial k ord (m :-: n))
+thEliminationIdealWith ord n ideal =
+    case singInstance n of
+      SingInstance ->  toIdeal $ [ transformMonomial (dropV n) f
+                                 | f <- calcGroebnerBasisWith ord ideal
+                                 , all (all (== 0) . take (toInt n) . toList . snd) $ getTerms f
+                                 ]
+
+-- | Calculate n-th elimination ideal using the specified n-th elimination type order.
+-- This function should be used carefully because it does not check whether the given ordering is
+-- n-th elimintion type or not.
+unsafeThEliminationIdealWith :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (m :-: n)
+                                , (n :<<= m) ~ True, IsMonomialOrder ord')
+                             => ord
+                             -> SNat n
+                             -> Ideal (OrderedPolynomial k ord' m)
+                             -> Ideal (OrderedPolynomial k ord (m :-: n))
+unsafeThEliminationIdealWith ord n ideal =
+    case singInstance n of
+      SingInstance ->  toIdeal $ [ transformMonomial (dropV n) f
+                                 | f <- calcGroebnerBasisWith ord ideal
+                                 , all (all (== 0) . take (toInt n) . toList . snd) $ getTerms f
+                                 ]
+
 
 -- | An intersection ideal of given ideals.
 intersection :: forall r k n ord.

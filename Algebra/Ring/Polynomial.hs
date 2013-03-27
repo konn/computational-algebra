@@ -1,20 +1,23 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, MultiParamTypeClasses        #-}
-{-# LANGUAGE PolyKinds, ScopedTypeVariables, StandaloneDeriving              #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE OverlappingInstances, PolyKinds, ScopedTypeVariables            #-}
+{-# LANGUAGE StandaloneDeriving, TypeFamilies, TypeOperators                 #-}
+{-# LANGUAGE UndecidableInstances, ViewPatterns                              #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults                    #-}
 module Algebra.Ring.Polynomial
-    ( Polynomial, Monomial, MonomialOrder, Order
-    , lex, revlex, graded, grlex, grevlex, transformMonomial
+    ( Polynomial, Monomial, MonomialOrder, EliminationType, EliminationOrder
+    , WeightedEliminationOrder, eliminationOrder, weightedEliminationOrder
+    , lex, revlex, graded, grlex, grevlex, productOrder, productOrder'
+    , transformMonomial, WeightProxy(..), weightOrder
     , IsPolynomial, coeff, lcmMonomial, sPolynomial, polynomial
     , castMonomial, castPolynomial, toPolynomial, changeOrder
-    , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars
+    , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars, showPolynomialWith, showRational
     , normalize, injectCoeff, varX, var, getTerms, shiftR, orderedBy
     , divs, tryDiv, fromList -- , genVarsV
     , leadingTerm, leadingMonomial, leadingCoeff, genVars, sDegree
     , OrderedMonomial(..), Grevlex(..), Revlex(..), Lex(..), Grlex(..)
-    , IsOrder, IsMonomialOrder)  where
-
+    , ProductOrder (..), WeightOrder(..)
+    , IsOrder(..), IsMonomialOrder)  where
 import           Algebra.Internal
 import           Algebra.Ring.Noetherian
 import           Control.Arrow
@@ -26,7 +29,8 @@ import           Data.Maybe
 import           Data.Monoid
 import           Data.Ord
 import           Data.Proxy
-import           Numeric.Algebra
+import           Data.Ratio
+import           Numeric.Algebra         hiding (Order(..))
 import           Prelude                 hiding (lex, (*), (+), (-), (^), (^^), recip, negate)
 import qualified Prelude                 as P
 
@@ -94,6 +98,53 @@ data Grlex = Grlex              -- Graded lexicographical order
 data Revlex = Revlex            -- Reversed lexicographical order
               deriving (Show, Eq, Ord)
 
+data ProductOrder n a b where
+  ProductOrder :: SNat n -> ord -> ord' -> ProductOrder n ord ord'
+
+productOrder :: forall ord ord' n m. (IsOrder ord, IsOrder ord', Sing n)
+             => Proxy (ProductOrder n ord ord') -> Monomial m -> Monomial m -> Ordering
+productOrder _ m m' =
+  case sing :: SNat n of
+    n -> case (splitAtLess n m, splitAtLess n m') of
+           ((xs, xs'), (ys, ys')) -> cmpMonomial (Proxy :: Proxy ord) xs ys <> cmpMonomial (Proxy :: Proxy ord') xs' ys'
+
+productOrder' :: forall n ord ord' m.(IsOrder ord, IsOrder ord')
+              => SNat n -> ord -> ord' -> Monomial m -> Monomial m -> Ordering
+productOrder' n ord ord' =
+  case singInstance n of SingInstance -> productOrder (toProxy $ ProductOrder n ord ord')
+
+-- | Data.Proxy provides kind-polymorphic 'Proxy' data-type, but due to bug of GHC 7.4.1,
+-- It canot be used as kind-polymorphic. So I define another type here.
+data WeightProxy (v :: [Nat]) where
+  NilWeight  :: WeightProxy '[]
+  ConsWeight :: SNat n -> WeightProxy v -> WeightProxy (n ': v)
+
+data WeightOrder (v :: [Nat]) (ord :: *) where
+  WeightOrder :: WeightProxy (v :: [Nat]) -> ord -> WeightOrder v ord
+
+data Proxy' (vs :: [Nat]) = Proxy'
+
+class ToWeightVector (vs :: [Nat]) where
+  toWeightV :: Proxy' vs -> [Int]
+
+instance ToWeightVector '[] where
+  toWeightV Proxy' = []
+
+instance (Sing n, ToWeightVector ns) => ToWeightVector (n ': ns) where
+  toWeightV Proxy' = toInt (sing :: SNat n) : toWeightV (Proxy' :: Proxy' ns)
+
+weightOrder :: forall ns ord m. (ToWeightVector ns, IsOrder ord)
+            => Proxy (WeightOrder ns ord) -> Monomial m -> Monomial m -> Ordering
+weightOrder Proxy m m' = comparing toW m m' <> cmpMonomial (Proxy :: Proxy ord) m m'
+  where
+    toW = zipWith (*) (toWeightV (Proxy' :: Proxy' ns)) . toList
+
+instance (ToWeightVector ws, IsOrder ord) => IsOrder (WeightOrder ws ord) where
+  cmpMonomial p = weightOrder p
+
+instance (IsOrder ord, IsOrder ord', Sing n) => IsOrder (ProductOrder n ord ord') where
+  cmpMonomial p = productOrder p
+
 -- They're all total orderings.
 instance IsOrder Grevlex where
   cmpMonomial _ = grevlex
@@ -115,6 +166,37 @@ class IsOrder name => IsMonomialOrder name where
 instance IsMonomialOrder Grlex
 instance IsMonomialOrder Grevlex
 instance IsMonomialOrder Lex
+instance (Sing n, IsMonomialOrder o, IsMonomialOrder o') => IsMonomialOrder (ProductOrder n o o')
+instance (ToWeightVector ws, IsMonomialOrder ord) => IsMonomialOrder (WeightOrder ws ord)
+
+-- | Monomial order which can be use to calculate n-th elimination ideal.
+-- This should judge it as bigger that contains variables to eliminate.
+class (IsMonomialOrder ord, Sing n) => EliminationType n ord
+instance Sing n => EliminationType n Lex
+instance (Sing n, IsMonomialOrder ord, IsMonomialOrder ord') => EliminationType n (ProductOrder n ord ord')
+instance (IsMonomialOrder ord) => EliminationType Z (WeightOrder '[] ord)
+instance (IsMonomialOrder ord, ToWeightVector ns, EliminationType n (WeightOrder ns ord))
+    => EliminationType (S n) (WeightOrder (One ': ns) ord)
+
+type EliminationOrder n = ProductOrder n Grevlex Grevlex
+
+eliminationOrder :: SNat n -> EliminationOrder n
+eliminationOrder n =
+  case singInstance n of
+    SingInstance -> ProductOrder n Grevlex Grevlex
+
+weightedEliminationOrder :: SNat n -> WeightedEliminationOrder n
+weightedEliminationOrder n = WeightOrder (mkWeight n) Grevlex
+
+mkWeight :: SNat n -> WeightProxy (EWeight n)
+mkWeight SZ     = NilWeight
+mkWeight (SS n) = ConsWeight sOne $ mkWeight n
+
+type family EWeight n :: [Nat]
+type instance EWeight Z = '[]
+type instance EWeight (S n) = One ': EWeight n
+
+type WeightedEliminationOrder n = WeightOrder (EWeight n) Grevlex
 
 -- | Special ordering for ordered-monomials.
 instance (Eq (Monomial n), IsOrder name) => Ord (OrderedMonomial name n) where
@@ -171,7 +253,7 @@ instance (IsOrder order, IsPolynomial r n) => Rig (OrderedPolynomial r order n) 
 instance (IsOrder order, IsPolynomial r n) => Group (OrderedPolynomial r order n) where
   negate (Polynomial dic) = Polynomial $ fmap negate dic
 instance (IsOrder order, IsPolynomial r n) => LeftModule Integer (OrderedPolynomial r order n) where
-  n .* Polynomial dic = Polynomial $ fmap (n .*) dic  
+  n .* Polynomial dic = Polynomial $ fmap (n .*) dic
 instance (IsOrder order, IsPolynomial r n) => RightModule Integer (OrderedPolynomial r order n) where
   (*.) = flip (.*)
 instance (IsOrder order, IsPolynomial r n) => Additive (OrderedPolynomial r order n) where
@@ -195,6 +277,9 @@ instance (IsOrder order, IsPolynomial r n) => Abelian (OrderedPolynomial r order
 instance (Eq r, IsPolynomial r n, IsOrder order, Show r) => Show (OrderedPolynomial r order n) where
   show = showPolynomialWithVars [(n, "X_"++ show n) | n <- [1..]]
 
+instance (Sing n, IsOrder order) => Show (OrderedPolynomial Rational order n) where
+  show = showPolynomialWith [(n, "X_"++ show n) | n <- [1..]] showRational
+
 showPolynomialWithVars :: (Eq a, Show a, Sing n, NoetherianRing a, IsOrder ordering)
                        => [(Int, String)] -> OrderedPolynomial a ordering n -> String
 showPolynomialWithVars dic p0@(Polynomial d)
@@ -214,6 +299,44 @@ showPolynomialWithVars dic p0@(Polynomial d)
                      | p == 1    = Just $ showVar n
                      | otherwise = Just $ showVar n ++ "^" ++ show p
       showVar n = fromMaybe ("X_" ++ show n) $ lookup n dic
+
+data Coefficient = Zero | Negative String | Positive String | Eps
+                 deriving (Show, Eq, Ord)
+
+showRational :: (Integral a, Show a) => Ratio a -> Coefficient
+showRational r | r == 0    = Zero
+               | r >  0    = Positive $ formatRat r
+               | otherwise = Negative $ formatRat $ abs r
+  where
+    formatRat q | denominator q == 1 = show $ numerator q
+                | otherwise          = show (numerator q) ++ "/" ++ show (denominator q) ++ " "
+
+showPolynomialWith  :: (Eq a, Show a, Sing n, NoetherianRing a, IsOrder ordering)
+                    => [(Int, String)] -> (a -> Coefficient) -> OrderedPolynomial a ordering n -> String
+showPolynomialWith vDic showCoeff p0@(Polynomial d)
+    | p0 == zero = "0"
+    | otherwise  = catTerms $ mapMaybe procTerm $ M.toDescList d
+    where
+      catTerms [] = "0"
+      catTerms (x:xs) = concat $ showTerm True x : map (showTerm False) xs
+      showTerm isLeading (Zero, _) = if isLeading then "0" else ""
+      showTerm isLeading (Positive s, deg) = if isLeading then s ++ deg else " + " ++ s ++ deg
+      showTerm isLeading (Negative s, deg) = if isLeading then '-' : s ++ deg else " - " ++ s ++ deg
+      showTerm isLeading (Eps, deg) = if isLeading then deg else " + " ++ deg
+      procTerm (getMonomial -> deg, c)
+          | c == zero = Nothing
+          | otherwise =
+              let cKind = showCoeff c
+                  cff | isConstantMonomial deg && c == one        = Positive "1"
+                      | isConstantMonomial deg && c == negate one = Negative "1"
+                      | c == one = Positive ""
+                      | c == negate one = Negative ""
+                      | otherwise                                 = cKind
+              in Just $ (cff, unwords (mapMaybe showDeg (zip [1..] $ toList deg)))
+      showDeg (n, p) | p == 0    = Nothing
+                     | p == 1    = Just $ showVar n
+                     | otherwise = Just $ showVar n ++ "^" ++ show p
+      showVar n = fromMaybe ("X_" ++ show n) $ lookup n vDic
 
 isConstantMonomial :: (Eq a, Num a) => Vector a n -> Bool
 isConstantMonomial v = all (== 0) $ toList v

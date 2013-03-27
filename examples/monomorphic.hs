@@ -40,7 +40,7 @@ heron = eliminate [Variable 'x' Nothing, Variable 'y' Nothing] ideal
 main :: IO ()
 main = do
   putStrLn $ unwords ["(" ++ show (x + 1) ++ ")^2", "="
-                     , show $ (x + 1) ^^2 ]
+                     , show $ show $ (x + 1) ^^2 ]
   putStrLn $ unwords ["(" ++ show (x + 1) ++ ")(" ++ show (x - 1) ++ ")", "="
                      , show $ (x + 1) * (x - 1) ]
   putStrLn $ unwords ["(" ++ show (x - 1) ++ ")(" ++ show (y^^2 + y - 1) ++ ")", "="
@@ -59,7 +59,7 @@ main = do
   putStrLn "Using elimination ideal, this can be automatically solved."
   putStrLn "We calculate this with theory of Groebner basis with respect to 'lex'."
   putStrLn "This might take a while. please wait..."
-  print heron
+  putStrLn $ show heron
   putStrLn "In equation above, X_1, X_2, X_3 and X_4 stands for a, b, c and S, respectively."
   putStrLn "The ideal has just one polynomial `f' as its only generator."
   putStrLn "Solving the equation `f = 0' assuming S > 0, we can get Heron's formula."
@@ -79,6 +79,7 @@ idealMembershipDemo = do
   let ex = parsePolyn src
   case (ls, ex) of
     ([], Right f)
-        | f `isIdealMember` rs -> putStrLn $ concat ["[YES!] ", show f, " ∈ 〈", intercalate ", " $ map show rs]
-        | otherwise            -> putStrLn $ concat ["[NO!] ", show f, " ∉ 〈", intercalate ", " $ map show rs]
+        | f `isIdealMember` rs -> putStrLn $ concat ["[YES!] ", show f, " ∈ 〈", intercalate ", " $ map show rs, "〉"]
+        | otherwise            ->
+            putStrLn $ concat ["[NO!] ", showRatPolynomial f, " ∉ 〈", intercalate ", " $ map show rs, "〉"]
     _ -> putStrLn "Parse error! try again." >> idealMembershipDemo

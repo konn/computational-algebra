@@ -25,13 +25,16 @@ f2 = y^^2 - 1
 type LexPolynomial r n = OrderedPolynomial r Lex n
 
 heron :: Ideal (LexPolynomial (Ratio Integer) (Two :+: Two))
-heron = sTwo `thEliminationIdeal` ideal
+heron = sTwo `thEliminationIdeal` heronIdeal
+
+heronIdeal :: Ideal (Polynomial (Ratio Integer) (Three :+: Three))
+heronIdeal = toIdeal [ 2 * s - a * y
+                     , b^^2 - (x^^2 + y^^2)
+                     , c^^2 - ( (a-x) ^^ 2 + y^^2)
+                     ]
   where
-    [x, y, a, b, c, s] = genVars (sThree %+ sThree) :: [LexPolynomial (Ratio Integer) (Three :+: Three)]
-    ideal = toIdeal [ 2 * s - a * y
-                    , b^^2 - (x^^2 + y^^2)
-                    , c^^2 - ( (a-x) ^^ 2 + y^^2)
-                    ]
+    [x, y, a, b, c, s] = genVars (sThree %+ sThree)
+
 
 main :: IO ()
 main = do
@@ -52,8 +55,15 @@ main = do
   putStrLn "Using elimination ideal, this can be automatically solved."
   putStrLn "We calculate this with theory of Groebner basis with respect to 'lex'."
   putStrLn "This might take a while. please wait..."
-  print heron
+  print $ sTwo `thEliminationIdeal` heronIdeal
   putStrLn "In equation above, X_1, X_2, X_3 and X_4 stands for a, b, c and S, respectively."
   putStrLn "The ideal has just one polynomial `f' as its only generator."
   putStrLn "Solving the equation `f = 0' assuming S > 0, we can get Heron's formula."
+  putStrLn ""
+  putStrLn "Let's use nother elimination type. We choose Grevlex × Grevlex: "
+  print $ thEliminationIdealWith (eliminationOrder sTwo) sTwo heronIdeal
+  putStrLn "And weighted order:"
+  print $ thEliminationIdealWith (weightedEliminationOrder sTwo) sTwo heronIdeal
+
+
 

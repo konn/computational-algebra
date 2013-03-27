@@ -10,6 +10,7 @@ import           Data.Function
 import           Data.Ord
 import           Data.Ratio
 import           Numeric.Algebra
+import qualified Numeric.Algebra         as NA
 import qualified Numeric.Algebra.Complex as NA
 import           Prelude                 hiding (negate, subtract, (*), (+),
                                           (-))
@@ -24,6 +25,18 @@ instance NoetherianRing Integer where
 instance (Commutative (NA.Complex r), Ring (NA.Complex r)) => NoetherianRing (NA.Complex r) where
 instance (Commutative (C.Complex r), Ring (C.Complex r)) => NoetherianRing (C.Complex r) where
 instance Integral n => NoetherianRing (Ratio n)
+
+instance Integral n => InvolutiveMultiplication (Ratio n) where
+  adjoint = id
+instance Integral n => InvolutiveSemiring (Ratio n)
+
+instance Integral n => TriviallyInvolutive (Ratio n)
+
+instance (P.Num n) => P.Num (NA.Complex n) where
+  fromInteger n = NA.Complex (P.fromInteger n) 0
+  negate (NA.Complex x y) = NA.Complex (P.negate x) (P.negate y)
+  NA.Complex x y + NA.Complex z w = NA.Complex (x P.+ y) (z P.+ w)
+  NA.Complex x y * NA.Complex z w = NA.Complex (x P.* z P.- y P.* w) (x P.* w P.+ y P.* z)
 
 instance Division (Ratio Integer) where
   recip = P.recip
