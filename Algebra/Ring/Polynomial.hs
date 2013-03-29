@@ -10,7 +10,7 @@ module Algebra.Ring.Polynomial
     , lex, revlex, graded, grlex, grevlex, productOrder, productOrder'
     , transformMonomial, WeightProxy(..), weightOrder
     , IsPolynomial, coeff, lcmMonomial, sPolynomial, polynomial
-    , castMonomial, castPolynomial, toPolynomial, changeOrder
+    , castMonomial, castPolynomial, toPolynomial, changeOrder, changeOrderProxy
     , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars, showPolynomialWith, showRational, ToWeightVectorInstance(..), weightVInstance
     , normalize, injectCoeff, varX, var, getTerms, shiftR, orderedBy
     , divs, tryDiv, fromList -- , genVarsV
@@ -410,6 +410,10 @@ sPolynomial f g =
 changeOrder :: (Eq (Monomial n), IsOrder o, IsOrder o',  Sing n)
             => o' -> OrderedPolynomial k o n -> OrderedPolynomial k o' n
 changeOrder _ = unwrapped %~ M.mapKeys (OrderedMonomial . getMonomial)
+
+changeOrderProxy :: (Eq (Monomial n), IsOrder o, IsOrder o',  Sing n)
+            => Proxy o' -> OrderedPolynomial k o n -> OrderedPolynomial k o' n
+changeOrderProxy _ = unwrapped %~ M.mapKeys (OrderedMonomial . getMonomial)
 
 getTerms :: OrderedPolynomial k order n -> [(k, Monomial n)]
 getTerms = map (snd &&& getMonomial . fst) . M.toDescList . terms

@@ -25,6 +25,7 @@ import qualified Data.Foldable           as H
 import           Data.Function
 import qualified Data.Heap               as H
 import           Data.List
+import           Data.Proxy
 import           Data.STRef
 import           Numeric.Algebra
 import           Prelude                 hiding (Num (..), recip)
@@ -171,12 +172,12 @@ thEliminationIdeal :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolyno
                       , (n :<<= m) ~ True)
                    => SNat n
                    -> Ideal (OrderedPolynomial k ord m)
-                   -> Ideal (OrderedPolynomial k (WeightedEliminationOrder n) (m :-: n))
+                   -> Ideal (OrderedPolynomial k ord (m :-: n))
 thEliminationIdeal n =
     case singInstance n of
       SingInstance ->
         case weightVInstance n of
-          ToWeightVectorInstance -> thEliminationIdealWith (weightedEliminationOrder n) n
+          ToWeightVectorInstance -> mapIdeal (changeOrderProxy Proxy) . thEliminationIdealWith (weightedEliminationOrder n) n
 
 -- | Calculate n-th elimination ideal using the specified n-th elimination type order.
 thEliminationIdealWith :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (m :-: n)
@@ -215,7 +216,7 @@ intersection :: forall r k n ord.
                 , IsPolynomial r (k :+: n)
                 )
              => Vector (Ideal (OrderedPolynomial r ord n)) k
-             -> Ideal (OrderedPolynomial r Lex n)
+             -> Ideal (OrderedPolynomial r ord n)
 intersection Nil = Ideal $ singletonV one
 intersection idsv@(_ :- _) =
     let sk = sLengthV idsv
@@ -225,22 +226,22 @@ intersection idsv@(_ :- _) =
         j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
     in case plusMinusEqR sn sk of
          Eql -> case propToBoolLeq (plusLeqL sk sn) of
-                  LeqTrueInstance -> thEliminationIdealWith Lex sk j
+                  LeqTrueInstance -> thEliminationIdeal sk j
 
 -- | Ideal quotient by a principal ideals.
 quotByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
                      => Ideal (OrderedPolynomial k ord n)
                      -> OrderedPolynomial k ord n
-                     -> Ideal (OrderedPolynomial k Lex n)
+                     -> Ideal (OrderedPolynomial k ord n)
 quotByPrincipalIdeal i g =
     case intersection (i :- (Ideal $ singletonV g) :- Nil) of
-      Ideal gs -> Ideal $ mapV (snd . head . (`divPolynomial` [changeOrder Lex g])) gs
+      Ideal gs -> Ideal $ mapV (snd . head . (`divPolynomial` [g])) gs
 
 -- | Ideal quotient by the given ideal.
 quotIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
           => Ideal (OrderedPolynomial k ord n)
           -> Ideal (OrderedPolynomial k ord n)
-          -> Ideal (OrderedPolynomial k Lex n)
+          -> Ideal (OrderedPolynomial k ord n)
 quotIdeal i (Ideal g) =
   case singInstance (sLengthV g) of
     SingInstance ->

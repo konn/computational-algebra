@@ -19,6 +19,7 @@ It contains following things:
 * Compute Groebner basis using Buchberger Algorithm
 * Ideal membership problem
 * Elimination ideal calculation
+    * This library provides the monomial orders of l-th elimination type other than lex order, such as elimination order, product order,...
 * Ideal operations
 	* Saturation Ideal, Quotient ideal,...
 

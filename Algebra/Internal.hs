@@ -390,7 +390,7 @@ plusMinusEqL (SS n) m =
     LeqTrueInstance -> eqlTrans (eqSuccMinus (n %+ m) m) (eqPreservesS $ plusMinusEqL n m)
 
 plusMinusEqR :: SNat n -> SNat m -> Eql ((m :+: n) :-: m) n
-plusMinusEqR n m = eqlTrans (minusCongEq (plusCommutative n m) m) (plusMinusEqL n m)
+plusMinusEqR n m = eqlTrans (minusCongEq (plusCommutative m n) m) (plusMinusEqL n m)
 
 data LeqTrueInstance a b where
   LeqTrueInstance :: (a :<<= b) ~ True => LeqTrueInstance a b
