@@ -1,21 +1,22 @@
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, MultiParamTypeClasses        #-}
 {-# LANGUAGE OverlappingInstances, PolyKinds, ScopedTypeVariables            #-}
 {-# LANGUAGE StandaloneDeriving, TypeFamilies, TypeOperators                 #-}
-{-# LANGUAGE UndecidableInstances, ViewPatterns                              #-}
+{-# LANGUAGE UndecidableInstances, ViewPatterns, LiberalTypeSynonyms         #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults                    #-}
 module Algebra.Ring.Polynomial
     ( Polynomial, Monomial, MonomialOrder, EliminationType, EliminationOrder
     , WeightedEliminationOrder, eliminationOrder, weightedEliminationOrder
     , lex, revlex, graded, grlex, grevlex, productOrder, productOrder'
-    , transformMonomial, WeightProxy(..), weightOrder
+    , transformMonomial, WeightProxy(..), weightOrder, totalDegree
     , IsPolynomial, coeff, lcmMonomial, sPolynomial, polynomial
     , castMonomial, castPolynomial, toPolynomial, changeOrder, changeOrderProxy
     , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars, showPolynomialWith, showRational, ToWeightVectorInstance(..), weightVInstance
     , normalize, injectCoeff, varX, var, getTerms, shiftR, orderedBy
-    , divs, tryDiv, fromList -- , genVarsV
-    , leadingTerm, leadingMonomial, leadingCoeff, genVars, sDegree
-    , OrderedMonomial(..), Grevlex(..), Revlex(..), Lex(..), Grlex(..)
+    , divs, tryDiv, fromList, Coefficient(..),ToWeightVector(..)
+    , leadingTerm, leadingMonomial, leadingOrderedMonomial, leadingCoeff, genVars, sDegree
+    , OrderedMonomial(..), OrderedMonomial'(..), Grevlex(..), Revlex(..), Lex(..), Grlex(..)
     , ProductOrder (..), WeightOrder(..)
     , IsOrder(..), IsMonomialOrder)  where
 import           Algebra.Internal
@@ -33,9 +34,33 @@ import           Data.Ratio
 import           Numeric.Algebra         hiding (Order(..))
 import           Prelude                 hiding (lex, (*), (+), (-), (^), (^^), recip, negate)
 import qualified Prelude                 as P
+import Data.Function
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i.
 type Monomial (n :: Nat) = Vector Int n
+
+-- | Monomorphic representation for monomial.
+newtype OrderedMonomial' ord = OM' { getMonomial' :: [Int] }
+    deriving (Read, Show, Eq)
+
+instance Monomorphicable (OrderedMonomial ord) where
+  type MonomorphicRep (OrderedMonomial ord) = OrderedMonomial' ord
+  promote (OM' xs) =
+    case promote xs of
+      Monomorphic m -> Monomorphic $ OrderedMonomial m
+  demote (Monomorphic (OrderedMonomial m)) = OM' (demote (Monomorphic m))
+
+instance IsMonomialOrder ord => Ord (OrderedMonomial' ord) where
+  compare = cmpMonomial' (Proxy :: Proxy ord) `on` getMonomial'
+
+instance Monomorphicable (Vector Int) where
+  type MonomorphicRep (Vector Int) = [Int]
+  promote []       = Monomorphic Nil
+  promote (n : ns) =
+    case promote ns of
+      Monomorphic ns' -> Monomorphic (n :- ns')
+  demote (Monomorphic Nil) = []
+  demote (Monomorphic (n :- ns)) = n : demote (Monomorphic ns)
 
 -- | convert NAry list into Monomial.
 fromList :: SNat n -> [Int] -> Monomial n
@@ -43,17 +68,23 @@ fromList SZ _ = Nil
 fromList (SS n) [] = 0 :- fromList n []
 fromList (SS n) (x : xs) = x :- fromList n xs
 
+-- | apply monomial ordering to monomorphic monomials.
+cmpMonomial' :: IsMonomialOrder ord => Proxy ord -> [Int] -> [Int] -> Ordering
+cmpMonomial' pxy xs ys =
+  withPolymorhic (max (length xs) (length ys)) $ \n ->
+    cmpMonomial pxy (fromList n xs) (fromList n ys)
+
 -- | Monomial order (of degree n). This should satisfy following laws:
 -- (1) Totality: forall a, b (a < b || a == b || b < a)
 -- (2) Additivity: a <= b ==> a + c <= b + c
 -- (3) Non-negative: forall a, 0 <= a
-type MonomialOrder n = Monomial n -> Monomial n -> Ordering
+type MonomialOrder = forall n. Monomial n -> Monomial n -> Ordering
 
 totalDegree :: Monomial n -> Int
 totalDegree = foldrV (+) 0
 
 -- | Lexicographical order. This *is* a monomial order.
-lex :: MonomialOrder n
+lex :: MonomialOrder
 lex Nil Nil = EQ
 lex (x :- xs) (y :- ys) = x `compare` y <> xs `lex` ys
 lex _ _ = error "cannot happen"
@@ -69,11 +100,11 @@ graded :: (Monomial n -> Monomial n -> Ordering) -> (Monomial n -> Monomial n ->
 graded cmp xs ys = comparing totalDegree xs ys <> cmp xs ys
 
 -- | Graded lexicographical order. This *is* a monomial order.
-grlex :: MonomialOrder n
+grlex :: MonomialOrder
 grlex = graded lex
 
 -- | Graded reversed lexicographical order. This *is* a monomial order.
-grevlex :: MonomialOrder n
+grevlex :: MonomialOrder
 grevlex = graded revlex
 
 -- | A wrapper for monomials with a certain (monomial) order.
@@ -85,7 +116,7 @@ instance Wrapped (Monomial n) (Monomial m) (OrderedMonomial o n) (OrderedMonomia
 
 -- | Class to lookup ordering from its (type-level) name.
 class IsOrder (ordering :: *) where
-  cmpMonomial :: Proxy ordering -> MonomialOrder n
+  cmpMonomial :: Proxy ordering -> MonomialOrder
 
 -- * Names for orderings.
 --   We didn't choose to define one single type for ordering names for the extensibility.
@@ -385,6 +416,10 @@ leadingTerm (Polynomial d) =
 
 leadingMonomial :: (IsOrder order, IsPolynomial r n) => OrderedPolynomial r order n -> Monomial n
 leadingMonomial = snd . leadingTerm
+
+leadingOrderedMonomial :: (IsOrder order, IsPolynomial r n)
+                       => OrderedPolynomial r order n -> OrderedMonomial order n
+leadingOrderedMonomial = OrderedMonomial . leadingMonomial
 
 leadingCoeff :: (IsOrder order, IsPolynomial r n) => OrderedPolynomial r order n -> r
 leadingCoeff = fst . leadingTerm

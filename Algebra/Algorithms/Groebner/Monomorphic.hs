@@ -1,6 +1,6 @@
-{-# LANGUAGE ConstraintKinds, FlexibleInstances, GADTs, PolyKinds #-}
-{-# LANGUAGE RecordWildCards, ScopedTypeVariables, TypeFamilies   #-}
-{-# LANGUAGE TypeOperators, UndecidableInstances                  #-}
+{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances, GADTs   #-}
+{-# LANGUAGE PolyKinds, RecordWildCards, ScopedTypeVariables, TypeFamilies #-}
+{-# LANGUAGE TypeOperators, UndecidableInstances                           #-}
 -- | Monomorphic interface for Groenber basis.
 module Algebra.Algorithms.Groebner.Monomorphic
     ( Groebnerable
@@ -9,7 +9,7 @@ module Algebra.Algorithms.Groebner.Monomorphic
     , divModPolynomialWith, divPolynomialWith, modPolynomialWith
     -- * Groebner basis
     , calcGroebnerBasis, calcGroebnerBasisWith
-    , syzygyBuchberger, syzygyBuchbergerWith
+    , syzygyBuchberger, syzygyBuchbergerWith, syzygyBuchbergerWithStrategy
     , primeTestBuchberger, primeTestBuchbergerWith
     , simpleBuchberger, simpleBuchbergerWith
     -- * Ideal operations
@@ -17,8 +17,13 @@ module Algebra.Algorithms.Groebner.Monomorphic
     , quotIdeal, quotByPrincipalIdeal
     , saturationIdeal, saturationByPrincipalIdeal
     -- * Re-exports
-    , Lex(..), Revlex(..), Grlex(..), Grevlex(..), IsOrder, IsMonomialOrder
+    , Lex(..), Revlex(..), Grlex(..), Grevlex(..), IsOrder(..), IsMonomialOrder
+    , SelectionStrategy(..), NormalStrategy(..), SugarStrategy(..), calcWeight'
     ) where
+import           Algebra.Algorithms.Groebner         (NormalStrategy (..),
+                                                      SelectionStrategy (..),
+                                                      SugarStrategy (..),
+                                                      calcWeight')
 import qualified Algebra.Algorithms.Groebner         as Gr
 import           Algebra.Internal
 import           Algebra.Ring.Noetherian
@@ -97,7 +102,7 @@ divModPolynomialWith _ f gs =
       in case singInstance sn of
            SingInstance ->
              let (q, r) = Gr.divModPolynomial f' gs'
-             in (map (renameVars vars . polyn . demote' *** polyn . demote') q, polyn $ demote' r)
+             in (map (renameVars vars . polyn . demote' *** renameVars vars . polyn . demote') q, renameVars vars $ polyn $ demote' r)
   where
     vars = nub $ sort $ concatMap buildVarsList (f:gs)
 
@@ -165,18 +170,26 @@ primeTestBuchbergerWith ord j =
 syzygyBuchberger :: (Groebnerable r) => [Polynomial r] -> [Polynomial r]
 syzygyBuchberger = syzygyBuchbergerWith Grevlex
 
-syzygyBuchbergerWith :: forall ord r. (Groebnerable r, IsMonomialOrder ord)
-                      => ord -> [Polynomial r] -> [Polynomial r]
-syzygyBuchbergerWith _ ps | any (== zero) ps = []
-syzygyBuchbergerWith ord j =
+syzygyBuchbergerWithStrategy :: forall strategy ord r.
+                                ( Groebnerable r, IsMonomialOrder ord
+                                , Gr.SelectionStrategy strategy, Ord (Gr.Weight strategy ord))
+                             => strategy -> ord -> [Polynomial r] -> [Polynomial r]
+syzygyBuchbergerWithStrategy _ _ ps | any (== zero) ps = []
+syzygyBuchbergerWithStrategy strategy ord j =
   case uniformlyPromote j :: Monomorphic (Ideal :.: Poly.OrderedPolynomial r ord) of
     Monomorphic (Comp ideal) ->
       case ideal of
         Ideal vec ->
           case singInstance (Poly.sDegree (head $ toList vec)) of
-            SingInstance -> map (renameVars vars . polyn . demote . Monomorphic) $ Gr.syzygyBuchberger ideal
+            SingInstance -> map (renameVars vars . polyn . demote . Monomorphic) $ Gr.syzygyBuchbergerWithStrategy strategy ideal
   where
     vars = nub $ sort $ concatMap buildVarsList j
+
+
+syzygyBuchbergerWith :: forall ord r. (Groebnerable r, IsMonomialOrder ord)
+                      => ord -> [Polynomial r] -> [Polynomial r]
+syzygyBuchbergerWith _ ps | any (== zero) ps = []
+syzygyBuchbergerWith ord j = syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy) ord j
 
 isIdealMember :: forall r. Groebnerable r => Polynomial r -> [Polynomial r] -> Bool
 isIdealMember f ideal =

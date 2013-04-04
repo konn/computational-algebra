@@ -1,13 +1,18 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, GADTs             #-}
-{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, ParallelListComp      #-}
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, TemplateHaskell, TypeOperators #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, GADTs        #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, ParallelListComp #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, StandaloneDeriving        #-}
+{-# LANGUAGE TemplateHaskell, TypeFamilies, TypeOperators               #-}
 module Algebra.Algorithms.Groebner (
                                    -- * Polynomial division
                                      divModPolynomial, divPolynomial, modPolynomial
                                    -- * Groebner basis
-                                   , calcGroebnerBasis, calcGroebnerBasisWith
-                                   , buchberger, syzygyBuchberger, simpleBuchberger, primeTestBuchberger
+                                   , calcGroebnerBasis, calcGroebnerBasisWith, calcGroebnerBasisWithStrategy
+                                   , buchberger, syzygyBuchberger, syzygyBuchbergerWithStrategy
+                                   , simpleBuchberger, primeTestBuchberger
                                    , reduceMinimalGroebnerBasis, minimizeGroebnerBasis
+                                   -- ** Strategies
+                                   , SelectionStrategy(..), calcWeight'
+                                   , NormalStrategy(..), SugarStrategy(..)
                                    -- * Ideal operations
                                    , isIdealMember, intersection, thEliminationIdeal, thEliminationIdealWith
                                    , unsafeThEliminationIdealWith
@@ -110,28 +115,58 @@ buchberger = syzygyBuchberger
 -- If you don't have strong reason to avoid this function, this function is recommended to use.
 syzygyBuchberger :: (Field r, IsPolynomial r n, IsMonomialOrder order)
                     => Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
-syzygyBuchberger ideal = runST $ do
+syzygyBuchberger = syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)
+
+-- | apply buchberger's algorithm using given selection strategy.
+syzygyBuchbergerWithStrategy :: ( Field r, IsPolynomial r n, IsMonomialOrder order, SelectionStrategy strategy
+                        , Ord (Weight strategy order))
+                    => strategy -> Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
+syzygyBuchbergerWithStrategy strategy ideal = runST $ do
   let gens = generators ideal
-      lcmm = lcmMonomial `on` leadingMonomial
-  gs <- newSTRef $ H.fromList [H.Entry (leadingMonomial g) g | g <- gens]
-  b  <- newSTRef $ H.fromList $ [H.Entry (lcmm f g) (f, g) | (f, g) <- combinations gens]
+  gs <- newSTRef $ H.fromList [H.Entry (leadingOrderedMonomial g) g | g <- gens]
+  b  <- newSTRef $ H.fromList $ [H.Entry (calcWeight' strategy f g) (f, g) | (f, g) <- combinations gens]
   whileM_ (not . H.null <$> readSTRef b) $ do
-    Just (H.Entry _ (f, g), rest) <- H.viewMin <$> readSTRef b
+    Just (H.Entry l (f, g), rest) <- H.viewMin <$> readSTRef b
     gs0 <- readSTRef gs
     b .= rest
     let f0 = leadingMonomial f
         g0 = leadingMonomial g
-        l = lcmMonomial f0 g0
         redundant = H.any (\(H.Entry _ h) -> h `notElem` [f, g]
                                   && all (\k -> H.any ((==k) . H.payload) rest) [(f, h), (g, h), (h, f), (h, g)]
-                                  && leadingMonomial h `divs` l) gs0
-    when (l /= zipWithV (+) f0 g0 && not redundant) $ do
+                                  && leadingMonomial h `divs` lcmMonomial f0 g0) gs0
+    when (lcmMonomial f0 g0 /= zipWithV (+) f0 g0 && not redundant) $ do
           let qs = (H.toList gs0)
               s = sPolynomial f g `modPolynomial` map H.payload qs
           when (s /= zero) $ do
-            b %= H.union (H.fromList [H.Entry (lcmm q s) (q, s) | H.Entry _ q <- qs])
-            gs %= H.insert (H.Entry (leadingMonomial s) s)
+            b %= H.union (H.fromList [H.Entry (calcWeight' strategy q s) (q, s) | H.Entry _ q <- qs])
+            gs %= H.insert (H.Entry (leadingOrderedMonomial s) s)
   map H.payload . H.toList <$> readSTRef gs
+
+calcWeight' :: (SelectionStrategy s, IsPolynomial r n, IsMonomialOrder ord, Ord (Weight s ord))
+            => s -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n -> Weight s ord
+calcWeight' s = calcWeight (toProxy s)
+
+class SelectionStrategy s where
+  type Weight s ord :: *
+  calcWeight :: (IsPolynomial r n, IsMonomialOrder ord)
+             => Proxy s -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n -> Weight s ord
+
+data NormalStrategy = NormalStrategy deriving (Read, Show, Eq, Ord)
+instance SelectionStrategy NormalStrategy where
+  type Weight NormalStrategy ord = OrderedMonomial' ord
+  calcWeight _ f g = demote' $ OrderedMonomial (lcmMonomial (leadingMonomial f)  (leadingMonomial g))
+                                 `asTypeOf` leadingOrderedMonomial f
+
+data SugarStrategy s = SugarStrategy s deriving (Read, Show, Eq, Ord)
+
+instance SelectionStrategy s => SelectionStrategy (SugarStrategy s) where
+  type Weight (SugarStrategy s) ord = (Int, Weight s ord)
+  calcWeight (Proxy :: Proxy (SugarStrategy s)) f g = (sugar, calcWeight (Proxy :: Proxy s) f g)
+    where
+      deg' = maximum . map (totalDegree . snd) . getTerms
+      tsgr h = totalDegree (zipWithV (-) (leadingMonomial h) gamma) + deg' h
+      sugar = tsgr f `max` tsgr g
+      gamma = lcmMonomial (leadingMonomial f) (leadingMonomial g)
 
 -- | Minimize the given groebner basis.
 minimizeGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
@@ -142,7 +177,7 @@ minimizeGroebnerBasis = foldr step []
 
 -- | Reduce minimum Groebner basis into reduced Groebner basis.
 reduceMinimalGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
-                    => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
+                           => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
 reduceMinimalGroebnerBasis bs = filter (/= zero) $  map red bs
   where
     red x = x `modPolynomial` delete x bs
@@ -151,6 +186,13 @@ reduceMinimalGroebnerBasis bs = filter (/= zero) $  map red bs
 calcGroebnerBasisWith :: (Field k, IsPolynomial k n, IsMonomialOrder order, IsMonomialOrder order')
                       => order -> Ideal (OrderedPolynomial k order' n) -> [OrderedPolynomial k order n]
 calcGroebnerBasisWith ord i = calcGroebnerBasis $ mapIdeal (changeOrder ord) i
+
+-- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
+calcGroebnerBasisWithStrategy :: ( Field k, IsPolynomial k n, IsMonomialOrder order
+                                 , SelectionStrategy strategy, Ord (Weight strategy order))
+                      => strategy -> Ideal (OrderedPolynomial k order n) -> [OrderedPolynomial k order n]
+calcGroebnerBasisWithStrategy strategy =
+  reduceMinimalGroebnerBasis . minimizeGroebnerBasis . syzygyBuchbergerWithStrategy strategy
 
 -- | Caliculating reduced Groebner basis of the given ideal.
 calcGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)

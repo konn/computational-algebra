@@ -24,9 +24,6 @@ f2 = y^^2 - 1
 
 type LexPolynomial r n = OrderedPolynomial r Lex n
 
-heron :: Ideal (LexPolynomial (Ratio Integer) (Two :+: Two))
-heron = sTwo `thEliminationIdeal` heronIdeal
-
 heronIdeal :: Ideal (Polynomial (Ratio Integer) (Three :+: Three))
 heronIdeal = toIdeal [ 2 * s - a * y
                      , b^^2 - (x^^2 + y^^2)
