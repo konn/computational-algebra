@@ -3,6 +3,7 @@
 {-# LANGUAGE ParallelListComp, RankNTypes, ScopedTypeVariables               #-}
 {-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies               #-}
 {-# LANGUAGE TypeOperators                                                   #-}
+{-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Algebra.Algorithms.Groebner (
                                    -- * Polynomial division
                                      divModPolynomial, divPolynomial, modPolynomial
@@ -147,44 +148,35 @@ instance IsMonomialOrder ord => Ord (Monomorphic (OrderedMonomial ord)) where
       let (mm, mm') = padVec 0 m m'
       in cmpMonomial (Proxy :: Proxy ord) mm mm'
 
-data Entry a b = Entry { priority :: a, payload :: b}
-               deriving (Read, Show)
-
-instance Eq a => Eq (Entry a b) where
-  (==) = (==) `on` priority
-
-instance Ord a => Ord (Entry a b) where
-  compare = compare `on` priority
-
 -- | apply buchberger's algorithm using given selection strategy.
 syzygyBuchbergerWithStrategy :: ( Field r, IsPolynomial r n, IsMonomialOrder order, SelectionStrategy strategy
                         , Ord (Weight strategy order))
                     => strategy -> Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
 syzygyBuchbergerWithStrategy strategy ideal = runST $ do
   let gens = zip [1..] $ generators ideal
-  gs <- {-# SCC "syz/buildList" #-} newSTRef $ H.fromList [Entry (leadingOrderedMonomial g) g | (_, g) <- gens]
-  b  <- newSTRef $ H.fromList $ [Entry ({-# SCC "syz/calcW'0" #-} calcWeight' strategy f g, j) (f, g) | ((i, f), (j, g)) <- combinations gens]
+  gs <- newSTRef $ H.fromList [H.Entry (leadingOrderedMonomial g) g | (_, g) <- gens]
+  b  <- newSTRef $ H.fromList $ [H.Entry (calcWeight' strategy f g, j) (f, g) | ((_, f), (j, g)) <- combinations gens]
   len <- newSTRef (genericLength gens :: Integer)
   whileM_ (not . H.null <$> readSTRef b) $ do
-    Just (Entry _ (f, g), rest) <- {-# SCC "selection" #-} H.viewMin <$> readSTRef b
+    Just (H.Entry _ (f, g), rest) <-  H.viewMin <$> readSTRef b
     gs0 <- readSTRef gs
     b .= rest
     let f0 = leadingMonomial f
         g0 = leadingMonomial g
         l  = lcmMonomial f0 g0
-        redundant = H.any (\(Entry _ h) -> ({-# SCC "notFG" #-} h `notElem` [f, g])
-                                  && ({-# SCC "notIncluded" #-} all (\k -> H.any ((==k) . payload) rest)
+        redundant = H.any (\(H.Entry _ h) -> (h `notElem` [f, g])
+                                  && (all (\k -> H.any ((==k) . H.payload) rest)
                                                      [(f, h), (g, h), (h, f), (h, g)])
-                                  && {-# SCC "syzygized" #-}leadingMonomial h `divs` l) gs0
-    when (({-# SCC "relprime" #-} l /= zipWithV (+) f0 g0) && not redundant) $ do
+                                  && leadingMonomial h `divs` l) gs0
+    when (l /= zipWithV (+) f0 g0 && not redundant) $ do
       len0 <- readSTRef len
       let qs = (H.toList gs0)
-          s = sPolynomial f g `modPolynomial` map payload qs
+          s = sPolynomial f g `modPolynomial` map H.payload qs
       when (s /= zero) $ do
-        b %= {-# SCC "syz/union" #-} H.union (H.fromList [Entry ({-# SCC "syz/caclW'2" #-} calcWeight' strategy q s, j) (q, s) | Entry _ q <- qs | j <- [len0+1..]])
-        gs %= {-# SCC "syz/insert" #-} H.insert (Entry (leadingOrderedMonomial s) s)
+        b %= H.union (H.fromList [H.Entry (calcWeight' strategy q s, j) (q, s) | H.Entry _ q <- qs | j <- [len0+1..]])
+        gs %= H.insert (H.Entry (leadingOrderedMonomial s) s)
         len %= (*2)
-  {-# SCC "syz/buildList" #-} map payload . H.toList <$> readSTRef gs
+  map H.payload . H.toList <$> readSTRef gs
 
 calcWeight' :: (SelectionStrategy s, IsPolynomial r n, IsMonomialOrder ord, Ord (Weight s ord))
             => s -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n -> Weight s ord
@@ -198,7 +190,7 @@ class SelectionStrategy s where
 data NormalStrategy = NormalStrategy deriving (Read, Show, Eq, Ord)
 instance SelectionStrategy NormalStrategy where
   type Weight NormalStrategy ord = Monomorphic (OrderedMonomial ord)
-  calcWeight _ f g = {-# SCC "normal/calcWeight" #-} Monomorphic $
+  calcWeight _ f g = Monomorphic $
     OrderedMonomial (lcmMonomial (leadingMonomial f)  (leadingMonomial g))
                                  `asTypeOf` leadingOrderedMonomial f
 
@@ -218,11 +210,10 @@ data SugarStrategy s = SugarStrategy s deriving (Read, Show, Eq, Ord)
 
 instance SelectionStrategy s => SelectionStrategy (SugarStrategy s) where
   type Weight (SugarStrategy s) ord = (Int, Weight s ord)
-  calcWeight (Proxy :: Proxy (SugarStrategy s)) f g = ( {-# SCC "sugar" #-} sugar
-                                                      , {-# SCC "sugar/sub" #-} calcWeight (Proxy :: Proxy s) f g)
+  calcWeight (Proxy :: Proxy (SugarStrategy s)) f g = (sugar, calcWeight (Proxy :: Proxy s) f g)
     where
-      deg' = {-# SCC "sug/deg'" #-} maximum . map (totalDegree . snd) . getTerms
-      tsgr h = {-# SCC "sug/tsgr" #-} deg' h - totalDegree (leadingMonomial h)
+      deg' = maximum . map (totalDegree . snd) . getTerms
+      tsgr h = deg' h - totalDegree (leadingMonomial h)
       sugar = max (tsgr f) (tsgr g) + totalDegree (lcmMonomial (leadingMonomial f) (leadingMonomial g))
 
 -- | Minimize the given groebner basis.
@@ -242,7 +233,7 @@ reduceMinimalGroebnerBasis bs = filter (/= zero) $  map red bs
 -- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
 calcGroebnerBasisWith :: (Field k, IsPolynomial k n, IsMonomialOrder order, IsMonomialOrder order')
                       => order -> Ideal (OrderedPolynomial k order' n) -> [OrderedPolynomial k order n]
-calcGroebnerBasisWith ord i = calcGroebnerBasis $ {-# SCC "cGB/changeOrd" #-} mapIdeal (changeOrder ord) i
+calcGroebnerBasisWith ord i = calcGroebnerBasis $  mapIdeal (changeOrder ord) i
 
 -- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
 calcGroebnerBasisWithStrategy :: ( Field k, IsPolynomial k n, IsMonomialOrder order

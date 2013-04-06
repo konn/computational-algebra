@@ -1,9 +1,8 @@
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
-{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, MultiParamTypeClasses        #-}
-{-# LANGUAGE OverlappingInstances, PolyKinds, ScopedTypeVariables            #-}
-{-# LANGUAGE StandaloneDeriving, TypeFamilies, TypeOperators                 #-}
-{-# LANGUAGE UndecidableInstances, ViewPatterns, LiberalTypeSynonyms         #-}
+{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, LiberalTypeSynonyms          #-}
+{-# LANGUAGE MultiParamTypeClasses, OverlappingInstances, PolyKinds          #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, StandaloneDeriving             #-}
+{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances               #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults                    #-}
 module Algebra.Ring.Polynomial
     ( Polynomial, Monomial, MonomialOrder, EliminationType, EliminationOrder
@@ -46,10 +45,10 @@ newtype OrderedMonomial' ord = OM' { getMonomial' :: [Int] }
 
 instance Monomorphicable (OrderedMonomial ord) where
   type MonomorphicRep (OrderedMonomial ord) = OrderedMonomial' ord
-  promote (OM' xs) = {-# SCC "promoteOM" #-}
+  promote (OM' xs) =
     case promote xs of
       Monomorphic m -> Monomorphic $ OrderedMonomial m
-  demote (Monomorphic (OrderedMonomial m)) = {-# SCC "demoteOM" #-} OM' (demote (Monomorphic m))
+  demote (Monomorphic (OrderedMonomial m)) = OM' (demote (Monomorphic m))
 
 instance IsMonomialOrder ord => Ord (OrderedMonomial' ord) where
   compare = cmpMonomial' (Proxy :: Proxy ord) `on` getMonomial'
@@ -71,9 +70,9 @@ fromList (SS n) (x : xs) = x :- fromList n xs
 
 -- | apply monomial ordering to monomorphic monomials.
 cmpMonomial' :: IsMonomialOrder ord => Proxy ord -> [Int] -> [Int] -> Ordering
-cmpMonomial' pxy xs ys = {-# SCC "cmpMonomial'" #-}
-  withPolymorhic ({-# SCC "cmpM'/max" #-} max (length xs) (length ys)) $ \n ->
-    cmpMonomial pxy ({-# SCC "cmpM'/fromList" #-} fromList n xs) ({-# SCC "cmpM'/fromList" #-} fromList n ys)
+cmpMonomial' pxy xs ys =
+  withPolymorhic (max (length xs) (length ys)) $ \n ->
+    cmpMonomial pxy (fromList n xs) (fromList n ys)
 
 -- | Monomial order (of degree n). This should satisfy following laws:
 -- (1) Totality: forall a, b (a < b || a == b || b < a)
@@ -82,7 +81,7 @@ cmpMonomial' pxy xs ys = {-# SCC "cmpMonomial'" #-}
 type MonomialOrder = forall n. Monomial n -> Monomial n -> Ordering
 
 totalDegree :: Monomial n -> Int
-totalDegree = {-# SCC "totalDegree" #-} foldlV (+) 0
+totalDegree = foldlV (+) 0
 
 -- | Lexicographical order. This *is* a monomial order.
 lex :: MonomialOrder
@@ -183,7 +182,7 @@ instance (Sing n, ToWeightVector ns) => ToWeightVector (n ': ns) where
 
 weightOrder :: forall ns ord m. (ToWeightVector ns, IsOrder ord)
             => Proxy (WeightOrder ns ord) -> Monomial m -> Monomial m -> Ordering
-weightOrder Proxy m m' = {-# SCC "weightOrder" #-} comparing toW m m' <> cmpMonomial (Proxy :: Proxy ord) m m'
+weightOrder Proxy m m' = comparing toW m m' <> cmpMonomial (Proxy :: Proxy ord) m m'
   where
     toW = zipWith (*) (toWeightV (Proxy' :: Proxy' ns)) . toList
 
@@ -446,12 +445,12 @@ tryDiv (a, f) (b, g)
     | otherwise  = error "cannot divide."
 
 lcmMonomial :: Monomial n -> Monomial n -> Monomial n
-lcmMonomial = {-# SCC "lcmMonomial" #-} zipWithV max
+lcmMonomial = zipWithV max
 
 sPolynomial :: (IsPolynomial k n, Field k, IsOrder order)
             => OrderedPolynomial k order n
             -> OrderedPolynomial k order n -> OrderedPolynomial k order n
-sPolynomial f g = {-# SCC "sPolynomial" #-}
+sPolynomial f g =
     let h = (one, lcmMonomial (leadingMonomial f) (leadingMonomial g))
     in toPolynomial (h `tryDiv` leadingTerm f) * f - toPolynomial (h `tryDiv` leadingTerm g) * g
 
@@ -488,4 +487,3 @@ genVars sn =
 
 sDegree :: OrderedPolynomial k ord n -> SNat n
 sDegree (Polynomial dic) = sLengthV $ getMonomial $ fst $ M.findMin dic
-
