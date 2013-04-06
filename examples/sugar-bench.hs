@@ -33,6 +33,7 @@ mkTestCases num ideal = [ mkTC ("lex0" ++ show num) ideal Lex
 mkTC :: (r ~ Rational, IsMonomialOrder ord) => String -> [Polynomial r] -> ord -> Benchmark
 mkTC name ideal ord =
     bgroup name [ bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy ord) ideal
+                , bench "syz+grevsel" $ nf (syzygyBuchbergerWithStrategy GrevlexStrategy ord) ideal
                 , bench "syz+grad" $ nf (syzygyBuchbergerWithStrategy GradedStrategy ord) ideal
                 , bench "syz+sugar" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy) ord) ideal
                 , bench "syz+grsugar" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy GradedStrategy) ord) ideal
@@ -44,5 +45,10 @@ main = do
   ideal2 <- return $! (i2 `using` rdeepseq)
   ideal3 <- return $! (i3 `using` rdeepseq)
   ideal4 <- return $! (i4 `using` rdeepseq)
-  defaultMain $ concat $ zipWith mkTestCases [1..] [ideal1, ideal2, ideal3, ideal4]
+  defaultMain $ concat $
+                  [ mkTestCases 1 ideal1
+                  , [mkTC "grlex02" ideal2 Grlex, mkTC "grevlex02" ideal2 Grevlex]
+                  , mkTestCases 3 ideal3
+                  , [mkTC "grlex04" ideal4 Grlex, mkTC "grevlex04" ideal4 Grevlex]
+                  ]
 

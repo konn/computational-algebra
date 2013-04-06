@@ -12,7 +12,7 @@ module Algebra.Algorithms.Groebner (
                                    , simpleBuchberger, primeTestBuchberger
                                    , reduceMinimalGroebnerBasis, minimizeGroebnerBasis
                                    -- ** Strategies
-                                   , SelectionStrategy(..), calcWeight'
+                                   , SelectionStrategy(..), calcWeight', GrevlexStrategy(..)
                                    , NormalStrategy(..), SugarStrategy(..), GradedStrategy(..)
                                    -- * Ideal operations
                                    , isIdealMember, intersection, thEliminationIdeal, thEliminationIdealWith
@@ -161,9 +161,10 @@ syzygyBuchbergerWithStrategy :: ( Field r, IsPolynomial r n, IsMonomialOrder ord
                         , Ord (Weight strategy order))
                     => strategy -> Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
 syzygyBuchbergerWithStrategy strategy ideal = runST $ do
-  let gens = generators ideal
-  gs <- {-# SCC "syz/buildList" #-} newSTRef $ H.fromList [Entry (leadingOrderedMonomial g) g | g <- gens]
-  b  <- newSTRef $ H.fromList $ [Entry ({-# SCC "syz/calcW'0" #-} calcWeight' strategy f g) (f, g) | (f, g) <- combinations gens]
+  let gens = zip [1..] $ generators ideal
+  gs <- {-# SCC "syz/buildList" #-} newSTRef $ H.fromList [Entry (leadingOrderedMonomial g) g | (_, g) <- gens]
+  b  <- newSTRef $ H.fromList $ [Entry ({-# SCC "syz/calcW'0" #-} calcWeight' strategy f g, j) (f, g) | ((i, f), (j, g)) <- combinations gens]
+  len <- newSTRef (genericLength gens :: Integer)
   whileM_ (not . H.null <$> readSTRef b) $ do
     Just (Entry _ (f, g), rest) <- {-# SCC "selection" #-} H.viewMin <$> readSTRef b
     gs0 <- readSTRef gs
@@ -176,11 +177,13 @@ syzygyBuchbergerWithStrategy strategy ideal = runST $ do
                                                      [(f, h), (g, h), (h, f), (h, g)])
                                   && {-# SCC "syzygized" #-}leadingMonomial h `divs` l) gs0
     when (({-# SCC "relprime" #-} l /= zipWithV (+) f0 g0) && not redundant) $ do
-          let qs = (H.toList gs0)
-              s = sPolynomial f g `modPolynomial` map payload qs
-          when (s /= zero) $ do
-            b %= {-# SCC "syz/union" #-} H.union (H.fromList [Entry ({-# SCC "syz/caclW'2" #-} calcWeight' strategy q s) (q, s) | Entry _ q <- qs])
-            gs %= {-# SCC "syz/insert" #-} H.insert (Entry (leadingOrderedMonomial s) s)
+      len0 <- readSTRef len
+      let qs = (H.toList gs0)
+          s = sPolynomial f g `modPolynomial` map payload qs
+      when (s /= zero) $ do
+        b %= {-# SCC "syz/union" #-} H.union (H.fromList [Entry ({-# SCC "syz/caclW'2" #-} calcWeight' strategy q s, j) (q, s) | Entry _ q <- qs | j <- [len0+1..]])
+        gs %= {-# SCC "syz/insert" #-} H.insert (Entry (leadingOrderedMonomial s) s)
+        len %= (*2)
   {-# SCC "syz/buildList" #-} map payload . H.toList <$> readSTRef gs
 
 calcWeight' :: (SelectionStrategy s, IsPolynomial r n, IsMonomialOrder ord, Ord (Weight s ord))
@@ -199,6 +202,12 @@ instance SelectionStrategy NormalStrategy where
     OrderedMonomial (lcmMonomial (leadingMonomial f)  (leadingMonomial g))
                                  `asTypeOf` leadingOrderedMonomial f
 
+data GrevlexStrategy = GrevlexStrategy deriving (Read, Show, Eq, Ord)
+
+instance SelectionStrategy GrevlexStrategy where
+  type Weight GrevlexStrategy ord = Monomorphic (OrderedMonomial Grevlex)
+  calcWeight _ f g = Monomorphic $ OrderedMonomial $ lcmMonomial (leadingMonomial f) (leadingMonomial g)
+
 data GradedStrategy = GradedStrategy deriving (Read, Show, Eq, Ord)
 
 instance SelectionStrategy GradedStrategy where
@@ -213,9 +222,8 @@ instance SelectionStrategy s => SelectionStrategy (SugarStrategy s) where
                                                       , {-# SCC "sugar/sub" #-} calcWeight (Proxy :: Proxy s) f g)
     where
       deg' = {-# SCC "sug/deg'" #-} maximum . map (totalDegree . snd) . getTerms
-      tsgr h = {-# SCC "sug/tsgr" #-} totalDegree (zipWithV (-) (leadingMonomial h) gamma) + deg' h
-      sugar = tsgr f `max` tsgr g
-      gamma = {-# SCC "sug/gamma" #-} lcmMonomial (leadingMonomial f) (leadingMonomial g)
+      tsgr h = {-# SCC "sug/tsgr" #-} deg' h - totalDegree (leadingMonomial h)
+      sugar = max (tsgr f) (tsgr g) + totalDegree (lcmMonomial (leadingMonomial f) (leadingMonomial g))
 
 -- | Minimize the given groebner basis.
 minimizeGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
