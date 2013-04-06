@@ -29,7 +29,7 @@ There are two interfaces:
     * Arity-paramaterized polynomials. It uses vector representations for monomials.
      `Algebra.Ring.Polynomial` and `Algebra.Algorithms.Groebner`.
 
-*Monomorphic wrapper I/F
+* Monomorphic wrapper I/F
     * Not-so-dependently-typed interface to wrap dependently-typed ones. `Algebra.Ring.Polynomial.Monomorphic` and `Algebra.Algorithms.Groebner.Monomorphic`.
 
 
