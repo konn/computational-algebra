@@ -229,7 +229,9 @@ eliminateWith ord elvs j =
     k = length els
 
 eliminate :: forall r.  Groebnerable r => [Variable] -> [Polynomial r] -> [Polynomial r]
-eliminate = eliminateWith Lex
+eliminate vs j = eliminateWith Lex vs j
+  where
+    vars = nub $ sort $ concatMap buildVarsList j
 
 -- | Computes nth elimination ideal.
 thEliminationIdeal :: Groebnerable r => Int -> [Polynomial r] -> [Polynomial r]

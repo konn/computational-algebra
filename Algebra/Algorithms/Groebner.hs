@@ -130,7 +130,7 @@ buchberger = syzygyBuchberger
 -- If you don't have strong reason to avoid this function, this function is recommended to use.
 syzygyBuchberger :: (Field r, IsPolynomial r n, IsMonomialOrder order)
                     => Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
-syzygyBuchberger = syzygyBuchbergerWithStrategy (SugarStrategy GradedStrategy)
+syzygyBuchberger = syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)
 
 (=@=) :: Vector Int n -> Vector Int m -> Bool
 Nil       =@= Nil       = True
