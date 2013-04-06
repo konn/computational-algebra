@@ -1,7 +1,8 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, GADTs        #-}
-{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, ParallelListComp #-}
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, StandaloneDeriving        #-}
-{-# LANGUAGE TemplateHaskell, TypeFamilies, TypeOperators               #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
+{-# LANGUAGE GADTs, MultiParamTypeClasses, NoImplicitPrelude                 #-}
+{-# LANGUAGE ParallelListComp, RankNTypes, ScopedTypeVariables               #-}
+{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies               #-}
+{-# LANGUAGE TypeOperators                                                   #-}
 module Algebra.Algorithms.Groebner (
                                    -- * Polynomial division
                                      divModPolynomial, divPolynomial, modPolynomial
@@ -12,7 +13,7 @@ module Algebra.Algorithms.Groebner (
                                    , reduceMinimalGroebnerBasis, minimizeGroebnerBasis
                                    -- ** Strategies
                                    , SelectionStrategy(..), calcWeight'
-                                   , NormalStrategy(..), SugarStrategy(..)
+                                   , NormalStrategy(..), SugarStrategy(..), GradedStrategy(..)
                                    -- * Ideal operations
                                    , isIdealMember, intersection, thEliminationIdeal, thEliminationIdealWith
                                    , unsafeThEliminationIdealWith
@@ -101,6 +102,20 @@ x .= v = writeSTRef x v
 (%=) :: STRef s a -> (a -> a) -> ST s ()
 x %= f = modifySTRef x f
 
+padVec :: a -> Vector a n -> Vector a m -> (Vector a (Max n m), Vector a (Max n m))
+padVec _   Nil Nil = (Nil, Nil)
+padVec def (x :- xs) (y :- ys) =
+  case padVec def xs ys of
+    (xs', ys') -> (x :- xs', y :- ys')
+padVec def (x :- xs) Nil =
+  case padVec def xs Nil of
+    (xs', ys') -> case maxZR (sLengthV xs) of
+                    Eql -> (x :- xs', def :- ys')
+padVec def Nil (y :- ys) =
+  case padVec def Nil ys of
+    (xs', ys') -> case maxZL (sLengthV ys) of
+                    Eql -> (def :- xs', y :- ys')
+
 combinations :: [a] -> [(a, a)]
 combinations xs = concat $ zipWith (map . (,)) xs $ drop 1 $ tails xs
 
@@ -115,7 +130,31 @@ buchberger = syzygyBuchberger
 -- If you don't have strong reason to avoid this function, this function is recommended to use.
 syzygyBuchberger :: (Field r, IsPolynomial r n, IsMonomialOrder order)
                     => Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
-syzygyBuchberger = syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)
+syzygyBuchberger = syzygyBuchbergerWithStrategy (SugarStrategy GradedStrategy)
+
+(=@=) :: Vector Int n -> Vector Int m -> Bool
+Nil       =@= Nil       = True
+(x :- xs) =@= (y :- ys) = x == y && xs =@= ys
+Nil       =@= (0 :- ys) = Nil =@= ys
+(0 :- xs) =@= Nil       = xs  =@= Nil
+_         =@= _         = False
+
+instance Eq (Monomorphic (OrderedMonomial ord)) where
+  Monomorphic xs == Monomorphic ys = getMonomial xs =@= getMonomial ys
+
+instance IsMonomialOrder ord => Ord (Monomorphic (OrderedMonomial ord)) where
+  compare (Monomorphic (OrderedMonomial m)) (Monomorphic (OrderedMonomial m')) =
+      let (mm, mm') = padVec 0 m m'
+      in cmpMonomial (Proxy :: Proxy ord) mm mm'
+
+data Entry a b = Entry { priority :: a, payload :: b}
+               deriving (Read, Show)
+
+instance Eq a => Eq (Entry a b) where
+  (==) = (==) `on` priority
+
+instance Ord a => Ord (Entry a b) where
+  compare = compare `on` priority
 
 -- | apply buchberger's algorithm using given selection strategy.
 syzygyBuchbergerWithStrategy :: ( Field r, IsPolynomial r n, IsMonomialOrder order, SelectionStrategy strategy
@@ -123,24 +162,26 @@ syzygyBuchbergerWithStrategy :: ( Field r, IsPolynomial r n, IsMonomialOrder ord
                     => strategy -> Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
 syzygyBuchbergerWithStrategy strategy ideal = runST $ do
   let gens = generators ideal
-  gs <- newSTRef $ H.fromList [H.Entry (leadingOrderedMonomial g) g | g <- gens]
-  b  <- newSTRef $ H.fromList $ [H.Entry (calcWeight' strategy f g) (f, g) | (f, g) <- combinations gens]
+  gs <- {-# SCC "syz/buildList" #-} newSTRef $ H.fromList [Entry (leadingOrderedMonomial g) g | g <- gens]
+  b  <- newSTRef $ H.fromList $ [Entry ({-# SCC "syz/calcW'0" #-} calcWeight' strategy f g) (f, g) | (f, g) <- combinations gens]
   whileM_ (not . H.null <$> readSTRef b) $ do
-    Just (H.Entry l (f, g), rest) <- H.viewMin <$> readSTRef b
+    Just (Entry _ (f, g), rest) <- {-# SCC "selection" #-} H.viewMin <$> readSTRef b
     gs0 <- readSTRef gs
     b .= rest
     let f0 = leadingMonomial f
         g0 = leadingMonomial g
-        redundant = H.any (\(H.Entry _ h) -> h `notElem` [f, g]
-                                  && all (\k -> H.any ((==k) . H.payload) rest) [(f, h), (g, h), (h, f), (h, g)]
-                                  && leadingMonomial h `divs` lcmMonomial f0 g0) gs0
-    when (lcmMonomial f0 g0 /= zipWithV (+) f0 g0 && not redundant) $ do
+        l  = lcmMonomial f0 g0
+        redundant = H.any (\(Entry _ h) -> ({-# SCC "notFG" #-} h `notElem` [f, g])
+                                  && ({-# SCC "notIncluded" #-} all (\k -> H.any ((==k) . payload) rest)
+                                                     [(f, h), (g, h), (h, f), (h, g)])
+                                  && {-# SCC "syzygized" #-}leadingMonomial h `divs` l) gs0
+    when (({-# SCC "relprime" #-} l /= zipWithV (+) f0 g0) && not redundant) $ do
           let qs = (H.toList gs0)
-              s = sPolynomial f g `modPolynomial` map H.payload qs
+              s = sPolynomial f g `modPolynomial` map payload qs
           when (s /= zero) $ do
-            b %= H.union (H.fromList [H.Entry (calcWeight' strategy q s) (q, s) | H.Entry _ q <- qs])
-            gs %= H.insert (H.Entry (leadingOrderedMonomial s) s)
-  map H.payload . H.toList <$> readSTRef gs
+            b %= {-# SCC "syz/union" #-} H.union (H.fromList [Entry ({-# SCC "syz/caclW'2" #-} calcWeight' strategy q s) (q, s) | Entry _ q <- qs])
+            gs %= {-# SCC "syz/insert" #-} H.insert (Entry (leadingOrderedMonomial s) s)
+  {-# SCC "syz/buildList" #-} map payload . H.toList <$> readSTRef gs
 
 calcWeight' :: (SelectionStrategy s, IsPolynomial r n, IsMonomialOrder ord, Ord (Weight s ord))
             => s -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n -> Weight s ord
@@ -153,20 +194,28 @@ class SelectionStrategy s where
 
 data NormalStrategy = NormalStrategy deriving (Read, Show, Eq, Ord)
 instance SelectionStrategy NormalStrategy where
-  type Weight NormalStrategy ord = OrderedMonomial' ord
-  calcWeight _ f g = demote' $ OrderedMonomial (lcmMonomial (leadingMonomial f)  (leadingMonomial g))
+  type Weight NormalStrategy ord = Monomorphic (OrderedMonomial ord)
+  calcWeight _ f g = {-# SCC "normal/calcWeight" #-} Monomorphic $
+    OrderedMonomial (lcmMonomial (leadingMonomial f)  (leadingMonomial g))
                                  `asTypeOf` leadingOrderedMonomial f
+
+data GradedStrategy = GradedStrategy deriving (Read, Show, Eq, Ord)
+
+instance SelectionStrategy GradedStrategy where
+  type Weight GradedStrategy ord = Monomorphic (OrderedMonomial (Graded ord))
+  calcWeight _ f g = Monomorphic $ OrderedMonomial (lcmMonomial (leadingMonomial f)  (leadingMonomial g))
 
 data SugarStrategy s = SugarStrategy s deriving (Read, Show, Eq, Ord)
 
 instance SelectionStrategy s => SelectionStrategy (SugarStrategy s) where
   type Weight (SugarStrategy s) ord = (Int, Weight s ord)
-  calcWeight (Proxy :: Proxy (SugarStrategy s)) f g = (sugar, calcWeight (Proxy :: Proxy s) f g)
+  calcWeight (Proxy :: Proxy (SugarStrategy s)) f g = ( {-# SCC "sugar" #-} sugar
+                                                      , {-# SCC "sugar/sub" #-} calcWeight (Proxy :: Proxy s) f g)
     where
-      deg' = maximum . map (totalDegree . snd) . getTerms
-      tsgr h = totalDegree (zipWithV (-) (leadingMonomial h) gamma) + deg' h
+      deg' = {-# SCC "sug/deg'" #-} maximum . map (totalDegree . snd) . getTerms
+      tsgr h = {-# SCC "sug/tsgr" #-} totalDegree (zipWithV (-) (leadingMonomial h) gamma) + deg' h
       sugar = tsgr f `max` tsgr g
-      gamma = lcmMonomial (leadingMonomial f) (leadingMonomial g)
+      gamma = {-# SCC "sug/gamma" #-} lcmMonomial (leadingMonomial f) (leadingMonomial g)
 
 -- | Minimize the given groebner basis.
 minimizeGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
@@ -185,7 +234,7 @@ reduceMinimalGroebnerBasis bs = filter (/= zero) $  map red bs
 -- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
 calcGroebnerBasisWith :: (Field k, IsPolynomial k n, IsMonomialOrder order, IsMonomialOrder order')
                       => order -> Ideal (OrderedPolynomial k order' n) -> [OrderedPolynomial k order n]
-calcGroebnerBasisWith ord i = calcGroebnerBasis $ mapIdeal (changeOrder ord) i
+calcGroebnerBasisWith ord i = calcGroebnerBasis $ {-# SCC "cGB/changeOrd" #-} mapIdeal (changeOrder ord) i
 
 -- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
 calcGroebnerBasisWithStrategy :: ( Field k, IsPolynomial k n, IsMonomialOrder order
@@ -218,8 +267,7 @@ thEliminationIdeal :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolyno
 thEliminationIdeal n =
     case singInstance n of
       SingInstance ->
-        case weightVInstance n of
-          ToWeightVectorInstance -> mapIdeal (changeOrderProxy Proxy) . thEliminationIdealWith (weightedEliminationOrder n) n
+          mapIdeal (changeOrderProxy Proxy) . thEliminationIdealWith (weightedEliminationOrder n) n
 
 -- | Calculate n-th elimination ideal using the specified n-th elimination type order.
 thEliminationIdealWith :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (m :-: n)

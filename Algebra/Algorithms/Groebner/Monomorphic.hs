@@ -18,7 +18,9 @@ module Algebra.Algorithms.Groebner.Monomorphic
     , saturationIdeal, saturationByPrincipalIdeal
     -- * Re-exports
     , Lex(..), Revlex(..), Grlex(..), Grevlex(..), IsOrder(..), IsMonomialOrder
-    , SelectionStrategy(..), NormalStrategy(..), SugarStrategy(..), calcWeight'
+    , SelectionStrategy(..), NormalStrategy(..), SugarStrategy(..)
+    , Gr.GradedStrategy(..)
+    , calcWeight'
     ) where
 import           Algebra.Algorithms.Groebner         (NormalStrategy (..),
                                                       SelectionStrategy (..),

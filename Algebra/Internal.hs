@@ -10,7 +10,7 @@ module Algebra.Internal ( toProxy, Nat(..), SNat(..), Vector(..), Sing(..)
                         , SZero, SOne, STwo, SThree
                         , lengthV, sLengthV, takeV, dropV, splitAtV, appendV
                         , foldrV, foldlV, singletonV, zipWithV, toList, allV
-                        , mapV, headV, tailV, splitAtLess
+                        , mapV, headV, tailV, splitAtLess, takeVAtMost
                         , Leq(..), (:<<=), (:<=), LeqInstance(..)
                         , LeqTrueInstance(..), boolToPropLeq, boolToClassLeq
                         , propToClassLeq, propToBoolLeq
@@ -218,6 +218,9 @@ dropV n = snd . splitAtV n
 
 takeV :: (n :<<= m) ~ True => SNat n -> Vector a m -> Vector a n
 takeV n = fst . splitAtV n
+
+takeVAtMost :: SNat n -> Vector a m -> Vector a (Min n m)
+takeVAtMost = (fst .) . splitAtLess
 
 splitAtLess :: SNat n -> Vector a m -> (Vector a (Min n m), Vector a (m :-: n))
 splitAtLess SZ v = case zAbsorbsMinL (sLengthV v) of

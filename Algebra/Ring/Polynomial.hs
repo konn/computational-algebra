@@ -12,11 +12,12 @@ module Algebra.Ring.Polynomial
     , transformMonomial, WeightProxy(..), weightOrder, totalDegree
     , IsPolynomial, coeff, lcmMonomial, sPolynomial, polynomial
     , castMonomial, castPolynomial, toPolynomial, changeOrder, changeOrderProxy
-    , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars, showPolynomialWith, showRational, ToWeightVectorInstance(..), weightVInstance
+    , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars, showPolynomialWith, showRational
     , normalize, injectCoeff, varX, var, getTerms, shiftR, orderedBy
     , divs, tryDiv, fromList, Coefficient(..),ToWeightVector(..)
     , leadingTerm, leadingMonomial, leadingOrderedMonomial, leadingCoeff, genVars, sDegree
-    , OrderedMonomial(..), OrderedMonomial'(..), Grevlex(..), Revlex(..), Lex(..), Grlex(..)
+    , OrderedMonomial(..), OrderedMonomial'(..), Grevlex(..)
+    , Revlex(..), Lex(..), Grlex(..), Graded(..)
     , ProductOrder (..), WeightOrder(..)
     , IsOrder(..), IsMonomialOrder)  where
 import           Algebra.Internal
@@ -31,7 +32,7 @@ import           Data.Monoid
 import           Data.Ord
 import           Data.Proxy
 import           Data.Ratio
-import           Numeric.Algebra         hiding (Order(..))
+import           Numeric.Algebra         hiding (Order(..), sum)
 import           Prelude                 hiding (lex, (*), (+), (-), (^), (^^), recip, negate)
 import qualified Prelude                 as P
 import Data.Function
@@ -45,10 +46,10 @@ newtype OrderedMonomial' ord = OM' { getMonomial' :: [Int] }
 
 instance Monomorphicable (OrderedMonomial ord) where
   type MonomorphicRep (OrderedMonomial ord) = OrderedMonomial' ord
-  promote (OM' xs) =
+  promote (OM' xs) = {-# SCC "promoteOM" #-}
     case promote xs of
       Monomorphic m -> Monomorphic $ OrderedMonomial m
-  demote (Monomorphic (OrderedMonomial m)) = OM' (demote (Monomorphic m))
+  demote (Monomorphic (OrderedMonomial m)) = {-# SCC "demoteOM" #-} OM' (demote (Monomorphic m))
 
 instance IsMonomialOrder ord => Ord (OrderedMonomial' ord) where
   compare = cmpMonomial' (Proxy :: Proxy ord) `on` getMonomial'
@@ -70,9 +71,9 @@ fromList (SS n) (x : xs) = x :- fromList n xs
 
 -- | apply monomial ordering to monomorphic monomials.
 cmpMonomial' :: IsMonomialOrder ord => Proxy ord -> [Int] -> [Int] -> Ordering
-cmpMonomial' pxy xs ys =
-  withPolymorhic (max (length xs) (length ys)) $ \n ->
-    cmpMonomial pxy (fromList n xs) (fromList n ys)
+cmpMonomial' pxy xs ys = {-# SCC "cmpMonomial'" #-}
+  withPolymorhic ({-# SCC "cmpM'/max" #-} max (length xs) (length ys)) $ \n ->
+    cmpMonomial pxy ({-# SCC "cmpM'/fromList" #-} fromList n xs) ({-# SCC "cmpM'/fromList" #-} fromList n ys)
 
 -- | Monomial order (of degree n). This should satisfy following laws:
 -- (1) Totality: forall a, b (a < b || a == b || b < a)
@@ -81,7 +82,7 @@ cmpMonomial' pxy xs ys =
 type MonomialOrder = forall n. Monomial n -> Monomial n -> Ordering
 
 totalDegree :: Monomial n -> Int
-totalDegree = foldrV (+) 0
+totalDegree = {-# SCC "totalDegree" #-} foldlV (+) 0
 
 -- | Lexicographical order. This *is* a monomial order.
 lex :: MonomialOrder
@@ -120,14 +121,30 @@ class IsOrder (ordering :: *) where
 
 -- * Names for orderings.
 --   We didn't choose to define one single type for ordering names for the extensibility.
-data Grevlex = Grevlex          -- Graded reversed lexicographical order
-               deriving (Show, Eq, Ord)
-data Lex = Lex                  -- Lexicographical order
+-- | Lexicographical order
+data Lex = Lex
            deriving (Show, Eq, Ord)
-data Grlex = Grlex              -- Graded lexicographical order
-             deriving (Show, Eq, Ord)
-data Revlex = Revlex            -- Reversed lexicographical order
+
+-- | Reversed lexicographical order
+data Revlex = Revlex
               deriving (Show, Eq, Ord)
+
+-- | Graded reversed lexicographical order. Same as @Graded Revlex@.
+data Grevlex = Grevlex
+               deriving (Show, Eq, Ord)
+
+-- | Graded lexicographical order. Same as @Graded Lex@.
+data Grlex = Grlex
+             deriving (Show, Eq, Ord)
+
+-- | Graded order from another monomial order.
+data Graded ord = Graded ord
+                  deriving (Read, Show, Eq, Ord)
+
+instance IsOrder ord => IsOrder (Graded ord) where
+  cmpMonomial Proxy = graded (cmpMonomial (Proxy :: Proxy ord))
+
+instance IsMonomialOrder ord => IsMonomialOrder (Graded ord)
 
 data ProductOrder n a b where
   ProductOrder :: SNat n -> ord -> ord' -> ProductOrder n ord ord'
@@ -166,7 +183,7 @@ instance (Sing n, ToWeightVector ns) => ToWeightVector (n ': ns) where
 
 weightOrder :: forall ns ord m. (ToWeightVector ns, IsOrder ord)
             => Proxy (WeightOrder ns ord) -> Monomial m -> Monomial m -> Ordering
-weightOrder Proxy m m' = comparing toW m m' <> cmpMonomial (Proxy :: Proxy ord) m m'
+weightOrder Proxy m m' = {-# SCC "weightOrder" #-} comparing toW m m' <> cmpMonomial (Proxy :: Proxy ord) m m'
   where
     toW = zipWith (*) (toWeightV (Proxy' :: Proxy' ns)) . toList
 
@@ -211,32 +228,28 @@ instance (IsMonomialOrder ord, ToWeightVector ns, EliminationType n (WeightOrder
 
 type EliminationOrder n = ProductOrder n Grevlex Grevlex
 
-data ToWeightVectorInstance n where
-  ToWeightVectorInstance :: (EliminationType n (WeightedEliminationOrder n), ToWeightVector (EWeight n)) => ToWeightVectorInstance n
-
-weightVInstance :: SNat n -> ToWeightVectorInstance n
-weightVInstance SZ = ToWeightVectorInstance
-weightVInstance (SS n) =
-  case weightVInstance n of
-    ToWeightVectorInstance -> ToWeightVectorInstance
-
 eliminationOrder :: SNat n -> EliminationOrder n
 eliminationOrder n =
   case singInstance n of
     SingInstance -> ProductOrder n Grevlex Grevlex
 
-weightedEliminationOrder :: SNat n -> WeightedEliminationOrder n
-weightedEliminationOrder n = WeightOrder (mkWeight n) Grevlex
-
-mkWeight :: SNat n -> WeightProxy (EWeight n)
-mkWeight SZ     = NilWeight
-mkWeight (SS n) = ConsWeight sOne $ mkWeight n
-
+weightedEliminationOrder :: SNat n -> WeightedEliminationOrder n Grevlex
+weightedEliminationOrder n = WEOrder n (Proxy :: Proxy Grevlex)
 type family EWeight n :: [Nat]
 type instance EWeight Z = '[]
 type instance EWeight (S n) = One ': EWeight n
 
-type WeightedEliminationOrder n = WeightOrder (EWeight n) Grevlex
+data WeightedEliminationOrder n ord where
+    WEOrder :: SNat n -> Proxy ord -> WeightedEliminationOrder n ord
+
+instance (Sing n, IsMonomialOrder ord) => IsOrder (WeightedEliminationOrder n ord) where
+  cmpMonomial Proxy m m' = comparing calc m m' <> cmpMonomial (Proxy :: Proxy ord) m m'
+    where
+      calc = foldlV (+) 0 . takeVAtMost (sing :: SNat n)
+
+instance (Sing n, IsMonomialOrder ord) => IsMonomialOrder (WeightedEliminationOrder n ord)
+
+instance (Sing n, IsMonomialOrder ord) => EliminationType n (WeightedEliminationOrder n ord) where
 
 -- | Special ordering for ordered-monomials.
 instance (Eq (Monomial n), IsOrder name) => Ord (OrderedMonomial name n) where
@@ -281,7 +294,7 @@ normalize :: (Eq r, IsOrder order, IsPolynomial r n)
 normalize = unwrapped %~ M.insertWith (+) (OrderedMonomial $ fromList sing []) zero . M.filter (/= zero)
 
 instance (Eq r, IsOrder order, IsPolynomial r n) => Eq (OrderedPolynomial r order n) where
-  (normalize -> Polynomial f) == (normalize -> Polynomial g) = f == g
+  Polynomial f == Polynomial g = f == g
 
 injectCoeff :: (IsPolynomial r n) => r -> OrderedPolynomial r order n
 injectCoeff r = Polynomial $ M.singleton (OrderedMonomial $ fromList sing []) r
@@ -433,12 +446,12 @@ tryDiv (a, f) (b, g)
     | otherwise  = error "cannot divide."
 
 lcmMonomial :: Monomial n -> Monomial n -> Monomial n
-lcmMonomial = zipWithV max
+lcmMonomial = {-# SCC "lcmMonomial" #-} zipWithV max
 
 sPolynomial :: (IsPolynomial k n, Field k, IsOrder order)
             => OrderedPolynomial k order n
             -> OrderedPolynomial k order n -> OrderedPolynomial k order n
-sPolynomial f g =
+sPolynomial f g = {-# SCC "sPolynomial" #-}
     let h = (one, lcmMonomial (leadingMonomial f) (leadingMonomial g))
     in toPolynomial (h `tryDiv` leadingTerm f) * f - toPolynomial (h `tryDiv` leadingTerm g) * g
 
@@ -475,3 +488,4 @@ genVars sn =
 
 sDegree :: OrderedPolynomial k ord n -> SNat n
 sDegree (Polynomial dic) = sLengthV $ getMonomial $ fst $ M.findMin dic
+
