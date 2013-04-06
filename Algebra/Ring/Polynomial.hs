@@ -2,7 +2,7 @@
 {-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, LiberalTypeSynonyms          #-}
 {-# LANGUAGE MultiParamTypeClasses, OverlappingInstances, PolyKinds          #-}
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, StandaloneDeriving             #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances               #-}
+{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances, ViewPatterns #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults                    #-}
 module Algebra.Ring.Polynomial
     ( Polynomial, Monomial, MonomialOrder, EliminationType, EliminationOrder
@@ -145,7 +145,7 @@ instance IsOrder ord => IsOrder (Graded ord) where
 
 instance IsMonomialOrder ord => IsMonomialOrder (Graded ord)
 
-data ProductOrder n a b where
+data ProductOrder (n :: Nat) (a :: *) (b :: *) where
   ProductOrder :: SNat n -> ord -> ord' -> ProductOrder n ord ord'
 
 productOrder :: forall ord ord' n m. (IsOrder ord, IsOrder ord', Sing n)
@@ -238,7 +238,7 @@ type family EWeight n :: [Nat]
 type instance EWeight Z = '[]
 type instance EWeight (S n) = One ': EWeight n
 
-data WeightedEliminationOrder n ord where
+data WeightedEliminationOrder (n :: Nat) (ord :: *) where
     WEOrder :: SNat n -> Proxy ord -> WeightedEliminationOrder n ord
 
 instance (Sing n, IsMonomialOrder ord) => IsOrder (WeightedEliminationOrder n ord) where

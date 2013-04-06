@@ -177,7 +177,7 @@ syzygyBuchbergerWithStrategy :: forall strategy ord r.
                                 , Gr.SelectionStrategy strategy, Ord (Gr.Weight strategy ord))
                              => strategy -> ord -> [Polynomial r] -> [Polynomial r]
 syzygyBuchbergerWithStrategy _ _ ps | any (== zero) ps = []
-syzygyBuchbergerWithStrategy strategy ord j =
+syzygyBuchbergerWithStrategy strategy _ j =
   case uniformlyPromote j :: Monomorphic (Ideal :.: Poly.OrderedPolynomial r ord) of
     Monomorphic (Comp ideal) ->
       case ideal of

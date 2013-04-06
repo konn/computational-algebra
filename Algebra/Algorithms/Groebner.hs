@@ -9,10 +9,11 @@ module Algebra.Algorithms.Groebner (
                                      divModPolynomial, divPolynomial, modPolynomial
                                    -- * Groebner basis
                                    , calcGroebnerBasis, calcGroebnerBasisWith, calcGroebnerBasisWithStrategy
-                                   , buchberger, syzygyBuchberger, syzygyBuchbergerWithStrategy
+                                   , buchberger, syzygyBuchberger
                                    , simpleBuchberger, primeTestBuchberger
                                    , reduceMinimalGroebnerBasis, minimizeGroebnerBasis
-                                   -- ** Strategies
+                                   -- ** Selection Strategies
+                                   , syzygyBuchbergerWithStrategy
                                    , SelectionStrategy(..), calcWeight', GrevlexStrategy(..)
                                    , NormalStrategy(..), SugarStrategy(..), GradedStrategy(..)
                                    -- * Ideal operations
@@ -126,7 +127,7 @@ buchberger :: (Field r, IsPolynomial r n, IsMonomialOrder order)
            => Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
 buchberger = syzygyBuchberger
 
--- | Buchberger's algorithm greately improved using the syzygy theory.
+-- | Buchberger's algorithm greately improved using the syzygy theory with the sugar strategy.
 -- Utilizing priority queues, this function reduces division complexity and comparison time.
 -- If you don't have strong reason to avoid this function, this function is recommended to use.
 syzygyBuchberger :: (Field r, IsPolynomial r n, IsMonomialOrder order)
@@ -178,22 +179,31 @@ syzygyBuchbergerWithStrategy strategy ideal = runST $ do
         len %= (*2)
   map H.payload . H.toList <$> readSTRef gs
 
+-- | Calculate the weight of given polynomials w.r.t. the given strategy.
+-- Buchberger's algorithm proccesses the pair with the most least weight first.
+-- This function requires the @Ord@ instance for the weight; this constraint is not required
+-- in the 'calcWeight' because of the ease of implementation. So use this function.
 calcWeight' :: (SelectionStrategy s, IsPolynomial r n, IsMonomialOrder ord, Ord (Weight s ord))
             => s -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n -> Weight s ord
 calcWeight' s = calcWeight (toProxy s)
 
+-- | Type-class for selection strategies in Buchberger's algorithm.
 class SelectionStrategy s where
   type Weight s ord :: *
   calcWeight :: (IsPolynomial r n, IsMonomialOrder ord)
              => Proxy s -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n -> Weight s ord
 
+-- | Buchberger's normal selection strategy. This selects the pair with
+-- the least LCM(LT(f), LT(g)) w.r.t. current monomial ordering.
 data NormalStrategy = NormalStrategy deriving (Read, Show, Eq, Ord)
+
 instance SelectionStrategy NormalStrategy where
   type Weight NormalStrategy ord = Monomorphic (OrderedMonomial ord)
   calcWeight _ f g = Monomorphic $
     OrderedMonomial (lcmMonomial (leadingMonomial f)  (leadingMonomial g))
                                  `asTypeOf` leadingOrderedMonomial f
 
+-- | Choose the pair with the least LCM(LT(f), LT(g)) w.r.t. 'Grevlex' order.
 data GrevlexStrategy = GrevlexStrategy deriving (Read, Show, Eq, Ord)
 
 instance SelectionStrategy GrevlexStrategy where
@@ -202,10 +212,12 @@ instance SelectionStrategy GrevlexStrategy where
 
 data GradedStrategy = GradedStrategy deriving (Read, Show, Eq, Ord)
 
+-- | Choose the pair with the least LCM(LT(f), LT(g)) w.r.t. graded current ordering.
 instance SelectionStrategy GradedStrategy where
   type Weight GradedStrategy ord = Monomorphic (OrderedMonomial (Graded ord))
   calcWeight _ f g = Monomorphic $ OrderedMonomial (lcmMonomial (leadingMonomial f)  (leadingMonomial g))
 
+-- | Sugar strategy. This chooses the pair with the least phantom homogenized degree and then break the tie with the given strategy (say @s@).
 data SugarStrategy s = SugarStrategy s deriving (Read, Show, Eq, Ord)
 
 instance SelectionStrategy s => SelectionStrategy (SugarStrategy s) where
@@ -257,7 +269,7 @@ groebnerTest :: (IsPolynomial k n, Field k, IsMonomialOrder order)
              => OrderedPolynomial k order n -> [OrderedPolynomial k order n] -> Bool
 groebnerTest f fs = f `modPolynomial` fs == zero
 
--- | Calculate n-th elimination ideal using 'Lex' ordering.
+-- | Calculate n-th elimination ideal using 'WeightedEliminationOrder' ordering.
 thEliminationIdeal :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (m :-: n)
                       , (n :<<= m) ~ True)
                    => SNat n
@@ -298,8 +310,7 @@ unsafeThEliminationIdealWith ord n ideal =
                                  , all (all (== 0) . take (toInt n) . toList . snd) $ getTerms f
                                  ]
 
-
--- | An intersection ideal of given ideals.
+-- | An intersection ideal of given ideals (using 'WeightedEliminationOrder').
 intersection :: forall r k n ord.
                 ( IsMonomialOrder ord, Field r, IsPolynomial r k, IsPolynomial r n
                 , IsPolynomial r (k :+: n)
@@ -340,16 +351,16 @@ quotIdeal i (Ideal g) =
 -- | Saturation by a principal ideal.
 saturationByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
                            => Ideal (OrderedPolynomial k ord n)
-                           -> OrderedPolynomial k ord n -> Ideal (OrderedPolynomial k Lex n)
+                           -> OrderedPolynomial k ord n -> Ideal (OrderedPolynomial k ord n)
 saturationByPrincipalIdeal is g =
   case propToClassLeq $ leqSucc (sDegree g) of
-    LeqInstance -> thEliminationIdealWith Lex sOne $ addToIdeal (one - (castPolynomial g * var sOne)) (mapIdeal (shiftR sOne) is)
+    LeqInstance -> thEliminationIdeal sOne $ addToIdeal (one - (castPolynomial g * var sOne)) (mapIdeal (shiftR sOne) is)
 
 -- | Saturation ideal
 saturationIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
                 => Ideal (OrderedPolynomial k ord n)
                 -> Ideal (OrderedPolynomial k ord n)
-                -> Ideal (OrderedPolynomial k Lex n)
+                -> Ideal (OrderedPolynomial k ord n)
 saturationIdeal i (Ideal g) =
   case singInstance (sLengthV g) of
     SingInstance ->
