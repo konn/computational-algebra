@@ -34,6 +34,7 @@ import           Data.Function
 import qualified Data.Heap               as H
 import           Data.List
 import           Data.Proxy
+import           Data.Reflection
 import           Data.STRef
 import           Numeric.Algebra
 import           Prelude                 hiding (Num (..), recip)
@@ -145,9 +146,9 @@ instance Eq (Monomorphic (OrderedMonomial ord)) where
   Monomorphic xs == Monomorphic ys = getMonomial xs =@= getMonomial ys
 
 instance IsMonomialOrder ord => Ord (Monomorphic (OrderedMonomial ord)) where
-  compare (Monomorphic (OrderedMonomial m)) (Monomorphic (OrderedMonomial m')) =
+  compare (Monomorphic (OrderedMonomial o m)) (Monomorphic (OrderedMonomial _ m')) =
       let (mm, mm') = padVec 0 m m'
-      in cmpMonomial (Proxy :: Proxy ord) mm mm'
+      in cmpMonomial o mm mm'
 
 -- | apply buchberger's algorithm using given selection strategy.
 syzygyBuchbergerWithStrategy :: ( Field r, IsPolynomial r n, IsMonomialOrder order, SelectionStrategy strategy
@@ -200,7 +201,8 @@ data NormalStrategy = NormalStrategy deriving (Read, Show, Eq, Ord)
 instance SelectionStrategy NormalStrategy where
   type Weight NormalStrategy ord = Monomorphic (OrderedMonomial ord)
   calcWeight _ f g = Monomorphic $
-    OrderedMonomial (lcmMonomial (leadingMonomial f)  (leadingMonomial g))
+    OrderedMonomial (getPolynomialOrder f)
+                        (lcmMonomial (leadingMonomial f)  (leadingMonomial g))
                                  `asTypeOf` leadingOrderedMonomial f
 
 -- | Choose the pair with the least LCM(LT(f), LT(g)) w.r.t. 'Grevlex' order.
@@ -208,14 +210,14 @@ data GrevlexStrategy = GrevlexStrategy deriving (Read, Show, Eq, Ord)
 
 instance SelectionStrategy GrevlexStrategy where
   type Weight GrevlexStrategy ord = Monomorphic (OrderedMonomial Grevlex)
-  calcWeight _ f g = Monomorphic $ OrderedMonomial $ lcmMonomial (leadingMonomial f) (leadingMonomial g)
+  calcWeight _ f g = Monomorphic $ OrderedMonomial Grevlex $ lcmMonomial (leadingMonomial f) (leadingMonomial g)
 
 data GradedStrategy = GradedStrategy deriving (Read, Show, Eq, Ord)
 
 -- | Choose the pair with the least LCM(LT(f), LT(g)) w.r.t. graded current ordering.
 instance SelectionStrategy GradedStrategy where
   type Weight GradedStrategy ord = Monomorphic (OrderedMonomial (Graded ord))
-  calcWeight _ f g = Monomorphic $ OrderedMonomial (lcmMonomial (leadingMonomial f)  (leadingMonomial g))
+  calcWeight _ f g = Monomorphic $ OrderedMonomial (Graded $ getPolynomialOrder f) (lcmMonomial (leadingMonomial f)  (leadingMonomial g))
 
 -- | Sugar strategy. This chooses the pair with the least phantom homogenized degree and then break the tie with the given strategy (say @s@).
 data SugarStrategy s = SugarStrategy s deriving (Read, Show, Eq, Ord)
