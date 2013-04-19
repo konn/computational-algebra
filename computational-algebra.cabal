@@ -36,6 +36,5 @@ library
                ,       peggy            == 0.3.*
                ,       monad-loops      == 0.3.*
                ,       heaps            == 0.2.*
-               ,       reflection       == 1.2.*
   if impl(ghc >= 7.6.1)
     build-depends:     monomorphic      == 0.0.*

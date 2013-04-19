@@ -22,7 +22,6 @@ module Algebra.Algorithms.Groebner.Monomorphic
     , Gr.GradedStrategy(..)
     , calcWeight'
     ) where
-import Data.Reflection
 import           Algebra.Algorithms.Groebner         (NormalStrategy (..),
                                                       SelectionStrategy (..),
                                                       SugarStrategy (..),
@@ -61,7 +60,7 @@ intersection ps =
                  let slen = sLengthV vec
                  in case singInstance slen of
                       SingInstance ->
-                        let ids = mapV (toIdeal . map (flip orderedBy Lex . Poly.polynomial . M.mapKeys (Poly.OrderedMonomial given . Poly.fromList sdim . encodeMonomList vars) . unPolynomial)) vec
+                        let ids = mapV (toIdeal . map (flip orderedBy Lex . Poly.polynomial . M.mapKeys (Poly.OrderedMonomial . Poly.fromList sdim . encodeMonomList vars) . unPolynomial)) vec
                         in case singInstance (slen %+ sdim) of
                              SingInstance -> demoteComposed $ Gr.intersection ids
 

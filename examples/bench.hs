@@ -64,9 +64,9 @@ main = do
                             ]
                 ,bgroup "lex03"
                             [ bench "simple" $ nf (simpleBuchbergerWith Lex) ideal3
-                            , bench "relprime" $ nf (primeTestBuchbergerWith Lex) ideal3
-                            , bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy Lex) ideal3
-                            , bench "syz+sugar" $ nf (syzygyBuchbergerWith Lex) ideal3
+                            , bench "relprime" $ nf (primeTestBuchbergerWith Lex) ideal4
+                            , bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy Lex) ideal4
+                            , bench "syz+sugar" $ nf (syzygyBuchbergerWith Lex) ideal4
                             -- , bench "singular" $ nfIO (singularWith Lex ideal3)
                             ]
                 ,bgroup "grlex03"
@@ -85,7 +85,7 @@ main = do
                 ,bgroup "grlex04"
                             [ bench "simple" $ nf (simpleBuchbergerWith Grlex) ideal4
                             , bench "relprime" $ nf (primeTestBuchbergerWith Grlex) ideal4
-                            , bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy Grlex) ideal4
+                            , bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy Grlex) ideal
                             , bench "syz+sugar" $ nf (syzygyBuchbergerWith Grlex) ideal4
                             -- , bench "singular" $ nfIO (singularWith Grlex ideal4)
                             ]

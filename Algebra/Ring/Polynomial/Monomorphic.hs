@@ -10,7 +10,6 @@ import           Control.Arrow
 import           Data.List
 import qualified Data.Map                as M
 import           Data.Maybe
-import           Data.Reflection
 import qualified Numeric.Algebra         as NA
 import           Data.Ratio
 
@@ -113,7 +112,7 @@ instance (Eq r, NoetherianRing r, Poly.IsMonomialOrder ord)
     case dimension of
       Monomorphic dim ->
         case singInstance dim of
-          SingInstance -> Monomorphic $ Poly.polynomial $ M.mapKeys (Poly.OrderedMonomial given . Poly.fromList dim . encodeMonomList vars) $ unPolynomial polyn
+          SingInstance -> Monomorphic $ Poly.polynomial $ M.mapKeys (Poly.OrderedMonomial . Poly.fromList dim . encodeMonomList vars) $ unPolynomial polyn
     where
       vars = buildVarsList polyn
   demote (Monomorphic f) =
@@ -131,7 +130,7 @@ uniformlyPromoteWithDim d ps  =
   case promote d of
     Monomorphic dim ->
       case singInstance dim of
-        SingInstance -> Monomorphic $ Comp $ toIdeal $ map (Poly.polynomial . M.mapKeys (Poly.OrderedMonomial given . Poly.fromList dim . encodeMonomList vars) . unPolynomial) ps
+        SingInstance -> Monomorphic $ Comp $ toIdeal $ map (Poly.polynomial . M.mapKeys (Poly.OrderedMonomial . Poly.fromList dim . encodeMonomList vars) . unPolynomial) ps
   where
     vars = nub $ sort $ concatMap buildVarsList ps
 
@@ -159,7 +158,7 @@ promoteListWithVarOrder dic ps =
   case promote dim of
     Monomorphic sdim ->
       case singInstance sdim of
-        SingInstance -> Monomorphic $ Comp $ map (Poly.polynomial . M.mapKeys (Poly.OrderedMonomial given . Poly.fromList sdim . encodeMonomList vars) . unPolynomial) ps
+        SingInstance -> Monomorphic $ Comp $ map (Poly.polynomial . M.mapKeys (Poly.OrderedMonomial . Poly.fromList sdim . encodeMonomList vars) . unPolynomial) ps
   where
     vs0 = nub $ sort $ concatMap buildVarsList ps
     (_, rest) = partition (`elem` dic) vs0
@@ -172,7 +171,7 @@ promoteListWithDim dim ps =
   case promote dim of
     Monomorphic sdim ->
       case singInstance sdim of
-        SingInstance -> Monomorphic $ Comp $ map (Poly.polynomial . M.mapKeys (Poly.OrderedMonomial given . Poly.fromList sdim . encodeMonomList vars) . unPolynomial) ps
+        SingInstance -> Monomorphic $ Comp $ map (Poly.polynomial . M.mapKeys (Poly.OrderedMonomial . Poly.fromList sdim . encodeMonomList vars) . unPolynomial) ps
   where
     vars = nub $ sort $ concatMap buildVarsList ps
 
