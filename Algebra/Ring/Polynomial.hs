@@ -172,19 +172,19 @@ data WeightOrder (v :: [Nat]) (ord :: *) where
 data Proxy' (vs :: [Nat]) = Proxy'
 
 class ToWeightVector (vs :: [Nat]) where
-  toWeightV :: Proxy' vs -> [Int]
+  calcOrderWeight :: Proxy' vs -> Vector Int n -> Int
 
 instance ToWeightVector '[] where
-  toWeightV Proxy' = []
+  calcOrderWeight Proxy' _ = 0
 
 instance (Sing n, ToWeightVector ns) => ToWeightVector (n ': ns) where
-  toWeightV Proxy' = toInt (sing :: SNat n) : toWeightV (Proxy' :: Proxy' ns)
+  calcOrderWeight Proxy' Nil = 0
+  calcOrderWeight Proxy' (x :- xs) = x * toInt (sing :: SNat n) + calcOrderWeight (Proxy' :: Proxy' ns) xs
 
 weightOrder :: forall ns ord m. (ToWeightVector ns, IsOrder ord)
             => Proxy (WeightOrder ns ord) -> Monomial m -> Monomial m -> Ordering
-weightOrder Proxy m m' = comparing toW m m' <> cmpMonomial (Proxy :: Proxy ord) m m'
-  where
-    toW = zipWith (*) (toWeightV (Proxy' :: Proxy' ns)) . toList
+weightOrder Proxy m m' = comparing (calcOrderWeight (Proxy' :: Proxy' ns)) m m'
+                         <> cmpMonomial (Proxy :: Proxy ord) m m'
 
 instance (ToWeightVector ws, IsOrder ord) => IsOrder (WeightOrder ws ord) where
   cmpMonomial p = weightOrder p
@@ -234,6 +234,7 @@ eliminationOrder n =
 
 weightedEliminationOrder :: SNat n -> WeightedEliminationOrder n Grevlex
 weightedEliminationOrder n = WEOrder n (Proxy :: Proxy Grevlex)
+
 type family EWeight n :: [Nat]
 type instance EWeight Z = '[]
 type instance EWeight (S n) = One ': EWeight n
@@ -242,9 +243,12 @@ data WeightedEliminationOrder (n :: Nat) (ord :: *) where
     WEOrder :: SNat n -> Proxy ord -> WeightedEliminationOrder n ord
 
 instance (Sing n, IsMonomialOrder ord) => IsOrder (WeightedEliminationOrder n ord) where
-  cmpMonomial Proxy m m' = comparing calc m m' <> cmpMonomial (Proxy :: Proxy ord) m m'
+  cmpMonomial Proxy m m' = comparing (calc (sing :: SNat n)) m m' <> cmpMonomial (Proxy :: Proxy ord) m m'
     where
-      calc = foldlV (+) 0 . takeVAtMost (sing :: SNat n)
+      calc :: SNat l -> Vector Int m -> Int
+      calc (SS _) Nil = 0
+      calc SZ _ = 0
+      calc (SS l) (x :- xs)= x + calc l xs
 
 instance (Sing n, IsMonomialOrder ord) => IsMonomialOrder (WeightedEliminationOrder n ord)
 
