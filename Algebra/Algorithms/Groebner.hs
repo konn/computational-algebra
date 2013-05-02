@@ -166,7 +166,7 @@ syzygyBuchbergerWithStrategy strategy ideal = runST $ do
         g0 = leadingMonomial g
         l  = lcmMonomial f0 g0
         redundant = H.any (\(H.Entry _ h) -> (h `notElem` [f, g])
-                                  && (all (\k -> H.any ((==k) . H.payload) rest)
+                                  && (all (\k -> H.all ((/=k) . H.payload) rest)
                                                      [(f, h), (g, h), (h, f), (h, g)])
                                   && leadingMonomial h `divs` l) gs0
     when (l /= zipWithV (+) f0 g0 && not redundant) $ do
