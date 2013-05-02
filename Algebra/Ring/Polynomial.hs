@@ -82,6 +82,7 @@ type MonomialOrder = forall n. Monomial n -> Monomial n -> Ordering
 
 totalDegree :: Monomial n -> Int
 totalDegree = foldlV (+) 0
+{-# INLINE totalDegree #-}
 
 -- | Lexicographical order. This *is* a monomial order.
 lex :: MonomialOrder
@@ -98,14 +99,21 @@ revlex _ _ = error "cannot happen!"
 -- | Convert ordering into graded one.
 graded :: (Monomial n -> Monomial n -> Ordering) -> (Monomial n -> Monomial n -> Ordering)
 graded cmp xs ys = comparing totalDegree xs ys <> cmp xs ys
+{-# INLINE graded #-}
+{-# RULES
+"graded/grevlex" graded grevlex = grevlex
+"graded/grlex"   graded grlex   = grlex
+  #-}
 
 -- | Graded lexicographical order. This *is* a monomial order.
 grlex :: MonomialOrder
 grlex = graded lex
+{-# INLINE grlex #-}
 
 -- | Graded reversed lexicographical order. This *is* a monomial order.
 grevlex :: MonomialOrder
 grevlex = graded revlex
+{-# INLINE grevlex #-}
 
 -- | A wrapper for monomials with a certain (monomial) order.
 newtype OrderedMonomial (ordering :: *) n = OrderedMonomial { getMonomial :: Monomial n }
@@ -491,3 +499,12 @@ genVars sn =
 
 sDegree :: OrderedPolynomial k ord n -> SNat n
 sDegree (Polynomial dic) = sLengthV $ getMonomial $ fst $ M.findMin dic
+{-# RULES
+"sDegree/zero" forall (v :: OrderedPolynomial k ord Z).                     sDegree v = SZ
+"sDegree/one" forall (v :: OrderedPolynomial k ord (S Z)).                  sDegree v = SS SZ
+"sDegree/two" forall (v :: OrderedPolynomial k ord (S (S Z))).              sDegree v = SS (SS SZ)
+"sDegree/three" forall (v :: OrderedPolynomial k ord (S (S (S Z)))).        sDegree v = SS (SS (sS SZ))
+"sDegree/four" forall (v :: OrderedPolynomial k ord (S (S (S (S Z))))).     sDegree v = SS (SS (SS (SS SZ)))
+"sDegree/five" forall (v :: OrderedPolynomial k ord (S (S (S (S (S Z)))))). sDegree v = SS (SS (SS (SS (SS SZ))))
+"sDegree/sing" forall (v :: Sing n => OrderedPolynomial k ord n).           sDegree (v :: OrderedPolynomial k ord n) = sing :: SNat n
+  #-}

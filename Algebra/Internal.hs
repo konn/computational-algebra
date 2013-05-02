@@ -102,6 +102,15 @@ instance Sing Z where
 instance Sing n => Sing (S n) where
   sing = SS sing
 
+{-# SPECIALISE INLINE sing :: SNat Z #-}
+{-# SPECIALISE INLINE sing :: SNat (S Z) #-}
+{-# SPECIALISE INLINE sing :: SNat (S (S Z)) #-}
+{-# SPECIALISE INLINE sing :: SNat (S (S (S Z))) #-}
+{-# SPECIALISE INLINE sing :: SNat (S (S (S (S Z)))) #-}
+{-# SPECIALISE INLINE sing :: SNat (S (S (S (S (S Z))))) #-}
+{-# SPECIALISE INLINE sing :: SNat (S (S (S (S (S (S Z)))))) #-}
+{-# SPECIALISE INLINE sing :: SNat (S (S (S (S (S (S (S Z))))))) #-}
+
 class (n :: Nat) :<= (m :: Nat)
 instance Zero :<= n
 instance (n :<= m) => S n :<= S m
@@ -223,8 +232,8 @@ takeVAtMost :: SNat n -> Vector a m -> Vector a (Min n m)
 takeVAtMost = (fst .) . splitAtLess
 
 splitAtLess :: SNat n -> Vector a m -> (Vector a (Min n m), Vector a (m :-: n))
-splitAtLess SZ v = case zAbsorbsMinL (sLengthV v) of
-                     Eql -> (Nil, v)
+splitAtLess SZ Nil = (Nil, Nil)
+splitAtLess SZ (x :- xs) = (Nil, x :- xs)
 splitAtLess (SS _) Nil = (Nil, Nil)
 splitAtLess (SS n) (x :- xs) =
   case splitAtLess n xs of
@@ -245,6 +254,15 @@ splitAtV _ _ = error "could not happen!"
 sLengthV :: Vector a n -> SNat n
 sLengthV Nil = SZ
 sLengthV (_ :- xs) = sOne %+ sLengthV xs
+{-# RULES
+"sLengthV/zero" forall (v :: Vector a Z).                     sLengthV v = sZ
+"sLengthV/one" forall (v :: Vector a (S Z)).                  sLengthV v = sS sZ
+"sLengthV/two" forall (v :: Vector a (S (S Z))).              sLengthV v = sS (sS sZ)
+"sLengthV/three" forall (v :: Vector a (S (S (S Z)))).        sLengthV v = sS (sS (sS sZ))
+"sLengthV/four" forall (v :: Vector a (S (S (S (S Z))))).     sLengthV v = sS (sS (sS (sS sZ)))
+"sLengthV/five" forall (v :: Vector a (S (S (S (S (S Z)))))). sLengthV v = sS (sS (sS (sS (sS sZ))))
+"sLengthV/sing" forall (v :: Sing n => Vector a n).           sLengthV (v :: Vector a n) = sing :: SNat n
+  #-}
 
 mapV :: (a -> b) -> Vector a n -> Vector b n
 mapV _ Nil       = Nil
@@ -422,9 +440,7 @@ zAbsorbsMinR (SS n) =
 
 zAbsorbsMinL :: SNat n -> Eql (Min Z n) Z
 zAbsorbsMinL SZ     = Eql
-zAbsorbsMinL (SS n) =
-  case zAbsorbsMinL n of
-    Eql -> Eql
+zAbsorbsMinL (SS n) = case zAbsorbsMinL n of Eql -> Eql
 
 minLeqL :: SNat n -> SNat m -> Leq (Min n m) n
 minLeqL SZ m = case zAbsorbsMinL m of Eql -> ZeroLeq sZ

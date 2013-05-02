@@ -2,7 +2,7 @@
 -- further documentation, see http://haskell.org/cabal/users-guide/
 
 name:                computational-algebra
-version:             0.1.3.0
+version:             0.1.3.1
 synopsis:            Well-kinded computational algebra library, currently supporting Groebner basis.
 description:         Dependently-typed computational algebra libray for Groebner basis.
 homepage:            https://github.com/konn/computational-algebra

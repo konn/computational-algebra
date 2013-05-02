@@ -10,8 +10,8 @@ import           Algebra.Ring.Polynomial
 import           Data.Ratio
 import qualified Numeric.Algebra             as NA
 
-c, s, x, y :: Polynomial Rational (S Three)
-[c, s, x, y] = genVars (sS sThree)
+u, v, x, y, z :: Polynomial Rational (S (S Three))
+[u, v, x, y, z] = genVars (sS (sS sThree))
 
 (.+), (.*), (.-) :: Polynomial Rational (S Three) -> Polynomial Rational (S Three) -> Polynomial Rational (S Three)
 (.+) = (NA.+)
@@ -26,11 +26,12 @@ infixl 7 .*
 
 fromRight :: Either t t1 -> t1
 fromRight (Right a) = a
-
+fromRight _ = error "fromRight"
 {-
 parse :: String -> Polynomial Rational
 parse = fromRight . parsePolyn
 -}
 
 main :: IO ()
-main = print $ thEliminationIdealWith (weightedEliminationOrder sTwo) sTwo (toIdeal [x-c^3, y-s^3, c^2+s^2-1])
+main = print $ thEliminationIdealWith (eliminationOrder sTwo) sTwo $
+         toIdeal [x - (3*u + 3*u*v^2 - u^3), y - (3*v + 3*u^2*v -  v^3), z - (3*u^2 - 3*v^2)]

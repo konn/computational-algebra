@@ -233,14 +233,18 @@ minimizeGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                       => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
 minimizeGroebnerBasis = foldr step []
   where
-    step x xs =  injectCoeff (recip $ leadingCoeff x) * x : filter (not . (leadingMonomial x `divs`) . leadingMonomial) xs
+    step x xs = monoize x : filter (not . (leadingMonomial x `divs`) . leadingMonomial) xs
 
 -- | Reduce minimum Groebner basis into reduced Groebner basis.
 reduceMinimalGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                            => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
-reduceMinimalGroebnerBasis bs = filter (/= zero) $  map red bs
+reduceMinimalGroebnerBasis bs = filter (/= zero) $ map (monoize . red) bs
   where
     red x = x `modPolynomial` delete x bs
+
+monoize :: (Field k, IsPolynomial k n, IsMonomialOrder order)
+           => OrderedPolynomial k order n -> OrderedPolynomial k order n
+monoize f = injectCoeff (recip $ leadingCoeff f) * f
 
 -- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
 calcGroebnerBasisWith :: (Field k, IsPolynomial k n, IsMonomialOrder order, IsMonomialOrder order')
