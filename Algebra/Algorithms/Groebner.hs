@@ -81,7 +81,7 @@ simpleBuchberger ideal =
   in fst $ until (null . snd) (\(ggs, acc) -> let cur = nub $ ggs ++ acc in
                                               (cur, calc cur)) (gs, calc gs)
   where
-    calc acc = [ q | f <- acc, g <- acc, f /= g
+    calc acc = [ q | f <- acc, g <- acc
                , let q = sPolynomial f g `modPolynomial` acc, q /= zero
                ]
 
@@ -231,18 +231,35 @@ instance SelectionStrategy s => SelectionStrategy (SugarStrategy s) where
 
 minimizeGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                       => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
-minimizeGroebnerBasis bs =
-  let bs' = zip bs [0..]
-  in mapMaybe (\(f, i) -> if any (\(g, j) -> i /= j && leadingMonomial g `divs` leadingMonomial f) bs'
-                          then Nothing else Just (monoize f)
-              ) bs'
+minimizeGroebnerBasis bs = runST $ do
+  left  <- newSTRef bs
+  right <- newSTRef []
+  whileM_ (not . null <$> readSTRef left) $ do
+    f : xs <- readSTRef left
+    writeSTRef left xs
+    ys     <- readSTRef right
+    if any (\g -> leadingMonomial g `divs` leadingMonomial f) xs ||
+       any (\g -> leadingMonomial g `divs` leadingMonomial f) ys
+      then writeSTRef right ys
+      else writeSTRef right (monoize f : ys)
+  readSTRef right
 
 -- | Reduce minimum Groebner basis into reduced Groebner basis.
 reduceMinimalGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                            => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
-reduceMinimalGroebnerBasis = filter (/= zero) . foldr step []
-  where
-    step x ys = (x `modPolynomial` delete x ys) : ys
+reduceMinimalGroebnerBasis bs = runST $ do
+  left  <- newSTRef bs
+  right <- newSTRef []
+  whileM_ (not . null <$> readSTRef left) $ do
+    f : xs <- readSTRef left
+    writeSTRef left xs
+    ys     <- readSTRef right
+    let q = f `modPolynomial` (xs ++ ys)
+    if q == zero then writeSTRef right ys else writeSTRef right (q : ys)
+  readSTRef right
+
+-- foldr step [] [f, g, h]
+--  f `step` (g `step` (h `step` []))
 
 monoize :: (Field k, IsPolynomial k n, IsMonomialOrder order)
            => OrderedPolynomial k order n -> OrderedPolynomial k order n
