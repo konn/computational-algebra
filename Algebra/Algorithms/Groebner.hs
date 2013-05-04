@@ -33,6 +33,7 @@ import qualified Data.Foldable           as H
 import           Data.Function
 import qualified Data.Heap               as H
 import           Data.List
+import           Data.Maybe
 import           Data.Proxy
 import           Data.STRef
 import           Numeric.Algebra
@@ -228,19 +229,20 @@ instance SelectionStrategy s => SelectionStrategy (SugarStrategy s) where
       tsgr h = deg' h - totalDegree (leadingMonomial h)
       sugar = max (tsgr f) (tsgr g) + totalDegree (lcmMonomial (leadingMonomial f) (leadingMonomial g))
 
--- | Minimize the given groebner basis.
 minimizeGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                       => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
-minimizeGroebnerBasis = foldr step []
-  where
-    step x xs = monoize x : filter (not . (leadingMonomial x `divs`) . leadingMonomial) xs
+minimizeGroebnerBasis bs =
+  let bs' = zip bs [0..]
+  in mapMaybe (\(f, i) -> if any (\(g, j) -> i /= j && leadingMonomial g `divs` leadingMonomial f) bs'
+                          then Nothing else Just (monoize f)
+              ) bs'
 
 -- | Reduce minimum Groebner basis into reduced Groebner basis.
 reduceMinimalGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                            => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
-reduceMinimalGroebnerBasis bs = filter (/= zero) $ map (monoize . red) bs
+reduceMinimalGroebnerBasis = filter (/= zero) . foldr step []
   where
-    red x = x `modPolynomial` delete x bs
+    step x ys = (x `modPolynomial` delete x ys) : ys
 
 monoize :: (Field k, IsPolynomial k n, IsMonomialOrder order)
            => OrderedPolynomial k order n -> OrderedPolynomial k order n
