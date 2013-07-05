@@ -6,6 +6,7 @@ import Algebra.Internal
 import Algebra.Ring.Noetherian
 import Algebra.Ring.Polynomial
 import Data.Ratio
+import Data.Type.Natural           hiding (one, zero)
 import Numeric.Algebra
 import Prelude                     hiding (Fractional (..), Integral (..),
                                     Num (..), (^), (^^))
