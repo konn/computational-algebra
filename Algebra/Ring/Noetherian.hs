@@ -15,6 +15,9 @@ import qualified Numeric.Algebra.Complex as NA
 import           Prelude                 hiding (negate, subtract, (*), (+),
                                           (-))
 import qualified Prelude                 as P
+import qualified Data.Vector.Sized as V
+import Data.Vector.Sized (Vector(..))
+import Data.Type.Natural
 
 class (Commutative r, Ring r) => NoetherianRing r where
 
@@ -79,7 +82,7 @@ instance Integral n => Multiplicative (Ratio n) where
   (*) = (P.*)
   pow1p r n = r ^^ (n P.+ 1)
 
-data Ideal r = forall n. Ideal (Vector r n)
+data Ideal r = forall n. Ideal (V.Vector r n)
 
 instance Eq r => Eq (Ideal r) where
   (==) = (==) `on` generators
@@ -97,16 +100,16 @@ toIdeal :: NoetherianRing r => [r] -> Ideal r
 toIdeal = foldr addToIdeal (Ideal Nil)
 
 appendIdeal :: Ideal r -> Ideal r -> Ideal r
-appendIdeal (Ideal is) (Ideal js) = Ideal (is `appendV` js)
+appendIdeal (Ideal is) (Ideal js) = Ideal (is `V.append` js)
 
 generators :: Ideal r -> [r]
-generators (Ideal is) = toList is
+generators (Ideal is) = V.toList is
 
 filterIdeal :: NoetherianRing r => (r -> Bool) -> Ideal r -> Ideal r
-filterIdeal p (Ideal i) = foldrV (\h -> if p h then addToIdeal h else id) (toIdeal []) i
+filterIdeal p (Ideal i) = V.foldr (\h -> if p h then addToIdeal h else id) (toIdeal []) i
 
 principalIdeal :: r -> Ideal r
-principalIdeal = Ideal . singletonV
+principalIdeal = Ideal . V.singleton
 
 mapIdeal :: (r -> r') -> Ideal r -> Ideal r'
-mapIdeal fun (Ideal xs) = Ideal $ mapV fun xs
+mapIdeal fun (Ideal xs) = Ideal $ V.map fun xs

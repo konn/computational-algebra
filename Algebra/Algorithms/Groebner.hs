@@ -1,8 +1,7 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
-{-# LANGUAGE GADTs, MultiParamTypeClasses, NoImplicitPrelude                 #-}
-{-# LANGUAGE ParallelListComp, RankNTypes, ScopedTypeVariables               #-}
-{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies               #-}
-{-# LANGUAGE TypeOperators                                                   #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances  #-}
+{-# LANGUAGE GADTs, MultiParamTypeClasses, NoImplicitPrelude                  #-}
+{-# LANGUAGE ParallelListComp, RankNTypes, ScopedTypeVariables                #-}
+{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies, TypeOperators #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Algebra.Algorithms.Groebner (
                                    -- * Polynomial division
@@ -36,8 +35,14 @@ import           Data.List
 import           Data.Maybe
 import           Data.Proxy
 import           Data.STRef
+import           Data.Type.Monomorphic
+import           Data.Type.Natural       hiding (max, one, zero)
+import           Data.Vector.Sized       hiding (all, drop, foldr, head, map,
+                                          take, zipWith)
+import qualified Data.Vector.Sized       as V
 import           Numeric.Algebra
 import           Prelude                 hiding (Num (..), recip)
+import           Proof.Equational
 
 -- | Calculate a polynomial quotient and remainder w.r.t. second argument.
 divModPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)
@@ -95,7 +100,7 @@ primeTestBuchberger ideal =
   where
     calc acc = [ q | f <- acc, g <- acc, f /= g
                , let f0 = leadingMonomial f, let g0 = leadingMonomial g
-               , lcmMonomial f0 g0 /= zipWithV (+) f0 g0
+               , lcmMonomial f0 g0 /= V.zipWithSame (+) f0 g0
                , let q = sPolynomial f g `modPolynomial` acc, q /= zero
                ]
 
@@ -112,12 +117,12 @@ padVec def (x :- xs) (y :- ys) =
     (xs', ys') -> (x :- xs', y :- ys')
 padVec def (x :- xs) Nil =
   case padVec def xs Nil of
-    (xs', ys') -> case maxZR (sLengthV xs) of
-                    Eql -> (x :- xs', def :- ys')
+    (xs', ys') -> case maxZR (sLength xs) of
+                    Refl -> (x :- xs', def :- ys')
 padVec def Nil (y :- ys) =
   case padVec def Nil ys of
-    (xs', ys') -> case maxZL (sLengthV ys) of
-                    Eql -> (def :- xs', y :- ys')
+    (xs', ys') -> case maxZL (sLength ys) of
+                    Refl -> (def :- xs', y :- ys')
 
 combinations :: [a] -> [(a, a)]
 combinations xs = concat $ zipWith (map . (,)) xs $ drop 1 $ tails xs
@@ -170,7 +175,7 @@ syzygyBuchbergerWithStrategy strategy ideal = runST $ do
                                   && (all (\k -> H.all ((/=k) . H.payload) rest)
                                                      [(f, h), (g, h), (h, f), (h, g)])
                                   && leadingMonomial h `divs` l) gs0
-    when (l /= zipWithV (+) f0 g0 && not redundant) $ do
+    when (l /= V.zipWithSame (+) f0 g0 && not redundant) $ do
       len0 <- readSTRef len
       let qs = (H.toList gs0)
           s = sPolynomial f g `modPolynomial` map H.payload qs
@@ -312,9 +317,9 @@ thEliminationIdealWith :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPo
                    -> Ideal (OrderedPolynomial k ord (m :-: n))
 thEliminationIdealWith ord n ideal =
     case singInstance n of
-      SingInstance ->  toIdeal $ [ transformMonomial (dropV n) f
+      SingInstance ->  toIdeal $ [ transformMonomial (V.drop n) f
                                  | f <- calcGroebnerBasisWith ord ideal
-                                 , all (all (== 0) . take (toInt n) . toList . snd) $ getTerms f
+                                 , all (all (== 0) . take (sNatToInt n) . toList . snd) $ getTerms f
                                  ]
 
 -- | Calculate n-th elimination ideal using the specified n-th elimination type order.
@@ -328,9 +333,9 @@ unsafeThEliminationIdealWith :: ( IsMonomialOrder ord, Field k, IsPolynomial k m
                              -> Ideal (OrderedPolynomial k ord (m :-: n))
 unsafeThEliminationIdealWith ord n ideal =
     case singInstance n of
-      SingInstance ->  toIdeal $ [ transformMonomial (dropV n) f
+      SingInstance ->  toIdeal $ [ transformMonomial (V.drop n) f
                                  | f <- calcGroebnerBasisWith ord ideal
-                                 , all (all (== 0) . take (toInt n) . toList . snd) $ getTerms f
+                                 , all (all (== 0) . take (sNatToInt n) . toList . snd) $ getTerms f
                                  ]
 
 -- | An intersection ideal of given ideals (using 'WeightedEliminationOrder').
@@ -340,15 +345,15 @@ intersection :: forall r k n ord.
                 )
              => Vector (Ideal (OrderedPolynomial r ord n)) k
              -> Ideal (OrderedPolynomial r ord n)
-intersection Nil = Ideal $ singletonV one
+intersection Nil = Ideal $ singleton one
 intersection idsv@(_ :- _) =
-    let sk = sLengthV idsv
+    let sk = sLength idsv
         sn = sing :: SNat n
         ts  = genVars (sk %+ sn)
         tis = zipWith (\ideal t -> mapIdeal ((t *) . shiftR sk) ideal) (toList idsv) ts
         j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
     in case plusMinusEqR sn sk of
-         Eql -> case propToBoolLeq (plusLeqL sk sn) of
+         Refl -> case propToBoolLeq (plusLeqL sk sn) of
                   LeqTrueInstance -> thEliminationIdeal sk j
 
 -- | Ideal quotient by a principal ideals.
@@ -357,8 +362,8 @@ quotByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
                      -> OrderedPolynomial k ord n
                      -> Ideal (OrderedPolynomial k ord n)
 quotByPrincipalIdeal i g =
-    case intersection (i :- (Ideal $ singletonV g) :- Nil) of
-      Ideal gs -> Ideal $ mapV (snd . head . (`divPolynomial` [g])) gs
+    case intersection (i :- (Ideal $ singleton g) :- Nil) of
+      Ideal gs -> Ideal $ V.map (snd . head . (`divPolynomial` [g])) gs
 
 -- | Ideal quotient by the given ideal.
 quotIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
@@ -366,10 +371,10 @@ quotIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
           -> Ideal (OrderedPolynomial k ord n)
           -> Ideal (OrderedPolynomial k ord n)
 quotIdeal i (Ideal g) =
-  case singInstance (sLengthV g) of
+  case singInstance (sLength g) of
     SingInstance ->
-        case singInstance (sLengthV g %+ (sing :: SNat n)) of
-          SingInstance -> intersection $ mapV (i `quotByPrincipalIdeal`) g
+        case singInstance (sLength g %+ (sing :: SNat n)) of
+          SingInstance -> intersection $ V.map (i `quotByPrincipalIdeal`) g
 
 -- | Saturation by a principal ideal.
 saturationByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
@@ -385,8 +390,7 @@ saturationIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder o
                 -> Ideal (OrderedPolynomial k ord n)
                 -> Ideal (OrderedPolynomial k ord n)
 saturationIdeal i (Ideal g) =
-  case singInstance (sLengthV g) of
+  case singInstance (sLength g) of
     SingInstance ->
-        case singInstance (sLengthV g %+ (sing :: SNat n)) of
-          SingInstance -> intersection $ mapV (i `saturationByPrincipalIdeal`) g
-
+        case singInstance (sLength g %+ (sing :: SNat n)) of
+          SingInstance -> intersection $ V.map (i `saturationByPrincipalIdeal`) g

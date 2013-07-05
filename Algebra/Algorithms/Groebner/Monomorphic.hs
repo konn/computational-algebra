@@ -1,6 +1,7 @@
-{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances, GADTs   #-}
-{-# LANGUAGE PolyKinds, RecordWildCards, ScopedTypeVariables, TypeFamilies #-}
-{-# LANGUAGE TypeOperators, UndecidableInstances                           #-}
+{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
+{-# LANGUAGE IncoherentInstances, OverlappingInstances, PolyKinds        #-}
+{-# LANGUAGE RecordWildCards, ScopedTypeVariables, TypeFamilies          #-}
+{-# LANGUAGE TypeOperators, UndecidableInstances                         #-}
 -- | Monomorphic interface for Groenber basis.
 module Algebra.Algorithms.Groebner.Monomorphic
     ( Groebnerable
@@ -38,6 +39,13 @@ import           Algebra.Ring.Polynomial.Monomorphic
 import           Control.Arrow
 import           Data.List
 import qualified Data.Map                            as M
+import           Data.Singletons                     hiding (demote, promote)
+import           Data.Type.Monomorphic
+import           Data.Type.Natural                   hiding (demote, one,
+                                                      promote, zero)
+import           Data.Vector.Sized                   (Vector (..), sLength,
+                                                      toList)
+import qualified Data.Vector.Sized                   as V
 import           Numeric.Algebra
 import           Prelude                             hiding (Num (..))
 
@@ -57,10 +65,10 @@ intersection ps =
            SingInstance ->
              case promote ps :: Monomorphic (Vector [Polynomial r]) of
                Monomorphic vec ->
-                 let slen = sLengthV vec
+                 let slen = sLength vec
                  in case singInstance slen of
                       SingInstance ->
-                        let ids = mapV (toIdeal . map (flip orderedBy Lex . Poly.polynomial . M.mapKeys (Poly.OrderedMonomial . Poly.fromList sdim . encodeMonomList vars) . unPolynomial)) vec
+                        let ids = V.map (toIdeal . map (flip orderedBy Lex . Poly.polynomial . M.mapKeys (Poly.OrderedMonomial . Poly.fromList sdim . encodeMonomList vars) . unPolynomial)) vec
                         in case singInstance (slen %+ sdim) of
                              SingInstance -> demoteComposed $ Gr.intersection ids
 
@@ -220,7 +228,7 @@ eliminateWith ord elvs j =
                          let fs'  = map ((flip Poly.orderedBy Poly.Lex) . Poly.scastPolynomial newDim) fs
                          in case propToBoolLeq $ maxLeqL sk sdim of
                               LeqTrueInstance ->
-                                case singInstance (newDim %- sk) of
+                                case singInstance (newDim %:- sk) of
                                   SingInstance ->
                                     map (renameVars rest) $ demoteComposed $ Gr.unsafeThEliminationIdealWith ord sk (toIdeal fs')
   where
@@ -230,8 +238,6 @@ eliminateWith ord elvs j =
 
 eliminate :: forall r.  Groebnerable r => [Variable] -> [Polynomial r] -> [Polynomial r]
 eliminate vs j = eliminateWith Lex vs j
-  where
-    vars = nub $ sort $ concatMap buildVarsList j
 
 -- | Computes nth elimination ideal.
 thEliminationIdeal :: Groebnerable r => Int -> [Polynomial r] -> [Polynomial r]

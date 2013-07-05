@@ -29,7 +29,7 @@ expr :: Polynomial Rational
   / term
 
 term :: Polynomial Rational
-   = number space* monoms { $1 NA..* $3 }
+   = number space* monoms { injectCoeff $1 * $3 }
    / number { injectCoeff $1 }
    / monoms
 

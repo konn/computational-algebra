@@ -10,8 +10,12 @@ import           Control.Arrow
 import           Data.List
 import qualified Data.Map                as M
 import           Data.Maybe
+import Data.Type.Natural hiding (one, zero, promote)
+import           Data.Type.Monomorphic
 import qualified Numeric.Algebra         as NA
 import           Data.Ratio
+import           Data.Singletons hiding (promote)
+import qualified Data.Vector.Sized as V
 
 data Variable = Variable { varName  :: Char
                          , varIndex :: Maybe Int
@@ -41,12 +45,6 @@ normalize (Polynomial dic) =
 
 normalizeMonom :: Monomial -> Monomial
 normalizeMonom = M.filter (/= 0)
-
-instance (Eq r, NoetherianRing r) => NA.LeftModule r (Polynomial r) where
-  c .* Polynomial d = normalize $ Polynomial $ fmap (c NA.*) d
-
-instance (Eq r, NoetherianRing r) => NA.RightModule r (Polynomial r) where
-  (*.) = flip (NA..*)
 
 instance (Eq r, NoetherianRing r) => NoetherianRing (Polynomial r)
 instance (Eq r, NoetherianRing r) => NA.Commutative (Polynomial r)
@@ -82,7 +80,7 @@ buildVarsList = nub . sort . concatMap M.keys . M.keys . unPolynomial
 encodeMonomList :: [Variable] -> Monomial -> [Int]
 encodeMonomList vars mono = map (maybe 0 fromInteger . flip M.lookup mono) vars
 
-encodeMonomial :: [Variable] -> Monomial -> Monomorphic (Vector Int)
+encodeMonomial :: [Variable] -> Monomial -> Monomorphic (V.Vector Int)
 encodeMonomial vars mono = promote $ encodeMonomList vars mono
 
 encodePolynomial :: (Monomorphicable (Poly.Polynomial r))
@@ -95,7 +93,7 @@ toPolynomialSetting p =
                 , dimension = promote $ length $ buildVarsList p
                 }
 
-data PolynomialSetting r = PolySetting { dimension :: Monomorphic SNat
+data PolynomialSetting r = PolySetting { dimension :: Monomorphic (Sing :: Nat -> *)
                                        , polyn     :: Polynomial r
                                        }
 
@@ -144,7 +142,7 @@ instance (NoetherianRing r, Eq r, Poly.IsMonomialOrder ord)
     => Monomorphicable (Ideal :.: Poly.OrderedPolynomial r ord) where
   type MonomorphicRep (Ideal :.: Poly.OrderedPolynomial r ord) = [Polynomial r]
   promote = uniformlyPromote
-  demote (Monomorphic (Comp (Ideal v))) = map (polyn . demote . Monomorphic) $ toList v
+  demote (Monomorphic (Comp (Ideal v))) = map (polyn . demote . Monomorphic) $ V.toList v
 
 promoteList :: (Eq r, NoetherianRing r, Poly.IsMonomialOrder ord)
             => [Polynomial r] -> Monomorphic ([] :.: Poly.OrderedPolynomial r ord)
@@ -188,7 +186,7 @@ showPolynomial f =
         case singInstance (Poly.sDegree f') of
           SingInstance -> Poly.showPolynomialWithVars dic f'
   where
-    dic = zip [1..] $ map show $ buildVarsList f
+    dic = zip [1 :: Int ..] $ map show $ buildVarsList f
 
 showRatPolynomial :: (Integral a, Show a) => Polynomial (Ratio a) -> String
 showRatPolynomial f =
@@ -197,7 +195,7 @@ showRatPolynomial f =
         case singInstance (Poly.sDegree f') of
           SingInstance -> Poly.showPolynomialWith dic Poly.showRational f'
   where
-    dic = zip [1..] $ map show $ buildVarsList f
+    dic = zip [1 :: Int ..] $ map show $ buildVarsList f
 
 injectVar :: NA.Unital r => Variable -> Polynomial r
 injectVar var = Polynomial $ M.singleton (M.singleton var 1) NA.one
