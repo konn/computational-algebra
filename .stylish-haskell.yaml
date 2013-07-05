@@ -3,7 +3,7 @@
 - 'imports':
     'align': 'group'
 - 'language_pragmas':
-    'style': 'line'
+    'style': 'compact_line'
     'remove_redundant': |-
       true
 - 'records': {}
