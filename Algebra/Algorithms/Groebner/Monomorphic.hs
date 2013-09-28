@@ -17,6 +17,8 @@ module Algebra.Algorithms.Groebner.Monomorphic
     , isIdealMember, intersection, thEliminationIdeal, eliminate, thEliminationIdealWith, eliminateWith
     , quotIdeal, quotByPrincipalIdeal
     , saturationIdeal, saturationByPrincipalIdeal
+    -- * Resultant
+    , resultant, hasCommonFactor
     -- * Re-exports
     , Lex(..), Revlex(..), Grlex(..), Grevlex(..), IsOrder(..), IsMonomialOrder
     , SelectionStrategy(..), NormalStrategy(..), SugarStrategy(..), Gr.GrevlexStrategy(..)
@@ -247,3 +249,21 @@ thEliminationIdealWith :: (IsMonomialOrder ord, Groebnerable r) => ord -> Int ->
 thEliminationIdealWith ord k j = eliminateWith ord (take k vars) j
   where
     vars = nub $ sort $ concatMap buildVarsList j
+
+-- | Calculates resultants for given two unary-polynomials.
+resultant :: forall r. Groebnerable r
+           => Polynomial r -> Polynomial r -> r
+resultant f g =
+  let vars = nub $ buildVarsList f ++ buildVarsList g
+  in case vars of
+       [_] ->
+           let f' = Poly.polynomial $ M.mapKeys (Poly.OrderedMonomial . Poly.fromList sOne . encodeMonomList vars) $
+                      unPolynomial f
+               g' = Poly.polynomial $ M.mapKeys (Poly.OrderedMonomial . Poly.fromList sOne . encodeMonomList vars) $
+                      unPolynomial g
+           in Gr.resultant (f' `orderedBy` Grevlex) g'
+       _ -> error "currently supports only unary polynomial."
+
+-- | Determin if given two unary polynomials have common factor.
+hasCommonFactor :: (Eq r, Division r, NoetherianRing r) => Polynomial r -> Polynomial r -> Bool
+hasCommonFactor f g = resultant f g == zero
