@@ -297,7 +297,7 @@ castMonomial :: (IsOrder o, IsOrder o', SingRep m, n :<= m) => OrderedMonomial o
 castMonomial = unwrapped %~ fromList sing . V.toList
 
 scastMonomial :: (n :<= m) => SNat m -> OrderedMonomial o n -> OrderedMonomial o m
-scastMonomial snat = unwrapped %~ fromList snat . V.toList
+scastMonomial sdim = unwrapped %~ fromList sdim . V.toList
 
 castPolynomial :: (IsPolynomial r n, IsPolynomial r m, SingRep m, IsOrder o, IsOrder o', n :<= m)
                => OrderedPolynomial r o n

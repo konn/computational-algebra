@@ -3,7 +3,6 @@
 {-# LANGUAGE TypeOperators, ViewPatterns, OverlappingInstances               #-}
 {-# OPTIONS_GHC -fno-warn-orphans                             #-}
 module Algebra.Ring.Polynomial.Monomorphic where
-import           Algebra.Internal
 import           Algebra.Ring.Noetherian
 import qualified Algebra.Ring.Polynomial as Poly
 import           Control.Arrow
@@ -14,7 +13,6 @@ import Data.Type.Natural hiding (one, zero, promote)
 import           Data.Type.Monomorphic
 import qualified Numeric.Algebra         as NA
 import           Data.Ratio
-import           Data.Singletons hiding (promote)
 import qualified Data.Vector.Sized as V
 
 data Variable = Variable { varName  :: Char
