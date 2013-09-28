@@ -108,7 +108,7 @@ divModPolynomialWith :: forall ord r. (IsMonomialOrder ord, Groebnerable r)
 divModPolynomialWith _ f gs =
   case promoteList (f:gs) :: Monomorphic ([] :.: Poly.OrderedPolynomial r ord) of
     Monomorphic (Comp (f' : gs')) ->
-      let sn = Poly.sDegree f'
+      let sn = Poly.sArity f'
       in case singInstance sn of
            SingInstance ->
              let (q, r) = Gr.divModPolynomial f' gs'
@@ -140,7 +140,7 @@ calcGroebnerBasisWith ord j =
     Monomorphic (Comp ideal) ->
       case ideal of
         Ideal vec ->
-          case singInstance (Poly.sDegree (head $ toList vec)) of
+          case singInstance (Poly.sArity (head $ toList vec)) of
             SingInstance -> map (renameVars vars . polyn . demote . Monomorphic) $ Gr.calcGroebnerBasisWith ord ideal
   where
     vars = nub $ sort $ concatMap buildVarsList j
@@ -156,7 +156,7 @@ simpleBuchbergerWith ord j =
     Monomorphic (Comp ideal) ->
       case ideal of
         Ideal vec ->
-          case singInstance (Poly.sDegree (head $ toList vec)) of
+          case singInstance (Poly.sArity (head $ toList vec)) of
             SingInstance -> map (renameVars vars . polyn . demote . Monomorphic) $ Gr.simpleBuchberger ideal
   where
     vars = nub $ sort $ concatMap buildVarsList j
@@ -172,7 +172,7 @@ primeTestBuchbergerWith ord j =
     Monomorphic (Comp ideal) ->
       case ideal of
         Ideal vec ->
-          case singInstance (Poly.sDegree (head $ toList vec)) of
+          case singInstance (Poly.sArity (head $ toList vec)) of
             SingInstance -> map (renameVars vars . polyn . demote . Monomorphic) $ Gr.primeTestBuchberger ideal
   where
     vars = nub $ sort $ concatMap buildVarsList j
@@ -190,7 +190,7 @@ syzygyBuchbergerWithStrategy strategy _ j =
     Monomorphic (Comp ideal) ->
       case ideal of
         Ideal vec ->
-          case singInstance (Poly.sDegree (head $ toList vec)) of
+          case singInstance (Poly.sArity (head $ toList vec)) of
             SingInstance -> map (renameVars vars . polyn . demote . Monomorphic) $ Gr.syzygyBuchbergerWithStrategy strategy ideal
   where
     vars = nub $ sort $ concatMap buildVarsList j
@@ -205,7 +205,7 @@ isIdealMember :: forall r. Groebnerable r => Polynomial r -> [Polynomial r] -> B
 isIdealMember f ideal =
   case promoteList (f:ideal) :: Monomorphic ([] :.: Poly.Polynomial r) of
     Monomorphic (Comp (f':ideal')) ->
-      case singInstance (Poly.sDegree f') of
+      case singInstance (Poly.sArity f') of
         SingInstance -> Gr.isIdealMember f' (toIdeal ideal')
     _ -> error "impossible happend!"
 
@@ -217,7 +217,7 @@ eliminateWith ord elvs j =
     Monomorphic (Comp fs) ->
       case promote k of
         Monomorphic sk ->
-          let sdim = Poly.sDegree $ head fs
+          let sdim = Poly.sArity $ head fs
               newDim = sMax sk sdim
           in case singInstance sdim of
                SingInstance ->

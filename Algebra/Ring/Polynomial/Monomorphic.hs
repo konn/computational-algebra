@@ -116,7 +116,7 @@ instance (Eq r, NoetherianRing r, Poly.IsMonomialOrder ord)
   demote (Monomorphic f) =
       PolySetting { polyn = Polynomial $ M.fromList $
                               map (toMonom . map toInteger . demote . Monomorphic . snd &&& fst) $ Poly.getTerms f
-                  , dimension = Monomorphic $ Poly.sDegree f
+                  , dimension = Monomorphic $ Poly.sArity f
                   }
     where
       toMonom = M.fromList . zip (Variable 'X' Nothing : [Variable 'X' (Just i) | i <- [1..]])
@@ -183,7 +183,7 @@ showPolynomial :: (Show r, Eq r, NoetherianRing r) => Polynomial r -> String
 showPolynomial f =
   case encodePolynomial f of
     Monomorphic f' ->
-        case singInstance (Poly.sDegree f') of
+        case singInstance (Poly.sArity f') of
           SingInstance -> Poly.showPolynomialWithVars dic f'
   where
     dic = zip [1 :: Int ..] $ map show $ buildVarsList f
@@ -192,7 +192,7 @@ showRatPolynomial :: (Integral a, Show a) => Polynomial (Ratio a) -> String
 showRatPolynomial f =
   case encodePolynomial f of
     Monomorphic f' ->
-        case singInstance (Poly.sDegree f') of
+        case singInstance (Poly.sArity f') of
           SingInstance -> Poly.showPolynomialWith dic Poly.showRational f'
   where
     dic = zip [1 :: Int ..] $ map show $ buildVarsList f

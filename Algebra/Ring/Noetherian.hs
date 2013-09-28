@@ -4,20 +4,17 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Ring.Noetherian ( NoetherianRing, Ideal(..), addToIdeal, toIdeal, appendIdeal
                                , generators, filterIdeal, mapIdeal, principalIdeal) where
-import           Algebra.Internal
 import qualified Data.Complex            as C
 import           Data.Function
 import           Data.Ord
 import           Data.Ratio
+import           Data.Vector.Sized       (Vector (..))
+import qualified Data.Vector.Sized       as V
 import           Numeric.Algebra
-import qualified Numeric.Algebra         as NA
 import qualified Numeric.Algebra.Complex as NA
 import           Prelude                 hiding (negate, subtract, (*), (+),
                                           (-))
 import qualified Prelude                 as P
-import qualified Data.Vector.Sized as V
-import Data.Vector.Sized (Vector(..))
-import Data.Type.Natural
 
 class (Commutative r, Ring r) => NoetherianRing r where
 
@@ -36,6 +33,8 @@ instance Integral n => InvolutiveSemiring (Ratio n)
 instance Integral n => TriviallyInvolutive (Ratio n)
 
 instance (P.Num n) => P.Num (NA.Complex n) where
+  abs = error "unimplemented"
+  signum = error "unimplemented"
   fromInteger n = NA.Complex (P.fromInteger n) 0
   negate (NA.Complex x y) = NA.Complex (P.negate x) (P.negate y)
   NA.Complex x y + NA.Complex z w = NA.Complex (x P.+ y) (z P.+ w)

@@ -9,13 +9,13 @@ module Algebra.Ring.Polynomial
     ( Polynomial, Monomial, MonomialOrder, EliminationType, EliminationOrder
     , WeightedEliminationOrder, eliminationOrder, weightedEliminationOrder
     , lex, revlex, graded, grlex, grevlex, productOrder, productOrder'
-    , transformMonomial, WeightProxy(..), weightOrder, totalDegree
+    , transformMonomial, WeightProxy(..), weightOrder, totalDegree, totalDegree'
     , IsPolynomial, coeff, lcmMonomial, sPolynomial, polynomial
     , castMonomial, castPolynomial, toPolynomial, changeOrder, changeOrderProxy
     , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars, showPolynomialWith, showRational
     , normalize, injectCoeff, varX, var, getTerms, shiftR, orderedBy
     , divs, tryDiv, fromList, Coefficient(..),ToWeightVector(..)
-    , leadingTerm, leadingMonomial, leadingOrderedMonomial, leadingCoeff, genVars, sDegree
+    , leadingTerm, leadingMonomial, leadingOrderedMonomial, leadingCoeff, genVars, sArity
     , OrderedMonomial(..), OrderedMonomial'(..), Grevlex(..)
     , Revlex(..), Lex(..), Grlex(..), Graded(..)
     , ProductOrder (..), WeightOrder(..)
@@ -31,7 +31,6 @@ import qualified Data.Map                as M
 import           Data.Maybe
 import           Data.Monoid
 import           Data.Ord
-import           Data.Proxy
 import           Data.Ratio
 import           Data.Type.Monomorphic
 import           Data.Type.Natural       hiding (max, one, promote, zero)
@@ -89,6 +88,9 @@ type MonomialOrder = forall n. Monomial n -> Monomial n -> Ordering
 totalDegree :: Monomial n -> Int
 totalDegree = V.foldl (+) 0
 {-# INLINE totalDegree #-}
+
+totalDegree' :: OrderedPolynomial k ord n -> Int
+totalDegree' = maximum . (0:) . map (totalDegree . snd) . getTerms
 
 -- | Lexicographical order. This *is* a monomial order.
 lex :: MonomialOrder
@@ -503,14 +505,14 @@ genVars sn =
         seed = cycle $ 1 : replicate (n - 1) 0
     in map (\m -> Polynomial $ M.singleton (OrderedMonomial $ fromList sn $ take n (drop (n-m) seed)) one) [0..n-1]
 
-sDegree :: OrderedPolynomial k ord n -> SNat n
-sDegree (Polynomial dic) = V.sLength $ getMonomial $ fst $ M.findMin dic
+sArity :: OrderedPolynomial k ord n -> SNat n
+sArity (Polynomial dic) = V.sLength $ getMonomial $ fst $ M.findMin dic
 {-# RULES
-"sDegree/zero" forall (v :: OrderedPolynomial k ord Z).                     sDegree v = SZ
-"sDegree/one" forall (v :: OrderedPolynomial k ord (S Z)).                  sDegree v = SS SZ
-"sDegree/two" forall (v :: OrderedPolynomial k ord (S (S Z))).              sDegree v = SS (SS SZ)
-"sDegree/three" forall (v :: OrderedPolynomial k ord (S (S (S Z)))).        sDegree v = SS (SS (sS SZ))
-"sDegree/four" forall (v :: OrderedPolynomial k ord (S (S (S (S Z))))).     sDegree v = SS (SS (SS (SS SZ)))
-"sDegree/five" forall (v :: OrderedPolynomial k ord (S (S (S (S (S Z)))))). sDegree v = SS (SS (SS (SS (SS SZ))))
-"sDegree/sing" forall (v :: SingRep n => OrderedPolynomial k ord n).           sDegree (v :: OrderedPolynomial k ord n) = sing :: SNat n
+"sArity/zero" forall (v :: OrderedPolynomial k ord Z).                     sArity v = SZ
+"sArity/one" forall (v :: OrderedPolynomial k ord (S Z)).                  sArity v = SS SZ
+"sArity/two" forall (v :: OrderedPolynomial k ord (S (S Z))).              sArity v = SS (SS SZ)
+"sArity/three" forall (v :: OrderedPolynomial k ord (S (S (S Z)))).        sArity v = SS (SS (sS SZ))
+"sArity/four" forall (v :: OrderedPolynomial k ord (S (S (S (S Z))))).     sArity v = SS (SS (SS (SS SZ)))
+"sArity/five" forall (v :: OrderedPolynomial k ord (S (S (S (S (S Z)))))). sArity v = SS (SS (SS (SS (SS SZ))))
+"sArity/sing" forall (v :: SingRep n => OrderedPolynomial k ord n).           sArity (v :: OrderedPolynomial k ord n) = sing :: SNat n
   #-}

@@ -1,7 +1,7 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances  #-}
-{-# LANGUAGE GADTs, MultiParamTypeClasses, NoImplicitPrelude                  #-}
-{-# LANGUAGE ParallelListComp, RankNTypes, ScopedTypeVariables                #-}
-{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies, TypeOperators #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
+{-# LANGUAGE GADTs, MultiParamTypeClasses, NoImplicitPrelude                 #-}
+{-# LANGUAGE ParallelListComp, RankNTypes, ScopedTypeVariables               #-}
+{-# LANGUAGE TemplateHaskell, TypeFamilies, TypeOperators                    #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Algebra.Algorithms.Groebner (
                                    -- * Polynomial division
@@ -20,6 +20,8 @@ module Algebra.Algorithms.Groebner (
                                    , unsafeThEliminationIdealWith
                                    , quotIdeal, quotByPrincipalIdeal
                                    , saturationIdeal, saturationByPrincipalIdeal
+                                   -- * Resultant
+                                   , resultant, hasCommonFactor
                                    ) where
 import           Algebra.Internal
 import           Algebra.Ring.Noetherian
@@ -33,15 +35,14 @@ import           Data.Function
 import qualified Data.Heap               as H
 import           Data.List
 import           Data.Maybe
-import           Data.Proxy
 import           Data.STRef
 import           Data.Type.Monomorphic
 import           Data.Type.Natural       hiding (max, one, zero)
 import           Data.Vector.Sized       hiding (all, drop, foldr, head, map,
                                           take, zipWith)
 import qualified Data.Vector.Sized       as V
-import           Numeric.Algebra
-import           Prelude                 hiding (Num (..), recip)
+import           Numeric.Algebra         hiding ((>))
+import           Prelude                 hiding (Num (..), recip, (^))
 import           Proof.Equational
 
 -- | Calculate a polynomial quotient and remainder w.r.t. second argument.
@@ -162,7 +163,7 @@ syzygyBuchbergerWithStrategy :: ( Field r, IsPolynomial r n, IsMonomialOrder ord
 syzygyBuchbergerWithStrategy strategy ideal = runST $ do
   let gens = zip [1..] $ generators ideal
   gs <- newSTRef $ H.fromList [H.Entry (leadingOrderedMonomial g) g | (_, g) <- gens]
-  b  <- newSTRef $ H.fromList $ [H.Entry (calcWeight' strategy f g, j) (f, g) | ((_, f), (j, g)) <- combinations gens]
+  b  <- newSTRef $ H.fromList [H.Entry (calcWeight' strategy f g, j) (f, g) | ((_, f), (j, g)) <- combinations gens]
   len <- newSTRef (genericLength gens :: Integer)
   whileM_ (not . H.null <$> readSTRef b) $ do
     Just (H.Entry _ (f, g), rest) <-  H.viewMin <$> readSTRef b
@@ -237,16 +238,15 @@ instance SelectionStrategy s => SelectionStrategy (SugarStrategy s) where
 minimizeGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                       => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
 minimizeGroebnerBasis bs = runST $ do
-  left  <- newSTRef bs
+  left  <- newSTRef $ map monoize $ filter (/= zero) bs
   right <- newSTRef []
   whileM_ (not . null <$> readSTRef left) $ do
     f : xs <- readSTRef left
     writeSTRef left xs
     ys     <- readSTRef right
-    if any (\g -> leadingMonomial g `divs` leadingMonomial f) xs ||
-       any (\g -> leadingMonomial g `divs` leadingMonomial f) ys
-      then writeSTRef right ys
-      else writeSTRef right (monoize f : ys)
+    unless (any (\g -> leadingMonomial g `divs` leadingMonomial f) xs
+         || any (\g -> leadingMonomial g `divs` leadingMonomial f) ys) $
+      writeSTRef right (f : ys)
   readSTRef right
 
 -- | Reduce minimum Groebner basis into reduced Groebner basis.
@@ -262,9 +262,6 @@ reduceMinimalGroebnerBasis bs = runST $ do
     let q = f `modPolynomial` (xs ++ ys)
     if q == zero then writeSTRef right ys else writeSTRef right (q : ys)
   readSTRef right
-
--- foldr step [] [f, g, h]
---  f `step` (g `step` (h `step` []))
 
 monoize :: (Field k, IsPolynomial k n, IsMonomialOrder order)
            => OrderedPolynomial k order n -> OrderedPolynomial k order n
@@ -381,7 +378,7 @@ saturationByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
                            => Ideal (OrderedPolynomial k ord n)
                            -> OrderedPolynomial k ord n -> Ideal (OrderedPolynomial k ord n)
 saturationByPrincipalIdeal is g =
-  case propToClassLeq $ leqSucc (sDegree g) of
+  case propToClassLeq $ leqSucc (sArity g) of
     LeqInstance -> thEliminationIdeal sOne $ addToIdeal (one - (castPolynomial g * var sOne)) (mapIdeal (shiftR sOne) is)
 
 -- | Saturation ideal
@@ -394,3 +391,25 @@ saturationIdeal i (Ideal g) =
     SingInstance ->
         case singInstance (sLength g %+ (sing :: SNat n)) of
           SingInstance -> intersection $ V.map (i `saturationByPrincipalIdeal`) g
+
+-- | Calculate resultant for given two unary polynomimals.
+resultant :: forall k ord . (Eq k, NoetherianRing k, Field k, IsMonomialOrder ord)
+          => OrderedPolynomial k ord One
+          -> OrderedPolynomial k ord One
+          -> k
+resultant = go one
+  where
+    go res h s
+        | totalDegree' s > 0     = let r = h `modPolynomial` [s]
+                                       res' = res * negate one ^ (totalDegree' h * totalDegree' s)
+                                                  * (leadingCoeff s) ^ (totalDegree' h - totalDegree' r)
+                                   in go res' s r
+        | h == zero || s == zero = zero
+        | totalDegree' h > 0     = (leadingCoeff s ^ totalDegree' h) * res
+        | otherwise              = res
+
+hasCommonFactor :: forall k ord . (NoetherianRing k, Eq k, Field k, IsMonomialOrder ord)
+                => OrderedPolynomial k ord One
+                -> OrderedPolynomial k ord One
+                -> Bool
+hasCommonFactor f g = resultant f g == zero
