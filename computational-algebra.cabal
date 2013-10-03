@@ -4,7 +4,7 @@
 name:                computational-algebra
 version:             0.3.0.0
 synopsis:            Well-kinded computational algebra library, currently supporting Groebner basis.
-description:         Dependently-typed computational algebra libray for Groebner basis.
+description:         Dependently-typed computational algebra library for Groebner basis.
 homepage:            https://github.com/konn/computational-algebra
 license:             BSD3
 license-file:        LICENSE
