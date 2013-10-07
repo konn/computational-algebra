@@ -1,17 +1,15 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE FlexibleContexts, QuasiQuotes, TemplateHaskell #-}
 module Algebra.Ring.Polynomial.Parser ( monomial, expression, variable, variableWithPower
                                       , number, integer, natural, parsePolyn) where
 import           Algebra.Ring.Polynomial.Monomorphic
 import           Control.Applicative                 hiding (many)
 import qualified Data.Map                            as M
 import           Data.Ratio
-import qualified Numeric.Algebra as NA
 import           Text.Peggy
 
 [peggy|
 expression :: Polynomial Rational
-  = expr !.
+  = space* e:expr space*  !. { e }
 
 letter :: Char
   = [a-zA-Z]
@@ -42,7 +40,7 @@ fact :: Polynomial Rational
   / "(" expr ")"
   / monomial { toPolyn [($1, 1)] }
 
-monomial :: Monomial
+monomial ::: Monomial
   = variableWithPower+ { M.fromListWith (+) $1 }
 
 number :: Rational
@@ -57,6 +55,9 @@ integer :: Integer
 natural :: Integer
   = [1-9] [0-9]* { read ($1 : $2) }
 
+delimiter :: ()
+  = [()^+] { () }
+  / '-' ![0-9] {()}
 |]
 
 toPolyn :: [(Monomial, Ratio Integer)] -> Polynomial (Ratio Integer)
