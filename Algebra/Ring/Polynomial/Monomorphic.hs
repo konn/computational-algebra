@@ -72,6 +72,12 @@ instance (Eq r, NoetherianRing r) => NA.Abelian (Polynomial r)
 instance (Eq r, NoetherianRing r) => NA.Additive (Polynomial r) where
   (Polynomial f) + (Polynomial g) = normalize $ Polynomial $ M.unionWith (NA.+) f g
 
+instance (NoetherianRing r, Eq r) => NA.LeftModule r (Polynomial r) where
+  r .* Polynomial dic = normalize $ Polynomial $ fmap (r NA.*) dic
+instance (NoetherianRing r, Eq r) => NA.RightModule r (Polynomial r) where
+  Polynomial dic *. r = normalize $ Polynomial $ fmap (r NA.*) dic
+
+
 buildVarsList :: Polynomial r -> [Variable]
 buildVarsList = nub . sort . concatMap M.keys . M.keys . unPolynomial
 
@@ -200,3 +206,8 @@ injectVar var = Polynomial $ M.singleton (M.singleton var 1) NA.one
 
 injectCoeff :: r -> Polynomial r
 injectCoeff c = Polynomial $ M.singleton M.empty c
+
+subst :: (NA.Module r a, NA.Ring a, NA.Ring r) =>  M.Map Variable a -> Polynomial r -> a
+subst assign poly = NA.sum $ map (uncurry (NA.*.) . first extractPower) $ M.toList $ unPolynomial poly
+  where
+    extractPower = NA.product . map (uncurry NA.pow) . map (flip (M.findWithDefault NA.zero) assign *** (fromInteger :: Integer -> NA.Natural)) . M.toList

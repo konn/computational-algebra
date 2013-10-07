@@ -81,6 +81,12 @@ instance Integral n => Multiplicative (Ratio n) where
   (*) = (P.*)
   pow1p r n = r ^^ (n P.+ 1)
 
+instance Integral n => LeftModule (Ratio n) (Ratio n) where
+    (.*) = (*)
+
+instance Integral n => RightModule (Ratio n) (Ratio n) where
+    (*.) = (*)
+
 data Ideal r = forall n. Ideal (V.Vector r n)
 
 instance Eq r => Eq (Ideal r) where

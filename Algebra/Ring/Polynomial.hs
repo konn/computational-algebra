@@ -1,3 +1,4 @@
+{-# LANGUAGE IncoherentInstances #-}
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, LiberalTypeSynonyms          #-}
@@ -18,12 +19,12 @@ module Algebra.Ring.Polynomial
     , leadingTerm, leadingMonomial, leadingOrderedMonomial, leadingCoeff, genVars, sArity
     , OrderedMonomial(..), OrderedMonomial'(..), Grevlex(..)
     , Revlex(..), Lex(..), Grlex(..), Graded(..)
-    , ProductOrder (..), WeightOrder(..)
+    , ProductOrder (..), WeightOrder(..), subst
     , IsOrder(..), IsMonomialOrder)  where
 import           Algebra.Internal
 import           Algebra.Ring.Noetherian
 import           Control.Arrow
-import           Control.Lens
+import           Control.Lens hiding     (assign)
 import           Data.Function
 import           Data.List               (intercalate)
 import           Data.Map                (Map)
@@ -36,9 +37,9 @@ import           Data.Type.Monomorphic
 import           Data.Type.Natural       hiding (max, one, promote, zero)
 import           Data.Vector.Sized       (Vector (..))
 import qualified Data.Vector.Sized       as V
-import           Numeric.Algebra         hiding (Order (..), sum)
+import           Numeric.Algebra         hiding (Order (..))
 import           Prelude                 hiding (lex, negate, recip, (*), (+),
-                                          (-), (^), (^^))
+                                          (-), (^), (^^), sum)
 import qualified Prelude                 as P
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i.
@@ -345,6 +346,10 @@ instance (IsOrder order, IsPolynomial r n) => Multiplicative (OrderedPolynomial 
 instance (IsOrder order, IsPolynomial r n) => Semiring (OrderedPolynomial r order n) where
 instance (IsOrder order, IsPolynomial r n) => Commutative (OrderedPolynomial r order n) where
 instance (IsOrder order, IsPolynomial r n) => Abelian (OrderedPolynomial r order n) where
+instance (IsOrder order, IsPolynomial r n) => LeftModule r (OrderedPolynomial r order n) where
+  r .* Polynomial dic = normalize $ Polynomial $ fmap (r*) dic
+instance (IsOrder order, IsPolynomial r n) => RightModule r (OrderedPolynomial r order n) where
+  Polynomial dic *. r = normalize $ Polynomial $ fmap (r*) dic
 
 instance (Eq r, IsPolynomial r n, IsOrder order, Show r) => Show (OrderedPolynomial r order n) where
   show = showPolynomialWithVars [(n, "X_"++ show n) | n <- [1..]]
@@ -466,6 +471,11 @@ tryDiv (a, f) (b, g)
 
 lcmMonomial :: Monomial n -> Monomial n -> Monomial n
 lcmMonomial = V.zipWithSame max
+
+subst :: (Module r a, Ring a, Ring r, SingRep n) => Vector a n -> OrderedPolynomial r order n -> a
+subst assign poly = sum $ map (uncurry (.*) . second extractPower) $ getTerms poly
+  where
+    extractPower = V.foldr (*) one . V.zipWithSame pow assign . V.map (fromIntegral :: Int -> Natural)
 
 sPolynomial :: (IsPolynomial k n, Field k, IsOrder order)
             => OrderedPolynomial k order n
