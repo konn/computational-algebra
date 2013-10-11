@@ -9,11 +9,13 @@ import           Control.Arrow
 import           Data.List
 import qualified Data.Map                as M
 import           Data.Maybe
-import Data.Type.Natural hiding (one, zero, promote)
+import Data.Type.Natural hiding (one, zero, promote, max)
 import           Data.Type.Monomorphic
 import qualified Numeric.Algebra         as NA
+import qualified Numeric.Ring.Class      as NA
 import           Data.Ratio
 import qualified Data.Vector.Sized as V
+import Control.Lens
 
 data Variable = Variable { varName  :: Char
                          , varIndex :: Maybe Int
@@ -36,6 +38,9 @@ type Monomial = M.Map Variable Integer
 
 newtype Polynomial k = Polynomial { unPolynomial :: M.Map Monomial k }
     deriving (Eq, Ord)
+
+instance (NA.Monoidal r, Eq r) => Wrapped (M.Map Monomial r) (M.Map Monomial r') (Polynomial r) (Polynomial r') where
+  wrapped = iso (normalize . Polynomial) unPolynomial
 
 normalize :: (Eq k, NA.Monoidal k) => Polynomial k -> Polynomial k
 normalize (Polynomial dic) =
@@ -211,3 +216,7 @@ subst :: (NA.Module r a, NA.Ring a, NA.Ring r) =>  M.Map Variable a -> Polynomia
 subst assign poly = NA.sum $ map (uncurry (NA.*.) . first extractPower) $ M.toList $ unPolynomial poly
   where
     extractPower = NA.product . map (uncurry NA.pow) . map (flip (M.findWithDefault NA.zero) assign *** (fromInteger :: Integer -> NA.Natural)) . M.toList
+
+diff :: (Eq r, NA.Ring r) => Variable -> Polynomial r -> Polynomial r
+diff var = unwrapped %~ M.mapKeysWith (NA.+) (at var._Just %~ max 0 . pred)
+                      . M.mapWithKey (\k v -> v NA.* NA.fromIntegral (M.findWithDefault NA.zero var k))
