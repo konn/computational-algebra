@@ -1,10 +1,8 @@
-{-# LANGUAGE IncoherentInstances #-}
-{-# LANGUAGE ViewPatterns #-}
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
-{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, LiberalTypeSynonyms          #-}
-{-# LANGUAGE MultiParamTypeClasses, OverlappingInstances, PolyKinds          #-}
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, StandaloneDeriving             #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances               #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances  #-}
+{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, IncoherentInstances           #-}
+{-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, OverlappingInstances #-}
+{-# LANGUAGE PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving   #-}
+{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances, ViewPatterns  #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults                    #-}
 module Algebra.Ring.Polynomial
     ( Polynomial, Monomial, MonomialOrder, EliminationType, EliminationOrder
@@ -19,12 +17,12 @@ module Algebra.Ring.Polynomial
     , leadingTerm, leadingMonomial, leadingOrderedMonomial, leadingCoeff, genVars, sArity
     , OrderedMonomial(..), OrderedMonomial'(..), Grevlex(..)
     , Revlex(..), Lex(..), Grlex(..), Graded(..)
-    , ProductOrder (..), WeightOrder(..), subst
+    , ProductOrder (..), WeightOrder(..), subst, diff
     , IsOrder(..), IsMonomialOrder)  where
 import           Algebra.Internal
 import           Algebra.Ring.Noetherian
 import           Control.Arrow
-import           Control.Lens hiding     (assign)
+import           Control.Lens            hiding (assign)
 import           Data.Function
 import           Data.List               (intercalate)
 import           Data.Map                (Map)
@@ -37,9 +35,10 @@ import           Data.Type.Monomorphic
 import           Data.Type.Natural       hiding (max, one, promote, zero)
 import           Data.Vector.Sized       (Vector (..))
 import qualified Data.Vector.Sized       as V
+import qualified Numeric.Ring.Class as   NA
 import           Numeric.Algebra         hiding (Order (..))
-import           Prelude                 hiding (lex, negate, recip, (*), (+),
-                                          (-), (^), (^^), sum)
+import           Prelude                 hiding (lex, negate, recip, sum, (*),
+                                          (+), (-), (^), (^^))
 import qualified Prelude                 as P
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i.
@@ -355,7 +354,7 @@ instance (Eq r, IsPolynomial r n, IsOrder order, Show r) => Show (OrderedPolynom
   show = showPolynomialWithVars [(n, "X_"++ show n) | n <- [1..]]
 
 instance (SingRep n, IsOrder order) => Show (OrderedPolynomial Rational order n) where
-  show = showPolynomialWith [(n, "X_"++ show n) | n <- [1..]] showRational
+  show = showPolynomialWith [(n, "X_"++ show n) | n <- [0..]] showRational
 
 showPolynomialWithVars :: (Eq a, Show a, SingRep n, NoetherianRing a, IsOrder ordering)
                        => [(Int, String)] -> OrderedPolynomial a ordering n -> String
@@ -371,7 +370,7 @@ showPolynomialWithVars dic p0@(Polynomial d)
                          else if (c /= one || isConstantMonomial deg)
                               then show c ++ " "
                               else ""
-              in Just $ cstr ++ unwords (mapMaybe showDeg (zip [1..] $ V.toList deg))
+              in Just $ cstr ++ unwords (mapMaybe showDeg (zip [0..] $ V.toList deg))
       showDeg (n, p) | p == 0    = Nothing
                      | p == 1    = Just $ showVar n
                      | otherwise = Just $ showVar n ++ "^" ++ show p
@@ -409,7 +408,7 @@ showPolynomialWith vDic showCoeff p0@(Polynomial d)
                       | c == one = Positive ""
                       | c == negate one = Negative ""
                       | otherwise                                 = cKind
-              in Just $ (cff, unwords (mapMaybe showDeg (zip [1..] $ V.toList deg)))
+              in Just $ (cff, unwords (mapMaybe showDeg (zip [0..] $ V.toList deg)))
       showDeg (n, p) | p == 0    = Nothing
                      | p == 1    = Just $ showVar n
                      | otherwise = Just $ showVar n ++ "^" ++ show p
@@ -476,6 +475,19 @@ subst :: (Module r a, Ring a, Ring r, SingRep n) => Vector a n -> OrderedPolynom
 subst assign poly = sum $ map (uncurry (.*) . second extractPower) $ getTerms poly
   where
     extractPower = V.foldr (*) one . V.zipWithSame pow assign . V.map (fromIntegral :: Int -> Natural)
+
+-- | Partially difference at (m+1)-th variable
+diff :: forall n m ord r. (Ring r, SingRep n, IsMonomialOrder ord, SingRep m, (m :<<= n) ~ True)
+     => SNat m -> OrderedPolynomial r ord (S n) -> OrderedPolynomial r ord (S n)
+diff mthVar = unwrapped %~ M.mapKeysWith (+) (unwrapped %~ dropDegree)
+                         . M.mapWithKey (\k c -> c * NA.fromIntegral (V.index mthVar (getMonomial k)))
+                         . M.filterWithKey (\k -> const $ V.index mthVar (getMonomial k) > 0)
+  where
+    dropDegree = updateNth mthVar (max 0 . pred)
+
+updateNth :: (m :<<= n) ~ True => SNat m -> (a -> a) -> Vector a (S n) -> Vector a (S n)
+updateNth SZ     f (a :- as) = f a :- as
+updateNth (SS n) f (a :- b :- bs) = a :- updateNth n f (b :- bs)
 
 sPolynomial :: (IsPolynomial k n, Field k, IsOrder order)
             => OrderedPolynomial k order n
