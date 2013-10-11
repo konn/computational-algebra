@@ -37,7 +37,7 @@ library
                ,       monad-loops           >= 0.3 && <0.5
                ,       heaps                 == 0.2.*
                ,       type-natural          == 0.0.3.*
-               ,       sized-vector          == 0.0.*
+               ,       sized-vector          >= 0.0.2.5 && < 0.1
                ,       singletons            >= 0.8
                ,       equational-reasoning  == 0.0.*
   if impl(ghc >= 7.6.1)
