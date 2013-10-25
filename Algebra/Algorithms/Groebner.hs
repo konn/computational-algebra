@@ -6,6 +6,7 @@
 module Algebra.Algorithms.Groebner (
                                    -- * Polynomial division
                                      divModPolynomial, divPolynomial, modPolynomial
+                                   , lcmPolynomial, gcdPolynomial
                                    -- * Groebner basis
                                    , calcGroebnerBasis, calcGroebnerBasisWith, calcGroebnerBasisWithStrategy
                                    , buchberger, syzygyBuchberger
@@ -161,7 +162,7 @@ syzygyBuchbergerWithStrategy :: ( Field r, IsPolynomial r n, IsMonomialOrder ord
                         , Ord (Weight strategy order))
                     => strategy -> Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
 syzygyBuchbergerWithStrategy strategy ideal = runST $ do
-  let gens = zip [1..] $ generators ideal
+  let gens = zip [1..] $ filter (/= zero) $ generators ideal
   gs <- newSTRef $ H.fromList [H.Entry (leadingOrderedMonomial g) g | (_, g) <- gens]
   b  <- newSTRef $ H.fromList [H.Entry (calcWeight' strategy f g, j) (f, g) | ((_, f), (j, g)) <- combinations gens]
   len <- newSTRef (genericLength gens :: Integer)
@@ -408,8 +409,22 @@ resultant = go one
         | totalDegree' h > 0     = (leadingCoeff s ^ totalDegree' h) * res
         | otherwise              = res
 
+
+-- | Determine whether two polynomials have a common factor with positive degree using resultant.
 hasCommonFactor :: forall k ord . (NoetherianRing k, Eq k, Field k, IsMonomialOrder ord)
                 => OrderedPolynomial k ord One
                 -> OrderedPolynomial k ord One
                 -> Bool
 hasCommonFactor f g = resultant f g == zero
+
+lcmPolynomial :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
+              => OrderedPolynomial k ord n
+              -> OrderedPolynomial k ord n
+              -> OrderedPolynomial k ord n
+lcmPolynomial f g = head $ generators $ intersection (principalIdeal f :- principalIdeal g :- Nil)
+
+gcdPolynomial :: (IsPolynomial r n, Field r, IsMonomialOrder order)
+              => OrderedPolynomial r order n -> OrderedPolynomial r order n
+              -> OrderedPolynomial r order n
+gcdPolynomial f g = snd $ head $ f * g `divPolynomial` [lcmPolynomial f g]
+
