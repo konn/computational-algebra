@@ -279,6 +279,9 @@ instance (Eq (Monomial n), IsOrder name) => Ord (OrderedMonomial name n) where
 instance (Eq (Monomial n)) => Ord (Monomial n) where
   compare = grevlex
 
+deriving instance (SingRep n, IsOrder ord, NoetherianRing r, Ord r, Ord (OrderedMonomial ord n))
+               => Ord (OrderedPolynomial r ord n)
+
 -- | n-ary polynomial ring over some noetherian ring R.
 newtype OrderedPolynomial r order n = Polynomial { terms :: Map (OrderedMonomial order n) r }
 type Polynomial r = OrderedPolynomial r Grevlex
