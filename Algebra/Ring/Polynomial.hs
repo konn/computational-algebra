@@ -428,11 +428,11 @@ instance (IsMonomialOrder order, IsPolynomial r n, Num r) => Num (OrderedPolynom
   abs = id
   negate = ((P.negate 1 :: Integer) .*)
 
-varX :: (NoetherianRing r, SingRep n, One :<= n) => OrderedPolynomial r order n
-varX = Polynomial $ M.singleton (OrderedMonomial $ fromList sing [1]) one
+varX :: (Eq r, NoetherianRing r, SingRep n, IsOrder order, One :<= n) => OrderedPolynomial r order n
+varX = polynomial $ M.singleton (OrderedMonomial $ fromList sing [1]) one
 
-var :: (NoetherianRing r, SingRep m, S n :<= m) => SNat (S n) -> OrderedPolynomial r order m
-var vIndex = Polynomial $ M.singleton (OrderedMonomial $ fromList sing (buildIndex vIndex)) one
+var :: (Eq r, NoetherianRing r, SingRep m, IsOrder order, S n :<= m) => SNat (S n) -> OrderedPolynomial r order m
+var vIndex = polynomial $ M.singleton (OrderedMonomial $ fromList sing (buildIndex vIndex)) one
 
 toPolynomial :: (IsOrder order, IsPolynomial r n) => (r, Monomial n) -> OrderedPolynomial r order n
 toPolynomial (c, deg) = polynomial $ M.singleton (OrderedMonomial deg) c
