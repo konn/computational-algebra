@@ -1,12 +1,18 @@
 {-# LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses, StandaloneDeriving    #-}
-module Algebra.Scalar (Scalar(..)) where
+module Algebra.Scalar (Scalar(..), (.*.)) where
 import Algebra.Ring.Noetherian
 import Numeric.Algebra
 
 newtype Scalar r = Scalar { runScalar :: r }
     deriving (Read, Show, Eq, Ord, Additive, Num, Integral, Real, Enum
              ,Multiplicative, Unital)
+
+(.*.) :: (RightModule (Scalar r) m, LeftModule (Scalar r) m)
+      => r -> m -> m
+r .*. f = Scalar r .* f
+
+infixl 7 .*.
 
 deriving instance Monoidal r => Monoidal (Scalar r)
 deriving instance Group r => Group (Scalar r)
