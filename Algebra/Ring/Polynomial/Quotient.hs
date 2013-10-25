@@ -3,6 +3,7 @@
 {-# LANGUAGE UndecidableInstances                                            #-}
 module Algebra.Ring.Polynomial.Quotient ( Quotient(), reifyQuotient, modIdeal
                                         , modIdeal', quotRepr, withQuotient
+                                        , genQuotVars, genQuotVars'
                                         , standardMonomials, standardMonomials') where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Ring.Noetherian
@@ -46,6 +47,14 @@ standardMonomials' pxy = do
 standardMonomials :: forall ideal r n. (Reifies ideal [Polynomial r n], IsPolynomial r n, Field r)
                   => Maybe [Quotient r n ideal]
 standardMonomials = standardMonomials' (Proxy :: Proxy ideal)
+
+genQuotVars' :: forall n ideal r. (Reifies ideal [Polynomial r (S n)], IsPolynomial r (S n), Field r)
+             => Proxy ideal -> [Quotient r (S n) ideal]
+genQuotVars' pxy = map (modIdeal' pxy) $ genVars (sing :: SNat (S n))
+
+genQuotVars :: forall n ideal r. (Reifies ideal [Polynomial r (S n)], IsPolynomial r (S n), Field r)
+             => [Quotient r (S n) ideal]
+genQuotVars = genQuotVars' (Proxy :: Proxy ideal)
 
 minimum' :: Ord a => [a] -> Maybe a
 minimum' [] = Nothing
@@ -100,6 +109,8 @@ instance (Reifies ideal [Polynomial r n], IsPolynomial r n, Field r) => LeftModu
 instance (Reifies ideal [Polynomial r n], IsPolynomial r n, Field r) => RightModule Integer (Quotient r n ideal) where
   f *. n = modIdeal $ quotRepr_ f *. n
 instance (Reifies ideal [Polynomial r n], IsPolynomial r n, Field r) => Group (Quotient r n ideal) where
+  negate f = Quotient $ negate $ quotRepr_ f
+  f - g    = Quotient $ quotRepr_ f - quotRepr_ g
 instance (Reifies ideal [Polynomial r n], IsPolynomial r n, Field r) => Abelian (Quotient r n ideal) where
 instance (Reifies ideal [Polynomial r n], IsPolynomial r n, Field r) => Multiplicative (Quotient r n ideal) where
   f * g = modIdeal $ quotRepr_ f * quotRepr_ g
