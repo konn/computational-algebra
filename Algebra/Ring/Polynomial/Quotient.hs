@@ -4,7 +4,8 @@
 module Algebra.Ring.Polynomial.Quotient ( Quotient(), reifyQuotient, modIdeal
                                         , modIdeal', quotRepr, withQuotient
                                         , genQuotVars, genQuotVars'
-                                        , standardMonomials, standardMonomials') where
+                                        , standardMonomials, standardMonomials'
+                                        , reduce) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
@@ -136,3 +137,8 @@ instance (IsMonomialOrder ord, Num r, Reifies ideal [OrderedPolynomial r ord n],
   signum = modIdeal . signum . quotRepr_
   abs    = id
   negate = modIdeal . negate . quotRepr_
+
+-- | Reduce polynomial modulo ideal.
+reduce :: (Eq r, Division r, SingRep n, NoetherianRing r, IsMonomialOrder ord)
+       => OrderedPolynomial r ord n -> Ideal (OrderedPolynomial r ord n) -> OrderedPolynomial r ord n
+reduce f i = withQuotient i $ modIdeal f
