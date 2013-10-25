@@ -98,10 +98,12 @@ instance Ord r => Ord (Ideal r) where
 instance Show r => Show (Ideal r) where
   show = show . generators
 
-addToIdeal :: r -> Ideal r -> Ideal r
-addToIdeal i (Ideal is) = Ideal (i :- is)
+addToIdeal :: (Monoidal r, Eq r) => r -> Ideal r -> Ideal r
+addToIdeal i (Ideal is)
+    | i == zero = Ideal is
+    | otherwise = Ideal (i :- is)
 
-toIdeal :: NoetherianRing r => [r] -> Ideal r
+toIdeal :: (Eq r, NoetherianRing r) => [r] -> Ideal r
 toIdeal = foldr addToIdeal (Ideal Nil)
 
 appendIdeal :: Ideal r -> Ideal r -> Ideal r
@@ -110,7 +112,7 @@ appendIdeal (Ideal is) (Ideal js) = Ideal (is `V.append` js)
 generators :: Ideal r -> [r]
 generators (Ideal is) = V.toList is
 
-filterIdeal :: NoetherianRing r => (r -> Bool) -> Ideal r -> Ideal r
+filterIdeal :: (Eq r, NoetherianRing r) => (r -> Bool) -> Ideal r -> Ideal r
 filterIdeal p (Ideal i) = V.foldr (\h -> if p h then addToIdeal h else id) (toIdeal []) i
 
 principalIdeal :: r -> Ideal r
