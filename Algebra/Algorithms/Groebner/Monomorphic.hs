@@ -1,7 +1,7 @@
 {-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
-{-# LANGUAGE IncoherentInstances, OverlappingInstances, PolyKinds        #-}
-{-# LANGUAGE RecordWildCards, ScopedTypeVariables, TypeFamilies          #-}
-{-# LANGUAGE TypeOperators, UndecidableInstances                         #-}
+{-# LANGUAGE OverlappingInstances, PolyKinds, RecordWildCards            #-}
+{-# LANGUAGE ScopedTypeVariables, TypeFamilies, TypeOperators            #-}
+{-# LANGUAGE UndecidableInstances                                        #-}
 -- | Monomorphic interface for Groenber basis.
 module Algebra.Algorithms.Groebner.Monomorphic
     ( Groebnerable

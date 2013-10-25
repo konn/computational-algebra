@@ -1,5 +1,5 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances  #-}
-{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, IncoherentInstances           #-}
+{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving                                #-}
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, OverlappingInstances #-}
 {-# LANGUAGE PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving   #-}
 {-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances, ViewPatterns  #-}
@@ -21,6 +21,7 @@ module Algebra.Ring.Polynomial
     , IsOrder(..), IsMonomialOrder)  where
 import           Algebra.Internal
 import           Algebra.Ring.Noetherian
+import           Algebra.Scalar
 import           Control.Arrow
 import           Control.Lens            hiding (assign)
 import           Data.Function
@@ -345,10 +346,10 @@ instance (IsOrder order, IsPolynomial r n) => Multiplicative (OrderedPolynomial 
 instance (IsOrder order, IsPolynomial r n) => Semiring (OrderedPolynomial r order n) where
 instance (IsOrder order, IsPolynomial r n) => Commutative (OrderedPolynomial r order n) where
 instance (IsOrder order, IsPolynomial r n) => Abelian (OrderedPolynomial r order n) where
-instance (IsOrder order, IsPolynomial r n) => LeftModule r (OrderedPolynomial r order n) where
-  r .* Polynomial dic = normalize $ Polynomial $ fmap (r*) dic
-instance (IsOrder order, IsPolynomial r n) => RightModule r (OrderedPolynomial r order n) where
-  Polynomial dic *. r = normalize $ Polynomial $ fmap (r*) dic
+instance (IsOrder order, IsPolynomial r n) => LeftModule (Scalar r) (OrderedPolynomial r order n) where
+  Scalar r .* Polynomial dic = normalize $ Polynomial $ fmap (r*) dic
+instance (IsOrder order, IsPolynomial r n) => RightModule (Scalar r) (OrderedPolynomial r order n) where
+  Polynomial dic *. Scalar r = normalize $ Polynomial $ fmap (r*) dic
 
 instance (Eq r, IsPolynomial r n, IsOrder order, Show r) => Show (OrderedPolynomial r order n) where
   show = showPolynomialWithVars [(n, "X_"++ show n) | n <- [0..]]

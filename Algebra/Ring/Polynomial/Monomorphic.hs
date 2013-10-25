@@ -4,6 +4,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans                             #-}
 module Algebra.Ring.Polynomial.Monomorphic where
 import           Algebra.Ring.Noetherian
+import           Algebra.Scalar
 import qualified Algebra.Ring.Polynomial as Poly
 import           Control.Arrow
 import           Data.List
@@ -77,11 +78,10 @@ instance (Eq r, NoetherianRing r) => NA.Abelian (Polynomial r)
 instance (Eq r, NoetherianRing r) => NA.Additive (Polynomial r) where
   (Polynomial f) + (Polynomial g) = normalize $ Polynomial $ M.unionWith (NA.+) f g
 
-instance (NoetherianRing r, Eq r) => NA.LeftModule r (Polynomial r) where
-  r .* Polynomial dic = normalize $ Polynomial $ fmap (r NA.*) dic
-instance (NoetherianRing r, Eq r) => NA.RightModule r (Polynomial r) where
-  Polynomial dic *. r = normalize $ Polynomial $ fmap (r NA.*) dic
-
+instance (NoetherianRing r, Eq r) => NA.LeftModule (Scalar r) (Polynomial r) where
+  Scalar r .* Polynomial dic = normalize $ Polynomial $ fmap (r NA.*) dic
+instance (NoetherianRing r, Eq r) => NA.RightModule (Scalar r) (Polynomial r) where
+  Polynomial dic *. Scalar r = normalize $ Polynomial $ fmap (r NA.*) dic
 
 buildVarsList :: Polynomial r -> [Variable]
 buildVarsList = nub . sort . concatMap M.keys . M.keys . unPolynomial
