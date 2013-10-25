@@ -5,13 +5,14 @@ module Algebra.Ring.Polynomial.Quotient ( Quotient(), reifyQuotient, modIdeal
                                         , modIdeal', quotRepr, withQuotient
                                         , genQuotVars, genQuotVars'
                                         , standardMonomials, standardMonomials'
-                                        , reduce, multWithTable) where
+                                        , reduce, multWithTable, isZeroDimensional) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
 import           Control.Applicative
 import qualified Data.Map                    as M
+import           Data.Maybe
 import           Data.Proxy
 import           Data.Reflection
 import           Data.Type.Natural           hiding (one, zero)
@@ -55,13 +56,14 @@ buildMultTable bs ms =
     M.fromList [ ((p, q), (toPolynomial (one, p) * toPolynomial (one, q)) `modPolynomial` bs)
                | p <- ms, q <- ms]
 
-stdMonoms :: (IsMonomialOrder ord, IsPolynomial r n, Field r) => [OrderedPolynomial r ord n] -> Maybe [Monomial n]
+stdMonoms :: forall r n ord. (IsMonomialOrder ord, IsPolynomial r n, Field r) => [OrderedPolynomial r ord n] -> Maybe [Monomial n]
 stdMonoms basis = do
-  let lms = map leadingMonomial basis
-      dim = sLength $ head lms
+  let lms = map leadingTerm basis
+      dim = sing :: SNat n
       tests = zip (diag 1 0 dim) (diag 0 1 dim)
       mexp (val, test) = [ V.foldr (+) 0 $ V.zipWith (*) val lm0
-                         | lm0 <- lms, let a = V.foldr (+) 0 $ V.zipWith (*) lm0 test, a == 0
+                         | (c, lm0) <- lms, c /= zero
+                         , let a = V.foldr (+) 0 $ V.zipWith (*) lm0 test, a == 0
                          ]
   degs <- mapM (minimum' . mexp) tests
   return [ monom | ds0 <- sequence $ map (enumFromTo 0) degs
@@ -184,3 +186,6 @@ instance (IsMonomialOrder ord, Num r, Reifies ideal (QIdeal r ord n), IsPolynomi
 reduce :: (Eq r, Division r, SingRep n, NoetherianRing r, IsMonomialOrder ord)
        => OrderedPolynomial r ord n -> Ideal (OrderedPolynomial r ord n) -> OrderedPolynomial r ord n
 reduce f i = withQuotient i $ modIdeal f
+
+isZeroDimensional :: (Eq r, Division r, SingRep n, NoetherianRing r, IsMonomialOrder ord) => [OrderedPolynomial r ord n] -> Bool
+isZeroDimensional ii = isJust $ stdMonoms ii
