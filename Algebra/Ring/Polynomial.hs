@@ -435,7 +435,7 @@ var :: (NoetherianRing r, SingRep m, S n :<= m) => SNat (S n) -> OrderedPolynomi
 var vIndex = Polynomial $ M.singleton (OrderedMonomial $ fromList sing (buildIndex vIndex)) one
 
 toPolynomial :: (IsOrder order, IsPolynomial r n) => (r, Monomial n) -> OrderedPolynomial r order n
-toPolynomial (c, deg) = Polynomial $ M.singleton (OrderedMonomial deg) c
+toPolynomial (c, deg) = polynomial $ M.singleton (OrderedMonomial deg) c
 
 polynomial :: (SingRep n, Eq r, NoetherianRing r, IsOrder order) => Map (OrderedMonomial order n) r -> OrderedPolynomial r order n
 polynomial dic = normalize $ Polynomial dic
