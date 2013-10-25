@@ -103,6 +103,8 @@ addToIdeal i (Ideal is)
     | i == zero = Ideal is
     | otherwise = Ideal (i :- is)
 
+infixr `addToIdeal`
+
 toIdeal :: (Eq r, NoetherianRing r) => [r] -> Ideal r
 toIdeal = foldr addToIdeal (Ideal Nil)
 
