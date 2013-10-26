@@ -7,8 +7,10 @@ import           Algebra.Algorithms.Groebner
 import           Algebra.Internal
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
+import           Algebra.Ring.Polynomial.Quotient
 import           Data.Ratio
-import qualified Numeric.Algebra             as NA
+import           Data.Type.Natural
+import qualified Numeric.Algebra                  as NA
 
 u, v, x, y, z :: Polynomial Rational (S (S Three))
 [u, v, x, y, z] = genVars (sS (sS sThree))
@@ -33,5 +35,6 @@ parse = fromRight . parsePolyn
 -}
 
 main :: IO ()
-main = print $ thEliminationIdealWith (eliminationOrder sTwo) sTwo $
-         toIdeal [x - (3*u + 3*u*v^2 - u^3), y - (3*v + 3*u^2*v -  v^3), z - (3*u^2 - 3*v^2)]
+main = do
+  print $ thEliminationIdealWith (eliminationOrder sTwo) sTwo $
+        toIdeal [x - (3*u + 3*u*v^2 - u^3), y - (3*v + 3*u^2*v -  v^3), z - (3*u^2 - 3*v^2)]
