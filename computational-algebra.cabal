@@ -70,12 +70,16 @@ Test-Suite test-main
                ,        algebra
                ,        transformers
 
-Benchmark bench
+Benchmark normal-bench
   type:                 exitcode-stdio-1.0
   hs-source-dirs:       . bench
   ghc-options:          -O2 -threaded
   main-is:              bench.hs
+  other-modules:        SingularBench
   build-depends:        computational-algebra
                ,        base
                ,        deepseq
                ,        criterion
+               ,        process
+               ,        text
+               ,        containers

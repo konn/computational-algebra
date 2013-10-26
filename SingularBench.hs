@@ -15,7 +15,6 @@ import           Data.List
 import qualified Data.Map                                as M
 import qualified Data.Text                               as T
 import           System.Process
-import           Text.Shakespeare.Text
 
 formatPoly :: Polynomial Rational -> String
 formatPoly (Polynomial dic) = intercalate "+" $
@@ -67,13 +66,16 @@ instance (ToWeightVector vec, SingularRep ord) => SingularRep (WeightOrder vec o
 type Ideal = [Polynomial Rational]
 
 skeleton :: SingularRep ord => ord -> [Polynomial Rational] -> String
-skeleton ord ideal = T.unpack [st|
-LIB "poly.lib";
-ring R = 0,(#{intercalate "," $ map show $ nub $ sort $ concatMap buildVarsList ideal}),#{singularRep ord};
-ideal I = #{formatIdeal ideal};
-std(I);
-quit;
-|]
-
+skeleton ord ideal =
+    unlines [ "LIB \"poly.lib\";"
+            , concat ["ring R = 0,("
+                     ,intercalate "," (map show $ nub $ sort $ concatMap buildVarsList ideal)
+                     , "),"
+                     , singularRep ord, ";"]
+            , "ideal I =" <> formatIdeal ideal <> ";"
+            , "std(I);"
+            , "quit;"
+            ]
 singularWith :: SingularRep ord => ord -> Ideal -> IO String
 singularWith = (readProcess "singular" [] .) . skeleton
+
