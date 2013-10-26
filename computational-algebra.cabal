@@ -12,7 +12,7 @@ author:              Hiromi ISHII
 maintainer:          konn.jinro_at_gmail.com
 copyright:           (C) Hiromi ISHII 2013
 category:            Math
-extra-source-files:  README.md, examples/*.hs, tests/*.hs, bench/*.hs
+extra-source-files:  README.md, examples/*.hs, tests/*.hs, bench/*.hs, share/*.hs
 build-type:          Simple
 cabal-version:       >=1.8
 source-repository head
