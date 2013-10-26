@@ -44,10 +44,11 @@ library
                ,       reflection            == 1.3.*
                ,       monomorphic           == 0.0.*
 
-Test-Suite test-main
+Test-Suite test-multi-table
+  buildable:            False
   type:                 exitcode-stdio-1.0
-  main-is:              properties.hs
-  hs-source-dirs:       . tests
+  main-is:              multi-table.hs
+  hs-source-dirs:       tests
   ghc-options:          -Wall -threaded
   other-modules:        Instances
   build-depends:        base
@@ -70,14 +71,34 @@ Test-Suite test-main
 
 Benchmark normal-bench
   type:                 exitcode-stdio-1.0
-  hs-source-dirs:       . bench
+  hs-source-dirs:       bench
   ghc-options:          -O2 -threaded
   main-is:              bench.hs
   other-modules:        SingularBench
   build-depends:        computational-algebra
+               ,        algebra
                ,        base
                ,        deepseq
                ,        criterion
                ,        process
-               ,        text
+               ,        singletons
+               ,        parallel
                ,        containers
+               ,        type-natural
+
+Benchmark elimination-bench
+  type:                 exitcode-stdio-1.0
+  hs-source-dirs:       bench
+  ghc-options:          -O2 -threaded
+  main-is:              elimination-bench.hs
+  other-modules:        SingularBench
+  build-depends:        computational-algebra
+               ,        algebra
+               ,        base
+               ,        singletons
+               ,        deepseq
+               ,        criterion
+               ,        process
+               ,        containers
+               ,        parallel
+               ,        type-natural

@@ -13,7 +13,9 @@ import           Algebra.Ring.Polynomial.Monomorphic
 import           Control.Arrow
 import           Data.List
 import qualified Data.Map                                as M
-import qualified Data.Text                               as T
+import           Data.Monoid
+import           Data.Singletons
+import           Data.Type.Natural
 import           System.Process
 
 formatPoly :: Polynomial Rational -> String
@@ -49,8 +51,8 @@ instance SingularRep Grlex where
 instance SingularRep Grevlex where
   singularRep _ = "dp"
 
-instance (Sing n, SingularRep o1, SingularRep o2) => SingularRep (ProductOrder n o1 o2) where
-  singularRep (ProductOrder n o1 o2) = concat ["(", singularRep o1, "(", show (toInt n), "),"
+instance (SingRep n, SingularRep o1, SingularRep o2) => SingularRep (ProductOrder n o1 o2) where
+  singularRep (ProductOrder n o1 o2) = concat ["(", singularRep o1, "(", show (sNatToInt n), "),"
                                               , singularRep o2, ")"
                                               ]
 
@@ -61,7 +63,7 @@ instance (ToWeightVector vec, SingularRep ord) => SingularRep (WeightOrder vec o
     where
       tovec :: WeightProxy v -> [Int]
       tovec NilWeight = []
-      tovec (ConsWeight n ns) = toInt n : tovec ns
+      tovec (ConsWeight n ns) = sNatToInt n : tovec ns
 
 type Ideal = [Polynomial Rational]
 

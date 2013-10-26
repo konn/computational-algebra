@@ -9,6 +9,7 @@ import           Control.DeepSeq
 import           Control.Parallel.Strategies
 import           Criterion.Main
 import           Criterion.Types
+import           Data.Type.Natural
 import           Numeric.Algebra                         (LeftModule (..))
 import qualified Numeric.Algebra                         as NA
 
@@ -28,7 +29,7 @@ i3 = [ 2 * s - a * y', b^2 - (x'^2 + y'^2), c^2 - ( (a-x') ^ 2 + y'^2)
      ]
 i4 = [ x - (3*u + 3*u*v^2 - u^3), y - (3*v + 3*u^2*v -  v^3), z - (3*u^2 - 3*v^2)]
 
-mkTestCase :: Sing n => String -> [Polynomial Rational] -> SNat n -> Benchmark
+mkTestCase :: SingRep n => String -> [Polynomial Rational] -> SNat n -> Benchmark
 mkTestCase name ideal nth =
   bgroup name [ bench "lex" $ nf (calcGroebnerBasisWith Lex) ideal
               , bench "product" $ nf (calcGroebnerBasisWith (eliminationOrder nth)) ideal
