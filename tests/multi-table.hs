@@ -25,12 +25,12 @@ i1 = toIdeal []
 spec :: Spec
 spec = do
   describe "Table multiplication" $ do
-    it "coincides with ordinary multiplication" $ SC.property prop01
+    it "coincides with ordinary multiplication" $ QC.property prop01
 
-prop01 :: Monad m => SC.Property m
+prop01 :: QC.Property
 prop01 =
-    SC.forAll $ \(ZeroDimIdeal ideal) ->
-        SC.forAll $ \f -> SC.forAll $ \g ->
+    QC.forAll (QC.resize 4 arbitrary) $ \(ZeroDimIdeal ideal) ->
+        QC.forAll (QC.resize 6 $ polyOfDim sThree) $ \f -> QC.forAll (QC.resize 6 $ polyOfDim sThree) $ \g ->
           withQuotient ideal (modIdeal f * modIdeal g)
             == withQuotient ideal (multWithTable (modIdeal f) (modIdeal g))
 
