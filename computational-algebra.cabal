@@ -45,7 +45,7 @@ library
                ,       monomorphic           == 0.0.*
 
 Test-Suite test-multi-table
-  buildable:            False
+  -- buildable:            False
   type:                 exitcode-stdio-1.0
   main-is:              multi-table.hs
   hs-source-dirs:       tests
@@ -88,7 +88,7 @@ Benchmark normal-bench
 
 Benchmark elimination-bench
   type:                 exitcode-stdio-1.0
-  hs-source-dirs:       bench
+  hs-source-dirs:       bench, share
   ghc-options:          -O2 -threaded
   main-is:              elimination-bench.hs
   other-modules:        SingularBench
@@ -102,3 +102,22 @@ Benchmark elimination-bench
                ,        containers
                ,        parallel
                ,        type-natural
+
+Benchmark quotient-bench
+  buildable:            False
+  type:                 exitcode-stdio-1.0
+  hs-source-dirs:       bench, share
+  ghc-options:          -O2 -threaded
+  main-is:              quotient-bench.hs
+  other-modules:        SingularBench
+  build-depends:        computational-algebra
+               ,        algebra
+               ,        base
+               ,        singletons
+               ,        deepseq
+               ,        criterion
+               ,        process
+               ,        containers
+               ,        parallel
+               ,        type-natural
+               ,        sized-vector
