@@ -1,7 +1,8 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, MultiParamTypeClasses, RankNTypes, ScopedTypeVariables   #-}
-{-# LANGUAGE UndecidableInstances                                            #-}
-module Algebra.Ring.Polynomial.Quotient ( Quotient(), reifyQuotient, modIdeal
+{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances               #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+module Algebra.Ring.Polynomial.QuotientMemo ( Quotient(), reifyQuotient, modIdeal
                                         , modIdeal', quotRepr, withQuotient
                                         , genQuotVars, genQuotVars'
                                         , standardMonomials, standardMonomials'
@@ -11,10 +12,11 @@ import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
 import           Control.Applicative
-import qualified Data.Map                    as M
+import           Control.Arrow
 import           Data.Maybe
+import           Data.MemoTrie
 import           Data.Proxy
-import           Data.Reflection
+import           Data.Reflection             hiding (Z)
 import           Data.Type.Natural           hiding (one, zero)
 import           Data.Vector.Sized           (Vector (..))
 import qualified Data.Vector.Sized           as V
@@ -27,14 +29,38 @@ import qualified Prelude                     as P
 -- | The polynomial modulo the ideal indexed at the last type-parameter.
 data Quotient r ord n ideal = Quotient { quotRepr_ :: OrderedPolynomial r ord n } deriving (Eq)
 
-data QIdeal r ord n = ZeroDimIdeal { gBasis    :: ![OrderedPolynomial r ord n]
+instance HasTrie (Vector a Z) where
+  newtype (Vector a Z) :->: x = NilTrie x
+  trie f = NilTrie (f Nil)
+  untrie (NilTrie a) = \Nil -> a
+  enumerate (NilTrie a) = [(Nil, a)]
+
+instance (HasTrie a, HasTrie (Vector a n)) => HasTrie (Vector a (S n)) where
+  newtype (Vector a (S n)) :->: x = ConsTrie ((a, Vector a n) :->: x)
+  trie f = ConsTrie $ trie $ f . uncurry (:-)
+  untrie (ConsTrie t) = untrie t . unconsV
+  enumerate (ConsTrie t) = (fmap.first)  (uncurry (:-)) . enumerate $ t
+
+unconsV :: Vector a (S n) -> (a, Vector a n)
+unconsV (a :- as) = (a, as)
+
+data MonomialTrieInstance n where
+    MonomialTrieInstance :: HasTrie (Monomial n) => MonomialTrieInstance n
+
+monomialTrieInstance :: SNat n -> MonomialTrieInstance n
+monomialTrieInstance SZ = MonomialTrieInstance
+monomialTrieInstance (SS n) =
+  case monomialTrieInstance n of
+    MonomialTrieInstance -> MonomialTrieInstance
+
+data QIdeal r ord n = ZeroDimIdeal { gBasis    :: [OrderedPolynomial r ord n]
                                    , vBasis    :: [Monomial n]
                                    , multTable :: Table r ord n
                                    }
                     | QIdeal { gBasis :: [OrderedPolynomial r ord n]
                              }
 
-type Table r ord n = M.Map (Monomial n, Monomial n) (OrderedPolynomial r ord n)
+type Table r ord n = Monomial n -> Monomial n -> OrderedPolynomial r ord n
 
 multWithTable :: (Reifies ideal (QIdeal r ord n), IsMonomialOrder ord, IsPolynomial r n, Field r)
               => Quotient r ord n ideal -> Quotient r ord n ideal
@@ -43,17 +69,15 @@ multWithTable f g =
   let qid = reflect f
       table = multTable qid
       basis = vBasis qid
-  in sum [ Quotient $ coeff l (quotRepr f) .*. coeff r (quotRepr g) .*. (M.findWithDefault zero (l, r) table)
+  in sum [ Quotient $ coeff l (quotRepr f) .*. coeff r (quotRepr g) .*. table l r
          | l <- basis, r <- basis ]
 
 instance Show (OrderedPolynomial r ord n) => Show (Quotient r ord n ideal) where
   show (Quotient f) = show f
 
 buildMultTable :: (IsMonomialOrder ord, IsPolynomial r n, Field r)
-               => [OrderedPolynomial r ord n] -> [Monomial n] -> Table r ord n
-buildMultTable bs ms =
-    M.fromList [ ((p, q), (toPolynomial (one, p) * toPolynomial (one, q)) `modPolynomial` bs)
-               | p <- ms, q <- ms]
+               => [OrderedPolynomial r ord n] -> Table r ord n
+buildMultTable bs p q =  (toPolynomial (one, p) * toPolynomial (one, q)) `modPolynomial` bs
 
 stdMonoms :: forall r n ord. (IsMonomialOrder ord, IsPolynomial r n, Field r) => [OrderedPolynomial r ord n] -> Maybe [Monomial n]
 stdMonoms basis = do
@@ -115,13 +139,15 @@ modIdeal' :: (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial 
           => Proxy ideal -> OrderedPolynomial r ord n -> Quotient r ord n ideal
 modIdeal' pxy f = Quotient $ f `modPolynomial` gBasis (reflect pxy)
 
-buildQIdeal :: (IsMonomialOrder ord, IsPolynomial r n, Field r)
+buildQIdeal :: forall r ord n. (IsMonomialOrder ord, IsPolynomial r n, Field r)
             => Ideal (OrderedPolynomial r ord n) -> QIdeal r ord n
 buildQIdeal ideal =
     let bs = calcGroebnerBasis $! ideal
     in case stdMonoms bs of
          Nothing -> QIdeal bs
-         Just ms -> ZeroDimIdeal bs ms (buildMultTable bs ms)
+         Just ms ->
+           case monomialTrieInstance (sing :: SNat n) of
+             MonomialTrieInstance -> ZeroDimIdeal bs ms (memo2 (buildMultTable bs))
 
 -- | Reifies the ideal at the type-level. The ideal can be recovered with 'reflect'.
 reifyQuotient :: (Field r, IsPolynomial r n, IsMonomialOrder ord)
