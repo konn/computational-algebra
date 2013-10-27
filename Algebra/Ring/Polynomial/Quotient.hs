@@ -1,7 +1,8 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, MultiParamTypeClasses, RankNTypes, ScopedTypeVariables   #-}
 {-# LANGUAGE UndecidableInstances                                            #-}
-module Algebra.Ring.Polynomial.Quotient ( Quotient(), reifyQuotient, modIdeal
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+module Algebra.Ring.Polynomial.QuotientHash ( Quotient(), reifyQuotient, modIdeal
                                         , modIdeal', quotRepr, withQuotient
                                         , genQuotVars, genQuotVars'
                                         , standardMonomials, standardMonomials'
@@ -11,7 +12,8 @@ import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
 import           Control.Applicative
-import qualified Data.Map                    as M
+import           Data.Hashable
+import qualified Data.HashMap.Lazy           as M
 import           Data.Maybe
 import           Data.Proxy
 import           Data.Reflection
@@ -34,7 +36,16 @@ data QIdeal r ord n = ZeroDimIdeal { gBasis    :: ![OrderedPolynomial r ord n]
                     | QIdeal { gBasis :: [OrderedPolynomial r ord n]
                              }
 
-type Table r ord n = M.Map (Monomial n, Monomial n) (OrderedPolynomial r ord n)
+type Table r ord n = M.HashMap (Monomial n, Monomial n) (OrderedPolynomial r ord n)
+
+monomHashWithSalt :: Int -> Monomial n -> Int
+monomHashWithSalt salt Nil = salt `combine` 0
+monomHashWithSalt salt xs  = V.foldl hashWithSalt salt xs
+
+instance Hashable (Monomial n) where
+  hash Nil = 0
+  hash (a :- as) = V.foldl hashWithSalt (hash a) as
+  hashWithSalt   = monomHashWithSalt
 
 multWithTable :: (Reifies ideal (QIdeal r ord n), IsMonomialOrder ord, IsPolynomial r n, Field r)
               => Quotient r ord n ideal -> Quotient r ord n ideal
@@ -43,7 +54,7 @@ multWithTable f g =
   let qid = reflect f
       table = multTable qid
       basis = vBasis qid
-  in sum [ Quotient $ coeff l (quotRepr f) .*. coeff r (quotRepr g) .*. (M.findWithDefault zero (l, r) table)
+  in sum [ Quotient $ coeff l (quotRepr f) .*. coeff r (quotRepr g) .*. (M.lookupDefault zero (l, r) table)
          | l <- basis, r <- basis ]
 
 instance Show (OrderedPolynomial r ord n) => Show (Quotient r ord n ideal) where
