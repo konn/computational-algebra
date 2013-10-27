@@ -1,7 +1,6 @@
 {-# LANGUAGE RankNTypes #-}
 module Main where
 import qualified Algebra.Ring.Polynomial as P
-import qualified Data.Sequence           as S
 import           Data.Type.Monomorphic
 import qualified SequenceMonomial        as S
 import           Test.Hspec
