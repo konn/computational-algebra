@@ -23,6 +23,7 @@ import           Algebra.Internal
 import           Algebra.Ring.Noetherian
 import           Algebra.Scalar
 import           Control.Arrow
+import           Control.DeepSeq
 import           Control.Lens            hiding (assign)
 import           Data.Function
 import           Data.List               (intercalate)
@@ -48,6 +49,12 @@ type Monomial (n :: Nat) = Vector Int n
 -- | Monomorphic representation for monomial.
 newtype OrderedMonomial' ord = OM' { getMonomial' :: [Int] }
     deriving (Read, Show, Eq)
+
+instance (NFData (Monomial n)) => NFData (OrderedMonomial ord n) where
+  rnf (OrderedMonomial m) = rnf m `seq` ()
+
+instance (NFData (Monomial n), NFData r) => NFData (OrderedPolynomial r ord n) where
+  rnf (Polynomial dic) = rnf dic
 
 instance Monomorphicable (OrderedMonomial ord) where
   type MonomorphicRep (OrderedMonomial ord) = OrderedMonomial' ord

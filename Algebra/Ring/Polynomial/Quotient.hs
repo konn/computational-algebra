@@ -11,7 +11,6 @@ import           Algebra.Algorithms.Groebner
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
-import           Control.Applicative
 import           Control.DeepSeq
 import qualified Data.HashMap.Lazy           as M
 import           Data.Maybe
@@ -39,6 +38,7 @@ data QIdeal r ord n = ZeroDimIdeal { gBasis    :: ![OrderedPolynomial r ord n]
 
 instance NFData (OrderedPolynomial r ord n) => NFData (Quotient r ord n ideal) where
   rnf (Quotient op) = rnf op
+
 
 type Table r ord n = M.HashMap (Monomial n, Monomial n) (OrderedPolynomial r ord n)
 

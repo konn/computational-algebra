@@ -4,6 +4,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Ring.Noetherian ( NoetherianRing, Ideal(..), addToIdeal, toIdeal, appendIdeal
                                , generators, filterIdeal, mapIdeal, principalIdeal) where
+import           Control.DeepSeq
 import qualified Data.Complex            as C
 import           Data.Function
 import           Data.Ord
@@ -122,3 +123,6 @@ principalIdeal = Ideal . V.singleton
 
 mapIdeal :: (r -> r') -> Ideal r -> Ideal r'
 mapIdeal fun (Ideal xs) = Ideal $ V.map fun xs
+
+instance NFData r => NFData (Ideal r) where
+  rnf (Ideal is) = rnf is
