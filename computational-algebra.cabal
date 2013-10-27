@@ -24,6 +24,7 @@ library
                  ,     Algebra.Algorithms.Groebner.Monomorphic
                  ,     Algebra.Ring.Noetherian
                  ,     Algebra.Ring.Polynomial
+                 ,     Algebra.Ring.PolynomialAccumulated
                  ,     Algebra.Ring.Polynomial.Quotient
                  ,     Algebra.Ring.Polynomial.Monomorphic
                  ,     Algebra.Ring.Polynomial.Parser
@@ -93,6 +94,7 @@ Test-Suite monomial-order-test
                ,        monomorphic
                ,        smallcheck              >= 1.0
                ,        hspec-smallcheck        >= 0.1
+               ,        deepseq
 
 Benchmark normal-bench
   buildable:            False
@@ -183,3 +185,4 @@ Benchmark monomial-order-bench
                ,        process
                ,        monomorphic
                ,        random
+               ,        deepseq
