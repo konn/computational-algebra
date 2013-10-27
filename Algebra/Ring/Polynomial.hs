@@ -15,7 +15,7 @@ module Algebra.Ring.Polynomial
     , normalize, injectCoeff, varX, var, getTerms, shiftR, orderedBy
     , divs, tryDiv, fromList, Coefficient(..),ToWeightVector(..)
     , leadingTerm, leadingMonomial, leadingOrderedMonomial, leadingCoeff, genVars, sArity
-    , OrderedMonomial(..), OrderedMonomial'(..), Grevlex(..)
+    , OrderedMonomial(..), Grevlex(..)
     , Revlex(..), Lex(..), Grlex(..), Graded(..)
     , ProductOrder (..), WeightOrder(..), subst, diff
     , IsOrder(..), IsMonomialOrder)  where
@@ -28,7 +28,7 @@ import           Control.Lens            hiding (assign)
 import           Data.Function
 import           Data.List               (intercalate)
 import           Data.Map                (Map)
-import qualified Data.Map                as M
+import qualified Data.Map.Strict         as M
 import           Data.Maybe
 import           Data.Monoid
 import           Data.Ord
@@ -46,25 +46,11 @@ import qualified Prelude                 as P
 -- | N-ary Monomial. IntMap contains degrees for each x_i.
 type Monomial (n :: Nat) = Vector Int n
 
--- | Monomorphic representation for monomial.
-newtype OrderedMonomial' ord = OM' { getMonomial' :: [Int] }
-    deriving (Read, Show, Eq)
-
 instance (NFData (Monomial n)) => NFData (OrderedMonomial ord n) where
   rnf (OrderedMonomial m) = rnf m `seq` ()
 
 instance (NFData (Monomial n), NFData r) => NFData (OrderedPolynomial r ord n) where
   rnf (Polynomial dic) = rnf dic
-
-instance Monomorphicable (OrderedMonomial ord) where
-  type MonomorphicRep (OrderedMonomial ord) = OrderedMonomial' ord
-  promote (OM' xs) =
-    case promote xs of
-      Monomorphic m -> Monomorphic $ OrderedMonomial m
-  demote (Monomorphic (OrderedMonomial m)) = OM' (demote (Monomorphic m))
-
-instance IsMonomialOrder ord => Ord (OrderedMonomial' ord) where
-  compare = cmpMonomial' (Proxy :: Proxy ord) `on` getMonomial'
 
 instance Monomorphicable (Vector Int) where
   type MonomorphicRep (Vector Int) = [Int]
@@ -80,12 +66,6 @@ fromList :: SNat n -> [Int] -> Monomial n
 fromList SZ _ = Nil
 fromList (SS n) [] = 0 :- fromList n []
 fromList (SS n) (x : xs) = x :- fromList n xs
-
--- | apply monomial ordering to monomorphic monomials.
-cmpMonomial' :: IsMonomialOrder ord => Proxy ord -> [Int] -> [Int] -> Ordering
-cmpMonomial' pxy xs ys =
-  withPolymorhic (P.max (length xs) (length ys)) $ \n ->
-    cmpMonomial pxy (fromList n xs) (fromList n ys)
 
 -- | Monomial order (of degree n). This should satisfy following laws:
 -- (1) Totality: forall a, b (a < b || a == b || b < a)
@@ -184,8 +164,6 @@ productOrder' :: forall n ord ord' m.(IsOrder ord, IsOrder ord')
 productOrder' n ord ord' =
   case singInstance n of SingInstance -> productOrder (toProxy $ ProductOrder n ord ord')
 
--- | Data.Proxy provides kind-polymorphic 'Proxy' data-type, but due to bug of GHC 7.4.1,
--- It canot be used as kind-polymorphic. So I define another type here.
 data WeightProxy (v :: [Nat]) where
   NilWeight  :: WeightProxy '[]
   ConsWeight :: SNat n -> WeightProxy v -> WeightProxy (n ': v)
@@ -193,21 +171,19 @@ data WeightProxy (v :: [Nat]) where
 data WeightOrder (v :: [Nat]) (ord :: *) where
   WeightOrder :: WeightProxy (v :: [Nat]) -> ord -> WeightOrder v ord
 
-data Proxy' (vs :: [Nat]) = Proxy'
-
 class ToWeightVector (vs :: [Nat]) where
-  calcOrderWeight :: Proxy' vs -> Vector Int n -> Int
+  calcOrderWeight :: Proxy vs -> Vector Int n -> Int
 
 instance ToWeightVector '[] where
-  calcOrderWeight Proxy' _ = 0
+  calcOrderWeight Proxy _ = 0
 
 instance (SingRep n, ToWeightVector ns) => ToWeightVector (n ': ns) where
-  calcOrderWeight Proxy' Nil = 0
-  calcOrderWeight Proxy' (x :- xs) = x * sNatToInt (sing :: SNat n) + calcOrderWeight (Proxy' :: Proxy' ns) xs
+  calcOrderWeight Proxy Nil = 0
+  calcOrderWeight Proxy (x :- xs) = x * sNatToInt (sing :: SNat n) + calcOrderWeight (Proxy :: Proxy ns) xs
 
 weightOrder :: forall ns ord m. (ToWeightVector ns, IsOrder ord)
             => Proxy (WeightOrder ns ord) -> Monomial m -> Monomial m -> Ordering
-weightOrder Proxy m m' = comparing (calcOrderWeight (Proxy' :: Proxy' ns)) m m'
+weightOrder Proxy m m' = comparing (calcOrderWeight (Proxy :: Proxy ns)) m m'
                          <> cmpMonomial (Proxy :: Proxy ord) m m'
 
 instance (ToWeightVector ws, IsOrder ord) => IsOrder (WeightOrder ws ord) where
@@ -321,7 +297,8 @@ scastPolynomial _ = castPolynomial
 
 normalize :: (Eq r, IsOrder order, IsPolynomial r n)
           => OrderedPolynomial r order n -> OrderedPolynomial r order n
-normalize = unwrapped %~ M.insertWith (+) (OrderedMonomial $ fromList sing []) zero . M.filter (/= zero)
+normalize = unwrapped %~ M.insertWith (+) (OrderedMonomial $ {-# SCC "replicate" #-} V.replicate' 0) zero
+                       . M.filter (/= zero)
 
 instance (Eq r, IsOrder order, IsPolynomial r n) => Eq (OrderedPolynomial r order n) where
   Polynomial f == Polynomial g = f == g
