@@ -155,3 +155,31 @@ Benchmark quotient-bench-randomized
                ,        reflection
                ,        tagged
                ,        process
+
+Benchmark monomial-order-bench
+  type:                 exitcode-stdio-1.0
+  hs-source-dirs:       bench, share
+  ghc-options:          -O2 -threaded -rtsopts
+  main-is:              monomials.hs
+  other-modules:        SingularBench
+  build-depends:        computational-algebra
+               ,        algebra
+               ,        base
+               ,        singletons
+               ,        deepseq
+               ,        criterion
+               ,        process
+               ,        containers
+               ,        parallel
+               ,        type-natural
+               ,        sized-vector
+               ,        QuickCheck
+               ,        smallcheck
+               ,        quickcheck-instances
+               ,        transformers
+               ,        lens
+               ,        reflection
+               ,        tagged
+               ,        process
+               ,        monomorphic
+               ,        random
