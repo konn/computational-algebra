@@ -4,7 +4,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Ring.Polynomial.QuotientMemo ( Quotient(), reifyQuotient, modIdeal
                                         , modIdeal', quotRepr, withQuotient
-                                        , genQuotVars, genQuotVars'
+                                        , genQuotVars, genQuotVars', QIdeal()
                                         , standardMonomials, standardMonomials'
                                         , reduce, multWithTable, isZeroDimensional) where
 import           Algebra.Algorithms.Groebner
@@ -13,6 +13,7 @@ import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
 import           Control.Applicative
 import           Control.Arrow
+import           Control.DeepSeq
 import           Data.Maybe
 import           Data.MemoTrie
 import           Data.Proxy
@@ -98,10 +99,10 @@ stdMonoms basis = do
 --   which are form the basis of it as k-vector space.
 standardMonomials' :: (Reifies ideal (QIdeal r ord n), IsMonomialOrder ord, IsPolynomial r n, Field r)
                    => Proxy ideal -> Maybe [Quotient r ord n ideal]
-standardMonomials' pxy = buildQs <$> stdMonoms basis
-  where
-    basis = gBasis $ reflect pxy
-    buildQs xs = [ Quotient $ toPolynomial (one, ds) | ds <- xs ]
+standardMonomials' pxy =
+  case reflect pxy of
+    ZeroDimIdeal _ vB _ -> Just $ map (Quotient . curry toPolynomial one) vB
+    _ -> Nothing
 
 standardMonomials :: forall ord ideal r n. ( IsMonomialOrder ord
                                            , Reifies ideal (QIdeal r ord n)
@@ -214,3 +215,6 @@ reduce f i = withQuotient i $ modIdeal f
 
 isZeroDimensional :: (Eq r, Division r, SingRep n, NoetherianRing r, IsMonomialOrder ord) => [OrderedPolynomial r ord n] -> Bool
 isZeroDimensional ii = isJust $ stdMonoms ii
+
+instance NFData (OrderedPolynomial r ord n) => NFData (Quotient r ord n ideal) where
+  rnf (Quotient op) = rnf op

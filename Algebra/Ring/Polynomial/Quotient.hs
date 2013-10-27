@@ -2,22 +2,23 @@
 {-# LANGUAGE GADTs, MultiParamTypeClasses, RankNTypes, ScopedTypeVariables   #-}
 {-# LANGUAGE UndecidableInstances                                            #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Algebra.Ring.Polynomial.QuotientHash ( Quotient(), reifyQuotient, modIdeal
+module Algebra.Ring.Polynomial.Quotient ( Quotient(), QIdeal(), reifyQuotient, modIdeal
                                         , modIdeal', quotRepr, withQuotient
                                         , genQuotVars, genQuotVars'
                                         , standardMonomials, standardMonomials'
-                                        , reduce, multWithTable, isZeroDimensional) where
+                                        , reduce, multWithTable, multUnamb, isZeroDimensional) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
 import           Control.Applicative
-import           Data.Hashable
+import           Control.DeepSeq
 import qualified Data.HashMap.Lazy           as M
 import           Data.Maybe
 import           Data.Proxy
 import           Data.Reflection
 import           Data.Type.Natural           hiding (one, zero)
+import           Data.Unamb
 import           Data.Vector.Sized           (Vector (..))
 import qualified Data.Vector.Sized           as V
 import           Numeric.Algebra
@@ -36,16 +37,15 @@ data QIdeal r ord n = ZeroDimIdeal { gBasis    :: ![OrderedPolynomial r ord n]
                     | QIdeal { gBasis :: [OrderedPolynomial r ord n]
                              }
 
+instance NFData (OrderedPolynomial r ord n) => NFData (Quotient r ord n ideal) where
+  rnf (Quotient op) = rnf op
+
 type Table r ord n = M.HashMap (Monomial n, Monomial n) (OrderedPolynomial r ord n)
 
-monomHashWithSalt :: Int -> Monomial n -> Int
-monomHashWithSalt salt Nil = salt `combine` 0
-monomHashWithSalt salt xs  = V.foldl hashWithSalt salt xs
-
-instance Hashable (Monomial n) where
-  hash Nil = 0
-  hash (a :- as) = V.foldl hashWithSalt (hash a) as
-  hashWithSalt   = monomHashWithSalt
+multUnamb :: (Reifies ideal (QIdeal r ord n), IsMonomialOrder ord, IsPolynomial r n, Field r)
+          => Quotient r ord n ideal -> Quotient r ord n ideal
+          -> Quotient r ord n ideal
+multUnamb a b = unamb (a * b) (multUnamb a b)
 
 multWithTable :: (Reifies ideal (QIdeal r ord n), IsMonomialOrder ord, IsPolynomial r n, Field r)
               => Quotient r ord n ideal -> Quotient r ord n ideal
@@ -83,17 +83,17 @@ stdMonoms basis = do
 
 -- | Find the standard monomials of the quotient ring for the zero-dimensional ideal,
 --   which are form the basis of it as k-vector space.
-standardMonomials' :: (Reifies ideal (QIdeal r ord n), IsMonomialOrder ord, IsPolynomial r n, Field r)
-                   => Proxy ideal -> Maybe [Quotient r ord n ideal]
-standardMonomials' pxy = buildQs <$> stdMonoms basis
-  where
-    basis = gBasis $ reflect pxy
-    buildQs xs = [ Quotient $ toPolynomial (one, ds) | ds <- xs ]
+standardMonomials' :: (Reifies ideal (QIdeal r ord n))
+                   => Proxy ideal -> Maybe [Monomial n]
+standardMonomials' pxy =
+  case reflect pxy of
+    ZeroDimIdeal _ vB _ -> Just vB
+    _ -> Nothing
 
 standardMonomials :: forall ord ideal r n. ( IsMonomialOrder ord
                                            , Reifies ideal (QIdeal r ord n)
                                            , IsPolynomial r n, Field r)
-                  => Maybe [Quotient r ord n ideal]
+                  => Maybe [Monomial n]
 standardMonomials = standardMonomials' (Proxy :: Proxy ideal)
 
 genQuotVars' :: forall ord n ideal r. ( Reifies ideal (QIdeal r ord (S n))

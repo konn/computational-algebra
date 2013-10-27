@@ -39,8 +39,8 @@ import           Data.Maybe
 import           Data.STRef
 import           Data.Type.Monomorphic
 import           Data.Type.Natural       hiding (max, one, zero)
-import           Data.Vector.Sized       hiding (all, drop, foldr, head, map,
-                                          take, zipWith)
+import           Data.Vector.Sized       (Vector (..), sLength, singleton,
+                                          toList)
 import qualified Data.Vector.Sized       as V
 import           Numeric.Algebra         hiding ((>))
 import           Prelude                 hiding (Num (..), recip, (^))
