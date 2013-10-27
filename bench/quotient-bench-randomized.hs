@@ -3,58 +3,54 @@
 {-# LANGUAGE TemplateHaskell, UndecidableInstances                            #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
-import           Algebra.Ring.Noetherian
-import           Algebra.Ring.Polynomial
-import           Algebra.Ring.Polynomial.Quotient
-import qualified Algebra.Ring.Polynomial.QuotientMemo as QM
-import           Control.DeepSeq
-import           Control.Monad
-import           Control.Parallel.Strategies
-import           Criterion.Main
-import           Data.List                            (foldl')
-import           Data.Type.Natural                    hiding (one)
-import           Data.Vector.Sized                    hiding (fromList, map,
-                                                       take, toList, zipWith)
-import qualified Data.Vector.Sized                    as V
-import           Instances
-import           Numeric.Algebra
-import           Prelude                              hiding ()
-import           Test.QuickCheck
+import Algebra.Ring.Noetherian
+import Algebra.Ring.Polynomial
+import Algebra.Ring.Polynomial.Quotient
+import Control.Applicative
+import Control.Concurrent
+import Control.DeepSeq
+import Control.Monad
+import Control.Parallel.Strategies
+import Criterion.Main
+import Data.List                        (foldl')
+import Data.Maybe
+import Data.Type.Natural                hiding (one)
+import Instances
+import Numeric.Algebra                  hiding ((>), (^))
+import Prelude                          hiding (product)
+import System.Process
+import Test.QuickCheck
 
-makeDataSet :: (SingRep n, NFData (Monomial n))
-            => SNat n
-            -> Int -> Int -> Int
-            -> IO [(Ideal (Polynomial Rational n), [Polynomial Rational n])]
-makeDataSet n count dpI dpP = do
-  tss <- sample' $ do
-    ZeroDimIdeal ideal <- resize dpI arbitrary
-    fs <- replicateM count $ resize dpP $ polyOfDim n
-    return (ideal `using` rdeepseq, fs `using` rdeepseq)
-  return $! (take 5 tss `using` rdeepseq)
+makeIdeals :: SingRep n => Int -> SNat n -> Int -> IO [Ideal (Polynomial Rational n)]
+makeIdeals count _ dpI = take count . map getIdeal <$> sample' (resize dpI arbitrary `suchThat` isNonTrivial)
 
-makeTestSet :: (SingRep n, NFData (Monomial n))
-            => [(Ideal (Polynomial Rational n), [Polynomial Rational n])]
-            -> [Benchmark]
-makeTestSet = concat . zipWith mk [1..]
-  where
-    mk n test =
-        [ bench ("naive-" ++ show n) $
-            nf (\(i,fs) -> withQuotient i $ product $ map modIdeal fs) test
-        , bench ("table-" ++ show n) $
-            nf (\(i,fs) -> withQuotient i $ foldl' multWithTable one (map modIdeal fs)) test
-        , bench ("mtrie-" ++ show n) $
-            nf (\(i,fs) -> QM.withQuotient i $ foldl' QM.multWithTable one (map QM.modIdeal fs)) test
-        ]
+mkTestCases :: SingRep n => Int -> Int -> [Ideal (Polynomial Rational n)] -> IO [Benchmark]
+mkTestCases count size is =
+  forM (zip [1..] is) $ \(n, ideal) -> do
+    reifyQuotient ideal $ \ii -> do
+      let dim = maybe 0 length $ standardMonomials' ii
+      fs0 <- take count <$> sample' (resize size $ quotOfDim ii)
+      putStrLn $ concat [ "\t subcase ", show n, " has dimension "
+                        , show dim]
+      fs <- return $! (fs0 `using` rdeepseq)
+      return $ bgroup (concat ["case-",show n, "-", show dim, "dim"])
+                 [ bench "naive" $ nf product fs
+                 , bench "table" $ nf (foldl multWithTable one) fs
+                 ]
 
 main :: IO ()
 main = do
-  test01 <- makeDataSet sTwo 2 4 6 `using` rdeepseq
-  test02 <- makeDataSet sThree 2 4 6
-  test03 <- makeDataSet sTwo 2 7 8
-  test04 <- makeDataSet sTwo 3 7 8
+  putStrLn "generating case01..."
+  case01 <- mkTestCases 2 8 =<< makeIdeals 3 sTwo 7
+  putStrLn "generating case02..."
+  case02 <- mkTestCases 3 8 =<< makeIdeals 3 sTwo 7
+  putStrLn "generating case03..."
+  case04 <- mkTestCases 10 8 =<< makeIdeals 3 sTwo 7
+  putStrLn "done. purge and sleep 10secs..."
+  system "purge"
+  threadDelay $ 10^7
   defaultMain $
-    [ bgroup "2-4-6" $ makeTestSet test01
-    , bgroup "3-4-6" $ makeTestSet test02
-    , bgroup "2-7-8" $ makeTestSet test03
-    , bgroup "ternary 2-7-8" makeTestSet test04
+    [ bgroup "binary" case01
+    , bgroup "ternary" case02
+    , bgroup "10-ary" case04
     ]
