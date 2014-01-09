@@ -380,7 +380,7 @@ saturationByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
                            -> OrderedPolynomial k ord n -> Ideal (OrderedPolynomial k ord n)
 saturationByPrincipalIdeal is g =
   case propToClassLeq $ leqSucc (sArity g) of
-    LeqInstance -> thEliminationIdeal sOne $ addToIdeal (one - (castPolynomial g * var sOne)) (mapIdeal (shiftR sOne) is)
+    LeqInstance -> thEliminationIdeal sOne $ addToIdeal (one - (castPolynomial g * varX)) (mapIdeal (shiftR sOne) is)
 
 -- | Saturation ideal
 saturationIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)

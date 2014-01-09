@@ -1,15 +1,18 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures, FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances, GADTs, MultiParamTypeClasses                 #-}
+{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving            #-}
+{-# LANGUAGE IncoherentInstances, MultiParamTypeClasses                      #-}
 {-# LANGUAGE NoMonomorphismRestriction, OverlappingInstances                 #-}
 {-# LANGUAGE OverloadedStrings, PolyKinds, ScopedTypeVariables, TypeFamilies #-}
-{-# LANGUAGE TypeSynonymInstances, UndecidableInstances, IncoherentInstances #-}
+{-# LANGUAGE TypeSynonymInstances, UndecidableInstances, StandaloneDeriving  #-}
 -- | Algorithms for zero-dimensional ideals.
-module Algebra.Algorithms.ZeroDim where
+module Algebra.Algorithms.ZeroDim (charPoly, solveLinear, solveWith, solveM, solve') where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
+import           Algebra.Scalar                   ((.*.))
+import qualified Data.Vector.Generic.Mutable      as MV
 import           Algebra.Scalar
 import           Control.Applicative
 import           Control.Arrow
@@ -18,17 +21,23 @@ import           Control.Monad
 import           Control.Monad.Random
 import           Data.Complex
 import           Data.List                        hiding (sum)
+import qualified Data.Matrix                      as M
 import           Data.Maybe
+import           Data.Proxy
+import           Control.Monad.ST
 import           Data.Ord
 import           Data.Ratio
 import           Data.Reflection
 import           Data.Singletons
 import           Data.Type.Natural                (Nat (..), SNat,
                                                    Sing (SS, SZ), sNatToInt)
-import qualified Data.Vector.Sized                as V
+import           Data.Type.Ordinal
+import qualified Data.Vector                      as V
+import qualified Data.Vector.Sized                as SV
 import           Numeric.Algebra                  hiding ((/), (<))
 import qualified Numeric.Algebra                  as NA
-import           Numeric.LinearAlgebra            hiding (Field, find, step)
+import           Numeric.Decidable.Zero
+import           Numeric.LinearAlgebra            ((@>), (@@>))
 import qualified Numeric.LinearAlgebra            as LA
 import           Prelude                          hiding (lex, negate, recip,
                                                    sum, (*), (+), (-), (^),
@@ -58,17 +67,17 @@ instance Coercible Rational Float where
   coerce = fromRational
 
 solveM :: forall m r ord n. (MonadRandom m, Field r, IsPolynomial r n, IsMonomialOrder ord,
-                             Coercible r (Complex Double), Show (OrderedPolynomial r ord (S n)))
+                             Coercible r (Complex Double))
        => Ideal (OrderedPolynomial r ord (S n))
-       -> m [V.Vector (Complex Double) (S n)]
-solveM ideal = reifyQuotient ideal $ \pxy -> 
+       -> m [SV.Vector (Complex Double) (S n)]
+solveM ideal = reifyQuotient ideal $ \pxy ->
   case standardMonomials' pxy of
     Just bs -> step (length bs)
     Nothing -> error "Given ideal is not zero-dimensional"
   where
     step len = do
       coeffs <- replicateM (sNatToInt (sing :: SNat (S n))) getRandom
-      let vars = V.toList allVars
+      let vars = SV.toList allVars
           f = sum $ zipWith (.*.) (map (NA.fromInteger :: Integer -> r) coeffs) vars
           sols = solveWith ideal f
       if length sols == len
@@ -78,15 +87,15 @@ solveM ideal = reifyQuotient ideal $ \pxy ->
 solve' :: (Field r, IsPolynomial r n, IsMonomialOrder ord, Coercible r Double)
        => Double
        -> Ideal (OrderedPolynomial r ord (S n))
-       -> [V.Vector (Complex Double) (S n)]
+       -> [SV.Vector (Complex Double) (S n)]
 solve' err ideal =
   reifyQuotient ideal $ \ii ->
-    let vs = map (LA.toList . eigenvalues . fromLists . map (map coerce') . matrixRep . modIdeal' ii) $
-             V.toList allVars
+    let vs = map (LA.toList . LA.eigenvalues . LA.fromLists . map (map coerce') . matrixRep . modIdeal' ii) $
+             SV.toList allVars
         mul p q = coerce p * q
     in [ xs
        | xs0 <- sequence vs
-       , let xs = V.unsafeFromList' xs0
+       , let xs = SV.unsafeFromList' xs0
        , all ((<err) . magnitude . substWith mul xs) $ generators ideal
        ]
 
@@ -94,7 +103,7 @@ solve' err ideal =
 solveWith :: (Field r, IsPolynomial r n, IsMonomialOrder ord, Coercible r (Complex Double))
           => Ideal (OrderedPolynomial r ord (S n))
           -> OrderedPolynomial r ord (S n)
-          -> [V.Vector (Complex Double) (S n)]
+          -> [SV.Vector (Complex Double) (S n)]
 solveWith i0 f0 =
   let ideal = calcGroebnerBasis i0
   in reifyQuotient (toIdeal ideal) $ \pxy ->
@@ -111,12 +120,12 @@ solveWith i0 f0 =
             in Left $ mapCoeff coerce $ injectCoeff (recip r) * (toPolynomial (leadingTerm g) - g)
       mf = LA.fromLists $ map (map coerce') $ matrixRep f
       Just cind = elemIndex one base
-      (_, evecs) = LA.eig $ ctrans mf
+      (_, evecs) = LA.eig $ LA.ctrans mf
       calc vec =
         let c = vec @> cind
             phi (idx, Right nth) acc = acc & ix idx .~ ((vec @> nth) / c)
             phi (idx, Left g)    acc = acc & ix idx .~ substWith (*) acc g
-        in foldr phi (V.replicate (sArity f0) (error "indec!")) inds
+        in foldr phi (SV.replicate (sArity f0) (error "indec!")) inds
   in map calc $ LA.toColumns evecs
 
 matrixRep :: (NoetherianRing t, Eq t, Field t, SingRep n, IsMonomialOrder order,
@@ -129,9 +138,88 @@ matrixRep f =
       in transpose $ map (\a -> map (flip coeff a . leadingMonomial . quotRepr) bases) anss
     Nothing -> error "Not finite dimension"
 
-enumOrdinal :: SNat n -> [V.Ordinal n]
-enumOrdinal SZ = []
-enumOrdinal (SS n) = V.OZ : map V.OS (enumOrdinal n)
-
 coerce' :: Coercible a (Complex Double) => a -> Complex Double
 coerce' a = coerce a
+
+newtype WrappedField a = WrapField { unwrapField :: a
+                                   } deriving (Read, Show, Eq, Ord,
+                                               Additive, Multiplicative,
+                                               Unital, DecidableUnits, Division)
+
+instance LeftModule a r => LeftModule a (WrappedField r) where
+  n .* WrapField r = WrapField $ n .* r
+
+instance RightModule a r => RightModule a (WrappedField r) where
+  WrapField r *. n = WrapField $ r *. n
+
+deriving instance Monoidal r => Monoidal (WrappedField r)
+deriving instance Group r => Group (WrappedField r)
+deriving instance DecidableZero r => DecidableZero (WrappedField r)
+
+instance (Unital r, Additive r, Multiplicative r, Group r, Ring r) => Num (WrappedField r) where
+  WrapField a + WrapField b = WrapField $ a + b
+  WrapField a - WrapField b = WrapField $ a - b
+  WrapField a * WrapField b = WrapField $ a * b
+  negate = WrapField . negate . unwrapField
+  fromInteger = WrapField . NA.fromInteger
+  abs = id
+  signum _ = NA.one
+
+instance (Ring r, Division r, Group r) => Fractional (WrappedField r) where
+  WrapField a / WrapField b = WrapField $ a NA./ b
+  recip (WrapField a) = WrapField $ NA.recip a
+  fromRational q = WrapField $ NA.fromInteger (numerator q) NA./ NA.fromInteger (denominator q)
+
+-- | Solve linear systems
+solveLinear :: (Ord r, Ring r, Monoidal r, Eq r, Division r, Group r)
+            => M.Matrix r
+            -> V.Vector r
+            -> Maybe (V.Vector r)
+solveLinear mat vec =
+  let (u, l, p, d) = M.luDecomp $ fmap WrapField mat
+      ans = M.getCol 1 $ p P.* M.colVector (fmap WrapField vec)
+      size = M.ncols mat
+      solveL = V.modify $ \mv -> do
+        forM_ [0,1..size-1] $ \ i -> do
+          forM_ [0,1..i-1] $ \j -> do
+            a <- MV.read mv i
+            b <- MV.read mv j
+            MV.write mv i $ a - (l M.! (i+1, j+1)) * b
+      solveU = V.modify $ \mv -> do
+        forM_ [size-1, size-2..0] $ \ i -> do
+          forM_ [i+1,i+2..size-1] $ \j -> do
+            a <- MV.read mv i
+            b <- MV.read mv j
+            MV.write mv i $ a - (u M.! (i+1, j+1)) * b
+          a0 <- MV.read mv i
+          MV.write mv i $ a0 / (u M.! (i+1, i+1))
+  in if d == zero || M.nrows u < size || M.ncols u < size || M.nrows l < size ||
+        M.ncols l < size || M.diagProd l == zero || M.diagProd u == zero
+     then Nothing
+     else Just $ fmap unwrapField $ solveU $ solveL ans
+
+vectorRepr :: forall r order ideal n.
+              (Division r, IsPolynomial r n, IsMonomialOrder order, Reifies ideal (QIdeal r order n))
+           => Quotient r order n ideal -> V.Vector r
+vectorRepr f =
+  case standardMonomials' (Proxy :: Proxy ideal) of
+    Just base -> let mf = quotRepr f
+                 in V.fromList $ map (flip coeff mf . leadingMonomial . quotRepr) base
+    Nothing -> error "dieeee"
+
+charPoly :: forall r ord n. (Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord)
+       => Ordinal n
+       -> Ideal (OrderedPolynomial r ord n)
+       -> OrderedPolynomial r ord n
+charPoly nth ideal =
+  reifyQuotient ideal $ \pxy ->
+  let x = var nth
+      p0 : pows = splitAt bLen [vectorRepr $ modIdeal' pxy (pow x i) | i <- [0:: Natural ..] ]
+      step m (p : ps) =
+        case solveLinear m p of
+          Nothing  -> step (m M.<|> M.colVector p) ps
+          Just ans ->
+            let cur = fromIntegral $ V.length ans :: Natural
+            in pow x cur - sum (zipWith (.*.) (V.toList ans) [pow x i | i <- [0 :: Natural ..]])
+  in step (M.colVector p0) pows
+

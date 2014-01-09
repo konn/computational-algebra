@@ -69,7 +69,8 @@ buildMultTable bs ms =
     M.fromList [ ((p, q), (toPolynomial (one, p) * toPolynomial (one, q)) `modPolynomial` bs)
                | p <- ms, q <- ms]
 
-stdMonoms :: forall r n ord. (IsMonomialOrder ord, IsPolynomial r n, Field r) => [OrderedPolynomial r ord n] -> Maybe [Monomial n]
+stdMonoms :: forall r n ord. (IsMonomialOrder ord, IsPolynomial r n, Field r)
+             => [OrderedPolynomial r ord n] -> Maybe [Monomial n]
 stdMonoms basis = do
   let lms = map leadingTerm basis
       dim = sing :: SNat n
