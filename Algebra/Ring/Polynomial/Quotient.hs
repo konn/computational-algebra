@@ -41,8 +41,9 @@ data QIdeal r ord n = ZeroDimIdeal { gBasis    :: ![OrderedPolynomial r ord n]
 instance NFData (OrderedPolynomial r ord n) => NFData (Quotient r ord n ideal) where
   rnf (Quotient op) = rnf op
 
-
 type Table r ord n = M.HashMap (Monomial n, Monomial n) (OrderedPolynomial r ord n)
+
+
 
 multUnamb :: (Reifies ideal (QIdeal r ord n), IsMonomialOrder ord, IsPolynomial r n, Field r)
           => Quotient r ord n ideal -> Quotient r ord n ideal
@@ -85,17 +86,17 @@ stdMonoms basis = do
 
 -- | Find the standard monomials of the quotient ring for the zero-dimensional ideal,
 --   which are form the basis of it as k-vector space.
-standardMonomials' :: (Reifies ideal (QIdeal r ord n))
-                   => Proxy ideal -> Maybe [Monomial n]
+standardMonomials' :: (Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r, IsMonomialOrder ord)
+                   => Proxy ideal -> Maybe [Quotient r ord n ideal]
 standardMonomials' pxy =
   case reflect pxy of
-    ZeroDimIdeal _ vB _ -> Just vB
+    ZeroDimIdeal _ vB _ -> Just $ map (modIdeal . toPolynomial . (,) one) vB
     _ -> Nothing
 
 standardMonomials :: forall ord ideal r n. ( IsMonomialOrder ord
                                            , Reifies ideal (QIdeal r ord n)
                                            , IsPolynomial r n, Field r)
-                  => Maybe [Monomial n]
+                  => Maybe [Quotient r ord n ideal]
 standardMonomials = standardMonomials' (Proxy :: Proxy ideal)
 
 genQuotVars' :: forall ord n ideal r. ( Reifies ideal (QIdeal r ord (S n))

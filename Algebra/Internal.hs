@@ -4,6 +4,7 @@
 {-# OPTIONS_GHC -fwarn-incomplete-patterns #-}
 module Algebra.Internal ( toProxy, module Data.Proxy
                         ) where
+import Algebra.Instances ()
 import Data.Proxy
 
 toProxy :: a -> Proxy a

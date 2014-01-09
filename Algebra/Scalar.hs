@@ -1,8 +1,9 @@
-{-# LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses, StandaloneDeriving    #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses, StandaloneDeriving                       #-}
 module Algebra.Scalar (Scalar(..), (.*.)) where
-import Algebra.Ring.Noetherian
-import Numeric.Algebra
+import           Algebra.Ring.Noetherian
+import           Numeric.Algebra
+import qualified Numeric.Algebra         as NA
 
 newtype Scalar r = Scalar { runScalar :: r }
     deriving (Read, Show, Eq, Ord, Additive, Num, Integral, Real, Enum
@@ -32,3 +33,8 @@ instance LeftModule Natural r => LeftModule Natural (Scalar r) where
   n .* Scalar r = Scalar $ n .* r
 instance RightModule Natural r => RightModule Natural (Scalar r) where
   Scalar r *. n = Scalar $ r *. n
+instance Ring r => RightModule r (Scalar r) where
+  Scalar r *. q = Scalar $ r NA.* q
+instance Ring r => LeftModule r (Scalar r) where
+  r .* Scalar q = Scalar $ r NA.* q
+
