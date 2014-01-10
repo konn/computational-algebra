@@ -21,6 +21,7 @@ import           Data.Function
 import qualified Data.Heap                        as H
 import           Data.List                        hiding (sum)
 import           Data.Maybe
+import           Data.Ord
 import           Data.STRef
 import           Data.Type.Monomorphic
 import           Data.Type.Natural                hiding (max, one, zero)
@@ -64,22 +65,24 @@ image :: (Functor f, MonadReader (FGLMEnv s r ord n) f) => OrderedPolynomial r o
 image a = views lMap ($ a)
 
 fglm :: (Ord r, SingRep n, Division r, NoetherianRing r, IsMonomialOrder ord)
-     => Ideal (OrderedPolynomial r ord (S n)) -> ([OrderedPolynomial r Lex (S n)], [V.Vector r])
-fglm ideal = fglmMap lin
-  where
-   lin f = reifyQuotient ideal $ \pxy -> vectorRep $ modIdeal' pxy f
+     => Ideal (OrderedPolynomial r ord (S n))
+     -> ([OrderedPolynomial r Lex (S n)], [OrderedPolynomial r Lex (S n)], OrderedMonomial Lex (S n))
+fglm ideal = reifyQuotient ideal $ \pxy ->
+  let (gs, bs, ms) = fglmMap (\f -> vectorRep $ modIdeal' pxy f)
+      Just stds = map (changeOrder Lex . quotRepr) <$> standardMonomials' pxy
+  in (gs, map (sum . zipWith (flip (.*.)) stds . V.toList) bs, ms)
 
 fglmMap :: forall k ord n. (Ord k, Field k, IsMonomialOrder ord, IsPolynomial k n)
         => (OrderedPolynomial k ord (S n) -> V.Vector k)
         -- ^ Linear map from polynomial ring.
-        -> ([OrderedPolynomial k Lex (S n)], [V.Vector k])
+        -> ([OrderedPolynomial k Lex (S n)], [V.Vector k], OrderedMonomial Lex (S n))
         -- ^ Tuple of Groebner basis w.r.t. lex ordering and basis of the image space.
 fglmMap l = runST $ do
   env <- FGLMEnv l <$> newSTRef [] <*> newSTRef [] <*> newSTRef Nothing <*> newSTRef one
   flip runReaderT env $ do
     mainLoop
     whileM_ toContinue $ nextMonomial >> mainLoop
-    (,) <$> look gLex <*> (mapM image =<< look bLex)
+    (,,) <$> look gLex <*> (mapM image =<< look bLex) <*> look monomial
 
 mainLoop :: (Ord r, SingRep n, Division r, NoetherianRing r, IsOrder o)
          => Machine s r o n ()
@@ -115,10 +118,13 @@ nextMonomial :: (Eq r, SingRep n, NoetherianRing r) => Machine s r ord n ()
 nextMonomial = do
   m <- look monomial
   gs <- map leadingMonomial <$> look gLex
-  monomial .== maximum [ OrderedMonomial monom `asTypeOf` m
-                       | monom <- map (beta $ getMonomial m) [0..]
-                       , all (not . (`divs` monom)) gs
-                       ]
+  let next = fst $ maximumBy (comparing snd)
+             [ (OrderedMonomial monom `asTypeOf` m, ordToInt od)
+             | od <- [0..]
+             , let monom = beta (getMonomial m) od
+             , all (not . (`divs` monom)) gs
+             ]
+  monomial .== next
 
 beta :: forall n. SingRep n => Monomial n -> Ordinal n -> Monomial n
 beta (a :- _) OZ     =
