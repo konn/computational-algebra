@@ -5,8 +5,8 @@
 {-# LANGUAGE OverloadedStrings, PolyKinds, ScopedTypeVariables, TypeFamilies #-}
 {-# LANGUAGE TypeSynonymInstances, UndecidableInstances, StandaloneDeriving  #-}
 -- | Algorithms for zero-dimensional ideals.
-module Algebra.Algorithms.ZeroDim (univPoly, solveWith, solveM,
-                                   solve', matrixRep, vectorRep, solveLinear) where
+module Algebra.Algorithms.ZeroDim (univPoly, radical, isRadical, solveWith,
+                                   solveM, solve', matrixRep, vectorRep, solveLinear) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
 import qualified Algebra.Linear                   as M
@@ -128,7 +128,6 @@ solve' err ideal =
        , all ((<err) . magnitude . substWith mul xs) $ generators ideal
        ]
 
-
 solveWith :: (Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord, Coercible r (Complex Double))
           => Ideal (OrderedPolynomial r ord (S n))
           -> OrderedPolynomial r ord (S n)
@@ -184,8 +183,6 @@ reduction :: (IsPolynomial r n, IsMonomialOrder ord, Field r)
 reduction f =
   let df = diff 0 f
   in snd $ head $ f `divPolynomial` calcGroebnerBasis (toIdeal [f, df])
-
-
 
 -- | Calculate the monic generator of k[X_0, ..., X_n] `intersect` k[X_i].
 univPoly :: forall r ord n. (Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord)
@@ -247,7 +244,14 @@ radical :: forall r ord n . (Ord r, IsPolynomial r n, Field r, IsMonomialOrder o
 radical ideal =
   let gens  = map (reduction . flip univPoly ideal) $ enumOrdinal (sing :: SNat (S n))
   in toIdeal $ calcGroebnerBasis $ toIdeal $ generators ideal ++ gens
-                   
+
+-- | Test if the given zero-dimensional ideal is radical or not.
+isRadical :: forall r ord n. (Ord r, IsPolynomial r n, Field r, IsMonomialOrder ord)
+          => Ideal (OrderedPolynomial r ord (S n)) -> Bool
+isRadical ideal =
+  let gens  = map (reduction . flip univPoly ideal) $ enumOrdinal (sing :: SNat (S n))
+  in all (`isIdealMember` ideal) gens
+
 testMat :: M.Matrix Rational
 testMat = M.fromLists [[1,0,0]
                       ,[0,0,0]
@@ -257,5 +261,6 @@ testMat = M.fromLists [[1,0,0]
                       ,[0,0,0]
                       ,[0,0,0]
                       ,[0,0,0]
-                      ,[0,0,1]]
+                      ,[0,0,1]
+                      ]
 
