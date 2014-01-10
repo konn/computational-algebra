@@ -1,17 +1,17 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures, FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving            #-}
-{-# LANGUAGE IncoherentInstances, MultiParamTypeClasses                      #-}
+{-# LANGUAGE IncoherentInstances, MultiParamTypeClasses, TemplateHaskell     #-}
 {-# LANGUAGE NoMonomorphismRestriction, OverlappingInstances                 #-}
 {-# LANGUAGE OverloadedStrings, PolyKinds, ScopedTypeVariables, TypeFamilies #-}
 {-# LANGUAGE TypeSynonymInstances, UndecidableInstances, StandaloneDeriving  #-}
 -- | Algorithms for zero-dimensional ideals.
-module Algebra.Algorithms.ZeroDim (charPoly, solveLinear, solveWith, solveM, solve') where
+module Algebra.Algorithms.ZeroDim (charPoly, solveWith, solveM, solve', matrixRep, vectorRep, solveLinear) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
+import qualified Algebra.Linear                   as M
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
-import           Algebra.Scalar                   ((.*.))
 import qualified Data.Vector.Generic.Mutable      as MV
 import           Algebra.Scalar
 import           Control.Applicative
@@ -21,10 +21,8 @@ import           Control.Monad
 import           Control.Monad.Random
 import           Data.Complex
 import           Data.List                        hiding (sum)
-import qualified Data.Matrix                      as M
 import           Data.Maybe
 import           Data.Proxy
-import           Control.Monad.ST
 import           Data.Ord
 import           Data.Ratio
 import           Data.Reflection
@@ -65,6 +63,37 @@ instance Coercible Float Rational where
   coerce = toRational
 instance Coercible Rational Float where
   coerce = fromRational
+
+newtype WrappedField a = WrapField { unwrapField :: a
+                                   } deriving (Read, Show, Eq, Ord,
+                                               Additive, Multiplicative,
+                                               Unital, DecidableUnits, Division)
+
+makeWrapped ''WrappedField
+
+instance LeftModule a r => LeftModule a (WrappedField r) where
+  n .* WrapField r = WrapField $ n .* r
+
+instance RightModule a r => RightModule a (WrappedField r) where
+  WrapField r *. n = WrapField $ r *. n
+
+deriving instance Monoidal r => Monoidal (WrappedField r)
+deriving instance Group r => Group (WrappedField r)
+deriving instance DecidableZero r => DecidableZero (WrappedField r)
+
+instance (Ord r, Group r, Ring r) => Num (WrappedField r) where
+  WrapField a + WrapField b = WrapField $ a + b
+  WrapField a - WrapField b = WrapField $ a - b
+  WrapField a * WrapField b = WrapField $ a * b
+  negate = unwrapped %~ negate
+  fromInteger = WrapField . NA.fromInteger
+  abs n = if n < zero then negate n else n
+  signum _ = NA.one
+
+instance (Ord r, Ring r, Division r, Group r) => Fractional (WrappedField r) where
+  WrapField a / WrapField b = WrapField $ a NA./ b
+  recip (WrapField a) = WrapField $ NA.recip a
+  fromRational q = WrapField $ NA.fromInteger (numerator q) NA./ NA.fromInteger (denominator q)
 
 solveM :: forall m r ord n. (MonadRandom m, Field r, IsPolynomial r n, IsMonomialOrder ord,
                              Coercible r (Complex Double))
@@ -141,80 +170,23 @@ matrixRep f =
 coerce' :: Coercible a (Complex Double) => a -> Complex Double
 coerce' a = coerce a
 
-newtype WrappedField a = WrapField { unwrapField :: a
-                                   } deriving (Read, Show, Eq, Ord,
-                                               Additive, Multiplicative,
-                                               Unital, DecidableUnits, Division)
-
-instance LeftModule a r => LeftModule a (WrappedField r) where
-  n .* WrapField r = WrapField $ n .* r
-
-instance RightModule a r => RightModule a (WrappedField r) where
-  WrapField r *. n = WrapField $ r *. n
-
-deriving instance Monoidal r => Monoidal (WrappedField r)
-deriving instance Group r => Group (WrappedField r)
-deriving instance DecidableZero r => DecidableZero (WrappedField r)
-
-instance (Unital r, Additive r, Multiplicative r, Group r, Ring r) => Num (WrappedField r) where
-  WrapField a + WrapField b = WrapField $ a + b
-  WrapField a - WrapField b = WrapField $ a - b
-  WrapField a * WrapField b = WrapField $ a * b
-  negate = WrapField . negate . unwrapField
-  fromInteger = WrapField . NA.fromInteger
-  abs = id
-  signum _ = NA.one
-
-instance (Ring r, Division r, Group r) => Fractional (WrappedField r) where
-  WrapField a / WrapField b = WrapField $ a NA./ b
-  recip (WrapField a) = WrapField $ NA.recip a
-  fromRational q = WrapField $ NA.fromInteger (numerator q) NA./ NA.fromInteger (denominator q)
-
--- | Solve linear systems
-solveLinear :: (Ord r, Ring r, Monoidal r, Eq r, Division r, Group r)
-            => M.Matrix r
-            -> V.Vector r
-            -> Maybe (V.Vector r)
-solveLinear mat vec =
-  let (u, l, p, d) = M.luDecomp $ fmap WrapField mat
-      ans = M.getCol 1 $ p P.* M.colVector (fmap WrapField vec)
-      size = M.ncols mat
-      solveL = V.modify $ \mv -> do
-        forM_ [0,1..size-1] $ \ i -> do
-          forM_ [0,1..i-1] $ \j -> do
-            a <- MV.read mv i
-            b <- MV.read mv j
-            MV.write mv i $ a - (l M.! (i+1, j+1)) * b
-      solveU = V.modify $ \mv -> do
-        forM_ [size-1, size-2..0] $ \ i -> do
-          forM_ [i+1,i+2..size-1] $ \j -> do
-            a <- MV.read mv i
-            b <- MV.read mv j
-            MV.write mv i $ a - (u M.! (i+1, j+1)) * b
-          a0 <- MV.read mv i
-          MV.write mv i $ a0 / (u M.! (i+1, i+1))
-  in if d == zero || M.nrows u < size || M.ncols u < size || M.nrows l < size ||
-        M.ncols l < size || M.diagProd l == zero || M.diagProd u == zero
-     then Nothing
-     else Just $ fmap unwrapField $ solveU $ solveL ans
-
-vectorRepr :: forall r order ideal n.
+vectorRep :: forall r order ideal n.
               (Division r, IsPolynomial r n, IsMonomialOrder order, Reifies ideal (QIdeal r order n))
            => Quotient r order n ideal -> V.Vector r
-vectorRepr f =
+vectorRep f =
   case standardMonomials' (Proxy :: Proxy ideal) of
     Just base -> let mf = quotRepr f
                  in V.fromList $ map (flip coeff mf . leadingMonomial . quotRepr) base
     Nothing -> error "dieeee"
 
 charPoly :: forall r ord n. (Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord)
-       => Ordinal n
-       -> Ideal (OrderedPolynomial r ord n)
-       -> OrderedPolynomial r ord n
+         => Ordinal n
+         -> Ideal (OrderedPolynomial r ord n)
+         -> OrderedPolynomial r ord n
 charPoly nth ideal =
   reifyQuotient ideal $ \pxy ->
   let x = var nth
-      p0 : pows = splitAt bLen [vectorRepr $ modIdeal' pxy (pow x i) | i <- [0:: Natural ..] ]
+      p0 : pows = [vectorRep $ modIdeal' pxy (pow x i) | i <- [0:: Natural ..] ]
       step m (p : ps) =
         case solveLinear m p of
           Nothing  -> step (m M.<|> M.colVector p) ps
@@ -222,4 +194,43 @@ charPoly nth ideal =
             let cur = fromIntegral $ V.length ans :: Natural
             in pow x cur - sum (zipWith (.*.) (V.toList ans) [pow x i | i <- [0 :: Natural ..]])
   in step (M.colVector p0) pows
+
+-- | Solve linear systems
+solveLinear :: (Ord r, Ring r, Monoidal r, Eq r, Division r, Group r)
+            => M.Matrix r
+            -> V.Vector r
+            -> Maybe (V.Vector r)
+solveLinear mat vec =
+  let (u, l, p, q, d, e) = M.luDecomp' $ fmap WrapField mat
+  in if d == zero || V.null (M.getDiag l) ||  M.diagProd l == zero ||
+        V.null (M.getDiag u) || M.diagProd u == zero
+     then Nothing
+     else
+       let  ans = M.getCol 1 $ p P.* M.colVector (fmap WrapField vec)
+            solveL v = V.create $ do
+              mv <- MV.replicate (M.ncols l) 0
+              forM_ [0..M.ncols l - 1] $ \i -> do
+                MV.write mv i $ v V.! i
+                forM_ [0,1..i-1] $ \j -> do
+                  a <- MV.read mv i
+                  b <- MV.read mv j
+                  MV.write mv i $ a - (l M.! (i + 1, j + 1)) * b
+              return mv
+            solveU v = V.create $ do
+              mv <- MV.replicate (M.ncols u) 0
+              forM_ [M.ncols u - 1, M.ncols u - 2..0] $ \ i -> do
+                MV.write mv i $ v V.! i
+                forM_ [i+1,i+2..M.ncols u-1] $ \j -> do
+                  a <- MV.read mv i
+                  b <- MV.read mv j
+                  MV.write mv i $ a - (u M.! (i+1, j+1)) * b
+                a0 <- MV.read mv i
+                MV.write mv i $ a0 / (u M.! (i+1, i+1))
+              return mv
+       in let cfs = M.getCol 1 $ M.transpose q P.* M.colVector (solveU (solveL ans))
+          in if V.all (== 0) cfs &&
+                fmap WrapField mat P.* M.colVector cfs /= M.colVector (fmap WrapField vec)
+             then Nothing
+             else  Just $ fmap unwrapField cfs
+
 
