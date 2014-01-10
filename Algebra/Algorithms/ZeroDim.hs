@@ -5,7 +5,8 @@
 {-# LANGUAGE OverloadedStrings, PolyKinds, ScopedTypeVariables, TypeFamilies #-}
 {-# LANGUAGE TypeSynonymInstances, UndecidableInstances, StandaloneDeriving  #-}
 -- | Algorithms for zero-dimensional ideals.
-module Algebra.Algorithms.ZeroDim (univPoly, solveWith, solveM, solve', matrixRep, vectorRep, solveLinear) where
+module Algebra.Algorithms.ZeroDim (univPoly, solveWith, solveM,
+                                   solve', matrixRep, vectorRep, solveLinear) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
 import qualified Algebra.Linear                   as M
@@ -28,14 +29,13 @@ import           Data.Ratio
 import           Data.Reflection
 import           Data.Singletons
 import           Data.Type.Natural                (Nat (..), SNat,
-                                                   Sing (SS, SZ), sNatToInt)
+                                                   sNatToInt, One)
 import           Data.Type.Ordinal
 import qualified Data.Vector                      as V
 import qualified Data.Vector.Sized                as SV
 import           Numeric.Algebra                  hiding ((/), (<))
 import qualified Numeric.Algebra                  as NA
-import           Numeric.Decidable.Zero
-import           Numeric.LinearAlgebra            ((@>), (@@>))
+import           Numeric.LinearAlgebra            ((@>))
 import qualified Numeric.LinearAlgebra            as LA
 import           Prelude                          hiding (lex, negate, recip,
                                                    sum, (*), (+), (-), (^),
@@ -95,7 +95,7 @@ instance (Ord r, Ring r, Division r, Group r) => Fractional (WrappedField r) whe
   recip (WrapField a) = WrapField $ NA.recip a
   fromRational q = WrapField $ NA.fromInteger (numerator q) NA./ NA.fromInteger (denominator q)
 
-solveM :: forall m r ord n. (MonadRandom m, Field r, IsPolynomial r n, IsMonomialOrder ord,
+solveM :: forall m r ord n. (Ord r, MonadRandom m, Field r, IsPolynomial r n, IsMonomialOrder ord,
                              Coercible r (Complex Double))
        => Ideal (OrderedPolynomial r ord (S n))
        -> m [SV.Vector (Complex Double) (S n)]
@@ -129,12 +129,12 @@ solve' err ideal =
        ]
 
 
-solveWith :: (Field r, IsPolynomial r n, IsMonomialOrder ord, Coercible r (Complex Double))
+solveWith :: (Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord, Coercible r (Complex Double))
           => Ideal (OrderedPolynomial r ord (S n))
           -> OrderedPolynomial r ord (S n)
           -> [SV.Vector (Complex Double) (S n)]
 solveWith i0 f0 =
-  let ideal = calcGroebnerBasis i0
+  let ideal = generators $ radical i0
   in reifyQuotient (toIdeal ideal) $ \pxy ->
   let f = modIdeal' pxy f0
       vars = sortBy (comparing snd) $ zip (enumOrdinal $ sArity f0) $
@@ -178,6 +178,14 @@ vectorRep f =
     Just base -> let mf = quotRepr f
                  in V.fromList $ map (flip coeff mf . leadingMonomial . quotRepr) base
     Nothing -> error "dieeee"
+
+reduction :: (IsPolynomial r n, IsMonomialOrder ord, Field r)
+             => OrderedPolynomial r ord (S n) -> OrderedPolynomial r ord (S n)
+reduction f =
+  let df = diff 0 f
+  in snd $ head $ f `divPolynomial` calcGroebnerBasis (toIdeal [f, df])
+
+
 
 -- | Calculate the monic generator of k[X_0, ..., X_n] `intersect` k[X_i].
 univPoly :: forall r ord n. (Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord)
@@ -233,6 +241,12 @@ solveLinear mat vec =
         MV.write mv i $ a0 / (u M.! (i+1, i+1))
       return mv
 
+-- | Calculate the radical of the given zero-dimensional ideal.
+radical :: forall r ord n . (Ord r, IsPolynomial r n, Field r, IsMonomialOrder ord)
+        => Ideal (OrderedPolynomial r ord (S n)) -> Ideal (OrderedPolynomial r ord (S n))
+radical ideal =
+  let gens  = map (reduction . flip univPoly ideal) $ enumOrdinal (sing :: SNat (S n))
+  in toIdeal $ calcGroebnerBasis $ toIdeal $ generators ideal ++ gens
                    
 testMat :: M.Matrix Rational
 testMat = M.fromLists [[1,0,0]

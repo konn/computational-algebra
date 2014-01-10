@@ -501,7 +501,7 @@ allVars :: forall k ord n . (IsOrder ord, IsPolynomial k n)
 allVars = V.unsafeFromList' $ genVars (sing :: SNat (S n))
 
 -- | Partially difference at (m+1)-th variable
-diff :: forall n m ord r. (Ring r, SingRep n, IsMonomialOrder ord, SingRep m)
+diff :: forall n ord r. (Ring r, SingRep n, IsMonomialOrder ord)
      => Ordinal (S n) -> OrderedPolynomial r ord (S n) -> OrderedPolynomial r ord (S n)
 diff mthVar = unwrapped %~ M.mapKeysWith (+) (unwrapped %~ dropDegree)
                          . M.mapWithKey (\k c -> c * NA.fromIntegral (V.sIndex mthVar (getMonomial k)))
