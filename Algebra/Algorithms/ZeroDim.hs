@@ -5,7 +5,7 @@
 {-# LANGUAGE OverloadedStrings, PolyKinds, ScopedTypeVariables, TypeFamilies #-}
 {-# LANGUAGE TypeSynonymInstances, UndecidableInstances, StandaloneDeriving  #-}
 -- | Algorithms for zero-dimensional ideals.
-module Algebra.Algorithms.ZeroDim (charPoly, solveWith, solveM, solve', matrixRep, vectorRep, solveLinear) where
+module Algebra.Algorithms.ZeroDim (univPoly, solveWith, solveM, solve', matrixRep, vectorRep, solveLinear) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
 import qualified Algebra.Linear                   as M
@@ -179,58 +179,69 @@ vectorRep f =
                  in V.fromList $ map (flip coeff mf . leadingMonomial . quotRepr) base
     Nothing -> error "dieeee"
 
-charPoly :: forall r ord n. (Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord)
+-- | Calculate the monic generator of k[X_0, ..., X_n] `intersect` k[X_i].
+univPoly :: forall r ord n. (Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord)
          => Ordinal n
          -> Ideal (OrderedPolynomial r ord n)
          -> OrderedPolynomial r ord n
-charPoly nth ideal =
+univPoly nth ideal =
   reifyQuotient ideal $ \pxy ->
   let x = var nth
-      p0 : pows = [vectorRep $ modIdeal' pxy (pow x i) | i <- [0:: Natural ..] ]
+      p0 : pows = [fmap WrapField $ vectorRep $ modIdeal' pxy (pow x i) | i <- [0:: Natural ..] ]
       step m (p : ps) =
         case solveLinear m p of
           Nothing  -> step (m M.<|> M.colVector p) ps
           Just ans ->
             let cur = fromIntegral $ V.length ans :: Natural
-            in pow x cur - sum (zipWith (.*.) (V.toList ans) [pow x i | i <- [0 :: Natural ..]])
+            in pow x cur - sum (zipWith (.*.) (map unwrapField $ V.toList ans)
+                                [pow x i | i <- [0 :: Natural .. cur P.- 1]])
   in step (M.colVector p0) pows
 
 -- | Solve linear systems
-solveLinear :: (Ord r, Ring r, Monoidal r, Eq r, Division r, Group r)
+solveLinear :: (Ord r, Fractional r)
             => M.Matrix r
             -> V.Vector r
             -> Maybe (V.Vector r)
 solveLinear mat vec =
-  let (u, l, p, q, d, e) = M.luDecomp' $ fmap WrapField mat
-  in if d == zero || V.null (M.getDiag l) ||  M.diagProd l == zero ||
-        V.null (M.getDiag u) || M.diagProd u == zero
-     then Nothing
-     else
-       let  ans = M.getCol 1 $ p P.* M.colVector (fmap WrapField vec)
-            solveL v = V.create $ do
-              mv <- MV.replicate (M.ncols l) 0
-              forM_ [0..M.ncols l - 1] $ \i -> do
-                MV.write mv i $ v V.! i
-                forM_ [0,1..i-1] $ \j -> do
-                  a <- MV.read mv i
-                  b <- MV.read mv j
-                  MV.write mv i $ a - (l M.! (i + 1, j + 1)) * b
-              return mv
-            solveU v = V.create $ do
-              mv <- MV.replicate (M.ncols u) 0
-              forM_ [M.ncols u - 1, M.ncols u - 2..0] $ \ i -> do
-                MV.write mv i $ v V.! i
-                forM_ [i+1,i+2..M.ncols u-1] $ \j -> do
-                  a <- MV.read mv i
-                  b <- MV.read mv j
-                  MV.write mv i $ a - (u M.! (i+1, j+1)) * b
-                a0 <- MV.read mv i
-                MV.write mv i $ a0 / (u M.! (i+1, i+1))
-              return mv
-       in let cfs = M.getCol 1 $ M.transpose q P.* M.colVector (solveU (solveL ans))
-          in if V.all (== 0) cfs &&
-                fmap WrapField mat P.* M.colVector cfs /= M.colVector (fmap WrapField vec)
+  if M.diagProd u == 0
+  then Nothing 
+  else let ans = M.getCol 1 $ p P.* M.colVector vec
+       in let cfs = M.getCol 1 $ q P.* M.colVector (solveU (solveL ans))
+          in if V.all (== 0) cfs && V.any (/= 0) vec
              then Nothing
-             else  Just $ fmap unwrapField cfs
+             else Just cfs
+  where
+    (u, l, p, q, _, _) = M.luDecomp' mat
+    solveL v = V.create $ do
+      mv <- MV.replicate (M.ncols l) 0
+      forM_ [0..M.ncols l - 1] $ \i -> do
+        MV.write mv i $ v V.! i
+        forM_ [0,1..i-1] $ \j -> do
+          a <- MV.read mv i
+          b <- MV.read mv j
+          MV.write mv i $ a P.- (l M.! (i + 1, j + 1)) P.* b
+      return mv
+    solveU v = V.create $ do
+      mv <- MV.replicate (M.ncols u) 0
+      forM_ [M.ncols u - 1, M.ncols u - 2..0] $ \ i -> do
+        MV.write mv i $ v V.! i
+        forM_ [i+1,i+2..M.ncols u-1] $ \j -> do
+          a <- MV.read mv i
+          b <- MV.read mv j
+          MV.write mv i $ a P.- (u M.! (i+1, j+1)) P.* b
+        a0 <- MV.read mv i
+        MV.write mv i $ a0 / (u M.! (i+1, i+1))
+      return mv
 
+                   
+testMat :: M.Matrix Rational
+testMat = M.fromLists [[1,0,0]
+                      ,[0,0,0]
+                      ,[0,0,0]
+                      ,[0,0,0]
+                      ,[0,1,0]
+                      ,[0,0,0]
+                      ,[0,0,0]
+                      ,[0,0,0]
+                      ,[0,0,1]]
 
