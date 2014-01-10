@@ -5,7 +5,7 @@
 {-# LANGUAGE OverloadedStrings, PolyKinds, ScopedTypeVariables, TypeFamilies #-}
 {-# LANGUAGE TypeSynonymInstances, UndecidableInstances, StandaloneDeriving  #-}
 -- | Algorithms for zero-dimensional ideals.
-module Algebra.Algorithms.ZeroDim (univPoly, radical, isRadical, solveWith,
+module Algebra.Algorithms.ZeroDim (univPoly, radical, isRadical, solveWith, WrappedField(..),
                                    solveM, solve', matrixRep, vectorRep, solveLinear) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
