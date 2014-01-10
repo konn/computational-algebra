@@ -3,7 +3,7 @@
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, OverlappingInstances #-}
 {-# LANGUAGE PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving   #-}
 {-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances, ViewPatterns  #-}
-{-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults                    #-}
+{-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults -fwarn-incomplete-patterns                    #-}
 module Algebra.Ring.Polynomial
     ( Polynomial, Monomial, MonomialOrder, EliminationType, EliminationOrder
     , WeightedEliminationOrder, eliminationOrder, weightedEliminationOrder
@@ -225,7 +225,7 @@ instance (SingRep n, IsMonomialOrder o, IsMonomialOrder o') => IsMonomialOrder (
 instance (ToWeightVector ws, IsMonomialOrder ord) => IsMonomialOrder (WeightOrder ws ord)
 
 -- | Monomial order which can be use to calculate n-th elimination ideal.
--- This should judge it as bigger that contains variables to eliminate.
+-- This should judge monomial to be bigger if it contains variables to eliminate.
 class (IsMonomialOrder ord, SingRep n) => EliminationType n ord
 instance SingRep n => EliminationType n Lex
 instance (SingRep n, IsMonomialOrder ord, IsMonomialOrder ord') => EliminationType n (ProductOrder n ord ord')
@@ -426,11 +426,19 @@ instance (IsMonomialOrder order, IsPolynomial r n, Num r) => Num (OrderedPolynom
   abs = id
   negate = ((P.negate 1 :: Integer) .*)
 
-varX :: (Eq r, NoetherianRing r, SingRep n, IsOrder order, One :<= n) => OrderedPolynomial r order n
-varX = polynomial $ M.singleton (OrderedMonomial $ fromList sing [1]) one
+varX :: (Eq r, NoetherianRing r, SingRep n, IsOrder order) => OrderedPolynomial r order (S n)
+varX = var OZ
 
-var :: (Eq r, NoetherianRing r, SingRep m, IsOrder order, S n :<= m) => SNat (S n) -> OrderedPolynomial r order m
-var vIndex = polynomial $ M.singleton (OrderedMonomial $ fromList sing (buildIndex vIndex)) one
+var :: (Eq r, NoetherianRing r, SingRep m, IsOrder order) => Ordinal m -> OrderedPolynomial r order m
+var vIndex = polynomial $ M.singleton (OrderedMonomial $ buildIdx vIndex) one
+
+buildIdx :: forall n. SingRep n => Ordinal n -> Monomial n
+buildIdx OZ =
+  case sing :: SNat n of
+    SS n -> 1 :- V.replicate n 0
+buildIdx (OS n) =
+  case sing :: SNat n of
+    SS _ -> 0 :- buildIdx n
 
 toPolynomial :: (IsOrder order, IsPolynomial r n) => (r, Monomial n) -> OrderedPolynomial r order n
 toPolynomial (c, deg) = polynomial $ M.singleton (OrderedMonomial deg) c
@@ -438,12 +446,8 @@ toPolynomial (c, deg) = polynomial $ M.singleton (OrderedMonomial deg) c
 polynomial :: (SingRep n, Eq r, NoetherianRing r, IsOrder order) => Map (OrderedMonomial order n) r -> OrderedPolynomial r order n
 polynomial dic = normalize $ Polynomial dic
 
-buildIndex :: SNat (S n) -> [Int]
-buildIndex (SS SZ) = [1]
-buildIndex (SS (SS n))  = 0 : buildIndex (SS n)
-
 leadingTerm :: (IsOrder order, IsPolynomial r n)
-                => OrderedPolynomial r order n -> (r, Monomial n)
+            => OrderedPolynomial r order n -> (r, Monomial n)
 leadingTerm (Polynomial d) =
   case M.maxViewWithKey d of
     Just ((deg, c), _) -> (c, getMonomial deg)
@@ -541,12 +545,9 @@ shiftR k =
   case singInstance k of
     SingInstance -> transformMonomial (V.append (fromList k []))
 
-genVars :: forall k o n. (IsPolynomial k (S n), IsOrder o)
-        => SNat (S n) -> [OrderedPolynomial k o (S n)]
-genVars sn =
-    let n  = sNatToInt sn
-        seed = cycle $ 1 : replicate (n - 1) 0
-    in map (\m -> Polynomial $ M.singleton (OrderedMonomial $ fromList sn $ take n (drop (n-m) seed)) one) [0..n-1]
+genVars :: forall k o n. (IsPolynomial k n, IsOrder o)
+        => SNat n -> [OrderedPolynomial k o n]
+genVars sn = map var $ enumOrdinal sn
 
 sArity :: OrderedPolynomial k ord n -> SNat n
 sArity (Polynomial dic) = V.sLength $ getMonomial $ fst $ M.findMin dic
