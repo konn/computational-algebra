@@ -57,8 +57,9 @@ multWithTable f g =
   let qid = reflect f
       table = multTable qid
       basis = vBasis qid
-  in sum [ Quotient $ coeff l (quotRepr f) .*. coeff r (quotRepr g) .*. (M.lookupDefault zero (l, r) table)
-         | l <- basis, r <- basis ]
+  in sum [ Quotient $ c .*. d .*. (M.lookupDefault zero (l, r) table)
+         | (c,l) <- getTerms $ quotRepr_ f, (d, r) <-  getTerms $ quotRepr_ g
+         ]
 
 instance Show (OrderedPolynomial r ord n) => Show (Quotient r ord n ideal) where
   show (Quotient f) = show f
@@ -202,4 +203,4 @@ reduce :: (Eq r, Division r, SingRep n, NoetherianRing r, IsMonomialOrder ord)
 reduce f i = withQuotient i $ modIdeal f
 
 isZeroDimensional :: (Eq r, Division r, SingRep n, NoetherianRing r, IsMonomialOrder ord) => [OrderedPolynomial r ord n] -> Bool
-isZeroDimensional ii = isJust $ stdMonoms ii
+isZeroDimensional ii = isJust $ stdMonoms $ calcGroebnerBasis $ toIdeal ii
