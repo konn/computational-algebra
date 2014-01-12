@@ -833,17 +833,6 @@ recLUDecomp' u l p q d e k n =
     else let x = (u_ ! (h,k)) / ukk
          in  go (combineRows h (-x) k u_) (setElem x (h,k) l_) (h+1)
 
-testMat :: Matrix Double
-testMat = fromLists [[1,0,0]
-                    ,[0,0,0]
-                    ,[0,0,0]
-                    ,[0,0,0]
-                    ,[0,1,0]
-                    ,[0,0,0]
-                    ,[0,0,0]
-                    ,[0,0,0]
-                    ,[0,0,1]]
-
 -------------------------------------------------------
 -------------------------------------------------------
 ---- PROPERTIES

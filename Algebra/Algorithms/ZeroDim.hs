@@ -212,7 +212,9 @@ solveLinear mat vec =
   then Nothing 
   else let ans = M.getCol 1 $ p P.* M.colVector vec
        in let cfs = M.getCol 1 $ q P.* M.colVector (solveU (solveL ans))
-          in if V.all (== 0) cfs && V.any (/= 0) vec
+              degenerate = V.all (== 0) cfs && V.any (/= 0) vec
+              unsolvable = V.length cfs < V.length vec && V.any (/= 0) (V.drop (V.length cfs) ans)
+          in if degenerate || unsolvable
              then Nothing
              else Just cfs
   where
