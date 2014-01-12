@@ -436,9 +436,11 @@ buildIdx :: forall n. SingRep n => Ordinal n -> Monomial n
 buildIdx OZ =
   case sing :: SNat n of
     SS n -> 1 :- V.replicate n 0
+    _   -> error "impossible"
 buildIdx (OS n) =
   case sing :: SNat n of
     SS _ -> 0 :- buildIdx n
+    _    -> error "impossible"
 
 toPolynomial :: (IsOrder order, IsPolynomial r n) => (r, Monomial n) -> OrderedPolynomial r order n
 toPolynomial (c, deg) = polynomial $ M.singleton (OrderedMonomial deg) c
