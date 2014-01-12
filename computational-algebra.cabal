@@ -53,9 +53,9 @@ library
                ,       matrix
                ,       vector
                ,       mtl                   == 2.1.*
-               ,       indexed
-               ,       indexed-do-notation
-               ,       indexed-extras
+--               ,       indexed
+--               ,       indexed-do-notation
+--               ,       indexed-extras
                ,       hmatrix
                ,       vector
                ,       primitive
