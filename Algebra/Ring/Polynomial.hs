@@ -369,7 +369,7 @@ showPolynomialWithVars dic p0@(Polynomial d)
                          else if (c /= one || isConstantMonomial deg)
                               then show c ++ " "
                               else ""
-              in Just $ cstr ++ unwords (mapMaybe showDeg (zip [1..] $ V.toList deg))
+              in Just $ cstr ++ unwords (mapMaybe showDeg (zip [0..] $ V.toList deg))
       showDeg (n, p) | p == 0    = Nothing
                      | p == 1    = Just $ showVar n
                      | otherwise = Just $ showVar n ++ "^" ++ show p
@@ -407,7 +407,7 @@ showPolynomialWith vDic showCoeff p0@(Polynomial d)
                       | c == one = Positive ""
                       | c == negate one = Negative ""
                       | otherwise                                 = cKind
-              in Just $ (cff, unwords (mapMaybe showDeg (zip [1..] $ V.toList deg)))
+              in Just $ (cff, unwords (mapMaybe showDeg (zip [0..] $ V.toList deg)))
       showDeg (n, p) | p == 0    = Nothing
                      | p == 1    = Just $ showVar n
                      | otherwise = Just $ showVar n ++ "^" ++ show p
