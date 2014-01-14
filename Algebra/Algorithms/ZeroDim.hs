@@ -215,7 +215,8 @@ solveLinear mat vec =
               cfs = M.getCol 1 $ q P.* M.colVector (solveU lsol)
               degenerate = V.all (== 0) cfs && V.any (/= 0) vec
               unsolvable = uRank < V.foldr (\a acc -> if a /= 0 then acc P.+ 1 else acc) 0 lsol
-          in if degenerate || unsolvable
+              unsolvable' = V.length cfs < V.length vec && V.any (/= 0) (V.drop (V.length cfs) ans)
+          in if degenerate || unsolvable || unsolvable'
              then Nothing
              else Just cfs
   where
