@@ -53,7 +53,6 @@ main = do
   showSols $ solve' err ideal
   putStrLn "\n---- FGLM Algorithm"
   let jdeal = toIdeal [x*y + z - x*z, x^^2 - z, 2*x^^3 - x^^2 * y * z - 1]
-      jdeal' = mapIdeal (substWith (.*.) (z SV.:- y SV.:- x SV.:- SV.Nil)) jdeal
-      lexed  = map (substWith (.*.) (x SV.:- y SV.:- z SV.:- SV.Nil)) $ fst $ fglm jdeal'
-  print lexed
+  print $ fglm jdeal
+  print $ calcGroebnerBasisWith Lex jdeal
   return ()

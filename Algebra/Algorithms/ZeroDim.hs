@@ -211,14 +211,16 @@ solveLinear mat vec =
   if M.diagProd u == 0
   then Nothing 
   else let ans = M.getCol 1 $ p P.* M.colVector vec
-       in let cfs = M.getCol 1 $ q P.* M.colVector (solveU (solveL ans))
+       in let lsol = solveL ans
+              cfs = M.getCol 1 $ q P.* M.colVector (solveU lsol)
               degenerate = V.all (== 0) cfs && V.any (/= 0) vec
-              unsolvable = V.length cfs < V.length vec && V.any (/= 0) (V.drop (V.length cfs) ans)
+              unsolvable = uRank < V.foldr (\a acc -> if a /= 0 then acc P.+ 1 else acc) 0 lsol
           in if degenerate || unsolvable
              then Nothing
              else Just cfs
   where
     (u, l, p, q, _, _) = M.luDecomp' mat
+    uRank = V.foldr (\a acc -> if a /= 0 then acc P.+ 1 else acc) (0 :: Int) $ M.getDiag u
     solveL v = V.create $ do
       mv <- MV.replicate (M.ncols l) 0
       forM_ [0..M.ncols l - 1] $ \i -> do
