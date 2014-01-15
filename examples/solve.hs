@@ -15,6 +15,7 @@ import           Algebra.Scalar
 import           Data.Complex
 import           Data.Ratio
 import           Data.Type.Natural
+import           Data.Type.Ordinal
 import qualified Data.Vector.Sized           as SV
 import           Numeric.Algebra             hiding ((<))
 import qualified Numeric.Algebra             as NA
@@ -55,4 +56,12 @@ main = do
   let jdeal = toIdeal [x*y + z - x*z, x^^2 - z, 2*x^^3 - x^^2 * y * z - 1]
   print $ fglm jdeal
   print $ calcGroebnerBasisWith Lex jdeal
+  print $ univPoly 0 jdeal
+  print $ univPoly 1 jdeal
+  print $ univPoly 2 jdeal
   return ()
+
+substIdeal :: [OrderedPolynomial Rational Grevlex Three]
+           -> Ideal (OrderedPolynomial Rational order Three)
+           -> Ideal (OrderedPolynomial Rational Grevlex Three)
+substIdeal = mapIdeal . substWith (.*.) . SV.unsafeFromList'

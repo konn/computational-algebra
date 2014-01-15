@@ -6,7 +6,7 @@
 {-# LANGUAGE TypeSynonymInstances, UndecidableInstances, StandaloneDeriving  #-}
 -- | Algorithms for zero-dimensional ideals.
 module Algebra.Algorithms.ZeroDim (univPoly, radical, isRadical, solveWith, WrappedField(..),
-                                   solveM, solve', matrixRep, vectorRep, solveLinear) where
+                                   solveM, solve', matrixRep, vectorRep, solveLinear, solveLinear') where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
 import qualified Algebra.Linear                   as M
@@ -194,7 +194,7 @@ univPoly nth ideal =
   let x = var nth
       p0 : pows = [fmap WrapField $ vectorRep $ modIdeal' pxy (pow x i) | i <- [0:: Natural ..] ]
       step m (p : ps) =
-        case solveLinear m p of
+        case solveLinear' m p of
           Nothing  -> step (m M.<|> M.colVector p) ps
           Just ans ->
             let cur = fromIntegral $ V.length ans :: Natural
@@ -222,6 +222,42 @@ solveLinear mat vec =
   where
     (u, l, p, q, _, _) = M.luDecomp' mat
     uRank = V.foldr (\a acc -> if a /= 0 then acc P.+ 1 else acc) (0 :: Int) $ M.getDiag u
+    solveL v = V.create $ do
+      mv <- MV.replicate (M.ncols l) 0
+      forM_ [0..M.ncols l - 1] $ \i -> do
+        MV.write mv i $ v V.! i
+        forM_ [0,1..i-1] $ \j -> do
+          a <- MV.read mv i
+          b <- MV.read mv j
+          MV.write mv i $ a P.- (l M.! (i + 1, j + 1)) P.* b
+      return mv
+    solveU v = V.create $ do
+      mv <- MV.replicate (M.ncols u) 0
+      forM_ [M.ncols u - 1, M.ncols u - 2..0] $ \ i -> do
+        MV.write mv i $ v V.! i
+        forM_ [i+1,i+2..M.ncols u-1] $ \j -> do
+          a <- MV.read mv i
+          b <- MV.read mv j
+          MV.write mv i $ a P.- (u M.! (i+1, j+1)) P.* b
+        a0 <- MV.read mv i
+        MV.write mv i $ a0 / (u M.! (i+1, i+1))
+      return mv
+
+solveLinear' :: (Ord r, Fractional r)
+            => M.Matrix r
+            -> V.Vector r
+            -> Maybe (V.Vector r)
+solveLinear' mat vec =
+  if uRank u < uRank u'
+  then Nothing 
+  else let ans = M.getCol 1 $ p P.* M.colVector vec
+           lsol = solveL ans
+           cfs = M.getCol 1 $ q P.* M.colVector (solveU lsol)
+       in Just cfs
+  where
+    (u, l, p, q, _, _) = M.luDecomp' mat
+    (u', _,_, _, _, _) = M.luDecomp' (mat M.<|> M.colVector vec)
+    uRank = V.foldr (\a acc -> if a /= 0 then acc P.+ 1 else acc) (0 :: Int) . M.getDiag
     solveL v = V.create $ do
       mv <- MV.replicate (M.ncols l) 0
       forM_ [0..M.ncols l - 1] $ \i -> do

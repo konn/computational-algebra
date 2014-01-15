@@ -93,7 +93,7 @@ mainLoop = do
       cond | null bs   = if V.all (== zero) lx
                          then Just $ V.replicate (length bs) zero
                          else Nothing
-           | otherwise = solveLinear mat (fmap WrapField lx)
+           | otherwise = solveLinear' mat (fmap WrapField lx)
   case cond of
     Nothing -> do
       proced .== Nothing
