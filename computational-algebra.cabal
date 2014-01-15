@@ -229,3 +229,38 @@ Benchmark monomial-order-bench
                ,        monomorphic
                ,        random
                ,        deepseq
+
+Benchmark linear-bench
+  -- buildable:            False
+  type:                 exitcode-stdio-1.0
+  main-is:              linear.hs
+  hs-source-dirs:       bench, share
+  ghc-options:          -Wall -threaded
+  other-modules:        Instances
+  build-depends:        base
+               ,        test-framework          >= 0.8
+               ,        test-framework-hunit    >= 0.3
+               ,        QuickCheck              >= 2.6
+               ,        HUnit                   >= 1.2
+               ,        hspec                   >= 1.7
+               ,        containers
+               ,        computational-algebra
+               ,        monomorphic
+               ,        smallcheck              >= 1.0
+               ,        hspec-smallcheck        >= 0.1
+               ,        deepseq
+               ,        MonadRandom
+               ,        quickcheck-instances
+               ,        algebra
+               ,        sized-vector
+               ,        type-natural
+               ,        reflection
+               ,        tagged
+               ,        deepseq
+               ,        criterion
+               ,        process
+               ,        containers
+               ,        parallel
+               ,        lens
+               ,        vector
+               ,        process

@@ -3,8 +3,9 @@
 {-# LANGUAGE OverlappingInstances, ScopedTypeVariables, StandaloneDeriving #-}
 {-# LANGUAGE UndecidableInstances                                          #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
-module Instances (ZeroDimIdeal(..), polyOfDim, arbitraryRational,
+module Instances (ZeroDimIdeal(..), polyOfDim, arbitraryRational, arbitrarySolvable,
                   quotOfDim, isNonTrivial, Equation(..), MatrixCase(..)) where
+import qualified Algebra.Linear                   as M hiding (fromList)
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial          hiding (Positive)
 import           Algebra.Ring.Polynomial.Quotient
@@ -17,8 +18,9 @@ import           Data.Ratio
 import           Data.Reflection                  hiding (Z)
 import qualified Data.Sequence                    as S
 import           Data.Type.Natural
+import qualified Data.Vector                      as V
 import           Data.Vector.Sized                (Vector (..))
-import qualified Data.Vector.Sized                as V
+import qualified Data.Vector.Sized                as SV
 import qualified Numeric.Algebra                  as NA
 import           Test.QuickCheck
 import qualified Test.QuickCheck                  as QC
@@ -82,7 +84,7 @@ instance SingRep n => Arbitrary (Monomial n) where
   arbitrary = arbVec
 
 arbVec :: forall n. SingRep n => Gen (Monomial n)
-arbVec = V.unsafeFromList len . map QC.getNonNegative <$> vector (sNatToInt len)
+arbVec = SV.unsafeFromList len . map QC.getNonNegative <$> vector (sNatToInt len)
     where
       len = sing :: SNat n
 
@@ -157,3 +159,9 @@ instance Arbitrary Equation where
     MatrixCase as <- arbitrary
     v <- vector $ length as
     return $ Equation as v
+
+arbitrarySolvable :: Gen Equation
+arbitrarySolvable = do
+    MatrixCase as <- arbitrary
+    v <- vector $ length $ head as
+    return $ Equation as (V.toList $ M.getCol 1 $ M.fromLists as * M.colVector (V.fromList v))

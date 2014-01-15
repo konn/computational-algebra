@@ -27,7 +27,7 @@ main = hspec $ do
     it "cannot solve unsolvable cases" $ do
       pendingWith "need example"
   describe "solveLinear" $ do
-    prop "generates same answer as solveLinear'" $ forAll (resize 10 arbitrary) $ \(Equation mat0 v0) ->
+    prop "generates same answer as solveLinear'" $ forAll (resize 20 arbitrary) $ \(Equation mat0 v0) ->
       let mat = M.fromLists mat0
           v   = V.fromList v0
       in solveLinear mat v == solveLinear' mat v
