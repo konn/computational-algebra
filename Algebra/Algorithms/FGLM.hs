@@ -63,24 +63,23 @@ image a = views lMap ($ a)
 fglm :: (Ord r, SingRep n, Division r, NoetherianRing r, IsMonomialOrder ord)
      => Ideal (OrderedPolynomial r ord (S n))
      -> ([OrderedPolynomial r Lex (S n)], [OrderedPolynomial r Lex (S n)])
-fglm ideal = reifyQuotient ideal $ \pxy ->
-  let (gs, bs) = fglmMap (\f -> vectorRep $ modIdeal' pxy f)
-      Just stds = map (changeOrder Lex . quotRepr) <$> standardMonomials' pxy
-  in (gs, map (sum . zipWith (flip (.*.)) stds . V.toList) bs)
+fglm ideal =
+  let (gs, bs) = reifyQuotient ideal $ \pxy -> fglmMap (\f -> vectorRep $ modIdeal' pxy f)
+  in (gs, bs)
 
 -- | Compute the kernel and image of the given linear map using generalized FGLM algorithm.
 fglmMap :: forall k ord n. (Ord k, Field k, IsMonomialOrder ord, IsPolynomial k n)
         => (OrderedPolynomial k ord (S n) -> V.Vector k)
         -- ^ Linear map from polynomial ring.
         -> ( [OrderedPolynomial k Lex (S n)] -- ^ lex-Groebner basis of the kernel of the given linear map.
-           , [V.Vector k]                    -- ^ The vector basis of the image of the linear map.
+           , [OrderedPolynomial k Lex (S n)] -- ^ The vector basis of the image of the linear map.
            )
 fglmMap l = runST $ do
   env <- FGLMEnv l <$> newSTRef [] <*> newSTRef [] <*> newSTRef Nothing <*> newSTRef one
   flip runReaderT env $ do
     mainLoop
     whileM_ toContinue $ nextMonomial >> mainLoop
-    (,) <$> look gLex <*> (mapM image =<< look bLex)
+    (,) <$> look gLex <*> (map (changeOrder Lex) <$> look bLex)
 
 mainLoop :: (Ord r, SingRep n, Division r, NoetherianRing r, IsOrder o)
          => Machine s r o n ()
