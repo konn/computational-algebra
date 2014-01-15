@@ -194,7 +194,7 @@ univPoly nth ideal =
   let x = var nth
       p0 : pows = [fmap WrapField $ vectorRep $ modIdeal' pxy (pow x i) | i <- [0:: Natural ..] ]
       step m (p : ps) =
-        case solveLinear' m p of
+        case solveLinear m p of
           Nothing  -> step (m M.<|> M.colVector p) ps
           Just ans ->
             let cur = fromIntegral $ V.length ans :: Natural
