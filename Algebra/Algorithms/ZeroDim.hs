@@ -202,13 +202,13 @@ univPoly nth ideal =
                                 [pow x i | i <- [0 :: Natural .. cur P.- 1]])
   in step (M.colVector p0) pows
 
--- | Solve linear systems
+-- | Solve linear systems. If the given matrix is degenerate, this function returns @Nothing@.
 solveLinear :: (Ord r, Fractional r)
             => M.Matrix r
             -> V.Vector r
             -> Maybe (V.Vector r)
 solveLinear mat vec =
-  if M.diagProd u == 0
+  if M.diagProd u == 0 || uRank < M.ncols mat
   then Nothing 
   else let ans = M.getCol 1 $ p P.* M.colVector vec
        in let lsol = solveL ans
@@ -223,33 +223,36 @@ solveLinear mat vec =
     (u, l, p, q, _, _) = M.luDecomp' mat
     uRank = V.foldr (\a acc -> if a /= 0 then acc P.+ 1 else acc) (0 :: Int) $ M.getDiag u
     solveL v = V.create $ do
+      let stop = min (M.ncols l) (M.nrows l)
       mv <- MV.replicate (M.ncols l) 0
-      forM_ [0..M.ncols l - 1] $ \i -> do
+      forM_ [0..stop - 1] $ \i -> do
         MV.write mv i $ v V.! i
-        forM_ [0,1..i-1] $ \j -> do
+        forM_ [0,1..min (i-1) (M.ncols l - 1)] $ \j -> do
           a <- MV.read mv i
           b <- MV.read mv j
           MV.write mv i $ a P.- (l M.! (i + 1, j + 1)) P.* b
       return mv
     solveU v = V.create $ do
+      let stop = min (M.ncols u) (M.nrows u)
       mv <- MV.replicate (M.ncols u) 0
-      forM_ [M.ncols u - 1, M.ncols u - 2..0] $ \ i -> do
+      forM_ [stop - 1, stop - 2 .. 0] $ \ i -> do
         MV.write mv i $ v V.! i
         forM_ [i+1,i+2..M.ncols u-1] $ \j -> do
           a <- MV.read mv i
           b <- MV.read mv j
           MV.write mv i $ a P.- (u M.! (i+1, j+1)) P.* b
         a0 <- MV.read mv i
-        MV.write mv i $ a0 / (u M.! (i+1, i+1))
+        MV.write mv i $ a0 P./ (u M.! (i+1, i+1))
       return mv
 
+-- | Solves linear system. If the given matrix is degenerate, this returns @Nothing@.
 solveLinear' :: (Ord r, Fractional r)
             => M.Matrix r
             -> V.Vector r
             -> Maybe (V.Vector r)
 solveLinear' mat vec =
-  if uRank u < uRank u'
-  then Nothing 
+  if uRank u < uRank u' || M.diagProd u == 0 || uRank u < M.ncols mat
+  then Nothing
   else let ans = M.getCol 1 $ p P.* M.colVector vec
            lsol = solveL ans
            cfs = M.getCol 1 $ q P.* M.colVector (solveU lsol)
@@ -257,26 +260,28 @@ solveLinear' mat vec =
   where
     (u, l, p, q, _, _) = M.luDecomp' mat
     (u', _,_, _, _, _) = M.luDecomp' (mat M.<|> M.colVector vec)
-    uRank = V.foldr (\a acc -> if a /= 0 then acc P.+ 1 else acc) (0 :: Int) . M.getDiag
+    uRank = V.foldr (\a acc -> if a /= 0 then acc + 1 else acc) (0 :: Int) . M.getDiag
     solveL v = V.create $ do
+      let stop = min (M.ncols l) (M.nrows l)
       mv <- MV.replicate (M.ncols l) 0
-      forM_ [0..M.ncols l - 1] $ \i -> do
+      forM_ [0..stop - 1] $ \i -> do
         MV.write mv i $ v V.! i
-        forM_ [0,1..i-1] $ \j -> do
+        forM_ [0,1..min (i-1) (M.ncols l - 1)] $ \j -> do
           a <- MV.read mv i
           b <- MV.read mv j
           MV.write mv i $ a P.- (l M.! (i + 1, j + 1)) P.* b
       return mv
     solveU v = V.create $ do
+      let stop = min (M.ncols u) (M.nrows u)
       mv <- MV.replicate (M.ncols u) 0
-      forM_ [M.ncols u - 1, M.ncols u - 2..0] $ \ i -> do
+      forM_ [stop - 1, stop - 2 .. 0] $ \ i -> do
         MV.write mv i $ v V.! i
         forM_ [i+1,i+2..M.ncols u-1] $ \j -> do
           a <- MV.read mv i
           b <- MV.read mv j
           MV.write mv i $ a P.- (u M.! (i+1, j+1)) P.* b
         a0 <- MV.read mv i
-        MV.write mv i $ a0 / (u M.! (i+1, i+1))
+        MV.write mv i $ a0 P./ (u M.! (i+1, i+1))
       return mv
 
 -- | Calculate the radical of the given zero-dimensional ideal.
