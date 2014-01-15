@@ -32,6 +32,7 @@ library
                  ,     Algebra.Ring.Polynomial.Parser
                  ,     Algebra.Scalar
                  ,     Algebra.Internal
+                 ,     Algebra.Instances
   build-depends:       base                  >= 2.0 && < 5
                ,       algebra               == 3.1.*
                ,       tagged                >= 0.4 && < 1
@@ -108,6 +109,35 @@ Test-Suite monomial-order-test
                ,        hspec-smallcheck        >= 0.1
                ,        deepseq
                ,        MonadRandom
+
+Test-Suite linear-test
+  -- buildable:            False
+  type:                 exitcode-stdio-1.0
+  main-is:              linear.hs
+  hs-source-dirs:       tests, share
+  ghc-options:          -Wall -threaded
+  other-modules:        Instances
+  build-depends:        base
+               ,        test-framework          >= 0.8
+               ,        test-framework-hunit    >= 0.3
+               ,        QuickCheck              >= 2.6
+               ,        HUnit                   >= 1.2
+               ,        hspec                   >= 1.7
+               ,        containers
+               ,        computational-algebra
+               ,        monomorphic
+               ,        smallcheck              >= 1.0
+               ,        hspec-smallcheck        >= 0.1
+               ,        deepseq
+               ,        MonadRandom
+               ,        quickcheck-instances
+               ,        algebra
+               ,        sized-vector
+               ,        type-natural
+               ,        reflection
+               ,        tagged
+               ,        lens
+               ,        vector
 
 Benchmark normal-bench
   buildable:            False

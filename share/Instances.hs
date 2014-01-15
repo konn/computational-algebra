@@ -3,7 +3,8 @@
 {-# LANGUAGE OverlappingInstances, ScopedTypeVariables, StandaloneDeriving #-}
 {-# LANGUAGE UndecidableInstances                                          #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
-module Instances (ZeroDimIdeal(..), polyOfDim, arbitraryRational, quotOfDim, isNonTrivial) where
+module Instances (ZeroDimIdeal(..), polyOfDim, arbitraryRational,
+                  quotOfDim, isNonTrivial, Equation(..), MatrixCase(..)) where
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial          hiding (Positive)
 import           Algebra.Ring.Polynomial.Quotient
@@ -137,3 +138,22 @@ arbitraryRational = do
 
 isNonTrivial :: SingRep n => ZeroDimIdeal n -> Bool
 isNonTrivial (ZeroDimIdeal ideal) = reifyQuotient ideal $ maybe False ((>0).length) . standardMonomials'
+
+data Equation = Equation { coefficients :: [[Rational]]
+                         , answers      :: [Rational]
+                         } deriving (Read, Show, Eq, Ord)
+
+newtype MatrixCase a = MatrixCase { getMatrix :: [[a]]
+                                  } deriving (Read, Show, Eq, Ord)
+
+instance (Eq a, Num a, Arbitrary a) => Arbitrary (MatrixCase a) where
+  arbitrary = flip suchThat (any (any (/= 0)) . getMatrix) $ sized $ \len -> do
+    a <- resize len $ listOf1 arbitrary
+    as <- listOf (vector $ length a)
+    return $ MatrixCase $ a : as
+
+instance Arbitrary Equation where
+  arbitrary = do
+    MatrixCase as <- arbitrary
+    v <- vector $ length as
+    return $ Equation as v
