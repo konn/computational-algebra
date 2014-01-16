@@ -64,7 +64,7 @@ library
                      Algebra.Ring.Polynomial.Parser
                      Algebra.Scalar
                      Algebra.Internal
-                     Algebra.Instances 
+                     Algebra.Instances
     exposed: True
     buildable: True
 
@@ -79,6 +79,7 @@ executable solve
                  ,        base          >=2.0 && <5
                  ,        type-natural  ==0.0.5.*
                  ,        algebra       ==3.1.*
+                 ,        computational-algebra
                  ,        sized-vector  ==1.2.*
 
 executable sandpit-poly
@@ -117,7 +118,7 @@ test-suite test-multi-table
                  ,      vector                  ==0.10.*
     type: exitcode-stdio-1.0
     main-is: multi-table.hs
-    buildable: True
+    buildable: False
     hs-source-dirs: tests share
     other-modules: Instances
     ghc-options: -Wall -threaded
@@ -139,7 +140,7 @@ test-suite monomial-order-test
                  ,      vector                  ==0.10.*
     type: exitcode-stdio-1.0
     main-is: monomials.hs
-    buildable: True
+    buildable: False
     hs-source-dirs: tests share
     other-modules: Instances
     ghc-options: -Wall -threaded
@@ -168,11 +169,40 @@ test-suite linear-test
                  ,      vector                  ==0.10.*
     type: exitcode-stdio-1.0
     main-is: linear.hs
-    buildable: True
+    buildable: False
     hs-source-dirs: tests share
     other-modules: Instances
     ghc-options: -Wall -threaded
- 
+
+test-suite specs
+    build-depends:      HUnit                   ==1.2.*
+                 ,      MonadRandom             ==0.1.*
+                 ,      QuickCheck              ==2.6.*
+                 ,      algebra                 ==3.1.*
+                 ,      base                    >=2.0 && <5
+                 ,      computational-algebra   -any
+                 ,      containers              >=0.4 && <0.6
+                 ,      deepseq                 ==1.3.*
+                 ,      hspec                   ==1.7.*
+                 ,      hspec-smallcheck        ==0.1.*
+                 ,      lens                    ==3.9.*
+                 ,      monomorphic             ==0.0.3.*
+                 ,      quickcheck-instances    ==0.3.*
+                 ,      reflection              ==1.3.*
+                 ,      sized-vector            ==1.2.*
+                 ,      smallcheck              ==1.0.*
+                 ,      tagged                  ==0.6.*
+                 ,      test-framework          ==0.8.*
+                 ,      test-framework-hunit    ==0.3.*
+                 ,      type-natural            ==0.0.5.*
+                 ,      vector                  ==0.10.*
+    type: exitcode-stdio-1.0
+    main-is: Spec.hs
+    buildable: True
+    hs-source-dirs: tests share
+    other-modules: Instances GroebnerSpec 
+    ghc-options: -Wall -threaded
+
 benchmark normal-bench
     build-depends:      algebra                 ==3.1.*
                  ,      base                    >=2.0 && <5
