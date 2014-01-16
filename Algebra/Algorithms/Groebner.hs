@@ -42,8 +42,8 @@ import           Data.Type.Natural       hiding (max, one, zero)
 import           Data.Vector.Sized       (Vector (..), sLength, singleton,
                                           toList)
 import qualified Data.Vector.Sized       as V
-import           Numeric.Algebra         hiding ((>))
-import           Prelude                 hiding (Num (..), recip, (^))
+import           Numeric.Algebra         hiding ((<), (>))
+import           Prelude                 hiding (Num (..), recip, subtract, (^))
 import           Proof.Equational
 
 -- | Calculate a polynomial quotient and remainder w.r.t. second argument.
