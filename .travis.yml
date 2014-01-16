@@ -1,5 +1,5 @@
 language: haskell
 before_install:
   - cabal update
-  - sudo apt-get install -qq libgsl0-dev liblapacke libblas3
+  - sudo apt-get install -qq libgsl0-dev
 
