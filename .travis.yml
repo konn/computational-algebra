@@ -2,6 +2,3 @@ language: haskell
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq libgsl0-dev liblapack-dev
-
-after_install:
-  - cat /home/travis/.cabal/logs/hmatrix-0.15.0.1.log
