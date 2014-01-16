@@ -16,20 +16,43 @@ asGenListOf = const
 
 spec :: Spec
 spec = do
-  modifyMaxSize (const 25) $ modifyMaxSuccess (const 100) $ describe "divModPolynomial" $ do
+  describe "divModPolynomial" $ modifyMaxSize (const 25) $ modifyMaxSuccess (const 100) $ do
     prop "quotient cannot be diveided by any denoms (ternary)" $
       forAll (elements [1..4 :: Int]) $ liftPoly prop_indivisible
     prop "satisfies a_i f_i /= 0 ==> deg(f) >= deg (a_i f_i)" $
       forAll (elements [1..4 :: Int]) $ liftPoly prop_degdecay
     prop "divides correctly" $
       forAll (elements [1..4 :: Int]) $ liftPoly prop_divCorrect
-  modifyMaxSize (const 5) $ modifyMaxSuccess (const 50) $ describe "calcGroebnerBasis" $ do
+  describe "calcGroebnerBasis" $ modifyMaxSize (const 5) $ modifyMaxSuccess (const 50) $ do
     prop "divides all original generators" $ do
       forAll (elements [2..3 :: Int]) $ liftPoly prop_groebnerDivsOrig
     it "generates the same ideal as original" $ do
       pendingWith "need example"
     prop "passes S-test" $
       forAll (elements [2..3 :: Int]) $ liftPoly prop_passesSTest
+    it "produces minimal basis" $ do
+      pendingWith "need example"
+    it "produces reduced basis" $ do
+      pending
+  describe "minimizeGroebnerBasis" $ do
+    it "generates the same ideal" $ do
+      pendingWith "need example"
+    it "produces minimal Groebner basis" $ do
+      pendingWith "need example"
+  describe "reduceMinimalGroebnerBasis" $ do
+    it "reduces minimal Groebner basis" $ do
+      pendingWith "need example"
+    it "generates the same ideal" $ do
+      pendingWith "need example"
+  describe "isIdealMember" $ do
+    it "determins membership correctly" $ do
+      pendingWith "need example"
+  describe "intersection" $ do
+    it "includes intersection" $ do
+      pendingWith "need example"
+    it "can calculate correctly" $ do
+      pendingWith "need example"
+
 
 prop_passesSTest :: SNat n -> Property
 prop_passesSTest sdim =
