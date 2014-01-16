@@ -1,9 +1,9 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures, FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving            #-}
-{-# LANGUAGE IncoherentInstances, MultiParamTypeClasses, TemplateHaskell     #-}
-{-# LANGUAGE NoMonomorphismRestriction, OverlappingInstances                 #-}
-{-# LANGUAGE OverloadedStrings, PolyKinds, ScopedTypeVariables, TypeFamilies #-}
-{-# LANGUAGE TypeSynonymInstances, UndecidableInstances, StandaloneDeriving  #-}
+{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction                #-}
+{-# LANGUAGE OverlappingInstances, OverloadedStrings, PolyKinds              #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell        #-}
+{-# LANGUAGE TypeFamilies, TypeSynonymInstances, UndecidableInstances        #-}
 -- | Algorithms for zero-dimensional ideals.
 module Algebra.Algorithms.ZeroDim (univPoly, radical, isRadical, solveWith, WrappedField(..),
                                    solveM, solve', matrixRep, vectorRep, solveLinear, solveLinear') where
@@ -13,25 +13,25 @@ import qualified Algebra.Linear                   as M
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
-import qualified Data.Vector.Generic.Mutable      as MV
 import           Algebra.Scalar
 import           Control.Applicative
 import           Control.Arrow
-import           Control.Lens                     hiding (coerce)
+import           Control.Lens
 import           Control.Monad
 import           Control.Monad.Random
 import           Data.Complex
+import           Data.Convertible
 import           Data.List                        hiding (sum)
 import           Data.Maybe
-import           Data.Proxy
 import           Data.Ord
+import           Data.Proxy
 import           Data.Ratio
 import           Data.Reflection
 import           Data.Singletons
-import           Data.Type.Natural                (Nat (..), SNat,
-                                                   sNatToInt, One)
+import           Data.Type.Natural                (Nat (..), SNat, sNatToInt)
 import           Data.Type.Ordinal
 import qualified Data.Vector                      as V
+import qualified Data.Vector.Generic.Mutable      as MV
 import qualified Data.Vector.Sized                as SV
 import           Numeric.Algebra                  hiding ((/), (<))
 import qualified Numeric.Algebra                  as NA
@@ -41,28 +41,6 @@ import           Prelude                          hiding (lex, negate, recip,
                                                    sum, (*), (+), (-), (^),
                                                    (^^))
 import qualified Prelude                          as P
-
-class Coercible a b where
-  coerce :: a -> b
-
-  default coerce :: (a ~ b) => a -> b
-  coerce = id
-
-instance Coercible Double Double
-instance Coercible Int Int
-instance Coercible Integer Integer
-instance Coercible Float Float
-instance Coercible (Complex a) (Complex a)
-instance (Num b, Coercible a b) => Coercible a (Complex b) where
-  coerce = (:+ 0) . coerce
-instance Coercible Double Rational where
-  coerce = toRational
-instance Coercible Rational Double where
-  coerce = fromRational
-instance Coercible Float Rational where
-  coerce = toRational
-instance Coercible Rational Float where
-  coerce = fromRational
 
 newtype WrappedField a = WrapField { unwrapField :: a
                                    } deriving (Read, Show, Eq, Ord,
@@ -96,7 +74,7 @@ instance (Ord r, Ring r, Division r, Group r) => Fractional (WrappedField r) whe
   fromRational q = WrapField $ NA.fromInteger (numerator q) NA./ NA.fromInteger (denominator q)
 
 solveM :: forall m r ord n. (Ord r, MonadRandom m, Field r, IsPolynomial r n, IsMonomialOrder ord,
-                             Coercible r (Complex Double))
+                             Convertible r Double)
        => Ideal (OrderedPolynomial r ord (S n))
        -> m [SV.Vector (Complex Double) (S n)]
 solveM ideal = reifyQuotient ideal $ \pxy ->
@@ -113,22 +91,22 @@ solveM ideal = reifyQuotient ideal $ \pxy ->
         then return sols
         else step len
 
-solve' :: (Field r, IsPolynomial r n, IsMonomialOrder ord, Coercible r Double)
+solve' :: (Field r, IsPolynomial r n, IsMonomialOrder ord, Convertible r Double)
        => Double
        -> Ideal (OrderedPolynomial r ord (S n))
        -> [SV.Vector (Complex Double) (S n)]
 solve' err ideal =
   reifyQuotient ideal $ \ii ->
-    let vs = map (LA.toList . LA.eigenvalues . LA.fromLists . map (map coerce') . matrixRep . modIdeal' ii) $
+    let vs = map (LA.toList . LA.eigenvalues . LA.fromLists . map (map toComplex) . matrixRep . modIdeal' ii) $
              SV.toList allVars
-        mul p q = coerce p * q
+        mul p q = toComplex p * q
     in [ xs
        | xs0 <- sequence vs
        , let xs = SV.unsafeFromList' xs0
        , all ((<err) . magnitude . substWith mul xs) $ generators ideal
        ]
 
-solveWith :: (Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord, Coercible r (Complex Double))
+solveWith :: (Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord, Convertible r Double)
           => Ideal (OrderedPolynomial r ord (S n))
           -> OrderedPolynomial r ord (S n)
           -> [SV.Vector (Complex Double) (S n)]
@@ -145,8 +123,8 @@ solveWith i0 f0 =
           Nothing  ->
             let Just g = find ((==b) . leadingOrderedMonomial) ideal
                 r = leadingCoeff g
-            in Left $ mapCoeff coerce $ injectCoeff (recip r) * (toPolynomial (leadingTerm g) - g)
-      mf = LA.fromLists $ map (map coerce') $ matrixRep f
+            in Left $ mapCoeff toComplex $ injectCoeff (recip r) * (toPolynomial (leadingTerm g) - g)
+      mf = LA.fromLists $ map (map toComplex) $ matrixRep f
       Just cind = elemIndex one base
       (_, evecs) = LA.eig $ LA.ctrans mf
       calc vec =
@@ -166,8 +144,8 @@ matrixRep f =
       in transpose $ map (\a -> map (flip coeff a . leadingMonomial . quotRepr) bases) anss
     Nothing -> error "Not finite dimension"
 
-coerce' :: Coercible a (Complex Double) => a -> Complex Double
-coerce' a = coerce a
+toComplex :: Convertible a Double => a -> Complex Double
+toComplex a = convert a :+ 0
 
 vectorRep :: forall r order ideal n.
               (Division r, IsPolynomial r n, IsMonomialOrder order, Reifies ideal (QIdeal r order n))
@@ -209,7 +187,7 @@ solveLinear :: (Ord r, Fractional r)
             -> Maybe (V.Vector r)
 solveLinear mat vec =
   if M.diagProd u == 0 || uRank < M.ncols mat
-  then Nothing 
+  then Nothing
   else let ans = M.getCol 1 $ p P.* M.colVector vec
        in let lsol = solveL ans
               cfs = M.getCol 1 $ q P.* M.colVector (solveU lsol)
@@ -297,16 +275,3 @@ isRadical :: forall r ord n. (Ord r, IsPolynomial r n, Field r, IsMonomialOrder 
 isRadical ideal =
   let gens  = map (reduction . flip univPoly ideal) $ enumOrdinal (sing :: SNat (S n))
   in all (`isIdealMember` ideal) gens
-
-testMat :: M.Matrix Rational
-testMat = M.fromLists [[1,0,0]
-                      ,[0,0,0]
-                      ,[0,0,0]
-                      ,[0,0,0]
-                      ,[0,1,0]
-                      ,[0,0,0]
-                      ,[0,0,0]
-                      ,[0,0,0]
-                      ,[0,0,1]
-                      ]
-
