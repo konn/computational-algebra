@@ -1,5 +1,6 @@
 Computational Algebra Library
 ==============================
+[![Build Status](https://travis-ci.org/konn/computational-algebra.png?branch=master)](https://travis-ci.org/konn/computational-algebra)
 
 Installation
 -------------

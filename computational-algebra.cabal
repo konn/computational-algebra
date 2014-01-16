@@ -136,6 +136,7 @@ test-suite monomial-order-test
                  ,      smallcheck              ==1.0.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
+                 ,      vector                  ==0.10.*
     type: exitcode-stdio-1.0
     main-is: monomials.hs
     buildable: True
