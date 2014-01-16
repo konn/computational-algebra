@@ -102,8 +102,7 @@ test-suite test-multi-table
                  ,      base                    >=2.0 && <5
                  ,      computational-algebra   -any
                  ,      containers              >=0.4 && <0.6
-                 ,      hspec                   ==1.7.*
-                 ,      hspec-smallcheck        ==0.1.*
+                 ,      hspec                   ==1.8.*
                  ,      lazysmallcheck          ==0.6.*
                  ,      lens                    ==3.9.*
                  ,      quickcheck-instances    ==0.3.*
@@ -131,8 +130,7 @@ test-suite monomial-order-test
                  ,      computational-algebra   -any
                  ,      containers              >=0.4 && <0.6
                  ,      deepseq                 ==1.3.*
-                 ,      hspec                   ==1.7.*
-                 ,      hspec-smallcheck        ==0.1.*
+                 ,      hspec                   ==1.8.*
                  ,      monomorphic             ==0.0.3.*
                  ,      smallcheck              ==1.0.*
                  ,      test-framework          ==0.8.*
@@ -154,8 +152,7 @@ test-suite linear-test
                  ,      computational-algebra   -any
                  ,      containers              >=0.4 && <0.6
                  ,      deepseq                 ==1.3.*
-                 ,      hspec                   ==1.7.*
-                 ,      hspec-smallcheck        ==0.1.*
+                 ,      hspec                   ==1.8.*
                  ,      lens                    ==3.9.*
                  ,      monomorphic             ==0.0.3.*
                  ,      quickcheck-instances    ==0.3.*
@@ -183,8 +180,7 @@ test-suite specs
                  ,      computational-algebra   -any
                  ,      containers              >=0.4 && <0.6
                  ,      deepseq                 ==1.3.*
-                 ,      hspec                   ==1.7.*
-                 ,      hspec-smallcheck        ==0.1.*
+                 ,      hspec                   ==1.8.*
                  ,      lens                    ==3.9.*
                  ,      monomorphic             ==0.0.3.*
                  ,      quickcheck-instances    ==0.3.*
@@ -201,6 +197,34 @@ test-suite specs
     buildable: True
     hs-source-dirs: tests share
     other-modules: Instances GroebnerSpec 
+    ghc-options: -Wall -threaded
+
+test-suite new-div-test
+    build-depends:      HUnit                   ==1.2.*
+                 ,      MonadRandom             ==0.1.*
+                 ,      QuickCheck              ==2.6.*
+                 ,      algebra                 ==3.1.*
+                 ,      base                    >=2.0 && <5
+                 ,      computational-algebra   -any
+                 ,      containers              >=0.4 && <0.6
+                 ,      deepseq                 ==1.3.*
+                 ,      hspec                   ==1.8.*
+                 ,      lens                    ==3.9.*
+                 ,      monomorphic             ==0.0.3.*
+                 ,      quickcheck-instances    ==0.3.*
+                 ,      reflection              ==1.3.*
+                 ,      sized-vector            ==1.2.*
+                 ,      smallcheck              ==1.0.*
+                 ,      tagged                  ==0.6.*
+                 ,      test-framework          ==0.8.*
+                 ,      test-framework-hunit    ==0.3.*
+                 ,      type-natural            ==0.0.5.*
+                 ,      vector                  ==0.10.*
+    type: exitcode-stdio-1.0
+    main-is: division.hs
+    buildable: False
+    hs-source-dirs: tests share
+    other-modules: Instances
     ghc-options: -Wall -threaded
 
 benchmark normal-bench
@@ -307,8 +331,7 @@ benchmark linear-bench
                  ,      containers              >=0.4 && <0.6
                  ,      criterion               ==0.6.*
                  ,      deepseq                 ==1.3.*
-                 ,      hspec                   ==1.7.*
-                 ,      hspec-smallcheck        ==0.1.*
+                 ,      hspec                   ==1.8.*
                  ,      lens                    ==3.9.*
                  ,      monomorphic             ==0.0.*
                  ,      parallel                ==3.2.*
@@ -325,6 +348,37 @@ benchmark linear-bench
     type: exitcode-stdio-1.0
     main-is: linear.hs
     buildable: True
+    hs-source-dirs: bench share
+    other-modules: Instances
+    ghc-options: -Wall -threaded
+
+benchmark division-bench
+    build-depends:      HUnit                   ==1.2.*
+                 ,      MonadRandom             ==0.1.*
+                 ,      QuickCheck              ==2.6.*
+                 ,      algebra                 ==3.1.*
+                 ,      base                    >=2.0 && <5
+                 ,      computational-algebra   -any
+                 ,      containers              >=0.4 && <0.6
+                 ,      criterion               ==0.6.*
+                 ,      deepseq                 ==1.3.*
+                 ,      hspec                   > 1.8.0
+                 ,      lens                    ==3.9.*
+                 ,      monomorphic             ==0.0.*
+                 ,      parallel                ==3.2.*
+                 ,      process                 ==1.1.*
+                 ,      quickcheck-instances    ==0.3.*
+                 ,      reflection              ==1.3.*
+                 ,      sized-vector            >=1.2.0.0
+                 ,      smallcheck              ==1.0.*
+                 ,      tagged                  ==0.6.*
+                 ,      test-framework          ==0.8.*
+                 ,      test-framework-hunit    ==0.3.*
+                 ,      type-natural            >=0.0.5.0
+                 ,      vector                  ==0.10.*
+    type: exitcode-stdio-1.0
+    main-is: division.hs
+    buildable: False
     hs-source-dirs: bench share
     other-modules: Instances
     ghc-options: -Wall -threaded

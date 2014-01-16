@@ -2,10 +2,10 @@
 module Main where
 import qualified Algebra.Ring.Polynomial as P
 import           Data.Type.Monomorphic
+import qualified HspecSmallCheck         as SC
 import qualified SequenceMonomial        as S
 import           Test.Hspec
 import qualified Test.Hspec.QuickCheck   as QC
-import qualified Test.Hspec.SmallCheck   as SC
 import qualified Test.QuickCheck         as QC
 import qualified Test.SmallCheck         as SC
 import qualified Test.SmallCheck.Series  as SC

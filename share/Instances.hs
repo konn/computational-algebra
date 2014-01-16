@@ -84,7 +84,7 @@ instance SingRep n => Arbitrary (Monomial n) where
   arbitrary = arbVec
 
 arbVec :: forall n. SingRep n => Gen (Monomial n)
-arbVec = SV.unsafeFromList len . map QC.getNonNegative <$> vector (sNatToInt len)
+arbVec =  SV.unsafeFromList len . map abs <$> vectorOf (sNatToInt len) arbitrarySizedBoundedIntegral
     where
       len = sing :: SNat n
 

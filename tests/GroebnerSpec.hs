@@ -16,36 +16,38 @@ asGenListOf = const
 
 spec :: Spec
 spec = do
-  describe "divModPolynomial" $ do
+  modifyMaxSize (const 25) $ modifyMaxSuccess (const 100) $ describe "divModPolynomial" $ do
     prop "quotient cannot be diveided by any denoms (ternary)" $
-      forAll (elements [2..3 :: Int]) $ liftPoly prop_indivisible
+      forAll (elements [1..4 :: Int]) $ liftPoly prop_indivisible
     prop "satisfies a_i f_i /= 0 ==> deg(f) >= deg (a_i f_i)" $
-      forAll (elements [2..3 :: Int]) $ liftPoly prop_degdecay
+      forAll (elements [1..4 :: Int]) $ liftPoly prop_degdecay
     prop "divides correctly" $
-      forAll (elements [2..3 :: Int]) $ liftPoly prop_divCorrect
-  describe "calcGroebnerBasis" $ do
+      forAll (elements [1..4 :: Int]) $ liftPoly prop_divCorrect
+  modifyMaxSize (const 5) $ modifyMaxSuccess (const 50) $ describe "calcGroebnerBasis" $ do
     prop "divides all original generators" $ do
       forAll (elements [2..3 :: Int]) $ liftPoly prop_groebnerDivsOrig
     it "generates the same ideal as original" $ do
       pendingWith "need example"
-    it "passes S-test" $ do
+    prop "passes S-test" $
       forAll (elements [2..3 :: Int]) $ liftPoly prop_passesSTest
 
 prop_passesSTest :: SNat n -> Property
 prop_passesSTest sdim =
   case singInstance sdim of
     SingInstance ->
-      forAll (idealOfDim sdim) $ \ideal ->
-      let gs = calcGroebnerBasis ideal
+      forAll (elements [3..15]) $ \count ->
+      forAll (vectorOf count (polyOfDim sdim)) $ \ideal ->
+      let gs = calcGroebnerBasis $ toIdeal ideal
       in all ((== 0) . (`modPolynomial` gs)) [sPolynomial f g | f <- gs, g <- gs, f /= g]
 
 prop_groebnerDivsOrig :: SNat n -> Property
 prop_groebnerDivsOrig sdim =
   case singInstance sdim of
     SingInstance ->
-      forAll (idealOfDim sdim) $ \ideal ->
-      let gs = calcGroebnerBasis ideal
-      in all ((== 0) . (`modPolynomial` gs)) (generators ideal)
+      forAll (elements [3..15]) $ \count ->
+      forAll (vectorOf count (polyOfDim sdim)) $ \ideal ->
+      let gs = calcGroebnerBasis $ toIdeal ideal
+      in all ((== 0) . (`modPolynomial` gs)) ideal
 
 prop_divCorrect :: SNat n -> Property
 prop_divCorrect sdim =
