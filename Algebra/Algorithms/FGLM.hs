@@ -27,7 +27,6 @@ import qualified Data.Vector.Sized                as VS
 import           Numeric.Algebra                  hiding ((>))
 import           Prelude                          hiding (Num (..), recip, sum,
                                                    (^))
-import           Proof.Equational
 
 data FGLMEnv s r ord n = FGLMEnv { _lMap     :: OrderedPolynomial r ord n -> V.Vector r
                                  , _gLex     :: STRef s [OrderedPolynomial r Lex n]
@@ -126,7 +125,7 @@ nextMonomial = do
   monomial .== next
 
 beta :: forall n. SingRep n => Monomial n -> Ordinal n -> Monomial n
-beta (a :- _) OZ     =
+beta (a :- _) OZ      =
   case sing :: SNat n of
     SS n -> case singInstance n of SingInstance -> (a + 1) :- VS.replicate' 0
     _   -> error "bugInGHC!"
@@ -134,6 +133,7 @@ beta (a :- as) (OS n) =
   case sing :: SNat n of
     SS k -> case singInstance k of SingInstance -> a :- beta as n
     _ -> error "bugInGHC"
+beta Nil      _       = bugInGHC
 
 isPowerOf :: Monomial n -> Monomial n -> Bool
 n `isPowerOf` m =
