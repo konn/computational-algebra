@@ -499,8 +499,8 @@ subst' p val f
   | otherwise = error "Not an "
 
 allVars :: forall k ord n . (IsOrder ord, IsPolynomial k n)
-        => Vector (OrderedPolynomial k ord (S n)) (S n)
-allVars = V.unsafeFromList' $ genVars (sing :: SNat (S n))
+        => Vector (OrderedPolynomial k ord n) n
+allVars = V.unsafeFromList' $ genVars (sing :: SNat n)
 
 -- | Partially difference at (m+1)-th variable
 diff :: forall n ord r. (Ring r, SingRep n, IsMonomialOrder ord)
@@ -562,3 +562,4 @@ sArity (Polynomial dic) = V.sLength $ getMonomial $ fst $ M.findMin dic
 "sArity/five" forall (v :: OrderedPolynomial k ord (S (S (S (S (S Z)))))). sArity v = SS (SS (SS (SS (SS SZ))))
 "sArity/sing" forall (v :: SingRep n => OrderedPolynomial k ord n).           sArity (v :: OrderedPolynomial k ord n) = sing :: SNat n
   #-}
+
