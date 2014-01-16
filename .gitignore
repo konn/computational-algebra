@@ -5,3 +5,4 @@
 .\#*
 dist
 *_flymake.hs
+.cabal-sandbox
