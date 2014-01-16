@@ -54,6 +54,7 @@ library
                ,       matrix
                ,       vector
                ,       mtl                   == 2.1.*
+               ,       representable-functors >= 3.2.0.2
 --               ,       indexed
 --               ,       indexed-do-notation
 --               ,       indexed-extras
@@ -72,12 +73,12 @@ Test-Suite test-multi-table
   build-depends:        base
                ,        test-framework          >= 0.8
                ,        test-framework-hunit    >= 0.3
-               ,        smallcheck              >= 1.0
+               ,        smallcheck              == 1.0.*
                ,        QuickCheck              >= 2.6
                ,        lazysmallcheck          >= 0.6
                ,        HUnit                   >= 1.2
                ,        hspec                   >= 1.7
-               ,        hspec-smallcheck        >= 0.1
+               ,        hspec-smallcheck        >= 0.1.*
                ,        sized-vector
                ,        reflection
                ,        tagged
@@ -105,8 +106,8 @@ Test-Suite monomial-order-test
                ,        containers
                ,        computational-algebra
                ,        monomorphic
-               ,        smallcheck              >= 1.0
-               ,        hspec-smallcheck        >= 0.1
+               ,        smallcheck              == 1.0.*
+               ,        hspec-smallcheck        == 0.1.*
                ,        deepseq
                ,        MonadRandom
 
@@ -126,8 +127,8 @@ Test-Suite linear-test
                ,        containers
                ,        computational-algebra
                ,        monomorphic
-               ,        smallcheck              >= 1.0
-               ,        hspec-smallcheck        >= 0.1
+               ,        smallcheck              == 1.0.*
+               ,        hspec-smallcheck        == 0.1.*
                ,        deepseq
                ,        MonadRandom
                ,        quickcheck-instances
@@ -193,7 +194,7 @@ Benchmark quotient-bench-randomized
                ,        type-natural
                ,        sized-vector
                ,        QuickCheck
-               ,        smallcheck
+               ,        smallcheck              == 1.0.*
                ,        quickcheck-instances
                ,        transformers
                ,        lens
@@ -219,7 +220,7 @@ Benchmark monomial-order-bench
                ,        type-natural
                ,        sized-vector
                ,        QuickCheck
-               ,        smallcheck
+               ,        smallcheck              == 1.0.*
                ,        quickcheck-instances
                ,        transformers
                ,        lens
@@ -246,8 +247,8 @@ Benchmark linear-bench
                ,        containers
                ,        computational-algebra
                ,        monomorphic
-               ,        smallcheck              >= 1.0
-               ,        hspec-smallcheck        >= 0.1
+               ,        smallcheck              == 1.0.*
+               ,        hspec-smallcheck        == 0.1.*
                ,        deepseq
                ,        MonadRandom
                ,        quickcheck-instances
