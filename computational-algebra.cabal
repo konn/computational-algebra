@@ -114,6 +114,7 @@ test-suite test-multi-table
                  ,      test-framework-hunit    ==0.3.*
                  ,      transformers            >=0.2 && <0.4
                  ,      type-natural            ==0.0.5.*
+                 ,      vector                  ==0.10.*
     type: exitcode-stdio-1.0
     main-is: multi-table.hs
     buildable: True
@@ -182,6 +183,7 @@ benchmark normal-bench
                  ,      process                 ==1.1.*
                  ,      singletons              ==0.8.*
                  ,      type-natural            ==0.0.5.*
+                 ,      vector                  ==0.10.*
     type: exitcode-stdio-1.0
     main-is: bench.hs
     buildable: False
@@ -200,6 +202,7 @@ benchmark elimination-bench
                  ,      process                 ==1.1.*
                  ,      singletons              ==0.8.*
                  ,      type-natural            ==0.0.5.*
+                 ,      vector                  ==0.10.*
     type: exitcode-stdio-1.0
     main-is: elimination-bench.hs
     buildable: False
@@ -226,6 +229,7 @@ benchmark quotient-bench-randomized
                  ,      tagged                  ==0.6.*
                  ,      transformers            >=0.2 && <0.4
                  ,      type-natural            >=0.0.5.0
+                 ,      vector                  ==0.10.*
     type: exitcode-stdio-1.0
     main-is: quotient-bench-randomized.hs
     buildable: True
@@ -254,6 +258,7 @@ benchmark monomial-order-bench
                  ,      tagged                  ==0.6.*
                  ,      transformers            >=0.2 && <0.4
                  ,      type-natural            >=0.0.5.0
+                 ,      vector                  ==0.10.*
     type: exitcode-stdio-1.0
     main-is: monomials.hs
     buildable: True
