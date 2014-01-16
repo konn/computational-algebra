@@ -77,7 +77,7 @@ Test-Suite test-multi-table
                ,        QuickCheck              >= 2.6
                ,        lazysmallcheck          >= 0.6
                ,        HUnit                   >= 1.2
-               ,        hspec                   >= 1.7
+               ,        hspec                   == 1.7.*
                ,        hspec-smallcheck        == 0.1.*
                ,        sized-vector
                ,        reflection
@@ -102,7 +102,7 @@ Test-Suite monomial-order-test
                ,        test-framework-hunit    >= 0.3
                ,        QuickCheck              >= 2.6
                ,        HUnit                   >= 1.2
-               ,        hspec                   >= 1.7
+               ,        hspec                   == 1.7.*
                ,        containers
                ,        computational-algebra
                ,        monomorphic
@@ -123,7 +123,7 @@ Test-Suite linear-test
                ,        test-framework-hunit    >= 0.3
                ,        QuickCheck              >= 2.6
                ,        HUnit                   >= 1.2
-               ,        hspec                   >= 1.7
+               ,        hspec                   == 1.7.*
                ,        containers
                ,        computational-algebra
                ,        monomorphic
@@ -243,7 +243,7 @@ Benchmark linear-bench
                ,        test-framework-hunit    >= 0.3
                ,        QuickCheck              >= 2.6
                ,        HUnit                   >= 1.2
-               ,        hspec                   >= 1.7
+               ,        hspec                   == 1.7.*
                ,        containers
                ,        computational-algebra
                ,        monomorphic
