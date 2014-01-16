@@ -78,7 +78,7 @@ Test-Suite test-multi-table
                ,        lazysmallcheck          >= 0.6
                ,        HUnit                   >= 1.2
                ,        hspec                   >= 1.7
-               ,        hspec-smallcheck        >= 0.1.*
+               ,        hspec-smallcheck        == 0.1.*
                ,        sized-vector
                ,        reflection
                ,        tagged
