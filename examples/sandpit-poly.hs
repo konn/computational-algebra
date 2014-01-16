@@ -15,7 +15,7 @@ import qualified Numeric.Algebra                  as NA
 u, v, x, y, z :: Polynomial Rational (S (S Three))
 [u, v, x, y, z] = genVars (sS (sS sThree))
 
-(.+), (.*), (.-) :: Polynomial Rational (S Three) -> Polynomial Rational (S Three) -> Polynomial Rational (S Three)
+(.+), (.*), (.-) :: SingRep n => Polynomial Rational n -> Polynomial Rational n -> Polynomial Rational n
 (.+) = (NA.+)
 (.*) = (NA.*)
 (.-) = (NA.-)
@@ -23,7 +23,7 @@ u, v, x, y, z :: Polynomial Rational (S (S Three))
 infixl 6 .+, .-
 infixl 7 .*
 
-(^^^) :: Polynomial Rational (S Three) -> NA.Natural -> Polynomial Rational (S Three)
+(^^^) :: SingRep n => Polynomial Rational n -> NA.Natural -> Polynomial Rational n
 (^^^) = NA.pow
 
 fromRight :: Either t t1 -> t1

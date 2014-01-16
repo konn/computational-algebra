@@ -48,7 +48,8 @@ import           Proof.Equational
 
 -- | Calculate a polynomial quotient and remainder w.r.t. second argument.
 divModPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)
-                  => OrderedPolynomial r order n -> [OrderedPolynomial r order n] -> ([(OrderedPolynomial r order n, OrderedPolynomial r order n)], OrderedPolynomial r order n)
+                 => OrderedPolynomial r order n -> [OrderedPolynomial r order n]
+                 -> ([(OrderedPolynomial r order n, OrderedPolynomial r order n)], OrderedPolynomial r order n)
 divModPolynomial f0 fs = loop f0 zero (zip (nub fs) (repeat zero))
   where
     loop p r dic

@@ -4,7 +4,7 @@
 {-# LANGUAGE UndecidableInstances                                          #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Instances (ZeroDimIdeal(..), polyOfDim, arbitraryRational, arbitrarySolvable,
-                  quotOfDim, isNonTrivial, Equation(..), MatrixCase(..)) where
+                  quotOfDim, isNonTrivial, Equation(..), MatrixCase(..), idealOfDim) where
 import qualified Algebra.Linear                   as M hiding (fromList)
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial          hiding (Positive)
@@ -107,8 +107,11 @@ instance (NA.Field r, NoetherianRing r, Reifies ideal (QIdeal r ord n)
     => Arbitrary (Quotient r ord n ideal) where
   arbitrary = modIdeal <$> arbitrary
 
-polyOfDim :: SingRep n => SNat n -> QC.Gen (Polynomial Rational n)
-polyOfDim _ = arbitrary
+polyOfDim :: SNat n -> QC.Gen (Polynomial Rational n)
+polyOfDim sn = case singInstance sn of SingInstance -> arbitrary
+
+idealOfDim :: SNat n -> QC.Gen (Ideal (Polynomial Rational n))
+idealOfDim sn = case singInstance sn of SingInstance -> arbitrary
 
 quotOfDim :: (SingRep n, Reifies ideal (QIdeal Rational Grevlex n))
           => Proxy ideal -> QC.Gen (Quotient Rational Grevlex n ideal)
