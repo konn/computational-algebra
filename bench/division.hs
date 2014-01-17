@@ -13,10 +13,10 @@ import Control.Monad
 import Control.Parallel.Strategies
 import Criterion.Main
 import Data.Type.Natural           hiding (one)
-import Instances
 import Prelude                     hiding (product)
 import System.Process
 import Test.QuickCheck
+import Utils
 
 makeIdeals :: SingRep n => Int -> SNat n -> Int -> IO [(Polynomial Rational n, [Polynomial Rational n])]
 makeIdeals count sn dpI = do

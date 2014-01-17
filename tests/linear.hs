@@ -5,10 +5,10 @@ import           Control.Monad
 import           Data.Ratio
 import qualified Data.Vector                as V
 import qualified Data.Vector.Mutable        as MV
-import           Instances
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
+import           Utils
 
 main :: IO ()
 main = hspec $ do

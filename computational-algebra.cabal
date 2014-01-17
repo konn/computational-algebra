@@ -119,7 +119,7 @@ test-suite test-multi-table
     main-is: multi-table.hs
     buildable: False
     hs-source-dirs: tests share
-    other-modules: Instances
+    other-modules: Utils
     ghc-options: -Wall -threaded
 
 test-suite monomial-order-test
@@ -140,7 +140,7 @@ test-suite monomial-order-test
     main-is: monomials.hs
     buildable: False
     hs-source-dirs: tests share
-    other-modules: Instances
+    other-modules: Utils
     ghc-options: -Wall -threaded
 
 test-suite linear-test
@@ -168,7 +168,7 @@ test-suite linear-test
     main-is: linear.hs
     buildable: False
     hs-source-dirs: tests share
-    other-modules: Instances
+    other-modules: Utils
     ghc-options: -Wall -threaded
 
 test-suite specs
@@ -196,7 +196,7 @@ test-suite specs
     main-is: Spec.hs
     buildable: True
     hs-source-dirs: tests share
-    other-modules: Instances GroebnerSpec 
+    other-modules: Utils GroebnerSpec ZeroDimSpec
     ghc-options: -Wall -threaded
 
 test-suite new-div-test
@@ -224,7 +224,7 @@ test-suite new-div-test
     main-is: division.hs
     buildable: False
     hs-source-dirs: tests share
-    other-modules: Instances
+    other-modules: Utils
     ghc-options: -Wall -threaded
 
 benchmark normal-bench
@@ -349,7 +349,7 @@ benchmark linear-bench
     main-is: linear.hs
     buildable: True
     hs-source-dirs: bench share
-    other-modules: Instances
+    other-modules: Utils
     ghc-options: -Wall -threaded
 
 benchmark division-bench
@@ -380,5 +380,5 @@ benchmark division-bench
     main-is: division.hs
     buildable: False
     hs-source-dirs: bench share
-    other-modules: Instances
+    other-modules: Utils
     ghc-options: -Wall -threaded

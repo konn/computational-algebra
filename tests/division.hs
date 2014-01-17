@@ -6,10 +6,10 @@ import Algebra.Ring.Noetherian
 import Algebra.Ring.Polynomial
 import Data.Type.Monomorphic
 import Data.Type.Natural           hiding (one, promote, zero)
-import Instances
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck             hiding (promote)
+import Utils
 
 main :: IO ()
 main = hspec $ do

@@ -11,10 +11,10 @@ import           Control.Monad
 import           Control.Parallel.Strategies
 import           Criterion.Main
 import qualified Data.Vector                 as V
-import           Instances
 import           Prelude                     hiding (product)
 import           System.Process
 import           Test.QuickCheck
+import           Utils
 
 makeLinear :: Int -> Int -> IO [(M.Matrix Rational, V.Vector Rational)]
 makeLinear count dpI =

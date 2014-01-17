@@ -15,11 +15,11 @@ import Criterion.Main
 import Data.List                        (foldl')
 import Data.Maybe
 import Data.Type.Natural                hiding (one)
-import Instances
 import Numeric.Algebra                  hiding ((>), (^))
 import Prelude                          hiding (product)
 import System.Process
 import Test.QuickCheck
+import Utils
 
 makeIdeals :: SingRep n => Int -> SNat n -> Int -> IO [Ideal (Polynomial Rational n)]
 makeIdeals count _ dpI = take count . map getIdeal <$> sample' (resize dpI arbitrary `suchThat` isNonTrivial)

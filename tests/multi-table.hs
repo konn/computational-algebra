@@ -4,11 +4,11 @@ import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
 import           Data.Type.Natural
-import           Instances
 import           Test.Hspec
 import qualified Test.Hspec.QuickCheck            as QC
 import           Test.QuickCheck                  (Arbitrary (..))
 import qualified Test.QuickCheck                  as QC
+import           Utils
 
 main :: IO ()
 main = hspec spec

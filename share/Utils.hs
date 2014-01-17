@@ -3,8 +3,8 @@
 {-# LANGUAGE OverlappingInstances, ScopedTypeVariables, StandaloneDeriving #-}
 {-# LANGUAGE UndecidableInstances                                          #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
-module Instances (ZeroDimIdeal(..), polyOfDim, arbitraryRational, arbitrarySolvable,
-                  quotOfDim, isNonTrivial, Equation(..), MatrixCase(..), idealOfDim) where
+module Utils (ZeroDimIdeal(..), polyOfDim, arbitraryRational, arbitrarySolvable,
+              quotOfDim, isNonTrivial, Equation(..), MatrixCase(..), idealOfDim) where
 import qualified Algebra.Linear                   as M hiding (fromList)
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial          hiding (Positive)
