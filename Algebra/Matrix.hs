@@ -1,10 +1,15 @@
-{-# LANGUAGE ConstraintKinds, GADTs, KindSignatures, MultiParamTypeClasses #-}
-{-# LANGUAGE TypeFamilies                                                  #-}
-module Algebra.Matrix (Matrix(..), mapSM) where
+{-# LANGUAGE ConstraintKinds, FlexibleInstances, GADTs, KindSignatures #-}
+{-# LANGUAGE MultiParamTypeClasses, TypeFamilies, TypeSynonymInstances #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+module Algebra.Matrix (Matrix(..), mapSM, delta, companion) where
 import qualified Algebra.Linear              as DM
-import           Algebra.Wrapped
+import           Algebra.Ring.Noetherian
+import           Algebra.Ring.Polynomial
+import           Algebra.Wrapped             ()
 import           Control.Lens
 import           Data.Maybe
+import           Data.Singletons             (SingRep (..))
+import           Data.Type.Ordinal
 import qualified Data.Vector                 as V
 import qualified Data.Vector.Generic         as GV
 import           Data.Vector.Hybrid.Internal
@@ -110,8 +115,8 @@ instance Matrix SM.Mat where
   cmap = mapSM
   empty = SM.fromList []
   fromLists = SM.fromList . concat. zipWith (\i -> zipWith (\j v -> (SM.Key i j, v)) [0..]) [0..]
-  nrows m = maybe 0 (succ . fromIntegral) $ maximumOf (traverse._1) $ m^.SM.keys.to GV.toList
-  ncols m = maybe 0 (succ . fromIntegral) $ maximumOf (traverse._2) $ m^.SM.keys.to GV.toList
+  nrows m = maybe 0 (succ . fromIntegral) $ maximumOf (traverse._1) $ m^.keys.to GV.toList
+  ncols m = maybe 0 (succ . fromIntegral) $ maximumOf (traverse._2) $ m^.keys.to GV.toList
   identity = SM.ident
   diag v = SM.fromList [ (SM.Key (fromIntegral i) (fromIntegral i), v V.! i) | i <- [0.. V.length v - 1]]
   getDiag m =
@@ -130,5 +135,25 @@ instance Matrix SM.Mat where
   buildMatrix h w f = SM.fromList [(SM.Key (fromIntegral $ i-1) (fromIntegral $ j-1), f (i,j))
                                   | i <- [1..h], j <- [1..w]]
   m ! (i, j) = fromMaybe 0 $ m ^? ix (SM.Key (fromIntegral i - 1) (fromIntegral j - 1))
-  m <||> n = SM.addWith (+) m (n & SM.keys %~ GV.map (_2 %~ (+ (fromIntegral $ ncols m))))
-  m <--> n = SM.addWith (+) m (n & SM.keys %~ GV.map (_1 %~ (+ (fromIntegral $ nrows m))))
+  m <||> n = SM.addWith (+) m (n & keys %~ GV.map (_2 %~ (+ (fromIntegral $ ncols m))))
+  m <--> n = SM.addWith (+) m (n & keys %~ GV.map (_1 %~ (+ (fromIntegral $ nrows m))))
+
+delta :: (NA.Monoidal r, NA.Unital r) => Int -> Int -> r
+delta i j | i == j = NA.one
+          | otherwise = NA.zero
+
+companion :: (SingRep n, NoetherianRing r, Matrix mat, Eq r,
+              Elem mat r, IsMonomialOrder ord)
+          => Ordinal n -> OrderedPolynomial r ord n -> mat r
+companion on poly =
+  let deg = totalDegree' poly
+      vx  = leadingMonomial (var on `asTypeOf` poly)
+  in buildMatrix deg deg $ \(j, k) ->
+  if 1 <= k && k <= deg - 1
+  then delta j (k+1)
+  else NA.negate $ coeff (NA.pow vx (fromIntegral $ j-1 :: NA.Natural)) poly
+
+instance SM.Vectored Rational where
+  type Vec Rational = V.Vector
+
+instance SM.Eq0 Rational where

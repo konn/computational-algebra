@@ -53,8 +53,7 @@ library
                  ,      unordered-containers    == 0.2.*
                  ,      vector                  == 0.10.*
                  ,      sparse                  == 0.7.*
-    exposed-modules: Algebra.Algorithms.FGLM
-                     Algebra.Algorithms.Groebner
+    exposed-modules: Algebra.Algorithms.Groebner
                      Algebra.Algorithms.Groebner.Monomorphic
                      Algebra.Algorithms.ZeroDim
                      Algebra.Linear
@@ -69,6 +68,7 @@ library
                      Algebra.Instances
                      Algebra.Wrapped
                      Algebra.Matrix
+    other-modules:   Algebra.Algorithms.FGLM
     exposed: True
     buildable: True
     ghc-options: -fwarn-name-shadowing -threaded

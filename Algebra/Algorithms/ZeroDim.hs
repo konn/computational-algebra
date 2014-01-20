@@ -9,8 +9,9 @@
 -- | Algorithms for zero-dimensional ideals.
 module Algebra.Algorithms.ZeroDim (univPoly, radical, isRadical, solveWith,
                                    WrappedField(..), reduction, solveViaCompanion,
-                                   solveM, solve', matrixRep, subspMatrix,
+                                   solveM, solve', solve'', matrixRep, subspMatrix,
                                    vectorRep, solveLinear, fglm, fglmMap) where
+import           Algebra.Algorithms.FGLM
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
 import qualified Algebra.Linear                   as M
@@ -25,7 +26,7 @@ import           Control.Arrow
 import           Control.Lens
 import           Control.Monad
 import           Control.Monad.Loops
-import           Control.Monad.Random
+import           Control.Monad.Random             hiding (next)
 import           Control.Monad.Reader
 import           Control.Monad.ST
 import           Data.Complex
@@ -44,6 +45,7 @@ import qualified Data.Vector                      as V
 import qualified Data.Vector.Mutable              as MV
 import           Data.Vector.Sized                (Vector ((:-), Nil))
 import qualified Data.Vector.Sized                as SV
+import           Debug.Trace
 import           Numeric.Algebra                  hiding ((/), (<))
 import qualified Numeric.Algebra                  as NA
 import           Numeric.LinearAlgebra            ((@>))
@@ -52,6 +54,10 @@ import           Prelude                          hiding (lex, negate, recip,
                                                    sum, (*), (+), (-), (^),
                                                    (^^))
 import qualified Prelude                          as P
+import qualified Sparse.Matrix                    as Sparse
+
+tr :: Show b => b -> b
+tr = join traceShow
 
 solveM :: forall m r ord n.
           (Normed r, Ord r, MonadRandom m, Field r, IsPolynomial r n, IsMonomialOrder ord,
@@ -247,34 +253,54 @@ isRadical ideal =
   let gens  = map (\on -> reduction on $ univPoly on ideal) $ enumOrdinal (sing :: SNat (S n))
   in all (`isIdealMember` ideal) gens
 
-data FGLMEnv s r ord n = FGLMEnv { _lMap     :: OrderedPolynomial r ord n -> V.Vector r
-                                 , _gLex     :: STRef s [OrderedPolynomial r Lex n]
-                                 , _bLex     :: STRef s [OrderedPolynomial r ord n]
-                                 , _proced   :: STRef s (Maybe (OrderedPolynomial r Lex n))
-                                 , _monomial :: STRef s (OrderedMonomial Lex n)
-                                 }
+solve'' :: forall r ord n.
+           (Show r, Sparse.Eq0 r, Normed r, Ord r, Field r, IsPolynomial r n,
+            IsMonomialOrder ord, Convertible r Double)
+       => Double
+       -> Ideal (OrderedPolynomial r ord (S n))
+       -> [SV.Vector (Complex Double) (S n)]
+solve'' err ideal =
+  reifyQuotient (radical ideal) $ \ii ->
+  let gbs = gBasis' ii
+      lexBase = fst $ fglm $ toIdeal gbs
+      restVars = init $ SV.toList allVars
+      calcEigs = nub . LA.toList . LA.eigenvalues . AM.fromLists
+      lastEigs = calcEigs $ M.toLists $ fmap (toComplex . unwrapField) $
+                 (AM.companion maxBound $ mapCoeff WrapField $ last lexBase :: M.Matrix (WrappedField r))
+  in if gbs == [one]
+     then []
+     else if length (lastEigs) == length (fromJust $ standardMonomials' ii)
+          then solveSpan ii restVars lastEigs (head lexBase)
+          else chooseAnswer $
+               lastEigs : map (calcEigs . map (map toComplex) . matrixRep . modIdeal' ii)
+                              restVars
+  where
+    mul p q = toComplex p * q
+    solveSpan ii rest lastEigs cpoly =
+      let origs = map (vectorRep . modIdeal' ii) rest
+          deg   = totalDegree' cpoly
+          xn    = modIdeal' ii $ var maxBound
+          powers = [ pow xn j | j <- [0..fromIntegral deg :: Natural]]
+          trans = AM.fromCols $ map vectorRep powers
+          answers = map (fromJust . solveLinearNA trans) origs
+          substEig eig = V.sum . V.imap (\j a -> pow eig (fromIntegral j :: Natural) * toComplex a)
+      in [ SV.unsafeFromList' $ map (substEig eig) answers ++ [eig]
+         | eig <- lastEigs
+         ]
+    chooseAnswer vs =
+          [ xs
+            | xs0 <- sequence vs
+            , let xs = SV.unsafeFromList' xs0
+            , all ((<err) . magnitude . substWith mul xs) $ generators ideal
+            ]
 
-makeLenses ''FGLMEnv
+solveLinearNA :: (Ord b, Ring b, Division b, Normed b) => M.Matrix b -> V.Vector b -> Maybe (V.Vector b)
+solveLinearNA m v = fmap unwrapField <$> solveLinear (fmap WrapField m) (fmap WrapField v)
 
-type Machine s r ord n = ReaderT (FGLMEnv s r ord n) (ST s)
+toDM :: (AM.Matrix mat, AM.Elem mat a, AM.Elem M.Matrix a) => mat a -> M.Matrix a
+toDM = AM.fromCols . AM.toCols
 
-look :: Getting (STRef s b) (FGLMEnv s r ord n) (STRef s b) -> Machine s r ord n b
-look = lift . readSTRef <=< view
-
-(.==) :: (MonadTrans t, MonadReader s (t (ST s1))) => Getting (STRef s1 a) s (STRef s1 a) -> a -> t (ST s1) ()
-v .== a = do
-  ref <- view v
-  lift $ writeSTRef ref a
-
-(%==) :: (MonadTrans t, MonadReader s (t (ST s1))) => Getting (STRef s1 a) s (STRef s1 a) -> (a -> a) -> t (ST s1) ()
-v %== f = do
-  ref <- view v
-  lift $ modifySTRef' ref f
-
-infix 4 .==, %==
-
-image :: (Functor f, MonadReader (FGLMEnv s r ord n) f) => OrderedPolynomial r ord n -> f (V.Vector r)
-image a = views lMap ($ a)
+-- * FGLM
 
 -- | Calculate the Groebner basis w.r.t. lex ordering of the zero-dimensional ideal using FGLM algorithm.
 --   If the given ideal is not zero-dimensional this function may diverge.

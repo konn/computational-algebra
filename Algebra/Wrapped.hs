@@ -1,7 +1,6 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures, FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving            #-}
-{-# LANGUAGE IncoherentInstances, MultiParamTypeClasses                      #-}
-{-# LANGUAGE NoMonomorphismRestriction, OverlappingInstances                 #-}
+{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction                #-}
 {-# LANGUAGE OverloadedStrings, ParallelListComp, PolyKinds                  #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell        #-}
 {-# LANGUAGE TypeFamilies, TypeSynonymInstances, UndecidableInstances        #-}
@@ -10,7 +9,6 @@ module Algebra.Wrapped (WrappedField(..), Normed(..)) where
 import           Algebra.Ring.Noetherian
 import           Control.Lens
 import           Data.Complex
-import           Data.Convertible
 import           Data.Ratio
 import           Numeric.Algebra         hiding ((/), (<))
 import qualified Numeric.Algebra         as NA
@@ -19,12 +17,22 @@ import           Prelude                 hiding (lex, negate, recip, sum, (*),
 import qualified Prelude                 as P
 
 newtype WrappedField a = WrapField { unwrapField :: a
-                                   } deriving (Read, Show, Eq, Ord,
-                                               Additive, Multiplicative,
-                                               Unital, DecidableUnits, Division)
+                                   } deriving (Read, Show, Eq, Ord)
 
 
 makeWrapped ''WrappedField
+
+deriving instance Commutative r => Commutative (WrappedField r)
+deriving instance Ring r => Ring (WrappedField r)
+deriving instance Additive r => Additive (WrappedField r)
+deriving instance Multiplicative r => Multiplicative (WrappedField r)
+deriving instance NoetherianRing r => NoetherianRing (WrappedField r)
+deriving instance Unital r => Unital (WrappedField r)
+deriving instance DecidableUnits r => DecidableUnits (WrappedField r)
+deriving instance Division r => Division (WrappedField r)
+deriving instance Semiring r => Semiring (WrappedField r)
+deriving instance Abelian r => Abelian (WrappedField r)
+deriving instance Rig r => Rig (WrappedField r)
 
 instance LeftModule a r => LeftModule a (WrappedField r) where
   n .* WrapField r = WrapField $ n .* r

@@ -5,11 +5,11 @@
 module Main (module Algebra.Algorithms.Groebner, module Algebra.Ring.Polynomial
             , module Data.Ratio, module Main, module Algebra.Internal
             ) where
-import           Algebra.Algorithms.FGLM
 import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.ZeroDim
 import           Algebra.Internal
 import qualified Algebra.Linear                   as M
+import           Algebra.Matrix                   (companion)
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
@@ -103,54 +103,46 @@ toCoeffList on f =
   let v = var on  `asTypeOf` f
   in [ coeff (leadingMonomial $ v ^^ i) f | i <- [0.. fromIntegral (totalDegree' f)]]
 
+showSols err eqn sols = do
+  let (rs, is) = partition (all ((<err).P.abs.imagPart)) $ map SV.toList sols
+      subs a b c = generators $
+                   mapIdeal (magnitude . substWith (*) (SV.unsafeFromList' [a, b, c]) . mapCoeff toComplex)
+                            eqn
+      showCase [a,b,c] = print (a, b, c) >> putStr "\terror: ">> print (maximum $ subs a b c)
+  putStrLn $ "- " ++ show (length rs) ++ " real solution(s):"
+  mapM_ showCase $ sortBy (comparing $ map magnitude) rs
+  putStrLn $ "- " ++ show (length is) ++ " imaginary solution(s):"
+  mapM_  showCase $ sortBy (comparing $ map magnitude) is
+  let errs = concatMap (\ [a,b,c] -> subs a b c) $ rs ++ is
+  putStrLn $ "- maximum error: " ++ show (maximum errs)
+  putStrLn $ "- minimum error: " ++ show (minimum errs)
+  putStrLn $ "- average error: " ++ show (sum errs P./ fromIntegral (length errs))
 
-{-
-solveByElimination :: (Eq r, Ord r, SingRep n, NoetherianRing r,
-                       IsMonomialOrder ord, Convertible r Double, Field r)
-                   => Ideal (OrderedPolynomial r ord (S n)) -> [SV.Vector (Complex Double) (S n)]
-solveByElimination ideal =
-  let gb = map (mapCoeff toComplex) $ fst $ fglm $ toIdeal $ calcGroebnerBasisWith Grevlex ideal
-      step f vec =
-        let g = substWith (.*.) vec f
-            typ = [g] `asTypeOf` gb
-        in if totalDegree' g == 0
-           then return vec
-           else do
-             let Just v = findUnivar g
-             ans <- polySolve (map realPart $ toCoeffList v g)
-             return $ vec & ix v .~ injectCoeff ans
-  in map (SV.map (coeff (fromList (sArity $ head gb) []))) $ foldrM step allVars gb
--}
 main :: IO ()
 main = do
   putStrLn "---- solving equation system"
   let err = 1e-10
-      showSols eqn sols = do
-        let (rs, is) = partition (all ((<err).P.abs.imagPart)) $ map SV.toList sols
-            subs a b c = maximum $ generators $ mapIdeal (magnitude . substWith (*) (SV.unsafeFromList' [a, b, c]) . mapCoeff toComplex) eqn
-            showCase [a,b,c] = print (a, b, c) >> putStr "\terror: ">> print (subs a b c)
-        putStrLn $ "- " ++ show (length rs) ++ " real solution(s):"
-        mapM_ showCase $ sortBy (comparing $ map magnitude) rs
-        putStrLn $ "- " ++ show (length is) ++ " imaginary solution(s):"
-        mapM_  showCase $ sortBy (comparing $ map magnitude) is
   putStrLn "< naive method"
-  showSols eqn01 $ solve' err eqn01
+  showSols err eqn01 $ solve' err eqn01
   putStrLn "\n< randomized method"
-  showSols eqn01 =<< evalRandIO (solveM eqn01)
+  showSols err eqn01 =<< evalRandIO (solveM eqn01)
   putStrLn "\n< companion characteristics"
-  showSols eqn01 $ solveViaCompanion err eqn01
+  showSols err eqn01 $ solveViaCompanion err eqn01
+  putStrLn "\n< univariate spanning"
+  showSols err eqn01 $ solve'' err eqn01
+
   putStrLn "\n\n---- exercise 8"
   putStrLn "< Solving 1-6"
   putStrLn "< Naive Method: "
-  showSols eqn02 $ nub $ solve' err eqn02
+  showSols err eqn02 $ nub $ solve' err eqn02
   putStrLn "\n< new method"
+  showSols err eqn02 =<< evalRandIO (solveM eqn02)
 
-  showSols eqn02 =<< evalRandIO (solveM eqn02)
   putStrLn "\n< Solving 1-7"
   putStrLn "< Naive Method: "
-  showSols eqn03 $ nub $ solve' err eqn03
+  showSols err eqn03 $ nub $ solve' err eqn03
   putStrLn "\n< new method"
-  showSols eqn03 =<< evalRandIO (solveM eqn03)
+  showSols err eqn03 =<< evalRandIO (solveM eqn03)
   putStrLn "\n\n---- FGLM Algorithm"
   print $ fglm jdeal
   print $ calcGroebnerBasisWith Lex jdeal
