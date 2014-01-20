@@ -8,6 +8,7 @@ import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
 import           Algebra.Scalar
+import           Algebra.Wrapped
 import           Control.Applicative
 import           Control.Lens
 import           Control.Monad
@@ -60,7 +61,7 @@ image a = views lMap ($ a)
 
 -- | Calculate the Groebner basis w.r.t. lex ordering of the zero-dimensional ideal using FGLM algorithm.
 --   If the given ideal is not zero-dimensional this function may diverge.
-fglm :: (Ord r, SingRep n, Division r, NoetherianRing r, IsMonomialOrder ord)
+fglm :: (Normed r, Ord r, SingRep n, Division r, NoetherianRing r, IsMonomialOrder ord)
      => Ideal (OrderedPolynomial r ord (S n))
      -> ([OrderedPolynomial r Lex (S n)], [OrderedPolynomial r Lex (S n)])
 fglm ideal =
@@ -68,7 +69,7 @@ fglm ideal =
   in (gs, bs)
 
 -- | Compute the kernel and image of the given linear map using generalized FGLM algorithm.
-fglmMap :: forall k ord n. (Ord k, Field k, IsMonomialOrder ord, IsPolynomial k n)
+fglmMap :: forall k ord n. (Normed k, Ord k, Field k, IsMonomialOrder ord, IsPolynomial k n)
         => (OrderedPolynomial k ord (S n) -> V.Vector k)
         -- ^ Linear map from polynomial ring.
         -> ( [OrderedPolynomial k Lex (S n)] -- ^ lex-Groebner basis of the kernel of the given linear map.
@@ -81,7 +82,7 @@ fglmMap l = runST $ do
     whileM_ toContinue $ nextMonomial >> mainLoop
     (,) <$> look gLex <*> (map (changeOrder Lex) <$> look bLex)
 
-mainLoop :: (Ord r, SingRep n, Division r, NoetherianRing r, IsOrder o)
+mainLoop :: (Ord r, Normed r, SingRep n, Division r, NoetherianRing r, IsOrder o)
          => Machine s r o n ()
 mainLoop = do
   m <- look monomial
