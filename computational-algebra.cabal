@@ -68,6 +68,7 @@ library
                      Algebra.Internal
                      Algebra.Instances
                      Algebra.Wrapped
+                     Algebra.Matrix
     exposed: True
     buildable: True
     ghc-options: -fwarn-name-shadowing -threaded
@@ -447,6 +448,7 @@ benchmark solve-bench
                  ,      type-natural            >=0.0.5.0
                  ,      vector                  ==0.10.*
                  ,      random                  ==1.0.*
+                 ,      progression             ==0.5.*
     type: exitcode-stdio-1.0
     main-is: solve.hs
     buildable: True
