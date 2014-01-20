@@ -20,10 +20,11 @@ import           Prelude                     hiding (Fractional (..),
                                               Integral (..), Num (..),
                                               Real (..), sum, (^^))
 import qualified Prelude                     as P
-import           Progression.Main
-import           System.Environment
-import           Test.QuickCheck
-import           Utils
+-- import           Progression.Main
+import Criterion.Main
+import System.Environment
+import Test.QuickCheck
+import Utils
 
 x, y, z :: Polynomial Rational Three
 [x, y, z] = genVars sThree
@@ -61,6 +62,7 @@ mkBench is = do
   return [ bench "naive" $ nf (solve' 1e-10) is
          , bench "lefteigen" $ nf (flip evalRand gen . solveM) is
          , bench "companion" $ nf (solveViaCompanion 1e-10) is
+         , bench "power" $ nf (solve'' 1e-10) is
          ]
 
 randomCase :: Int -> SNat (S n) -> IO [Ideal (Polynomial Rational (S n))]
@@ -74,14 +76,14 @@ main = do
   case02 <- mkBench =<< (return $!! (eqn02 `using` rdeepseq))
   case03 <- mkBench =<< (return $!! (eqn03 `using` rdeepseq))
   case04 <- mkBench =<< (return $!! (eqn04 `using` rdeepseq))
-  cases  <- mapM mkBench =<< randomCase 3 sFour
+  cases  <- mapM mkBench =<< randomCase 4 sFour
 --  cases'  <- mapM mkBench =<< randomCase 1 sTen
-  name : rest <- getArgs
-  withArgs rest $ defaultMain $ bgroup name $
+  -- name : rest <- getArgs
+  -- withArgs (("-n"++name) : rest) $ defaultMain $ {-bgroup "solution" $ -}
+  defaultMain $
     [ bgroup "ternary-01" case01
     , bgroup "ternary-02" case02
     , bgroup "ternary-03" case03
     , bgroup "ternary-04" case04
-    ]
-    ++ zipWith (\i -> bgroup ("4-ary-0"++show i)) [5,6,7]  cases
+    ] ++ zipWith (\i -> bgroup ("4-ary-0"++show i)) [5..]  cases
 --    ++ zipWith (\i -> bgroup ("10-ary-0"++show i)) [8]  cases'

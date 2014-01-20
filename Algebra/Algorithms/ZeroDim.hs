@@ -262,15 +262,15 @@ solve'' :: forall r ord n.
 solve'' err ideal =
   reifyQuotient (radical ideal) $ \ii ->
   let gbs = gBasis' ii
-      lexBase = fst $ fglm $ toIdeal gbs
+      upoly = univPoly maxBound $ toIdeal gbs
       restVars = init $ SV.toList allVars
       calcEigs = nub . LA.toList . LA.eigenvalues . AM.fromLists
       lastEigs = calcEigs $ M.toLists $ fmap (toComplex . unwrapField) $
-                 (AM.companion maxBound $ mapCoeff WrapField $ last lexBase :: M.Matrix (WrappedField r))
+                 (AM.companion maxBound $ mapCoeff WrapField upoly)
   in if gbs == [one]
      then []
      else if length (lastEigs) == length (fromJust $ standardMonomials' ii)
-          then solveSpan ii restVars lastEigs (head lexBase)
+          then solveSpan ii restVars lastEigs upoly
           else chooseAnswer $
                lastEigs : map (calcEigs . map (map toComplex) . matrixRep . modIdeal' ii)
                               restVars
@@ -278,7 +278,7 @@ solve'' err ideal =
     mul p q = toComplex p * q
     solveSpan ii rest lastEigs cpoly =
       let origs = map (vectorRep . modIdeal' ii) rest
-          deg   = totalDegree' cpoly
+          deg   = totalDegree' cpoly - 1
           xn    = modIdeal' ii $ var maxBound
           powers = [ pow xn j | j <- [0..fromIntegral deg :: Natural]]
           trans = AM.fromCols $ map vectorRep powers
