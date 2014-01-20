@@ -387,7 +387,7 @@ benchmark linear-bench
                  ,      vector                  ==0.10.*
     type: exitcode-stdio-1.0
     main-is: linear.hs
-    buildable: True
+    buildable: False
     hs-source-dirs: bench share
     other-modules: Utils
     ghc-options: -Wall -threaded

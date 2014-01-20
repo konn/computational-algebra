@@ -100,4 +100,4 @@ prop_degdecay sdim =
       forAll (idealOfDim sdim) $ \ideal ->
       let dvs = generators ideal
           (qs, _) = poly `divModPolynomial` dvs
-      in all (\(a, f) -> (a * f == 0) || (leadingOrderedMonomial poly >= leadingOrderedMonomial (a * f))) qs
+      in all (\(a, f) -> (a * f == 0) || (leadingMonomial poly >= leadingMonomial (a * f))) qs
