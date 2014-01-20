@@ -124,7 +124,8 @@ instance (Eq r, NoetherianRing r, Poly.IsMonomialOrder ord)
       vars = buildVarsList polyn
   demote (Monomorphic f) =
       PolySetting { polyn = Polynomial $ M.fromList $
-                              map (toMonom . map toInteger . demote . Monomorphic . snd &&& fst) $ Poly.getTerms f
+                              map (toMonom . map toInteger . demote . Monomorphic . Poly.getMonomial . snd &&& fst) $
+                              Poly.getTerms f
                   , dimension = Monomorphic $ Poly.sArity f
                   }
     where

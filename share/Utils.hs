@@ -3,8 +3,10 @@
 {-# LANGUAGE OverlappingInstances, ScopedTypeVariables, StandaloneDeriving #-}
 {-# LANGUAGE UndecidableInstances                                          #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
-module Utils (ZeroDimIdeal(..), polyOfDim, arbitraryRational, arbitrarySolvable,
-              quotOfDim, isNonTrivial, Equation(..), MatrixCase(..), idealOfDim) where
+module Utils (ZeroDimIdeal(..), polyOfDim, arbitraryRational,
+              arbitrarySolvable, zeroDimOf, zeroDimG,
+              quotOfDim, isNonTrivial, Equation(..),
+              MatrixCase(..), idealOfDim) where
 import qualified Algebra.Linear                   as M hiding (fromList)
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial          hiding (Positive)
@@ -64,14 +66,14 @@ xPoly :: Monad m => SC.Series m (Polynomial Rational Two)
 xPoly = do
   (series SC.>< series) >>- \(c, d) ->
     series >>- \p -> do
-      guard $ OrderedMonomial (leadingMonomial p) < (OrderedMonomial (d :- 0 :- Nil) :: OrderedMonomial Grevlex Two)
+      guard $ (leadingMonomial p) < (OrderedMonomial (d :- 0 :- Nil))
       return $ appendLM c (d :- 0 :- Nil) p
 
 yPoly :: Monad m => SC.Series m (Polynomial Rational Two)
 yPoly = do
   (series SC.>< series) >>- \(c, d) ->
     series >>- \p -> do
-      guard $ OrderedMonomial (leadingMonomial p) < (OrderedMonomial (d :- 0 :- Nil) :: OrderedMonomial Grevlex Two)
+      guard $ leadingMonomial p < OrderedMonomial (d :- 0 :- Nil)
       return $ appendLM c (0 :- d :- Nil) p
 
 instance Monad m => Serial m (ZeroDimIdeal Two) where
@@ -127,6 +129,14 @@ genLM (SS n) = do
   let xlm = OrderedMonomial $ fromList (sS n) [deg + 1]
       f = xf & unwrapped %~ M.insert xlm coef . M.filterWithKey (\k _ -> k < xlm)
   return $ f : fs
+
+zeroDimOf :: SNat n -> QC.Gen (ZeroDimIdeal n)
+zeroDimOf sn =
+  case singInstance sn of
+    SingInstance -> do
+      fs <- genLM sn
+      i0 <- arbitrary
+      return $ ZeroDimIdeal $ toIdeal $ fs ++ i0
 
 zeroDimG :: forall n. (SingRep n) => QC.Gen (ZeroDimIdeal n)
 zeroDimG = do

@@ -1,5 +1,5 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances  #-}
-{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, PatternGuards                 #-}
+{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, PatternGuards, IncoherentInstances                 #-}
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, OverlappingInstances #-}
 {-# LANGUAGE PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving   #-}
 {-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances, ViewPatterns  #-}
@@ -11,11 +11,12 @@ module Algebra.Ring.Polynomial
     , transformMonomial, WeightProxy(..), weightOrder, totalDegree, totalDegree'
     , IsPolynomial, coeff, lcmMonomial, sPolynomial, polynomial, substWith
     , castMonomial, castPolynomial, toPolynomial, changeOrder, changeOrderProxy
+    , changeMonomialOrder, changeMonomialOrderProxy
     , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars
-    , showPolynomialWith, showRational, allVars, subst'
+    , showPolynomialWith, showRational, allVars, subst', homogenize, unhomogenize
     , normalize, injectCoeff, varX, var, getTerms, shiftR, orderedBy
-    , divs, tryDiv, fromList, Coefficient(..),ToWeightVector(..)
-    , leadingTerm, leadingMonomial, leadingOrderedMonomial, leadingCoeff, genVars, sArity
+    , divs, isPowerOf, tryDiv, fromList, Coefficient(..),ToWeightVector(..)
+    , leadingTerm, leadingMonomial, leadingCoeff, genVars, sArity
     , OrderedMonomial(..), Grevlex(..), mapCoeff
     , Revlex(..), Lex(..), Grlex(..), Graded(..)
     , ProductOrder (..), WeightOrder(..), subst, diff
@@ -24,10 +25,12 @@ import           Algebra.Internal
 import           Algebra.Ring.Noetherian
 import           Data.Type.Ordinal
 import           Algebra.Scalar
+import           Proof.Equational        ((:=:)(..))
 import           Control.Arrow
 import           Control.DeepSeq
 import           Control.Lens            hiding (assign)
 import           Data.Function
+import           Data.Hashable
 import           Data.List               (intercalate)
 import           Data.Map                (Map)
 import qualified Data.Map.Strict         as M
@@ -75,8 +78,8 @@ fromList (SS n) (x : xs) = x :- fromList n xs
 -- (3) Non-negative: forall a, 0 <= a
 type MonomialOrder = forall n. Monomial n -> Monomial n -> Ordering
 
-totalDegree :: Monomial n -> Int
-totalDegree = V.foldl (+) 0
+totalDegree :: OrderedMonomial ord n -> Int
+totalDegree = V.sum . getMonomial
 {-# INLINE totalDegree #-}
 
 totalDegree' :: OrderedPolynomial k ord n -> Int
@@ -96,7 +99,7 @@ revlex _ _ = bugInGHC
 
 -- | Convert ordering into graded one.
 graded :: (Monomial n -> Monomial n -> Ordering) -> (Monomial n -> Monomial n -> Ordering)
-graded cmp xs ys = comparing totalDegree xs ys <> cmp xs ys
+graded cmp xs ys = comparing (V.sum) xs ys <> cmp xs ys
 {-# INLINE graded #-}
 {-# RULES
 "graded/grevlex" graded grevlex = grevlex
@@ -115,7 +118,15 @@ grevlex = graded revlex
 
 -- | A wrapper for monomials with a certain (monomial) order.
 newtype OrderedMonomial (ordering :: *) n = OrderedMonomial { getMonomial :: Monomial n }
+deriving instance Hashable (Monomial n) => Hashable (OrderedMonomial ordering n)
 deriving instance (Eq (Monomial n)) => Eq (OrderedMonomial ordering n)
+instance SingRep n => Show (OrderedMonomial ord n) where
+  show xs =
+    let vs = catMaybes $ V.toList $
+            V.zipWithSame (\n i -> if i > 0 then Just ("X_" ++ show n ++ if i == 1 then "" else "^" ++ show i) else Nothing)
+            (V.unsafeFromList' [0..])
+            $ getMonomial xs
+    in if null vs then "1" else unwords vs
 
 instance Multiplicative (OrderedMonomial ord n) where
   OrderedMonomial n * OrderedMonomial m = OrderedMonomial $ V.zipWithSame (+) n m
@@ -281,12 +292,13 @@ type Polynomial r = OrderedPolynomial r Grevlex
 type IsPolynomial r n = (NoetherianRing r, SingRep n, Eq r)
 
 -- | coefficient for a degree.
-coeff :: (IsOrder order, IsPolynomial r n) => Monomial n -> OrderedPolynomial r order n -> r
-coeff d = M.findWithDefault zero (OrderedMonomial d) . terms
+coeff :: (IsOrder order, IsPolynomial r n) => OrderedMonomial order n -> OrderedPolynomial r order n -> r
+coeff d = M.findWithDefault zero d . terms
 
-instance Wrapped (Map (OrderedMonomial order n) r) (Map (OrderedMonomial order' m) q)
-                 (OrderedPolynomial r order n)     (OrderedPolynomial q order' m) where
-    wrapped = iso Polynomial  terms
+instance (SingRep n, Eq r, NoetherianRing r, NoetherianRing q, IsOrder order', SingRep m, Eq q, IsOrder order)
+         => Wrapped (Map (OrderedMonomial order n) r) (Map (OrderedMonomial order' m) q)
+                    (OrderedPolynomial r order n)     (OrderedPolynomial q order' m) where
+    wrapped = iso polynomial terms
 
 castMonomial :: (IsOrder o, IsOrder o', SingRep m, n :<= m) => OrderedMonomial o n -> OrderedMonomial o' m
 castMonomial = unwrapped %~ fromList sing . V.toList
@@ -303,13 +315,14 @@ scastPolynomial :: (IsOrder o, IsOrder o', IsPolynomial r n, IsPolynomial r m, n
                 => SNat m -> OrderedPolynomial r o n -> OrderedPolynomial r o' m
 scastPolynomial _ = castPolynomial
 
-mapCoeff :: (a -> b) -> OrderedPolynomial a ord n -> OrderedPolynomial b ord n
-mapCoeff f = unwrapped %~ fmap f
+mapCoeff :: (SingRep n, NoetherianRing b, Eq b, IsOrder ord)
+         => (a -> b) -> OrderedPolynomial a ord n -> OrderedPolynomial b ord n
+mapCoeff f (Polynomial dic) = polynomial $ M.map f dic
 
 normalize :: (Eq r, IsOrder order, IsPolynomial r n)
           => OrderedPolynomial r order n -> OrderedPolynomial r order n
-normalize = unwrapped %~ M.insertWith (+) (OrderedMonomial $ {-# SCC "replicate" #-} V.replicate' 0) zero
-                       . M.filter (/= zero)
+normalize (Polynomial dic) =
+  Polynomial $ M.insertWith (+) one zero $ M.filter (/= zero) dic
 
 instance (Eq r, IsOrder order, IsPolynomial r n) => Eq (OrderedPolynomial r order n) where
   Polynomial f == Polynomial g = f == g
@@ -339,8 +352,9 @@ instance (IsOrder order, IsPolynomial r n) => Unital (OrderedPolynomial r order 
   one = injectCoeff one
 instance (IsOrder order, IsPolynomial r n) => Multiplicative (OrderedPolynomial r order n) where
   Polynomial (M.toList -> d1) *  Polynomial (M.toList -> d2) =
-    let dic = [ (OrderedMonomial $ V.zipWithSame (+) a b, r * r') | (getMonomial -> a, r) <- d1, (getMonomial -> b, r') <- d2 ]
-    in normalize $ Polynomial $ M.fromListWith (+) dic
+    let dic = (one, zero) : [ (a * b, r * r') | (a, r) <- d1, (b, r') <- d2, r * r' /= zero
+              ]
+    in Polynomial $ M.fromListWith (+) dic
 instance (IsOrder order, IsPolynomial r n) => Semiring (OrderedPolynomial r order n) where
 instance (IsOrder order, IsPolynomial r n) => Commutative (OrderedPolynomial r order n) where
 instance (IsOrder order, IsPolynomial r n) => Abelian (OrderedPolynomial r order n) where
@@ -442,50 +456,56 @@ buildIdx (OS n) =
     SS _ -> 0 :- buildIdx n
     _    -> error "impossible"
 
-toPolynomial :: (IsOrder order, IsPolynomial r n) => (r, Monomial n) -> OrderedPolynomial r order n
-toPolynomial (c, deg) = polynomial $ M.singleton (OrderedMonomial deg) c
+toPolynomial :: (IsOrder order, IsPolynomial r n) => (r, OrderedMonomial order n) -> OrderedPolynomial r order n
+toPolynomial (c, deg) = polynomial $ M.singleton deg c
 
 polynomial :: (SingRep n, Eq r, NoetherianRing r, IsOrder order) => Map (OrderedMonomial order n) r -> OrderedPolynomial r order n
 polynomial dic = normalize $ Polynomial dic
 
 leadingTerm :: (IsOrder order, IsPolynomial r n)
-            => OrderedPolynomial r order n -> (r, Monomial n)
+            => OrderedPolynomial r order n -> (r, OrderedMonomial order n)
 leadingTerm (Polynomial d) =
   case M.maxViewWithKey d of
-    Just ((deg, c), _) -> (c, getMonomial deg)
-    Nothing -> (zero, fromList sing [])
+    Just ((deg, c), _) -> (c, deg)
+    Nothing -> (zero, one)
 
-leadingMonomial :: (IsOrder order, IsPolynomial r n) => OrderedPolynomial r order n -> Monomial n
+leadingMonomial :: (IsOrder order, IsPolynomial r n)
+                => OrderedPolynomial r order n
+                -> OrderedMonomial order n
 leadingMonomial = snd . leadingTerm
-
-leadingOrderedMonomial :: (IsOrder order, IsPolynomial r n)
-                       => OrderedPolynomial r order n -> OrderedMonomial order n
-leadingOrderedMonomial = OrderedMonomial . leadingMonomial
 
 leadingCoeff :: (IsOrder order, IsPolynomial r n) => OrderedPolynomial r order n -> r
 leadingCoeff = fst . leadingTerm
 
-divs :: Monomial n -> Monomial n -> Bool
-xs `divs` ys = and $ V.toList $ V.zipWith (<=) xs ys
+divs :: OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
+(OrderedMonomial xs) `divs` (OrderedMonomial ys) = and $ V.toList $ V.zipWith (<=) xs ys
 
-tryDiv :: Field r => (r, Monomial n) -> (r, Monomial n) -> (r, Monomial n)
+isPowerOf :: OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
+OrderedMonomial n `isPowerOf` OrderedMonomial m =
+  case V.sFindIndices (> 0) m of
+    [ind] -> V.sum n == V.sIndex ind n
+    _     -> False
+
+tryDiv :: Field r => (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n)
 tryDiv (a, f) (b, g)
-    | g `divs` f = (a * recip b, V.zipWithSame (-) f g)
+    | g `divs` f = (a * recip b, OrderedMonomial $ V.zipWithSame (-) (getMonomial f) (getMonomial g))
     | otherwise  = error "cannot divide."
 
-lcmMonomial :: Monomial n -> Monomial n -> Monomial n
-lcmMonomial = V.zipWithSame max
+lcmMonomial :: OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
+lcmMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWithSame max m n
 
 subst :: (Module r a, Ring a, Ring r, SingRep n) => Vector a n -> OrderedPolynomial r order n -> a
 subst assign poly = sum $ map (uncurry (.*) . second extractPower) $ getTerms poly
   where
-    extractPower = V.foldr (*) one . V.zipWithSame pow assign . V.map (fromIntegral :: Int -> Natural)
+    extractPower = V.foldr (*) one . V.zipWithSame pow assign .
+                   V.map (fromIntegral :: Int -> Natural) . getMonomial
 
 
 substWith :: (Unital c, Monoidal m) => (d -> c -> m) -> Vector c n -> OrderedPolynomial d order n -> m
 substWith o assign poly = sum $ map (uncurry o . second extractPower) $ getTerms poly
   where
-    extractPower = V.foldr (*) one . V.zipWithSame pow assign . V.map (fromIntegral :: Int -> Natural)
+    extractPower = V.foldr (*) one . V.zipWithSame pow assign .
+                   V.map (fromIntegral :: Int -> Natural) . getMonomial
 
 subst' :: (IsPolynomial r n, Module r (OrderedPolynomial r ord (S n)), IsOrder ord)
        => OrderedPolynomial r ord (S n)
@@ -495,7 +515,7 @@ subst' :: (IsPolynomial r n, Module r (OrderedPolynomial r ord (S n)), IsOrder o
 subst' p val f
   | v <- leadingMonomial p
   , totalDegree v == 1 =
-    subst (V.zipWithSame (\i xn -> if i == 0 then xn else val) v allVars) f 
+    subst (V.zipWithSame (\i xn -> if i == 0 then xn else val) (getMonomial v) allVars) f 
   | otherwise = error "Not an "
 
 allVars :: forall k ord n . (IsOrder ord, IsPolynomial k n)
@@ -503,15 +523,16 @@ allVars :: forall k ord n . (IsOrder ord, IsPolynomial k n)
 allVars = V.unsafeFromList' $ genVars (sing :: SNat n)
 
 -- | Partially difference at (m+1)-th variable
-diff :: forall n ord r. (Ring r, SingRep n, IsMonomialOrder ord)
-     => Ordinal (S n) -> OrderedPolynomial r ord (S n) -> OrderedPolynomial r ord (S n)
+diff :: forall n ord r. (Eq r, Ring r, SingRep n, NoetherianRing r, IsMonomialOrder ord)
+     => Ordinal n -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n
 diff mthVar = unwrapped %~ M.mapKeysWith (+) (unwrapped %~ dropDegree)
-                         . M.mapWithKey (\k c -> c * NA.fromIntegral (V.sIndex mthVar (getMonomial k)))
-                         . M.filterWithKey (\k -> const $ V.sIndex mthVar (getMonomial k) > 0)
+                         . M.mapMaybeWithKey (\k c -> if (V.sIndex mthVar (getMonomial k) > 0)
+                                                      then Just $ c * NA.fromIntegral (V.sIndex mthVar (getMonomial k))
+                                                      else Nothing)
   where
     dropDegree = updateNth mthVar (max 0 . pred)
 
-updateNth :: Ordinal (S n) -> (a -> a) -> Vector a (S n) -> Vector a (S n)
+updateNth :: Ordinal n -> (a -> a) -> Vector a n -> Vector a n
 updateNth OZ     f (a :- as) = f a :- as
 updateNth (OS n) f (a :- b :- bs) = a :- updateNth n f (b :- bs)
 updateNth _      _ _              = bugInGHC
@@ -523,16 +544,23 @@ sPolynomial f g =
     let h = (one, lcmMonomial (leadingMonomial f) (leadingMonomial g))
     in toPolynomial (h `tryDiv` leadingTerm f) * f - toPolynomial (h `tryDiv` leadingTerm g) * g
 
-changeOrder :: (Eq (Monomial n), IsOrder o, IsOrder o',  SingRep n)
+changeMonomialOrder :: o' -> OrderedMonomial ord n -> OrderedMonomial o' n
+changeMonomialOrder _ = OrderedMonomial . getMonomial
+
+changeMonomialOrderProxy :: Proxy o' -> OrderedMonomial ord n -> OrderedMonomial o' n
+changeMonomialOrderProxy _ = OrderedMonomial . getMonomial
+
+
+changeOrder :: (Eq k, NoetherianRing k, Eq (Monomial n), IsOrder o, IsOrder o',  SingRep n)
             => o' -> OrderedPolynomial k o n -> OrderedPolynomial k o' n
 changeOrder _ = unwrapped %~ M.mapKeys (OrderedMonomial . getMonomial)
 
-changeOrderProxy :: (Eq (Monomial n), IsOrder o, IsOrder o',  SingRep n)
+changeOrderProxy :: (Eq k, NoetherianRing k, Eq (Monomial n), IsOrder o, IsOrder o',  SingRep n)
             => Proxy o' -> OrderedPolynomial k o n -> OrderedPolynomial k o' n
 changeOrderProxy _ = unwrapped %~ M.mapKeys (OrderedMonomial . getMonomial)
 
-getTerms :: OrderedPolynomial k order n -> [(k, Monomial n)]
-getTerms = map (snd &&& getMonomial . fst) . M.toDescList . terms
+getTerms :: OrderedPolynomial k order n -> [(k, OrderedMonomial order n)]
+getTerms = map (snd &&& fst) . M.toDescList . terms
 
 transformMonomial :: (IsOrder o, IsPolynomial k n, IsPolynomial k m)
                   => (Monomial n -> Monomial m) -> OrderedPolynomial k o n -> OrderedPolynomial k o m
@@ -550,6 +578,25 @@ shiftR k =
 genVars :: forall k o n. (IsPolynomial k n, IsOrder o)
         => SNat n -> [OrderedPolynomial k o n]
 genVars sn = map var $ enumOrdinal sn
+
+-- | Calculate the homogenized polynomial of given one, with additional variable is the last variable.
+homogenize :: forall k ord n. (IsPolynomial k n, IsMonomialOrder ord)
+           => OrderedPolynomial k ord n -> OrderedPolynomial k ord (S n)
+homogenize f =
+  let g = substWith (.*.) (initSV allVars) f
+      d = totalDegree' g
+  in transformMonomial (\m -> m & ix maxBound .~ d - V.sum m) g
+
+unhomogenize :: forall k ord n. (IsPolynomial k n, IsMonomialOrder ord)
+             => OrderedPolynomial k ord (S n) -> OrderedPolynomial k ord n
+unhomogenize f =
+  case sAndPlusOne (sing :: SNat n) of
+    Refl -> substWith (.*.) (allVars `V.append` V.singleton one) f
+
+initSV :: Vector a (S n) -> Vector a n
+initSV (_ :- Nil) = Nil
+initSV (x :- xs@(_ :- _))  = x :- initSV xs
+
 
 sArity :: OrderedPolynomial k ord n -> SNat n
 sArity (Polynomial dic) = V.sLength $ getMonomial $ fst $ M.findMin dic

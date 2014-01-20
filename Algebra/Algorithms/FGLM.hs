@@ -18,6 +18,7 @@ import           Data.Function
 import           Data.List                        hiding (sum)
 import           Data.Maybe
 import           Data.Ord
+import           Data.Proxy
 import           Data.STRef
 import           Data.Type.Natural                hiding (max, one, zero)
 import           Data.Type.Ordinal
@@ -84,7 +85,7 @@ mainLoop :: (Ord r, SingRep n, Division r, NoetherianRing r, IsOrder o)
          => Machine s r o n ()
 mainLoop = do
   m <- look monomial
-  let f = toPolynomial (one, getMonomial m)
+  let f = toPolynomial (one, changeMonomialOrderProxy Proxy m)
   lx <- image f
   bs <- mapM image =<< look bLex
   let mat  = foldr1 (M.<|>) $ map (M.colVector . fmap WrapField) bs
@@ -120,7 +121,7 @@ nextMonomial = do
              [ (OrderedMonomial monom, ordToInt od)
              | od <- [0..]
              , let monom = beta (getMonomial m) od
-             , all (not . (`divs` monom)) gs
+             , all (not . (`divs` OrderedMonomial monom)) gs
              ]
   monomial .== next
 
@@ -134,9 +135,3 @@ beta (a :- as) (OS n) =
     SS k -> case singInstance k of SingInstance -> a :- beta as n
     _ -> error "bugInGHC"
 beta Nil      _       = bugInGHC
-
-isPowerOf :: Monomial n -> Monomial n -> Bool
-n `isPowerOf` m =
-  case VS.sFindIndices (> 0) m of
-    [ind] -> totalDegree n == VS.sIndex ind n
-    _     -> False

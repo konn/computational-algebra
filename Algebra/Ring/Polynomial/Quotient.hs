@@ -3,25 +3,28 @@
 {-# LANGUAGE UndecidableInstances                                            #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Ring.Polynomial.Quotient ( Quotient(), QIdeal(), reifyQuotient, modIdeal
-                                        , modIdeal', quotRepr, withQuotient
-                                        , genQuotVars, genQuotVars'
-                                        , standardMonomials, standardMonomials'
+                                        , modIdeal', quotRepr, withQuotient, vectorRep
+                                        , genQuotVars, genQuotVars', gBasis, gBasis', matRep0
+                                        , standardMonomials, standardMonomials', matRepr'
                                         , reduce, multWithTable, multUnamb, isZeroDimensional) where
 import           Algebra.Algorithms.Groebner
+import qualified Algebra.Linear              as M
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
+import           Algebra.Wrapped
 import           Control.DeepSeq
-import qualified Data.HashMap.Lazy           as M
-import           Data.List                   (sortBy)
+import qualified Data.HashMap.Lazy           as HM
+import           Data.List                   (sort, sortBy)
 import           Data.Maybe
 import           Data.Ord
 import           Data.Proxy
 import           Data.Reflection
 import           Data.Type.Natural           hiding (one, zero)
 import           Data.Unamb
+import qualified Data.Vector                 as V
 import           Data.Vector.Sized           (Vector (..))
-import qualified Data.Vector.Sized           as V
+import qualified Data.Vector.Sized           as SV
 import           Numeric.Algebra
 import qualified Numeric.Algebra             as NA
 import           Prelude                     hiding (lex, negate, recip, sum,
@@ -31,19 +34,48 @@ import qualified Prelude                     as P
 -- | The polynomial modulo the ideal indexed at the last type-parameter.
 data Quotient r ord n ideal = Quotient { quotRepr_ :: OrderedPolynomial r ord n } deriving (Eq)
 
-data QIdeal r ord n = ZeroDimIdeal { gBasis    :: ![OrderedPolynomial r ord n]
-                                   , vBasis    :: [Monomial n]
+data QIdeal r ord n = ZeroDimIdeal { _gBasis   :: ![OrderedPolynomial r ord n]
+                                   , _vBasis   :: [OrderedMonomial ord n]
                                    , multTable :: Table r ord n
                                    }
-                    | QIdeal { gBasis :: [OrderedPolynomial r ord n]
+                    | QIdeal { _gBasis :: [OrderedPolynomial r ord n]
                              }
 
 instance NFData (OrderedPolynomial r ord n) => NFData (Quotient r ord n ideal) where
   rnf (Quotient op) = rnf op
 
-type Table r ord n = M.HashMap (Monomial n, Monomial n) (OrderedPolynomial r ord n)
+type Table r ord n = HM.HashMap
+                     (OrderedMonomial ord n, OrderedMonomial ord n)
+                     (OrderedPolynomial r ord n)
 
+vectorRep :: forall r order ideal n.
+              (Division r, IsPolynomial r n, IsMonomialOrder order, Reifies ideal (QIdeal r order n))
+           => Quotient r order n ideal -> V.Vector r
+vectorRep f =
+  let ZeroDimIdeal _ base _ = reflect f
+      mf = quotRepr f
+  in V.fromList $ map (flip coeff mf) base
 
+matRepr' :: forall r ord n ideal.
+          (Ord r, Normed r, Division r, IsPolynomial r n, IsMonomialOrder ord, Reifies ideal (QIdeal r ord n))
+       => Quotient r ord n ideal -> M.Matrix r
+matRepr' f =
+  let ZeroDimIdeal bs vs _ = reflect f
+      dim = length vs
+  in fmap unwrapField $
+     if null vs
+     then M.zero 0 0
+     else foldl (P.+) (M.zero dim dim) $
+          [ fmap (WrapField . (c *)) $ matRep0 (Proxy :: Proxy ideal) t
+          | (c, t) <- getTerms $ quotRepr_ f ]
+
+matRep0 :: forall r ord ideal n.
+           (Ord r, Division r, IsPolynomial r n, IsMonomialOrder ord, Reifies ideal (QIdeal r ord n))
+        => Proxy ideal -> OrderedMonomial ord n -> M.Matrix r
+matRep0 pxy m =
+  let ZeroDimIdeal _ bs table = reflect pxy
+  in foldr1 (M.<|>) [ M.colVector $ vectorRep $ modIdeal' pxy (HM.lookupDefault zero (m, b) table)
+                    | b <- bs  ]
 
 multUnamb :: (Reifies ideal (QIdeal r ord n), IsMonomialOrder ord, IsPolynomial r n, Field r)
           => Quotient r ord n ideal -> Quotient r ord n ideal
@@ -56,35 +88,38 @@ multWithTable :: (Reifies ideal (QIdeal r ord n), IsMonomialOrder ord, IsPolynom
 multWithTable f g =
   let qid = reflect f
       table = multTable qid
-      basis = vBasis qid
-  in sum [ Quotient $ c .*. d .*. (M.lookupDefault zero (l, r) table)
-         | (c,l) <- getTerms $ quotRepr_ f, (d, r) <-  getTerms $ quotRepr_ g
+  in sum [ Quotient $ c .*. d .*. (HM.lookupDefault zero (l, r) table)
+         | (c,l) <- getTerms $ quotRepr_ f, (d, r) <- getTerms $ quotRepr_ g
          ]
 
 instance Show (OrderedPolynomial r ord n) => Show (Quotient r ord n ideal) where
   show (Quotient f) = show f
 
 buildMultTable :: (IsMonomialOrder ord, IsPolynomial r n, Field r)
-               => [OrderedPolynomial r ord n] -> [Monomial n] -> Table r ord n
+               => [OrderedPolynomial r ord n] -> [OrderedMonomial ord n] -> Table r ord n
 buildMultTable bs ms =
-    M.fromList [ ((p, q), (toPolynomial (one, p) * toPolynomial (one, q)) `modPolynomial` bs)
+    HM.fromList [ ((p, q), (toPolynomial (one, p) * toPolynomial (one, q)) `modPolynomial` bs)
                | p <- ms, q <- ms]
 
 stdMonoms :: forall r n ord. (IsMonomialOrder ord, IsPolynomial r n, Field r)
-             => [OrderedPolynomial r ord n] -> Maybe [Monomial n]
+             => [OrderedPolynomial r ord n] -> Maybe [OrderedMonomial ord n]
 stdMonoms basis = do
   let lms = map leadingTerm basis
       dim = sing :: SNat n
+      ordering = OrderedMonomial :: Monomial n -> OrderedMonomial ord n
       tests = zip (diag 1 0 dim) (diag 0 1 dim)
-      mexp (val, test) = [ V.foldr (+) 0 $ V.zipWith (*) val lm0
+      mexp (val, test) = [ SV.foldr (+) 0 $ SV.zipWith (*) val $ getMonomial lm0
                          | (c, lm0) <- lms, c /= zero
-                         , let a = V.foldr (+) 0 $ V.zipWith (*) lm0 test, a == 0
+                         , let a = SV.foldr (+) 0 $ SV.zipWith (*) (getMonomial lm0) test
+                         , a == 0
                          ]
   degs <- mapM (minimum' . mexp) tests
-  return [ monom | ds0 <- sequence $ map (enumFromTo 0) degs
-         , let monom = fromList dim ds0
-         , let ds = toPolynomial (one, monom)
-         , ds `modPolynomial` basis == ds]
+  return $ sort [ monom
+                | ds0 <- sequence $ map (enumFromTo 0) degs
+                , let monom = OrderedMonomial $ fromList dim ds0
+                , let ds = toPolynomial (one, monom)
+                , ds `modPolynomial` basis == ds
+                ]
 
 -- | Find the standard monomials of the quotient ring for the zero-dimensional ideal,
 --   which are form the basis of it as k-vector space.
@@ -115,10 +150,10 @@ minimum' :: Ord a => [a] -> Maybe a
 minimum' [] = Nothing
 minimum' xs = Just $ minimum xs
 
-diag :: a -> a -> SNat n -> [V.Vector a n]
+diag :: a -> a -> SNat n -> [SV.Vector a n]
 diag _ _ SZ = []
 diag d _ (SS SZ) = [d :- Nil]
-diag d z (SS n)  = (d :- V.unsafeFromList n (repeat z)) : map (z :-) (diag d z n)
+diag d z (SS n)  = (d :- SV.unsafeFromList n (repeat z)) : map (z :-) (diag d z n)
 
 -- | Polynomial modulo ideal.
 modIdeal :: forall ord r n ideal. ( IsMonomialOrder ord, Reifies ideal (QIdeal r ord n)
@@ -126,15 +161,24 @@ modIdeal :: forall ord r n ideal. ( IsMonomialOrder ord, Reifies ideal (QIdeal r
            => OrderedPolynomial r ord n -> Quotient r ord n ideal
 modIdeal = modIdeal' (Proxy :: Proxy ideal)
 
+gBasis' :: (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r)
+       => Proxy ideal -> [OrderedPolynomial r ord n]
+gBasis' pxy = _gBasis (reflect pxy)
+
+gBasis :: forall ideal r ord n. (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n),
+                                     IsPolynomial r n, Field r)
+       => [OrderedPolynomial r ord n]
+gBasis = gBasis' (Proxy :: Proxy ideal)
+
 -- | Polynomial modulo ideal given by @Proxy@.
 modIdeal' :: (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r)
           => Proxy ideal -> OrderedPolynomial r ord n -> Quotient r ord n ideal
-modIdeal' pxy f = Quotient $ f `modPolynomial` gBasis (reflect pxy)
+modIdeal' pxy f = Quotient $ f `modPolynomial` _gBasis (reflect pxy)
 
 buildQIdeal :: (IsMonomialOrder ord, IsPolynomial r n, Field r)
             => Ideal (OrderedPolynomial r ord n) -> QIdeal r ord n
 buildQIdeal ideal =
-    let bs = sortBy (comparing leadingOrderedMonomial) $! calcGroebnerBasis ideal
+    let bs = sortBy (comparing leadingMonomial) $! calcGroebnerBasis ideal
     in case stdMonoms bs of
          Nothing -> QIdeal bs
          Just ms -> ZeroDimIdeal bs ms (buildMultTable bs ms)

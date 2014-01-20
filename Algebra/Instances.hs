@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses, TypeFamilies                   #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+-- | This Library provides some *dangerous* instances for @Double@s and @Complex@.
 module Algebra.Instances () where
 import           Control.Lens
 import           Data.Complex
@@ -27,6 +28,16 @@ updateNth _      _ _              = bugInGHC
 instance Additive r => Additive (Complex r) where
   (a :+ b) + (c :+ d) = (a + c) :+ (b + d)
 instance Abelian r => Abelian (Complex r) where
+instance (Group r, Semiring r) => Semiring (Complex r) where
+instance (Group r, Rig r) => Rig (Complex r) where
+  fromNatural = (:+ zero) . fromNatural
+instance (Group r, Commutative r) => Commutative (Complex r) where
+instance Ring r => Ring (Complex r) where
+  fromInteger = (:+ zero) . fromInteger
+instance Group r => Group (Complex r) where
+  (a :+ b) - (c :+ d) = (a - c) :+ (b - d)
+  negate (a :+ b) = negate a :+ negate b
+  times n (a :+ b) = times n a :+ times n b
 instance LeftModule a r => LeftModule a (Complex r) where
   r .* (a :+ b) = (r .* a) :+ (r .* b)
 instance RightModule a r => RightModule a (Complex r) where
@@ -49,6 +60,7 @@ instance Unital Double where
   one = 1
 instance Multiplicative Double where
   (*) = (P.*)
+instance Commutative Double where
 instance Group Double where
   (-) = (P.-)
   negate = P.negate
@@ -58,3 +70,9 @@ instance LeftModule Integer Double where
   n .* r = P.fromInteger n * r
 instance RightModule Integer Double where
   r *. n = r * P.fromInteger n
+instance Rig Double where
+  fromNatural = P.fromInteger . fromNatural
+instance Semiring Double where
+instance Abelian Double where
+instance Ring Double where
+  fromInteger = P.fromInteger

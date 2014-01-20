@@ -22,6 +22,7 @@ module Algebra.Linear (
   , setElem
   , transpose , extendTo
   , mapRow , mapCol
+  , toLists
     -- * Submatrices
     -- ** Splitting blocks
   , submatrix
@@ -886,3 +887,6 @@ detLU :: (Ord a, Fractional a) => Matrix a -> a
 detLU m = d * diagProd u
  where
   (u,_,_,d) = luDecomp m
+
+toLists :: Matrix a -> [[a]]
+toLists mat = [ V.toList $ getRow i mat | i <- [1..nrows mat] ]
