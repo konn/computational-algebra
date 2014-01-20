@@ -10,7 +10,7 @@
 module Algebra.Algorithms.ZeroDim (univPoly, radical, isRadical, solveWith,
                                    WrappedField(..), reduction, solveViaCompanion,
                                    solveM, solve', matrixRep, subspMatrix,
-                                   vectorRep, solveLinear) where
+                                   vectorRep, solveLinear, fglm, fglmMap) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
 import qualified Algebra.Linear                   as M
@@ -24,15 +24,19 @@ import           Control.Applicative
 import           Control.Arrow
 import           Control.Lens
 import           Control.Monad
+import           Control.Monad.Loops
 import           Control.Monad.Random
+import           Control.Monad.Reader
 import           Control.Monad.ST
 import           Data.Complex
 import           Data.Convertible
 import           Data.List                        hiding (sum)
 import           Data.Maybe
 import           Data.Ord
+import           Data.Proxy
 import           Data.Reflection
 import           Data.Singletons
+import           Data.STRef
 import           Data.Type.Natural                (Nat (..), SNat,
                                                    Sing (SS, SZ), sNatToInt)
 import           Data.Type.Ordinal
@@ -242,3 +246,110 @@ isRadical :: forall r ord n. (Normed r, Ord r, IsPolynomial r n, Field r, IsMono
 isRadical ideal =
   let gens  = map (\on -> reduction on $ univPoly on ideal) $ enumOrdinal (sing :: SNat (S n))
   in all (`isIdealMember` ideal) gens
+
+data FGLMEnv s r ord n = FGLMEnv { _lMap     :: OrderedPolynomial r ord n -> V.Vector r
+                                 , _gLex     :: STRef s [OrderedPolynomial r Lex n]
+                                 , _bLex     :: STRef s [OrderedPolynomial r ord n]
+                                 , _proced   :: STRef s (Maybe (OrderedPolynomial r Lex n))
+                                 , _monomial :: STRef s (OrderedMonomial Lex n)
+                                 }
+
+makeLenses ''FGLMEnv
+
+type Machine s r ord n = ReaderT (FGLMEnv s r ord n) (ST s)
+
+look :: Getting (STRef s b) (FGLMEnv s r ord n) (STRef s b) -> Machine s r ord n b
+look = lift . readSTRef <=< view
+
+(.==) :: (MonadTrans t, MonadReader s (t (ST s1))) => Getting (STRef s1 a) s (STRef s1 a) -> a -> t (ST s1) ()
+v .== a = do
+  ref <- view v
+  lift $ writeSTRef ref a
+
+(%==) :: (MonadTrans t, MonadReader s (t (ST s1))) => Getting (STRef s1 a) s (STRef s1 a) -> (a -> a) -> t (ST s1) ()
+v %== f = do
+  ref <- view v
+  lift $ modifySTRef' ref f
+
+infix 4 .==, %==
+
+image :: (Functor f, MonadReader (FGLMEnv s r ord n) f) => OrderedPolynomial r ord n -> f (V.Vector r)
+image a = views lMap ($ a)
+
+-- | Calculate the Groebner basis w.r.t. lex ordering of the zero-dimensional ideal using FGLM algorithm.
+--   If the given ideal is not zero-dimensional this function may diverge.
+fglm :: (Normed r, Ord r, SingRep n, Division r, NoetherianRing r, IsMonomialOrder ord)
+     => Ideal (OrderedPolynomial r ord (S n))
+     -> ([OrderedPolynomial r Lex (S n)], [OrderedPolynomial r Lex (S n)])
+fglm ideal =
+  let (gs, bs) = reifyQuotient ideal $ \pxy -> fglmMap (\f -> vectorRep $ modIdeal' pxy f)
+  in (gs, bs)
+
+-- | Compute the kernel and image of the given linear map using generalized FGLM algorithm.
+fglmMap :: forall k ord n. (Normed k, Ord k, Field k, IsMonomialOrder ord, IsPolynomial k n)
+        => (OrderedPolynomial k ord (S n) -> V.Vector k)
+        -- ^ Linear map from polynomial ring.
+        -> ( [OrderedPolynomial k Lex (S n)] -- ^ lex-Groebner basis of the kernel of the given linear map.
+           , [OrderedPolynomial k Lex (S n)] -- ^ The vector basis of the image of the linear map.
+           )
+fglmMap l = runST $ do
+  env <- FGLMEnv l <$> newSTRef [] <*> newSTRef [] <*> newSTRef Nothing <*> newSTRef one
+  flip runReaderT env $ do
+    mainLoop
+    whileM_ toContinue $ nextMonomial >> mainLoop
+    (,) <$> look gLex <*> (map (changeOrder Lex) <$> look bLex)
+
+mainLoop :: (Ord r, Normed r, SingRep n, Division r, NoetherianRing r, IsOrder o)
+         => Machine s r o n ()
+mainLoop = do
+  m <- look monomial
+  let f = toPolynomial (one, changeMonomialOrderProxy Proxy m)
+  lx <- image f
+  bs <- mapM image =<< look bLex
+  let mat  = foldr1 (M.<|>) $ map (M.colVector . fmap WrapField) bs
+      cond | null bs   = if V.all (== zero) lx
+                         then Just $ V.replicate (length bs) zero
+                         else Nothing
+           | otherwise = solveLinear mat (fmap WrapField lx)
+  case cond of
+    Nothing -> do
+      proced .== Nothing
+      bLex %== (f : )
+    Just cs -> do
+      bps <- look bLex
+      let g = changeOrder Lex $ f - sum (zipWith (.*.) (V.toList $ fmap unwrapField cs) bps)
+      proced .== Just (changeOrder Lex f)
+      gLex %== (g :)
+
+toContinue :: (Ord r, SingRep n, Division r, NoetherianRing r, IsOrder o)
+           => Machine s r o (S n) Bool
+toContinue = do
+  mans <- look proced
+  case mans of
+    Nothing -> return True
+    Just g -> do
+      let xLast = SV.maximum allVars `asTypeOf` g
+      return $ not $ leadingMonomial g `isPowerOf` leadingMonomial xLast
+
+nextMonomial :: (Eq r, SingRep n, NoetherianRing r) => Machine s r ord n ()
+nextMonomial = do
+  m <- look monomial
+  gs <- map leadingMonomial <$> look gLex
+  let next = fst $ maximumBy (comparing snd)
+             [ (OrderedMonomial monom, ordToInt od)
+             | od <- [0..]
+             , let monom = beta (getMonomial m) od
+             , all (not . (`divs` OrderedMonomial monom)) gs
+             ]
+  monomial .== next
+
+beta :: forall n. SingRep n => Monomial n -> Ordinal n -> Monomial n
+beta (a :- _) OZ      =
+  case sing :: SNat n of
+    SS n -> case singInstance n of SingInstance -> (a + 1) :- SV.replicate' 0
+    _   -> error "bugInGHC!"
+beta (a :- as) (OS n) =
+  case sing :: SNat n of
+    SS k -> case singInstance k of SingInstance -> a :- beta as n
+    _ -> error "bugInGHC"
+beta Nil      _       = bugInGHC
