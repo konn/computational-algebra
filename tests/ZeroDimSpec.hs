@@ -9,6 +9,7 @@ import           Algebra.Ring.Polynomial
 import           Control.Monad
 import           Data.Type.Monomorphic
 import           Data.Type.Natural           hiding (one, promote, zero)
+import           Data.Type.Ordinal
 import qualified Data.Vector                 as V
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
@@ -23,7 +24,8 @@ spec = do
   describe "solveLinear" $ do
     it "solves data set correctly" $
       forM_ linSet $ \set ->
-      solveLinear (M.fromLists $ inputMat set) (V.fromList $ inputVec set) `shouldBe` Just (V.fromList $ answer set)
+      solveLinear (M.fromLists $ inputMat set) (V.fromList $ inputVec set)
+      `shouldBe` Just (V.fromList $ answer set)
     prop "solves any solvable cases" $
       forAll (resize 10 arbitrary) $ \(MatrixCase ms) ->
       let mat = M.fromLists ms :: M.Matrix Rational
@@ -33,57 +35,19 @@ spec = do
              in solveLinear mat ans == Just (V.fromList v)
     it "cannot solve unsolvable cases" $ do
       pendingWith "need example"
-  describe "univPoly" $ do
-    it "produces elimination ideal's monic generator" $ do
-      pendingWith "need example"
+  describe "univPoly" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 5) $ do
+    prop "produces elimination ideal's monic generator" $ do
+      forAll (elements [2..4 :: Int]) $ liftSNat prop_univPoly
 
-prop_passesSTest :: SNat n -> Property
-prop_passesSTest sdim =
-  case singInstance sdim of
-    SingInstance ->
-      forAll (elements [3..15]) $ \count ->
-      forAll (vectorOf count (polyOfDim sdim)) $ \ideal ->
-      let gs = calcGroebnerBasis $ toIdeal ideal
-      in all ((== 0) . (`modPolynomial` gs)) [sPolynomial f g | f <- gs, g <- gs, f /= g]
 
-prop_groebnerDivsOrig :: SNat n -> Property
-prop_groebnerDivsOrig sdim =
-  case singInstance sdim of
-    SingInstance ->
-      forAll (elements [3..15]) $ \count ->
-      forAll (vectorOf count (polyOfDim sdim)) $ \ideal ->
-      let gs = calcGroebnerBasis $ toIdeal ideal
-      in all ((== 0) . (`modPolynomial` gs)) ideal
-
-prop_divCorrect :: SNat n -> Property
-prop_divCorrect sdim =
-  case singInstance sdim of
-    SingInstance ->
-      forAll (polyOfDim sdim) $ \poly ->
-      forAll (idealOfDim sdim) $ \ideal ->
-      let dvs = generators ideal
-          (qds, r) = poly `divModPolynomial` dvs
-      in poly == sum (map (uncurry (*)) qds) + r
-
-prop_indivisible :: SNat n -> Property
-prop_indivisible sdim =
-  case singInstance sdim of
-    SingInstance ->
-      forAll (polyOfDim sdim) $ \poly ->
-      forAll (idealOfDim sdim) $ \ideal ->
-      let dvs = generators ideal
-          (_, r) = changeOrder Grevlex poly `divModPolynomial` dvs
-      in r /= 0 ==> all (\f -> all (\(_, m) -> not $ leadingMonomial f `divs` m) $ getTerms r)  dvs
-
-prop_degdecay :: SNat n -> Property
-prop_degdecay sdim =
-  case singInstance sdim of
-    SingInstance ->
-      forAll (polyOfDim sdim) $ \poly ->
-      forAll (idealOfDim sdim) $ \ideal ->
-      let dvs = generators ideal
-          (qs, _) = poly `divModPolynomial` dvs
-      in all (\(a, f) -> (a * f == 0) || (leadingMonomial poly >= leadingMonomial (a * f))) qs
+prop_univPoly :: SingRep n => SNat n -> Property
+prop_univPoly sdim =
+  forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
+  let ods = enumOrdinal sdim
+  in conjoin $ flip map ods $ \nth ->
+  let gen = univPoly nth ideal
+  in forAll (unaryPoly sdim nth) $ \f ->
+  (f `modPolynomial` [gen] == 0) == (f `isIdealMember` ideal)
 
 rank :: (Eq r, Num r, Ord r, Fractional r) => M.Matrix r -> Int
 rank mat =

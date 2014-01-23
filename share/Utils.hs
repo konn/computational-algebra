@@ -1,17 +1,19 @@
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE DataKinds, DeriveGeneric, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, MultiParamTypeClasses      #-}
-{-# LANGUAGE OverlappingInstances, ScopedTypeVariables, StandaloneDeriving #-}
-{-# LANGUAGE UndecidableInstances                                          #-}
+{-# LANGUAGE OverlappingInstances, RankNTypes, ScopedTypeVariables         #-}
+{-# LANGUAGE StandaloneDeriving, UndecidableInstances                      #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Utils (ZeroDimIdeal(..), polyOfDim, arbitraryRational,
-              arbitrarySolvable, zeroDimOf, zeroDimG,
-              quotOfDim, isNonTrivial, Equation(..),
+              arbitrarySolvable, zeroDimOf, zeroDimG, unaryPoly,
+              quotOfDim, isNonTrivial, Equation(..), liftSNat,
               MatrixCase(..), idealOfDim) where
 import qualified Algebra.Linear                   as M hiding (fromList)
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial          hiding (Positive)
 import           Algebra.Ring.Polynomial.Quotient
 import           Control.Applicative
+import           Proof.Equational ((:=:)(..))
 import           Control.Lens
 import           Control.Monad
 import qualified Data.Map                         as M
@@ -19,7 +21,10 @@ import           Data.Proxy
 import           Data.Ratio
 import           Data.Reflection                  hiding (Z)
 import qualified Data.Sequence                    as S
+import           Data.Type.Monomorphic
+import qualified Data.Type.Monomorphic            as M
 import           Data.Type.Natural
+import           Data.Type.Ordinal
 import qualified Data.Vector                      as V
 import           Data.Vector.Sized                (Vector (..))
 import qualified Data.Vector.Sized                as SV
@@ -178,3 +183,25 @@ arbitrarySolvable = do
     MatrixCase as <- arbitrary
     v <- vector $ length $ head as
     return $ Equation as (V.toList $ M.getCol 1 $ M.fromLists as * M.colVector (V.fromList v))
+
+liftSNat :: (forall n. SingRep (n :: Nat) => Sing n -> Property) -> MonomorphicRep (Sing :: Nat -> *) -> Property
+liftSNat f int =
+  case M.promote int of
+    Monomorphic snat ->
+      case singInstance snat of
+        SingInstance -> f snat
+
+unaryPoly :: SNat n -> Ordinal n -> Gen (Polynomial Rational n)
+unaryPoly arity mth = do
+  f <- polyOfDim sOne
+  case singInstance arity of
+    SingInstance ->
+      case ordToSNat' mth of
+        CastedOrdinal sm ->
+          case singInstance (sm %:+ sOne) of
+            SingInstance ->
+              case sAndPlusOne sm of
+                Refl ->
+                  case boolToClassLeq (sm %:+ sOne) arity of
+                    LeqInstance -> return $ scastPolynomial arity $ shiftR sm f
+
