@@ -1,0 +1,8 @@
+JOB "mult-table-prof 1 8 9 +RTS -p -hc"
+DATE "Tue Oct 29 00:53 2013"
+SAMPLE_UNIT "seconds"
+VALUE_UNIT "bytes"
+BEGIN_SAMPLE 0.00
+END_SAMPLE 0.00
+BEGIN_SAMPLE 0.00
+END_SAMPLE 0.00

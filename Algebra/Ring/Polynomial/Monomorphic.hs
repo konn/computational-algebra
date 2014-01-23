@@ -203,7 +203,7 @@ showRatPolynomial f =
   case encodePolynomial f of
     Monomorphic f' ->
         case singInstance (Poly.sArity f') of
-          SingInstance -> Poly.showPolynomialWith dic Poly.showRational f'
+          SingInstance -> Poly.showPolynomialWith False dic Poly.showRational f'
   where
     dic = zip [1 :: Int ..] $ map show $ buildVarsList f
 

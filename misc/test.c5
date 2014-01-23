@@ -1,0 +1,34 @@
+Use R ::= QQ[x,y,z], lex;
+
+Define SPoly(f, g)
+  gamma := LCM(LM(f), LM(g));
+  Return (DivAlg(gamma, [LT(f)]).Quotients[1] * f - (DivAlg(gamma, [LT(g)]).Quotients[1] * g));
+EndDefine;
+
+Define BuchbergerTest(L)
+  answer := true;
+  For I := 1 to Len(L)-1 Do
+    F := L[I];
+    For J := I+1 to Len(L) Do
+      G := L[J];
+      s := DivAlg(SPoly(F, G), L).Remainder;
+      answer := answer and (s = 0);
+    EndFor;
+  EndFor;
+  Return answer;
+EndDefine;
+
+Define BuchbergerAlgorithm(F);
+  g := F;
+  Repeat
+    g2 := g;
+    For I := 1 To Len(g2) - 1 Do
+      For J := I+1 To Len(g2) Do
+	s := DivAlg(SPoly(g2[I], g2[J]), g2).Remainder;
+	If s <> 0 Then append(ref g, s);
+	EndIf;
+      EndFor;
+    EndFor;
+  Until g = g2;
+  Return g;
+EndDefine;
