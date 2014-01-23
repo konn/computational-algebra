@@ -56,49 +56,49 @@ readSingularPoly _ _ code =
     [p] -> p
     _ -> error "Reading"
   where
-readPoly st =  do
-  (t, rest) <- readTerm st
-  readPoly' rest t
+    readPoly st =  do
+      (t, rest) <- readTerm st
+      readPoly' rest t
 
-readPoly' st  acc = do ("+", st') <- lex st
-                       (t, rest) <- readTerm st'
-                       readPoly' rest (acc + t)
-                <|> do ("-", st') <- lex st
-                       (t, rest) <- readTerm st'
-                       readPoly' rest (acc - t)
-                <|> return (acc, st)
+    readPoly' st  acc = do ("+", st') <- lex st
+                           (t, rest) <- readTerm st'
+                           readPoly' rest (acc + t)
+                    <|> do ("-", st') <- lex st
+                           (t, rest) <- readTerm st'
+                           readPoly' rest (acc - t)
+                    <|> return (acc, st)
 
-readCoeff st = do
-  (modify, st') <- do { ("-", roo) <- lex st ; return (negate, roo) } <|> return (id, st)
-  (num, rest) <- readDec st'
-  (a, foo) <- lex rest
-  case a of
-    "/" -> do
-      (den, rest') <- readDec foo
-      return (injectCoeff $ modify $ num % den, rest')
-    _ -> return (injectCoeff $ modify $ num % 1, rest)
+    readCoeff st = do
+      (modify, st') <- do { ("-", roo) <- lex st ; return (negate, roo) } <|> return (id, st)
+      (num, rest) <- readDec st'
+      (a, foo) <- lex rest
+      case a of
+        "/" -> do
+          (den, rest') <- readDec foo
+          return (injectCoeff $ modify $ num % den, rest')
+        _ -> return (injectCoeff $ modify $ num % 1, rest)
 
-readTerm st = do
-  (a, rest) <- readFactor st
-  (ts, gomi) <- readTerm' rest
-  return (product (a : ts), gomi)
-readTerm' st = do ("*", st') <- lex st
-                  (a, rest) <- readFactor st'
-                  (as, gomi) <- readTerm' rest
-                  return (a: as, gomi)
-              <|> return ([], st)
+    readTerm st = do
+      (a, rest) <- readFactor st
+      (ts, gomi) <- readTerm' rest
+      return (product (a : ts), gomi)
+    readTerm' st = do ("*", st') <- lex st
+                      (a, rest) <- readFactor st'
+                      (as, gomi) <- readTerm' rest
+                      return (a: as, gomi)
+                  <|> return ([], st)
 
-readFactor st = readCoeff st <|> readVar st
+    readFactor st = readCoeff st <|> readVar st
 
-readVar st  = do
-        ("x", '(':rest) <- lex st
-        (nstr, ')':mpow) <- lex rest
-        (nth, "") <- readDec nstr
-        (power, gomi) <- do ("^", rst'') <- lex mpow
-                            (pow, gomi) <- readDec rst''
-                            return (pow :: Integer, gomi)
-                        <|> return (1, mpow)
-        return (var (toEnum nth) ^ power, gomi)
+    readVar st  = do
+            ("x", '(':rest) <- lex st
+            (nstr, ')':mpow) <- lex rest
+            (nth, "") <- readDec nstr
+            (power, gomi) <- do ("^", rst'') <- lex mpow
+                                (pow, gomi) <- readDec rst''
+                                return (pow :: Integer, gomi)
+                            <|> return (1, mpow)
+            return (var (toEnum nth) ^ power, gomi)
 
 singIdealFun :: forall ord n. (SingularOrder ord, SingRep n)
              => String -> Ideal (OrderedPolynomial Rational ord n) -> Ideal (OrderedPolynomial Rational ord n)

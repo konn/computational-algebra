@@ -47,7 +47,7 @@ spec = do
   describe "isIdealMember" $ do
     it "determins membership correctly" $ do
       pendingWith "need example"
-  describe "intersection" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 50) $ do
+  describe "intersection" $ modifyMaxSize (const 3) $ modifyMaxSuccess (const 50) $ do
     it "can calculate correctly" $ do
       checkForArity [2..3] prop_intersection
     it "can solve test-cases correctly" $ do
