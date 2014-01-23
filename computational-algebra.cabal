@@ -48,7 +48,7 @@ library
                  ,      tagged                  == 0.6.*
                  ,      hybrid-vectors
                  ,      text                    == 0.11.*
-                 ,      type-natural            == 0.0.5.*
+                 ,      type-natural            == 0.0.6.*
                  ,      unamb                   == 0.2.*
                  ,      unordered-containers    == 0.2.*
                  ,      vector                  == 0.10.*
@@ -82,7 +82,7 @@ executable solve
     hs-source-dirs: share examples
     build-depends:        algebra               ==3.1.*
                  ,        base                  >=2.0 && <5
-                 ,        type-natural          ==0.0.5.*
+                 ,        type-natural          ==0.0.6.*
                  ,        algebra               ==3.1.*
                  ,        computational-algebra
                  ,        random                ==1.0.*
@@ -92,7 +92,30 @@ executable solve
                  ,        convertible           ==1.0.*
                  ,        lens
                  ,        MonadRandom           ==0.1.*
-    ghc-options: -caf-all -auto-all -prof -rtsopts -O2 -threaded
+    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
+
+executable solve-prof
+    main-is: solve-prof.hs
+    if flag(examples)
+        buildable: True
+    else
+        buildable: False
+    hs-source-dirs: share examples
+    build-depends:        algebra               ==3.1.*
+                 ,        base                  >=2.0 && <5
+                 ,        type-natural          ==0.0.6.*
+                 ,        algebra               ==3.1.*
+                 ,        computational-algebra
+                 ,        random                ==1.0.*
+                 ,        hmatrix               ==0.15.0.1
+                 ,        sized-vector          ==1.2.*
+                 ,        vector                ==0.10.*
+                 ,        convertible           ==1.0.*
+                 ,        lens
+                 ,        MonadRandom           ==0.1.*
+                 ,        deepseq
+                 ,        parallel
+    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
 
 executable sandpit-poly
     main-is: sandpit-poly.hs
@@ -125,8 +148,9 @@ test-suite test-multi-table
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
                  ,      transformers            >=0.2 && <0.4
-                 ,      type-natural            ==0.0.5.*
+                 ,      type-natural            ==0.0.6.*
                  ,      vector                  ==0.10.*
+                 ,      equational-reasoning
     type: exitcode-stdio-1.0
     main-is: multi-table.hs
     buildable: False
@@ -148,6 +172,7 @@ test-suite monomial-order-test
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
                  ,      vector                  ==0.10.*
+                 ,      equational-reasoning
     type: exitcode-stdio-1.0
     main-is: monomials.hs
     buildable: False
@@ -174,8 +199,9 @@ test-suite linear-test
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.0.5.*
+                 ,      type-natural            ==0.0.6.*
                  ,      vector                  ==0.10.*
+                 ,      equational-reasoning
     type: exitcode-stdio-1.0
     main-is: linear.hs
     buildable: True
@@ -202,8 +228,9 @@ test-suite matrix-test
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.0.5.*
+                 ,      type-natural            ==0.0.6.*
                  ,      vector                  ==0.10.*
+                 ,      equational-reasoning
     type: exitcode-stdio-1.0
     main-is: matrix.hs
     buildable: False
@@ -230,8 +257,9 @@ test-suite specs
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.0.5.*
+                 ,      type-natural            ==0.0.6.*
                  ,      vector                  ==0.10.*
+                 ,      equational-reasoning
     type: exitcode-stdio-1.0
     main-is: Spec.hs
     buildable: True
@@ -258,8 +286,9 @@ test-suite new-div-test
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.0.5.*
+                 ,      type-natural            ==0.0.6.*
                  ,      vector                  ==0.10.*
+                 ,      equational-reasoning
     type: exitcode-stdio-1.0
     main-is: division.hs
     buildable: False
@@ -277,7 +306,7 @@ benchmark normal-bench
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
                  ,      singletons              ==0.8.*
-                 ,      type-natural            ==0.0.5.*
+                 ,      type-natural            ==0.0.6.*
                  ,      vector                  ==0.10.*
     type: exitcode-stdio-1.0
     main-is: bench.hs
@@ -296,7 +325,7 @@ benchmark elimination-bench
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
                  ,      singletons              ==0.8.*
-                 ,      type-natural            ==0.0.5.*
+                 ,      type-natural            ==0.0.6.*
                  ,      vector                  ==0.10.*
     type: exitcode-stdio-1.0
     main-is: elimination-bench.hs
@@ -385,6 +414,7 @@ benchmark linear-bench
                  ,      test-framework-hunit    ==0.3.*
                  ,      type-natural            >=0.0.5.0
                  ,      vector                  ==0.10.*
+                 ,      equational-reasoning
     type: exitcode-stdio-1.0
     main-is: linear.hs
     buildable: False
@@ -416,6 +446,7 @@ benchmark division-bench
                  ,      test-framework-hunit    ==0.3.*
                  ,      type-natural            >=0.0.5.0
                  ,      vector                  ==0.10.*
+                 ,      equational-reasoning
     type: exitcode-stdio-1.0
     main-is: division.hs
     buildable: False
@@ -449,6 +480,7 @@ benchmark solve-bench
                  ,      vector                  ==0.10.*
                  ,      random                  ==1.0.*
                  ,      progression             ==0.5.*
+                 ,      equational-reasoning
     type: exitcode-stdio-1.0
     main-is: solve.hs
     buildable: True
