@@ -63,7 +63,6 @@ mkBench is = do
          , bench "lefteigen" $ nf (flip evalRand gen . solveM) is
          , bench "companion" $ nf (solveViaCompanion 1e-10) is
          , bench "power" $ nf (solve'' 1e-10) is
-         , bench "power-fglm" $ nf (solve''' 1e-10) is
          ]
 
 randomCase :: Int -> SNat (S n) -> IO [Ideal (Polynomial Rational (S n))]

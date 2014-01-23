@@ -1,5 +1,5 @@
 module Main where
-import qualified Algebra.Linear        as M
+import qualified Data.Matrix           as M
 import qualified Data.Vector           as V
 import           Test.Hspec
 import           Test.Hspec.QuickCheck

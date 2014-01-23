@@ -14,7 +14,6 @@ module Algebra.Algorithms.ZeroDim (univPoly, radical, isRadical, solveWith,
 import           Algebra.Algorithms.FGLM
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
-import qualified Algebra.Linear                   as M
 import qualified Algebra.Matrix                   as AM
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
@@ -32,6 +31,7 @@ import           Control.Monad.ST
 import           Data.Complex
 import           Data.Convertible
 import           Data.List                        hiding (sum)
+import qualified Data.Matrix                      as M
 import           Data.Maybe
 import           Data.Ord
 import           Data.Proxy
@@ -64,13 +64,14 @@ solveM :: forall m r ord n.
            Convertible r Double)
        => Ideal (OrderedPolynomial r ord (S n))
        -> m [SV.Vector (Complex Double) (S n)]
-solveM ideal = reifyQuotient (radical ideal) $ \pxy ->
+solveM ideal = {-# SCC "solveM" #-} reifyQuotient (radical ideal) $ \pxy ->
   case standardMonomials' pxy of
     Just bs -> step 10 (length bs)
     Nothing -> error "Given ideal is not zero-dimensional"
   where
-    step bd len = do
-      coeffs <- replicateM (sNatToInt (sing :: SNat ((S (S n))))) $ getRandomR (-bd, bd)
+    step bd len = {-# SCC "solveM/step" #-}do
+      coeffs <- {-# SCC "solveM/coeff-gen" #-}
+        replicateM (sNatToInt (sing :: SNat ((S (S n))))) $ getRandomR (-bd, bd)
       let vars = one : SV.toList allVars
           f = sum $ zipWith (.*.) (map (NA.fromInteger :: Integer -> r) coeffs) vars
       case solveWith f ideal of
@@ -81,11 +82,11 @@ solveWith :: (Normed r, Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord, C
           => OrderedPolynomial r ord (S n)
           -> Ideal (OrderedPolynomial r ord (S n))
           -> Maybe [SV.Vector (Complex Double) (S n)]
-solveWith f0 i0 =
+solveWith f0 i0 = {-# SCC "solveWith" #-}
   reifyQuotient (radical i0) $ \pxy ->
     let ideal = gBasis' pxy
         Just base = map (leadingMonomial . quotRepr) <$> standardMonomials' pxy
-    in case elemIndex one base of
+    in case {-# SCC "findOne" #-} elemIndex one base of
       Nothing -> Just []
       Just cind ->
         let f = modIdeal' pxy f0
@@ -102,13 +103,13 @@ solveWith f0 i0 =
                   in Left answer
             mf = AM.fromLists $ map (map toComplex) $ matrixRep f
             (_, evecs) = LA.eig $ LA.ctrans mf
-            calc vec =
+            calc vec ={-# SCC "calc" #-}
               let c = vec @> cind
                   phi (idx, Right nth) acc = acc & ix idx .~ (vec @> nth) / c
                   phi (idx, Left g)    acc = acc & ix idx .~ substWith (*) acc g
               in if c == 0
                  then Nothing
-                 else Just $ foldr phi (SV.replicate (sArity f0) (error "indec!")) inds
+                 else Just $ foldr ({-# SCC "rewrite-answer" #-} phi) (SV.replicate (sArity f0) (error "indec!")) inds
         in sequence $ map calc $ LA.toColumns evecs
 
 solve' :: (Field r, IsPolynomial r n, IsMonomialOrder ord, Convertible r Double)
@@ -149,7 +150,7 @@ solveViaCompanion err ideal =
   if calcGroebnerBasis ideal == [one]
   then []
   else
-  let vs = map (nub . LA.toList . LA.eigenvalues . LA.fromLists . M.toLists . fmap toComplex . flip subspMatrix ideal) $
+  let vs = map (nub . LA.toList . LA.eigenvalues . LA.fromLists . matToLists . fmap toComplex . flip subspMatrix ideal) $
            enumOrdinal (sing :: SNat n)
       mul p q = toComplex p * q
   in [ xs
@@ -157,6 +158,9 @@ solveViaCompanion err ideal =
      , let xs = SV.unsafeFromList' xs0
      , all ((<err) . magnitude . substWith mul xs) $ generators ideal
      ]
+
+matToLists :: M.Matrix a -> [[a]]
+matToLists mat = [ V.toList $ M.getRow i mat | i <- [1.. M.nrows mat] ]
 
 matrixRep :: (NoetherianRing t, Eq t, Field t, SingRep n, IsMonomialOrder order,
               Reifies ideal (QIdeal t order n))
@@ -174,8 +178,8 @@ toComplex a = convert a :+ 0
 
 reduction :: (IsPolynomial r n, IsMonomialOrder ord, Field r)
              => Ordinal n -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n
-reduction on f =
-  let df = diff on f
+reduction on f = {-# SCC "reduction" #-}
+  let df = {-# SCC "differentiate" #-} diff on f
   in snd $ head $ f `divPolynomial` calcGroebnerBasis (toIdeal [f, df])
 
 -- | Calculate the monic generator of k[X_0, ..., X_n] `intersect` k[X_i].
@@ -183,7 +187,7 @@ univPoly :: forall r ord n. (Ord r, Normed r, Field r, IsPolynomial r n, IsMonom
          => Ordinal n
          -> Ideal (OrderedPolynomial r ord n)
          -> OrderedPolynomial r ord n
-univPoly nth ideal =
+univPoly nth ideal = {-# SCC "univPoly" #-}
   reifyQuotient ideal $ \pxy ->
   if gBasis' pxy == [one]
   then one
@@ -191,12 +195,13 @@ univPoly nth ideal =
            p0 : pows = [fmap WrapField $ vectorRep $ modIdeal' pxy (pow x i)
                        | i <- [0:: Natural ..]
                        | _ <- zero : fromJust (standardMonomials' pxy) ]
-           step m (p : ps) =
+           step m (p : ps) = {-# SCC "univPoly/step" #-}
              case solveLinear m p of
-               Nothing  -> step (m M.<|> M.colVector p) ps
+               Nothing  -> {-# SCC "recur" #-} step ({-# SCC "consCol" #-}m M.<|> M.colVector p) ps
                Just ans ->
                  let cur = fromIntegral $ V.length ans :: Natural
-                 in pow x cur - sum (zipWith (.*.) (map unwrapField $ V.toList ans)
+                 in {-# SCC "buildRelation" #-}
+                    pow x cur - sum (zipWith (.*.) (map unwrapField $ V.toList ans)
                                      [pow x i | i <- [0 :: Natural .. cur P.- 1]])
        in step (M.colVector p0) pows
 
@@ -205,12 +210,12 @@ solveLinear :: (Normed r, Ord r, Eq r, Fractional r)
             => M.Matrix r
             -> V.Vector r
             -> Maybe (V.Vector r)
-solveLinear mat vec =
-  if uRank u < uRank u' || M.diagProd u == 0 || uRank u < M.ncols mat
+solveLinear mat vec = {-# SCC "solveLinear" #-}
+  if ({-# SCC "uRank" #-} uRank u) < uRank u' || M.diagProd u == 0 || uRank u < M.ncols mat
   then Nothing
   else let ans = M.getCol 1 $ p P.* M.colVector vec
-           lsol = solveL ans
-           cfs = M.getCol 1 $ q P.* M.colVector (solveU lsol)
+           lsol = {-# SCC "solveL" #-} solveL ans
+           cfs = M.getCol 1 $ q P.* M.colVector ({-# SCC "solveU" #-} solveU lsol)
        in Just cfs
   where
     (u, l, p, q, _, _) = M.luDecomp' mat
@@ -266,7 +271,7 @@ solve'' err ideal =
       upoly = last lexBase
       restVars = init $ SV.toList allVars
       calcEigs = nub . LA.toList . LA.eigenvalues . AM.fromLists
-      lastEigs = calcEigs $ M.toLists $ fmap (toComplex . unwrapField) $
+      lastEigs = calcEigs $ matToLists $ fmap (toComplex . unwrapField) $
                  (AM.companion maxBound $ mapCoeff WrapField upoly)
   in if gbs == [one]
      then []

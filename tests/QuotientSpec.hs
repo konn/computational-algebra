@@ -2,10 +2,10 @@
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 module QuotientSpec where
 import           Algebra.Algorithms.Groebner
-import qualified Algebra.Linear                   as M
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
+import qualified Data.Matrix                      as M
 import           Data.Type.Monomorphic
 import           Data.Type.Natural                hiding (one, promote, zero)
 import qualified Data.Vector                      as V

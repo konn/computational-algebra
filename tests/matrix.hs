@@ -1,9 +1,10 @@
 module Main where
 import           Algebra.Algorithms.ZeroDim
-import qualified Algebra.Linear                   as M
 import           Algebra.Ring.Polynomial.Quotient
+import qualified Data.Matrix                      as M
 import           Data.Type.Monomorphic            (liftPoly)
 import           Data.Type.Natural
+import qualified Data.Vector                      as V
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
@@ -21,4 +22,7 @@ prop_matrixRep sn =
   forAll (polyOfDim sn) $ \poly ->
   reifyQuotient ideal $ \pxy ->
   let f = modIdeal' pxy poly
-  in matrixRep f == M.toLists (matRepr' f)
+  in matrixRep f == matToLists (matRepr' f)
+
+matToLists :: M.Matrix a -> [[a]]
+matToLists mat = [ V.toList $ M.getRow i mat | i <- [1..M.nrows mat] ]

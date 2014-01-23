@@ -3,9 +3,9 @@
 module PolynomialSpec where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.ZeroDim
-import qualified Algebra.Linear              as M
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
+import qualified Data.Matrix                 as M
 import           Data.Type.Monomorphic
 import           Data.Type.Natural           hiding (one, promote, zero)
 import qualified Data.Vector                 as V

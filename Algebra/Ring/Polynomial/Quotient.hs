@@ -8,7 +8,6 @@ module Algebra.Ring.Polynomial.Quotient ( Quotient(), QIdeal(), reifyQuotient, m
                                         , standardMonomials, standardMonomials', matRepr'
                                         , reduce, multWithTable, multUnamb, isZeroDimensional) where
 import           Algebra.Algorithms.Groebner
-import qualified Algebra.Linear              as M
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
@@ -16,6 +15,7 @@ import           Algebra.Wrapped
 import           Control.DeepSeq
 import qualified Data.HashMap.Lazy           as HM
 import           Data.List                   (sort, sortBy)
+import qualified Data.Matrix                 as M
 import           Data.Maybe
 import           Data.Ord
 import           Data.Proxy

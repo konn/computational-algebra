@@ -34,6 +34,7 @@ library
                  ,      hashable                == 1.1.*
                  ,      heaps                   == 0.3.*
                  ,      hmatrix                 == 0.15.0.1
+                 ,      matrix                  >= 0.2.4.0
                  ,      lens                    == 3.9.*
                  ,      monad-loops             == 0.4.*
                  ,      monomorphic             == 0.0.3.*
@@ -56,7 +57,6 @@ library
     exposed-modules: Algebra.Algorithms.Groebner
                      Algebra.Algorithms.Groebner.Monomorphic
                      Algebra.Algorithms.ZeroDim
-                     Algebra.Linear
                      Algebra.Ring.Noetherian
                      Algebra.Ring.Polynomial
                      Algebra.Ring.PolynomialAccumulated
@@ -87,6 +87,7 @@ executable solve
                  ,        computational-algebra
                  ,        random                ==1.0.*
                  ,        hmatrix               ==0.15.0.1
+                 ,        matrix                >= 0.2.4.0
                  ,        sized-vector          ==1.2.*
                  ,        vector                ==0.10.*
                  ,        convertible           ==1.0.*
@@ -94,28 +95,6 @@ executable solve
                  ,        MonadRandom           ==0.1.*
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
 
-executable solve-prof
-    main-is: solve-prof.hs
-    if flag(examples)
-        buildable: True
-    else
-        buildable: False
-    hs-source-dirs: share examples
-    build-depends:        algebra               ==3.1.*
-                 ,        base                  >=2.0 && <5
-                 ,        type-natural          ==0.0.6.*
-                 ,        algebra               ==3.1.*
-                 ,        computational-algebra
-                 ,        random                ==1.0.*
-                 ,        hmatrix               ==0.15.0.1
-                 ,        sized-vector          ==1.2.*
-                 ,        vector                ==0.10.*
-                 ,        convertible           ==1.0.*
-                 ,        lens
-                 ,        MonadRandom           ==0.1.*
-                 ,        deepseq
-                 ,        parallel
-    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
 
 executable sandpit-poly
     main-is: sandpit-poly.hs
@@ -202,6 +181,7 @@ test-suite linear-test
                  ,      type-natural            ==0.0.6.*
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
+                 ,      matrix                >= 0.2.4.0
     type: exitcode-stdio-1.0
     main-is: linear.hs
     buildable: True
@@ -230,6 +210,7 @@ test-suite matrix-test
                  ,      test-framework-hunit    ==0.3.*
                  ,      type-natural            ==0.0.6.*
                  ,      vector                  ==0.10.*
+                 ,      matrix                >= 0.2.4.0
                  ,      equational-reasoning
     type: exitcode-stdio-1.0
     main-is: matrix.hs
@@ -263,6 +244,7 @@ test-suite specs
                  ,      process
                  ,      text
                  ,      singletons
+                 ,      matrix                  >= 0.2.4.0
     type: exitcode-stdio-1.0
     main-is: Spec.hs
     buildable: True
@@ -292,6 +274,8 @@ test-suite new-div-test
                  ,      type-natural            ==0.0.6.*
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
+                 ,      matrix                  >= 0.2.4.0
+
     type: exitcode-stdio-1.0
     main-is: division.hs
     buildable: False
@@ -311,6 +295,8 @@ benchmark normal-bench
                  ,      singletons              ==0.8.*
                  ,      type-natural            ==0.0.6.*
                  ,      vector                  ==0.10.*
+                 ,      matrix                  >= 0.2.4.0
+
     type: exitcode-stdio-1.0
     main-is: bench.hs
     buildable: False
@@ -330,6 +316,7 @@ benchmark elimination-bench
                  ,      singletons              ==0.8.*
                  ,      type-natural            ==0.0.6.*
                  ,      vector                  ==0.10.*
+                 ,      matrix                  >= 0.2.4.0
     type: exitcode-stdio-1.0
     main-is: elimination-bench.hs
     buildable: False
@@ -357,11 +344,14 @@ benchmark quotient-bench-randomized
                  ,      transformers            >=0.2 && <0.4
                  ,      type-natural            >=0.0.5.0
                  ,      vector                  ==0.10.*
+                 ,      matrix                  >= 0.2.4.0
+                 ,      equational-reasoning
+                 ,      monomorphic
     type: exitcode-stdio-1.0
     main-is: quotient-bench-randomized.hs
     buildable: True
     hs-source-dirs: bench share
-    other-modules: SingularBench
+    other-modules: SingularBench Utils
     ghc-options: -O2 -threaded -rtsopts
 
 benchmark monomial-order-bench
@@ -386,11 +376,12 @@ benchmark monomial-order-bench
                  ,      transformers            >=0.2 && <0.4
                  ,      type-natural            >=0.0.5.0
                  ,      vector                  ==0.10.*
+                 ,      matrix                  >= 0.2.4.0
     type: exitcode-stdio-1.0
     main-is: monomials.hs
     buildable: True
     hs-source-dirs: bench share
-    other-modules: SingularBench
+    other-modules: SingularBench Utils
     ghc-options: -O2 -threaded -rtsopts
 
 benchmark linear-bench
@@ -418,6 +409,8 @@ benchmark linear-bench
                  ,      type-natural            >=0.0.5.0
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
+                 ,      matrix                  >= 0.2.4.0
+                 ,      monomorphic
     type: exitcode-stdio-1.0
     main-is: linear.hs
     buildable: False
@@ -450,6 +443,8 @@ benchmark division-bench
                  ,      type-natural            >=0.0.5.0
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
+                 ,      matrix                  >= 0.2.4.0
+                 ,      monomorphic
     type: exitcode-stdio-1.0
     main-is: division.hs
     buildable: False
@@ -484,6 +479,7 @@ benchmark solve-bench
                  ,      random                  ==1.0.*
                  ,      progression             ==0.5.*
                  ,      equational-reasoning
+                 ,      matrix                  >= 0.2.4.0
     type: exitcode-stdio-1.0
     main-is: solve.hs
     buildable: True

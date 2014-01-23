@@ -8,7 +8,6 @@ module Main (module Algebra.Algorithms.Groebner, module Algebra.Ring.Polynomial
 import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.ZeroDim
 import           Algebra.Internal
-import qualified Algebra.Linear                   as M
 import           Algebra.Matrix                   (companion)
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
@@ -20,6 +19,7 @@ import           Data.Complex
 import           Data.Convertible
 import           Data.Foldable                    (foldrM)
 import           Data.List                        (find, nub, partition, sortBy)
+import qualified Data.Matrix                      as M
 import           Data.Ord
 import           Data.Ratio
 import           Data.Type.Natural                hiding (one, zero)

@@ -4,12 +4,12 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
 import           Algebra.Algorithms.ZeroDim
-import qualified Algebra.Linear              as M
 import           Control.Concurrent
 import           Control.DeepSeq
 import           Control.Monad
 import           Control.Parallel.Strategies
 import           Criterion.Main
+import qualified Data.Matrix                 as M
 import qualified Data.Vector                 as V
 import           Prelude                     hiding (product)
 import           System.Process

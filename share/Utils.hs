@@ -8,7 +8,7 @@ module Utils (ZeroDimIdeal(..), polyOfDim, arbitraryRational,
               arbitrarySolvable, zeroDimOf, zeroDimG, unaryPoly, stdReduced,
               quotOfDim, isNonTrivial, Equation(..), liftSNat, checkForArity,
               MatrixCase(..), idealOfDim) where
-import qualified Algebra.Linear                   as M hiding (fromList)
+import qualified Data.Matrix                   as M hiding (fromList)
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial          hiding (Positive)
 import           Algebra.Ring.Polynomial.Quotient

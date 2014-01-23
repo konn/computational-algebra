@@ -2,11 +2,11 @@
 {-# LANGUAGE MultiParamTypeClasses, TypeFamilies, TypeSynonymInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Matrix (Matrix(..), mapSM, delta, companion) where
-import qualified Algebra.Linear              as DM
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Wrapped             ()
 import           Control.Lens
+import qualified Data.Matrix                 as DM
 import           Data.Maybe
 import           Data.Singletons             (SingRep (..))
 import           Data.Type.Ordinal

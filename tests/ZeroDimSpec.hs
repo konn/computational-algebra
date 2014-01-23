@@ -3,13 +3,13 @@
 module ZeroDimSpec where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.ZeroDim
-import qualified Algebra.Linear                   as M
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
 import           Control.Monad
 import           Control.Monad.Random
 import           Data.Complex
+import qualified Data.Matrix                      as M
 import           Data.Maybe
 import           Data.Type.Monomorphic
 import           Data.Type.Natural                hiding (one, promote, zero)
