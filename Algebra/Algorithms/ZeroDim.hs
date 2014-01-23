@@ -241,9 +241,9 @@ solveLinear mat vec =
 
 -- | Calculate the radical of the given zero-dimensional ideal.
 radical :: forall r ord n . (Normed r, Ord r, IsPolynomial r n, Field r, IsMonomialOrder ord)
-        => Ideal (OrderedPolynomial r ord (S n)) -> Ideal (OrderedPolynomial r ord (S n))
-radical ideal =
-  let gens  = map (\on -> reduction on $ univPoly on ideal) $ enumOrdinal (sing :: SNat (S n))
+        => Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
+radical ideal = {-# SCC "radical" #-}
+  let gens  = {-# SCC "calcGens" #-} map (\on -> reduction on $ univPoly on ideal) $ enumOrdinal (sing :: SNat n)
   in toIdeal $ calcGroebnerBasis $ toIdeal $ generators ideal ++ gens
 
 -- | Test if the given zero-dimensional ideal is radical or not.
