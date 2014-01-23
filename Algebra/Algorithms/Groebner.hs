@@ -348,7 +348,7 @@ intersection Nil = Ideal $ singleton one
 intersection idsv@(_ :- _) =
     let sk = sLength idsv
         sn = sing :: SNat n
-        ts  = genVars (sk %+ sn)
+        ts  = take (sNatToInt sk) $ genVars (sk %+ sn)
         tis = zipWith (\ideal t -> mapIdeal ((t *) . shiftR sk) ideal) (toList idsv) ts
         j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
     in case plusMinusEqR sn sk of
