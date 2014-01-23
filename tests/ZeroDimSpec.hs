@@ -1,22 +1,20 @@
-{-# LANGUAGE DataKinds, GADTs #-}
+{-# LANGUAGE DataKinds #-}
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 module ZeroDimSpec where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.ZeroDim
-import qualified Algebra.Linear                   as M
+import qualified Algebra.Linear              as M
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
-import           Algebra.Ring.Polynomial.Quotient
 import           Control.Monad
-import           Data.Maybe
 import           Data.Type.Monomorphic
-import           Data.Type.Natural                hiding (one, promote, zero)
+import           Data.Type.Natural           hiding (one, promote, zero)
 import           Data.Type.Ordinal
-import qualified Data.Vector                      as V
+import qualified Data.Vector                 as V
 import           SingularBridge
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
-import           Test.QuickCheck                  hiding (promote)
+import           Test.QuickCheck             hiding (promote)
 import           Utils
 
 asGenListOf :: Gen [a] -> a -> Gen [a]
@@ -38,11 +36,11 @@ spec = do
              in solveLinear mat ans == Just (V.fromList v)
     it "cannot solve unsolvable cases" $ do
       pendingWith "need example"
-  describe "univPoly" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
+  describe "univPoly" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 5) $ do
     prop "produces elimination ideal's monic generator" $ do
       checkForArity [2..4] prop_univPoly
-  describe "radical" $ do
-    it "really computes radical" $ do
+  describe "radical" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 5) $ do
+    prop "really computes radical" $ do
       pendingWith "We can verify correctness by comparing with singular, but it's not quite smart way..."
 {-
       checkForArity [2..4] $ \sdim ->
@@ -50,23 +48,6 @@ spec = do
         stdReduced (generators $ radical ideal) == calcGroebnerBasis (singIdealFun "radical" ideal)
       -- pendingWith "I couldn't formulate the spec for radical without existentials :-("
 -}
-  describe "fglm" $ modifyMaxSuccess (const 25) $ modifyMaxSize (const 3) $ do
-    it "computes monomial basis" $ do
-      checkForArity [2..4] $ \sdim ->
-        case sdim of
-          SZ -> error "impossible"
-          SS _ ->
-            forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
-            let base = reifyQuotient (mapIdeal (changeOrder Lex) ideal) $ \ii ->
-                  map quotRepr $ fromJust $ standardMonomials' ii
-            in stdReduced (snd $ fglm ideal) == stdReduced base
-    it "computes lex base" $ do
-      checkForArity [2..4] $ \sdim ->
-        case sdim of
-          SZ -> error "impossible"
-          SS _ ->
-            forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
-            stdReduced (fst $ fglm ideal) == stdReduced (calcGroebnerBasisWith Lex ideal)
 
 prop_univPoly :: SingRep n => SNat n -> Property
 prop_univPoly sdim =

@@ -367,7 +367,7 @@ instance (Eq r, IsPolynomial r n, IsOrder order, Show r) => Show (OrderedPolynom
   show = showPolynomialWithVars [(n, "X_"++ show n) | n <- [0..]]
 
 instance (SingRep n, IsOrder order) => Show (OrderedPolynomial Rational order n) where
-  show = showPolynomialWith False [(n, "X_"++ show n) | n <- [0..]] showRational
+  show = showPolynomialWith [(n, "X_"++ show n) | n <- [0..]] showRational
 
 showPolynomialWithVars :: (Eq a, Show a, SingRep n, NoetherianRing a, IsOrder ordering)
                        => [(Int, String)] -> OrderedPolynomial a ordering n -> String
@@ -401,13 +401,11 @@ showRational r | r == 0    = Zero
                 | otherwise          = show (numerator q) ++ "/" ++ show (denominator q) ++ " "
 
 showPolynomialWith  :: (Eq a, Show a, SingRep n, NoetherianRing a, IsOrder ordering)
-                    => Bool -> [(Int, String)] -> (a -> Coefficient) -> OrderedPolynomial a ordering n -> String
-showPolynomialWith useAst vDic showCoeff p0@(Polynomial d)
+                    => [(Int, String)] -> (a -> Coefficient) -> OrderedPolynomial a ordering n -> String
+showPolynomialWith vDic showCoeff p0@(Polynomial d)
     | p0 == zero = "0"
     | otherwise  = catTerms $ mapMaybe procTerm $ M.toDescList d
     where
-      ast | useAst    = "*"
-          | otherwise = ""
       catTerms [] = "0"
       catTerms (x:xs) = concat $ showTerm True x : map (showTerm False) xs
       showTerm isLeading (Zero, _) = if isLeading then "0" else ""
@@ -422,15 +420,8 @@ showPolynomialWith useAst vDic showCoeff p0@(Polynomial d)
                       | isConstantMonomial deg && c == negate one = Negative "1"
                       | c == one = Positive ""
                       | c == negate one = Negative ""
-                      | not (isConstantMonomial deg)              =
-                        case cKind of
-                          Negative c -> Negative $ c ++ ast
-                          Positive c -> Positive $ c ++ ast
-                          i          -> i
                       | otherwise                                 = cKind
-                  catnate | useAst    = intercalate "*"
-                          | otherwise = unwords
-              in Just $ (cff, catnate (mapMaybe showDeg (zip [0..] $ V.toList deg)))
+              in Just $ (cff, unwords (mapMaybe showDeg (zip [0..] $ V.toList deg)))
       showDeg (n, p) | p == 0    = Nothing
                      | p == 1    = Just $ showVar n
                      | otherwise = Just $ showVar n ++ "^" ++ show p
