@@ -5,7 +5,7 @@
 {-# LANGUAGE StandaloneDeriving, UndecidableInstances                      #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Utils (ZeroDimIdeal(..), polyOfDim, arbitraryRational,
-              arbitrarySolvable, zeroDimOf, zeroDimG, unaryPoly,
+              arbitrarySolvable, zeroDimOf, zeroDimG, unaryPoly, stdReduced,
               quotOfDim, isNonTrivial, Equation(..), liftSNat, checkForArity,
               MatrixCase(..), idealOfDim) where
 import qualified Algebra.Linear                   as M hiding (fromList)
@@ -20,7 +20,6 @@ import qualified Data.Map                         as M
 import           Data.Proxy
 import           Data.Ratio
 import           Data.Reflection                  hiding (Z)
-import qualified Data.Sequence                    as S
 import           Data.Type.Monomorphic
 import qualified Data.Type.Monomorphic            as M
 import           Data.Type.Natural
@@ -34,6 +33,8 @@ import qualified Test.QuickCheck                  as QC
 import           Test.QuickCheck.Instances        ()
 import           Test.SmallCheck.Series
 import qualified Test.SmallCheck.Series           as SC
+import Data.Ord
+import Data.List (sortBy)
 
 newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal :: Ideal (Polynomial Rational n)
                                       } deriving (Show, Eq, Ord)
@@ -207,3 +208,7 @@ unaryPoly arity mth = do
 
 checkForArity :: [Int] -> (forall n. SingRep (n :: Nat) => Sing n -> Property) -> Property
 checkForArity as test = forAll (QC.elements as) $ liftSNat test
+
+stdReduced :: (Eq r, Num r, SingRep n, NA.Division r, NoetherianRing r, IsMonomialOrder order)
+           => [OrderedPolynomial r order n] -> [OrderedPolynomial r order n]
+stdReduced ps = sortBy (comparing leadingMonomial) $ map (\f -> injectCoeff (NA.recip $ leadingCoeff f) * f) ps

@@ -28,12 +28,18 @@ spec = do
     prop "divides correctly" $
       checkForArity [1..4] prop_divCorrect
   describe "calcGroebnerBasis" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 50) $ do
+    prop "passes S-test" $
+      checkForArity [2..3] prop_passesSTest
     prop "divides all original generators" $ do
       checkForArity [2..3] prop_groebnerDivsOrig
     it "generates the same ideal as original" $ do
       pendingWith "need example"
-    prop "passes S-test" $
-      checkForArity [2..3] prop_passesSTest
+    it "contains the original ideal" $ checkForArity [1..3] $ \ari ->
+      forAll (idealOfDim ari) $ \i ->
+      forAll (vectorOf (length $ generators i) $ polyOfDim ari) $ \fs ->
+      let f = sum $ zipWith (*) fs (generators i)
+          gs = calcGroebnerBasis i
+      in f `modPolynomial` gs == 0
     it "produces minimal basis" $ do
       checkForArity [2..3] prop_isMinimal
     it "produces reduced basis" $ do
@@ -53,8 +59,8 @@ prop_intersection sdim =
   forAll (idealOfDim sdim) $ \ideal ->
   forAll (idealOfDim sdim) $ \jdeal ->
   forAll (polyOfDim sdim) $ \f ->
-  collect (f `isIdealMember` ideal && f `isIdealMember` jdeal) $
-  (f `isIdealMember` ideal && f `isIdealMember` jdeal) == f `isIdealMember` (intersection $ ideal :- jdeal :- Nil)
+  (f `isIdealMember` ideal && f `isIdealMember` jdeal)
+  == f `isIdealMember` (intersection $ ideal :- jdeal :- Nil)
 
 prop_isMinimal :: SingRep n => SNat n -> Property
 prop_isMinimal sdim =
@@ -72,8 +78,7 @@ prop_isReduced sdim =
 
 prop_passesSTest :: SingRep n => SNat n -> Property
 prop_passesSTest sdim =
-  forAll (elements [3..15]) $ \count ->
-  forAll (vectorOf count (polyOfDim sdim)) $ \ideal ->
+  forAll (sized $ \size -> vectorOf size (polyOfDim sdim)) $ \ideal ->
   let gs = calcGroebnerBasis $ toIdeal ideal
   in all ((== 0) . (`modPolynomial` gs)) [sPolynomial f g | f <- gs, g <- gs, f /= g]
 

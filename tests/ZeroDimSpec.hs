@@ -11,6 +11,7 @@ import           Data.Type.Monomorphic
 import           Data.Type.Natural           hiding (one, promote, zero)
 import           Data.Type.Ordinal
 import qualified Data.Vector                 as V
+import           SingularBridge
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck             hiding (promote)
@@ -38,7 +39,15 @@ spec = do
   describe "univPoly" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 5) $ do
     prop "produces elimination ideal's monic generator" $ do
       checkForArity [2..4] prop_univPoly
-
+  describe "radical" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 5) $ do
+    prop "really computes radical" $ do
+      pendingWith "We can verify correctness by comparing with singular, but it's not quite smart way..."
+{-
+      checkForArity [2..4] $ \sdim ->
+        forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
+        stdReduced (generators $ radical ideal) == calcGroebnerBasis (singIdealFun "radical" ideal)
+      -- pendingWith "I couldn't formulate the spec for radical without existentials :-("
+-}
 
 prop_univPoly :: SingRep n => SNat n -> Property
 prop_univPoly sdim =
