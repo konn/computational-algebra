@@ -22,28 +22,28 @@ spec :: Spec
 spec = do
   describe "divModPolynomial" $ modifyMaxSize (const 25) $ modifyMaxSuccess (const 100) $ do
     prop "quotient cannot be diveided by any denoms (ternary)" $
-      forAll (elements [1..4 :: Int]) $ liftSNat prop_indivisible
+      checkForArity [1..4] prop_indivisible
     prop "satisfies a_i f_i /= 0 ==> deg(f) >= deg (a_i f_i)" $
-      forAll (elements [1..4 :: Int]) $ liftSNat prop_degdecay
+      checkForArity [1..4] prop_degdecay
     prop "divides correctly" $
-      forAll (elements [1..4 :: Int]) $ liftSNat prop_divCorrect
+      checkForArity [1..4] prop_divCorrect
   describe "calcGroebnerBasis" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 50) $ do
     prop "divides all original generators" $ do
-      forAll (elements [2..3 :: Int]) $ liftSNat prop_groebnerDivsOrig
+      checkForArity [2..3] prop_groebnerDivsOrig
     it "generates the same ideal as original" $ do
       pendingWith "need example"
     prop "passes S-test" $
-      forAll (elements [2..3 :: Int]) $ liftSNat prop_passesSTest
+      checkForArity [2..3] prop_passesSTest
     it "produces minimal basis" $ do
-      forAll (elements [2..3 :: Int]) $ liftSNat prop_isMinimal
+      checkForArity [2..3] prop_isMinimal
     it "produces reduced basis" $ do
-      forAll (elements [2..3 :: Int]) $ liftSNat prop_isReduced
+      checkForArity [2..3] prop_isReduced
   describe "isIdealMember" $ do
     it "determins membership correctly" $ do
       pendingWith "need example"
   describe "intersection" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 50) $ do
     it "can calculate correctly" $ do
-      forAll (elements [2..3 :: Int]) $ liftSNat prop_intersection
+      checkForArity [2..3] prop_intersection
     it "can solve test-cases correctly" $ do
       forM_ ics_binary $ \(IC i j ans) ->
         intersection (toIdeal i :- toIdeal j :- Nil) `shouldBe` toIdeal ans

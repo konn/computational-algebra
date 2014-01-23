@@ -6,7 +6,7 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Utils (ZeroDimIdeal(..), polyOfDim, arbitraryRational,
               arbitrarySolvable, zeroDimOf, zeroDimG, unaryPoly,
-              quotOfDim, isNonTrivial, Equation(..), liftSNat,
+              quotOfDim, isNonTrivial, Equation(..), liftSNat, checkForArity,
               MatrixCase(..), idealOfDim) where
 import qualified Algebra.Linear                   as M hiding (fromList)
 import           Algebra.Ring.Noetherian
@@ -205,3 +205,5 @@ unaryPoly arity mth = do
                   case boolToClassLeq (sm %:+ sOne) arity of
                     LeqInstance -> return $ scastPolynomial arity $ shiftR sm f
 
+checkForArity :: [Int] -> (forall n. SingRep (n :: Nat) => Sing n -> Property) -> Property
+checkForArity as test = forAll (QC.elements as) $ liftSNat test

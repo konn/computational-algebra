@@ -37,7 +37,7 @@ spec = do
       pendingWith "need example"
   describe "univPoly" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 5) $ do
     prop "produces elimination ideal's monic generator" $ do
-      forAll (elements [2..4 :: Int]) $ liftSNat prop_univPoly
+      checkForArity [2..4] prop_univPoly
 
 
 prop_univPoly :: SingRep n => SNat n -> Property
