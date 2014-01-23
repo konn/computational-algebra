@@ -260,11 +260,14 @@ test-suite specs
                  ,      type-natural            ==0.0.6.*
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
+                 ,      process
+                 ,      text
+                 ,      singletons
     type: exitcode-stdio-1.0
     main-is: Spec.hs
     buildable: True
     hs-source-dirs: tests share
-    other-modules: Utils GroebnerSpec ZeroDimSpec
+    other-modules: Utils GroebnerSpec ZeroDimSpec SingularBridge
     ghc-options: -Wall -threaded
 
 test-suite new-div-test
