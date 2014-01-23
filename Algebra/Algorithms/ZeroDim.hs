@@ -262,7 +262,8 @@ solve'' :: forall r ord n.
 solve'' err ideal =
   reifyQuotient (radical ideal) $ \ii ->
   let gbs = gBasis' ii
-      upoly = univPoly maxBound $ toIdeal gbs
+      lexBase = fst $ fglm $ toIdeal gbs
+      upoly = last lexBase
       restVars = init $ SV.toList allVars
       calcEigs = nub . LA.toList . LA.eigenvalues . AM.fromLists
       lastEigs = calcEigs $ M.toLists $ fmap (toComplex . unwrapField) $
@@ -270,20 +271,15 @@ solve'' err ideal =
   in if gbs == [one]
      then []
      else if length (lastEigs) == length (fromJust $ standardMonomials' ii)
-          then solveSpan ii restVars lastEigs upoly
+          then solveSpan (init lexBase) lastEigs
           else chooseAnswer $
                lastEigs : map (calcEigs . map (map toComplex) . matrixRep . modIdeal' ii)
                               restVars
   where
     mul p q = toComplex p * q
-    solveSpan ii rest lastEigs cpoly =
-      let origs = map (vectorRep . modIdeal' ii) rest
-          deg   = totalDegree' cpoly - 1
-          xn    = modIdeal' ii $ var maxBound
-          powers = [ pow xn j | j <- [0..fromIntegral deg :: Natural]]
-          trans = AM.fromCols $ map vectorRep powers
-          answers = map (fromJust . solveLinearNA trans) origs
-          substEig eig = V.sum . V.imap (\j a -> pow eig (fromIntegral j :: Natural) * toComplex a)
+    solveSpan rest lastEigs =
+      let answers = map (\f -> toPolynomial (leadingTerm f) - f) rest
+          substEig eig = substWith (\d b -> toComplex d * b) $ SV.unsafeFromList' $ map (const zero) rest ++ [eig]
       in [ SV.unsafeFromList' $ map (substEig eig) answers ++ [eig]
          | eig <- lastEigs
          ]
