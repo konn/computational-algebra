@@ -1,22 +1,29 @@
-{-# LANGUAGE ConstraintKinds, FlexibleInstances, GADTs, KindSignatures #-}
-{-# LANGUAGE MultiParamTypeClasses, TypeFamilies, TypeSynonymInstances #-}
+{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
+{-# LANGUAGE KindSignatures, MultiParamTypeClasses, TypeFamilies         #-}
+{-# LANGUAGE TypeSynonymInstances                                        #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Algebra.Matrix (Matrix(..), mapSM, delta, companion) where
+module Algebra.Matrix (Matrix(..), mapSM, delta, companion, Sparse(..), gaussReduction) where
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
-import           Algebra.Wrapped             ()
+import           Algebra.Wrapped                  (Normed (..))
+import           Control.Arrow
 import           Control.Lens
-import qualified Data.Matrix                 as DM
+import           Data.Complex
+import           Data.List
+import qualified Data.Matrix                      as DM
 import           Data.Maybe
-import           Data.Singletons             (SingRep (..))
+import           Data.Ord
+import           Data.Singletons                  (SingRep)
 import           Data.Type.Ordinal
-import qualified Data.Vector                 as V
-import qualified Data.Vector.Generic         as GV
+import qualified Data.Vector                      as V
+import qualified Data.Vector.Algorithms.Insertion as Sort
+import qualified Data.Vector.Generic              as GV
+import qualified Data.Vector.Hybrid               as H
 import           Data.Vector.Hybrid.Internal
-import qualified Numeric.Algebra             as NA
-import qualified Numeric.LinearAlgebra       as LA
-import           Sparse.Matrix               (keys, _Mat)
-import qualified Sparse.Matrix               as SM
+import qualified Numeric.Algebra                  as NA
+import qualified Numeric.LinearAlgebra            as LA
+import           Sparse.Matrix                    (_Mat)
+import qualified Sparse.Matrix                    as SM
 
 class Matrix mat where
   type Elem mat a
@@ -45,6 +52,8 @@ class Matrix mat where
   rowVector :: Elem mat a => V.Vector a -> mat a
   getCol :: Elem mat a => Int -> mat a -> V.Vector a
   getRow :: Elem mat a => Int -> mat a -> V.Vector a
+  switchRows :: Elem mat a => Int -> Int -> mat a -> mat a
+  combineRows :: Elem mat a => Int -> a -> Int -> mat a -> mat a
   trans :: Elem mat a => mat a -> mat a
   buildMatrix :: Elem mat a => Int -> Int -> ((Int, Int) -> a) -> mat a
   index :: Elem mat a => Int -> Int -> mat a -> Maybe a
@@ -74,10 +83,15 @@ instance Matrix DM.Matrix where
   rowVector = DM.rowVector
   getCol = DM.getCol
   getRow = DM.getRow
+  switchRows = DM.switchRows
+  combineRows = DM.combineRows
   buildMatrix = DM.matrix
   (!) = (DM.!)
   (<||>) = (DM.<|>)
   (<-->) = (DM.<->)
+
+swapIJ :: Eq a => a -> a -> a -> a
+swapIJ i j k = if k == i then j else if k == j then i else k
 
 instance Matrix LA.Matrix where
   type Elem LA.Matrix a = (Num a, LA.Element a, LA.Container LA.Vector a)
@@ -100,6 +114,8 @@ instance Matrix LA.Matrix where
   toRows = map (V.fromList . LA.toList) . LA.toRows
   getCol i = V.fromList . LA.toList . (!! (i - 1)) . LA.toColumns
   getRow i = V.fromList . LA.toList . (!! (i - 1)) . LA.toRows
+  switchRows i j m = LA.extractRows (map (swapIJ (i-1) (j-1)) [0.. nrows m - 1]) m
+  combineRows j s i m = LA.mapMatrixWithIndex (\(k,l) v -> if k == j - 1 then s * (m ! (i,l+1)) + v else v) m
   buildMatrix w h f = LA.buildMatrix w h (\(i, j) -> f (i-1, j-1))
   m ! (i, j) = m LA.@@> (i - 1, j - 1)
   m <||> n = LA.fromColumns $ LA.toColumns m ++ LA.toColumns n
@@ -110,33 +126,78 @@ mapSM f m =
   case m ^._Mat of
     V ks as  -> V ks (GV.fromList $ map f $ GV.toList as) ^.from _Mat
 
-instance Matrix SM.Mat where
-  type Elem SM.Mat a = (Num a, SM.Vectored a)
-  cmap = mapSM
-  empty = SM.fromList []
-  fromLists = SM.fromList . concat. zipWith (\i -> zipWith (\j v -> (SM.Key i j, v)) [0..]) [0..]
-  nrows m = maybe 0 (succ . fromIntegral) $ maximumOf (traverse._1) $ m^.keys.to GV.toList
-  ncols m = maybe 0 (succ . fromIntegral) $ maximumOf (traverse._2) $ m^.keys.to GV.toList
-  identity = SM.ident
-  diag v = SM.fromList [ (SM.Key (fromIntegral i) (fromIntegral i), v V.! i) | i <- [0.. V.length v - 1]]
-  getDiag m =
-    let s = fromIntegral $ min (nrows m) (ncols m)
+data Sparse r = Sparse { rawSM :: !(SM.Mat r)
+                       , cols  :: !Int
+                       , rows  :: !Int
+                       }
+
+instance (SM.Vectored a, SM.Eq0 a) => Num (Sparse a) where
+  {-# SPECIALIZE instance Num (Sparse Int) #-}
+  {-# SPECIALIZE instance Num (Sparse Double) #-}
+  {-# SPECIALIZE instance Num (Sparse (Complex Double)) #-}
+  Sparse m r _ * Sparse n _ c = Sparse (m * n) r c
+  {-# INLINE (*) #-}
+  abs (Sparse m r c) = Sparse (m & over each abs) r c
+  {-# INLINE abs #-}
+  signum (Sparse m r c) = Sparse (m & over each signum) r c
+  {-# INLINE signum #-}
+  negate (Sparse m r c) = Sparse (m & over each negate) r c
+  {-# INLINE negate #-}
+  fromInteger _ = error "Sparse: fromInteger"
+  {-# INLINE fromInteger #-}
+  Sparse m r c + Sparse n r' c' = Sparse (m + n) (max r r') (max c c')
+  {-# INLINE (+) #-}
+  Sparse m r c - Sparse n r' c' = Sparse (m - n) (max r r') (max c c')
+  {-# INLINE (-) #-}
+
+instance (SM.Vectored a, Show a) => Show (Sparse a) where
+  showsPrec d = showsPrec d . rawSM
+
+instance Matrix Sparse where
+  type Elem Sparse a = (Num a, SM.Vectored a, SM.Eq0 a)
+  cmap f (Sparse raw nc nr) = Sparse (mapSM f raw) nc nr
+  empty = Sparse (SM.fromList []) 0 0
+  fromLists ls =
+    Sparse (SM.fromList . concat. zipWith (\i -> zipWith (\j v -> (SM.Key i j, v)) [0..]) [0..] $ ls)
+    (length ls) (maximum $ map length ls)
+  nrows (Sparse _ _ r) = r
+  ncols (Sparse _ c _) = c
+  identity n = Sparse (SM.ident n) n n
+  diag v = Sparse (SM.fromList [ (SM.Key (fromIntegral i) (fromIntegral i), v V.! i) | i <- [0.. V.length v - 1]])
+             (V.length v) (V.length v)
+  getDiag (Sparse m r c) =
+    let s = fromIntegral $ min r c
     in V.fromList [ fromMaybe 0 $ m ^? ix (SM.Key i i) | i <- [1..s] ]
   trace = V.sum . getDiag
   diagProd = V.product . getDiag
-  zero n m = SM.fromList []
-  colVector v = SM.fromList [(SM.Key (fromIntegral i) 0, v V.! i) | i <- [0..V.length v - 1]]
-  rowVector v = SM.fromList [(SM.Key 0 (fromIntegral i), v V.! i) | i <- [0..V.length v - 1]]
-  getCol j m = V.fromList $ [ fromMaybe 0 $ m ^? ix (SM.Key (fromIntegral i) (fromIntegral (j-1)))
-                            | i <- [0..nrows m - 1]]
-  getRow i m = V.fromList $ [ fromMaybe 0 $ m ^? ix (SM.Key (fromIntegral (i-1)) (fromIntegral j))
-                            | j <- [0..ncols m - 1]]
-  trans = SM.transpose
-  buildMatrix h w f = SM.fromList [(SM.Key (fromIntegral $ i-1) (fromIntegral $ j-1), f (i,j))
-                                  | i <- [1..h], j <- [1..w]]
-  m ! (i, j) = fromMaybe 0 $ m ^? ix (SM.Key (fromIntegral i - 1) (fromIntegral j - 1))
-  m <||> n = SM.addWith (+) m (n & keys %~ GV.map (_2 %~ (+ (fromIntegral $ ncols m))))
-  m <--> n = SM.addWith (+) m (n & keys %~ GV.map (_1 %~ (+ (fromIntegral $ nrows m))))
+  zero n m = Sparse (SM.fromList []) n m
+  colVector v = Sparse (SM.fromList [(SM.Key (fromIntegral i) 0, v V.! i) | i <- [0..V.length v - 1]]) (V.length v) 1
+  rowVector v = Sparse (SM.fromList [(SM.Key 0 (fromIntegral i), v V.! i) | i <- [0..V.length v - 1]]) 1 (V.length v)
+  switchRows i j = wrapSM $ modifyKey $ _1 %~ swapIJ (fromIntegral i - 1) (fromIntegral j - 1)
+  combineRows j s i spm = flip wrapSM spm $ \m ->
+    m & _Mat %~ H.map (\(SM.Key k l, v) -> (SM.Key k l,
+                                            if k == fromIntegral j - 1
+                                            then s * (spm ! (i, fromIntegral l+1)) + v
+                                            else v))
+  getCol j (Sparse m rs _) = V.fromList $ [ fromMaybe 0 $ m ^? ix (SM.Key (fromIntegral i) (fromIntegral (j-1)))
+                                          | i <- [0..rs - 1]]
+  getRow i (Sparse m _ cs) = V.fromList $ [ fromMaybe 0 $ m ^? ix (SM.Key (fromIntegral (i-1)) (fromIntegral j))
+                                          | j <- [0..cs - 1]]
+  trans (Sparse m r c) = Sparse (SM.transpose m) c r
+  buildMatrix h w f = Sparse (SM.fromList [(SM.Key (fromIntegral $ i-1) (fromIntegral $ j-1), f (i,j))
+                                          | i <- [1..h], j <- [1..w]]) h w
+  Sparse m _ _ ! (i, j) = fromMaybe 0 $ m ^? ix (SM.Key (fromIntegral i - 1) (fromIntegral j - 1))
+  Sparse m r c1 <||> Sparse n r' c2 =
+    Sparse (m + modifyKey (_2 %~ (+ fromIntegral c1)) n) (max r r') (c1 + c2)
+  Sparse m r1 c <--> Sparse n r2 c' =
+    Sparse (m + modifyKey (_1 %~ (+ fromIntegral r1)) n) (r1 + r2) (max c c')
+
+modifyKey :: (SM.Vectored a) => (SM.Key -> SM.Key) -> SM.Mat a -> SM.Mat a
+modifyKey f m =
+  m & _Mat %~ H.modify (Sort.sortBy (comparing fst)). H.map (first f)
+
+wrapSM :: (SM.Mat a -> SM.Mat b) -> Sparse a -> Sparse b
+wrapSM f (Sparse m r c) = Sparse (f m) r c
 
 delta :: (NA.Monoidal r, NA.Unital r) => Int -> Int -> r
 delta i j | i == j = NA.one
@@ -156,4 +217,26 @@ companion on poly =
 instance SM.Vectored Rational where
   type Vec Rational = V.Vector
 
-instance SM.Eq0 Rational where
+instance SM.Eq0 Rational
+
+-- | @gaussReduction a = (a', p)@ where @a'@ is row echelon form and @p@ is pivoting matrix.
+gaussReduction :: (Matrix mat, Elem mat a, Normed a, Ord (Norm a), Eq a, NA.Field a)
+               => mat a -> (mat a, mat a)
+gaussReduction mat = go 1 1 mat (identity $ nrows mat)
+  where
+    go i j a p
+      | i > nrows mat || j > ncols mat = (a, p)
+      | otherwise =
+        let (k, new) =  maximumBy (comparing $ norm . snd) [(l, a ! (l, j)) | l <- [i..nrows mat]]
+        in if new == NA.zero
+           then go i (j + 1) a p
+           else let prc l a0 p0
+                      | l == i = prc (l+1) a0 p0
+                      | l > nrows mat = (a0, p0)
+                      | otherwise     =
+                        let coe = NA.negate (a0 ! (l, j)) NA./ new
+                            a'' = combineRows l coe i a0
+                            p'' = combineRows l coe i p0
+                        in prc (l+1) a'' p''
+                    (a', p') = prc 1 (switchRows i k a) (switchRows i k p)
+                in go (i+1) (j+1) a' p'

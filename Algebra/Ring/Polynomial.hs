@@ -14,7 +14,7 @@ module Algebra.Ring.Polynomial
     , changeMonomialOrder, changeMonomialOrderProxy
     , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars
     , showPolynomialWith, showRational, allVars, subst', homogenize, unhomogenize
-    , normalize, injectCoeff, varX, var, getTerms, shiftR, orderedBy
+    , normalize, injectCoeff, varX, var, getTerms, shiftR, orderedBy, monomials
     , divs, isPowerOf, tryDiv, fromList, Coefficient(..),ToWeightVector(..)
     , leadingTerm, leadingMonomial, leadingCoeff, genVars, sArity
     , OrderedMonomial(..), Grevlex(..), mapCoeff
@@ -130,6 +130,10 @@ instance SingRep n => Show (OrderedMonomial ord n) where
 
 instance Multiplicative (OrderedMonomial ord n) where
   OrderedMonomial n * OrderedMonomial m = OrderedMonomial $ V.zipWithSame (+) n m
+
+instance SingRep n => Division (OrderedMonomial ord n) where
+  recip = unwrapped %~ V.map P.negate
+  OrderedMonomial n / OrderedMonomial m = OrderedMonomial $ V.zipWithSame (-) n m
 
 instance SingRep n => Unital (OrderedMonomial ord n) where
   one = OrderedMonomial $ fromList sing []
@@ -570,6 +574,9 @@ changeOrderProxy _ = unwrapped %~ M.mapKeys (OrderedMonomial . getMonomial)
 
 getTerms :: OrderedPolynomial k order n -> [(k, OrderedMonomial order n)]
 getTerms = map (snd &&& fst) . M.toDescList . terms
+
+monomials :: OrderedPolynomial a order n -> [OrderedMonomial order n]
+monomials = M.keys . terms
 
 transformMonomial :: (IsOrder o, IsPolynomial k n, IsPolynomial k m)
                   => (Monomial n -> Monomial m) -> OrderedPolynomial k o n -> OrderedPolynomial k o m

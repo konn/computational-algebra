@@ -62,7 +62,7 @@ matRepr' :: forall r ord n ideal.
 matRepr' f =
   let ZeroDimIdeal bs vs _ = reflect f
       dim = length vs
-  in fmap unwrapField $
+  in fmapUnwrap $
      if null vs
      then M.zero 0 0
      else foldl (P.+) (M.zero dim dim) $

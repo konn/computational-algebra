@@ -5,7 +5,7 @@
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell        #-}
 {-# LANGUAGE TypeFamilies, TypeSynonymInstances, UndecidableInstances        #-}
 {-# OPTIONS_GHC -fwarn-name-shadowing #-}
-module Algebra.Wrapped (WrappedField(..), Normed(..)) where
+module Algebra.Wrapped (WrappedField(..), Normed(..), fmapUnwrap, fmapWrap) where
 import           Algebra.Ring.Noetherian
 import           Control.Lens
 import           Data.Complex
@@ -15,6 +15,7 @@ import qualified Numeric.Algebra         as NA
 import           Prelude                 hiding (lex, negate, recip, sum, (*),
                                           (+), (-), (^), (^^))
 import qualified Prelude                 as P
+import           Unsafe.Coerce
 
 newtype WrappedField a = WrapField { unwrapField :: a
                                    } deriving (Read, Show, Eq, Ord)
@@ -44,7 +45,7 @@ deriving instance Monoidal r => Monoidal (WrappedField r)
 deriving instance Group r => Group (WrappedField r)
 deriving instance DecidableZero r => DecidableZero (WrappedField r)
 
-class Additive (Norm a) => Normed a where
+class Ord (Norm a) => Normed a where
   type Norm a
   norm :: a -> Norm a
   liftNorm :: Norm a -> a
@@ -54,7 +55,13 @@ instance Normed a => Normed (WrappedField a) where
   norm = norm . unwrapField
   liftNorm = WrapField . liftNorm
 
+sq :: Multiplicative r => r -> r
 sq x = x*x
+
+instance Normed Double where
+  type Norm Double = Double
+  norm a = abs a
+  liftNorm = id
 
 instance Normed Int where
   type Norm Int = Int
@@ -71,7 +78,7 @@ instance Normed Rational where
   norm = sq
   liftNorm = id
 
-instance (Monoidal a, Normed a) => Normed (Complex a) where
+instance (Monoidal a, Normed a, Additive (Norm a)) => Normed (Complex a) where
   type Norm (Complex a) = Norm a
   norm (a :+ b) = norm a + norm b
   liftNorm = (:+ zero) . liftNorm
@@ -91,3 +98,14 @@ instance (Normed r, Eq r, Ring r, Division r, Group r) => Fractional (WrappedFie
   WrapField a / WrapField b = WrapField $ a NA./ b
   recip (WrapField a) = WrapField $ NA.recip a
   fromRational q = WrapField $ NA.fromInteger (numerator q) NA./ NA.fromInteger (denominator q)
+
+fmapUnwrap :: Functor f => f (WrappedField r) -> f r
+fmapUnwrap = unsafeCoerce
+
+fmapWrap :: Functor f => f r -> f (WrappedField r)
+fmapWrap = unsafeCoerce
+
+{-# RULES
+"fmap/unwrap" forall (x :: Functor f => f (WrappedField r)) . fmap unwrapField x = fmapUnwrap x
+"fmap/wrap"   forall (x :: Functor f => f r) . fmap WrapField   x = fmapWrap x
+  #-}

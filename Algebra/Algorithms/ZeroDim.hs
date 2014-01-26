@@ -139,7 +139,7 @@ subspMatrix on ideal =
       cfs  = [negate $ coeff (leadingMonomial $ pow v (j :: Natural)) poly | j <- [0..fromIntegral (dim - 1)]]
   in (M.fromLists [replicate (dim - 1) zero]
           M.<->
-      fmap unwrapField (M.identity (dim - 1))) M.<|> M.colVector (V.fromList cfs)
+      fmapUnwrap (M.identity (dim - 1))) M.<|> M.colVector (V.fromList cfs)
 
 solveViaCompanion :: forall r ord n.
                      (Normed r, Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord, Convertible r Double)
@@ -192,7 +192,7 @@ univPoly nth ideal = {-# SCC "univPoly" #-}
   if gBasis' pxy == [one]
   then one
   else let x = var nth
-           p0 : pows = [fmap WrapField $ vectorRep $ modIdeal' pxy (pow x i)
+           p0 : pows = [fmapWrap $ vectorRep $ modIdeal' pxy (pow x i)
                        | i <- [0:: Natural ..]
                        | _ <- zero : fromJust (standardMonomials' pxy) ]
            step m (p : ps) = {-# SCC "univPoly/step" #-}
@@ -201,7 +201,7 @@ univPoly nth ideal = {-# SCC "univPoly" #-}
                Just ans ->
                  let cur = fromIntegral $ V.length ans :: Natural
                  in {-# SCC "buildRelation" #-}
-                    pow x cur - sum (zipWith (.*.) (map unwrapField $ V.toList ans)
+                    pow x cur - sum (zipWith (.*.) (fmapUnwrap $ V.toList ans)
                                      [pow x i | i <- [0 :: Natural .. cur P.- 1]])
        in step (M.colVector p0) pows
 
@@ -271,7 +271,7 @@ solve'' err ideal =
       upoly = last lexBase
       restVars = init $ SV.toList allVars
       calcEigs = nub . LA.toList . LA.eigenvalues . AM.fromLists
-      lastEigs = calcEigs $ matToLists $ fmap (toComplex . unwrapField) $
+      lastEigs = calcEigs $ matToLists $ fmap toComplex $ fmapUnwrap
                  (AM.companion maxBound $ mapCoeff WrapField upoly)
   in if gbs == [one]
      then []
@@ -296,7 +296,7 @@ solve'' err ideal =
             ]
 
 solveLinearNA :: (Ord b, Ring b, Division b, Normed b) => M.Matrix b -> V.Vector b -> Maybe (V.Vector b)
-solveLinearNA m v = fmap unwrapField <$> solveLinear (fmap WrapField m) (fmap WrapField v)
+solveLinearNA m v = fmapUnwrap <$> solveLinear (fmapWrap m) (fmapWrap v)
 
 toDM :: (AM.Matrix mat, AM.Elem mat a, AM.Elem M.Matrix a) => mat a -> M.Matrix a
 toDM = AM.fromCols . AM.toCols
@@ -333,18 +333,18 @@ mainLoop = do
   let f = toPolynomial (one, changeMonomialOrderProxy Proxy m)
   lx <- image f
   bs <- mapM image =<< look bLex
-  let mat  = foldr1 (M.<|>) $ map (M.colVector . fmap WrapField) bs
+  let mat  = foldr1 (M.<|>) $ map (M.colVector . fmapWrap) bs
       cond | null bs   = if V.all (== zero) lx
                          then Just $ V.replicate (length bs) zero
                          else Nothing
-           | otherwise = solveLinear mat (fmap WrapField lx)
+           | otherwise = solveLinear mat (fmapWrap lx)
   case cond of
     Nothing -> do
       proced .== Nothing
       bLex %== (f : )
     Just cs -> do
       bps <- look bLex
-      let g = changeOrder Lex $ f - sum (zipWith (.*.) (V.toList $ fmap unwrapField cs) bps)
+      let g = changeOrder Lex $ f - sum (zipWith (.*.) (V.toList $ fmapUnwrap cs) bps)
       proced .== Just (changeOrder Lex f)
       gLex %== (g :)
 
