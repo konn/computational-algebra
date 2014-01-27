@@ -5,8 +5,9 @@
 {-# LANGUAGE TypeOperators, ViewPatterns                                     #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Algebra.Algorithms.Faugere where
-import Algebra.Algorithms.Groebner
--- import           Algebra.Matrix              hiding (trace)
+import           Algebra.Algorithms.Groebner
+import           Algebra.Matrix              hiding (trace)
+import qualified Algebra.Repa                as Repa
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Wrapped
@@ -15,26 +16,24 @@ import           Control.Lens
 import           Control.Monad
 import           Control.Monad.Identity
 import           Control.Parallel
+import qualified Data.Array.Repa             as Repa
+import qualified Data.Array.Repa.Eval        as Repa
 import           Data.Function
-import qualified Data.HashSet            as S
+import qualified Data.HashSet                as S
 import           Data.List
+import qualified Data.Matrix                 as DM
 import           Data.Maybe
-import           Data.Type.Natural       hiding (one, zero)
-import qualified Data.Vector             as V
-import           Data.Vector.Sized       (Vector ((:-), Nil))
-import qualified Data.Vector.Sized       as SV
+import           Data.Type.Natural           hiding (one, zero)
+import qualified Data.Vector                 as V
+import           Data.Vector.Sized           (Vector ((:-), Nil))
+import qualified Data.Vector.Sized           as SV
 import           Debug.Trace
-import           Numeric.Algebra         hiding (sum, (<), (>), (\\))
-import qualified Numeric.Algebra         as NA
-import           Prelude                 hiding (Num (..), recip, subtract, (/),
-                                          (^))
-import           Prelude                 (Num ())
-import qualified Prelude                 as P
-
--- import qualified Data.Matrix                 as DM
-import qualified Algebra.Repa         as DM
-import qualified Data.Array.Repa      as DM
-import qualified Data.Array.Repa.Eval as DM
+import           Numeric.Algebra             hiding (sum, (<), (>), (\\))
+import qualified Numeric.Algebra             as NA
+import           Prelude                     hiding (Num (..), recip, subtract,
+                                              (/), (^))
+import           Prelude                     (Num ())
+import qualified Prelude                     as P
 
 tr :: Show a => String -> a -> a
 tr lab a = trace (lab ++ ": " ++ show a) a
@@ -48,7 +47,7 @@ data Pair r ord n = Pair { lcmPair    :: OrderedMonomial ord n
 type Strategy r ord n = [Pair r ord n] -> [Pair r ord n]
 
 faugere4 :: (Show r, Normed r, Field r, Fractional r, IsMonomialOrder ord, IsPolynomial r n,
-             DM.Elt r, DM.Target (DM.DefVec r) r, DM.Source (DM.DefVec r) r)
+             Repa.Elt r, Repa.Target (Repa.DefVec r) r, Repa.Source (Repa.DefVec r) r)
          => Strategy r ord n -> Ideal (OrderedPolynomial r ord n)
          -> Ideal (OrderedPolynomial r ord n)
 faugere4 sel (generators -> fs) = {-# SCC "F_4" #-}
@@ -84,7 +83,7 @@ mkPair f g =
   in Pair lij ti f tj g
 
 redF4 :: (Show r, IsPolynomial r n, IsMonomialOrder ord, Field r, Normed r,
-          Fractional r, DM.Elt r, DM.Target (DM.DefVec r) r, DM.Source (DM.DefVec r) r)
+          Fractional r, Repa.Elt r, Repa.Target (Repa.DefVec r) r, Repa.Source (Repa.DefVec r) r)
       => [(OrderedMonomial ord n, OrderedPolynomial r ord n)]
       -> [OrderedPolynomial r ord n]
       -> [[OrderedPolynomial r ord n]]
@@ -94,30 +93,30 @@ redF4 ls gs fss = {-# SCC "reduction" #-}
       fs' = rowEchelon fs
   in ([ f | f <- fs', not $ leadingMonomial f `elem` map leadingMonomial fs], fs)
 
-polysToMatrix :: (IsMonomialOrder ord, IsPolynomial r n, Num r, DM.Target (DM.DefVec r) r)
-          => [OrderedPolynomial r ord n] -> (DM.Matrix r, [OrderedMonomial ord n])
+polysToMatrix :: (IsMonomialOrder ord, IsPolynomial r n, Num r, Repa.Target (Repa.DefVec r) r)
+          => [OrderedPolynomial r ord n] -> (Repa.Matrix r, [OrderedMonomial ord n])
 polysToMatrix fs =
   let ts  = nub $ sortBy (flip compare) $ concatMap monomials fs
-  in (DM.fromLists $ map (\f -> map (\t -> coeff t f) ts) fs, ts)
+  in (Repa.fromLists $ map (\f -> map (\t -> coeff t f) ts) fs, ts)
 
-matToPolysWith :: (IsMonomialOrder ord, IsPolynomial r n, Num r, DM.Source (DM.DefVec r) r, DM.Target (DM.DefVec r) r)
-            => [OrderedMonomial ord n] -> DM.Matrix r -> [OrderedPolynomial r ord n]
+matToPolysWith :: (IsMonomialOrder ord, IsPolynomial r n, Num r, Repa.Source (Repa.DefVec r) r, Repa.Target (Repa.DefVec r) r)
+            => [OrderedMonomial ord n] -> Repa.Matrix r -> [OrderedPolynomial r ord n]
 matToPolysWith ts mat =
-  map (NA.sum . zipWith (flip $ curry toPolynomial) ts . V.toList) $ DM.toRows mat
+  map (NA.sum . zipWith (flip $ curry toPolynomial) ts . V.toList) $ Repa.toRows mat
 
 rowEchelon :: forall r ord n. (IsPolynomial r n, IsMonomialOrder ord, Field r, Num r,
-                               Normed r, DM.Elt r, DM.Target (DM.DefVec r) r,
-                               DM.Source (DM.DefVec r) r, Fractional r)
+                               Normed r, Repa.Elt r, Repa.Target (Repa.DefVec r) r,
+                               Repa.Source (Repa.DefVec r) r, Fractional r)
            => [OrderedPolynomial r ord n]
            -> [OrderedPolynomial r ord n]
 rowEchelon fs = {-# SCC "rowEchelon" #-}
   let (mf, ts) = {-# SCC "buildMatrix" #-} polysToMatrix fs
-      mf' = matToPolysWith ts $ fst $ {-# SCC "eche/red" #-} runIdentity $ DM.gaussReductionP mf
+      mf' = matToPolysWith ts $ fst $ {-# SCC "eche/red" #-} runIdentity $ Repa.gaussReductionP mf
   in nub mf' \\ [0]
 
 symbolicPP :: forall r ord n. (Show r, IsPolynomial r n, IsMonomialOrder ord, Field r, Num r,
-                               Normed r, Fractional r, DM.Elt r,
-                               DM.Target (DM.DefVec r) r, DM.Source (DM.DefVec r) r)
+                               Normed r, Fractional r, Repa.Elt r,
+                               Repa.Target (Repa.DefVec r) r, Repa.Source (Repa.DefVec r) r)
            => [(OrderedMonomial ord n, OrderedPolynomial r ord n)]
            -> [OrderedPolynomial r ord n]
            -> [[OrderedPolynomial r ord n]]
@@ -200,7 +199,7 @@ cyclic sn =
   in toIdeal $ NA.product vars - one : [ NA.sum $ map (NA.product . take i) $ take arity cycs | i <- [arity - 1,arity-2..1]]
 
 simplify :: (Show r, IsPolynomial r n, IsMonomialOrder ord, Normed r, Field r, Num r,
-             Fractional r, DM.Elt r, DM.Target (DM.DefVec r) r, DM.Source (DM.DefVec r) r)
+             Fractional r, Repa.Elt r, Repa.Target (Repa.DefVec r) r, Repa.Source (Repa.DefVec r) r)
          => [[OrderedPolynomial r ord n]]
          -> OrderedMonomial ord n -> OrderedPolynomial r ord n
          -> (OrderedMonomial ord n, OrderedPolynomial r ord n)
@@ -227,3 +226,92 @@ divisors t = [om
 sequenceSV :: SV.Vector [a] n -> [SV.Vector a n]
 sequenceSV Nil = [Nil]
 sequenceSV (xs :- xss) = concatMap (\x -> map (x :-) $ sequenceSV xss) xs
+
+simplifyDM :: (Show r, IsPolynomial r n, IsMonomialOrder ord, Normed r, Field r, Num r,
+               Fractional r)
+         => [[OrderedPolynomial r ord n]]
+         -> OrderedMonomial ord n -> OrderedPolynomial r ord n
+         -> (OrderedMonomial ord n, OrderedPolynomial r ord n)
+simplifyDM fss t f = go $ divisors t
+  where
+    go []       = (t, f)
+    go (u : us) =
+      case find (u >* f `elem`) fss of
+        Nothing -> go us
+        Just fs ->
+          let fs' = rowEchelonDM fs
+              Just p = find (\g -> leadingMonomial g == leadingMonomial (u >* f)) fs'
+          in if u /= t
+             then simplifyDM fss (t/u) p
+             else (one, p)
+
+rowEchelonDM :: forall r ord n. (IsPolynomial r n, IsMonomialOrder ord, Field r, Num r,
+                               Normed r, Fractional r)
+           => [OrderedPolynomial r ord n]
+           -> [OrderedPolynomial r ord n]
+rowEchelonDM fs = {-# SCC "rowEchelon" #-}
+  let (mf, ts) = {-# SCC "buildMatrix" #-} polysToMatrixDM fs
+      mf' = matToPolysWithDM ts $ fst $ {-# SCC "eche/red" #-} gaussReduction mf
+  in nub mf' \\ [0]
+
+polysToMatrixDM :: (IsMonomialOrder ord, IsPolynomial r n, Num r)
+          => [OrderedPolynomial r ord n] -> (DM.Matrix r, [OrderedMonomial ord n])
+polysToMatrixDM fs =
+  let ts  = nub $ sortBy (flip compare) $ concatMap monomials fs
+  in (DM.fromLists $ map (\f -> map (\t -> coeff t f) ts) fs, ts)
+
+matToPolysWithDM :: (IsMonomialOrder ord, IsPolynomial r n, Num r)
+            => [OrderedMonomial ord n] -> DM.Matrix r -> [OrderedPolynomial r ord n]
+matToPolysWithDM ts mat =
+  map (NA.sum . zipWith (flip $ curry toPolynomial) ts . V.toList) $ toRows mat
+
+symbolicPPDM :: forall r ord n. (Show r, IsPolynomial r n, IsMonomialOrder ord, Field r, Num r,
+                               Normed r, Fractional r)
+           => [(OrderedMonomial ord n, OrderedPolynomial r ord n)]
+           -> [OrderedPolynomial r ord n]
+           -> [[OrderedPolynomial r ord n]]
+           -> [OrderedPolynomial r ord n]
+symbolicPPDM ls gs fss = {-# SCC "symbolicPP" #-}
+  let fs0 = map mul ls
+  in go fs0 (S.fromList $ concatMap monomials fs0) (S.fromList $ map leadingMonomial fs0)
+  where
+    mul = uncurry (>*) . uncurry (simplifyDM fss)
+    go fs ts done
+      | S.null (ts `S.difference` done) = fs
+      | otherwise =
+        let m = head $ S.toList $ ts `S.difference` done
+            done' = S.insert m done
+            ts'   = S.delete m ts
+        in case find (\f -> leadingMonomial f `divs` m) gs of
+          Just f -> let m' = m / leadingMonomial f
+                        f' = mul (m', f)
+                        ts'' = S.fromList (monomials f') `S.difference` done'
+                    in go (f' : fs) (ts' `S.union` ts'') done'
+          Nothing -> go fs ts' done'
+
+faugere4DM :: (Show r, Normed r, Field r, Fractional r, IsMonomialOrder ord, IsPolynomial r n)
+         => Strategy r ord n -> Ideal (OrderedPolynomial r ord n)
+         -> Ideal (OrderedPolynomial r ord n)
+faugere4DM sel (generators -> fs) = {-# SCC "F_4" #-}
+  let (gs0, ps0) = foldl' (uncurry update) ([], []) fs
+  in go gs0 ps0 []
+  where
+    go gs ps fds
+      | null ps   = toIdeal gs
+      | otherwise =
+        let pd   = sel ps
+            ps'  = ps \\ pd
+            ls   = map leftP pd ++ map rightP pd
+            (fdp, fd) = redF4DM ls gs fds
+            (gs2, ps2) = foldl' (uncurry update) (gs, ps') fdp
+        in go gs2 ps2 (fd:fds)
+
+redF4DM :: (Show r, IsPolynomial r n, IsMonomialOrder ord, Field r, Normed r, Fractional r)
+      => [(OrderedMonomial ord n, OrderedPolynomial r ord n)]
+      -> [OrderedPolynomial r ord n]
+      -> [[OrderedPolynomial r ord n]]
+      -> ([OrderedPolynomial r ord n], [OrderedPolynomial r ord n])
+redF4DM ls gs fss = {-# SCC "reduction" #-}
+  let fs  = symbolicPPDM ls gs fss
+      fs' = rowEchelonDM fs
+  in ([ f | f <- fs', not $ leadingMonomial f `elem` map leadingMonomial fs], fs)
