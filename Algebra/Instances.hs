@@ -5,6 +5,8 @@
 module Algebra.Instances () where
 import           Control.Lens
 import           Data.Complex
+import           Data.Hashable
+import           Data.Ratio
 import           Data.Type.Natural (Nat (..), bugInGHC)
 import qualified Data.Vector.Sized as V
 import           Numeric.Algebra

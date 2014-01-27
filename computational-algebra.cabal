@@ -54,9 +54,13 @@ library
                  ,      unordered-containers    == 0.2.*
                  ,      vector                  == 0.10.*
                  ,      sparse                  == 0.7.*
+                 ,      parallel
                  ,      hybrid-vectors
                  ,      vector-algorithms
-    exposed-modules: Algebra.Algorithms.Groebner
+                 ,      repa
+                 ,      repa-algorithms
+    exposed-modules: Algebra.Algorithms.Faugere
+                     Algebra.Algorithms.Groebner
                      Algebra.Algorithms.Groebner.Monomorphic
                      Algebra.Algorithms.ZeroDim
                      Algebra.Ring.Noetherian
@@ -95,7 +99,30 @@ executable solve
                  ,        convertible           ==1.0.*
                  ,        lens
                  ,        MonadRandom           ==0.1.*
-    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
+    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded -prof
+
+executable faugere-prof
+    main-is: faugere-prof.hs
+    if flag(examples)
+        buildable: True
+    else
+        buildable: False
+    hs-source-dirs: share examples
+    build-depends:        algebra               ==3.1.*
+                 ,        base                  >=2.0 && <5
+                 ,        type-natural          ==0.0.6.*
+                 ,        algebra               ==3.1.*
+                 ,        computational-algebra
+                 ,        random                ==1.0.*
+                 ,        hmatrix               ==0.15.0.1
+                 ,        matrix                >= 0.2.4.0
+                 ,        sized-vector          ==1.2.*
+                 ,        vector                ==0.10.*
+                 ,        convertible           ==1.0.*
+                 ,        lens
+                 ,        deepseq
+                 ,        MonadRandom           ==0.1.*
+--    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
 
 
 executable sandpit-poly

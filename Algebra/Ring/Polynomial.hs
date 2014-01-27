@@ -7,11 +7,11 @@
 module Algebra.Ring.Polynomial
     ( Polynomial, Monomial, MonomialOrder, EliminationType, EliminationOrder
     , WeightedEliminationOrder, eliminationOrder, weightedEliminationOrder
-    , lex, revlex, graded, grlex, grevlex, productOrder, productOrder'
+    , lex, revlex, graded, grlex, grevlex, productOrder, productOrder', (*<), (>*)
     , transformMonomial, WeightProxy(..), weightOrder, totalDegree, totalDegree'
     , IsPolynomial, coeff, lcmMonomial, sPolynomial, polynomial, substWith
     , castMonomial, castPolynomial, toPolynomial, changeOrder, changeOrderProxy
-    , changeMonomialOrder, changeMonomialOrderProxy
+    , changeMonomialOrder, changeMonomialOrderProxy, isRelativelyPrime
     , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars
     , showPolynomialWith, showRational, allVars, subst', homogenize, unhomogenize
     , normalize, injectCoeff, varX, var, getTerms, shiftR, orderedBy, monomials
@@ -35,6 +35,7 @@ import           Data.List               (intercalate)
 import           Data.Map                (Map)
 import qualified Data.Map.Strict         as M
 import           Data.Maybe
+import           Data.Hashable
 import           Data.Monoid
 import           Data.Ord
 import           Data.Ratio
@@ -50,6 +51,9 @@ import qualified Prelude                 as P
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i.
 type Monomial (n :: Nat) = Vector Int n
+
+instance Hashable r => Hashable (OrderedPolynomial r ord n) where
+  hashWithSalt salt poly = hashWithSalt salt $ getTerms poly
 
 instance (NFData (Monomial n)) => NFData (OrderedMonomial ord n) where
   rnf (OrderedMonomial m) = rnf m `seq` ()
@@ -77,6 +81,9 @@ fromList (SS n) (x : xs) = x :- fromList n xs
 -- (2) Additivity: a <= b ==> a + c <= b + c
 -- (3) Non-negative: forall a, 0 <= a
 type MonomialOrder = forall n. Monomial n -> Monomial n -> Ordering
+
+isRelativelyPrime :: IsMonomialOrder ord => OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
+isRelativelyPrime n m = lcmMonomial n m == n * m
 
 totalDegree :: OrderedMonomial ord n -> Int
 totalDegree = V.sum . getMonomial
@@ -333,6 +340,16 @@ instance (Eq r, IsOrder order, IsPolynomial r n) => Eq (OrderedPolynomial r orde
 
 injectCoeff :: (IsPolynomial r n) => r -> OrderedPolynomial r order n
 injectCoeff r = Polynomial $ M.singleton (OrderedMonomial $ fromList sing []) r
+
+(>*) :: (IsMonomialOrder ord, NoetherianRing r, Eq r, SingRep n)
+     => OrderedMonomial ord n -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n
+m >* f = toPolynomial (one, m) * f
+
+(*<) :: (IsMonomialOrder ord, NoetherianRing r, Eq r, SingRep n)
+     => OrderedPolynomial r ord n -> OrderedMonomial ord n -> OrderedPolynomial r ord n
+(*<) = flip (>*)
+
+infixl 7 *<, >*
 
 -- | By Hilbert's finite basis theorem, a polynomial ring over a noetherian ring is also a noetherian ring.
 instance (IsOrder order, IsPolynomial r n) => NoetherianRing (OrderedPolynomial r order n) where

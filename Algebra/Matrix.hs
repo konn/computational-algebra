@@ -53,6 +53,7 @@ class Matrix mat where
   getCol :: Elem mat a => Int -> mat a -> V.Vector a
   getRow :: Elem mat a => Int -> mat a -> V.Vector a
   switchRows :: Elem mat a => Int -> Int -> mat a -> mat a
+  scaleRow :: Elem mat a => a -> Int -> mat a -> mat a
   combineRows :: Elem mat a => Int -> a -> Int -> mat a -> mat a
   trans :: Elem mat a => mat a -> mat a
   buildMatrix :: Elem mat a => Int -> Int -> ((Int, Int) -> a) -> mat a
@@ -85,6 +86,7 @@ instance Matrix DM.Matrix where
   getRow = DM.getRow
   switchRows = DM.switchRows
   combineRows = DM.combineRows
+  scaleRow = DM.scaleRow
   buildMatrix = DM.matrix
   (!) = (DM.!)
   (<||>) = (DM.<|>)
@@ -117,6 +119,7 @@ instance Matrix LA.Matrix where
   switchRows i j m = LA.extractRows (map (swapIJ (i-1) (j-1)) [0.. nrows m - 1]) m
   combineRows j s i m = LA.mapMatrixWithIndex (\(k,l) v -> if k == j - 1 then s * (m ! (i,l+1)) + v else v) m
   buildMatrix w h f = LA.buildMatrix w h (\(i, j) -> f (i-1, j-1))
+  scaleRow a i = LA.mapMatrixWithIndex (\(k, l) v -> if k == i - 1 then a * v else v)
   m ! (i, j) = m LA.@@> (i - 1, j - 1)
   m <||> n = LA.fromColumns $ LA.toColumns m ++ LA.toColumns n
   m <--> n = LA.fromRows $ LA.toRows m ++ LA.toRows n
@@ -179,6 +182,7 @@ instance Matrix Sparse where
                                             if k == fromIntegral j - 1
                                             then s * (spm ! (i, fromIntegral l+1)) + v
                                             else v))
+  scaleRow a i = wrapSM $ _Mat %~ H.map (\(key@(SM.Key l _), v) -> (key, if l == fromIntegral i - 1 then a * v else v))
   getCol j (Sparse m rs _) = V.fromList $ [ fromMaybe 0 $ m ^? ix (SM.Key (fromIntegral i) (fromIntegral (j-1)))
                                           | i <- [0..rs - 1]]
   getRow i (Sparse m _ cs) = V.fromList $ [ fromMaybe 0 $ m ^? ix (SM.Key (fromIntegral (i-1)) (fromIntegral j))
@@ -222,7 +226,7 @@ instance SM.Eq0 Rational
 -- | @gaussReduction a = (a', p)@ where @a'@ is row echelon form and @p@ is pivoting matrix.
 gaussReduction :: (Matrix mat, Elem mat a, Normed a, Ord (Norm a), Eq a, NA.Field a)
                => mat a -> (mat a, mat a)
-gaussReduction mat = go 1 1 mat (identity $ nrows mat)
+gaussReduction mat = {-# SCC "gaussRed" #-} go 1 1 mat (identity $ nrows mat)
   where
     go i j a p
       | i > nrows mat || j > ncols mat = (a, p)
@@ -234,9 +238,10 @@ gaussReduction mat = go 1 1 mat (identity $ nrows mat)
                       | l == i = prc (l+1) a0 p0
                       | l > nrows mat = (a0, p0)
                       | otherwise     =
-                        let coe = NA.negate (a0 ! (l, j)) NA./ new
+                        let coe = NA.negate (a0 ! (l, j))
                             a'' = combineRows l coe i a0
                             p'' = combineRows l coe i p0
                         in prc (l+1) a'' p''
-                    (a', p') = prc 1 (switchRows i k a) (switchRows i k p)
+                    (a', p') = prc 1 (scaleRow (NA.recip new) i $ switchRows i k a)
+                                     (scaleRow (NA.recip new) i $ switchRows i k p)
                 in go (i+1) (j+1) a' p'
