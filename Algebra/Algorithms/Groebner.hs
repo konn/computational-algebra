@@ -344,8 +344,6 @@ unsafeThEliminationIdealWith ord n ideal =
                                  , all (all (== 0) . take (sNatToInt n) . toList . getMonomial . snd) $ getTerms f
                                  ]
 
-newtype Compose f g a = Compose { getComposed :: f (g a) }
-
 -- | An intersection ideal of given ideals (using 'WeightedEliminationOrder').
 intersection :: forall r k n ord.
                 ( IsMonomialOrder ord, Field r, IsPolynomial r k, IsPolynomial r n
@@ -361,7 +359,7 @@ intersection idsv@(_ :- _) =
         tis = zipWith (\ideal t -> mapIdeal ((t *) . shiftR sk) ideal) (toList idsv) ts
         j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
     in case propToBoolLeq (plusLeqL sk sn) of
-      Dict -> getComposed $ coerce (plusMinusEqR sn sk) $ Compose $ thEliminationIdeal sk j
+      Dict -> coerce (cong Proxy $ plusMinusEqR sn sk) $ thEliminationIdeal sk j
 
 -- | Ideal quotient by a principal ideals.
 quotByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
