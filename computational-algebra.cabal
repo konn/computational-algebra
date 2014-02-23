@@ -29,8 +29,9 @@ library
                  ,      bifunctors              == 3.2.*
                  ,      containers              >= 0.4 && <0.6
                  ,      convertible             == 1.0.*
+                 ,      constraints             == 0.3.*
                  ,      deepseq                 == 1.3.*
-                 ,      equational-reasoning    == 0.0.1.*
+                 ,      equational-reasoning    == 0.0.3.*
                  ,      hashable                == 1.1.*
                  ,      heaps                   == 0.3.*
                  ,      hmatrix                 == 0.15.0.1
@@ -45,11 +46,11 @@ library
                  ,      representable-functors  == 3.2.*
                  ,      semigroupoids           == 3.1.*
                  ,      singletons              == 0.8.*
-                 ,      sized-vector            == 1.2.*
+                 ,      sized-vector            == 1.3.*
                  ,      tagged                  == 0.6.*
                  ,      hybrid-vectors
                  ,      text                    == 0.11.*
-                 ,      type-natural            == 0.0.6.*
+                 ,      type-natural            == 0.1.*
                  ,      unamb                   == 0.2.*
                  ,      unordered-containers    == 0.2.*
                  ,      vector                  == 0.10.*
@@ -89,13 +90,13 @@ executable solve
     hs-source-dirs: share examples
     build-depends:        algebra               ==3.1.*
                  ,        base                  >=2.0 && <5
-                 ,        type-natural          ==0.0.6.*
+                 ,        type-natural          ==0.1.*
                  ,        algebra               ==3.1.*
                  ,        computational-algebra
                  ,        random                ==1.0.*
                  ,        hmatrix               ==0.15.0.1
                  ,        matrix                >= 0.2.4.0
-                 ,        sized-vector          ==1.2.*
+                 ,        sized-vector          ==1.3.*
                  ,        vector                ==0.10.*
                  ,        convertible           ==1.0.*
                  ,        lens
@@ -111,13 +112,13 @@ executable faugere-prof
     hs-source-dirs: share examples
     build-depends:        algebra               ==3.1.*
                  ,        base                  >=2.0 && <5
-                 ,        type-natural          ==0.0.6.*
+                 ,        type-natural          ==0.1.*
                  ,        algebra               ==3.1.*
                  ,        computational-algebra
                  ,        random                ==1.0.*
                  ,        hmatrix               ==0.15.0.1
                  ,        matrix                >= 0.2.4.0
-                 ,        sized-vector          ==1.2.*
+                 ,        sized-vector          ==1.3.*
                  ,        vector                ==0.10.*
                  ,        convertible           ==1.0.*
                  ,        lens
@@ -151,13 +152,13 @@ test-suite test-multi-table
                  ,      lens                    ==3.9.*
                  ,      quickcheck-instances    ==0.3.*
                  ,      reflection              ==1.3.*
-                 ,      sized-vector            ==1.2.*
+                 ,      sized-vector            ==1.3.*
                  ,      smallcheck              ==1.0.*
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
                  ,      transformers            >=0.2 && <0.4
-                 ,      type-natural            ==0.0.6.*
+                 ,      type-natural            ==0.1.*
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
     type: exitcode-stdio-1.0
@@ -203,12 +204,12 @@ test-suite linear-test
                  ,      monomorphic             ==0.0.3.*
                  ,      quickcheck-instances    ==0.3.*
                  ,      reflection              ==1.3.*
-                 ,      sized-vector            ==1.2.*
+                 ,      sized-vector            ==1.3.*
                  ,      smallcheck              ==1.0.*
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.0.6.*
+                 ,      type-natural            ==0.1.*
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
                  ,      matrix                >= 0.2.4.0
@@ -233,12 +234,12 @@ test-suite matrix-test
                  ,      monomorphic             ==0.0.3.*
                  ,      quickcheck-instances    ==0.3.*
                  ,      reflection              ==1.3.*
-                 ,      sized-vector            ==1.2.*
+                 ,      sized-vector            ==1.3.*
                  ,      smallcheck              ==1.0.*
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.0.6.*
+                 ,      type-natural            ==0.1.*
                  ,      vector                  ==0.10.*
                  ,      matrix                >= 0.2.4.0
                  ,      equational-reasoning
@@ -263,12 +264,12 @@ test-suite specs
                  ,      monomorphic             ==0.0.3.*
                  ,      quickcheck-instances    ==0.3.*
                  ,      reflection              ==1.3.*
-                 ,      sized-vector            ==1.2.*
+                 ,      sized-vector            ==1.3.*
                  ,      smallcheck              ==1.0.*
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.0.6.*
+                 ,      type-natural            ==0.1.*
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
                  ,      process
@@ -296,12 +297,12 @@ test-suite new-div-test
                  ,      monomorphic             ==0.0.3.*
                  ,      quickcheck-instances    ==0.3.*
                  ,      reflection              ==1.3.*
-                 ,      sized-vector            ==1.2.*
+                 ,      sized-vector            ==1.3.*
                  ,      smallcheck              ==1.0.*
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.0.6.*
+                 ,      type-natural            ==0.1.*
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
                  ,      matrix                  >= 0.2.4.0
@@ -323,7 +324,7 @@ benchmark normal-bench
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
                  ,      singletons              ==0.8.*
-                 ,      type-natural            ==0.0.6.*
+                 ,      type-natural            ==0.1.*
                  ,      vector                  ==0.10.*
                  ,      matrix                  >= 0.2.4.0
 
@@ -344,7 +345,7 @@ benchmark elimination-bench
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
                  ,      singletons              ==0.8.*
-                 ,      type-natural            ==0.0.6.*
+                 ,      type-natural            ==0.1.*
                  ,      vector                  ==0.10.*
                  ,      matrix                  >= 0.2.4.0
     type: exitcode-stdio-1.0
@@ -550,6 +551,41 @@ benchmark solve-bench
     hs-source-dirs: bench share
     other-modules: Utils
     ghc-options: -Wall -threaded
+
+benchmark coercion-bench
+    build-depends:      HUnit                   ==1.2.*
+                 ,      MonadRandom             ==0.1.*
+                 ,      QuickCheck              ==2.6.*
+                 ,      algebra                 ==3.1.*
+                 ,      base                    >=2.0 && <5
+                 ,      computational-algebra   -any
+                 ,      containers              >=0.4 && <0.6
+                 ,      criterion               ==0.8.*
+                 ,      deepseq                 ==1.3.*
+                 ,      hspec                   > 1.8.0
+                 ,      lens                    ==3.9.*
+                 ,      monomorphic             ==0.0.*
+                 ,      parallel                ==3.2.*
+                 ,      process                 ==1.1.*
+                 ,      quickcheck-instances    ==0.3.*
+                 ,      reflection              ==1.3.*
+                 ,      sized-vector            >=1.2.0.0
+                 ,      smallcheck              ==1.0.*
+                 ,      tagged                  ==0.6.*
+                 ,      test-framework          ==0.8.*
+                 ,      test-framework-hunit    ==0.3.*
+                 ,      type-natural            >=0.0.5.0
+                 ,      vector                  ==0.10.*
+                 ,      random                  ==1.0.*
+                 ,      progression             ==0.5.*
+                 ,      equational-reasoning
+                 ,      matrix                  >= 0.2.4.0
+    type: exitcode-stdio-1.0
+    main-is: coercion.hs
+    buildable: True
+    hs-source-dirs: bench share
+    other-modules: Utils
+    ghc-options: -Wall -threaded -fcontext-stack=1000
 
 benchmark faugere4-bench
     build-depends:      HUnit                   ==1.2.*

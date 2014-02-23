@@ -25,10 +25,10 @@ import           Algebra.Internal
 import           Algebra.Ring.Noetherian
 import           Data.Type.Ordinal
 import           Algebra.Scalar
-import           Proof.Equational        ((:=:)(..))
+import           Proof.Equational        (symmetry, coerce)
 import           Control.Arrow
 import           Control.DeepSeq
-import           Control.Lens            hiding (assign)
+import           Control.Lens            hiding (assign, coerce)
 import           Data.Function
 import           Data.Hashable
 import           Data.List               (intercalate)
@@ -623,8 +623,8 @@ homogenize f =
 unhomogenize :: forall k ord n. (IsPolynomial k n, IsMonomialOrder ord)
              => OrderedPolynomial k ord (S n) -> OrderedPolynomial k ord n
 unhomogenize f =
-  case sAndPlusOne (sing :: SNat n) of
-    Refl -> substWith (.*.) (allVars `V.append` V.singleton one) f
+  substWith (.*.)
+  (coerce (symmetry $ sAndPlusOne (sing :: SNat n)) $ allVars `V.append` V.singleton one) f
 
 initSV :: Vector a (S n) -> Vector a n
 initSV (_ :- Nil) = Nil

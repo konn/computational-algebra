@@ -1,6 +1,6 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, MultiParamTypeClasses, NoImplicitPrelude                 #-}
-{-# LANGUAGE ParallelListComp, RankNTypes, ScopedTypeVariables               #-}
+{-# LANGUAGE ParallelListComp, PolyKinds, RankNTypes, ScopedTypeVariables    #-}
 {-# LANGUAGE TemplateHaskell, TypeFamilies, TypeOperators                    #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Algebra.Algorithms.Groebner (
@@ -23,6 +23,8 @@ module Algebra.Algorithms.Groebner (
                                    , saturationIdeal, saturationByPrincipalIdeal
                                    -- * Resultant
                                    , resultant, hasCommonFactor
+                                   -- * Misc
+                                   , padVec
                                    ) where
 import           Algebra.Internal
 import           Algebra.Ring.Noetherian
@@ -31,6 +33,7 @@ import           Control.Applicative
 import           Control.Monad
 import           Control.Monad.Loops
 import           Control.Monad.ST
+import           Data.Constraint
 import qualified Data.Foldable           as H
 import           Data.Function
 import qualified Data.Heap               as H
@@ -120,12 +123,13 @@ padVec def (x :- xs) (y :- ys) =
     (xs', ys') -> (x :- xs', y :- ys')
 padVec def (x :- xs) Nil =
   case padVec def xs Nil of
-    (xs', ys') -> case maxZR (sLength xs) of
-                    Refl -> (x :- xs', def :- ys')
+    (xs', ys') ->
+      (x :- coerce (maxZR (sLength xs)) xs',
+       def :- coerce (maxZR (sLength xs)) ys')
 padVec def Nil (y :- ys) =
   case padVec def Nil ys of
-    (xs', ys') -> case maxZL (sLength ys) of
-                    Refl -> (def :- xs', y :- ys')
+    (xs', ys') -> (def :- coerce (maxZL (sLength ys)) xs',
+                   y :- coerce (maxZL (sLength ys)) ys')
 
 combinations :: [a] -> [(a, a)]
 combinations xs = concat $ zipWith (map . (,)) xs $ drop 1 $ tails xs
@@ -297,7 +301,8 @@ groebnerTest :: (IsPolynomial k n, Field k, IsMonomialOrder order)
 groebnerTest f fs = f `modPolynomial` fs == zero
 
 -- | Calculate n-th elimination ideal using 'WeightedEliminationOrder' ordering.
-thEliminationIdeal :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (m :-: n)
+thEliminationIdeal :: forall n m ord k.
+                      ( IsMonomialOrder ord, Field k, IsPolynomial k m, SingRep m
                       , (n :<<= m) ~ True)
                    => SNat n
                    -> Ideal (OrderedPolynomial k ord m)
@@ -305,7 +310,9 @@ thEliminationIdeal :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolyno
 thEliminationIdeal n =
     case singInstance n of
       SingInstance ->
-          mapIdeal (changeOrderProxy Proxy) . thEliminationIdealWith (weightedEliminationOrder n) n
+        case singInstance ((sing :: SNat m) %:- n) of
+          SingInstance ->
+            mapIdeal (changeOrderProxy Proxy) . thEliminationIdealWith (weightedEliminationOrder n) n
 
 -- | Calculate n-th elimination ideal using the specified n-th elimination type order.
 thEliminationIdealWith :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (m :-: n)
@@ -337,6 +344,8 @@ unsafeThEliminationIdealWith ord n ideal =
                                  , all (all (== 0) . take (sNatToInt n) . toList . getMonomial . snd) $ getTerms f
                                  ]
 
+newtype Compose f g a = Compose { getComposed :: f (g a) }
+
 -- | An intersection ideal of given ideals (using 'WeightedEliminationOrder').
 intersection :: forall r k n ord.
                 ( IsMonomialOrder ord, Field r, IsPolynomial r k, IsPolynomial r n
@@ -351,9 +360,8 @@ intersection idsv@(_ :- _) =
         ts  = take (sNatToInt sk) $ genVars (sk %+ sn)
         tis = zipWith (\ideal t -> mapIdeal ((t *) . shiftR sk) ideal) (toList idsv) ts
         j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
-    in case plusMinusEqR sn sk of
-         Refl -> case propToBoolLeq (plusLeqL sk sn) of
-                  LeqTrueInstance -> thEliminationIdeal sk j
+    in case propToBoolLeq (plusLeqL sk sn) of
+      Dict -> getComposed $ coerce (plusMinusEqR sn sk) $ Compose $ thEliminationIdeal sk j
 
 -- | Ideal quotient by a principal ideals.
 quotByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
@@ -381,7 +389,7 @@ saturationByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
                            -> OrderedPolynomial k ord n -> Ideal (OrderedPolynomial k ord n)
 saturationByPrincipalIdeal is g =
   case propToClassLeq $ leqSucc (sArity g) of
-    LeqInstance -> thEliminationIdeal sOne $ addToIdeal (one - (castPolynomial g * varX)) (mapIdeal (shiftR sOne) is)
+    Dict -> thEliminationIdeal sOne $ addToIdeal (one - (castPolynomial g * varX)) (mapIdeal (shiftR sOne) is)
 
 -- | Saturation ideal
 saturationIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)

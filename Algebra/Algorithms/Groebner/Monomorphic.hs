@@ -39,6 +39,7 @@ import           Algebra.Ring.Polynomial             (Grevlex (..), Grlex (..),
 import qualified Algebra.Ring.Polynomial             as Poly
 import           Algebra.Ring.Polynomial.Monomorphic
 import           Control.Arrow
+import           Data.Constraint                     (Dict (..))
 import           Data.List
 import qualified Data.Map                            as M
 import           Data.Singletons                     hiding (demote, promote)
@@ -224,12 +225,12 @@ eliminateWith ord elvs j =
           in case singInstance sdim of
                SingInstance ->
                  case propToClassLeq $ maxLeqR sk sdim of
-                   LeqInstance ->
+                   Dict ->
                      case singInstance newDim of
                        SingInstance ->
                          let fs'  = map ((flip Poly.orderedBy Poly.Lex) . Poly.scastPolynomial newDim) fs
                          in case propToBoolLeq $ maxLeqL sk sdim of
-                              LeqTrueInstance ->
+                              Dict ->
                                 case singInstance (newDim %:- sk) of
                                   SingInstance ->
                                     map (renameVars rest) $ demoteComposed $ Gr.unsafeThEliminationIdealWith ord sk (toIdeal fs')
