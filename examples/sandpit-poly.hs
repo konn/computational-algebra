@@ -1,38 +1,23 @@
-{-# LANGUAGE DataKinds, OverlappingInstances, PolyKinds #-}
+{-# LANGUAGE DataKinds, OverlappingInstances, PolyKinds, NoImplicitPrelude #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Main (module Algebra.Algorithms.Groebner, module Algebra.Ring.Polynomial
             , module Data.Ratio, module Main, module Algebra.Internal
             ) where
+import Algebra.Prelude
 import           Algebra.Algorithms.Groebner
 import           Algebra.Internal
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
-import           Algebra.Ring.Polynomial.Quotient
 import           Data.Ratio
 import           Data.Type.Natural
-import qualified Numeric.Algebra                  as NA
 
-u, v, x, y, z :: Polynomial Rational (S (S Three))
-[u, v, x, y, z] = genVars (sS (sS sThree))
-
-(.+), (.*), (.-) :: SingRep n => Polynomial Rational n -> Polynomial Rational n -> Polynomial Rational n
-(.+) = (NA.+)
-(.*) = (NA.*)
-(.-) = (NA.-)
-
-infixl 6 .+, .-
-infixl 7 .*
-
-(^^^) :: SingRep n => Polynomial Rational n -> NA.Natural -> Polynomial Rational n
-(^^^) = NA.pow
+u, v, x, y, z :: Polynomial Rational Five
+[u, v, x, y, z] = genVars sFive
 
 fromRight :: Either t t1 -> t1
 fromRight (Right a) = a
 fromRight _ = error "fromRight"
-{-
-parse :: String -> Polynomial Rational
-parse = fromRight . parsePolyn
--}
+
 
 main :: IO ()
 main = do

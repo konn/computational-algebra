@@ -16,6 +16,7 @@ import           Control.Applicative
 import           Proof.Equational ((:=:)(..))
 import           Control.Lens
 import           Control.Monad
+import Data.Constraint
 import qualified Data.Map                         as M
 import           Data.Proxy
 import           Data.Ratio
@@ -204,7 +205,7 @@ unaryPoly arity mth = do
               case sAndPlusOne sm of
                 Refl ->
                   case boolToClassLeq (sm %:+ sOne) arity of
-                    LeqInstance -> return $ scastPolynomial arity $ shiftR sm f
+                    Dict -> return $ scastPolynomial arity $ shiftR sm f
 
 checkForArity :: [Int] -> (forall n. SingRep (n :: Nat) => Sing n -> Property) -> Property
 checkForArity as test = forAll (QC.elements as) $ liftSNat test
