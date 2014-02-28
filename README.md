@@ -88,7 +88,7 @@ Type Interface
 --------------
 `computational-algebra` provides well-typed interface. In this section, we will see how this package represents mathematical objects by type.
 
-### Type-level natural numbers and singletons ### {#type-nats}
+### Type-level natural numbers and singletons ###
 As we will see below, we use type-level natural number to indicate the number of variables. So, let's see how we express natural numbers as type.
 
 We use `Nat` from [`type-natural`](http://hackage.haskell.org/package/type-natural ) package. This package adopt [peano numerals](http://www.haskell.org/haskellwiki/Peano_numbers) to express the number at type-level, that is:
@@ -126,7 +126,7 @@ The type for the polynomials and operations are defined in `Algebra.Ring.Polynom
 * over the coefficient ring `r`,
 * with terms sorted w.r.t. [*the monomial ordering*](http://en.wikipedia.org/wiki/Monomial_order) `ord`.
 
-In the above, `n` should have kind `Nat` described [above](#type-nats) and `r` should be at least an instance of `NoetherianRing`, but usually the `Field` for practical usage. The monomial ordering `ord` should be the instance of `IsMonomialOrder`.
+In the above, `n` should have kind `Nat` described [above](#type-level-natural-numbers-and-singletons) and `r` should be at least an instance of `NoetherianRing`, but usually the `Field` for practical usage. The monomial ordering `ord` should be the instance of `IsMonomialOrder`.
 
 Let's see example. QQ[x,y,z] (the trivariate polynomial ring over the rational number) with Lex ordering is represented by the type `OrderedPolynomial Rational Lex Three`. `Polynomial Rational Three` is short for `OrderedPolynomial Rational Grevlex Three`.
 
