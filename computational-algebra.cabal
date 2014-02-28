@@ -50,7 +50,7 @@ library
                  ,      tagged                  == 0.6.*
                  ,      hybrid-vectors
                  ,      text                    == 0.11.*
-                 ,      type-natural            == 0.1.*
+                 ,      type-natural            == 0.2.*
                  ,      unamb                   == 0.2.*
                  ,      unordered-containers    == 0.2.*
                  ,      vector                  == 0.10.*
@@ -76,6 +76,7 @@ library
                      Algebra.Wrapped
                      Algebra.Matrix
                      Algebra.Repa
+                     Algebra.Prelude
     other-modules:   Algebra.Algorithms.FGLM
     exposed: True
     buildable: True
@@ -88,9 +89,10 @@ executable solve
     else
         buildable: False
     hs-source-dirs: share examples
-    build-depends:        algebra               ==3.1.*
+    build-depends:        constraints >= 0.3.4.2,
+                          algebra               ==3.1.*
                  ,        base                  >=2.0 && <5
-                 ,        type-natural          ==0.1.*
+                 ,        type-natural          ==0.2.*
                  ,        algebra               ==3.1.*
                  ,        computational-algebra
                  ,        random                ==1.0.*
@@ -110,9 +112,10 @@ executable faugere-prof
     else
         buildable: False
     hs-source-dirs: share examples
-    build-depends:        algebra               ==3.1.*
+    build-depends:        constraints >= 0.3.4.2,
+                          algebra               ==3.1.*
                  ,        base                  >=2.0 && <5
-                 ,        type-natural          ==0.1.*
+                 ,        type-natural          ==0.2.*
                  ,        algebra               ==3.1.*
                  ,        computational-algebra
                  ,        random                ==1.0.*
@@ -134,14 +137,16 @@ executable sandpit-poly
     else
         buildable: False
     hs-source-dirs: share examples
-    build-depends: computational-algebra
+    build-depends: constraints >= 0.3.4.2,
+                   computational-algebra
                  , base
                  , type-natural
                  , algebra
                  , sized-vector
  
 test-suite test-multi-table
-    build-depends:      HUnit                   ==1.2.*
+    build-depends:        constraints >= 0.3.4.2,
+                          HUnit                   ==1.2.*
                  ,      QuickCheck              ==2.6.*
                  ,      algebra                 ==3.1.*
                  ,      base                    >=2.0 && <5
@@ -158,7 +163,7 @@ test-suite test-multi-table
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
                  ,      transformers            >=0.2 && <0.4
-                 ,      type-natural            ==0.1.*
+                 ,      type-natural            ==0.2.*
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
     type: exitcode-stdio-1.0
@@ -169,7 +174,8 @@ test-suite test-multi-table
     ghc-options: -Wall -threaded
 
 test-suite monomial-order-test
-    build-depends:      HUnit                   ==1.2.*
+    build-depends:        constraints >= 0.3.4.2,
+                          HUnit                   ==1.2.*
                  ,      MonadRandom             ==0.1.*
                  ,      QuickCheck              ==2.6.*
                  ,      base                    >=2.0 && <5
@@ -191,7 +197,8 @@ test-suite monomial-order-test
     ghc-options: -Wall -threaded
 
 test-suite linear-test
-    build-depends:      HUnit                   ==1.2.*
+    build-depends:        constraints >= 0.3.4.2,
+                          HUnit                   ==1.2.*
                  ,      MonadRandom             ==0.1.*
                  ,      QuickCheck              ==2.6.*
                  ,      algebra                 ==3.1.*
@@ -209,7 +216,7 @@ test-suite linear-test
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.1.*
+                 ,      type-natural            ==0.2.*
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
                  ,      matrix                >= 0.2.4.0
@@ -221,7 +228,8 @@ test-suite linear-test
     ghc-options: -Wall -threaded
 
 test-suite matrix-test
-    build-depends:      HUnit                   ==1.2.*
+    build-depends:      constraints >= 0.3.4.2,
+                        HUnit                   ==1.2.*
                  ,      MonadRandom             ==0.1.*
                  ,      QuickCheck              ==2.6.*
                  ,      algebra                 ==3.1.*
@@ -239,7 +247,7 @@ test-suite matrix-test
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.1.*
+                 ,      type-natural            ==0.2.*
                  ,      vector                  ==0.10.*
                  ,      matrix                >= 0.2.4.0
                  ,      equational-reasoning
@@ -251,7 +259,8 @@ test-suite matrix-test
     ghc-options: -Wall -threaded
 
 test-suite specs
-    build-depends:      HUnit                   ==1.2.*
+    build-depends:        constraints >= 0.3.4.2,
+                          HUnit                   ==1.2.*
                  ,      MonadRandom             ==0.1.*
                  ,      QuickCheck              ==2.6.*
                  ,      algebra                 ==3.1.*
@@ -269,7 +278,7 @@ test-suite specs
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.1.*
+                 ,      type-natural            ==0.2.*
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
                  ,      process
@@ -284,7 +293,8 @@ test-suite specs
     ghc-options: -Wall -threaded
 
 test-suite new-div-test
-    build-depends:      HUnit                   ==1.2.*
+    build-depends:        constraints >= 0.3.4.2,
+                          HUnit                   ==1.2.*
                  ,      MonadRandom             ==0.1.*
                  ,      QuickCheck              ==2.6.*
                  ,      algebra                 ==3.1.*
@@ -302,7 +312,7 @@ test-suite new-div-test
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.1.*
+                 ,      type-natural            ==0.2.*
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
                  ,      matrix                  >= 0.2.4.0
@@ -315,7 +325,8 @@ test-suite new-div-test
     ghc-options: -Wall -threaded
 
 benchmark normal-bench
-    build-depends:      algebra                 ==3.1.*
+    build-depends:              constraints >= 0.3.4.2,
+                                algebra                 ==3.1.*
                  ,      base                    >=2.0 && <5
                  ,      computational-algebra   -any
                  ,      containers              >=0.4 && <0.6
@@ -324,7 +335,7 @@ benchmark normal-bench
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
                  ,      singletons              ==0.8.*
-                 ,      type-natural            ==0.1.*
+                 ,      type-natural            ==0.2.*
                  ,      vector                  ==0.10.*
                  ,      matrix                  >= 0.2.4.0
 
@@ -336,7 +347,8 @@ benchmark normal-bench
     ghc-options: -O2 -threaded
 
 benchmark elimination-bench
-    build-depends:      algebra                 ==3.1.*
+    build-depends:              constraints >= 0.3.4.2,
+                                algebra                 ==3.1.*
                  ,      base                    >=2.0 && <5
                  ,      computational-algebra   -any
                  ,      containers              >=0.4 && <0.6
@@ -345,7 +357,7 @@ benchmark elimination-bench
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
                  ,      singletons              ==0.8.*
-                 ,      type-natural            ==0.1.*
+                 ,      type-natural            ==0.2.*
                  ,      vector                  ==0.10.*
                  ,      matrix                  >= 0.2.4.0
     type: exitcode-stdio-1.0
@@ -356,7 +368,8 @@ benchmark elimination-bench
     ghc-options: -O2 -threaded
 
 benchmark quotient-bench-randomized
-    build-depends:      QuickCheck              ==2.6.*
+    build-depends:              constraints >= 0.3.4.2,
+                                QuickCheck              ==2.6.*
                  ,      algebra                 ==3.1.*
                  ,      base                    >=2.0 && <5
                  ,      computational-algebra   -any
@@ -386,7 +399,8 @@ benchmark quotient-bench-randomized
     ghc-options: -O2 -threaded -rtsopts
 
 benchmark monomial-order-bench
-    build-depends:      QuickCheck              ==2.6.*
+    build-depends:              constraints >= 0.3.4.2,
+                                QuickCheck              ==2.6.*
                  ,      algebra                 ==3.1.*
                  ,      base                    >=2.0 && <5
                  ,      computational-algebra   -any
@@ -416,7 +430,8 @@ benchmark monomial-order-bench
     ghc-options: -O2 -threaded -rtsopts
 
 benchmark linear-bench
-    build-depends:      HUnit                   ==1.2.*
+    build-depends:              constraints >= 0.3.4.2,
+                                HUnit                   ==1.2.*
                  ,      MonadRandom             ==0.1.*
                  ,      QuickCheck              ==2.6.*
                  ,      algebra                 ==3.1.*
@@ -450,7 +465,8 @@ benchmark linear-bench
     ghc-options: -Wall -threaded
 
 benchmark division-bench
-    build-depends:      HUnit                   ==1.2.*
+    build-depends:              constraints >= 0.3.4.2,
+                                HUnit                   ==1.2.*
                  ,      MonadRandom             ==0.1.*
                  ,      QuickCheck              ==2.6.*
                  ,      algebra                 ==3.1.*
@@ -484,7 +500,8 @@ benchmark division-bench
     ghc-options: -Wall -threaded
 
 benchmark sugar-paper-bench
-    build-depends:      HUnit                   ==1.2.*
+    build-depends:              constraints >= 0.3.4.2,
+                                HUnit                   ==1.2.*
                  ,      MonadRandom             ==0.1.*
                  ,      QuickCheck              ==2.6.*
                  ,      algebra                 ==3.1.*
@@ -518,7 +535,8 @@ benchmark sugar-paper-bench
     ghc-options: -Wall -threaded
 
 benchmark solve-bench
-    build-depends:      HUnit                   ==1.2.*
+    build-depends:              constraints >= 0.3.4.2,
+                                HUnit                   ==1.2.*
                  ,      MonadRandom             ==0.1.*
                  ,      QuickCheck              ==2.6.*
                  ,      algebra                 ==3.1.*
@@ -553,7 +571,8 @@ benchmark solve-bench
     ghc-options: -Wall -threaded
 
 benchmark coercion-bench
-    build-depends:      HUnit                   ==1.2.*
+    build-depends:              constraints >= 0.3.4.2,
+                                HUnit                   ==1.2.*
                  ,      MonadRandom             ==0.1.*
                  ,      QuickCheck              ==2.6.*
                  ,      algebra                 ==3.1.*
@@ -588,7 +607,8 @@ benchmark coercion-bench
     ghc-options: -Wall -threaded -fcontext-stack=1000
 
 benchmark faugere4-bench
-    build-depends:      HUnit                   ==1.2.*
+    build-depends:              constraints >= 0.3.4.2,
+                                HUnit                   ==1.2.*
                  ,      MonadRandom             ==0.1.*
                  ,      QuickCheck              ==2.6.*
                  ,      algebra                 ==3.1.*
