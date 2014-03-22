@@ -103,7 +103,33 @@ executable solve
                  ,        convertible           ==1.0.*
                  ,        lens
                  ,        MonadRandom           ==0.1.*
-    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded -prof
+    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
+
+executable ipsolve
+    main-is: ipsolve.hs
+    if flag(examples)
+        buildable: True
+    else
+        buildable: False
+    hs-source-dirs: share examples
+    build-depends:        parallel >= 3.2.0.3,
+                          constraints >= 0.3.4.2,
+                          algebra               ==3.1.*
+                 ,        equational-reasoning
+                 ,        reflection
+                 ,        base                  >=2.0 && <5
+                 ,        type-natural          ==0.2.*
+                 ,        algebra               ==3.1.*
+                 ,        computational-algebra
+                 ,        random                ==1.0.*
+                 ,        hmatrix               ==0.15.0.1
+                 ,        matrix                >= 0.2.4.0
+                 ,        sized-vector          ==1.3.*
+                 ,        vector                ==0.10.*
+                 ,        convertible           ==1.0.*
+                 ,        lens
+                 ,        MonadRandom           ==0.1.*
+    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
 
 executable faugere-prof
     main-is: faugere-prof.hs
@@ -127,7 +153,7 @@ executable faugere-prof
                  ,        lens
                  ,        deepseq
                  ,        MonadRandom           ==0.1.*
-    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
+    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded -eventlog
 
 
 executable sandpit-poly
