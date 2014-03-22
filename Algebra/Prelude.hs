@@ -5,18 +5,18 @@ module Algebra.Prelude
         module Numeric.Algebra,
         module Algebra.Ring.Polynomial,
         module Data.Ratio) where
-import Prelude hiding (Num(..), Integral(..), Real(..),
-                       product, sum, lex,
-                       Fractional(..), (^^), (^), subtract)
-import Prelude (fromRational)
-import Numeric.Algebra hiding ((^), (^^), Order(..))
-import qualified Numeric.Algebra as NA
-import Algebra.Ring.Polynomial
-import Algebra.Ring.Noetherian
-import Data.Ratio hiding ((%))
-import Data.Type.Natural
-import Data.Type.Ordinal
-import Data.Singletons
+import           Algebra.Ring.Noetherian
+import           Algebra.Ring.Polynomial
+import           Data.Ratio              hiding ((%))
+import           Data.Singletons
+import           Data.Type.Natural
+import           Data.Type.Ordinal
+import           Numeric.Algebra         hiding (Order (..), (^), (^^))
+import qualified Numeric.Algebra         as NA
+import           Prelude                 hiding (Fractional (..), Integral (..),
+                                          Num (..), Real (..), lex, product,
+                                          subtract, sum, (^), (^^))
+import           Prelude                 (fromRational)
 
 (^) :: Unital r => r -> Natural -> r
 (^) = pow

@@ -1,7 +1,7 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, MultiParamTypeClasses, NoImplicitPrelude                 #-}
-{-# LANGUAGE NoMonomorphismRestriction, ParallelListComp, RankNTypes         #-}
-{-# LANGUAGE ScopedTypeVariables, TemplateHaskell, TypeFamilies              #-}
+{-# LANGUAGE NoMonomorphismRestriction, ParallelListComp, QuasiQuotes        #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, TemplateHaskell, TypeFamilies  #-}
 {-# LANGUAGE TypeOperators, ViewPatterns                                     #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Algebra.Algorithms.Faugere where
