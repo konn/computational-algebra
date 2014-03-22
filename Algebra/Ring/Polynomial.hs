@@ -8,14 +8,14 @@ module Algebra.Ring.Polynomial
     ( Polynomial, Monomial, MonomialOrder, EliminationType, EliminationOrder
     , WeightedEliminationOrder, eliminationOrder, weightedEliminationOrder
     , lex, revlex, graded, grlex, grevlex, productOrder, productOrder', (*<), (>*)
-    , transformMonomial, WeightProxy(..), weightOrder, totalDegree, totalDegree'
+    , transformMonomial, WeightProxy, weightOrder, totalDegree, totalDegree'
     , IsPolynomial, coeff, lcmMonomial, sPolynomial, polynomial, substWith
     , castMonomial, castPolynomial, toPolynomial, changeOrder, changeOrderProxy
     , changeMonomialOrder, changeMonomialOrderProxy, isRelativelyPrime
     , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars
     , showPolynomialWith, showRational, allVars, subst', homogenize, unhomogenize
-    , normalize, injectCoeff, varX, var, getTerms, shiftR, orderedBy, monomials
-    , divs, isPowerOf, tryDiv, fromList, Coefficient(..),ToWeightVector(..)
+    , normalize, injectCoeff, varX, var, varMonom, getTerms, shiftR, orderedBy, monomials
+    , divs, isPowerOf, tryDiv, fromList, Coefficient(..)
     , leadingTerm, leadingMonomial, leadingCoeff, genVars, sArity
     , OrderedMonomial(..), Grevlex(..), mapCoeff
     , Revlex(..), Lex(..), Grlex(..), Graded(..)
@@ -194,29 +194,26 @@ productOrder' :: forall n ord ord' m.(IsOrder ord, IsOrder ord')
 productOrder' n ord ord' =
   case singInstance n of SingInstance -> productOrder (toProxy $ ProductOrder n ord ord')
 
-data WeightProxy (v :: [Nat]) where
-  NilWeight  :: WeightProxy '[]
-  ConsWeight :: SNat n -> WeightProxy v -> WeightProxy (n ': v)
+type WeightProxy (v :: [Nat]) = SList v
 
 data WeightOrder (v :: [Nat]) (ord :: *) where
-  WeightOrder :: WeightProxy (v :: [Nat]) -> ord -> WeightOrder v ord
+  WeightOrder :: SList (v :: [Nat]) -> ord -> WeightOrder v ord
 
-class ToWeightVector (vs :: [Nat]) where
-  calcOrderWeight :: Proxy vs -> Vector Int n -> Int
+calcOrderWeight :: forall vs n. (SingRep vs)
+                 => Proxy (vs :: [Nat]) -> Vector Int n -> Int
+calcOrderWeight Proxy = calcOrderWeight' (sing :: SList vs)
 
-instance ToWeightVector '[] where
-  calcOrderWeight Proxy _ = 0
-
-instance (SingRep n, ToWeightVector ns) => ToWeightVector (n ': ns) where
-  calcOrderWeight Proxy Nil = 0
-  calcOrderWeight Proxy (x :- xs) = x * sNatToInt (sing :: SNat n) + calcOrderWeight (Proxy :: Proxy ns) xs
-
-weightOrder :: forall ns ord m. (ToWeightVector ns, IsOrder ord)
+calcOrderWeight' :: forall vs n. SList (vs :: [Nat]) -> Vector Int n -> Int
+calcOrderWeight' SNil _ = 0
+calcOrderWeight' (SCons n ns) (x :- xs) =
+  x * sNatToInt n + calcOrderWeight' ns xs
+                                                           
+weightOrder :: forall ns ord m. (IsOrder ord, SingRep ns)
             => Proxy (WeightOrder ns ord) -> Monomial m -> Monomial m -> Ordering
 weightOrder Proxy m m' = comparing (calcOrderWeight (Proxy :: Proxy ns)) m m'
                          <> cmpMonomial (Proxy :: Proxy ord) m m'
 
-instance (ToWeightVector ws, IsOrder ord) => IsOrder (WeightOrder ws ord) where
+instance (IsOrder ord, SingRep ws) => IsOrder (WeightOrder ws ord) where
   cmpMonomial p = weightOrder p
 
 instance (IsOrder ord, IsOrder ord', SingRep n) => IsOrder (ProductOrder n ord ord') where
@@ -244,7 +241,7 @@ instance IsMonomialOrder Grlex
 instance IsMonomialOrder Grevlex
 instance IsMonomialOrder Lex
 instance (SingRep n, IsMonomialOrder o, IsMonomialOrder o') => IsMonomialOrder (ProductOrder n o o')
-instance (ToWeightVector ws, IsMonomialOrder ord) => IsMonomialOrder (WeightOrder ws ord)
+instance (SingRep ws, IsMonomialOrder ord) => IsMonomialOrder (WeightOrder ws ord)
 
 -- | Monomial order which can be use to calculate n-th elimination ideal.
 -- This should judge monomial to be bigger if it contains variables to eliminate.
@@ -252,7 +249,7 @@ class (IsMonomialOrder ord, SingRep n) => EliminationType n ord
 instance SingRep n => EliminationType n Lex
 instance (SingRep n, IsMonomialOrder ord, IsMonomialOrder ord') => EliminationType n (ProductOrder n ord ord')
 instance (IsMonomialOrder ord) => EliminationType Z (WeightOrder '[] ord)
-instance (IsMonomialOrder ord, ToWeightVector ns, EliminationType n (WeightOrder ns ord))
+instance (SingRep ns, IsMonomialOrder ord, EliminationType n (WeightOrder ns ord))
     => EliminationType (S n) (WeightOrder (One ': ns) ord)
 
 type EliminationOrder n = ProductOrder n Grevlex Grevlex
@@ -474,16 +471,16 @@ varX :: (Eq r, NoetherianRing r, SingRep n, IsOrder order) => OrderedPolynomial 
 varX = var OZ
 
 var :: (Eq r, NoetherianRing r, SingRep m, IsOrder order) => Ordinal m -> OrderedPolynomial r order m
-var vIndex = polynomial $ M.singleton (OrderedMonomial $ buildIdx vIndex) one
+var vIndex = polynomial $ M.singleton (OrderedMonomial $ varMonom vIndex) one
 
-buildIdx :: forall n. SingRep n => Ordinal n -> Monomial n
-buildIdx OZ =
+varMonom :: forall n. SingRep n => Ordinal n -> Monomial n
+varMonom OZ =
   case sing :: SNat n of
     SS n -> 1 :- V.replicate n 0
     _   -> error "impossible"
-buildIdx (OS n) =
+varMonom (OS n) =
   case sing :: SNat n of
-    SS _ -> 0 :- buildIdx n
+    SS _ -> 0 :- varMonom n
     _    -> error "impossible"
 
 toPolynomial :: (IsOrder order, IsPolynomial r n) => (r, OrderedMonomial order n) -> OrderedPolynomial r order n
