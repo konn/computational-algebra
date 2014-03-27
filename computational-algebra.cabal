@@ -31,7 +31,7 @@ library
                  ,      convertible             == 1.0.*
                  ,      constraints             == 0.3.*
                  ,      deepseq                 == 1.3.*
-                 ,      equational-reasoning    == 0.0.3.*
+                 ,      equational-reasoning    >  0.2.0.1 && < 0.3
                  ,      hashable                == 1.1.*
                  ,      heaps                   == 0.3.*
                  ,      hmatrix                 == 0.15.0.1
@@ -46,7 +46,7 @@ library
                  ,      representable-functors  == 3.2.*
                  ,      semigroupoids           == 3.1.*
                  ,      singletons              == 0.8.*
-                 ,      sized-vector            == 1.3.*
+                 ,      sized-vector            == 1.4.*
                  ,      tagged                  == 0.6.*
                  ,      hybrid-vectors
                  ,      text                    == 0.11.*
@@ -92,13 +92,13 @@ executable solve
     build-depends:        constraints >= 0.3.4.2,
                           algebra               ==3.1.*
                  ,        base                  >=2.0 && <5
-                 ,        type-natural          ==0.2.*
+                 ,        type-natural
                  ,        algebra               ==3.1.*
                  ,        computational-algebra
                  ,        random                ==1.0.*
                  ,        hmatrix               ==0.15.0.1
                  ,        matrix                >= 0.2.4.0
-                 ,        sized-vector          ==1.3.*
+                 ,        sized-vector
                  ,        vector                ==0.10.*
                  ,        convertible           ==1.0.*
                  ,        lens
@@ -118,13 +118,13 @@ executable ipsolve
                  ,        equational-reasoning
                  ,        reflection
                  ,        base                  >=2.0 && <5
-                 ,        type-natural          ==0.2.*
+                 ,        type-natural
                  ,        algebra               ==3.1.*
                  ,        computational-algebra
                  ,        random                ==1.0.*
                  ,        hmatrix               ==0.15.0.1
                  ,        matrix                >= 0.2.4.0
-                 ,        sized-vector          ==1.3.*
+                 ,        sized-vector
                  ,        vector                ==0.10.*
                  ,        convertible           ==1.0.*
                  ,        lens
@@ -141,13 +141,13 @@ executable faugere-prof
     build-depends:        constraints >= 0.3.4.2,
                           algebra               ==3.1.*
                  ,        base                  >=2.0 && <5
-                 ,        type-natural          ==0.2.*
+                 ,        type-natural
                  ,        algebra               ==3.1.*
                  ,        computational-algebra
                  ,        random                ==1.0.*
                  ,        hmatrix               ==0.15.0.1
                  ,        matrix                >= 0.2.4.0
-                 ,        sized-vector          ==1.3.*
+                 ,        sized-vector
                  ,        vector                ==0.10.*
                  ,        convertible           ==1.0.*
                  ,        lens
@@ -183,13 +183,13 @@ test-suite test-multi-table
                  ,      lens                    ==3.9.*
                  ,      quickcheck-instances    ==0.3.*
                  ,      reflection              ==1.3.*
-                 ,      sized-vector            ==1.3.*
+                 ,      sized-vector
                  ,      smallcheck              ==1.0.*
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
                  ,      transformers            >=0.2 && <0.4
-                 ,      type-natural            ==0.2.*
+                 ,      type-natural
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
     type: exitcode-stdio-1.0
@@ -209,7 +209,7 @@ test-suite monomial-order-test
                  ,      containers              >=0.4 && <0.6
                  ,      deepseq                 ==1.3.*
                  ,      hspec                   ==1.8.*
-                 ,      monomorphic             ==0.0.3.*
+                 ,      monomorphic
                  ,      smallcheck              ==1.0.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
@@ -234,15 +234,15 @@ test-suite linear-test
                  ,      deepseq                 ==1.3.*
                  ,      hspec                   ==1.8.*
                  ,      lens                    ==3.9.*
-                 ,      monomorphic             ==0.0.3.*
+                 ,      monomorphic
                  ,      quickcheck-instances    ==0.3.*
                  ,      reflection              ==1.3.*
-                 ,      sized-vector            ==1.3.*
+                 ,      sized-vector
                  ,      smallcheck              ==1.0.*
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.2.*
+                 ,      type-natural
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
                  ,      matrix                >= 0.2.4.0
@@ -265,15 +265,15 @@ test-suite matrix-test
                  ,      deepseq                 ==1.3.*
                  ,      hspec                   ==1.8.*
                  ,      lens                    ==3.9.*
-                 ,      monomorphic             ==0.0.3.*
+                 ,      monomorphic
                  ,      quickcheck-instances    ==0.3.*
                  ,      reflection              ==1.3.*
-                 ,      sized-vector            ==1.3.*
+                 ,      sized-vector
                  ,      smallcheck              ==1.0.*
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.2.*
+                 ,      type-natural
                  ,      vector                  ==0.10.*
                  ,      matrix                >= 0.2.4.0
                  ,      equational-reasoning
@@ -296,15 +296,15 @@ test-suite specs
                  ,      deepseq                 ==1.3.*
                  ,      hspec                   ==1.8.*
                  ,      lens                    ==3.9.*
-                 ,      monomorphic             ==0.0.3.*
+                 ,      monomorphic
                  ,      quickcheck-instances    ==0.3.*
                  ,      reflection              ==1.3.*
-                 ,      sized-vector            ==1.3.*
+                 ,      sized-vector
                  ,      smallcheck              ==1.0.*
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.2.*
+                 ,      type-natural
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
                  ,      process
@@ -330,15 +330,15 @@ test-suite new-div-test
                  ,      deepseq                 ==1.3.*
                  ,      hspec                   ==1.8.*
                  ,      lens                    ==3.9.*
-                 ,      monomorphic             ==0.0.3.*
+                 ,      monomorphic
                  ,      quickcheck-instances    ==0.3.*
                  ,      reflection              ==1.3.*
-                 ,      sized-vector            ==1.3.*
+                 ,      sized-vector
                  ,      smallcheck              ==1.0.*
                  ,      tagged                  ==0.6.*
                  ,      test-framework          ==0.8.*
                  ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            ==0.2.*
+                 ,      type-natural
                  ,      vector                  ==0.10.*
                  ,      equational-reasoning
                  ,      matrix                  >= 0.2.4.0
@@ -360,8 +360,8 @@ benchmark normal-bench
                  ,      deepseq                 ==1.3.*
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
-                 ,      singletons              ==0.8.*
-                 ,      type-natural            ==0.2.*
+                 ,      singletons
+                 ,      type-natural
                  ,      vector                  ==0.10.*
                  ,      matrix                  >= 0.2.4.0
 
@@ -382,8 +382,8 @@ benchmark elimination-bench
                  ,      deepseq                 ==1.3.*
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
-                 ,      singletons              ==0.8.*
-                 ,      type-natural            ==0.2.*
+                 ,      singletons
+                 ,      type-natural
                  ,      vector                  ==0.10.*
                  ,      matrix                  >= 0.2.4.0
     type: exitcode-stdio-1.0
@@ -407,7 +407,7 @@ benchmark quotient-bench-randomized
                  ,      process                 ==1.1.*
                  ,      quickcheck-instances    ==0.3.*
                  ,      reflection              ==1.3.*
-                 ,      singletons              ==0.8.*
+                 ,      singletons
                  ,      sized-vector            >=1.2.0.0
                  ,      smallcheck              ==1.0.*
                  ,      tagged                  ==0.6.*
@@ -434,13 +434,13 @@ benchmark monomial-order-bench
                  ,      criterion               ==0.8.*
                  ,      deepseq                 ==1.3.*
                  ,      lens                    ==3.9.*
-                 ,      monomorphic             ==0.0.*
+                 ,      monomorphic
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
                  ,      quickcheck-instances    ==0.3.*
                  ,      random                  ==1.0.*
                  ,      reflection              ==1.3.*
-                 ,      singletons              ==0.8.*
+                 ,      singletons
                  ,      sized-vector            >=1.2.0.0
                  ,      smallcheck              ==1.0.*
                  ,      tagged                  ==0.6.*
@@ -468,7 +468,7 @@ benchmark linear-bench
                  ,      deepseq                 ==1.3.*
                  ,      hspec                   ==1.8.*
                  ,      lens                    ==3.9.*
-                 ,      monomorphic             ==0.0.*
+                 ,      monomorphic
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
                  ,      quickcheck-instances    ==0.3.*
@@ -503,7 +503,7 @@ benchmark division-bench
                  ,      deepseq                 ==1.3.*
                  ,      hspec                   > 1.8.0
                  ,      lens                    ==3.9.*
-                 ,      monomorphic             ==0.0.*
+                 ,      monomorphic
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
                  ,      quickcheck-instances    ==0.3.*
@@ -538,7 +538,7 @@ benchmark sugar-paper-bench
                  ,      deepseq                 ==1.3.*
                  ,      hspec                   > 1.8.0
                  ,      lens                    ==3.9.*
-                 ,      monomorphic             ==0.0.*
+                 ,      monomorphic
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
                  ,      quickcheck-instances    ==0.3.*
@@ -573,7 +573,7 @@ benchmark solve-bench
                  ,      deepseq                 ==1.3.*
                  ,      hspec                   > 1.8.0
                  ,      lens                    ==3.9.*
-                 ,      monomorphic             ==0.0.*
+                 ,      monomorphic
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
                  ,      quickcheck-instances    ==0.3.*
@@ -609,7 +609,7 @@ benchmark coercion-bench
                  ,      deepseq                 ==1.3.*
                  ,      hspec                   > 1.8.0
                  ,      lens                    ==3.9.*
-                 ,      monomorphic             ==0.0.*
+                 ,      monomorphic
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
                  ,      quickcheck-instances    ==0.3.*
@@ -645,7 +645,7 @@ benchmark faugere4-bench
                  ,      deepseq                 ==1.3.*
                  ,      hspec                   > 1.8.0
                  ,      lens                    ==3.9.*
-                 ,      monomorphic             ==0.0.*
+                 ,      monomorphic
                  ,      parallel                ==3.2.*
                  ,      process                 ==1.1.*
                  ,      quickcheck-instances    ==0.3.*
