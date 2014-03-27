@@ -560,77 +560,77 @@ benchmark sugar-paper-bench
     other-modules: Utils
     ghc-options: -Wall -threaded
 
-benchmark solve-bench
-    build-depends:              constraints >= 0.3.4.2,
-                                HUnit                   ==1.2.*
-                 ,      MonadRandom             ==0.1.*
-                 ,      QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      criterion               ==0.8.*
-                 ,      deepseq                 ==1.3.*
-                 ,      hspec                   > 1.8.0
-                 ,      lens                    ==3.9.*
-                 ,      monomorphic
-                 ,      parallel                ==3.2.*
-                 ,      process                 ==1.1.*
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      reflection              ==1.3.*
-                 ,      sized-vector            >=1.2.0.0
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      test-framework          ==0.8.*
-                 ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            >=0.0.5.0
-                 ,      vector                  ==0.10.*
-                 ,      random                  ==1.0.*
-                 ,      progression             ==0.5.*
-                 ,      equational-reasoning
-                 ,      matrix                  >= 0.2.4.0
-    type: exitcode-stdio-1.0
-    main-is: solve.hs
-    buildable: True
-    hs-source-dirs: bench share
-    other-modules: Utils
-    ghc-options: -Wall -threaded
+-- benchmark solve-bench
+--     build-depends:              constraints >= 0.3.4.2,
+--                                 HUnit                   ==1.2.*
+--                  ,      MonadRandom             ==0.1.*
+--                  ,      QuickCheck              ==2.6.*
+--                  ,      algebra                 ==3.1.*
+--                  ,      base                    >=2.0 && <5
+--                  ,      computational-algebra   -any
+--                  ,      containers              >=0.4 && <0.6
+--                  ,      criterion               ==0.8.*
+--                  ,      deepseq                 ==1.3.*
+--                  ,      hspec                   > 1.8.0
+--                  ,      lens                    ==3.9.*
+--                  ,      monomorphic
+--                  ,      parallel                ==3.2.*
+--                  ,      process                 ==1.1.*
+--                  ,      quickcheck-instances    ==0.3.*
+--                  ,      reflection              ==1.3.*
+--                  ,      sized-vector            >=1.2.0.0
+--                  ,      smallcheck              ==1.0.*
+--                  ,      tagged                  ==0.6.*
+--                  ,      test-framework          ==0.8.*
+--                  ,      test-framework-hunit    ==0.3.*
+--                  ,      type-natural            >=0.0.5.0
+--                  ,      vector                  ==0.10.*
+--                  ,      random                  ==1.0.*
+--                  ,      progression             ==0.5.*
+--                  ,      equational-reasoning
+--                  ,      matrix                  >= 0.2.4.0
+--     type: exitcode-stdio-1.0
+--     main-is: solve.hs
+--     buildable: True
+--     hs-source-dirs: bench share
+--     other-modules: Utils
+--     ghc-options: -Wall -threaded
 
-benchmark coercion-bench
-    build-depends:              constraints >= 0.3.4.2,
-                                HUnit                   ==1.2.*
-                 ,      MonadRandom             ==0.1.*
-                 ,      QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      criterion               ==0.8.*
-                 ,      deepseq                 ==1.3.*
-                 ,      hspec                   > 1.8.0
-                 ,      lens                    ==3.9.*
-                 ,      monomorphic
-                 ,      parallel                ==3.2.*
-                 ,      process                 ==1.1.*
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      reflection              ==1.3.*
-                 ,      sized-vector            >=1.2.0.0
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      test-framework          ==0.8.*
-                 ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            >=0.0.5.0
-                 ,      vector                  ==0.10.*
-                 ,      random                  ==1.0.*
-                 ,      progression             ==0.5.*
-                 ,      equational-reasoning
-                 ,      matrix                  >= 0.2.4.0
-    type: exitcode-stdio-1.0
-    main-is: coercion.hs
-    buildable: True
-    hs-source-dirs: bench share
-    other-modules: Utils
-    ghc-options: -Wall -threaded -fcontext-stack=1000
+-- benchmark coercion-bench
+--     build-depends:              constraints >= 0.3.4.2,
+--                                 HUnit                   ==1.2.*
+--                  ,      MonadRandom             ==0.1.*
+--                  ,      QuickCheck              ==2.6.*
+--                  ,      algebra                 ==3.1.*
+--                  ,      base                    >=2.0 && <5
+--                  ,      computational-algebra   -any
+--                  ,      containers              >=0.4 && <0.6
+--                  ,      criterion               ==0.8.*
+--                  ,      deepseq                 ==1.3.*
+--                  ,      hspec                   > 1.8.0
+--                  ,      lens                    ==3.9.*
+--                  ,      monomorphic
+--                  ,      parallel                ==3.2.*
+--                  ,      process                 ==1.1.*
+--                  ,      quickcheck-instances    ==0.3.*
+--                  ,      reflection              ==1.3.*
+--                  ,      sized-vector            >=1.2.0.0
+--                  ,      smallcheck              ==1.0.*
+--                  ,      tagged                  ==0.6.*
+--                  ,      test-framework          ==0.8.*
+--                  ,      test-framework-hunit    ==0.3.*
+--                  ,      type-natural            >=0.0.5.0
+--                  ,      vector                  ==0.10.*
+--                  ,      random                  ==1.0.*
+--                  ,      progression             ==0.5.*
+--                  ,      equational-reasoning
+--                  ,      matrix                  >= 0.2.4.0
+--     type: exitcode-stdio-1.0
+--     main-is: coercion.hs
+--     buildable: True
+--     hs-source-dirs: bench share
+--     other-modules: Utils
+--     ghc-options: -Wall -threaded -fcontext-stack=1000
 
 benchmark faugere4-bench
     build-depends:              constraints >= 0.3.4.2,
@@ -658,7 +658,6 @@ benchmark faugere4-bench
                  ,      type-natural            >=0.0.5.0
                  ,      vector                  ==0.10.*
                  ,      random                  ==1.0.*
-                 ,      progression             ==0.5.*
                  ,      equational-reasoning
                  ,      matrix                  >= 0.2.4.0
     type: exitcode-stdio-1.0
