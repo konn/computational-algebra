@@ -96,7 +96,7 @@ isDescending xs = and $ zipWith (>=) xs (drop 1 xs)
 
 prop_isApproximateZero :: SingRep n
                        => Double
-                       -> (forall m ord. (SingRep m, IsMonomialOrder ord) =>
+                       -> (forall m ord. (SingI m, IsMonomialOrder ord) =>
                            Ideal (OrderedPolynomial Rational ord (S m)) -> [SV.Vector (Complex Double) (S m)])
                        -> SNat n -> Property
 prop_isApproximateZero err solver sn =
@@ -106,7 +106,7 @@ prop_isApproximateZero err solver sn =
           mul r d = fromRational r * d
       in all (\as -> all ((<err) . magnitude . substWith mul as) $ generators ideal) anss
 
-prop_univPoly :: SingRep n => SNat n -> Property
+prop_univPoly :: SingI n => SNat n -> Property
 prop_univPoly sdim =
   forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
   let ods = enumOrdinal sdim

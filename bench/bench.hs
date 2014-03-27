@@ -1,13 +1,12 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
-{-# LANGUAGE MultiParamTypeClasses, OverloadedStrings, PolyKinds   #-}
-{-# LANGUAGE QuasiQuotes, TemplateHaskell, UndecidableInstances    #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs            #-}
+{-# LANGUAGE MultiParamTypeClasses, OverloadedStrings, PolyKinds, QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskell, UndecidableInstances                            #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 import Algebra.Algorithms.Groebner.Monomorphic
 import Algebra.Ring.Polynomial.Monomorphic
 import Control.DeepSeq
 import Control.Parallel.Strategies
 import Criterion.Main
-import SingularBench
 
 x, y, z, w, s, a, b, c :: Polynomial Rational
 [x, y, z, w, s, a, b, c] = map (injectVar . flip Variable Nothing) "xyzwSabc"

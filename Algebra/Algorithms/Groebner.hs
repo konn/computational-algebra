@@ -302,7 +302,7 @@ groebnerTest f fs = f `modPolynomial` fs == zero
 
 -- | Calculate n-th elimination ideal using 'WeightedEliminationOrder' ordering.
 thEliminationIdeal :: forall n m ord k.
-                      ( IsMonomialOrder ord, Field k, IsPolynomial k m, SingRep m
+                      ( IsMonomialOrder ord, Field k, IsPolynomial k m, SingI m
                       , (n :<<= m) ~ True)
                    => SNat n
                    -> Ideal (OrderedPolynomial k ord m)

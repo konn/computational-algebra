@@ -18,13 +18,13 @@ import System.Process
 import Test.QuickCheck
 import Utils
 
-makeIdeals :: SingRep n => Int -> SNat n -> Int -> IO [(Polynomial Rational n, [Polynomial Rational n])]
+makeIdeals :: SingI n => Int -> SNat n -> Int -> IO [(Polynomial Rational n, [Polynomial Rational n])]
 makeIdeals count sn dpI = do
   ideals <- take count . map generators <$> sample' (resize dpI (idealOfDim sn))
   fs <- take count <$> sample' (polyOfDim sn)
   return $ zip fs ideals
 
-mkTestCases :: SingRep n => [(Polynomial Rational n, [Polynomial Rational n])] -> IO [Benchmark]
+mkTestCases :: SingI n => [(Polynomial Rational n, [Polynomial Rational n])] -> IO [Benchmark]
 mkTestCases is =
   forM (zip [1..] is) $ \(n, (f0, gs0)) -> do
       f  <- return $!! (f0 `using` rdeepseq)

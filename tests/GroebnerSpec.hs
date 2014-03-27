@@ -54,7 +54,7 @@ spec = do
       forM_ ics_binary $ \(IC i j ans) ->
         intersection (toIdeal i :- toIdeal j :- Nil) `shouldBe` toIdeal ans
 
-prop_intersection :: SingRep n => SNat n -> Property
+prop_intersection :: SingI n => SNat n -> Property
 prop_intersection sdim =
   forAll (idealOfDim sdim) $ \ideal ->
   forAll (idealOfDim sdim) $ \jdeal ->
@@ -62,34 +62,34 @@ prop_intersection sdim =
   (f `isIdealMember` ideal && f `isIdealMember` jdeal)
   == f `isIdealMember` (intersection $ ideal :- jdeal :- Nil)
 
-prop_isMinimal :: SingRep n => SNat n -> Property
+prop_isMinimal :: SingI n => SNat n -> Property
 prop_isMinimal sdim =
   forAll (idealOfDim sdim) $ \ideal ->
   let gs = calcGroebnerBasis ideal
   in all ((== 1) . leadingCoeff) gs &&
      all (\f -> all (\g -> not $ leadingMonomial g `divs` leadingMonomial f) (delete f gs)) gs
 
-prop_isReduced :: SingRep n => SNat n -> Property
+prop_isReduced :: SingI n => SNat n -> Property
 prop_isReduced sdim =
   forAll (idealOfDim sdim) $ \ideal ->
   let gs = calcGroebnerBasis ideal
   in all ((== 1) . leadingCoeff) gs &&
      all (\f -> all (\g -> all (\(_, m) -> not $ leadingMonomial g `divs` m) $ getTerms f) (delete f gs)) gs
 
-prop_passesSTest :: SingRep n => SNat n -> Property
+prop_passesSTest :: SingI n => SNat n -> Property
 prop_passesSTest sdim =
   forAll (sized $ \size -> vectorOf size (polyOfDim sdim)) $ \ideal ->
   let gs = calcGroebnerBasis $ toIdeal ideal
   in all ((== 0) . (`modPolynomial` gs)) [sPolynomial f g | f <- gs, g <- gs, f /= g]
 
-prop_groebnerDivsOrig :: SingRep n => SNat n -> Property
+prop_groebnerDivsOrig :: SingI n => SNat n -> Property
 prop_groebnerDivsOrig sdim =
   forAll (elements [3..15]) $ \count ->
   forAll (vectorOf count (polyOfDim sdim)) $ \ideal ->
   let gs = calcGroebnerBasis $ toIdeal ideal
   in all ((== 0) . (`modPolynomial` gs)) ideal
 
-prop_divCorrect :: SingRep n => SNat n -> Property
+prop_divCorrect :: SingI n => SNat n -> Property
 prop_divCorrect sdim =
   forAll (polyOfDim sdim) $ \poly ->
   forAll (idealOfDim sdim) $ \ideal ->
@@ -97,7 +97,7 @@ prop_divCorrect sdim =
       (qds, r) = poly `divModPolynomial` dvs
   in poly == sum (map (uncurry (*)) qds) + r
 
-prop_indivisible :: SingRep n => SNat n -> Property
+prop_indivisible :: SingI n => SNat n -> Property
 prop_indivisible sdim =
   forAll (polyOfDim sdim) $ \poly ->
   forAll (idealOfDim sdim) $ \ideal ->
@@ -105,7 +105,7 @@ prop_indivisible sdim =
       (_, r) = changeOrder Grevlex poly `divModPolynomial` dvs
   in r /= 0 ==> all (\f -> all (\(_, m) -> not $ leadingMonomial f `divs` m) $ getTerms r)  dvs
 
-prop_degdecay :: SingRep n => SNat n -> Property
+prop_degdecay :: SingI n => SNat n -> Property
 prop_degdecay sdim =
   forAll (polyOfDim sdim) $ \poly ->
   forAll (idealOfDim sdim) $ \ideal ->

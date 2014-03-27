@@ -15,7 +15,7 @@ import           Data.Default
 import           Data.Fixed
 import           Data.List
 import           Data.Proxy
-import           Data.Singletons             (SingInstance (..), SingRep,
+import           Data.Singletons             (SingI, SingInstance (..),
                                               singInstance)
 import           Data.Type.Natural           (Nat (..))
 import           Data.Vector.Sized           (Vector (..))
@@ -55,7 +55,7 @@ data RingData k ord n = Ring { _coefficient :: Proxy k
                              , _qIdeal      :: Maybe (Ideal (OrderedPolynomial k ord n))
                              }
 
-instance SingRep n => Default (RingData k ord n) where
+instance SingI n => Default (RingData k ord n) where
   def = Ring Proxy (V.unsafeFromList' [ "X_" ++ show i |  i <- [1..] ]) Proxy Nothing
 
 class HasName a where
@@ -92,7 +92,7 @@ instance HasName k => HasName (Complex k) where
   name cx = name (unComplexify cx) ++ "(i)"
 
 instance ( IsOrder ord, DecidableZero k, DecidableUnits k
-         , NoetherianRing k, SingRep n, HasName ord, HasName k, Show k) => Show (RingData k ord n) where
+         , NoetherianRing k, SingI n, HasName ord, HasName k, Show k) => Show (RingData k ord n) where
   show (Ring field vs ord mideal) = maybe id (\j -> (++ ("/" ++ showIdeal j))) mideal ringS
     where
       ringS = concat [name field, "[", intercalate "," $ V.toList vs , "] (", name ord, ")"]
@@ -113,7 +113,7 @@ ring r = [ido| do
   ireturn r
   |]
 
-qring :: ( Eq k, DecidableZero k, DecidableUnits k, Division k, SingRep n, NoetherianRing k
+qring :: ( Eq k, DecidableZero k, DecidableUnits k, Division k, SingI n, NoetherianRing k
          , IsMonomialOrder ord, IxMonadState m)
       => Ideal (OrderedPolynomial k ord n) -> m (Environment k ord n) (Environment k ord n) (Environment k ord n)
 qring ideal = [ido| do

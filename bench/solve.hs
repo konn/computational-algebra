@@ -29,7 +29,7 @@ import Utils
 x, y, z :: Polynomial Rational Three
 [x, y, z] = genVars sThree
 
-(.*) :: SingRep n => Rational -> Polynomial Rational n -> Polynomial Rational n
+(.*) :: SingI n => Rational -> Polynomial Rational n -> Polynomial Rational n
 (.*) = (.*.)
 
 infixl 7 .*
@@ -56,7 +56,7 @@ eqn03 = toIdeal [x^^2 + y^^2 + z^^2 - 2*x
 eqn04 :: Ideal (Polynomial Rational Three)
 eqn04 = toIdeal [x*y + z - x*z, x^^2 - z, 2*x^^3 - x^^2 * y * z - 1]
 
-mkBench :: SingRep n => Ideal (Polynomial Rational (S n)) -> IO [Benchmark]
+mkBench :: SingI n => Ideal (Polynomial Rational (S n)) -> IO [Benchmark]
 mkBench is = do
   gen <- newStdGen
   return [ bench "naive" $ nf (solve' 1e-10) is

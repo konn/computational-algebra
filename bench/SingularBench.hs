@@ -51,7 +51,7 @@ instance SingularRep Grlex where
 instance SingularRep Grevlex where
   singularRep _ = "dp"
 
-instance (SingRep n, SingularRep o1, SingularRep o2) => SingularRep (ProductOrder n o1 o2) where
+instance (SingI n, SingularRep o1, SingularRep o2) => SingularRep (ProductOrder n o1 o2) where
   singularRep (ProductOrder n o1 o2) = concat ["(", singularRep o1, "(", show (sNatToInt n), "),"
                                               , singularRep o2, ")"
                                               ]

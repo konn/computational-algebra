@@ -13,7 +13,7 @@ import           Data.List
 import qualified Data.Matrix                      as DM
 import           Data.Maybe
 import           Data.Ord
-import           Data.Singletons                  (SingRep)
+import           Data.Singletons                  (SingI)
 import           Data.Type.Ordinal
 import qualified Data.Vector                      as V
 import qualified Data.Vector.Algorithms.Insertion as Sort
@@ -207,7 +207,7 @@ delta :: (NA.Monoidal r, NA.Unital r) => Int -> Int -> r
 delta i j | i == j = NA.one
           | otherwise = NA.zero
 
-companion :: (SingRep n, NoetherianRing r, Matrix mat, Eq r,
+companion :: (SingI n, NoetherianRing r, Matrix mat, Eq r,
               Elem mat r, IsMonomialOrder ord)
           => Ordinal n -> OrderedPolynomial r ord n -> mat r
 companion on poly =

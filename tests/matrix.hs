@@ -16,7 +16,7 @@ main = hspec $ do
     prop "coincids with matrixRep" $ checkForArity [1..3] prop_matrixRep
   return ()
 
-prop_matrixRep :: SingRep n => SNat n -> Property
+prop_matrixRep :: SingI n => SNat n -> Property
 prop_matrixRep sn =
   forAll arbitrary $ \(ZeroDimIdeal ideal) ->
   forAll (polyOfDim sn) $ \poly ->

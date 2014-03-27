@@ -21,10 +21,10 @@ import System.Process
 import Test.QuickCheck
 import Utils
 
-makeIdeals :: SingRep n => Int -> SNat n -> Int -> IO [Ideal (Polynomial Rational n)]
+makeIdeals :: SingI n => Int -> SNat n -> Int -> IO [Ideal (Polynomial Rational n)]
 makeIdeals count _ dpI = take count . map getIdeal <$> sample' (resize dpI arbitrary `suchThat` isNonTrivial)
 
-mkTestCases :: SingRep n => Int -> Int -> [Ideal (Polynomial Rational n)] -> IO [Benchmark]
+mkTestCases :: SingI n => Int -> Int -> [Ideal (Polynomial Rational n)] -> IO [Benchmark]
 mkTestCases count size is =
   forM (zip [1..] is) $ \(n, ideal) -> do
     reifyQuotient ideal $ \ii -> do

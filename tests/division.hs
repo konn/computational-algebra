@@ -21,7 +21,7 @@ main = hspec $ do
     prop "divides correctly" $
       checkForArity [3] prop_divCorrect
 
-prop_divCorrect :: SingRep n => SNat n -> Property
+prop_divCorrect :: SingI n => SNat n -> Property
 prop_divCorrect sdim =
   forAll (polyOfDim sdim) $ \poly ->
   forAll (idealOfDim sdim) $ \ideal ->
@@ -29,7 +29,7 @@ prop_divCorrect sdim =
       (qds, r) = poly `divModPolynomial'` dvs
   in poly == sum (map (uncurry (*)) qds) + r
 
-prop_indivisible :: SingRep n => SNat n -> Property
+prop_indivisible :: SingI n => SNat n -> Property
 prop_indivisible sdim =
   forAll (polyOfDim sdim) $ \poly ->
   forAll (idealOfDim sdim) $ \ideal ->
@@ -37,7 +37,7 @@ prop_indivisible sdim =
       (_, r) = changeOrder Grevlex poly `divModPolynomial'` dvs
   in r /= 0 ==> all (\f -> all (\(_, m) -> not $ leadingMonomial f `divs` m) $ getTerms r)  dvs
 
-prop_degdecay :: SingRep n => SNat n -> Property
+prop_degdecay :: SingI n => SNat n -> Property
 prop_degdecay sdim =
   forAll (polyOfDim sdim) $ \poly ->
   forAll (idealOfDim sdim) $ \ideal ->

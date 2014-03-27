@@ -144,12 +144,12 @@ optimalStrategy ps =
   let d = minimum $ map degPair ps
   in filter ((==d) . degPair) ps
 
-sugarStrategy :: (NoetherianRing r, SingRep n, IsOrder ord, Eq r) => Strategy r ord n
+sugarStrategy :: (NoetherianRing r, SingI n, IsOrder ord, Eq r) => Strategy r ord n
 sugarStrategy ps =
   let d = minimum $ map calcSug ps
   in filter ((==d) . calcSug) ps
 
-calcSug :: (Eq r, SingRep n, NoetherianRing r, IsOrder ord) => Pair r ord n -> Int
+calcSug :: (Eq r, SingI n, NoetherianRing r, IsOrder ord) => Pair r ord n -> Int
 calcSug p =
   let f = leftPoly p
       g = rightPoly p
@@ -190,7 +190,7 @@ update gs bs h = {-# SCC "update" #-}
       gs' = [g | g <- gs, leadingMonomial h `notDivs` leadingMonomial g ]
   in (es `par` bs' `par` gs') `pseq` (h : gs', bs' ++ es)
 
-cyclic :: (SingRep n)
+cyclic :: (SingI n)
        => SNat n -> Ideal (Polynomial Rational n)
 cyclic sn =
   let vars = genVars sn
@@ -216,7 +216,7 @@ simplify fss t f = go $ divisors t
              then simplify fss (t/u) p
              else (one, p)
 
-divisors :: (SingRep n, IsOrder ord) => OrderedMonomial ord n -> [OrderedMonomial ord n]
+divisors :: (SingI n, IsOrder ord) => OrderedMonomial ord n -> [OrderedMonomial ord n]
 divisors t = [om
              | m <- sequenceSV (SV.map (enumFromTo 0) $ getMonomial t)
              , let om = OrderedMonomial m

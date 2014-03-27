@@ -24,7 +24,7 @@ instance SingularOrder Lex where
 instance SingularOrder Grevlex where
   singularOrder _ = "dp"
 
-idealProgram :: forall ord n. (SingularOrder ord, SingRep n)
+idealProgram :: forall ord n. (SingularOrder ord, SingI n)
              => String
              -> Ideal (OrderedPolynomial Rational ord n)
              -> String
@@ -44,12 +44,12 @@ idealProgram fun ideal =
 singular :: String -> IO String
 singular code = readProcess "singular" ["-q"] code
 
-readSingularIdeal :: (SingRep n, IsMonomialOrder ord)
+readSingularIdeal :: (SingI n, IsMonomialOrder ord)
                   => SNat n -> Proxy ord -> String -> [OrderedPolynomial Rational ord n]
 readSingularIdeal n p (T.pack -> code) =
   map (readSingularPoly n p  . T.unpack) $ T.splitOn ",\n" code
 
-readSingularPoly :: (SingRep n, IsMonomialOrder ord)
+readSingularPoly :: (SingI n, IsMonomialOrder ord)
                  => SNat n -> Proxy ord -> String -> OrderedPolynomial Rational ord n
 readSingularPoly _ _ code =
   case [p | (p, xs) <- readPoly code, all isSpace xs] of
@@ -100,13 +100,13 @@ readSingularPoly _ _ code =
                             <|> return (1, mpow)
             return (var (toEnum nth) ^ power, gomi)
 
-singIdealFun :: forall ord n. (SingularOrder ord, SingRep n)
+singIdealFun :: forall ord n. (SingularOrder ord, SingI n)
              => String -> Ideal (OrderedPolynomial Rational ord n) -> Ideal (OrderedPolynomial Rational ord n)
 singIdealFun fun ideal = unsafePerformIO $ do
   ans <- singular $ idealProgram fun ideal
   return $ toIdeal $ readSingularIdeal (sing :: SNat n) (Proxy :: Proxy ord) ans
 
-singPolyFun :: forall ord n. (SingularOrder ord, SingRep n)
+singPolyFun :: forall ord n. (SingularOrder ord, SingI n)
             => String
             -> Ideal (OrderedPolynomial Rational ord n)
             -> OrderedPolynomial Rational ord n

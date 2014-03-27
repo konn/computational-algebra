@@ -42,7 +42,7 @@ tr a = trace (show a) a
 x, y, z :: Polynomial Rational Three
 [x, y, z] = genVars sThree
 
-(.*) :: SingRep n => Rational -> Polynomial Rational n -> Polynomial Rational n
+(.*) :: SingI n => Rational -> Polynomial Rational n -> Polynomial Rational n
 (.*) = (.*.)
 
 infixl 7 .*
@@ -92,13 +92,13 @@ mat = fromCols $ take 4 vs
 fromCols :: [V.Vector a] -> M.Matrix a
 fromCols = foldr1 (M.<|>) . map M.colVector
 
-findUnivar :: (NoetherianRing r, Eq r, IsOrder ord, SingRep n) => OrderedPolynomial r ord n -> Maybe (Ordinal n)
+findUnivar :: (NoetherianRing r, Eq r, IsOrder ord, SingI n) => OrderedPolynomial r ord n -> Maybe (Ordinal n)
 findUnivar poly =
   let os = enumOrdinal (sArity poly)
       ms = map snd $ getTerms poly
   in find (\a -> all (`isPowerOf` (leadingMonomial (var a `asTypeOf` poly))) ms) os
 
-toCoeffList :: (Eq r, SingRep n, NoetherianRing r, IsOrder ord) => Ordinal n -> OrderedPolynomial r ord n -> [r]
+toCoeffList :: (Eq r, SingI n, NoetherianRing r, IsOrder ord) => Ordinal n -> OrderedPolynomial r ord n -> [r]
 toCoeffList on f =
   let v = var on  `asTypeOf` f
   in [ coeff (leadingMonomial $ v ^^ i) f | i <- [0.. fromIntegral (totalDegree' f)]]

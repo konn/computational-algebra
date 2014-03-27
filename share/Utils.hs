@@ -59,7 +59,7 @@ instance (Ord k, Serial m k, Serial m v) => Serial m (M.Map k v) where
 instance Serial m (Monomial n) => Serial m (OrderedMonomial ord n) where
   series = newtypeCons OrderedMonomial
 
-instance (Eq r, NoetherianRing r, SingRep n, IsMonomialOrder ord, Serial m r, Serial m (Monomial n))
+instance (Eq r, NoetherianRing r, SingI n, IsMonomialOrder ord, Serial m r, Serial m (Monomial n))
           => Serial m (OrderedPolynomial r ord n) where
   series = cons2 (curry toPolynomial) \/ cons2 (NA.+)
 
@@ -89,10 +89,10 @@ instance Monad m => Serial m (ZeroDimIdeal Two) where
     return $ ZeroDimIdeal $ f `addToIdeal` g `addToIdeal` ideal
 
 -- * Instances for QuickCheck.
-instance SingRep n => Arbitrary (Monomial n) where
+instance SingI n => Arbitrary (Monomial n) where
   arbitrary = arbVec
 
-arbVec :: forall n. SingRep n => Gen (Monomial n)
+arbVec :: forall n. SingI n => Gen (Monomial n)
 arbVec =  SV.unsafeFromList len . map abs <$> vectorOf (sNatToInt len) arbitrarySizedBoundedIntegral
     where
       len = sing :: SNat n
@@ -100,19 +100,19 @@ arbVec =  SV.unsafeFromList len . map abs <$> vectorOf (sNatToInt len) arbitrary
 instance (IsOrder ord, Arbitrary (Monomial n)) => Arbitrary (OrderedMonomial ord n) where
   arbitrary = OrderedMonomial <$> arbitrary
 
-instance (SingRep n, IsOrder ord)
+instance (SingI n, IsOrder ord)
       => Arbitrary (OrderedPolynomial Rational ord n) where
   arbitrary = polynomial . M.fromList <$> listOf1 ((,) <$> arbitrary <*> arbitraryRational)
 
 instance (Ord r, NoetherianRing r, Arbitrary r, Num r) => Arbitrary (Ideal r) where
   arbitrary = toIdeal . map QC.getNonZero . getNonEmpty <$> arbitrary
 
-instance (SingRep n) => Arbitrary (ZeroDimIdeal n) where
+instance (SingI n) => Arbitrary (ZeroDimIdeal n) where
   arbitrary = zeroDimG
 
 instance (NA.Field r, NoetherianRing r, Reifies ideal (QIdeal r ord n)
          , Arbitrary (OrderedPolynomial r ord n)
-         , IsMonomialOrder ord, SingRep n, Eq r)
+         , IsMonomialOrder ord, SingI n, Eq r)
     => Arbitrary (Quotient r ord n ideal) where
   arbitrary = modIdeal <$> arbitrary
 
@@ -122,7 +122,7 @@ polyOfDim sn = case singInstance sn of SingInstance -> arbitrary
 idealOfDim :: SNat n -> QC.Gen (Ideal (Polynomial Rational n))
 idealOfDim sn = case singInstance sn of SingInstance -> arbitrary
 
-quotOfDim :: (SingRep n, Reifies ideal (QIdeal Rational Grevlex n))
+quotOfDim :: (SingI n, Reifies ideal (QIdeal Rational Grevlex n))
           => Proxy ideal -> QC.Gen (Quotient Rational Grevlex n ideal)
 quotOfDim _ = arbitrary
 
@@ -145,7 +145,7 @@ zeroDimOf sn =
       i0 <- arbitrary
       return $ ZeroDimIdeal $ toIdeal $ fs ++ i0
 
-zeroDimG :: forall n. (SingRep n) => QC.Gen (ZeroDimIdeal n)
+zeroDimG :: forall n. (SingI n) => QC.Gen (ZeroDimIdeal n)
 zeroDimG = do
   fs <- genLM (sing :: SNat n)
   i0 <- arbitrary
@@ -158,7 +158,7 @@ arbitraryRational = do
                     `suchThat` \(QC.NonZero b) -> gcd a b == 1 && b /= 0
   return $ a % b
 
-isNonTrivial :: SingRep n => ZeroDimIdeal n -> Bool
+isNonTrivial :: SingI n => ZeroDimIdeal n -> Bool
 isNonTrivial (ZeroDimIdeal ideal) = reifyQuotient ideal $ maybe False ((>0).length) . standardMonomials'
 
 data Equation = Equation { coefficients :: [[Rational]]
@@ -186,7 +186,7 @@ arbitrarySolvable = do
     v <- vector $ length $ head as
     return $ Equation as (V.toList $ M.getCol 1 $ M.fromLists as * M.colVector (V.fromList v))
 
-liftSNat :: (forall n. SingRep (n :: Nat) => Sing n -> Property) -> MonomorphicRep (Sing :: Nat -> *) -> Property
+liftSNat :: (forall n. SingI (n :: Nat) => Sing n -> Property) -> MonomorphicRep (Sing :: Nat -> *) -> Property
 liftSNat f int =
   case M.promote int of
     Monomorphic snat ->
@@ -207,9 +207,9 @@ unaryPoly arity mth = do
                   case boolToClassLeq (sm %:+ sOne) arity of
                     Dict -> return $ scastPolynomial arity $ shiftR sm f
 
-checkForArity :: [Int] -> (forall n. SingRep (n :: Nat) => Sing n -> Property) -> Property
+checkForArity :: [Int] -> (forall n. SingI (n :: Nat) => Sing n -> Property) -> Property
 checkForArity as test = forAll (QC.elements as) $ liftSNat test
 
-stdReduced :: (Eq r, Num r, SingRep n, NA.Division r, NoetherianRing r, IsMonomialOrder order)
+stdReduced :: (Eq r, Num r, SingI n, NA.Division r, NoetherianRing r, IsMonomialOrder order)
            => [OrderedPolynomial r order n] -> [OrderedPolynomial r order n]
 stdReduced ps = sortBy (comparing leadingMonomial) $ map (\f -> injectCoeff (NA.recip $ leadingCoeff f) * f) ps

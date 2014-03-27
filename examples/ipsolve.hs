@@ -31,7 +31,7 @@ type IPOrder n vs = ProductOrder n Grevlex (ProductOrder One Grevlex (WeightOrde
 ipOrder :: SNat n -> SList vs -> IPOrder n vs
 ipOrder n vs = ProductOrder n Grevlex (ProductOrder sOne Grevlex (WeightOrder vs Grevlex))
 
-toMonomial :: forall n ord . (SingRep n, IsMonomialOrder ord)
+toMonomial :: forall n ord . (SingI n, IsMonomialOrder ord)
            => ord -> Vector Int n -> OrderedPolynomial Rational ord (S n)
 toMonomial _ ds =
   let !c = V.foldl' (\a b -> if b < 0 then a + P.abs b else a) 0 ds
@@ -49,7 +49,7 @@ costCmp cost ns ms =
 toMOrder :: Proxy m -> MOrder m
 toMOrder Proxy = MOrder
 
-solveIP' :: forall n m . (SingRep n, SingRep m)
+solveIP' :: forall n m . (SingI n, SingI m)
          => Vector Int n            -- ^ cost vector
          -> Vector (Vector Int n) m -- ^ constraint matrix
          -> Vector Int m            -- ^ constraint
@@ -76,8 +76,10 @@ solveIP' c mat b =
              then Just $ coerce (plusMinusEqR n m) $ solution
              else Nothing
 
-test :: (Vector Int Four, Vector (Vector Int Four) Two, Vector Int Two)
-test@(testC, testM, testB) =
+testC :: Vector Int Four
+testM :: Vector (Vector Int Four) Two
+testB :: Vector Int Two
+(testC, testM, testB) =
   (1000 :- 1 :- 1 :- 100 :- Nil,
    (3 :- -2 :- 1 :- -1 :- Nil) :- (4 :- 1 :- -1 :- 0 :- Nil) :- Nil,
    -1 :- 5 :- Nil)
