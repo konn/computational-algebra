@@ -80,7 +80,7 @@ library
     other-modules:   Algebra.Algorithms.FGLM
     exposed: True
     buildable: True
-    ghc-options: -fwarn-name-shadowing -threaded -Odph -with-rtsopts="-qa"
+    ghc-options: -fwarn-name-shadowing -Odph -with-rtsopts="-qa"
 
 executable solve
     main-is: solve.hs
