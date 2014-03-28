@@ -133,6 +133,7 @@ padVec def Nil (y :- ys) =
 
 combinations :: [a] -> [(a, a)]
 combinations xs = concat $ zipWith (map . (,)) xs $ drop 1 $ tails xs
+{-# INLINE combinations #-}
 
 -- | Calculate Groebner basis applying (modified) Buchberger's algorithm.
 -- This function is same as 'syzygyBuchberger'.
@@ -146,6 +147,7 @@ buchberger = syzygyBuchberger
 syzygyBuchberger :: (Field r, IsPolynomial r n, IsMonomialOrder order)
                     => Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
 syzygyBuchberger = syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)
+{-# INLINE syzygyBuchberger #-}
 
 (=@=) :: Vector Int n -> Vector Int m -> Bool
 Nil       =@= Nil       = True
@@ -199,6 +201,7 @@ syzygyBuchbergerWithStrategy strategy ideal = runST $ do
 calcWeight' :: (SelectionStrategy s, IsPolynomial r n, IsMonomialOrder ord, Ord (Weight s ord))
             => s -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n -> Weight s ord
 calcWeight' s = calcWeight (toProxy s)
+{-# INLINE calcWeight' #-}
 
 -- | Type-class for selection strategies in Buchberger's algorithm.
 class SelectionStrategy s where
@@ -213,6 +216,7 @@ data NormalStrategy = NormalStrategy deriving (Read, Show, Eq, Ord)
 instance SelectionStrategy NormalStrategy where
   type Weight NormalStrategy ord = Monomorphic (OrderedMonomial ord)
   calcWeight _ f g = Monomorphic $ lcmMonomial (leadingMonomial f)  (leadingMonomial g)
+  {-# INLINE calcWeight #-}
 
 -- | Choose the pair with the least LCM(LT(f), LT(g)) w.r.t. 'Grevlex' order.
 data GrevlexStrategy = GrevlexStrategy deriving (Read, Show, Eq, Ord)
@@ -221,6 +225,7 @@ instance SelectionStrategy GrevlexStrategy where
   type Weight GrevlexStrategy ord = Monomorphic (OrderedMonomial Grevlex)
   calcWeight _ f g = Monomorphic $ changeMonomialOrderProxy Proxy $
                      lcmMonomial (leadingMonomial f) (leadingMonomial g)
+  {-# INLINE calcWeight #-}
 
 data GradedStrategy = GradedStrategy deriving (Read, Show, Eq, Ord)
 
@@ -229,6 +234,8 @@ instance SelectionStrategy GradedStrategy where
   type Weight GradedStrategy ord = Monomorphic (OrderedMonomial (Graded ord))
   calcWeight _ f g = Monomorphic $ changeMonomialOrderProxy Proxy $
                      lcmMonomial (leadingMonomial f)  (leadingMonomial g)
+  {-# INLINE calcWeight #-}
+
 
 -- | Sugar strategy. This chooses the pair with the least phantom homogenized degree and then break the tie with the given strategy (say @s@).
 data SugarStrategy s = SugarStrategy s deriving (Read, Show, Eq, Ord)
@@ -240,6 +247,8 @@ instance SelectionStrategy s => SelectionStrategy (SugarStrategy s) where
       deg' = maximum . map (totalDegree . snd) . getTerms
       tsgr h = deg' h - totalDegree (leadingMonomial h)
       sugar = max (tsgr f) (tsgr g) + totalDegree (lcmMonomial (leadingMonomial f) (leadingMonomial g))
+  {-# INLINE calcWeight #-}
+
 
 minimizeGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
                       => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
