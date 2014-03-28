@@ -14,8 +14,11 @@ before_install:
 
 install:
   - cabal-1.18 update
-  - patch $HOME/.cabal/config < config.patch
-  - cabal-1.18 update
+  - case GHCVER in
+      ^7\.8\..* | head )
+         patch $HOME/.cabal/config < config.patch;
+         cabal-1.18 update;;
+    esac
   - cabal-1.18 install --only-dependencies --enable-tests --enable-benchmarks
 
 script:
