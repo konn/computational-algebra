@@ -14,8 +14,9 @@ before_install:
 
 install:
   - cabal-1.18 update
-  - case GHCVER in
+  - case $GHCVER in
       ^7\.8\..* | head )
+         echo "workaround for 7.8.1 fired...";
          patch $HOME/.cabal/config < config.patch;
          cabal-1.18 update;;
     esac
