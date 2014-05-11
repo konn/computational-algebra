@@ -1,5 +1,5 @@
 module Main where
-import Algebra.Algorithms.Faugere
+import Algebra.Algorithms.Faugere4
 import Algebra.Algorithms.Groebner
 import Algebra.Ring.Polynomial
 import Control.DeepSeq
