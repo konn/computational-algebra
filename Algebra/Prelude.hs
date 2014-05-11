@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
 module Algebra.Prelude
-       ((^), (^^),(%),Scalar(..),(.*.),
+       ((^), (^^),(%),Scalar(..),(.*.),Noetherian(..),
         module Prelude,
         module Numeric.Algebra,
         module Algebra.Ring.Polynomial,
@@ -8,14 +8,16 @@ module Algebra.Prelude
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
-import           Data.Ratio              hiding ((%))
+import           Data.Ratio                      hiding ((%))
 import           Data.Singletons
-import           Numeric.Algebra         hiding (Order (..), (^))
-import qualified Numeric.Algebra         as NA
-import           Prelude                 hiding (Fractional (..), Integral (..),
-                                          Num (..), Real (..), lex, product,
-                                          subtract, sum, (^), (^^))
-import           Prelude                 (fromRational)
+import           Numeric.Algebra                 hiding (Order (..), (^))
+import qualified Numeric.Algebra                 as NA
+import           Numeric.Algebra.Ring.Noetherian
+import           Prelude                         hiding (Fractional (..),
+                                                  Integral (..), Num (..),
+                                                  Real (..), lex, product,
+                                                  subtract, sum, (^), (^^))
+import           Prelude                         (fromRational)
 
 (^) :: Unital r => r -> Natural -> r
 (^) = pow

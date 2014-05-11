@@ -10,11 +10,12 @@ import           Algebra.Ring.Noetherian
 import           Control.Lens
 import           Data.Complex
 import           Data.Ratio
-import           Numeric.Algebra         hiding ((/), (<))
-import qualified Numeric.Algebra         as NA
-import           Prelude                 hiding (lex, negate, recip, sum, (*),
-                                          (+), (-), (^), (^^))
-import qualified Prelude                 as P
+import           Numeric.Algebra                 hiding ((/), (<))
+import qualified Numeric.Algebra                 as NA
+import           Numeric.Algebra.Ring.Noetherian
+import           Prelude                         hiding (lex, negate, recip,
+                                                  sum, (*), (+), (-), (^), (^^))
+import qualified Prelude                         as P
 import           Unsafe.Coerce
 
 newtype WrappedField a = WrapField { unwrapField :: a
