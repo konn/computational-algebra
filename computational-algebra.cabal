@@ -14,53 +14,54 @@ author: Hiromi ISHII
 data-dir: ""
 extra-source-files: README.md examples/*.hs tests/*.hs bench/*.hs
                     share/*.hs
- 
+
 source-repository head
     type: git
     location: git://github.com/konn/computational-algebra.git
- 
+
 flag examples
      default: False
 
 library
-    build-depends:      MonadRandom             == 0.1.*
-                 ,      algebra                 == 3.1.*
-                 ,      base                    >= 2.0 && <5
-                 ,      bifunctors              == 3.2.*
-                 ,      containers              >= 0.4 && <0.6
-                 ,      convertible             == 1.0.*
-                 ,      constraints             == 0.3.*
-                 ,      deepseq                 == 1.3.*
-                 ,      equational-reasoning    >  0.2.0.1 && < 0.3
-                 ,      hashable                == 1.1.*
-                 ,      heaps                   == 0.3.*
+    build-depends:      MonadRandom
+                 ,      algebra
+                 ,      base
+                 ,      bifunctors
+                 ,      containers
+                 ,      convertible
+                 ,      constraints
+                 ,      deepseq
+                 ,      equational-reasoning
+                 ,      hashable
+                 ,      heaps
                  ,      hmatrix                 == 0.15.0.1
-                 ,      matrix                  >= 0.2.4.0
+                 ,      matrix                  >= 0.3
                  ,      lens                    == 3.9.*
                  ,      monad-loops             == 0.4.*
                  ,      monomorphic             == 0.0.3.*
                  ,      mtl                     == 2.1.*
-                 ,      peggy                   == 0.3.*
                  ,      primitive               == 0.5.*
-                 ,      reflection              == 1.3.*
+                 ,      reflection              >= 1.3
                  ,      representable-functors  == 3.2.*
-                 ,      semigroupoids           == 3.1.*
-                 ,      singletons              == 0.8.*
-                 ,      sized-vector            == 1.4.*
-                 ,      tagged                  == 0.6.*
+                 ,      semigroupoids
+                 ,      singletons              >= 0.8
+                 ,      sized-vector            >= 1.4
+                 ,      tagged                  >= 0.6
                  ,      hybrid-vectors
                  ,      text                    == 0.11.*
                  ,      type-natural            == 0.2.*
-                 ,      unamb                   == 0.2.*
-                 ,      unordered-containers    == 0.2.*
-                 ,      vector                  == 0.10.*
-                 ,      sparse                  == 0.7.*
+                 ,      unamb
+                 ,      unordered-containers
+                 ,      vector
+                 ,      sparse                  >= 0.7    && < 0.10
                  ,      parallel
                  ,      hybrid-vectors
                  ,      vector-algorithms
                  ,      repa
                  ,      repa-algorithms
-    exposed-modules: Algebra.Algorithms.Faugere
+                 ,      peggy
+    exposed-modules: Algebra.Algorithms.Faugere4
+                     -- Algebra.Algorithms.Faugere5
                      Algebra.Algorithms.Groebner
                      Algebra.Algorithms.Groebner.Monomorphic
                      Algebra.Algorithms.ZeroDim
@@ -89,20 +90,20 @@ executable solve
     else
         buildable: False
     hs-source-dirs: share examples
-    build-depends:        constraints >= 0.3.4.2,
-                          algebra               ==3.1.*
-                 ,        base                  >=2.0 && <5
+    build-depends:        constraints
+                 ,        algebra
+                 ,        base
                  ,        type-natural
-                 ,        algebra               ==3.1.*
+                 ,        algebra
                  ,        computational-algebra
-                 ,        random                ==1.0.*
-                 ,        hmatrix               ==0.15.0.1
-                 ,        matrix                >= 0.2.4.0
+                 ,        random
+                 ,        hmatrix
+                 ,        matrix
                  ,        sized-vector
-                 ,        vector                ==0.10.*
-                 ,        convertible           ==1.0.*
-                 ,        lens
-                 ,        MonadRandom           ==0.1.*
+                 ,        vector
+                 ,        convertible
+                 ,        lens                    == 3.9.*
+                 ,        MonadRandom
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
 
 executable ipsolve
@@ -112,23 +113,23 @@ executable ipsolve
     else
         buildable: False
     hs-source-dirs: share examples
-    build-depends:        parallel >= 3.2.0.3,
-                          constraints >= 0.3.4.2,
-                          algebra               ==3.1.*
+    build-depends:        parallel
+                 ,        constraints
+                 ,        algebra
                  ,        equational-reasoning
                  ,        reflection
-                 ,        base                  >=2.0 && <5
+                 ,        base
                  ,        type-natural
-                 ,        algebra               ==3.1.*
+                 ,        algebra
                  ,        computational-algebra
-                 ,        random                ==1.0.*
-                 ,        hmatrix               ==0.15.0.1
-                 ,        matrix                >= 0.2.4.0
+                 ,        random
+                 ,        hmatrix
+                 ,        matrix
                  ,        sized-vector
-                 ,        vector                ==0.10.*
-                 ,        convertible           ==1.0.*
-                 ,        lens
-                 ,        MonadRandom           ==0.1.*
+                 ,        vector
+                 ,        convertible
+                 ,        lens ==3.9.*
+                 ,        MonadRandom
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
 
 executable faugere-prof
@@ -138,21 +139,21 @@ executable faugere-prof
     else
         buildable: False
     hs-source-dirs: share examples
-    build-depends:        constraints >= 0.3.4.2,
-                          algebra               ==3.1.*
-                 ,        base                  >=2.0 && <5
+    build-depends:        constraints
+                 ,        algebra
+                 ,        base
                  ,        type-natural
-                 ,        algebra               ==3.1.*
+                 ,        algebra
                  ,        computational-algebra
-                 ,        random                ==1.0.*
-                 ,        hmatrix               ==0.15.0.1
-                 ,        matrix                >= 0.2.4.0
+                 ,        random
+                 ,        hmatrix
+                 ,        matrix
                  ,        sized-vector
-                 ,        vector                ==0.10.*
-                 ,        convertible           ==1.0.*
-                 ,        lens
+                 ,        vector
+                 ,        convertible
+                 ,        lens ==3.9.*
                  ,        deepseq
-                 ,        MonadRandom           ==0.1.*
+                 ,        MonadRandom
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded -eventlog
 
 
@@ -163,34 +164,34 @@ executable sandpit-poly
     else
         buildable: False
     hs-source-dirs: share examples
-    build-depends: constraints >= 0.3.4.2,
-                   computational-algebra
+    build-depends: constraints
+                 , computational-algebra
                  , base
                  , type-natural
                  , algebra
                  , sized-vector
- 
+
 test-suite test-multi-table
-    build-depends:        constraints >= 0.3.4.2,
-                          HUnit                   ==1.2.*
-                 ,      QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      hspec                   ==1.8.*
-                 ,      lazysmallcheck          ==0.6.*
-                 ,      lens                    ==3.9.*
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      reflection              ==1.3.*
+    build-depends:        constraints
+                 ,        HUnit
+                 ,      QuickCheck
+                 ,      algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      hspec
+                 ,      lazysmallcheck
+                 ,      lens == 3.9.*
+                 ,      quickcheck-instances
+                 ,      reflection
                  ,      sized-vector
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      test-framework          ==0.8.*
-                 ,      test-framework-hunit    ==0.3.*
-                 ,      transformers            >=0.2 && <0.4
+                 ,      smallcheck      >= 1.1.1
+                 ,      tagged
+                 ,      test-framework
+                 ,      test-framework-hunit
+                 ,      transformers
                  ,      type-natural
-                 ,      vector                  ==0.10.*
+                 ,      vector
                  ,      equational-reasoning
     type: exitcode-stdio-1.0
     main-is: multi-table.hs
@@ -200,20 +201,20 @@ test-suite test-multi-table
     ghc-options: -Wall -threaded
 
 test-suite monomial-order-test
-    build-depends:        constraints >= 0.3.4.2,
-                          HUnit                   ==1.2.*
-                 ,      MonadRandom             ==0.1.*
-                 ,      QuickCheck              ==2.6.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      deepseq                 ==1.3.*
-                 ,      hspec                   ==1.8.*
+    build-depends:        constraints
+                 ,        HUnit
+                 ,      MonadRandom
+                 ,      QuickCheck
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      deepseq
+                 ,      hspec
                  ,      monomorphic
-                 ,      smallcheck              ==1.0.*
-                 ,      test-framework          ==0.8.*
-                 ,      test-framework-hunit    ==0.3.*
-                 ,      vector                  ==0.10.*
+                 ,      smallcheck
+                 ,      test-framework
+                 ,      test-framework-hunit
+                 ,      vector
                  ,      equational-reasoning
     type: exitcode-stdio-1.0
     main-is: monomials.hs
@@ -223,29 +224,29 @@ test-suite monomial-order-test
     ghc-options: -Wall -threaded
 
 test-suite linear-test
-    build-depends:        constraints >= 0.3.4.2,
-                          HUnit                   ==1.2.*
-                 ,      MonadRandom             ==0.1.*
-                 ,      QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      deepseq                 ==1.3.*
-                 ,      hspec                   ==1.8.*
-                 ,      lens                    ==3.9.*
+    build-depends:      constraints
+                 ,      HUnit
+                 ,      MonadRandom
+                 ,      QuickCheck
+                 ,      algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      deepseq
+                 ,      hspec
+                 ,      lens == 3.9.*
                  ,      monomorphic
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      reflection              ==1.3.*
+                 ,      quickcheck-instances
+                 ,      reflection
                  ,      sized-vector
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      test-framework          ==0.8.*
-                 ,      test-framework-hunit    ==0.3.*
+                 ,      smallcheck
+                 ,      tagged
+                 ,      test-framework
+                 ,      test-framework-hunit
                  ,      type-natural
-                 ,      vector                  ==0.10.*
+                 ,      vector
                  ,      equational-reasoning
-                 ,      matrix                >= 0.2.4.0
+                 ,      matrix
     type: exitcode-stdio-1.0
     main-is: linear.hs
     buildable: True
@@ -254,28 +255,28 @@ test-suite linear-test
     ghc-options: -Wall -threaded
 
 test-suite matrix-test
-    build-depends:      constraints >= 0.3.4.2,
-                        HUnit                   ==1.2.*
-                 ,      MonadRandom             ==0.1.*
-                 ,      QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      deepseq                 ==1.3.*
-                 ,      hspec                   ==1.8.*
-                 ,      lens                    ==3.9.*
+    build-depends:      constraints
+                 ,       HUnit
+                 ,      MonadRandom
+                 ,      QuickCheck
+                 ,      algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      deepseq
+                 ,      hspec
+                 ,      lens == 3.9.*
                  ,      monomorphic
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      reflection              ==1.3.*
+                 ,      quickcheck-instances
+                 ,      reflection
                  ,      sized-vector
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      test-framework          ==0.8.*
-                 ,      test-framework-hunit    ==0.3.*
+                 ,      smallcheck
+                 ,      tagged
+                 ,      test-framework
+                 ,      test-framework-hunit
                  ,      type-natural
-                 ,      vector                  ==0.10.*
-                 ,      matrix                >= 0.2.4.0
+                 ,      vector
+                 ,      matrix
                  ,      equational-reasoning
     type: exitcode-stdio-1.0
     main-is: matrix.hs
@@ -285,32 +286,32 @@ test-suite matrix-test
     ghc-options: -Wall -threaded
 
 test-suite specs
-    build-depends:        constraints >= 0.3.4.2,
-                          HUnit                   ==1.2.*
-                 ,      MonadRandom             ==0.1.*
-                 ,      QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      deepseq                 ==1.3.*
-                 ,      hspec                   ==1.8.*
-                 ,      lens                    ==3.9.*
+    build-depends:        constraints
+                 ,        HUnit
+                 ,      MonadRandom
+                 ,      QuickCheck
+                 ,      algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      deepseq
+                 ,      hspec
+                 ,      lens == 3.9.*
                  ,      monomorphic
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      reflection              ==1.3.*
+                 ,      quickcheck-instances
+                 ,      reflection
                  ,      sized-vector
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      test-framework          ==0.8.*
-                 ,      test-framework-hunit    ==0.3.*
+                 ,      smallcheck
+                 ,      tagged
+                 ,      test-framework
+                 ,      test-framework-hunit
                  ,      type-natural
-                 ,      vector                  ==0.10.*
+                 ,      vector
                  ,      equational-reasoning
-                 ,      process                 >= 1.0 && < 1.3
+                 ,      process
                  ,      text
                  ,      singletons
-                 ,      matrix                  >= 0.2.4.0
+                 ,      matrix
     type: exitcode-stdio-1.0
     main-is: Spec.hs
     buildable: True
@@ -319,29 +320,29 @@ test-suite specs
     ghc-options: -Wall -threaded
 
 test-suite new-div-test
-    build-depends:        constraints >= 0.3.4.2,
-                          HUnit                   ==1.2.*
-                 ,      MonadRandom             ==0.1.*
-                 ,      QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      deepseq                 ==1.3.*
-                 ,      hspec                   ==1.8.*
-                 ,      lens                    ==3.9.*
+    build-depends:        constraints
+                 ,        HUnit
+                 ,      MonadRandom
+                 ,      QuickCheck
+                 ,      algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      deepseq
+                 ,      hspec
+                 ,      lens == 3.9.*
                  ,      monomorphic
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      reflection              ==1.3.*
+                 ,      quickcheck-instances
+                 ,      reflection
                  ,      sized-vector
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      test-framework          ==0.8.*
-                 ,      test-framework-hunit    ==0.3.*
+                 ,      smallcheck
+                 ,      tagged
+                 ,      test-framework
+                 ,      test-framework-hunit
                  ,      type-natural
-                 ,      vector                  ==0.10.*
+                 ,      vector
                  ,      equational-reasoning
-                 ,      matrix                  >= 0.2.4.0
+                 ,      matrix
 
     type: exitcode-stdio-1.0
     main-is: division.hs
@@ -351,19 +352,19 @@ test-suite new-div-test
     ghc-options: -Wall -threaded
 
 benchmark normal-bench
-    build-depends:              constraints >= 0.3.4.2,
-                                algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      criterion               ==0.8.*
-                 ,      deepseq                 ==1.3.*
-                 ,      parallel                ==3.2.*
+    build-depends:      constraints
+                 ,      algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      criterion   == 0.8.*
+                 ,      deepseq
+                 ,      parallel
                  ,      process
                  ,      singletons
                  ,      type-natural
-                 ,      vector                  ==0.10.*
-                 ,      matrix                  >= 0.2.4.0
+                 ,      vector
+                 ,      matrix
 
     type: exitcode-stdio-1.0
     main-is: bench.hs
@@ -373,19 +374,19 @@ benchmark normal-bench
     ghc-options: -O2 -threaded
 
 benchmark elimination-bench
-    build-depends:              constraints >= 0.3.4.2,
-                                algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      criterion               ==0.8.*
-                 ,      deepseq                 ==1.3.*
-                 ,      parallel                ==3.2.*
+    build-depends:              constraints
+                 ,              algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      criterion
+                 ,      deepseq
+                 ,      parallel
                  ,      process
                  ,      singletons
                  ,      type-natural
-                 ,      vector                  ==0.10.*
-                 ,      matrix                  >= 0.2.4.0
+                 ,      vector
+                 ,      matrix
     type: exitcode-stdio-1.0
     main-is: elimination-bench.hs
     buildable: False
@@ -394,27 +395,27 @@ benchmark elimination-bench
     ghc-options: -O2 -threaded
 
 benchmark quotient-bench-randomized
-    build-depends:              constraints >= 0.3.4.2,
-                                QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      criterion               ==0.8.*
-                 ,      deepseq                 ==1.3.*
-                 ,      lens                    ==3.9.*
-                 ,      parallel                ==3.2.*
+    build-depends:              constraints
+                 ,              QuickCheck
+                 ,      algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      criterion
+                 ,      deepseq
+                 ,      lens
+                 ,      parallel
                  ,      process
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      reflection              ==1.3.*
+                 ,      quickcheck-instances
+                 ,      reflection
                  ,      singletons
-                 ,      sized-vector            >=1.2.0.0
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      transformers            >=0.2 && <0.4
-                 ,      type-natural            >=0.0.5.0
-                 ,      vector                  ==0.10.*
-                 ,      matrix                  >= 0.2.4.0
+                 ,      sized-vector
+                 ,      smallcheck
+                 ,      tagged
+                 ,      transformers
+                 ,      type-natural
+                 ,      vector
+                 ,      matrix
                  ,      equational-reasoning
                  ,      monomorphic
     type: exitcode-stdio-1.0
@@ -425,29 +426,29 @@ benchmark quotient-bench-randomized
     ghc-options: -O2 -threaded -rtsopts
 
 benchmark monomial-order-bench
-    build-depends:              constraints >= 0.3.4.2,
-                                QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      criterion               ==0.8.*
-                 ,      deepseq                 ==1.3.*
-                 ,      lens                    ==3.9.*
+    build-depends:              constraints
+                 ,              QuickCheck
+                 ,      algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      criterion
+                 ,      deepseq
+                 ,      lens
                  ,      monomorphic
-                 ,      parallel                ==3.2.*
+                 ,      parallel
                  ,      process
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      random                  ==1.0.*
-                 ,      reflection              ==1.3.*
+                 ,      quickcheck-instances
+                 ,      random
+                 ,      reflection
                  ,      singletons
-                 ,      sized-vector            >=1.2.0.0
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      transformers            >=0.2 && <0.4
-                 ,      type-natural            >=0.0.5.0
-                 ,      vector                  ==0.10.*
-                 ,      matrix                  >= 0.2.4.0
+                 ,      sized-vector
+                 ,      smallcheck
+                 ,      tagged
+                 ,      transformers
+                 ,      type-natural
+                 ,      vector
+                 ,      matrix
     type: exitcode-stdio-1.0
     main-is: monomials.hs
     buildable: True
@@ -456,32 +457,32 @@ benchmark monomial-order-bench
     ghc-options: -O2 -threaded -rtsopts
 
 benchmark linear-bench
-    build-depends:              constraints >= 0.3.4.2,
-                                HUnit                   ==1.2.*
-                 ,      MonadRandom             ==0.1.*
-                 ,      QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      criterion               ==0.8.*
-                 ,      deepseq                 ==1.3.*
-                 ,      hspec                   ==1.8.*
-                 ,      lens                    ==3.9.*
+    build-depends:              constraints
+                 ,              HUnit
+                 ,      MonadRandom
+                 ,      QuickCheck
+                 ,      algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      criterion
+                 ,      deepseq
+                 ,      hspec
+                 ,      lens
                  ,      monomorphic
-                 ,      parallel                ==3.2.*
+                 ,      parallel
                  ,      process
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      reflection              ==1.3.*
-                 ,      sized-vector            >=1.2.0.0
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      test-framework          ==0.8.*
-                 ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            >=0.0.5.0
-                 ,      vector                  ==0.10.*
+                 ,      quickcheck-instances
+                 ,      reflection
+                 ,      sized-vector
+                 ,      smallcheck
+                 ,      tagged
+                 ,      test-framework
+                 ,      test-framework-hunit
+                 ,      type-natural
+                 ,      vector
                  ,      equational-reasoning
-                 ,      matrix                  >= 0.2.4.0
+                 ,      matrix
                  ,      monomorphic
     type: exitcode-stdio-1.0
     main-is: linear.hs
@@ -491,32 +492,32 @@ benchmark linear-bench
     ghc-options: -Wall -threaded
 
 benchmark division-bench
-    build-depends:              constraints >= 0.3.4.2,
-                                HUnit                   ==1.2.*
-                 ,      MonadRandom             ==0.1.*
-                 ,      QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      criterion               ==0.8.*
-                 ,      deepseq                 ==1.3.*
-                 ,      hspec                   > 1.8.0
-                 ,      lens                    ==3.9.*
+    build-depends:              constraints
+                 ,              HUnit
+                 ,      MonadRandom
+                 ,      QuickCheck
+                 ,      algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      criterion
+                 ,      deepseq
+                 ,      hspec
+                 ,      lens
                  ,      monomorphic
-                 ,      parallel                ==3.2.*
+                 ,      parallel
                  ,      process
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      reflection              ==1.3.*
-                 ,      sized-vector            >=1.2.0.0
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      test-framework          ==0.8.*
-                 ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            >=0.0.5.0
-                 ,      vector                  ==0.10.*
+                 ,      quickcheck-instances
+                 ,      reflection
+                 ,      sized-vector
+                 ,      smallcheck
+                 ,      tagged
+                 ,      test-framework
+                 ,      test-framework-hunit
+                 ,      type-natural
+                 ,      vector
                  ,      equational-reasoning
-                 ,      matrix                  >= 0.2.4.0
+                 ,      matrix
                  ,      monomorphic
     type: exitcode-stdio-1.0
     main-is: division.hs
@@ -526,32 +527,32 @@ benchmark division-bench
     ghc-options: -Wall -threaded
 
 benchmark sugar-paper-bench
-    build-depends:              constraints >= 0.3.4.2,
-                                HUnit                   ==1.2.*
-                 ,      MonadRandom             ==0.1.*
-                 ,      QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      criterion               ==0.8.*
-                 ,      deepseq                 ==1.3.*
-                 ,      hspec                   > 1.8.0
-                 ,      lens                    ==3.9.*
+    build-depends:              constraints
+                 ,              HUnit
+                 ,      MonadRandom
+                 ,      QuickCheck
+                 ,      algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      criterion
+                 ,      deepseq
+                 ,      hspec
+                 ,      lens
                  ,      monomorphic
-                 ,      parallel                ==3.2.*
+                 ,      parallel
                  ,      process
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      reflection              ==1.3.*
-                 ,      sized-vector            >=1.2.0.0
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      test-framework          ==0.8.*
-                 ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            >=0.0.5.0
-                 ,      vector                  ==0.10.*
+                 ,      quickcheck-instances
+                 ,      reflection
+                 ,      sized-vector
+                 ,      smallcheck
+                 ,      tagged
+                 ,      test-framework
+                 ,      test-framework-hunit
+                 ,      type-natural
+                 ,      vector
                  ,      equational-reasoning
-                 ,      matrix                  >= 0.2.4.0
+                 ,      matrix
                  ,      monomorphic
     type: exitcode-stdio-1.0
     main-is: sugar-paper.hs
@@ -561,34 +562,34 @@ benchmark sugar-paper-bench
     ghc-options: -Wall -threaded
 
 benchmark solve-bench
-    build-depends:              constraints >= 0.3.4.2,
-                                HUnit                   ==1.2.*
-                 ,      MonadRandom             ==0.1.*
-                 ,      QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      criterion               ==0.8.*
-                 ,      deepseq                 ==1.3.*
-                 ,      hspec                   > 1.8.0
-                 ,      lens                    ==3.9.*
+    build-depends:              constraints
+                 ,              HUnit
+                 ,      MonadRandom
+                 ,      QuickCheck
+                 ,      algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      criterion
+                 ,      deepseq
+                 ,      hspec
+                 ,      lens
                  ,      monomorphic
-                 ,      parallel                ==3.2.*
+                 ,      parallel
                  ,      process
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      reflection              ==1.3.*
-                 ,      sized-vector            >=1.2.0.0
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      test-framework          ==0.8.*
-                 ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            >=0.0.5.0
-                 ,      vector                  ==0.10.*
-                 ,      random                  ==1.0.*
-                 ,      progression             ==0.5.*
+                 ,      quickcheck-instances
+                 ,      reflection
+                 ,      sized-vector
+                 ,      smallcheck
+                 ,      tagged
+                 ,      test-framework
+                 ,      test-framework-hunit
+                 ,      type-natural
+                 ,      vector
+                 ,      random
+                 ,      progression
                  ,      equational-reasoning
-                 ,      matrix                  >= 0.2.4.0
+                 ,      matrix
     type: exitcode-stdio-1.0
     main-is: solve.hs
     buildable: True
@@ -597,34 +598,34 @@ benchmark solve-bench
     ghc-options: -Wall -threaded
 
 benchmark coercion-bench
-    build-depends:              constraints >= 0.3.4.2,
-                                HUnit                   ==1.2.*
-                 ,      MonadRandom             ==0.1.*
-                 ,      QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      criterion               ==0.8.*
-                 ,      deepseq                 ==1.3.*
-                 ,      hspec                   > 1.8.0
-                 ,      lens                    ==3.9.*
+    build-depends:              constraints
+                 ,               HUnit
+                 ,      MonadRandom
+                 ,      QuickCheck
+                 ,      algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      criterion
+                 ,      deepseq
+                 ,      hspec
+                 ,      lens
                  ,      monomorphic
-                 ,      parallel                ==3.2.*
+                 ,      parallel
                  ,      process
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      reflection              ==1.3.*
-                 ,      sized-vector            >=1.2.0.0
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      test-framework          ==0.8.*
-                 ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            >=0.0.5.0
-                 ,      vector                  ==0.10.*
-                 ,      random                  ==1.0.*
-                 ,      progression             ==0.5.*
+                 ,      quickcheck-instances
+                 ,      reflection
+                 ,      sized-vector
+                 ,      smallcheck
+                 ,      tagged
+                 ,      test-framework
+                 ,      test-framework-hunit
+                 ,      type-natural
+                 ,      vector
+                 ,      random
+                 ,      progression
                  ,      equational-reasoning
-                 ,      matrix                  >= 0.2.4.0
+                 ,      matrix
     type: exitcode-stdio-1.0
     main-is: coercion.hs
     buildable: True
@@ -633,33 +634,32 @@ benchmark coercion-bench
     ghc-options: -Wall -threaded -fcontext-stack=1000
 
 benchmark faugere4-bench
-    build-depends:              constraints >= 0.3.4.2,
-                                HUnit                   ==1.2.*
-                 ,      MonadRandom             ==0.1.*
-                 ,      QuickCheck              ==2.6.*
-                 ,      algebra                 ==3.1.*
-                 ,      base                    >=2.0 && <5
-                 ,      computational-algebra   -any
-                 ,      containers              >=0.4 && <0.6
-                 ,      criterion               ==0.8.*
-                 ,      deepseq                 ==1.3.*
-                 ,      hspec                   > 1.8.0
-                 ,      lens                    ==3.9.*
+    build-depends:              constraints
+                 ,              HUnit
+                 ,      QuickCheck
+                 ,      algebra
+                 ,      base
+                 ,      computational-algebra
+                 ,      containers
+                 ,      criterion
+                 ,      deepseq
+                 ,      hspec
+                 ,      lens
                  ,      monomorphic
-                 ,      parallel                ==3.2.*
+                 ,      parallel
                  ,      process
-                 ,      quickcheck-instances    ==0.3.*
-                 ,      reflection              ==1.3.*
-                 ,      sized-vector            >=1.2.0.0
-                 ,      smallcheck              ==1.0.*
-                 ,      tagged                  ==0.6.*
-                 ,      test-framework          ==0.8.*
-                 ,      test-framework-hunit    ==0.3.*
-                 ,      type-natural            >=0.0.5.0
-                 ,      vector                  ==0.10.*
-                 ,      random                  ==1.0.*
+                 ,      quickcheck-instances
+                 ,      reflection
+                 ,      sized-vector
+                 ,      smallcheck
+                 ,      tagged
+                 ,      test-framework
+                 ,      test-framework-hunit
+                 ,      type-natural
+                 ,      vector
+                 ,      random
                  ,      equational-reasoning
-                 ,      matrix                  >= 0.2.4.0
+                 ,      matrix
     type: exitcode-stdio-1.0
     main-is: faugere4.hs
     buildable: True
