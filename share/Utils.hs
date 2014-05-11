@@ -56,11 +56,11 @@ instance (Ord k, Serial m k, Serial m v) => Serial m (M.Map k v) where
 instance Serial m (Monomial n) => Serial m (OrderedMonomial ord n) where
   series = newtypeCons OrderedMonomial
 
-instance (Eq r, NoetherianRing r, SingI n, IsMonomialOrder ord, Serial m r, Serial m (Monomial n))
+instance (Eq r, Noetherian r, SingI n, IsMonomialOrder ord, Serial m r, Serial m (Monomial n))
           => Serial m (OrderedPolynomial r ord n) where
   series = cons2 (curry toPolynomial) \/ cons2 (NA.+)
 
-instance (Num r, Ord r, NoetherianRing r, Serial m r) => Serial m (Ideal r) where
+instance (Num r, Ord r, Noetherian r, Serial m r) => Serial m (Ideal r) where
   series = newtypeCons toIdeal
 
 appendLM :: Rational -> Monomial Two -> Polynomial Rational Two -> Polynomial Rational Two
@@ -101,13 +101,13 @@ instance (SingI n, IsOrder ord)
       => Arbitrary (OrderedPolynomial Rational ord n) where
   arbitrary = polynomial . M.fromList <$> listOf1 ((,) <$> arbitrary <*> arbitraryRational)
 
-instance (Ord r, NoetherianRing r, Arbitrary r, Num r) => Arbitrary (Ideal r) where
+instance (Ord r, Noetherian r, Arbitrary r, Num r) => Arbitrary (Ideal r) where
   arbitrary = toIdeal . map QC.getNonZero . QC.getNonEmpty <$> arbitrary
 
 instance (SingI n) => Arbitrary (ZeroDimIdeal n) where
   arbitrary = zeroDimG
 
-instance (NA.Field r, NoetherianRing r, Reifies ideal (QIdeal r ord n)
+instance (NA.Field r, Noetherian r, Reifies ideal (QIdeal r ord n)
          , Arbitrary (OrderedPolynomial r ord n)
          , IsMonomialOrder ord, SingI n, Eq r)
     => Arbitrary (Quotient r ord n ideal) where
@@ -207,6 +207,6 @@ unaryPoly arity mth = do
 checkForArity :: [Int] -> (forall n. SingI (n :: Nat) => Sing n -> Property) -> Property
 checkForArity as test = forAll (QC.elements as) $ liftSNat test
 
-stdReduced :: (Eq r, Num r, SingI n, NA.Division r, NoetherianRing r, IsMonomialOrder order)
+stdReduced :: (Eq r, Num r, SingI n, NA.Division r, Noetherian r, IsMonomialOrder order)
            => [OrderedPolynomial r order n] -> [OrderedPolynomial r order n]
 stdReduced ps = sortBy (comparing leadingMonomial) $ map (\f -> injectCoeff (NA.recip $ leadingCoeff f) * f) ps

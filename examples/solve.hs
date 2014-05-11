@@ -92,13 +92,13 @@ mat = fromCols $ take 4 vs
 fromCols :: [V.Vector a] -> M.Matrix a
 fromCols = foldr1 (M.<|>) . map M.colVector
 
-findUnivar :: (NoetherianRing r, Eq r, IsOrder ord, SingI n) => OrderedPolynomial r ord n -> Maybe (Ordinal n)
+findUnivar :: (Noetherian r, Eq r, IsOrder ord, SingI n) => OrderedPolynomial r ord n -> Maybe (Ordinal n)
 findUnivar poly =
   let os = enumOrdinal (sArity poly)
       ms = map snd $ getTerms poly
   in find (\a -> all (`isPowerOf` (leadingMonomial (var a `asTypeOf` poly))) ms) os
 
-toCoeffList :: (Eq r, SingI n, NoetherianRing r, IsOrder ord) => Ordinal n -> OrderedPolynomial r ord n -> [r]
+toCoeffList :: (Eq r, SingI n, Noetherian r, IsOrder ord) => Ordinal n -> OrderedPolynomial r ord n -> [r]
 toCoeffList on f =
   let v = var on  `asTypeOf` f
   in [ coeff (leadingMonomial $ v ^^ i) f | i <- [0.. fromIntegral (totalDegree' f)]]

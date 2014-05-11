@@ -289,7 +289,7 @@ instance (Eq (Monomial n), IsOrder name) => Ord (OrderedMonomial name n) where
 instance (Eq (Monomial n)) => Ord (Monomial n) where
   compare = grevlex
 
-deriving instance (SingI n, IsOrder ord, NoetherianRing r, Ord r, Ord (OrderedMonomial ord n))
+deriving instance (SingI n, IsOrder ord, Noetherian r, Ord r, Ord (OrderedMonomial ord n))
                => Ord (OrderedPolynomial r ord n)
 
 -- | n-ary polynomial ring over some noetherian ring R.
@@ -297,13 +297,13 @@ newtype OrderedPolynomial r order n = Polynomial { terms :: Map (OrderedMonomial
 type Polynomial r = OrderedPolynomial r Grevlex
 
 -- | Type-level constraint to check whether it forms polynomial ring or not.
-type IsPolynomial r n = (NoetherianRing r, SingI n, Eq r)
+type IsPolynomial r n = (Noetherian r, SingI n, Eq r)
 
 -- | coefficient for a degree.
 coeff :: (IsOrder order, IsPolynomial r n) => OrderedMonomial order n -> OrderedPolynomial r order n -> r
 coeff d = M.findWithDefault zero d . terms
 
-instance (SingI n, Eq r, NoetherianRing r, NoetherianRing q, IsOrder order', SingI m, Eq q, IsOrder order)
+instance (SingI n, Eq r, Noetherian r, Noetherian q, IsOrder order', SingI m, Eq q, IsOrder order)
          => Wrapped (Map (OrderedMonomial order n) r) (Map (OrderedMonomial order' m) q)
                     (OrderedPolynomial r order n)     (OrderedPolynomial q order' m) where
     wrapped = iso polynomial terms
@@ -323,7 +323,7 @@ scastPolynomial :: (IsOrder o, IsOrder o', IsPolynomial r n, IsPolynomial r m, n
                 => SNat m -> OrderedPolynomial r o n -> OrderedPolynomial r o' m
 scastPolynomial _ = castPolynomial
 
-mapCoeff :: (SingI n, NoetherianRing b, Eq b, IsOrder ord)
+mapCoeff :: (SingI n, Noetherian b, Eq b, IsOrder ord)
          => (a -> b) -> OrderedPolynomial a ord n -> OrderedPolynomial b ord n
 mapCoeff f (Polynomial dic) = polynomial $ M.map f dic
 
@@ -338,18 +338,18 @@ instance (Eq r, IsOrder order, IsPolynomial r n) => Eq (OrderedPolynomial r orde
 injectCoeff :: (IsPolynomial r n) => r -> OrderedPolynomial r order n
 injectCoeff r = Polynomial $ M.singleton (OrderedMonomial $ fromList sing []) r
 
-(>*) :: (IsMonomialOrder ord, NoetherianRing r, Eq r, SingI n)
+(>*) :: (IsMonomialOrder ord, Noetherian r, Eq r, SingI n)
      => OrderedMonomial ord n -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n
 m >* f = toPolynomial (one, m) * f
 
-(*<) :: (IsMonomialOrder ord, NoetherianRing r, Eq r, SingI n)
+(*<) :: (IsMonomialOrder ord, Noetherian r, Eq r, SingI n)
      => OrderedPolynomial r ord n -> OrderedMonomial ord n -> OrderedPolynomial r ord n
 (*<) = flip (>*)
 
 infixl 7 *<, >*
 
 -- | By Hilbert's finite basis theorem, a polynomial ring over a noetherian ring is also a noetherian ring.
-instance (IsOrder order, IsPolynomial r n) => NoetherianRing (OrderedPolynomial r order n) where
+instance (IsOrder order, IsPolynomial r n) => Noetherian (OrderedPolynomial r order n) where
 instance (IsOrder order, IsPolynomial r n) => Ring (OrderedPolynomial r order n) where
 instance (IsOrder order, IsPolynomial r n) => Rig (OrderedPolynomial r order n) where
 instance (IsOrder order, IsPolynomial r n) => Group (OrderedPolynomial r order n) where
@@ -387,7 +387,7 @@ instance (Eq r, IsPolynomial r n, IsOrder order, Show r) => Show (OrderedPolynom
 instance (SingI n, IsOrder order) => Show (OrderedPolynomial Rational order n) where
   show = showPolynomialWith False [(n, "X_"++ show n) | n <- [0..]] showRational
 
-showPolynomialWithVars :: (Eq a, Show a, SingI n, NoetherianRing a, IsOrder ordering)
+showPolynomialWithVars :: (Eq a, Show a, SingI n, Noetherian a, IsOrder ordering)
                        => [(Int, String)] -> OrderedPolynomial a ordering n -> String
 showPolynomialWithVars dic p0@(Polynomial d)
     | p0 == zero = "0"
@@ -418,7 +418,7 @@ showRational r | r == 0    = Zero
     formatRat q | denominator q == 1 = show $ numerator q
                 | otherwise          = show (numerator q) ++ "/" ++ show (denominator q) ++ " "
 
-showPolynomialWith  :: (Eq a, Show a, SingI n, NoetherianRing a, IsOrder ordering)
+showPolynomialWith  :: (Eq a, Show a, SingI n, Noetherian a, IsOrder ordering)
                     => Bool -> [(Int, String)] -> (a -> Coefficient) -> OrderedPolynomial a ordering n -> String
 showPolynomialWith useAst vDic showCoeff p0@(Polynomial d)
     | p0 == zero = "0"
@@ -467,10 +467,10 @@ instance (IsMonomialOrder order, IsPolynomial r n, Num r) => Num (OrderedPolynom
   abs = id
   negate = ((P.negate 1 :: Integer) .*)
 
-varX :: (Eq r, NoetherianRing r, SingI n, IsOrder order) => OrderedPolynomial r order (S n)
+varX :: (Eq r, Noetherian r, SingI n, IsOrder order) => OrderedPolynomial r order (S n)
 varX = var OZ
 
-var :: (Eq r, NoetherianRing r, SingI m, IsOrder order) => Ordinal m -> OrderedPolynomial r order m
+var :: (Eq r, Noetherian r, SingI m, IsOrder order) => Ordinal m -> OrderedPolynomial r order m
 var vIndex = polynomial $ M.singleton (OrderedMonomial $ varMonom vIndex) one
 
 varMonom :: forall n. SingI n => Ordinal n -> Monomial n
@@ -486,7 +486,7 @@ varMonom (OS n) =
 toPolynomial :: (IsOrder order, IsPolynomial r n) => (r, OrderedMonomial order n) -> OrderedPolynomial r order n
 toPolynomial (c, deg) = polynomial $ M.singleton deg c
 
-polynomial :: (SingI n, Eq r, NoetherianRing r, IsOrder order) => Map (OrderedMonomial order n) r -> OrderedPolynomial r order n
+polynomial :: (SingI n, Eq r, Noetherian r, IsOrder order) => Map (OrderedMonomial order n) r -> OrderedPolynomial r order n
 polynomial dic = normalize $ Polynomial dic
 
 leadingTerm :: (IsOrder order, IsPolynomial r n)
@@ -550,7 +550,7 @@ allVars :: forall k ord n . (IsOrder ord, IsPolynomial k n)
 allVars = V.unsafeFromList' $ genVars (sing :: SNat n)
 
 -- | Partially difference at (m+1)-th variable
-diff :: forall n ord r. (Eq r, Ring r, SingI n, NoetherianRing r, IsMonomialOrder ord)
+diff :: forall n ord r. (Eq r, Ring r, SingI n, Noetherian r, IsMonomialOrder ord)
      => Ordinal n -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n
 diff mthVar = unwrapped %~ M.mapKeysWith (+) (unwrapped %~ dropDegree)
                          . M.mapMaybeWithKey (\k c -> if (V.sIndex mthVar (getMonomial k) > 0)
@@ -578,11 +578,11 @@ changeMonomialOrderProxy :: Proxy o' -> OrderedMonomial ord n -> OrderedMonomial
 changeMonomialOrderProxy _ = OrderedMonomial . getMonomial
 
 
-changeOrder :: (Eq k, NoetherianRing k, Eq (Monomial n), IsOrder o, IsOrder o',  SingI n)
+changeOrder :: (Eq k, Noetherian k, Eq (Monomial n), IsOrder o, IsOrder o',  SingI n)
             => o' -> OrderedPolynomial k o n -> OrderedPolynomial k o' n
 changeOrder _ = unwrapped %~ M.mapKeys (OrderedMonomial . getMonomial)
 
-changeOrderProxy :: (Eq k, NoetherianRing k, Eq (Monomial n), IsOrder o, IsOrder o',  SingI n)
+changeOrderProxy :: (Eq k, Noetherian k, Eq (Monomial n), IsOrder o, IsOrder o',  SingI n)
             => Proxy o' -> OrderedPolynomial k o n -> OrderedPolynomial k o' n
 changeOrderProxy _ = unwrapped %~ M.mapKeys (OrderedMonomial . getMonomial)
 

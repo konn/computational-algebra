@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, TypeSynonymInstances #-}
 {-# LANGUAGE UndecidableInstances                                           #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Algebra.Ring.Noetherian ( NoetherianRing, Ideal(..), addToIdeal, toIdeal, appendIdeal
+module Algebra.Ring.Noetherian ( Noetherian, Ideal(..), addToIdeal, toIdeal, appendIdeal
                                , generators, filterIdeal, mapIdeal, principalIdeal) where
 import           Control.DeepSeq
 import qualified Data.Complex            as C
@@ -17,15 +17,15 @@ import           Prelude                 hiding (negate, subtract, (*), (+),
                                           (-))
 import qualified Prelude                 as P
 
-class (Commutative r, Ring r) => NoetherianRing r where
+class (Commutative r, Ring r) => Noetherian r where
 
-instance NoetherianRing Int where
+instance Noetherian Int where
 
-instance NoetherianRing Integer where
+instance Noetherian Integer where
 
-instance (Commutative (NA.Complex r), Ring (NA.Complex r)) => NoetherianRing (NA.Complex r) where
-instance (Commutative (C.Complex r), Ring (C.Complex r)) => NoetherianRing (C.Complex r) where
-instance Integral n => NoetherianRing (Ratio n)
+instance (Commutative (NA.Complex r), Ring (NA.Complex r)) => Noetherian (NA.Complex r) where
+instance (Commutative (C.Complex r), Ring (C.Complex r)) => Noetherian (C.Complex r) where
+instance Integral n => Noetherian (Ratio n)
 
 instance Integral n => InvolutiveMultiplication (Ratio n) where
   adjoint = id
@@ -106,7 +106,7 @@ addToIdeal i (Ideal is)
 
 infixr `addToIdeal`
 
-toIdeal :: (Eq r, NoetherianRing r) => [r] -> Ideal r
+toIdeal :: (Eq r, Noetherian r) => [r] -> Ideal r
 toIdeal = foldr addToIdeal (Ideal Nil)
 
 appendIdeal :: Ideal r -> Ideal r -> Ideal r
@@ -115,7 +115,7 @@ appendIdeal (Ideal is) (Ideal js) = Ideal (is `V.append` js)
 generators :: Ideal r -> [r]
 generators (Ideal is) = V.toList is
 
-filterIdeal :: (Eq r, NoetherianRing r) => (r -> Bool) -> Ideal r -> Ideal r
+filterIdeal :: (Eq r, Noetherian r) => (r -> Bool) -> Ideal r -> Ideal r
 filterIdeal p (Ideal i) = V.foldr (\h -> if p h then addToIdeal h else id) (toIdeal []) i
 
 principalIdeal :: r -> Ideal r

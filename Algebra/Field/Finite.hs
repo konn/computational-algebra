@@ -26,7 +26,7 @@ asProxyOf = const
 reifyMod :: Int -> (forall p. Reifies p Int => F p) -> Int
 reifyMod p a = reify p (runF . asProxyOf a)
 -}
-instance Reifies p Int => NoetherianRing (F p)
+instance Reifies p Int => Noetherian (F p)
 
 instance Reifies p Int => Eq (F p) where
   n == m = runF n `mod` reflect n == runF m `mod` reflect n

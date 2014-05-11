@@ -92,7 +92,7 @@ instance HasName k => HasName (Complex k) where
   name cx = name (unComplexify cx) ++ "(i)"
 
 instance ( IsOrder ord, DecidableZero k, DecidableUnits k
-         , NoetherianRing k, SingI n, HasName ord, HasName k, Show k) => Show (RingData k ord n) where
+         , Noetherian k, SingI n, HasName ord, HasName k, Show k) => Show (RingData k ord n) where
   show (Ring field vs ord mideal) = maybe id (\j -> (++ ("/" ++ showIdeal j))) mideal ringS
     where
       ringS = concat [name field, "[", intercalate "," $ V.toList vs , "] (", name ord, ")"]
@@ -113,7 +113,7 @@ ring r = [ido| do
   ireturn r
   |]
 
-qring :: ( Eq k, DecidableZero k, DecidableUnits k, Division k, SingI n, NoetherianRing k
+qring :: ( Eq k, DecidableZero k, DecidableUnits k, Division k, SingI n, Noetherian k
          , IsMonomialOrder ord, IxMonadState m)
       => Ideal (OrderedPolynomial k ord n) -> m (Environment k ord n) (Environment k ord n) (Environment k ord n)
 qring ideal = [ido| do
@@ -121,7 +121,7 @@ qring ideal = [ido| do
   iget
  |]
 
-vars :: (DecidableZero k, DecidableUnits k, NoetherianRing k, IsOrder o, IxMonadState m)
+vars :: (DecidableZero k, DecidableUnits k, Noetherian k, IsOrder o, IxMonadState m)
      => m (Environment k1 ord (S n)) (Environment k1 ord (S n)) [OrderedPolynomial k o (S n)]
 vars = [ido| do
   vs <- igets (_variables . _baseRing)

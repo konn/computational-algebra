@@ -23,7 +23,7 @@ import           Prelude                 (fromRational)
 (^^) :: Division r => r -> Integer -> r
 (^^) = (NA.^)
 
-(%) :: (Eq r, Division r, SingI n, NoetherianRing r)
+(%) :: (Eq r, Division r, SingI n, Noetherian r)
     => r -> r -> OrderedPolynomial r order n
 n % m = injectCoeff (n / m)
 infixl 7 %

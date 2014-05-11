@@ -22,7 +22,7 @@ data Variable = Variable { varName  :: Char
                          , varIndex :: Maybe Int
                          } deriving (Eq, Ord)
 
-instance (Eq r, NoetherianRing r, Num r) => Num (Polynomial r) where
+instance (Eq r, Noetherian r, Num r) => Num (Polynomial r) where
   fromInteger n = Polynomial $ M.singleton M.empty $ fromInteger n
   (+) = (NA.+)
   (*) = (NA.*)
@@ -50,37 +50,37 @@ normalize (Polynomial dic) =
 normalizeMonom :: Monomial -> Monomial
 normalizeMonom = M.filter (/= 0)
 
-instance (Eq r, NoetherianRing r) => NoetherianRing (Polynomial r)
-instance (Eq r, NoetherianRing r) => NA.Commutative (Polynomial r)
-instance (Eq r, NoetherianRing r) => NA.Multiplicative (Polynomial r) where
+instance (Eq r, Noetherian r) => Noetherian (Polynomial r)
+instance (Eq r, Noetherian r) => NA.Commutative (Polynomial r)
+instance (Eq r, Noetherian r) => NA.Multiplicative (Polynomial r) where
   Polynomial (M.toList -> d1) *  Polynomial (M.toList -> d2) =
     let dic = [ (M.unionWith (+) a b, r NA.* r') | (a, r) <- d1, (b, r') <- d2 ]
     in normalize $ Polynomial $ M.fromListWith (NA.+) dic
 
-instance (Eq r, NoetherianRing r) => NA.Ring (Polynomial r)
-instance (Eq r, NoetherianRing r) => NA.Group (Polynomial r) where
+instance (Eq r, Noetherian r) => NA.Ring (Polynomial r)
+instance (Eq r, Noetherian r) => NA.Group (Polynomial r) where
   negate (Polynomial dic) = Polynomial $ fmap NA.negate dic
-instance (Eq r, NoetherianRing r) => NA.Rig (Polynomial r)
-instance (Eq r, NoetherianRing r) => NA.Unital (Polynomial r) where
+instance (Eq r, Noetherian r) => NA.Rig (Polynomial r)
+instance (Eq r, Noetherian r) => NA.Unital (Polynomial r) where
   one = Polynomial $ M.singleton M.empty NA.one
-instance (Eq r, NoetherianRing r) => NA.Monoidal (Polynomial r) where
+instance (Eq r, Noetherian r) => NA.Monoidal (Polynomial r) where
   zero = Polynomial $ M.singleton M.empty NA.zero
-instance (Eq r, NoetherianRing r) => NA.LeftModule NA.Natural (Polynomial r) where
+instance (Eq r, Noetherian r) => NA.LeftModule NA.Natural (Polynomial r) where
   n .* Polynomial dic = Polynomial $ fmap (n NA..*) dic  
-instance (Eq r, NoetherianRing r) => NA.RightModule NA.Natural (Polynomial r) where
+instance (Eq r, Noetherian r) => NA.RightModule NA.Natural (Polynomial r) where
   (*.) = flip (NA..*)
-instance (Eq r, NoetherianRing r) => NA.LeftModule Integer (Polynomial r) where
+instance (Eq r, Noetherian r) => NA.LeftModule Integer (Polynomial r) where
   n .* Polynomial dic = Polynomial $ fmap (n NA..*) dic  
-instance (Eq r, NoetherianRing r) => NA.RightModule Integer (Polynomial r) where
+instance (Eq r, Noetherian r) => NA.RightModule Integer (Polynomial r) where
   (*.) = flip (NA..*)
-instance (Eq r, NoetherianRing r) => NA.Semiring (Polynomial r)
-instance (Eq r, NoetherianRing r) => NA.Abelian (Polynomial r)
-instance (Eq r, NoetherianRing r) => NA.Additive (Polynomial r) where
+instance (Eq r, Noetherian r) => NA.Semiring (Polynomial r)
+instance (Eq r, Noetherian r) => NA.Abelian (Polynomial r)
+instance (Eq r, Noetherian r) => NA.Additive (Polynomial r) where
   (Polynomial f) + (Polynomial g) = normalize $ Polynomial $ M.unionWith (NA.+) f g
 
-instance (NoetherianRing r, Eq r) => NA.LeftModule (Scalar r) (Polynomial r) where
+instance (Noetherian r, Eq r) => NA.LeftModule (Scalar r) (Polynomial r) where
   Scalar r .* Polynomial dic = normalize $ Polynomial $ fmap (r NA.*) dic
-instance (NoetherianRing r, Eq r) => NA.RightModule (Scalar r) (Polynomial r) where
+instance (Noetherian r, Eq r) => NA.RightModule (Scalar r) (Polynomial r) where
   Polynomial dic *. Scalar r = normalize $ Polynomial $ fmap (r NA.*) dic
 
 buildVarsList :: Polynomial r -> [Variable]
@@ -109,10 +109,10 @@ data PolynomialSetting r = PolySetting { dimension :: Monomorphic (Sing :: Nat -
 instance (Integral a, Show a) => Show (Polynomial (Ratio a)) where
   show = showRatPolynomial
 
-instance (Eq r, NoetherianRing r, Show r) => Show (Polynomial r) where
+instance (Eq r, Noetherian r, Show r) => Show (Polynomial r) where
   show = showPolynomial
 
-instance (Eq r, NoetherianRing r, Poly.IsMonomialOrder ord)
+instance (Eq r, Noetherian r, Poly.IsMonomialOrder ord)
     => Monomorphicable (Poly.OrderedPolynomial r ord) where
   type MonomorphicRep (Poly.OrderedPolynomial r ord) = PolynomialSetting r
   promote PolySetting{..} =
@@ -131,7 +131,7 @@ instance (Eq r, NoetherianRing r, Poly.IsMonomialOrder ord)
     where
       toMonom = M.fromList . zip (Variable 'X' Nothing : [Variable 'X' (Just i) | i <- [1..]])
 
-uniformlyPromoteWithDim :: (Eq r, NoetherianRing r)
+uniformlyPromoteWithDim :: (Eq r, Noetherian r)
                         => Poly.IsMonomialOrder ord
                  => Int -> [Polynomial r] -> Monomorphic (Ideal :.: Poly.OrderedPolynomial r ord)
 uniformlyPromoteWithDim d ps  =
@@ -142,25 +142,25 @@ uniformlyPromoteWithDim d ps  =
   where
     vars = nub $ sort $ concatMap buildVarsList ps
 
-uniformlyPromote :: (Eq r, NoetherianRing r, Poly.IsMonomialOrder ord)
+uniformlyPromote :: (Eq r, Noetherian r, Poly.IsMonomialOrder ord)
                  => [Polynomial r] -> Monomorphic (Ideal :.: Poly.OrderedPolynomial r ord)
 uniformlyPromote ps  = uniformlyPromoteWithDim (length vars) ps
   where
     vars = nub $ sort $ concatMap buildVarsList ps
 
-instance (NoetherianRing r, Eq r, Poly.IsMonomialOrder ord)
+instance (Noetherian r, Eq r, Poly.IsMonomialOrder ord)
     => Monomorphicable (Ideal :.: Poly.OrderedPolynomial r ord) where
   type MonomorphicRep (Ideal :.: Poly.OrderedPolynomial r ord) = [Polynomial r]
   promote = uniformlyPromote
   demote (Monomorphic (Comp (Ideal v))) = map (polyn . demote . Monomorphic) $ V.toList v
 
-promoteList :: (Eq r, NoetherianRing r, Poly.IsMonomialOrder ord)
+promoteList :: (Eq r, Noetherian r, Poly.IsMonomialOrder ord)
             => [Polynomial r] -> Monomorphic ([] :.: Poly.OrderedPolynomial r ord)
 promoteList ps = promoteListWithDim (length vars) ps
   where
     vars = nub $ sort $ concatMap buildVarsList ps
 
-promoteListWithVarOrder :: (Eq r, NoetherianRing r, Poly.IsMonomialOrder ord)
+promoteListWithVarOrder :: (Eq r, Noetherian r, Poly.IsMonomialOrder ord)
                         => [Variable] -> [Polynomial r] -> Monomorphic ([] :.: Poly.OrderedPolynomial r ord)
 promoteListWithVarOrder dic ps =
   case promote dim of
@@ -173,7 +173,7 @@ promoteListWithVarOrder dic ps =
     vars = dic ++ rest
     dim  = length vars
 
-promoteListWithDim :: (NoetherianRing r, Eq r, Poly.IsMonomialOrder ord)
+promoteListWithDim :: (Noetherian r, Eq r, Poly.IsMonomialOrder ord)
                    => Int -> [Polynomial r] -> Monomorphic ([] :.: Poly.OrderedPolynomial r ord)
 promoteListWithDim dim ps =
   case promote dim of
@@ -189,7 +189,7 @@ renameVars vars = Polynomial . M.mapKeys (M.mapKeys ren) . unPolynomial
     ren v = fromMaybe v $ lookup v dic
     dic = zip (Variable 'X' Nothing : [Variable 'X' (Just i) | i <- [1..]]) vars
 
-showPolynomial :: (Show r, Eq r, NoetherianRing r) => Polynomial r -> String
+showPolynomial :: (Show r, Eq r, Noetherian r) => Polynomial r -> String
 showPolynomial f =
   case encodePolynomial f of
     Monomorphic f' ->

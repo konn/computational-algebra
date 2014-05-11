@@ -207,7 +207,7 @@ delta :: (NA.Monoidal r, NA.Unital r) => Int -> Int -> r
 delta i j | i == j = NA.one
           | otherwise = NA.zero
 
-companion :: (SingI n, NoetherianRing r, Matrix mat, Eq r,
+companion :: (SingI n, Noetherian r, Matrix mat, Eq r,
               Elem mat r, IsMonomialOrder ord)
           => Ordinal n -> OrderedPolynomial r ord n -> mat r
 companion on poly =

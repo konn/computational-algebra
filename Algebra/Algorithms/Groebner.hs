@@ -410,7 +410,7 @@ saturationIdeal i (Ideal g) =
           SingInstance -> intersection $ V.map (i `saturationByPrincipalIdeal`) g
 
 -- | Calculate resultant for given two unary polynomimals.
-resultant :: forall k ord . (Eq k, NoetherianRing k, Field k, IsMonomialOrder ord)
+resultant :: forall k ord . (Eq k, Noetherian k, Field k, IsMonomialOrder ord)
           => OrderedPolynomial k ord One
           -> OrderedPolynomial k ord One
           -> k
@@ -427,7 +427,7 @@ resultant = go one
 
 
 -- | Determine whether two polynomials have a common factor with positive degree using resultant.
-hasCommonFactor :: forall k ord . (NoetherianRing k, Eq k, Field k, IsMonomialOrder ord)
+hasCommonFactor :: forall k ord . (Noetherian k, Eq k, Field k, IsMonomialOrder ord)
                 => OrderedPolynomial k ord One
                 -> OrderedPolynomial k ord One
                 -> Bool

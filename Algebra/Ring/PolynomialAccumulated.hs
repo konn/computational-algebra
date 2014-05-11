@@ -297,7 +297,7 @@ instance (Eq (Monomial n), IsOrder name) => Ord (OrderedMonomial name n) where
 instance (Eq (Monomial n)) => Ord (Monomial n) where
   compare = grevlex
 
-deriving instance (SingI n, IsOrder ord, NoetherianRing r, Ord r, Ord (OrderedMonomial ord n))
+deriving instance (SingI n, IsOrder ord, Noetherian r, Ord r, Ord (OrderedMonomial ord n))
                => Ord (OrderedPolynomial r ord n)
 
 -- | n-ary polynomial ring over some noetherian ring R.
@@ -305,7 +305,7 @@ newtype OrderedPolynomial r order n = Polynomial { terms :: Map (OrderedMonomial
 type Polynomial r = OrderedPolynomial r Grevlex
 
 -- | Type-level constraint to check whether it forms polynomial ring or not.
-type IsPolynomial r n = (NoetherianRing r, SingI n, Eq r)
+type IsPolynomial r n = (Noetherian r, SingI n, Eq r)
 
 -- | coefficient for a degree.
 coeff :: (IsOrder order, IsPolynomial r n) => Monomial n -> OrderedPolynomial r order n -> r
@@ -342,7 +342,7 @@ injectCoeff :: (IsPolynomial r n) => r -> OrderedPolynomial r order n
 injectCoeff r = Polynomial $ M.singleton (OrderedMonomial $ fromList sing []) r
 
 -- | By Hilbert's finite basis theorem, a polynomial ring over a noetherian ring is also a noetherian ring.
-instance (IsOrder order, IsPolynomial r n) => NoetherianRing (OrderedPolynomial r order n) where
+instance (IsOrder order, IsPolynomial r n) => Noetherian (OrderedPolynomial r order n) where
 instance (IsOrder order, IsPolynomial r n) => Ring (OrderedPolynomial r order n) where
 instance (IsOrder order, IsPolynomial r n) => Rig (OrderedPolynomial r order n) where
 instance (IsOrder order, IsPolynomial r n) => Group (OrderedPolynomial r order n) where
@@ -381,7 +381,7 @@ instance (Eq r, IsPolynomial r n, IsOrder order, Show r) => Show (OrderedPolynom
 instance (SingI n, IsOrder order) => Show (OrderedPolynomial Rational order n) where
   show = showPolynomialWith [(n, "X_"++ show n) | n <- [0..]] showRational
 
-showPolynomialWithVars :: (Eq a, Show a, SingI n, NoetherianRing a, IsOrder ordering)
+showPolynomialWithVars :: (Eq a, Show a, SingI n, Noetherian a, IsOrder ordering)
                        => [(Int, String)] -> OrderedPolynomial a ordering n -> String
 showPolynomialWithVars dic p0@(Polynomial d)
     | p0 == zero = "0"
@@ -412,7 +412,7 @@ showRational r | r == 0    = Zero
     formatRat q | denominator q == 1 = show $ numerator q
                 | otherwise          = show (numerator q) ++ "/" ++ show (denominator q) ++ " "
 
-showPolynomialWith  :: (Eq a, Show a, SingI n, NoetherianRing a, IsOrder ordering)
+showPolynomialWith  :: (Eq a, Show a, SingI n, Noetherian a, IsOrder ordering)
                     => [(Int, String)] -> (a -> Coefficient) -> OrderedPolynomial a ordering n -> String
 showPolynomialWith vDic showCoeff p0@(Polynomial d)
     | p0 == zero = "0"
@@ -452,16 +452,16 @@ instance (IsMonomialOrder order, IsPolynomial r n, Num r) => Num (OrderedPolynom
   abs = id
   negate = ((P.negate 1 :: Integer) .*)
 
-varX :: (Eq r, NoetherianRing r, SingI n, IsOrder order, One :<= n) => OrderedPolynomial r order n
+varX :: (Eq r, Noetherian r, SingI n, IsOrder order, One :<= n) => OrderedPolynomial r order n
 varX = polynomial $ M.singleton (OrderedMonomial $ fromList sing [1]) one
 
-var :: (Eq r, NoetherianRing r, SingI m, IsOrder order, S n :<= m) => SNat (S n) -> OrderedPolynomial r order m
+var :: (Eq r, Noetherian r, SingI m, IsOrder order, S n :<= m) => SNat (S n) -> OrderedPolynomial r order m
 var vIndex = polynomial $ M.singleton (OrderedMonomial $ fromList sing (buildIndex vIndex)) one
 
 toPolynomial :: (IsOrder order, IsPolynomial r n) => (r, Monomial n) -> OrderedPolynomial r order n
 toPolynomial (c, deg) = polynomial $ M.singleton (OrderedMonomial deg) c
 
-polynomial :: (SingI n, Eq r, NoetherianRing r, IsOrder order) => Map (OrderedMonomial order n) r -> OrderedPolynomial r order n
+polynomial :: (SingI n, Eq r, Noetherian r, IsOrder order) => Map (OrderedMonomial order n) r -> OrderedPolynomial r order n
 polynomial dic = normalize $ Polynomial dic
 
 buildIndex :: SNat (S n) -> [Int]

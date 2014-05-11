@@ -23,7 +23,7 @@ deriving instance Abelian r => Abelian (Scalar r)
 deriving instance Rig r => Rig (Scalar r)
 deriving instance Commutative r => Commutative (Scalar r)
 deriving instance Division r => Division (Scalar r)
-deriving instance NoetherianRing r => NoetherianRing (Scalar r)
+deriving instance Noetherian r => Noetherian (Scalar r)
 
 instance LeftModule Integer r => LeftModule Integer (Scalar r) where
   n .* Scalar r = Scalar $ n .* r
