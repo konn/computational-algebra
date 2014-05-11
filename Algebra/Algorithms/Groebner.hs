@@ -46,6 +46,7 @@ import           Data.Vector.Sized       (Vector (..), sLength, singleton,
                                           toList)
 import qualified Data.Vector.Sized       as V
 import           Numeric.Algebra         hiding ((<), (>))
+import           Numeric.Decidable.Zero
 import           Prelude                 hiding (Num (..), recip, subtract, (^))
 import           Proof.Equational
 
@@ -56,7 +57,7 @@ divModPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)
 divModPolynomial f0 fs = loop f0 zero (zip (nub fs) (repeat zero))
   where
     loop p r dic
-        | p == zero = (dic, r)
+        | isZero p = (dic, r)
         | otherwise =
             let ltP = toPolynomial $ leadingTerm p
             in case break ((`divs` leadingMonomial p) . leadingMonomial . fst) dic of
@@ -410,28 +411,28 @@ saturationIdeal i (Ideal g) =
           SingInstance -> intersection $ V.map (i `saturationByPrincipalIdeal`) g
 
 -- | Calculate resultant for given two unary polynomimals.
-resultant :: forall k ord . (Eq k, Noetherian k, Field k, IsMonomialOrder ord)
+resultant :: forall k ord . (Eq k, Noetherian k, Field k, DecidableZero k, IsMonomialOrder ord)
           => OrderedPolynomial k ord One
           -> OrderedPolynomial k ord One
           -> k
 resultant = go one
   where
     go res h s
-        | totalDegree' s > 0     = let r = h `modPolynomial` [s]
+        | totalDegree' s > 0     = let r    = h `modPolynomial` [s]
                                        res' = res * negate one ^ (totalDegree' h * totalDegree' s)
                                                   * (leadingCoeff s) ^ (totalDegree' h - totalDegree' r)
                                    in go res' s r
-        | h == zero || s == zero = zero
+        | isZero h || isZero s = zero
         | totalDegree' h > 0     = (leadingCoeff s ^ totalDegree' h) * res
         | otherwise              = res
 
 
 -- | Determine whether two polynomials have a common factor with positive degree using resultant.
-hasCommonFactor :: forall k ord . (Noetherian k, Eq k, Field k, IsMonomialOrder ord)
+hasCommonFactor :: forall k ord . (Eq k, Noetherian k, Field k, DecidableZero k, IsMonomialOrder ord)
                 => OrderedPolynomial k ord One
                 -> OrderedPolynomial k ord One
                 -> Bool
-hasCommonFactor f g = resultant f g == zero
+hasCommonFactor f g = isZero $ resultant f g
 
 lcmPolynomial :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
               => OrderedPolynomial k ord n

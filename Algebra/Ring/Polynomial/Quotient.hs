@@ -242,9 +242,10 @@ instance (IsMonomialOrder ord, Num r, Reifies ideal (QIdeal r ord n), IsPolynomi
   negate = Quotient . negate . quotRepr_
 
 -- | Reduce polynomial modulo ideal.
-reduce :: (Eq r, Division r, SingI n, Noetherian r, IsMonomialOrder ord)
+reduce :: (Eq r, DecidableZero r, Division r, SingI n, Noetherian r, IsMonomialOrder ord)
        => OrderedPolynomial r ord n -> Ideal (OrderedPolynomial r ord n) -> OrderedPolynomial r ord n
 reduce f i = withQuotient i $ modIdeal f
 
-isZeroDimensional :: (Eq r, Division r, SingI n, Noetherian r, IsMonomialOrder ord) => [OrderedPolynomial r ord n] -> Bool
+isZeroDimensional :: (Eq r, DecidableZero r, Division r, SingI n, Noetherian r, IsMonomialOrder ord)
+                  => [OrderedPolynomial r ord n] -> Bool
 isZeroDimensional ii = isJust $ stdMonoms $ calcGroebnerBasis $ toIdeal ii

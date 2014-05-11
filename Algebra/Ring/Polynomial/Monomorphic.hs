@@ -106,13 +106,13 @@ data PolynomialSetting r = PolySetting { dimension :: Monomorphic (Sing :: Nat -
                                        , polyn     :: Polynomial r
                                        }
 
-instance (Integral a, Show a) => Show (Polynomial (Ratio a)) where
+instance (NA.DecidableZero a, Integral a, Show a) => Show (Polynomial (Ratio a)) where
   show = showRatPolynomial
 
-instance (Eq r, Noetherian r, Show r) => Show (Polynomial r) where
+instance (NA.DecidableZero r, Eq r, Noetherian r, Show r) => Show (Polynomial r) where
   show = showPolynomial
 
-instance (Eq r, Noetherian r, Poly.IsMonomialOrder ord)
+instance (NA.DecidableZero r, Eq r, Noetherian r, Poly.IsMonomialOrder ord)
     => Monomorphicable (Poly.OrderedPolynomial r ord) where
   type MonomorphicRep (Poly.OrderedPolynomial r ord) = PolynomialSetting r
   promote PolySetting{..} =
@@ -131,7 +131,7 @@ instance (Eq r, Noetherian r, Poly.IsMonomialOrder ord)
     where
       toMonom = M.fromList . zip (Variable 'X' Nothing : [Variable 'X' (Just i) | i <- [1..]])
 
-uniformlyPromoteWithDim :: (Eq r, Noetherian r)
+uniformlyPromoteWithDim :: (NA.DecidableZero r, Eq r, Noetherian r)
                         => Poly.IsMonomialOrder ord
                  => Int -> [Polynomial r] -> Monomorphic (Ideal :.: Poly.OrderedPolynomial r ord)
 uniformlyPromoteWithDim d ps  =
@@ -142,25 +142,25 @@ uniformlyPromoteWithDim d ps  =
   where
     vars = nub $ sort $ concatMap buildVarsList ps
 
-uniformlyPromote :: (Eq r, Noetherian r, Poly.IsMonomialOrder ord)
+uniformlyPromote :: (NA.DecidableZero r, Eq r, Noetherian r, Poly.IsMonomialOrder ord)
                  => [Polynomial r] -> Monomorphic (Ideal :.: Poly.OrderedPolynomial r ord)
 uniformlyPromote ps  = uniformlyPromoteWithDim (length vars) ps
   where
     vars = nub $ sort $ concatMap buildVarsList ps
 
-instance (Noetherian r, Eq r, Poly.IsMonomialOrder ord)
+instance (NA.DecidableZero r, Noetherian r, Eq r, Poly.IsMonomialOrder ord)
     => Monomorphicable (Ideal :.: Poly.OrderedPolynomial r ord) where
   type MonomorphicRep (Ideal :.: Poly.OrderedPolynomial r ord) = [Polynomial r]
   promote = uniformlyPromote
   demote (Monomorphic (Comp (Ideal v))) = map (polyn . demote . Monomorphic) $ V.toList v
 
-promoteList :: (Eq r, Noetherian r, Poly.IsMonomialOrder ord)
+promoteList :: (Eq r, NA.DecidableZero r, Noetherian r, Poly.IsMonomialOrder ord)
             => [Polynomial r] -> Monomorphic ([] :.: Poly.OrderedPolynomial r ord)
 promoteList ps = promoteListWithDim (length vars) ps
   where
     vars = nub $ sort $ concatMap buildVarsList ps
 
-promoteListWithVarOrder :: (Eq r, Noetherian r, Poly.IsMonomialOrder ord)
+promoteListWithVarOrder :: (NA.DecidableZero r, Eq r, Noetherian r, Poly.IsMonomialOrder ord)
                         => [Variable] -> [Polynomial r] -> Monomorphic ([] :.: Poly.OrderedPolynomial r ord)
 promoteListWithVarOrder dic ps =
   case promote dim of
@@ -173,7 +173,7 @@ promoteListWithVarOrder dic ps =
     vars = dic ++ rest
     dim  = length vars
 
-promoteListWithDim :: (Noetherian r, Eq r, Poly.IsMonomialOrder ord)
+promoteListWithDim :: (NA.DecidableZero r, Noetherian r, Eq r, Poly.IsMonomialOrder ord)
                    => Int -> [Polynomial r] -> Monomorphic ([] :.: Poly.OrderedPolynomial r ord)
 promoteListWithDim dim ps =
   case promote dim of
@@ -189,7 +189,7 @@ renameVars vars = Polynomial . M.mapKeys (M.mapKeys ren) . unPolynomial
     ren v = fromMaybe v $ lookup v dic
     dic = zip (Variable 'X' Nothing : [Variable 'X' (Just i) | i <- [1..]]) vars
 
-showPolynomial :: (Show r, Eq r, Noetherian r) => Polynomial r -> String
+showPolynomial :: (NA.DecidableZero r, Show r, Eq r, Noetherian r) => Polynomial r -> String
 showPolynomial f =
   case encodePolynomial f of
     Monomorphic f' ->
@@ -198,7 +198,7 @@ showPolynomial f =
   where
     dic = zip [1 :: Int ..] $ map show $ buildVarsList f
 
-showRatPolynomial :: (Integral a, Show a) => Polynomial (Ratio a) -> String
+showRatPolynomial :: (NA.DecidableZero a, Integral a, Show a) => Polynomial (Ratio a) -> String
 showRatPolynomial f =
   case encodePolynomial f of
     Monomorphic f' ->

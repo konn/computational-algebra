@@ -20,6 +20,7 @@ import qualified Data.Vector.Algorithms.Insertion as Sort
 import qualified Data.Vector.Generic              as GV
 import qualified Data.Vector.Hybrid               as H
 import           Data.Vector.Hybrid.Internal
+import           Numeric.Algebra                  (DecidableZero)
 import qualified Numeric.Algebra                  as NA
 import qualified Numeric.LinearAlgebra            as LA
 import           Sparse.Matrix                    (_Mat)
@@ -207,7 +208,7 @@ delta :: (NA.Monoidal r, NA.Unital r) => Int -> Int -> r
 delta i j | i == j = NA.one
           | otherwise = NA.zero
 
-companion :: (SingI n, Noetherian r, Matrix mat, Eq r,
+companion :: (SingI n, DecidableZero r, Noetherian r, Matrix mat, Eq r,
               Elem mat r, IsMonomialOrder ord)
           => Ordinal n -> OrderedPolynomial r ord n -> mat r
 companion on poly =

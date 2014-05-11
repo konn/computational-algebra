@@ -5,11 +5,12 @@
 module Algebra.Instances () where
 import           Control.Lens
 import           Data.Complex
-import           Data.Type.Natural (Nat (..), bugInGHC)
-import qualified Data.Vector.Sized as V
+import           Data.Type.Natural      (Nat (..), bugInGHC)
+import qualified Data.Vector.Sized      as V
 import           Numeric.Algebra
-import           Prelude           hiding (Num (..))
-import qualified Prelude           as P
+import           Numeric.Decidable.Zero
+import           Prelude                hiding (Num (..))
+import qualified Prelude                as P
 
 type instance Index (V.Vector a n) = V.Index n
 type instance IxValue (V.Vector a n) = a
@@ -25,6 +26,9 @@ updateNth (V.OS n) f (a V.:- b V.:- bs) = a V.:- updateNth n f (b V.:- bs)
 updateNth _      _ _              = bugInGHC
 
 -- | These Instances are not algebraically right, but for the sake of convenience.
+instance DecidableZero r => DecidableZero (Complex r) where
+  isZero (a :+ b) = isZero a && isZero b
+
 instance Additive r => Additive (Complex r) where
   (a :+ b) + (c :+ d) = (a + c) :+ (b + d)
 instance Abelian r => Abelian (Complex r) where
@@ -76,3 +80,6 @@ instance Semiring Double where
 instance Abelian Double where
 instance Ring Double where
   fromInteger = P.fromInteger
+instance DecidableZero Double where
+  isZero 0 = True
+  isZero _ = False

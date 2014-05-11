@@ -140,12 +140,12 @@ optimalStrategy ps =
   let d = minimum $ map degPair ps
   in filter ((==d) . degPair) ps
 
-sugarStrategy :: (Noetherian r, SingI n, IsOrder ord, Eq r) => Strategy r ord n
+sugarStrategy :: (DecidableZero r, Noetherian r, SingI n, IsOrder ord, Eq r) => Strategy r ord n
 sugarStrategy ps =
   let d = minimum $ map calcSug ps
   in filter ((==d) . calcSug) ps
 
-calcSug :: (Eq r, SingI n, Noetherian r, IsOrder ord) => Pair r ord n -> Int
+calcSug :: (DecidableZero r, Eq r, SingI n, Noetherian r, IsOrder ord) => Pair r ord n -> Int
 calcSug p =
   let f = leftPoly p
       g = rightPoly p
