@@ -218,8 +218,8 @@ solveLinear mat vec = {-# SCC "solveLinear" #-}
            cfs = M.getCol 1 $ q P.* M.colVector ({-# SCC "solveU" #-} solveU lsol)
        in Just cfs
   where
-    (u, l, p, q, _, _) = M.luDecomp' mat
-    (u', _,_, _, _, _) = M.luDecomp' (mat M.<|> M.colVector vec)
+    Just (u, l, p, q, _, _) = M.luDecomp' mat
+    Just (u', _,_, _, _, _) = M.luDecomp' (mat M.<|> M.colVector vec)
     uRank = V.foldr (\a acc -> if a /= 0 then acc + 1 else acc) (0 :: Int) . M.getDiag
     solveL v = V.create $ do
       let stop = min (M.ncols l) (M.nrows l)
