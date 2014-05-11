@@ -44,9 +44,6 @@ newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal :: Ideal (Polynomial Rational n
 a %. SC.Positive b = a % b
 
 -- * Instances for SmallCheck.
-instance (Integral a, Ord a, Serial m a) => Serial m (Ratio a) where
-  series = cons2 (%.)
-
 instance Monad m => Serial m (Monomial Z) where
   series = cons0 Nil
 
@@ -105,7 +102,7 @@ instance (SingI n, IsOrder ord)
   arbitrary = polynomial . M.fromList <$> listOf1 ((,) <$> arbitrary <*> arbitraryRational)
 
 instance (Ord r, NoetherianRing r, Arbitrary r, Num r) => Arbitrary (Ideal r) where
-  arbitrary = toIdeal . map QC.getNonZero . getNonEmpty <$> arbitrary
+  arbitrary = toIdeal . map QC.getNonZero . QC.getNonEmpty <$> arbitrary
 
 instance (SingI n) => Arbitrary (ZeroDimIdeal n) where
   arbitrary = zeroDimG

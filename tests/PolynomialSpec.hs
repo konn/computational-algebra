@@ -71,5 +71,5 @@ prop_degdecay sdim =
 
 rank :: (Eq r, Num r, Ord r, Fractional r) => M.Matrix r -> Int
 rank mat =
-  let (u, _, _, _,_, _) = M.luDecomp' mat
+  let Just (u, _, _, _,_, _) = M.luDecomp' mat
   in V.foldr (\a acc -> if a /= 0 then acc + 1 else acc) (0 :: Int) $ M.getDiag u
