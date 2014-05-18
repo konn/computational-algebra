@@ -4,7 +4,7 @@
 {-# LANGUAGE OverlappingInstances, RankNTypes, ScopedTypeVariables         #-}
 {-# LANGUAGE StandaloneDeriving, UndecidableInstances                      #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
-module Utils (ZeroDimIdeal(..), polyOfDim, arbitraryRational,
+module Utils (ZeroDimIdeal(..), polyOfDim, arbitraryRational,homogPolyOfDim,arbVecOfSum,
               arbitrarySolvable, zeroDimOf, zeroDimG, unaryPoly, stdReduced,
               quotOfDim, isNonTrivial, Equation(..), liftSNat, checkForArity,
               MatrixCase(..), idealOfDim) where
@@ -36,6 +36,7 @@ import           Test.SmallCheck.Series
 import qualified Test.SmallCheck.Series           as SC
 import Data.Ord
 import Data.List (sortBy)
+import Numeric.Algebra (DecidableZero)
 
 newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal :: Ideal (Polynomial Rational n)
                                       } deriving (Show, Eq, Ord)
@@ -56,7 +57,7 @@ instance (Ord k, Serial m k, Serial m v) => Serial m (M.Map k v) where
 instance Serial m (Monomial n) => Serial m (OrderedMonomial ord n) where
   series = newtypeCons OrderedMonomial
 
-instance (Eq r, Noetherian r, SingI n, IsMonomialOrder ord, Serial m r, Serial m (Monomial n))
+instance (Eq r, DecidableZero r, Noetherian r, SingI n, IsMonomialOrder ord, Serial m r, Serial m (Monomial n))
           => Serial m (OrderedPolynomial r ord n) where
   series = cons2 (curry toPolynomial) \/ cons2 (NA.+)
 
@@ -85,6 +86,12 @@ instance Monad m => Serial m (ZeroDimIdeal Two) where
     (f, g, ideal) <- (,,) <$> xPoly <~> yPoly <~> series
     return $ ZeroDimIdeal $ f `addToIdeal` g `addToIdeal` ideal
 
+arbVecOfSum :: SNat n -> Int -> Gen (Monomial n)
+arbVecOfSum (SS SZ) n = return $ n :- Nil
+arbVecOfSum (SS (SS sn)) n = do
+  k <- QC.elements [0..abs n]
+  (:-) k <$> arbVecOfSum (SS sn) (abs n - k)
+
 -- * Instances for QuickCheck.
 instance SingI n => Arbitrary (Monomial n) where
   arbitrary = arbVec
@@ -101,13 +108,20 @@ instance (SingI n, IsOrder ord)
       => Arbitrary (OrderedPolynomial Rational ord n) where
   arbitrary = polynomial . M.fromList <$> listOf1 ((,) <$> arbitrary <*> arbitraryRational)
 
+instance (SingI n, IsOrder ord)
+      => Arbitrary (HomogPoly Rational ord n) where
+  arbitrary = do
+    deg <- QC.elements [2, 3]
+    HomogPoly . polynomial . M.fromList <$>
+      listOf1 ((,) <$> (OrderedMonomial <$> arbVecOfSum (sing :: SNat n) deg) <*> arbitraryRational)
+
 instance (Ord r, Noetherian r, Arbitrary r, Num r) => Arbitrary (Ideal r) where
   arbitrary = toIdeal . map QC.getNonZero . QC.getNonEmpty <$> arbitrary
 
 instance (SingI n) => Arbitrary (ZeroDimIdeal n) where
   arbitrary = zeroDimG
 
-instance (NA.Field r, Noetherian r, Reifies ideal (QIdeal r ord n)
+instance (DecidableZero r, NA.Field r, Noetherian r, Reifies ideal (QIdeal r ord n)
          , Arbitrary (OrderedPolynomial r ord n)
          , IsMonomialOrder ord, SingI n, Eq r)
     => Arbitrary (Quotient r ord n ideal) where
@@ -115,6 +129,11 @@ instance (NA.Field r, Noetherian r, Reifies ideal (QIdeal r ord n)
 
 polyOfDim :: SNat n -> QC.Gen (Polynomial Rational n)
 polyOfDim sn = case singInstance sn of SingInstance -> arbitrary
+
+newtype HomogPoly r ord n = HomogPoly { getHomogPoly :: OrderedPolynomial r ord n }
+
+homogPolyOfDim :: SNat n -> QC.Gen (Polynomial Rational n)
+homogPolyOfDim sn = case singInstance sn of SingInstance -> getHomogPoly <$> arbitrary
 
 idealOfDim :: SNat n -> QC.Gen (Ideal (Polynomial Rational n))
 idealOfDim sn = case singInstance sn of SingInstance -> arbitrary
@@ -207,6 +226,6 @@ unaryPoly arity mth = do
 checkForArity :: [Int] -> (forall n. SingI (n :: Nat) => Sing n -> Property) -> Property
 checkForArity as test = forAll (QC.elements as) $ liftSNat test
 
-stdReduced :: (Eq r, Num r, SingI n, NA.Division r, Noetherian r, IsMonomialOrder order)
+stdReduced :: (DecidableZero r, Eq r, Num r, SingI n, NA.Division r, Noetherian r, IsMonomialOrder order)
            => [OrderedPolynomial r order n] -> [OrderedPolynomial r order n]
 stdReduced ps = sortBy (comparing leadingMonomial) $ map (\f -> injectCoeff (NA.recip $ leadingCoeff f) * f) ps
