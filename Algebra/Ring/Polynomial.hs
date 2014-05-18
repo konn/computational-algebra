@@ -55,7 +55,7 @@ import           Prelude                 hiding (lex, negate, recip, sum, (*),
 import qualified Prelude                 as P
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i.
-type Monomial (n :: Nat) = Vector Int n
+type Monomial (n :: Nat) = V.Vector Int n
 
 instance Hashable r => Hashable (OrderedPolynomial r ord n) where
   hashWithSalt salt poly = hashWithSalt salt $ getTerms poly
@@ -66,8 +66,8 @@ instance (NFData (Monomial n)) => NFData (OrderedMonomial ord n) where
 instance (NFData (Monomial n), NFData r) => NFData (OrderedPolynomial r ord n) where
   rnf (Polynomial dic) = rnf dic
 
-instance Monomorphicable (Vector Int) where
-  type MonomorphicRep (Vector Int) = [Int]
+instance Monomorphicable (V.Vector Int) where
+  type MonomorphicRep (V.Vector Int) = [Int]
   promote []       = Monomorphic Nil
   promote (n : ns) =
     case promote ns of
@@ -205,10 +205,10 @@ data WeightOrder (v :: [Nat]) (ord :: *) where
   WeightOrder :: SList (v :: [Nat]) -> ord -> WeightOrder v ord
 
 calcOrderWeight :: forall vs n. (SingI vs)
-                 => Proxy (vs :: [Nat]) -> Vector Int n -> Int
+                 => Proxy (vs :: [Nat]) -> V.Vector Int n -> Int
 calcOrderWeight Proxy = calcOrderWeight' (sing :: SList vs)
 
-calcOrderWeight' :: forall vs n. SList (vs :: [Nat]) -> Vector Int n -> Int
+calcOrderWeight' :: forall vs n. SList (vs :: [Nat]) -> V.Vector Int n -> Int
 calcOrderWeight' SNil _ = 0
 calcOrderWeight' (SCons n ns) (x :- xs) =
   x * sNatToInt n + calcOrderWeight' ns xs
@@ -277,7 +277,7 @@ data WeightedEliminationOrder (n :: Nat) (ord :: *) where
 instance (SingI n, IsMonomialOrder ord) => IsOrder (WeightedEliminationOrder n ord) where
   cmpMonomial Proxy m m' = comparing (calc (sing :: SNat n)) m m' <> cmpMonomial (Proxy :: Proxy ord) m m'
     where
-      calc :: SNat l -> Vector Int m -> Int
+      calc :: SNat l -> V.Vector Int m -> Int
       calc (SS _) Nil = 0
       calc SZ _ = 0
       calc (SS l) (x :- xs)= x + calc l xs
@@ -450,8 +450,8 @@ showPolynomialWith useAst vDic showCoeff p0@(Polynomial d)
                       | isZero (c + one) = Negative ""
                       | not (isConstantMonomial deg)              =
                         case cKind of
-                          Negative c -> Negative $ c ++ ast
-                          Positive c -> Positive $ c ++ ast
+                          Negative c' -> Negative $ c' ++ ast
+                          Positive c' -> Positive $ c' ++ ast
                           i          -> i
                       | otherwise                                 = cKind
                   catnate | useAst    = intercalate "*"
@@ -462,7 +462,7 @@ showPolynomialWith useAst vDic showCoeff p0@(Polynomial d)
                      | otherwise = Just $ showVar n ++ "^" ++ show p
       showVar n = fromMaybe ("X_" ++ show n) $ lookup n vDic
 
-isConstantMonomial :: (Eq a, Num a) => Vector a n -> Bool
+isConstantMonomial :: (Eq a, Num a) => V.Vector a n -> Bool
 isConstantMonomial v = all (== 0) $ V.toList v
 
 -- | We provide Num instance to use trivial injection R into R[X].
@@ -532,14 +532,14 @@ tryDiv (a, f) (b, g)
 lcmMonomial :: OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
 lcmMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWithSame max m n
 
-subst :: (Module r a, Ring a, Ring r, SingI n) => Vector a n -> OrderedPolynomial r order n -> a
+subst :: (Module r a, Ring a, Ring r, SingI n) => V.Vector a n -> OrderedPolynomial r order n -> a
 subst assign poly = sum $ map (uncurry (.*) . second extractPower) $ getTerms poly
   where
     extractPower = V.foldr (*) one . V.zipWithSame pow assign .
                    V.map (fromIntegral :: Int -> Natural) . getMonomial
 
 
-substWith :: (Unital c, Monoidal m) => (d -> c -> m) -> Vector c n -> OrderedPolynomial d order n -> m
+substWith :: (Unital c, Monoidal m) => (d -> c -> m) -> V.Vector c n -> OrderedPolynomial d order n -> m
 substWith o assign poly = sum $ map (uncurry o . second extractPower) $ getTerms poly
   where
     extractPower = V.foldr (*) one . V.zipWithSame pow assign .
@@ -553,11 +553,11 @@ subst' :: (Noetherian r, DecidableZero r, SingI n, Module r (OrderedPolynomial r
 subst' p val f
   | v <- leadingMonomial p
   , totalDegree v == 1 =
-    subst (V.zipWithSame (\i xn -> if i == 0 then xn else val) (getMonomial v) allVars) f 
+    subst (V.zipWithSame (\i mn -> if i == 0 then mn else val) (getMonomial v) allVars) f 
   | otherwise = error "Not an "
 
 allVars :: forall k ord n . (IsOrder ord, Noetherian k, DecidableZero k, SingI n)
-        => Vector (OrderedPolynomial k ord n) n
+        => V.Vector (OrderedPolynomial k ord n) n
 allVars = V.unsafeFromList' $ genVars (sing :: SNat n)
 
 -- | Partially difference at (m+1)-th variable
@@ -570,7 +570,7 @@ diff mthVar = unwrapped %~ M.mapKeysWith (+) (unwrapped %~ dropDegree)
   where
     dropDegree = updateNth mthVar (max 0 . pred)
 
-updateNth :: Ordinal n -> (a -> a) -> Vector a n -> Vector a n
+updateNth :: Ordinal n -> (a -> a) -> V.Vector a n -> V.Vector a n
 updateNth OZ     f (a :- as) = f a :- as
 updateNth (OS n) f (a :- b :- bs) = a :- updateNth n f (b :- bs)
 updateNth _      _ _              = bugInGHC
@@ -603,9 +603,9 @@ getTerms = map (snd &&& fst) . M.toDescList . terms
 monomials :: OrderedPolynomial a order n -> [OrderedMonomial order n]
 monomials = M.keys . terms
 
-transformMonomial :: (IsOrder o, Noetherian k, DecidableZero k, SingI n, Noetherian k, DecidableZero k, SingI m)
+transformMonomial :: (IsOrder o, Noetherian k, SingI n, SingI m)
                   => (Monomial n -> Monomial m) -> OrderedPolynomial k o n -> OrderedPolynomial k o m
-transformMonomial trans (Polynomial d) = Polynomial $ M.mapKeys (OrderedMonomial . trans . getMonomial) d
+transformMonomial tr (Polynomial d) = Polynomial $ M.mapKeys (OrderedMonomial . tr . getMonomial) d
 
 orderedBy :: IsOrder o => OrderedPolynomial k o n -> o -> OrderedPolynomial k o n
 p `orderedBy` _ = p
@@ -634,7 +634,7 @@ unhomogenize f =
   substWith (.*.)
   (coerce (symmetry $ sAndPlusOne (sing :: SNat n)) $ allVars `V.append` V.singleton one) f
 
-initSV :: Vector a (S n) -> Vector a n
+initSV :: V.Vector a (S n) -> V.Vector a n
 initSV (_ :- Nil) = Nil
 initSV (x :- xs@(_ :- _))  = x :- initSV xs
 
