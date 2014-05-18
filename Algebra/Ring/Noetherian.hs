@@ -1,18 +1,15 @@
-{-# LANGUAGE DataKinds, ExistentialQuantification, FlexibleContexts         #-}
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, TypeSynonymInstances #-}
-{-# LANGUAGE UndecidableInstances                                           #-}
+{-# LANGUAGE DataKinds, ExistentialQuantification, FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances, GADTs, MultiParamTypeClasses        #-}
+{-# LANGUAGE TypeSynonymInstances, UndecidableInstances             #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Algebra.Ring.Noetherian ( Noetherian(..), Ideal(..), addToIdeal, toIdeal, appendIdeal
-                               , generators, filterIdeal, mapIdeal, principalIdeal) where
+module Algebra.Ring.Noetherian ( Noetherian, Ideal(..), addToIdeal, toIdeal, appendIdeal
+                               , generators, filterIdeal, mapIdeal, principalIdeal, isEmptyIdeal) where
 import           Control.DeepSeq
-import qualified Data.Complex                    as C
 import           Data.Function
 import           Data.Ord
-import           Data.Ratio
 import           Data.Vector.Sized               (Vector (..))
 import qualified Data.Vector.Sized               as V
 import           Numeric.Algebra
-import qualified Numeric.Algebra.Complex         as NA
 import           Numeric.Algebra.Ring.Noetherian
 import           Prelude                         hiding (negate, subtract, (*),
                                                   (+), (-))
@@ -20,6 +17,10 @@ import qualified Prelude                         as P
 
 
 data Ideal r = forall n. Ideal (V.Vector r n)
+
+isEmptyIdeal :: Ideal t -> Bool
+isEmptyIdeal (Ideal Nil) = True
+isEmptyIdeal _ = False
 
 instance Eq r => Eq (Ideal r) where
   (==) = (==) `on` generators

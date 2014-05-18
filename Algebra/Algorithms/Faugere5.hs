@@ -1,8 +1,8 @@
-{-# LANGUAGE ConstraintKinds, DeriveDataTypeable, FlexibleContexts      #-}
-{-# LANGUAGE ImplicitParams, MultiParamTypeClasses, NoImplicitPrelude   #-}
-{-# LANGUAGE NoMonomorphismRestriction, RankNTypes, ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell, TypeOperators, ViewPatterns               #-}
-module Algebra.Algorithms.Faugere5 where
+{-# LANGUAGE ConstraintKinds, DataKinds, DeriveDataTypeable, FlexibleContexts  #-}
+{-# LANGUAGE GADTs, ImplicitParams, MultiParamTypeClasses, NoImplicitPrelude   #-}
+{-# LANGUAGE NoMonomorphismRestriction, ParallelListComp, RankNTypes           #-}
+{-# LANGUAGE ScopedTypeVariables, TemplateHaskell, TypeOperators, ViewPatterns #-}
+module Algebra.Algorithms.Faugere5 (f5Original) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Prelude
 import           Algebra.Ring.Noetherian
@@ -56,10 +56,6 @@ instance (IsOrder ord, SingRep n) => Eq (PolyRepr r ord n) where
 instance (IsOrder ord, SingRep n) => Ord (PolyRepr r ord n) where
   compare = flip (comparing (view $ signature._1)) <> comparing (view $ signature._2)
 
-(*|) :: (DecidableZero r, Eq r, IsOrder ord, SingRep n, Noetherian r)
-     => r -> PolyRepr r ord n -> PolyRepr r ord n
-(*|) k = poly %~ (k .*.)
-
 (*@) :: (DecidableZero r, Eq r, IsOrder ord, SingRep n, Noetherian r)
      => OrderedMonomial ord n -> PolyRepr r ord n -> PolyRepr r ord n
 (*@) v = (signature._2 %~ (v*)) >>> (poly %~ (toPolynomial (one, v) *))
@@ -68,15 +64,32 @@ nf :: (DecidableZero r, Eq r, SingRep n, Division r, Noetherian r, IsMonomialOrd
    => PolyRepr r ord n -> [OrderedPolynomial r ord n] -> PolyRepr r ord n
 nf r g = r & poly %~ (`modPolynomial` g)
 
-infixl 7 *|, *@
+infixl 7 *@
 
 f5Original :: ( Eq r, DecidableZero r, SingRep n, Division r, Noetherian r, IsMonomialOrder ord)
            => Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
 f5Original = mainLoop
 
+setupRedBasis g0 = do
+  bs <- reduceMinimalGroebnerBasis . minimizeGroebnerBasis <$>
+        mapM (liftM (view poly) . readAt ?labPolys) (IS.toList g0)
+  let m  = length bs
+  g' <- V.unsafeThaw $ V.generate m id
+  writeSTRef ?labPolys
+    =<< V.unsafeThaw (V.fromList [ PolyRepr (j, one) bj | j <- [0..] | bj <- bs])
+  writeSTRef ?rules =<< MV.replicate m []
+  forM_ [0..m-2] $ \j -> do
+    let t = leadingMonomial $ bs !! j
+    forM_ [j+1..m-1] $ \k -> do
+      let lmk = leadingMonomial (bs !! k)
+          u = lcmMonomial t lmk / lmk
+      writeAt ?rules k . ((one, 0):) =<< readAt ?rules k
+  return g'
+
 mainLoop :: ( IsMonomialOrder ord, IsPolynomial r n, Field r)
          => Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
-mainLoop ideal = runST $ do
+mainLoop ideal | isEmptyIdeal ideal = toIdeal [zero]
+               | otherwise = runST $ do
   let gs = generators ideal
       m  = length gs
       f0 = last gs
