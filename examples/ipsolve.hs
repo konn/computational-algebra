@@ -1,11 +1,14 @@
-{-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, GADTs, KindSignatures #-}
-{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, RankNTypes             #-}
-{-# LANGUAGE ScopedTypeVariables, TypeOperators, UndecidableInstances         #-}
+{-# LANGUAGE BangPatterns, DataKinds, ExistentialQuantification             #-}
+{-# LANGUAGE FlexibleContexts, GADTs, KindSignatures, MultiParamTypeClasses #-}
+{-# LANGUAGE NoImplicitPrelude, RankNTypes, ScopedTypeVariables             #-}
+{-# LANGUAGE TemplateHaskell, TypeOperators, UndecidableInstances           #-}
 module Main where
 import           Algebra.Algorithms.Groebner
+import           Algebra.Instances           ()
 import           Algebra.Prelude
 import           Algebra.Ring.Noetherian
-import           Control.Parallel.Strategies
+import           Control.Applicative         ((<$>))
+import           Control.Lens                (ix, makeLenses, view, (&), (.~))
 import           Data.Constraint
 import           Data.Monoid
 import           Data.Ord
@@ -49,6 +52,7 @@ costCmp cost ns ms =
 toMOrder :: Proxy m -> MOrder m
 toMOrder Proxy = MOrder
 
+-- | Solve integer programming problem with general signature.
 solveIP' :: forall n m . (SingI n, SingI m)
          => Vector Int n            -- ^ cost vector
          -> Vector (Vector Int n) m -- ^ constraint matrix
@@ -73,8 +77,49 @@ solveIP' c mat b =
               ans = b' `modPolynomial` gs
               (cond, solution) = V.splitAt (sS m) $ getMonomial $ leadingMonomial ans
           in if V.all (== 0) cond
-             then Just $ coerce (plusMinusEqR n m) $ solution
+             then Just $ coerce (plusMinusEqR n m) solution
              else Nothing
+
+data Cnstr n = (:<=) { _lhs :: Vector Int n, _rhs :: Int }
+             | (:>=) { _lhs :: Vector Int n, _rhs :: Int }
+             | (:==) { _lhs :: Vector Int n, _rhs :: Int }
+             deriving (Show, Eq, Ord)
+
+infix 4 :<=, :>=, :==
+
+data IPProblem n m = IPProblem { objectCnstr :: Vector Int n
+                               , cnstrs      :: Vector (Cnstr n) m
+                               } deriving (Show, Eq)
+makeLenses ''Cnstr
+
+solveCnstrs :: forall n m. (SingRep m, SingRep n) => IPProblem n m -> Maybe (Vector Int n)
+solveCnstrs ipp =
+  let sn = sing :: SNat n
+      sm = sing :: SNat m
+      (obj, mat, vec) = extractProblem $ nfProblem ipp
+  in case propToBoolLeq (plusLeqL sn sm) of
+    Dict -> case singInstance (sn %:+ sm) of
+      SingInstance -> V.take (sing :: SNat n) <$> solveIP' obj mat vec
+
+extractProblem :: IPProblem n m -> (Vector Int n, Vector (Vector Int n) m, Vector Int m)
+extractProblem (IPProblem obj css) = (obj, V.map (view lhs) css, V.map (view rhs) css)
+
+nfProblem :: forall n m . SingRep m => IPProblem n m -> IPProblem (n :+ m) m
+nfProblem (IPProblem obj css) =
+  IPProblem (obj `V.append` V.replicate (sing :: SNat m) 0)
+            (nfCnstrs css)
+
+enumOrd' :: SNat n -> V.Vector (V.Ordinal n) n
+enumOrd' SZ = Nil
+enumOrd' (SS n) = V.OZ :- V.map V.OS (enumOrd' n)
+
+nfCnstrs :: forall n m. (SingRep m)
+         => Vector (Cnstr n) m -> Vector (Cnstr (n :+ m)) m
+nfCnstrs css = V.zipWithSame conv css (enumOrd' (sing :: SNat m))
+  where
+    conv (lh :<= r) nth = (lh `V.append` (V.replicate (sing :: SNat m) 0 & ix nth .~  1)) :== r
+    conv (lh :>= r) nth = (lh `V.append` (V.replicate (sing :: SNat m) 0 & ix nth .~ -1)) :== r
+    conv (lh :== r) _   = (lh `V.append`  V.replicate (sing :: SNat m) 0) :== r
 
 testC :: Vector Int Four
 testM :: Vector (Vector Int Four) Two
@@ -83,6 +128,26 @@ testB :: Vector Int Two
   (1000 :- 1 :- 1 :- 100 :- Nil,
    (3 :- -2 :- 1 :- -1 :- Nil) :- (4 :- 1 :- -1 :- 0 :- Nil) :- Nil,
    -1 :- 5 :- Nil)
+
+data Rect = Rect { _height :: Int, _width :: Int
+                 } deriving (Read, Show, Eq, Ord)
+makeLenses ''Rect
+
+data Design = Design { _frame    :: Rect
+                     , _pictures :: [Rect]
+                     } deriving (Read, Show, Eq, Ord)
+makeLenses ''Design
+
+data Department = Department { _area    :: Int
+                             , _aspect  :: Int
+                             , _maxSide :: Int
+                             , _minSide :: Int
+                             } deriving (Read, Show, Eq, Ord)
+
+data SomeIPProblem = forall n m. SomeIPProblem (IPProblem n m)
+
+designConstraint :: Design -> SomeIPProblem
+designConstraint = undefined
 
 main :: IO ()
 main = print $ solveIP' testC testM testB
