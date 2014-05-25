@@ -14,13 +14,13 @@ import qualified Prelude                as P
 
 type instance Index (V.Vector a n) = V.Index n
 type instance IxValue (V.Vector a n) = a
-instance Functor f => Ixed f (V.Vector a (S n)) where
+instance Functor f => Ixed f (V.Vector a  n) where
   ix idx = ilens getter setter
     where
       getter v = (idx, V.sIndex idx v)
       setter v val = updateNth idx (const val) v
 
-updateNth :: V.Index (S n) -> (a -> a) -> V.Vector a (S n) -> V.Vector a (S n)
+updateNth :: V.Index n -> (a -> a) -> V.Vector a n -> V.Vector a n
 updateNth V.OZ     f (a V.:- as) = f a V.:- as
 updateNth (V.OS n) f (a V.:- b V.:- bs) = a V.:- updateNth n f (b V.:- bs)
 updateNth _      _ _              = bugInGHC

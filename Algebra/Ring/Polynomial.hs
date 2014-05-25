@@ -1,9 +1,9 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances  #-}
-{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, PatternGuards, IncoherentInstances                 #-}
+{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, PatternGuards, IncoherentInstances #-}
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, OverlappingInstances #-}
 {-# LANGUAGE PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving   #-}
 {-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances, ViewPatterns  #-}
-{-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults -fwarn-incomplete-patterns                    #-}
+{-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults -fwarn-incomplete-patterns #-}
 module Algebra.Ring.Polynomial
     ( Polynomial, Monomial, MonomialOrder, EliminationType, EliminationOrder
     , WeightedEliminationOrder, eliminationOrder, weightedEliminationOrder
