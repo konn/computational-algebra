@@ -87,6 +87,7 @@ instance Monad m => Serial m (ZeroDimIdeal Two) where
     return $ ZeroDimIdeal $ f `addToIdeal` g `addToIdeal` ideal
 
 arbVecOfSum :: SNat n -> Int -> Gen (Monomial n)
+arbVecOfSum SZ      _ = fail "boo"
 arbVecOfSum (SS SZ) n = return $ n :- Nil
 arbVecOfSum (SS (SS sn)) n = do
   k <- QC.elements [0..abs n]
@@ -111,7 +112,7 @@ instance (SingI n, IsOrder ord)
 instance (SingI n, IsOrder ord)
       => Arbitrary (HomogPoly Rational ord n) where
   arbitrary = do
-    deg <- QC.elements [2, 3]
+    deg <- QC.elements [2, 3, 4]
     HomogPoly . polynomial . M.fromList <$>
       listOf1 ((,) <$> (OrderedMonomial <$> arbVecOfSum (sing :: SNat n) deg) <*> arbitraryRational)
 
@@ -203,11 +204,11 @@ arbitrarySolvable = do
     return $ Equation as (V.toList $ M.getCol 1 $ M.fromLists as * M.colVector (V.fromList v))
 
 liftSNat :: (forall n. SingI (n :: Nat) => Sing n -> Property) -> MonomorphicRep (Sing :: Nat -> *) -> Property
-liftSNat f int =
-  case M.promote int of
-    Monomorphic snat ->
-      case singInstance snat of
-        SingInstance -> f snat
+liftSNat f i =
+  case M.promote i of
+    Monomorphic sn ->
+      case singInstance sn of
+        SingInstance -> f sn
 
 unaryPoly :: SNat n -> Ordinal n -> Gen (Polynomial Rational n)
 unaryPoly arity mth = do
