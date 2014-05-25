@@ -8,16 +8,13 @@ module Main (module Algebra.Algorithms.Groebner, module Algebra.Ring.Polynomial
 import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.ZeroDim
 import           Algebra.Internal
-import           Algebra.Matrix                   (companion)
 import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
 import           Algebra.Scalar
-import           Control.Lens
 import           Control.Monad.Random             hiding (fromList)
 import           Data.Complex
 import           Data.Convertible
-import           Data.Foldable                    (foldrM)
 import           Data.List                        (find, nub, partition, sortBy)
 import qualified Data.Matrix                      as M
 import           Data.Ord
@@ -29,7 +26,6 @@ import qualified Data.Vector.Sized                as SV
 import           Debug.Trace
 import           Numeric.Algebra                  hiding ((.*), (<))
 import qualified Numeric.Algebra                  as NA
-import           Numeric.GSL.Polynomials
 import qualified Numeric.LinearAlgebra            as LA
 import           Prelude                          hiding (Fractional (..),
                                                    Integral (..), Num (..),
@@ -92,17 +88,20 @@ mat = fromCols $ take 4 vs
 fromCols :: [V.Vector a] -> M.Matrix a
 fromCols = foldr1 (M.<|>) . map M.colVector
 
-findUnivar :: (Noetherian r, Eq r, IsOrder ord, SingI n) => OrderedPolynomial r ord n -> Maybe (Ordinal n)
+findUnivar :: (DecidableZero r, Noetherian r, Eq r, IsOrder ord, SingI n)
+           => OrderedPolynomial r ord n -> Maybe (Ordinal n)
 findUnivar poly =
   let os = enumOrdinal (sArity poly)
       ms = map snd $ getTerms poly
   in find (\a -> all (`isPowerOf` (leadingMonomial (var a `asTypeOf` poly))) ms) os
 
-toCoeffList :: (Eq r, SingI n, Noetherian r, IsOrder ord) => Ordinal n -> OrderedPolynomial r ord n -> [r]
+toCoeffList :: (DecidableZero r, Eq r, SingI n, Noetherian r, IsOrder ord) => Ordinal n -> OrderedPolynomial r ord n -> [r]
 toCoeffList on f =
   let v = var on  `asTypeOf` f
   in [ coeff (leadingMonomial $ v ^^ i) f | i <- [0.. fromIntegral (totalDegree' f)]]
 
+showSols :: (SingRep n, IsOrder order, Convertible a Double)
+         => Double -> Ideal (OrderedPolynomial a order n) -> [SV.Vector (Complex Double) n1] -> IO ()
 showSols err eqn sols = do
   let (rs, is) = partition (all ((<err).P.abs.imagPart)) $ map SV.toList sols
       subs a b c = generators $
