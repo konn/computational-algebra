@@ -11,6 +11,7 @@ import           Control.Arrow               ((>>>))
 import           Control.Lens                (makeLenses, view, (%~), (&), (.~))
 import           Control.Lens                ((^.), _1, _2)
 import           Control.Monad               (filterM, forM_, liftM)
+import           Control.Monad               (zipWithM_)
 import           Control.Monad.Loops         (anyM, whileM_)
 import           Control.Monad.ST            (ST, runST)
 import           Data.Foldable               (foldrM)
@@ -22,12 +23,15 @@ import           Data.IntSet                 (IntSet)
 import qualified Data.IntSet                 as IS
 import           Data.List                   (find, partition)
 import           Data.List                   (sort, sortBy)
+import           Data.List                   (tails)
 import           Data.Maybe                  (listToMaybe)
 import           Data.Monoid                 ((<>))
 import           Data.Ord                    (comparing)
 import           Data.Singletons             (SingRep)
 import           Data.STRef                  (STRef, modifySTRef', newSTRef)
 import           Data.STRef                  (readSTRef, writeSTRef)
+import qualified Data.Vector                 as V
+import qualified Data.Vector                 as V
 import qualified Data.Vector.Mutable         as MV
 import           Numeric.Decidable.Zero      (isZero)
 
@@ -76,21 +80,37 @@ mainLoop (filter (not . isZero) . generators -> ideal)
             ideal
       m  = length gs
       (f0 : fs) = gs
-  lps0 <- newSTRef =<< MV.new m
+  lps0 <- newSTRef =<< MV.new 2
   writeAt lps0 0 (PolyRepr (0, one) $ monoize f0)
-  rs0  <- newSTRef =<< MV.replicate m []
+  rs0  <- newSTRef =<< V.unsafeThaw (V.fromList [[], []])
   let ?labPolys = lps0
       ?rules    = rs0
-  loop (IS.fromList [0]) $ zip [1..] fs
+  loop [f0] (IS.fromList [0]) $ zip [1..] fs
   where
-    loop g [] = toIdeal <$> mapM (liftM (view poly) . readAt ?labPolys) (IS.toList g)
-    loop g ((i, f):xs) = do
-      snoc ?labPolys $ (PolyRepr (i, one) $ monoize f)
-      g' <- f5Core i g
+    zeroRule []     _ = return ()
+    zeroRule (f:fs) i =
+      let t = leadingMonomial f
+      in forM_ (zip [i+1..] fs) $ \(j, fj) -> do
+        let u = lcm t (leadingMonomial fj) / leadingMonomial fj
+        snoc ?labPolys $ PolyRepr (j, u) zero
+        addRule
+    loop bs _ [] = return $ toIdeal bs
+    loop bs g ((i, f):xs) = do
+      g' <- f5Core (length bs) bs g
       p  <- anyM (liftM ((== one) . view poly) . readAt ?labPolys) $ IS.toList g'
       if p
         then return $ toIdeal [one]
-        else loop g' xs
+        else do
+        bs' <- reduceMinimalGroebnerBasis . minimizeGroebnerBasis <$>
+               mapM (liftM (view poly) . readAt ?labPolys) (IS.toList g')
+        let count = length bs'
+        writeSTRef ?labPolys
+          =<< V.unsafeThaw (V.fromList $ [ PolyRepr (j, one) p
+                                         | p <- bs'
+                                         | j <- [0..] ])
+        writeSTRef ?rules =<< MV.replicate count []
+        zipWithM_ zeroRule (tails bs') [0..]
+        loop bs' (IS.fromList [0..length bs' - 1]) xs
 
 f5Core :: ( ?labPolys :: (RefVector s (PolyRepr r ord n)),
            ?rules :: (RefVector s (Rule ord n)),
@@ -192,7 +212,7 @@ topReduction k g' g = do
         else do
           n <- lengthMV ?labPolys
           snoc ?labPolys $ (u *@ rj) & poly .~ p'
-          addRule n
+          addRule -- n
           return ([], [k, n])
 
 spols :: (?labPolys :: (RefVector s (PolyRepr r ord n)),
@@ -214,7 +234,7 @@ spols bs = do
               rn = (u *@ rk) & poly .~ s0
           snoc ?labPolys rn
           n <- lengthMV ?labPolys
-          addRule (n-1)
+          addRule  -- (n-1)
           if isZero s0
             then return fs
             else return $ insert (Entry rn (n-1)) fs
@@ -222,8 +242,9 @@ spols bs = do
 
 addRule :: (IsMonomialOrder ord, Noetherian r, DecidableZero r, ?labPolys :: (RefVector s (PolyRepr r ord n)),
             ?rules :: (RefVector s (Rule ord n)), SingRep n)
-        => Int -> ST s ()
-addRule j = do
+        => ST s ()
+addRule = do
+  j <- MV.length <$> readSTRef ?labPolys
   (i, t) <- view signature <$> readAt ?labPolys j
   writeAt ?rules i . ((t, j):) =<< readAt ?rules i
 
@@ -289,3 +310,4 @@ snoc m x = do
 
 lengthMV :: STRef s1 (MV.MVector s a) -> ST s1 Int
 lengthMV = liftM MV.length . readSTRef
+
