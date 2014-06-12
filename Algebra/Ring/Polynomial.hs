@@ -9,7 +9,7 @@ module Algebra.Ring.Polynomial
     , WeightedEliminationOrder, eliminationOrder, weightedEliminationOrder
     , lex, revlex, graded, grlex, grevlex, productOrder, productOrder', (*<), (>*)
     , transformMonomial, WeightProxy, weightOrder, totalDegree, totalDegree'
-    , IsPolynomial, coeff, lcmMonomial, sPolynomial, polynomial, substWith
+    , IsPolynomial, coeff, lcmMonomial, gcdMonomial, sPolynomial, polynomial, substWith
     , castMonomial, castPolynomial, toPolynomial, changeOrder, changeOrderProxy
     , changeMonomialOrder, changeMonomialOrderProxy, isRelativelyPrime
     , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars
@@ -531,6 +531,9 @@ tryDiv (a, f) (b, g)
 
 lcmMonomial :: OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
 lcmMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWithSame max m n
+
+gcdMonomial :: OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
+gcdMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWithSame P.min m n
 
 subst :: (Module r a, Ring a, Ring r, SingI n) => V.Vector a n -> OrderedPolynomial r order n -> a
 subst assign poly = sum $ map (uncurry (.*) . second extractPower) $ getTerms poly

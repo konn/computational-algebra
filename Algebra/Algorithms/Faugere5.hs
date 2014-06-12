@@ -1,7 +1,8 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, DeriveDataTypeable, FlexibleContexts  #-}
-{-# LANGUAGE GADTs, ImplicitParams, MultiParamTypeClasses, NoImplicitPrelude   #-}
-{-# LANGUAGE NoMonomorphismRestriction, ParallelListComp, RankNTypes           #-}
-{-# LANGUAGE ScopedTypeVariables, TemplateHaskell, TypeOperators, ViewPatterns #-}
+{-# LANGUAGE BangPatterns, ConstraintKinds, DataKinds, DeriveDataTypeable    #-}
+{-# LANGUAGE FlexibleContexts, GADTs, ImplicitParams, MultiParamTypeClasses  #-}
+{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction, ParallelListComp  #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, TemplateHaskell, TypeOperators #-}
+{-# LANGUAGE ViewPatterns                                                    #-}
 module Algebra.Algorithms.Faugere5 (f5Original) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Prelude
@@ -37,12 +38,12 @@ import qualified Data.Vector                 as V
 import qualified Data.Vector.Mutable         as MV
 import           Numeric.Decidable.Zero      (isZero)
 
--- import Control.Monad.ST.Unsafe (unsafeIOToST)
+import Control.Monad.ST.Unsafe (unsafeIOToST)
 
--- {-
+{-
 unsafeIOToST :: Monad m => t -> m ()
 unsafeIOToST _ = return ()
--- -}
+-}
 
 type CriticalPair ord n = (OrderedMonomial ord n, OrderedMonomial ord n, Int, OrderedMonomial ord n, Int)
 type Rule ord n = [(OrderedMonomial ord n, Maybe Int)]
@@ -73,7 +74,7 @@ instance (IsMonomialOrder ord, SingRep n) => Eq (PolyRepr r ord n) where
   (==) = (==) `on` view signature
 
 instance (IsMonomialOrder ord, SingRep n) => Ord (PolyRepr r ord n) where
-  compare = flip (comparing (view $ signature._1)) <> comparing (view $ signature._2)
+  compare = comparing $ view signature
 
 (*@) :: (DecidableZero r, Eq r, IsMonomialOrder ord, SingRep n, Noetherian r)
      => OrderedMonomial ord n -> PolyRepr r ord n -> PolyRepr r ord n
@@ -91,33 +92,37 @@ f5Original = toIdeal . sort . generators . mainLoop
 
 mainLoop :: (Show r, IsMonomialOrder ord, IsPolynomial r n, Field r)
          => Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
-mainLoop (filter (not . isZero) . generators -> ij)
+mainLoop (map monoize . filter (not . isZero) . generators -> ij)
   | null ij = toIdeal [zero]
   | otherwise = runST $ do
   let (f0 : fs) =
         sortBy (comparing totalDegree' <> comparing leadingMonomial) ij
-  lps0 <- newSTRef =<< V.unsafeThaw (V.singleton (PolyRepr (0, one) $ monoize f0))
+  lps0 <- newSTRef =<< V.unsafeThaw (V.singleton (PolyRepr (0, one) f0))
   rs0  <- newSTRef =<< V.unsafeThaw (V.fromList [[]])
   let ?labPolys = lps0
       ?rules    = rs0
-  loop [monoize f0] (IS.fromList [0]) $ zip [1..] fs
+  loop [f0] (IS.fromList [0]) $ zip [1..] fs
   where
     loop bs _ [] = return $ toIdeal bs
     loop bs g ((i, f):xs) = do
       rlen <- lengthMV ?labPolys
       unsafeIOToST $ putStrLn $ show (i :: Integer) ++ "th iteration"
-      addLabPoly $ PolyRepr (rlen, one) (monoize f)
+      addLabPoly $ PolyRepr (rlen, one) f
       g' <- f5Core rlen bs g
-      unsafeIOToST $ putStr "\tnew base so far: " >> print g'
       p  <- anyM (liftM ((== one) . view poly) . readAt ?labPolys) $ IS.toList g'
-      unsafeIOToST $ putStr "\tcontains one?: " >> print p
       if p
         then return $ toIdeal [one]
         else do
-        g'' <- setupReducedBasis g'
-        bs' <- toPolys g''
-        unsafeIOToST $ putStr "\treduced: " >> print bs'
+        !g'' <- setupReducedBasis g'
+        !bs' <- toPolys g''
+        unsafeIOToST $ putStrLn $ concat
+          ["reduced(", show i, "th): ", show (isGroebnerBasis $ toIdeal bs'), ", ", show bs']
         loop bs' g'' xs
+
+interred :: (Eq k, SingRep n, DecidableZero k,
+             Division k, Noetherian k, IsMonomialOrder order)
+         => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
+interred = reduceMinimalGroebnerBasis . minimizeGroebnerBasis
 
 toPolys :: (?labPolys::STRef s (MV.MVector s (PolyRepr r ord n)))
         => IntSet -> ST s [OrderedPolynomial r ord n]
@@ -129,7 +134,7 @@ setupReducedBasis :: (Show r, Eq r, ?labPolys::STRef s (MV.MVector s (PolyRepr r
                      IsMonomialOrder ord)
                  => IntSet -> ST s IntSet
 setupReducedBasis gs = do
-  bs <- reduceMinimalGroebnerBasis . minimizeGroebnerBasis <$> toPolys gs
+  bs <- interred <$> toPolys gs
   unsafeIOToST $ putStr "setup for: " >> print bs
   let count = length bs
       g0 = [0..count-1]
@@ -138,17 +143,14 @@ setupReducedBasis gs = do
                                    | h <- bs
                                    | j <- [0..] ])
   writeSTRef ?rules =<< MV.replicate count []
-  v <- V.freeze =<< readSTRef ?labPolys
-  unsafeIOToST $ putStr "adding rules for: " >> print (V.length v, v)
   zipWithM_ zeroRule (tails bs) [0..]
-  unsafeIOToST $ putStrLn $ "successfully added rules. returning: " ++ show g0
   return $ IS.fromList g0
   where
     zeroRule []     _ = return ()
     zeroRule (f:fs) j =
-      let t = leadingMonomial f
+      let !t = leadingMonomial f
       in forM_ (zip [j+1..] fs) $ \(k, fk) -> do
-        let u = lcmMonomial t (leadingMonomial fk) / leadingMonomial fk
+        let !u = t / gcdMonomial (leadingMonomial fk) t
         addRule (k, u) Nothing
 
 f5Core :: ( ?labPolys :: (RefVector s (PolyRepr r ord n)),
@@ -170,7 +172,7 @@ f5Core i bs g = do
     sd <- spols pd
     rd <- reduction sd bs g =<< readSTRef g'
     forM_ (IS.toList rd) $ \k -> do
-      pss <- mapMaybeM (\j -> criticalPair k j i g) . IS.toList =<< readSTRef g'
+      pss <- mapMaybeM (\j -> criticalPair j k i g) . IS.toList =<< readSTRef g'
       modifySTRef' ps (pss ++)
       modifySTRef' g' (IS.insert k)
   readSTRef g'
@@ -209,7 +211,7 @@ findReductor :: (Eq r, ?labPolys :: RefVector s (PolyRepr r ord n),
              => Int -> IntSet -> IntSet -> ST s (Maybe Int)
 findReductor k g g' = do
   rk <- readAt ?labPolys k
-  let t = leadingMonomial $ rk ^. poly
+  let t = leadingMonomial $! rk ^. poly
       cond j = do
         rj <- readAt ?labPolys j
         let t' = leadingMonomial $ rj ^. poly
@@ -218,7 +220,7 @@ findReductor k g g' = do
         p1 <- isRewritable u j
         p2 <- isTopReducible (u*vj) g
         return $ t' `divs` t
-              && (u *@ rj)^.signature  /= rk ^. signature
+              -- && (u *@ rj)^.signature  /= rk ^. signature
               && not p1 && not p2
   listToMaybe <$> filterM cond (IS.toList g')
 
@@ -252,7 +254,7 @@ topReduction k g g' = do
         else do
           n <- lengthMV ?labPolys
           addLabPoly $ (u *@ rj) & poly .~ p'
-          addRule (j, u) $ Just n
+          addRule ((u*@rj) ^. signature) $ Just n
           return ([], [k, n])
 
 spols :: (?labPolys :: (RefVector s (PolyRepr r ord n)),
@@ -294,7 +296,7 @@ addRule (n, m) k = do
   cst <- readSTRef ?rules >>= V.freeze
   unsafeIOToST $ putStr ("\tadding rule for" ++ show ((n,m),k) ++ ": ") >> print cst
   writeAt ?rules n . ((m, k):) =<< readAt ?rules n
-  unsafeIOToST $ putStrLn "\tRule added."
+  unsafeIOToST . putStrLn . ("\tnew rule : "++).show =<< V.freeze =<< readSTRef ?rules
 
 isRewritable :: (?labPolys :: (RefVector s (PolyRepr r ord n)),
                  ?rules :: (RefVector s (Rule ord n)))
@@ -311,8 +313,9 @@ rewrite u k = do
   rs <- readAt ?rules l
   return $ maybe (Just k) snd $ find (\(t, _) -> t `divs` (u * v)) rs
 
-criticalPair :: (?labPolys :: RefVector s (PolyRepr r ord n),
-                 Eq r, SingRep n, DecidableZero r, Noetherian r, IsMonomialOrder ord)
+criticalPair :: (?labPolys :: RefVector s (PolyRepr r ord n)
+                ,?rules::RefVector s (Rule ord n)
+                ,Eq r, SingRep n, DecidableZero r, Noetherian r, IsMonomialOrder ord)
              => Int
              -> Int
              -> Int
@@ -330,8 +333,10 @@ criticalPair k l i g = do
       (k2, t2) = rl ^. signature
   p1 <- isTopReducible (u1 * t1) g
   p2 <- isTopReducible (u2 * t2) g
-  if {- (u1 *@ rk)^.signature == (u2 *@ rl)^.signature || -}
-     k1 == i && p1 || k2 == i && p2
+  q1 <- isRewritable u1 k
+  q2 <- isRewritable u2 l
+  if  (u1 *@ rk)^.signature == (u2 *@ rl)^.signature ||
+     k1 == i && p1 || k2 == i && p2 || q1 || q2
     then return Nothing
     else if u1 *@ rk < u2 *@ rl
          then return $ Just (t, u2, l, u1, k)
