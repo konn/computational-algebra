@@ -1,14 +1,16 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, MultiParamTypeClasses, NoImplicitPrelude                 #-}
 {-# LANGUAGE ParallelListComp, PolyKinds, RankNTypes, ScopedTypeVariables    #-}
-{-# LANGUAGE TemplateHaskell, TypeFamilies, TypeOperators                    #-}
+{-# LANGUAGE TemplateHaskell, TypeFamilies, TypeOperators, ViewPatterns      #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Algebra.Algorithms.Groebner (
                                    -- * Polynomial division
                                      divModPolynomial, divPolynomial, modPolynomial
                                    , lcmPolynomial, gcdPolynomial
                                    -- * Groebner basis
-                                   , calcGroebnerBasis, calcGroebnerBasisWith, calcGroebnerBasisWithStrategy
+                                   , isGroebnerBasis
+                                   , calcGroebnerBasis, calcGroebnerBasisWith
+                                   , calcGroebnerBasisWithStrategy
                                    , buchberger, syzygyBuchberger
                                    , simpleBuchberger, primeTestBuchberger
                                    , reduceMinimalGroebnerBasis, minimizeGroebnerBasis
@@ -84,6 +86,15 @@ divPolynomial = (fst .) . divModPolynomial
 infixl 7 `divPolynomial`
 infixl 7 `modPolynomial`
 infixl 7 `divModPolynomial`
+
+-- | Test if the given ideal is Groebner basis, using Buchberger criteria and relatively primeness.
+isGroebnerBasis :: (Eq r, SingRep n, DecidableZero r, Division r, Noetherian r, IsMonomialOrder order)
+                => Ideal (OrderedPolynomial r order n) -> Bool
+isGroebnerBasis (nub . generators -> ideal) = all check $ combinations ideal
+  where
+    check (f, g) =
+      let (t, u) = (leadingMonomial f , leadingMonomial g)
+      in t*u == lcmMonomial t u || sPolynomial f g `modPolynomial` ideal == zero
 
 -- | The Naive buchberger's algorithm to calculate Groebner basis for the given ideal.
 simpleBuchberger :: (Field k, IsPolynomial k n, IsMonomialOrder order)
@@ -418,10 +429,11 @@ resultant :: forall k ord . (Eq k, Noetherian k, Field k, DecidableZero k, IsMon
 resultant = go one
   where
     go res h s
-        | totalDegree' s > 0     = let r    = h `modPolynomial` [s]
-                                       res' = res * negate one ^ (totalDegree' h * totalDegree' s)
-                                                  * (leadingCoeff s) ^ (totalDegree' h - totalDegree' r)
-                                   in go res' s r
+        | totalDegree' s > 0     =
+          let r    = h `modPolynomial` [s]
+              res' = res * negate one ^ (totalDegree' h * totalDegree' s)
+                     * (leadingCoeff s) ^ (totalDegree' h - totalDegree' r)
+          in go res' s r
         | isZero h || isZero s = zero
         | totalDegree' h > 0     = (leadingCoeff s ^ totalDegree' h) * res
         | otherwise              = res
