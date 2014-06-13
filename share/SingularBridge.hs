@@ -6,6 +6,8 @@ import           Algebra.Ring.Polynomial hiding (lex)
 import           Control.Applicative
 import           Data.Char
 import           Data.List
+import           Data.Maybe              (mapMaybe)
+import           Data.Maybe              (fromMaybe)
 import           Data.Proxy
 import           Data.Ratio
 import           Data.Singletons
@@ -34,10 +36,11 @@ idealProgram fun ideal =
   in (++";") $ intercalate ";\n"
 
      [ "LIB \"primdec.lib\""
+     , "LIB \"f5_library.lib\""
      , "ring R = 0,(x(0.." ++ show (sNatToInt (sing :: SNat n) - 1) ++ "))," ++ singularOrder (Proxy :: Proxy ord)
      , "ideal I = " ++ istr
      , "option(redSB)"
-     , "print(" ++ fun ++ "(std(I)))"
+     , "print(" ++ fun ++ "(I))"
      , "exit"
      ]
 
@@ -47,14 +50,14 @@ singular code = readProcess "singular" ["-q"] code
 readSingularIdeal :: (SingI n, IsMonomialOrder ord)
                   => SNat n -> Proxy ord -> String -> [OrderedPolynomial Rational ord n]
 readSingularIdeal n p (T.pack -> code) =
-  map (readSingularPoly n p  . T.unpack) $ T.splitOn ",\n" code
+  mapMaybe (readSingularPoly n p  . T.unpack) $ map (\a -> fromMaybe a $ T.stripSuffix "," a) $ T.lines code
 
 readSingularPoly :: (SingI n, IsMonomialOrder ord)
-                 => SNat n -> Proxy ord -> String -> OrderedPolynomial Rational ord n
+                 => SNat n -> Proxy ord -> String -> Maybe (OrderedPolynomial Rational ord n)
 readSingularPoly _ _ code =
   case [p | (p, xs) <- readPoly code, all isSpace xs] of
-    [p] -> p
-    _ -> error "Reading"
+    (p:_) -> Just p
+    _ -> Nothing
   where
     readPoly st =  do
       (t, rest) <- readTerm st
@@ -112,4 +115,5 @@ singPolyFun :: forall ord n. (SingularOrder ord, SingI n)
             -> OrderedPolynomial Rational ord n
 singPolyFun fun ideal = unsafePerformIO $ do
   ans <- singular $ idealProgram fun ideal
-  return $ readSingularPoly (sing :: SNat n) (Proxy :: Proxy ord) ans
+  let Just p = readSingularPoly (sing :: SNat n) (Proxy :: Proxy ord) ans
+  return p
