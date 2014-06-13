@@ -44,7 +44,7 @@ library
                      Algebra.Algorithms.Faugere5 Algebra.Algorithms.Groebner
                      Algebra.Algorithms.Groebner.Monomorphic Algebra.Algorithms.ZeroDim
                      Algebra.Ring.Noetherian Algebra.Ring.Polynomial
-                     Algebra.Ring.PolynomialAccumulated Algebra.Ring.Polynomial.Quotient
+                     Algebra.Ring.Polynomial.Quotient
                      Algebra.Ring.Polynomial.Monomorphic Algebra.Ring.Polynomial.Parser
                      Algebra.Scalar Algebra.Internal Algebra.Instances Algebra.Wrapped
                      Algebra.Matrix Algebra.Repa Algebra.Prelude
