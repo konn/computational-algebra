@@ -11,8 +11,7 @@ import           Control.Applicative         ((<$>))
 import           Control.Arrow               ((>>>))
 import           Control.Lens                (makeLenses, view, (%~), (&), (.~))
 import           Control.Lens                ((^.), _1, _2)
-import           Control.Monad               (filterM, forM_, liftM)
-import           Control.Monad               (zipWithM_)
+import           Control.Monad               (filterM, forM_, liftM, zipWithM_)
 import           Control.Monad.Loops         (anyM, whileM_)
 import           Control.Monad.ST            (ST, runST)
 import           Data.Foldable               (foldrM)
@@ -22,23 +21,20 @@ import           Data.Heap                   (Entry (..), insert)
 import qualified Data.Heap                   as H
 import           Data.IntSet                 (IntSet)
 import qualified Data.IntSet                 as IS
-import           Data.List                   (find, partition)
-import           Data.List                   (sortBy)
+import           Data.List                   (find, partition, sort, sortBy)
 import           Data.List                   (tails)
-import           Data.List                   (sort)
 import           Data.Maybe                  (listToMaybe)
-import           Data.Monoid                 ((<>))
 import           Data.Ord                    (comparing)
 import           Data.Singletons             (SingRep)
 import           Data.STRef                  (STRef, modifySTRef', newSTRef)
 import           Data.STRef                  (readSTRef, writeSTRef)
-import           Data.Type.Natural           (sThree)
-import           Data.Type.Natural           (Three)
+import           Data.Type.Natural           (Three, sThree)
 import qualified Data.Vector                 as V
 import qualified Data.Vector.Mutable         as MV
 import           Numeric.Decidable.Zero      (isZero)
 
 import Control.Monad.ST.Unsafe (unsafeIOToST)
+import Data.Monoid             ((<>))
 
 {-
 unsafeIOToST :: Monad m => t -> m ()
@@ -194,15 +190,16 @@ reduction :: (Eq r, ?labPolys :: (RefVector s (PolyRepr r ord n)),
               IsMonomialOrder ord)
           => [Int] -> [OrderedPolynomial r ord n] -> IntSet -> IntSet -> ST s IntSet
 reduction t0 bs g g' = do
-  loop IS.empty . H.fromList =<< mapM (\l -> flip Entry l <$> readAt ?labPolys l) t0
+  loop IS.empty . H.fromList =<< mapM (\l -> flip Entry l . view signature <$> readAt ?labPolys l) t0
   where
-    loop completed todo =
+    loop !completed !todo =
       case H.uncons todo of
         Nothing -> return completed
-        Just (Entry rk k, todo') -> do
+        Just (Entry _ k, todo') -> do
+          rk <- readAt ?labPolys k
           writeAt ?labPolys k $ nf rk bs
           (new, redo) <- topReduction k g (g' `IS.union` completed)
-          redo' <- mapM (\l -> flip Entry l <$> readAt ?labPolys l) redo
+          redo' <- mapM (\l -> flip Entry l . view signature <$> readAt ?labPolys l) redo
           loop (completed `IS.union` IS.fromList new) (todo' `H.union` H.fromList redo')
 
 findReductor :: (Eq r, ?labPolys :: RefVector s (PolyRepr r ord n),
@@ -230,10 +227,10 @@ topReduction :: (Eq r, ?labPolys :: (RefVector s (PolyRepr r ord n)),
              => Int -> IntSet -> IntSet -> ST s ([Int], [Int])
 topReduction k g g' = do
   rk <- readAt ?labPolys k
-  let p = rk ^. poly
+  let !p = rk ^. poly
   if isZero p
      then do
-       unsafeIOToST (putStrLn "!!!!!!!!!!!! REDUCTION TO ZERO !!!!!!!!!!!!!!!")
+       unsafeIOToST $ putStrLn "!!!!!!!!!!!! REDUCTION TO ZERO !!!!!!!!!!!!!!!"
        return ([], [])
      else do
   mj <- findReductor k g g'
@@ -265,24 +262,30 @@ spols :: (?labPolys :: (RefVector s (PolyRepr r ord n)),
 spols bs = do
   map payload . T.toList <$> foldrM step H.empty (sortBy (comparing $ view _1) bs)
   where
-    step (_, u,k,v,l) fs = do
+    step (_, _, k, _,l) fs = do
       rk <- readAt ?labPolys k
       rl <- readAt ?labPolys l
+      let t1 = leadingMonomial $ rk^.poly
+          t2 = leadingMonomial $ rl^.poly
+          u = t2 / gcdMonomial t1 t2
+          v = t1 / gcdMonomial t1 t2
       p1 <- isRewritable u k
       p2 <- isRewritable v l
       if not p1 && not p2
         then do
-          let s0 = monoize $ sPolynomial (rk^.poly)  (rl^.poly)
+          let (fk, fl) = (rk^.poly, rl^.poly)
+              s0 = monoize $ leadingCoeff fl % one * toPolynomial (one, u) * fk
+                   - leadingCoeff fk %one * toPolynomial (one, v) * fl
               rn = (u *@ rk) & poly .~ s0
           n <- lengthMV ?labPolys
           addLabPoly rn
           rs <- V.freeze =<< readSTRef ?rules
           unsafeIOToST $ putStrLn $ concat
             [ "spol with: Rule = ", drop 9 $ show rs, ", ((k,u),n) = ", show ((k, u), n)]
-          addRule (k, u) (Just n)
+          addRule (k, u*(rk^.signature._2)) (Just n)
           if isZero s0
             then return fs
-            else return $ insert (Entry rn n) fs
+            else return $ insert (Entry (rn^.signature) n) fs
         else return fs
 
 addLabPoly :: (?labPolys::STRef s (MV.MVector s a),
@@ -327,8 +330,9 @@ criticalPair k l i g = do
   let tk = leadingMonomial $ rk^.poly
       tl = leadingMonomial $ rl^.poly
       t  = lcmMonomial tk tl
-      u1 = t / tk
-      u2 = t / tl
+      tgcd = gcdMonomial tk tl
+      u1 = tl / tgcd
+      u2 = tk / tgcd
       (k1, t1) = rk ^. signature
       (k2, t2) = rl ^. signature
   p1 <- isTopReducible (u1 * t1) g
@@ -338,7 +342,7 @@ criticalPair k l i g = do
   if  (u1 *@ rk)^.signature == (u2 *@ rl)^.signature ||
      k1 == i && p1 || k2 == i && p2 || q1 || q2
     then return Nothing
-    else if u1 *@ rk < u2 *@ rl
+    else if (u1 *@ rk)^.signature < (u2 *@ rl)^.signature
          then return $ Just (t, u2, l, u1, k)
          else return $ Just (t, u1, k, u2, l)
 
@@ -346,7 +350,7 @@ isTopReducible :: (?labPolys :: RefVector s (PolyRepr r ord n), SingRep n,
                    DecidableZero r, Noetherian r, IsMonomialOrder ord)
                => OrderedMonomial ord n -> IntSet -> ST s Bool
 isTopReducible f gs =
-  any (`divs` f) <$> mapM (liftM (leadingMonomial . view poly) . readAt ?labPolys) (IS.toList gs)
+  anyM (liftM ((`divs` f) . leadingMonomial . view poly) . readAt ?labPolys) (IS.toList gs)
 
 readAt :: STRef s (MV.MVector s b) -> Int -> ST s b
 readAt m i = flip MV.read i =<< readSTRef m
