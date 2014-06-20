@@ -31,7 +31,6 @@ import           Algebra.Algorithms.Groebner         (NormalStrategy (..),
                                                       calcWeight')
 import qualified Algebra.Algorithms.Groebner         as Gr
 import           Algebra.Internal
-import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial             (Grevlex (..), Grlex (..),
                                                       IsMonomialOrder, IsOrder,
                                                       Lex (..), Revlex (..),
@@ -53,8 +52,8 @@ import           Numeric.Algebra
 import           Prelude                             hiding (Num (..))
 
 -- | Synonym
-class (Eq r, Field r, Noetherian r, DecidableZero r) => Groebnerable r
-instance (Eq r, Field r, Noetherian r, DecidableZero r) => Groebnerable r
+class (Eq r, Field r, DecidableZero r) => Groebnerable r
+instance (Eq r, Field r, DecidableZero r) => Groebnerable r
 
 -- | Calculate a intersection of given ideals.
 intersection :: forall r. (Groebnerable r)
@@ -266,5 +265,5 @@ resultant f g =
        _ -> error "currently supports only unary polynomial."
 
 -- | Determin if given two unary polynomials have common factor.
-hasCommonFactor :: (DecidableZero r, Eq r, Division r, Noetherian r) => Polynomial r -> Polynomial r -> Bool
+hasCommonFactor :: (DecidableZero r, Eq r, Division r) => Polynomial r -> Polynomial r -> Bool
 hasCommonFactor f g = resultant f g == zero

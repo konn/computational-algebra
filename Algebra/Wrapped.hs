@@ -6,16 +6,14 @@
 {-# LANGUAGE TypeFamilies, TypeSynonymInstances, UndecidableInstances        #-}
 {-# OPTIONS_GHC -fwarn-name-shadowing #-}
 module Algebra.Wrapped (WrappedField(..), Normed(..), fmapUnwrap, fmapWrap) where
-import           Algebra.Ring.Noetherian
 import           Control.Lens
 import           Data.Complex
 import           Data.Ratio
-import           Numeric.Algebra                 hiding ((/), (<))
-import qualified Numeric.Algebra                 as NA
-import           Numeric.Algebra.Ring.Noetherian
-import           Prelude                         hiding (lex, negate, recip,
-                                                  sum, (*), (+), (-), (^), (^^))
-import qualified Prelude                         as P
+import           Numeric.Algebra hiding ((/), (<))
+import qualified Numeric.Algebra as NA
+import           Prelude         hiding (lex, negate, recip, sum, (*), (+), (-),
+                                  (^), (^^))
+import qualified Prelude         as P
 import           Unsafe.Coerce
 
 newtype WrappedField a = WrapField { unwrapField :: a
@@ -28,7 +26,6 @@ deriving instance Commutative r => Commutative (WrappedField r)
 deriving instance Ring r => Ring (WrappedField r)
 deriving instance Additive r => Additive (WrappedField r)
 deriving instance Multiplicative r => Multiplicative (WrappedField r)
-deriving instance Noetherian r => Noetherian (WrappedField r)
 deriving instance Unital r => Unital (WrappedField r)
 deriving instance DecidableUnits r => DecidableUnits (WrappedField r)
 deriving instance Division r => Division (WrappedField r)

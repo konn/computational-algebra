@@ -3,7 +3,6 @@
 {-# LANGUAGE TypeSynonymInstances                                        #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Matrix (Matrix(..), mapSM, delta, companion, Sparse(..), gaussReduction) where
-import           Algebra.Ring.Noetherian
 import           Algebra.Ring.Polynomial
 import           Algebra.Wrapped                  (Normed (..))
 import           Control.Arrow
@@ -208,7 +207,7 @@ delta :: (NA.Monoidal r, NA.Unital r) => Int -> Int -> r
 delta i j | i == j = NA.one
           | otherwise = NA.zero
 
-companion :: (SingI n, DecidableZero r, Noetherian r, Matrix mat, Eq r,
+companion :: (SingI n, DecidableZero r, Matrix mat, Eq r,
               Elem mat r, IsMonomialOrder ord)
           => Ordinal n -> OrderedPolynomial r ord n -> mat r
 companion on poly =
