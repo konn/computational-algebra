@@ -4,23 +4,25 @@ module Algebra.Prelude
         module Prelude,
         module Numeric.Algebra,
         module Algebra.Ring.Polynomial,
-        module Numeric.Algebra.Domain,
-        module Numeric.Algebra.Domain.Euclidean,
-        module Data.Ratio) where
+        module Numeric.Domain.Class,
+        module Numeric.Domain.Euclidean,
         module Algebra.Ring.Ideal,
+        module Numeric.Field.Fraction) where
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
-import           Data.Ratio                       hiding ((%))
+import           Data.Ratio               hiding ((%))
 import           Data.Singletons
-import           Numeric.Algebra                  hiding (Order (..), (^))
-import qualified Numeric.Algebra                  as NA
-import           Numeric.Algebra.Domain
-import           Numeric.Algebra.Domain.Euclidean hiding (normalize)
-import           Prelude                          hiding (Fractional (..),
-                                                   Integral (..), Num (..),
-                                                   Real (..), gcd, lex, product,
-                                                   subtract, sum, (^), (^^))
-import           Prelude                          (fromRational)
+import           Numeric.Algebra          hiding (Order (..), (^))
+import qualified Numeric.Algebra          as NA
+import           Numeric.Domain.Class
+import           Numeric.Domain.Euclidean hiding (normalize)
+import           Numeric.Field.Fraction
+import           Prelude                  hiding (Fractional (..),
+                                           Integral (..), Num (..), Rational,
+                                           Real (..), gcd, lex, product,
+                                           subtract, sum, (^), (^^))
+import           Prelude                  (fromRational)
 
 (^) :: Unital r => r -> Natural -> r
 (^) = pow
@@ -33,3 +35,5 @@ import           Prelude                          (fromRational)
 n % m = injectCoeff (n / m)
 infixl 7 %
 infixr 8 ^, ^^
+
+type Rational = Ratio Integer
