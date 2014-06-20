@@ -17,7 +17,7 @@ module Algebra.Ring.Polynomial
     , normalize, injectCoeff, varX, var, varMonom, getTerms, shiftR, orderedBy, monomials
     , divs, isPowerOf, tryDiv, fromList, Coefficient(..)
     , leadingTerm, leadingMonomial, leadingCoeff, genVars, sArity
-    , OrderedMonomial(..), Grevlex(..), mapCoeff
+    , OrderedMonomial(..), Grevlex(..), mapCoeff,pDivModPoly
     , Revlex(..), Lex(..), Grlex(..), Graded(..)
     , ProductOrder (..), WeightOrder(..), subst, diff
     , IsOrder(..), IsMonomialOrder)  where
@@ -48,8 +48,8 @@ import qualified Numeric.Ring.Class as   NA
 import           Numeric.Algebra         hiding (Order (..))
 import           Numeric.Decidable.Zero
 import           Numeric.Decidable.Units
-import           Prelude                 hiding (lex, negate, recip, sum, (*),
-                                          (+), (-), (^), (^^), Rational, fromInteger)
+import           Prelude                 hiding (lex, negate, recip, sum, (*), quot,rem,
+                                          (+), (-), (^), (^^), Rational, fromInteger, (/))
 import qualified Prelude                 as P
 import Numeric.Semiring.Integral (IntegralSemiring)
 import Control.Applicative ((<$>))
@@ -482,7 +482,15 @@ instance (Ring r, DecidableZero r, SingI n, IsOrder ord) => DecidableZero (Order
 
 instance (DecidableZero r, Ring r, IsOrder ord, SingI n, IntegralSemiring r) => IntegralSemiring (OrderedPolynomial r ord n)
 instance (Eq r, DecidableUnits r, DecidableZero r, Field r, IsMonomialOrder ord, IntegralSemiring r) => Euclidean (OrderedPolynomial r ord One) where
-  p `divide` q = divModPolynomial p q
+  f0 `divide` g = loop f0 zero
+    where
+      lm = leadingMonomial g
+      loop p quo
+          | isZero p = (quo, p)
+          | lm `divs` leadingMonomial p =
+              let q   = toPolynomial $ leadingTerm p `tryDiv` leadingTerm g
+              in loop (p - (q * g)) (quo + q)
+          | otherwise = (quo, p)
   degree f | isZero f  = Nothing
            | otherwise = Just $ P.fromIntegral $ totalDegree' f
   splitUnit f
@@ -490,25 +498,26 @@ instance (Eq r, DecidableUnits r, DecidableZero r, Field r, IsMonomialOrder ord,
     | otherwise = let lc = leadingCoeff f
                   in (injectCoeff lc, injectCoeff (recip lc) * f)
 
+pDivModPoly :: (Euclidean k, SingRep n, IsOrder ord)
+            => OrderedPolynomial k ord n -> OrderedPolynomial k ord n
+            -> (OrderedPolynomial k ord n, OrderedPolynomial k ord n)
+f0 `pDivModPoly` g =
+  loop (injectCoeff (pow (leadingCoeff g) (P.fromIntegral $ totalDegree' f0 - totalDegree' g + 1 :: Natural)) * f0) zero
+  where
+    lm = leadingMonomial g
+    loop p quo
+        | isZero p = (quo, p)
+        | lm `divs` leadingMonomial p =
+            let q   = toPolynomial $ (leadingCoeff p `quot` leadingCoeff g, leadingMonomial p / leadingMonomial g)
+            in loop (p - (q * g)) (quo + q)
+        | otherwise = (quo, p)
+
 instance (Ring r, DecidableZero r, IsOrder ord, DecidableUnits r, SingRep n) => DecidableUnits (OrderedPolynomial r ord n) where
   isUnit f =
     let (lc, lm) = leadingTerm f
     in lm == one && isUnit lc
   recipUnit f | isUnit f  = injectCoeff <$> recipUnit (leadingCoeff f)
               | otherwise = Nothing
-
-divModPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)
-                 => OrderedPolynomial r order n -> OrderedPolynomial r order n
-                 -> (OrderedPolynomial r order n, OrderedPolynomial r order n)
-divModPolynomial f0 g = loop f0 zero
-  where
-    lm = leadingMonomial g
-    loop p quo
-        | isZero p = (quo, p)
-        | lm `divs` leadingMonomial p =
-            let q   = toPolynomial $ leadingTerm p `tryDiv` leadingTerm g
-            in loop (p - (q * g)) (quo + q)
-        | otherwise = (quo, p)
 
 varX :: (DecidableZero r, Ring r, SingI n, IsOrder order) => OrderedPolynomial r order (S n)
 varX = var OZ
@@ -580,7 +589,7 @@ substWith o assign poly = sum $ map (uncurry o . second extractPower) $ getTerms
     extractPower = V.foldr (*) one . V.zipWithSame pow assign .
                    V.map (P.fromIntegral :: Int -> Natural) . getMonomial
 
-subst' :: (Ring r, DecidableZero r, SingI n, Module r (OrderedPolynomial r ord (S n)), IsOrder ord)
+subst' :: (Ring r, DecidableZero r, SingI n, IsOrder ord)
        => OrderedPolynomial r ord (S n)
        -> OrderedPolynomial r ord (S n)
        -> OrderedPolynomial r ord (S n)
@@ -588,7 +597,7 @@ subst' :: (Ring r, DecidableZero r, SingI n, Module r (OrderedPolynomial r ord (
 subst' p val f
   | v <- leadingMonomial p
   , totalDegree v == 1 =
-    subst (V.zipWithSame (\i mn -> if i == 0 then mn else val) (getMonomial v) allVars) f 
+    substWith (.*.) (V.zipWithSame (\i mn -> if i == 0 then mn else val) (getMonomial v) allVars) f 
   | otherwise = error "Not an "
 
 allVars :: forall k ord n . (IsOrder ord, Ring k, DecidableZero k, SingI n)
@@ -685,4 +694,5 @@ sArity (Polynomial dic) = V.sLength $ getMonomial $ fst $ M.findMin dic
 "sArity/five" forall (v :: OrderedPolynomial k ord (S (S (S (S (S Z)))))). sArity v = SS (SS (SS (SS (SS SZ))))
 "sArity/sing" forall (v :: SingI n => OrderedPolynomial k ord n).           sArity (v :: OrderedPolynomial k ord n) = sing :: SNat n
   #-}
+
 
