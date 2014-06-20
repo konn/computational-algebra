@@ -4,7 +4,7 @@ module Faugere5Spec where
 import Algebra.Algorithms.Faugere5
 import Algebra.Algorithms.Groebner
 import Algebra.Prelude             ((%))
-import Algebra.Ring.Noetherian
+import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
 import Data.List                   (sort)
 import Data.Type.Natural           hiding (one, promote, zero)
@@ -28,7 +28,7 @@ prop_computesGroebner sdim =
       gs = generators $ f5Original $ toIdeal ideal
   in gs == answer
 
-testCases :: [Ideal (OrderedPolynomial Rational Grevlex Three)]
+testCases :: [Ideal (OrderedPolynomial (Fraction Integer) Grevlex Three)]
 testCases = map toIdeal
             [[-8%5 *x^2 + 2*x *y - 3%2 *y^2
              ,-1%2 *x^2 + 7%3 *x *y

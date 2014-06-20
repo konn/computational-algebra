@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings, ScopedTypeVariables, ViewPatterns #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module SingularBridge (singIdealFun, singPolyFun) where
-import           Algebra.Ring.Noetherian
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial hiding (lex)
 import           Control.Applicative
 import           Data.Char
@@ -9,11 +9,11 @@ import           Data.List
 import           Data.Maybe              (mapMaybe)
 import           Data.Maybe              (fromMaybe)
 import           Data.Proxy
-import           Data.Ratio
 import           Data.Singletons
 import qualified Data.Text               as T
 import           Data.Type.Natural
 import           Numeric
+import           Numeric.Field.Fraction
 import           System.IO.Unsafe
 import           System.Process
 
@@ -28,7 +28,7 @@ instance SingularOrder Grevlex where
 
 idealProgram :: forall ord n. (SingularOrder ord, SingI n)
              => String
-             -> Ideal (OrderedPolynomial Rational ord n)
+             -> Ideal (OrderedPolynomial (Fraction Integer) ord n)
              -> String
 idealProgram fun ideal =
   let vars = [(i, "x(" ++ show i ++ ")") | i <- [0.. sNatToInt (sing :: SNat n) - 1]]
@@ -48,12 +48,12 @@ singular :: String -> IO String
 singular code = readProcess "singular" ["-q"] code
 
 readSingularIdeal :: (SingI n, IsMonomialOrder ord)
-                  => SNat n -> Proxy ord -> String -> [OrderedPolynomial Rational ord n]
+                  => SNat n -> Proxy ord -> String -> [OrderedPolynomial (Fraction Integer) ord n]
 readSingularIdeal n p (T.pack -> code) =
   mapMaybe (readSingularPoly n p  . T.unpack) $ map (\a -> fromMaybe a $ T.stripSuffix "," a) $ T.lines code
 
 readSingularPoly :: (SingI n, IsMonomialOrder ord)
-                 => SNat n -> Proxy ord -> String -> Maybe (OrderedPolynomial Rational ord n)
+                 => SNat n -> Proxy ord -> String -> Maybe (OrderedPolynomial (Fraction Integer) ord n)
 readSingularPoly _ _ code =
   case [p | (p, xs) <- readPoly code, all isSpace xs] of
     (p:_) -> Just p
@@ -104,15 +104,15 @@ readSingularPoly _ _ code =
             return (var (toEnum nth) ^ power, gomi)
 
 singIdealFun :: forall ord n. (SingularOrder ord, SingI n)
-             => String -> Ideal (OrderedPolynomial Rational ord n) -> Ideal (OrderedPolynomial Rational ord n)
+             => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Ideal (OrderedPolynomial (Fraction Integer) ord n)
 singIdealFun fun ideal = unsafePerformIO $ do
   ans <- singular $ idealProgram fun ideal
   return $ toIdeal $ readSingularIdeal (sing :: SNat n) (Proxy :: Proxy ord) ans
 
 singPolyFun :: forall ord n. (SingularOrder ord, SingI n)
             => String
-            -> Ideal (OrderedPolynomial Rational ord n)
-            -> OrderedPolynomial Rational ord n
+            -> Ideal (OrderedPolynomial (Fraction Integer) ord n)
+            -> OrderedPolynomial (Fraction Integer) ord n
 singPolyFun fun ideal = unsafePerformIO $ do
   ans <- singular $ idealProgram fun ideal
   let Just p = readSingularPoly (sing :: SNat n) (Proxy :: Proxy ord) ans

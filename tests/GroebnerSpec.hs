@@ -2,7 +2,7 @@
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 module GroebnerSpec where
 import           Algebra.Algorithms.Groebner
-import           Algebra.Ring.Noetherian
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Control.Monad
 import           Data.List                   (delete)
@@ -115,7 +115,7 @@ prop_degdecay sdim =
 
 data IntersectCase r ord n = IC [OrderedPolynomial r ord n] [OrderedPolynomial r ord n] [OrderedPolynomial r ord n]
 
-ics_binary :: [IntersectCase Rational Grevlex Two]
+ics_binary :: [IntersectCase (Fraction Integer) Grevlex Two]
 ics_binary =
   let [x, y] = SV.toList allVars
   in [IC [x*y] [y] [x*y]]

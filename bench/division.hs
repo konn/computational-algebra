@@ -4,7 +4,7 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
 import Algebra.Algorithms.Groebner
-import Algebra.Ring.Noetherian
+import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
 import Control.Applicative
 import Control.Concurrent
@@ -18,13 +18,13 @@ import System.Process
 import Test.QuickCheck
 import Utils
 
-makeIdeals :: SingI n => Int -> SNat n -> Int -> IO [(Polynomial Rational n, [Polynomial Rational n])]
+makeIdeals :: SingI n => Int -> SNat n -> Int -> IO [(Polynomial (Fraction Integer) n, [Polynomial (Fraction Integer) n])]
 makeIdeals count sn dpI = do
   ideals <- take count . map generators <$> sample' (resize dpI (idealOfDim sn))
   fs <- take count <$> sample' (polyOfDim sn)
   return $ zip fs ideals
 
-mkTestCases :: SingI n => [(Polynomial Rational n, [Polynomial Rational n])] -> IO [Benchmark]
+mkTestCases :: SingI n => [(Polynomial (Fraction Integer) n, [Polynomial (Fraction Integer) n])] -> IO [Benchmark]
 mkTestCases is =
   forM (zip [1..] is) $ \(n, (f0, gs0)) -> do
       f  <- return $!! (f0 `using` rdeepseq)

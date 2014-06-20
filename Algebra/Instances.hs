@@ -5,12 +5,16 @@
 module Algebra.Instances () where
 import           Control.Lens
 import           Data.Complex
-import           Data.Type.Natural      (Nat (..), bugInGHC)
-import qualified Data.Vector.Sized      as V
+import           Data.Type.Natural        (bugInGHC)
+import qualified Data.Vector.Sized        as V
 import           Numeric.Algebra
+import qualified Numeric.Algebra          as NA
 import           Numeric.Decidable.Zero
-import           Prelude                hiding (Num (..))
-import qualified Prelude                as P
+import           Numeric.Domain.Euclidean (Euclidean)
+import           Numeric.Domain.Euclidean (splitUnit)
+import           Numeric.Field.Fraction
+import           Prelude                  hiding (Num (..))
+import qualified Prelude                  as P
 
 type instance Index (V.Vector a n) = V.Index n
 type instance IxValue (V.Vector a n) = a
@@ -28,6 +32,15 @@ updateNth _      _ _              = bugInGHC
 -- | These Instances are not algebraically right, but for the sake of convenience.
 instance DecidableZero r => DecidableZero (Complex r) where
   isZero (a :+ b) = isZero a && isZero b
+
+instance Euclidean a => P.Num (Fraction a) where
+  (+) = (NA.+)
+  (-) = (NA.-)
+  negate = NA.negate
+  (*) = (NA.*)
+  fromInteger = NA.fromInteger
+  abs p = snd (splitUnit (numerator p)) % snd (splitUnit (denominator p))
+  signum p = fst (splitUnit (numerator p)) % fst (splitUnit (denominator p))
 
 instance Additive r => Additive (Complex r) where
   (a :+ b) + (c :+ d) = (a + c) :+ (b + d)

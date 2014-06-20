@@ -9,20 +9,20 @@ import Control.DeepSeq
 import Control.Parallel.Strategies
 import Criterion.Main
 
-x, y, z, w, s, a, b, c :: Polynomial Rational
+x, y, z, w, s, a, b, c :: Polynomial (Fraction Integer)
 [x, y, z, w, s, a, b, c, t] = map (injectVar . flip Variable Nothing) "xyzwSabct"
 
 instance NFData Variable where
   rnf (Variable x y) = rnf x `seq` rnf y `seq` ()
 
-instance NFData (Polynomial Rational) where
+instance NFData (Polynomial (Fraction Integer)) where
   rnf (Polynomial dic) = rnf dic
 
 parse x = case parsePolyn x of
             Right y -> y
             Left er -> error $ show er
 
-i1, i2, i3, i4 :: [Polynomial Rational]
+i1, i2, i3, i4 :: [Polynomial (Fraction Integer)]
 i1 = map parse ["yw - 1/2 zw + tw"
                ,"-2/7 uw^2 + 10/7 vw^2 - 20/7 w^3 + tu - 5tv + 10tw"
                ,"2/7 yw^2 - 2/7 zw^2 + 6/7 tw^2 - yt + zt - 3t^2"
@@ -46,12 +46,12 @@ i2 = map parse ["35y^4 - 30xy^2 - 210y^2z + 3x^2 + 30xz - 105z^2 +140yt - 21u"
 i3 = [ x^31 - x^6 - x- y, x^8 - z, x^10 -t]
 i4 = [ w+x+y+z, w*x+x*y+y*z+z*w, w*x*y + x*y*z + y*z*w + z*w*x, w*x*y*z]
 
-mkTestCases :: (Eq r, Show a, r ~ Rational) => a -> [Polynomial r] -> [Benchmark]
+mkTestCases :: (Eq r, Show a, r ~ (Fraction Integer)) => a -> [Polynomial r] -> [Benchmark]
 mkTestCases num ideal = [ mkTC ("lex0" ++ show num) ideal Lex
                         , mkTC ("grevlex0" ++ show num) ideal Grevlex
                         ]
 
-mkTC :: (r ~ Rational, IsMonomialOrder ord) => String -> [Polynomial r] -> ord -> Benchmark
+mkTC :: (r ~ (Fraction Integer), IsMonomialOrder ord) => String -> [Polynomial r] -> ord -> Benchmark
 mkTC name ideal ord =
     bgroup name [ bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy ord) ideal
                 , bench "syz+sugar" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy) ord) ideal

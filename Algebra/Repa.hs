@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, MultiParamTypeClasses #-}
 {-# LANGUAGE NoMonomorphismRestriction, TypeFamilies                    #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Repa where
 import           Algebra.Wrapped
 import           Control.Applicative
@@ -10,19 +11,21 @@ import           Data.Array.Repa.Eval
 import           Data.Array.Repa.Repr.Vector
 import           Data.List                         (maximumBy)
 import           Data.Ord
-import           Data.Ratio
 import qualified Data.Vector                       as V
+import qualified Numeric.Algebra                   as NA
+import           Numeric.Field.Fraction
+import           Numeric.Field.Fraction            (Fraction)
 
 type Matrix a = Array (DefVec a) DIM2 a
 
 type family DefVec a
 type instance DefVec Double  = U
 type instance DefVec Integer = V
-type instance DefVec Rational = V
+type instance DefVec (Fraction Integer) = V
 
-instance Elt Rational where
-  zero = 0
-  one  = 1
+instance Elt (Fraction Integer) where
+  zero = NA.zero
+  one  = NA.one
   touch r = touch (fromInteger $ numerator r :: Int) >> touch (fromInteger $ denominator r :: Int)
 
 switchRows :: (Source r e) => Int -> Int -> Array r DIM2 e -> Array D DIM2 e

@@ -4,7 +4,7 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
 import           Algebra.Algorithms.ZeroDim
-import           Algebra.Ring.Noetherian
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
 import           Control.Applicative
@@ -26,10 +26,10 @@ import System.Environment
 import Test.QuickCheck
 import Utils
 
-x, y, z :: Polynomial Rational Three
+x, y, z :: Polynomial (Fraction Integer) Three
 [x, y, z] = genVars sThree
 
-(.*) :: SingI n => Rational -> Polynomial Rational n -> Polynomial Rational n
+(.*) :: SingI n => (Fraction Integer) -> Polynomial (Fraction Integer) n -> Polynomial (Fraction Integer) n
 (.*) = (.*.)
 
 infixl 7 .*
@@ -37,26 +37,26 @@ infixl 7 .*
 (^^) :: Unital r => r -> NA.Natural -> r
 (^^) = NA.pow
 
-eqn01 :: Ideal (Polynomial Rational Three)
+eqn01 :: Ideal (Polynomial (Fraction Integer) Three)
 eqn01 = toIdeal [x^^2 - 2*x*z + 5, x*y^^2+y*z+1, 3*y^^2 - 8*x*z]
 
-eqn02 :: Ideal (Polynomial Rational Three)
+eqn02 :: Ideal (Polynomial (Fraction Integer) Three)
 eqn02 =
   toIdeal [x^^2 + 2*y^^2 - y - 2*z
           ,x^^2 - 8*y^^2 + 10*z - 1
           ,x^^2 - 7*y*z
           ]
 
-eqn03 :: Ideal (Polynomial Rational Three)
+eqn03 :: Ideal (Polynomial (Fraction Integer) Three)
 eqn03 = toIdeal [x^^2 + y^^2 + z^^2 - 2*x
                 ,x^^3 - y*z - x
                 ,x - y + 2*z
                 ]
 
-eqn04 :: Ideal (Polynomial Rational Three)
+eqn04 :: Ideal (Polynomial (Fraction Integer) Three)
 eqn04 = toIdeal [x*y + z - x*z, x^^2 - z, 2*x^^3 - x^^2 * y * z - 1]
 
-mkBench :: SingI n => Ideal (Polynomial Rational (S n)) -> IO [Benchmark]
+mkBench :: SingI n => Ideal (Polynomial (Fraction Integer) (S n)) -> IO [Benchmark]
 mkBench is = do
   gen <- newStdGen
   return [ bench "naive" $ nf (solve' 1e-10) is
@@ -65,7 +65,7 @@ mkBench is = do
          , bench "power" $ nf (solve'' 1e-10) is
          ]
 
-randomCase :: Int -> SNat (S n) -> IO [Ideal (Polynomial Rational (S n))]
+randomCase :: Int -> SNat (S n) -> IO [Ideal (Polynomial (Fraction Integer) (S n))]
 randomCase count sn = do
   as <- take count . map getIdeal <$> sample' (zeroDimOf sn)
   mapM (\a -> return $!! (a `using` rdeepseq)) as

@@ -2,7 +2,7 @@
 module Main where
 import Algebra.Algorithms.Groebner
 import Algebra.Prelude
-import Algebra.Ring.Noetherian
+import Algebra.Ring.Ideal
 import SingularBridge
 import Test.QuickCheck
 import Utils

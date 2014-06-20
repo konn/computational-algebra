@@ -7,6 +7,7 @@
 module Algebra.Algorithms.Faugere4 where
 import           Algebra.Matrix          hiding (trace)
 import qualified Algebra.Repa            as Repa
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Wrapped
 import           Control.Arrow
@@ -26,6 +27,7 @@ import qualified Data.Vector.Sized       as SV
 import           Debug.Trace
 import           Numeric.Algebra         hiding (sum, (<), (>), (\\))
 import qualified Numeric.Algebra         as NA
+import           Numeric.Field.Fraction  (Fraction)
 import           Prelude                 hiding (Num (..), recip, subtract, (/),
                                           (^))
 import           Prelude                 (Num ())
@@ -139,12 +141,12 @@ optimalStrategy ps =
   let d = minimum $ map degPair ps
   in filter ((==d) . degPair) ps
 
-sugarStrategy :: (DecidableZero r, SingI n, IsOrder ord, Eq r) => Strategy r ord n
+sugarStrategy :: (DecidableZero r, SingI n, IsOrder ord, Ring r) => Strategy r ord n
 sugarStrategy ps =
   let d = minimum $ map calcSug ps
   in filter ((==d) . calcSug) ps
 
-calcSug :: (DecidableZero r, Eq r, SingI n, IsOrder ord) => Pair r ord n -> Int
+calcSug :: (DecidableZero r, Ring r, SingI n, IsOrder ord) => Pair r ord n -> Int
 calcSug p =
   let f = leftPoly p
       g = rightPoly p
@@ -186,7 +188,7 @@ update gs bs h = {-# SCC "update" #-}
   in (es `par` bs' `par` gs') `pseq` (h : gs', bs' ++ es)
 
 cyclic :: (SingI n)
-       => SNat n -> Ideal (Polynomial Rational n)
+       => SNat n -> Ideal (Polynomial (Fraction Integer) n)
 cyclic sn =
   let vars = genVars sn
       cycs = tails $ cycle vars

@@ -2,11 +2,11 @@
 {-# LANGUAGE ConstraintKinds, NoImplicitPrelude, TypeOperators #-}
 module Example where
 import Algebra.Algorithms.Groebner
-import Algebra.Ring.Noetherian
-import Algebra.Ring.Polynomial
-import Data.Ratio
-import Data.Type.Natural           hiding (one, zero)
 import Algebra.Prelude
+import Algebra.Ring.Ideal
+import Algebra.Ring.Polynomial
+import Data.Type.Natural           hiding (one, zero)
+import Numeric.Field.Fraction
 
 default (Int)
 

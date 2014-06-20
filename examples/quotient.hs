@@ -2,33 +2,33 @@
 {-# LANGUAGE OverlappingInstances, PolyKinds                         #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Main (module Algebra.Algorithms.Groebner, module Algebra.Ring.Polynomial
-            , module Data.Ratio, module Main, module Algebra.Internal
+            , module Numeric.Field.Fraction, module Main, module Algebra.Internal
             ) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Internal
-import           Algebra.Ring.Noetherian
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
 import           Algebra.Scalar
 import           Control.Arrow
-import           Data.Ratio
 import           Data.Reflection
 import           Data.Type.Natural
 import           Numeric.Additive.Group
 import           Numeric.Algebra                  hiding ((/))
+import           Numeric.Field.Fraction
 import           Prelude                          hiding (Num (..), Real (..),
                                                    (/), (^), (^^))
 import qualified Prelude                          as P
 
 default (Integer)
 
-x, y :: Polynomial Rational Two
+x, y :: Polynomial (Fraction Integer) Two
 [x, y] = genVars sTwo
 
 (^^) :: Unital r => r -> Natural -> r
 (^^) = pow
 
-(/) :: Integer -> Integer -> Rational
+(/) :: Integer -> Integer -> (Fraction Integer)
 (/) = (%)
 
 infixr 8 ^^

@@ -8,6 +8,7 @@ module Algebra.Ring.Polynomial.Quotient ( Quotient(), QIdeal(), reifyQuotient, m
                                         , standardMonomials, standardMonomials', matRepr'
                                         , reduce, multWithTable, multUnamb, isZeroDimensional) where
 import           Algebra.Algorithms.Groebner
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
 import           Algebra.Wrapped
@@ -48,7 +49,7 @@ type Table r ord n = HM.HashMap
                      (OrderedPolynomial r ord n)
 
 vectorRep :: forall r order ideal n.
-              (Division r, IsPolynomial r n, IsMonomialOrder order, Reifies ideal (QIdeal r order n))
+              (Field r, IsPolynomial r n, IsMonomialOrder order, Reifies ideal (QIdeal r order n))
            => Quotient r order n ideal -> V.Vector r
 vectorRep f =
   let ZeroDimIdeal _ base _ = reflect f
@@ -56,7 +57,7 @@ vectorRep f =
   in V.fromList $ map (flip coeff mf) base
 
 matRepr' :: forall r ord n ideal.
-          (Ord r, Normed r, Division r, IsPolynomial r n, IsMonomialOrder ord, Reifies ideal (QIdeal r ord n))
+          (Ord r, Normed r, Field r, IsPolynomial r n, IsMonomialOrder ord, Reifies ideal (QIdeal r ord n))
        => Quotient r ord n ideal -> M.Matrix r
 matRepr' f =
   let ZeroDimIdeal bs vs _ = reflect f
@@ -69,7 +70,7 @@ matRepr' f =
           | (c, t) <- getTerms $ quotRepr_ f ]
 
 matRep0 :: forall r ord ideal n.
-           (Ord r, Division r, IsPolynomial r n, IsMonomialOrder ord, Reifies ideal (QIdeal r ord n))
+           (Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord, Reifies ideal (QIdeal r ord n))
         => Proxy ideal -> OrderedMonomial ord n -> M.Matrix r
 matRep0 pxy m =
   let ZeroDimIdeal _ bs table = reflect pxy
@@ -241,10 +242,10 @@ instance (IsMonomialOrder ord, Num r, Reifies ideal (QIdeal r ord n), IsPolynomi
   negate = Quotient . negate . quotRepr_
 
 -- | Reduce polynomial modulo ideal.
-reduce :: (Eq r, DecidableZero r, Division r, SingI n, IsMonomialOrder ord)
+reduce :: (Eq r, DecidableZero r, Field r, SingI n, IsMonomialOrder ord)
        => OrderedPolynomial r ord n -> Ideal (OrderedPolynomial r ord n) -> OrderedPolynomial r ord n
 reduce f i = withQuotient i $ modIdeal f
 
-isZeroDimensional :: (Eq r, DecidableZero r, Division r, SingI n, IsMonomialOrder ord)
+isZeroDimensional :: (Eq r, DecidableZero r, Field r, SingI n, IsMonomialOrder ord)
                   => [OrderedPolynomial r ord n] -> Bool
 isZeroDimensional ii = isJust $ stdMonoms $ calcGroebnerBasis $ toIdeal ii

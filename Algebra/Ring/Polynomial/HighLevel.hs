@@ -27,10 +27,10 @@ import           Numeric.Decidable.Zero
 import           Prelude                     hiding (negate, (*), (+), (-), (/),
                                               (^), (^^))
 
-rational :: Proxy Rational
+rational :: Proxy (Fraction Integer)
 rational = Proxy
 
-complexified :: Proxy a -> Proxy (Complex Rational)
+complexified :: Proxy a -> Proxy (Complex (Fraction Integer))
 complexified = reproxy
 
 double :: Proxy Double
@@ -75,7 +75,7 @@ instance HasName Lex where
 instance HasName Grlex where
   name _ = "grlex"
 
-instance HasName Rational where
+instance HasName (Fraction Integer) where
   name _ = "QQ"
 
 instance (Ring r, DecidableUnits r, Commutative r) => DecidableUnits (Complex r) where
@@ -128,7 +128,7 @@ vars = [ido| do
   ireturn $ case singInstance len of SingInstance -> genVars len
  |]
 
-qq :: Proxy Rational
+qq :: Proxy (Fraction Integer)
 qq = rational
 
 (^^) :: Unital r => r -> Natural -> r

@@ -3,12 +3,12 @@
 {-# LANGUAGE PolyKinds, QuasiQuotes, TemplateHaskell                        #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Main (module Algebra.Algorithms.Groebner, module Algebra.Ring.Polynomial
-            , module Data.Ratio, module Main, module Algebra.Internal
+            , module Numeric.Field.Fraction, module Main, module Algebra.Internal
             ) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.ZeroDim
 import           Algebra.Internal
-import           Algebra.Ring.Noetherian
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
 import           Algebra.Scalar
@@ -18,7 +18,6 @@ import           Data.Convertible
 import           Data.List                        (find, nub, partition, sortBy)
 import qualified Data.Matrix                      as M
 import           Data.Ord
-import           Data.Ratio
 import           Data.Type.Natural                hiding (one, zero)
 import           Data.Type.Ordinal
 import qualified Data.Vector                      as V
@@ -26,6 +25,8 @@ import qualified Data.Vector.Sized                as SV
 import           Debug.Trace
 import           Numeric.Algebra                  hiding ((.*), (<))
 import qualified Numeric.Algebra                  as NA
+import           Numeric.Field.Fraction
+import           Numeric.Field.Fraction
 import qualified Numeric.LinearAlgebra            as LA
 import           Prelude                          hiding (Fractional (..),
                                                    Integral (..), Num (..),
@@ -35,10 +36,10 @@ import qualified Prelude                          as P
 tr :: Show a => a -> a
 tr a = trace (show a) a
 
-x, y, z :: Polynomial Rational Three
+x, y, z :: Polynomial (Fraction Integer) Three
 [x, y, z] = genVars sThree
 
-(.*) :: SingI n => Rational -> Polynomial Rational n -> Polynomial Rational n
+(.*) :: SingI n => (Fraction Integer) -> Polynomial (Fraction Integer) n -> Polynomial (Fraction Integer) n
 (.*) = (.*.)
 
 infixl 7 .*
@@ -46,11 +47,11 @@ infixl 7 .*
 (^^) :: Unital r => r -> NA.Natural -> r
 (^^) = NA.pow
 
-seed :: Polynomial Rational Three
+seed :: Polynomial (Fraction Integer) Three
 seed = -412742019532366985 * x -7641395389638504101 * y + 4362835172800530323 * z
 
 seedMat :: LA.Matrix Double
-seedMat = LA.fromLists $ map (map P.fromRational) $ reifyQuotient eqn02 $ \pxy -> matrixRep (modIdeal' pxy seed)
+seedMat = LA.fromLists $ map (map P.from(Fraction Integer)) $ reifyQuotient eqn02 $ \pxy -> matrixRep (modIdeal' pxy seed)
 
 fromRight :: Either t t1 -> t1
 fromRight (Right a) = a
@@ -59,43 +60,43 @@ fromRight _ = error "fromRight"
 printLvl :: Show a => Int -> a -> IO ()
 printLvl lvl = putStrLn . unlines . map (replicate lvl '\t' ++) . lines . show
 
-eqn01 :: Ideal (Polynomial Rational Three)
+eqn01 :: Ideal (Polynomial (Fraction Integer) Three)
 eqn01 = toIdeal [x^^2 - 2*x*z + 5, x*y^^2+y*z+1, 3*y^^2 - 8*x*z]
 
-eqn02 :: Ideal (Polynomial Rational Three)
+eqn02 :: Ideal (Polynomial (Fraction Integer) Three)
 eqn02 =
   toIdeal [x^^2 + 2*y^^2 - y - 2*z
           ,x^^2 - 8*y^^2 + 10*z - 1
           ,x^^2 - 7*y*z
           ]
 
-eqn03 :: Ideal (Polynomial Rational Three)
+eqn03 :: Ideal (Polynomial (Fraction Integer) Three)
 eqn03 = toIdeal [x^^2 + y^^2 + z^^2 - 2*x
                 ,x^^3 - y*z - x
                 ,x - y + 2*z
                 ]
 
-jdeal :: Ideal (Polynomial Rational Three)
+jdeal :: Ideal (Polynomial (Fraction Integer) Three)
 jdeal = toIdeal [x*y + z - x*z, x^^2 - z, 2*x^^3 - x^^2 * y * z - 1]
 
 
-vs :: [V.Vector Rational]
+vs :: [V.Vector (Fraction Integer)]
 vs = reifyQuotient eqn03 $ \pxy -> map (vectorRep . modIdeal' pxy) [var 0 ^^ i | i <- [0..6::Natural]]
 
-mat :: M.Matrix Rational
+mat :: M.Matrix (Fraction Integer)
 mat = fromCols $ take 4 vs
 
 fromCols :: [V.Vector a] -> M.Matrix a
 fromCols = foldr1 (M.<|>) . map M.colVector
 
-findUnivar :: (DecidableZero r, Noetherian r, Eq r, IsOrder ord, SingI n)
+findUnivar :: (DecidableZero r, Ring r, Eq r, IsOrder ord, SingI n)
            => OrderedPolynomial r ord n -> Maybe (Ordinal n)
 findUnivar poly =
   let os = enumOrdinal (sArity poly)
       ms = map snd $ getTerms poly
   in find (\a -> all (`isPowerOf` (leadingMonomial (var a `asTypeOf` poly))) ms) os
 
-toCoeffList :: (DecidableZero r, Eq r, SingI n, Noetherian r, IsOrder ord) => Ordinal n -> OrderedPolynomial r ord n -> [r]
+toCoeffList :: (DecidableZero r, Eq r, SingI n, Ring r, IsOrder ord) => Ordinal n -> OrderedPolynomial r ord n -> [r]
 toCoeffList on f =
   let v = var on  `asTypeOf` f
   in [ coeff (leadingMonomial $ v ^^ i) f | i <- [0.. fromIntegral (totalDegree' f)]]
@@ -150,9 +151,9 @@ main = do
   print $ univPoly 2 jdeal
   return ()
 
-substIdeal :: [OrderedPolynomial Rational Grevlex Three]
-           -> Ideal (OrderedPolynomial Rational order Three)
-           -> Ideal (OrderedPolynomial Rational Grevlex Three)
+substIdeal :: [OrderedPolynomial (Fraction Integer) Grevlex Three]
+           -> Ideal (OrderedPolynomial (Fraction Integer) order Three)
+           -> Ideal (OrderedPolynomial (Fraction Integer) Grevlex Three)
 substIdeal = mapIdeal . substWith (.*.) . SV.unsafeFromList'
 
 toComplex :: Convertible r Double => r -> Complex Double

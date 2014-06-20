@@ -4,7 +4,7 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans -fcontext-stack=1000 #-}
 module Main where
 import           Algebra.Algorithms.Groebner
-import           Algebra.Ring.Noetherian
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
 import           Control.DeepSeq
@@ -22,10 +22,10 @@ import           Prelude                     hiding (Fractional (..),
 import qualified Prelude                     as P
 import           Progression.Main
 
-x, y, z :: Polynomial Rational Three
+x, y, z :: Polynomial (Fraction Integer) Three
 [x, y, z] = genVars sThree
 
-(.*) :: SingI n => Rational -> Polynomial Rational n -> Polynomial Rational n
+(.*) :: SingI n => (Fraction Integer) -> Polynomial (Fraction Integer) n -> Polynomial (Fraction Integer) n
 (.*) = (.*.)
 
 infixl 7 .*
@@ -33,35 +33,35 @@ infixl 7 .*
 (^^) :: Unital r => r -> NA.Natural -> r
 (^^) = NA.pow
 
-eqn01 :: Ideal (Polynomial Rational Three)
+eqn01 :: Ideal (Polynomial (Fraction Integer) Three)
 eqn01 = toIdeal [x^^2 - 2*x*z + 5, x*y^^2+y*z+1, 3*y^^2 - 8*x*z]
 
-eqn02 :: Ideal (Polynomial Rational Three)
+eqn02 :: Ideal (Polynomial (Fraction Integer) Three)
 eqn02 =
   toIdeal [x^^2 + 2*y^^2 - y - 2*z
           ,x^^2 - 8*y^^2 + 10*z - 1
           ,x^^2 - 7*y*z
           ]
 
-eqn03 :: Ideal (Polynomial Rational Three)
+eqn03 :: Ideal (Polynomial (Fraction Integer) Three)
 eqn03 = toIdeal [x^^2 + y^^2 + z^^2 - 2*x
                 ,x^^3 - y*z - x
                 ,x - y + 2*z
                 ]
 
-eqn04 :: Ideal (Polynomial Rational Three)
+eqn04 :: Ideal (Polynomial (Fraction Integer) Three)
 eqn04 = toIdeal [x*y + z - x*z, x^^2 - z, 2*x^^3 - x^^2 * y * z - 1]
 
-f01 :: Polynomial Rational Three
+f01 :: Polynomial (Fraction Integer) Three
 f01 = -4*x^^4*y^^4 - (1/3).*(x^^3*y^^4*z) + (4/5).*(x^^2*y^^2*z^^4) - (1/5).*(x*y^^2*z^^5)
 
-f02 :: Polynomial Rational Three
+f02 :: Polynomial (Fraction Integer) Three
 f02 = (3/4).*x^^6 - (6/5).*(x^^5*y) + 4*y^^5*z
 
-f03 :: Polynomial Rational Four
+f03 :: Polynomial (Fraction Integer) Four
 f03 = (6/7).* (a^^7*b^^3*c^^4) - (4/3) .* (a^^5*b^^6*c*d^^2) - a^^4*b^^2*c^^4*d^^4
   where
-    a, b, c, d :: Polynomial Rational Four
+    a, b, c, d :: Polynomial (Fraction Integer) Four
     [a, b, c, d] = genVars sFour
 
 main :: IO ()

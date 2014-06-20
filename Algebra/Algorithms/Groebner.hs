@@ -29,6 +29,7 @@ module Algebra.Algorithms.Groebner (
                                    , padVec
                                    ) where
 import           Algebra.Internal
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Control.Applicative
 import           Control.Monad
@@ -87,7 +88,7 @@ infixl 7 `modPolynomial`
 infixl 7 `divModPolynomial`
 
 -- | Test if the given ideal is Groebner basis, using Buchberger criteria and relatively primeness.
-isGroebnerBasis :: (Eq r, SingRep n, DecidableZero r, Division r, IsMonomialOrder order)
+isGroebnerBasis :: (Eq r, SingRep n, DecidableZero r, Field r, IsMonomialOrder order)
                 => Ideal (OrderedPolynomial r order n) -> Bool
 isGroebnerBasis (nub . generators -> ideal) = all check $ combinations ideal
   where

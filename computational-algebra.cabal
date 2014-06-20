@@ -42,10 +42,10 @@ library
                    control-monad-loop ==0.1.*
     exposed-modules: Algebra.Algorithms.Faugere4
                      Algebra.Algorithms.Faugere5 Algebra.Algorithms.Groebner
-                     Algebra.Algorithms.Groebner.Monomorphic Algebra.Algorithms.ZeroDim
+                     Algebra.Algorithms.ZeroDim
                      Algebra.Ring.Ideal Algebra.Ring.Polynomial
                      Algebra.Ring.Polynomial.Quotient
-                     Algebra.Ring.Polynomial.Monomorphic Algebra.Ring.Polynomial.Parser
+                     Algebra.Ring.Polynomial.Parser
                      Algebra.Scalar Algebra.Internal Algebra.Instances Algebra.Wrapped
                      Algebra.Matrix Algebra.Repa Algebra.Prelude
     exposed: True

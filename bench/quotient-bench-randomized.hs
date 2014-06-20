@@ -3,7 +3,7 @@
 {-# LANGUAGE TemplateHaskell, UndecidableInstances                            #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
-import Algebra.Ring.Noetherian
+import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
 import Algebra.Ring.Polynomial.Quotient
 import Control.Applicative
@@ -21,10 +21,10 @@ import System.Process
 import Test.QuickCheck
 import Utils
 
-makeIdeals :: SingI n => Int -> SNat n -> Int -> IO [Ideal (Polynomial Rational n)]
+makeIdeals :: SingI n => Int -> SNat n -> Int -> IO [Ideal (Polynomial (Fraction Integer) n)]
 makeIdeals count _ dpI = take count . map getIdeal <$> sample' (resize dpI arbitrary `suchThat` isNonTrivial)
 
-mkTestCases :: SingI n => Int -> Int -> [Ideal (Polynomial Rational n)] -> IO [Benchmark]
+mkTestCases :: SingI n => Int -> Int -> [Ideal (Polynomial (Fraction Integer) n)] -> IO [Benchmark]
 mkTestCases count size is =
   forM (zip [1..] is) $ \(n, ideal) -> do
     reifyQuotient ideal $ \ii -> do

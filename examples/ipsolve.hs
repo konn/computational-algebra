@@ -6,7 +6,7 @@ module Main where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances           ()
 import           Algebra.Prelude
-import           Algebra.Ring.Noetherian
+import           Algebra.Ring.Ideal
 import           Control.Applicative         ((<$>))
 import           Control.Lens                (ix, makeLenses, view, (&), (.~))
 import           Data.Constraint
@@ -35,7 +35,7 @@ ipOrder :: SNat n -> SList vs -> IPOrder n vs
 ipOrder n vs = ProductOrder n Grevlex (ProductOrder sOne Grevlex (WeightOrder vs Grevlex))
 
 toMonomial :: forall n ord . (SingI n, IsMonomialOrder ord)
-           => ord -> Vector Int n -> OrderedPolynomial Rational ord (S n)
+           => ord -> Vector Int n -> OrderedPolynomial (Fraction Integer) ord (S n)
 toMonomial _ ds =
   let !c = V.foldl' (\a b -> if b < 0 then a + P.abs b else a) 0 ds
   in toPolynomial (1, OrderedMonomial $

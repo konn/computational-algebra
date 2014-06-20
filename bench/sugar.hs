@@ -1,6 +1,6 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
-{-# LANGUAGE MultiParamTypeClasses, OverloadedStrings, PolyKinds   #-}
-{-# LANGUAGE QuasiQuotes, TemplateHaskell, UndecidableInstances    #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs            #-}
+{-# LANGUAGE MultiParamTypeClasses, OverloadedStrings, PolyKinds, QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskell, UndecidableInstances                            #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 import Algebra.Algorithms.Groebner.Monomorphic
 import Algebra.Ring.Polynomial.Monomorphic
@@ -9,16 +9,16 @@ import Control.Parallel.Strategies
 import Criterion.Main
 import SingularBench
 
-x, y, z, w, s, a, b, c :: Polynomial Rational
+x, y, z, w, s, a, b, c :: Polynomial (Fraction Integer)
 [x, y, z, w, s, a, b, c] = map (injectVar . flip Variable Nothing) "xyzwSabc"
 
 instance NFData Variable where
   rnf (Variable x y) = rnf x `seq` rnf y `seq` ()
 
-instance NFData (Polynomial Rational) where
+instance NFData (Polynomial (Fraction Integer)) where
   rnf (Polynomial dic) = rnf dic
 
-i1, i2, i3, i4 :: [Polynomial Rational]
+i1, i2, i3, i4 :: [Polynomial (Fraction Integer)]
 i1 = [x^2 + y^2 + z^2 - 1, x^2 + y^2 + z^2 - 2*x, 2*x -3*y - z]
 i2 = [x^2 * y - 2*x*y - 4*z - 1, z-y^2, x^3 - 4*z*y]
 i3 = [ 2 * s - a * y, b^2 - (x^2 + y^2), c^2 - ( (a-x) ^ 2 + y^2)

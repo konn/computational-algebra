@@ -18,11 +18,11 @@ import           Data.Singletons
 import           Data.Type.Natural
 import           System.Process
 
-formatPoly :: Polynomial Rational -> String
+formatPoly :: Polynomial (Fraction Integer) -> String
 formatPoly (Polynomial dic) = intercalate "+" $
    map (uncurry formatTerm) $ M.toList dic
 
-formatTerm :: M.Map Variable Integer -> Rational -> String
+formatTerm :: M.Map Variable Integer -> (Fraction Integer) -> String
 formatTerm k v
     | M.null k  = showCoeff $ showRational v
     | otherwise = concat ["(", showCoeff $ showRational v, ")*", formatMonom k]
@@ -36,7 +36,7 @@ showCoeff Eps = "1"
 formatMonom :: Monomial -> String
 formatMonom = intercalate "*" . map (uncurry (++) <<< show *** ('^':).show) . M.toList
 
-formatIdeal :: [Polynomial Rational] -> String
+formatIdeal :: [Polynomial (Fraction Integer)] -> String
 formatIdeal = intercalate ", " . map formatPoly
 
 class IsMonomialOrder ord => SingularRep ord where
@@ -65,9 +65,9 @@ instance (ToWeightVector vec, SingularRep ord) => SingularRep (WeightOrder vec o
       tovec NilWeight = []
       tovec (ConsWeight n ns) = sNatToInt n : tovec ns
 
-type Ideal = [Polynomial Rational]
+type Ideal = [Polynomial (Fraction Integer)]
 
-skeleton :: SingularRep ord => ord -> [Polynomial Rational] -> String
+skeleton :: SingularRep ord => ord -> [Polynomial (Fraction Integer)] -> String
 skeleton ord ideal =
     unlines [ "LIB \"poly.lib\";"
             , concat ["ring R = 0,("

@@ -8,12 +8,14 @@
 module Algebra.Wrapped (WrappedField(..), Normed(..), fmapUnwrap, fmapWrap) where
 import           Control.Lens
 import           Data.Complex
-import           Data.Ratio
-import           Numeric.Algebra hiding ((/), (<))
-import qualified Numeric.Algebra as NA
-import           Prelude         hiding (lex, negate, recip, sum, (*), (+), (-),
-                                  (^), (^^))
-import qualified Prelude         as P
+import qualified Data.Ratio               as P
+import           Numeric.Algebra          hiding ((/), (<))
+import qualified Numeric.Algebra          as NA
+import           Numeric.Domain.Euclidean (Euclidean)
+import           Numeric.Field.Fraction   (Fraction)
+import           Prelude                  hiding (lex, negate, recip, sum, (*),
+                                           (+), (-), (^), (^^))
+import qualified Prelude                  as P
 import           Unsafe.Coerce
 
 newtype WrappedField a = WrapField { unwrapField :: a
@@ -71,8 +73,8 @@ instance Normed Integer where
   norm = sq
   liftNorm = id
 
-instance Normed Rational where
-  type Norm Rational = Rational
+instance (Ord d, Euclidean d) =>  Normed (Fraction d) where
+  type Norm (Fraction d) = Fraction d
   norm = sq
   liftNorm = id
 
@@ -95,7 +97,7 @@ instance (Eq r, Division r, Group r, Ring r, Normed r)
 instance (Normed r, Eq r, Ring r, Division r, Group r) => Fractional (WrappedField r) where
   WrapField a / WrapField b = WrapField $ a NA./ b
   recip (WrapField a) = WrapField $ NA.recip a
-  fromRational q = WrapField $ NA.fromInteger (numerator q) NA./ NA.fromInteger (denominator q)
+  fromRational q = WrapField $ NA.fromInteger (P.numerator q) NA./ NA.fromInteger (P.denominator q)
 
 fmapUnwrap :: Functor f => f (WrappedField r) -> f r
 fmapUnwrap = unsafeCoerce

@@ -1,17 +1,17 @@
-{-# LANGUAGE DataKinds, OverlappingInstances, PolyKinds, NoImplicitPrelude #-}
+{-# LANGUAGE DataKinds, NoImplicitPrelude, OverlappingInstances, PolyKinds #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Main (module Algebra.Algorithms.Groebner, module Algebra.Ring.Polynomial
-            , module Data.Ratio, module Main, module Algebra.Internal
+            , module Numeric.Field.Fraction, module Main, module Algebra.Internal
             ) where
+import Algebra.Algorithms.Groebner
+import Algebra.Internal
 import Algebra.Prelude
-import           Algebra.Algorithms.Groebner
-import           Algebra.Internal
-import           Algebra.Ring.Noetherian
-import           Algebra.Ring.Polynomial
-import           Data.Ratio
-import           Data.Type.Natural
+import Algebra.Ring.Ideal
+import Algebra.Ring.Polynomial
+import Data.Type.Natural
+import Numeric.Field.Fraction
 
-u, v, x, y, z :: Polynomial Rational Five
+u, v, x, y, z :: Polynomial (Fraction Integer) Five
 [u, v, x, y, z] = genVars sFive
 
 fromRight :: Either t t1 -> t1

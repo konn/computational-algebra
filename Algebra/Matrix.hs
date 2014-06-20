@@ -20,7 +20,9 @@ import qualified Data.Vector.Generic              as GV
 import qualified Data.Vector.Hybrid               as H
 import           Data.Vector.Hybrid.Internal
 import           Numeric.Algebra                  (DecidableZero)
+import           Numeric.Algebra                  (Ring)
 import qualified Numeric.Algebra                  as NA
+import           Numeric.Field.Fraction
 import qualified Numeric.LinearAlgebra            as LA
 import           Sparse.Matrix                    (_Mat)
 import qualified Sparse.Matrix                    as SM
@@ -208,7 +210,7 @@ delta i j | i == j = NA.one
           | otherwise = NA.zero
 
 companion :: (SingI n, DecidableZero r, Matrix mat, Eq r,
-              Elem mat r, IsMonomialOrder ord)
+              Elem mat r, IsMonomialOrder ord, Ring r)
           => Ordinal n -> OrderedPolynomial r ord n -> mat r
 companion on poly =
   let deg = totalDegree' poly
@@ -218,10 +220,10 @@ companion on poly =
   then delta j (k+1)
   else NA.negate $ coeff (NA.pow vx (fromIntegral $ j-1 :: NA.Natural)) poly
 
-instance SM.Vectored Rational where
-  type Vec Rational = V.Vector
+instance SM.Vectored (Fraction Integer) where
+  type Vec (Fraction Integer) = V.Vector
 
-instance SM.Eq0 Rational
+instance SM.Eq0 (Fraction Integer)
 
 -- | @gaussReduction a = (a', p)@ where @a'@ is row echelon form and @p@ is pivoting matrix.
 gaussReduction :: (Matrix mat, Elem mat a, Normed a, Ord (Norm a), Eq a, NA.Field a)

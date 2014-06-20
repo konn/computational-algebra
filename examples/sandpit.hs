@@ -1,6 +1,6 @@
 module Main (module Algebra.Algorithms.Groebner.Monomorphic, module Algebra.Ring.Polynomial
             {- , module Algebra.Ring.Polynomial.Parser-} , module Algebra.Ring.Polynomial.Monomorphic
-            , module Data.Ratio, module Main, module Algebra.Internal
+            , module Numeric.Field.Fraction, module Main, module Algebra.Internal
             ) where
 import Algebra.Algorithms.Groebner.Monomorphic
 import Algebra.Internal
@@ -12,16 +12,16 @@ import Algebra.Ring.Polynomial                 (Grevlex (..), Grlex (..),
                                                 weightedEliminationOrder)
 import Algebra.Ring.Polynomial.Monomorphic
 -- import           Algebra.Ring.Polynomial.Parser
-import           Data.Ratio
-import qualified Numeric.Algebra as NA
+import qualified Numeric.Algebra        as NA
+import           Numeric.Field.Fraction
 
 var_x, var_y, var_z, var_t, var_u :: Variable
 [var_c, var_s, var_x, var_y, var_z, var_t, var_u] = map (flip Variable Nothing) "csxyztu"
 
-x, y, z, t, u :: Polynomial Rational
+x, y, z, t, u :: Polynomial (Fraction Integer)
 [c, s, x, y, z, t, u] = map injectVar [var_c, var_s, var_x, var_y, var_z, var_t, var_u]
 
-(.+), (.*), (.-) :: Polynomial Rational -> Polynomial Rational -> Polynomial Rational
+(.+), (.*), (.-) :: Polynomial (Fraction Integer) -> Polynomial (Fraction Integer) -> Polynomial (Fraction Integer)
 (.+) = (NA.+)
 (.*) = (NA.*)
 (.-) = (NA.-)
@@ -29,14 +29,14 @@ x, y, z, t, u :: Polynomial Rational
 infixl 6 .+, .-
 infixl 7 .*
 
-(^^^) :: Polynomial Rational -> NA.Natural -> Polynomial Rational
+(^^^) :: Polynomial (Fraction Integer) -> NA.Natural -> Polynomial (Fraction Integer)
 (^^^) = NA.pow
 
 fromRight :: Either t t1 -> t1
 fromRight (Right a) = a
 
 {-
-parse :: String -> Polynomial Rational
+parse :: String -> Polynomial (Fraction Integer)
 parse = fromRight . parsePolyn
 -}
 

@@ -14,7 +14,7 @@ main = hspec $ do
 
 prop_luDecomp :: Property
 prop_luDecomp = forAll (resize 10 arbitrary)  $ \(MatrixCase ms) ->
-      let m = M.fromLists ms :: M.Matrix Rational
+      let m = M.fromLists ms :: M.Matrix (Fraction Integer)
           Just (u,l,p,q,_,_) = M.luDecomp' m
       in collect (minimum $ map (minimum . map abs) ms) $ collect (M.ncols m, M.nrows m) $
          p * m * q == l * u && isUpperTriangle u && isLowerTriangle l && M.diagProd l == 1

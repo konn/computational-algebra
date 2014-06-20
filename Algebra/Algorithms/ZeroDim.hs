@@ -15,6 +15,7 @@ import           Algebra.Algorithms.FGLM
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
 import qualified Algebra.Matrix                   as AM
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
 import           Algebra.Scalar
@@ -294,7 +295,7 @@ solve'' err ideal =
             , all ((<err) . magnitude . substWith mul xs) $ generators ideal
             ]
 
-solveLinearNA :: (Ord b, Ring b, Division b, Normed b) => M.Matrix b -> V.Vector b -> Maybe (V.Vector b)
+solveLinearNA :: (Ord b, Field b, Normed b) => M.Matrix b -> V.Vector b -> Maybe (V.Vector b)
 solveLinearNA m v = fmapUnwrap <$> solveLinear (fmapWrap m) (fmapWrap v)
 
 toDM :: (AM.Matrix mat, AM.Elem mat a, AM.Elem M.Matrix a) => mat a -> M.Matrix a
@@ -304,7 +305,7 @@ toDM = AM.fromCols . AM.toCols
 
 -- | Calculate the Groebner basis w.r.t. lex ordering of the zero-dimensional ideal using FGLM algorithm.
 --   If the given ideal is not zero-dimensional this function may diverge.
-fglm :: (DecidableZero r, Normed r, Ord r, SingI n, Division r, IsMonomialOrder ord)
+fglm :: (DecidableZero r, Normed r, Ord r, SingI n, Field r, IsMonomialOrder ord)
      => Ideal (OrderedPolynomial r ord (S n))
      -> ([OrderedPolynomial r Lex (S n)], [OrderedPolynomial r Lex (S n)])
 fglm ideal =
@@ -325,7 +326,7 @@ fglmMap l = runST $ do
     whileM_ toContinue $ nextMonomial >> mainLoop
     (,) <$> look gLex <*> (map (changeOrder Lex) <$> look bLex)
 
-mainLoop :: (DecidableZero r, Ord r, Normed r, SingI n, Division r, IsOrder o)
+mainLoop :: (DecidableZero r, Ord r, Normed r, SingI n, Field r, IsOrder o)
          => Machine s r o n ()
 mainLoop = do
   m <- look monomial
@@ -347,7 +348,7 @@ mainLoop = do
       proced .== Just (changeOrder Lex f)
       gLex %== (g :)
 
-toContinue :: (DecidableZero r, Ord r, SingI n, Division r, IsOrder o)
+toContinue :: (DecidableZero r, Ord r, SingI n, Field r, IsOrder o)
            => Machine s r o (S n) Bool
 toContinue = do
   mans <- look proced
@@ -357,7 +358,7 @@ toContinue = do
       let xLast = SV.maximum allVars `asTypeOf` g
       return $ not $ leadingMonomial g `isPowerOf` leadingMonomial xLast
 
-nextMonomial :: (DecidableZero r, Eq r, SingI n) => Machine s r ord n ()
+nextMonomial :: (Ring r, DecidableZero r, SingI n) => Machine s r ord n ()
 nextMonomial = do
   m <- look monomial
   gs <- map leadingMonomial <$> look gLex

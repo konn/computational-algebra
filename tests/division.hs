@@ -2,7 +2,7 @@
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 module Main where
 import Algebra.Algorithms.Groebner
-import Algebra.Ring.Noetherian
+import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
 import Data.Type.Monomorphic
 import Data.Type.Natural           hiding (one, promote, zero)

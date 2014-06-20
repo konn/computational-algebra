@@ -9,7 +9,7 @@ module Utils (ZeroDimIdeal(..), polyOfDim, arbitraryRational,homogPolyOfDim,arbV
               quotOfDim, isNonTrivial, Equation(..), liftSNat, checkForArity,
               MatrixCase(..), idealOfDim) where
 import qualified Data.Matrix                   as M hiding (fromList)
-import           Algebra.Ring.Noetherian
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial          hiding (Positive)
 import           Algebra.Ring.Polynomial.Quotient
 import           Control.Applicative
@@ -19,7 +19,7 @@ import           Control.Monad
 import Data.Constraint
 import qualified Data.Map                         as M
 import           Data.Proxy
-import           Data.Ratio
+import           Numeric.Field.Fraction
 import           Data.Reflection                  hiding (Z)
 import           Data.Type.Monomorphic
 import qualified Data.Type.Monomorphic            as M
@@ -38,7 +38,7 @@ import Data.Ord
 import Data.List (sortBy)
 import Numeric.Algebra (DecidableZero)
 
-newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal :: Ideal (Polynomial Rational n)
+newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal :: Ideal (Polynomial (Fraction Integer) n)
                                       } deriving (Show, Eq, Ord)
 
 (%.) :: Integral a => a -> SC.Positive a -> Ratio a
@@ -57,24 +57,24 @@ instance (Ord k, Serial m k, Serial m v) => Serial m (M.Map k v) where
 instance Serial m (Monomial n) => Serial m (OrderedMonomial ord n) where
   series = newtypeCons OrderedMonomial
 
-instance (Eq r, DecidableZero r, Noetherian r, SingI n, IsMonomialOrder ord, Serial m r, Serial m (Monomial n))
+instance (Eq r, DecidableZero r, Ring r, SingI n, IsMonomialOrder ord, Serial m r, Serial m (Monomial n))
           => Serial m (OrderedPolynomial r ord n) where
   series = cons2 (curry toPolynomial) \/ cons2 (NA.+)
 
-instance (Num r, Ord r, Noetherian r, Serial m r) => Serial m (Ideal r) where
+instance (Num r, Ord r, Ring r, Serial m r) => Serial m (Ideal r) where
   series = newtypeCons toIdeal
 
-appendLM :: Rational -> Monomial Two -> Polynomial Rational Two -> Polynomial Rational Two
+appendLM :: (Fraction Integer) -> Monomial Two -> Polynomial (Fraction Integer) Two -> Polynomial (Fraction Integer) Two
 appendLM coef lm = unwrapped %~ M.insert (OrderedMonomial lm) coef
 
-xPoly :: Monad m => SC.Series m (Polynomial Rational Two)
+xPoly :: Monad m => SC.Series m (Polynomial (Fraction Integer) Two)
 xPoly = do
   (series SC.>< series) >>- \(c, d) ->
     series >>- \p -> do
       guard $ (leadingMonomial p) < (OrderedMonomial (d :- 0 :- Nil))
       return $ appendLM c (d :- 0 :- Nil) p
 
-yPoly :: Monad m => SC.Series m (Polynomial Rational Two)
+yPoly :: Monad m => SC.Series m (Polynomial (Fraction Integer) Two)
 yPoly = do
   (series SC.>< series) >>- \(c, d) ->
     series >>- \p -> do
@@ -106,50 +106,50 @@ instance (IsOrder ord, Arbitrary (Monomial n)) => Arbitrary (OrderedMonomial ord
   arbitrary = OrderedMonomial <$> arbitrary
 
 instance (SingI n, IsOrder ord)
-      => Arbitrary (OrderedPolynomial Rational ord n) where
-  arbitrary = polynomial . M.fromList <$> listOf1 ((,) <$> arbitrary <*> arbitraryRational)
+      => Arbitrary (OrderedPolynomial (Fraction Integer) ord n) where
+  arbitrary = polynomial . M.fromList <$> listOf1 ((,) <$> arbitrary <*> arbitrary(Fraction Integer))
 
 instance (SingI n, IsOrder ord)
-      => Arbitrary (HomogPoly Rational ord n) where
+      => Arbitrary (HomogPoly (Fraction Integer) ord n) where
   arbitrary = do
     deg <- QC.elements [2, 3, 4]
     HomogPoly . polynomial . M.fromList <$>
       listOf1 ((,) <$> (OrderedMonomial <$> arbVecOfSum (sing :: SNat n) deg) <*> arbitraryRational)
 
-instance (Ord r, Noetherian r, Arbitrary r, Num r) => Arbitrary (Ideal r) where
+instance (Ord r, Ring r, Arbitrary r, Num r) => Arbitrary (Ideal r) where
   arbitrary = toIdeal . map QC.getNonZero . QC.getNonEmpty <$> arbitrary
 
 instance (SingI n) => Arbitrary (ZeroDimIdeal n) where
   arbitrary = zeroDimG
 
-instance (DecidableZero r, NA.Field r, Noetherian r, Reifies ideal (QIdeal r ord n)
+instance (DecidableZero r, NA.Field r, Ring r, Reifies ideal (QIdeal r ord n)
          , Arbitrary (OrderedPolynomial r ord n)
          , IsMonomialOrder ord, SingI n, Eq r)
     => Arbitrary (Quotient r ord n ideal) where
   arbitrary = modIdeal <$> arbitrary
 
-polyOfDim :: SNat n -> QC.Gen (Polynomial Rational n)
+polyOfDim :: SNat n -> QC.Gen (Polynomial (Fraction Integer) n)
 polyOfDim sn = case singInstance sn of SingInstance -> arbitrary
 
 newtype HomogPoly r ord n = HomogPoly { getHomogPoly :: OrderedPolynomial r ord n }
 
-homogPolyOfDim :: SNat n -> QC.Gen (Polynomial Rational n)
+homogPolyOfDim :: SNat n -> QC.Gen (Polynomial (Fraction Integer) n)
 homogPolyOfDim sn = case singInstance sn of SingInstance -> getHomogPoly <$> arbitrary
 
-idealOfDim :: SNat n -> QC.Gen (Ideal (Polynomial Rational n))
+idealOfDim :: SNat n -> QC.Gen (Ideal (Polynomial (Fraction Integer) n))
 idealOfDim sn = case singInstance sn of SingInstance -> arbitrary
 
-quotOfDim :: (SingI n, Reifies ideal (QIdeal Rational Grevlex n))
-          => Proxy ideal -> QC.Gen (Quotient Rational Grevlex n ideal)
+quotOfDim :: (SingI n, Reifies ideal (QIdeal (Fraction Integer) Grevlex n))
+          => Proxy ideal -> QC.Gen (Quotient (Fraction Integer) Grevlex n ideal)
 quotOfDim _ = arbitrary
 
-genLM :: forall n. SNat n -> QC.Gen [Polynomial Rational n]
+genLM :: forall n. SNat n -> QC.Gen [Polynomial (Fraction Integer) n]
 genLM SZ = return []
 genLM (SS n) = do
   fs <- map (shiftR sOne) <$> genLM n
   QC.NonNegative deg <- arbitrary
   coef <- arbitraryRational `suchThat` (/= 0)
-  xf <- arbitrary :: QC.Gen (Polynomial Rational n)
+  xf <- arbitrary :: QC.Gen (Polynomial (Fraction Integer) n)
   let xlm = OrderedMonomial $ fromList (sS n) [deg + 1]
       f = xf & unwrapped %~ M.insert xlm coef . M.filterWithKey (\k _ -> k < xlm)
   return $ f : fs
@@ -168,7 +168,7 @@ zeroDimG = do
   i0 <- arbitrary
   return $ ZeroDimIdeal $ toIdeal $ fs ++ i0
 
-arbitraryRational :: QC.Gen Rational
+arbitraryRational :: QC.Gen (Fraction Integer)
 arbitraryRational = do
   a <- QC.arbitrarySizedIntegral
   QC.NonZero b <- QC.arbitrarySizedIntegral
@@ -178,8 +178,8 @@ arbitraryRational = do
 isNonTrivial :: SingI n => ZeroDimIdeal n -> Bool
 isNonTrivial (ZeroDimIdeal ideal) = reifyQuotient ideal $ maybe False ((>0).length) . standardMonomials'
 
-data Equation = Equation { coefficients :: [[Rational]]
-                         , answers      :: [Rational]
+data Equation = Equation { coefficients :: [[(Fraction Integer)]]
+                         , answers      :: [(Fraction Integer)]
                          } deriving (Read, Show, Eq, Ord)
 
 newtype MatrixCase a = MatrixCase { getMatrix :: [[a]]
@@ -210,7 +210,7 @@ liftSNat f i =
       case singInstance sn of
         SingInstance -> f sn
 
-unaryPoly :: SNat n -> Ordinal n -> Gen (Polynomial Rational n)
+unaryPoly :: SNat n -> Ordinal n -> Gen (Polynomial (Fraction Integer) n)
 unaryPoly arity mth = do
   f <- polyOfDim sOne
   case singInstance arity of
@@ -227,6 +227,6 @@ unaryPoly arity mth = do
 checkForArity :: [Int] -> (forall n. SingI (n :: Nat) => Sing n -> Property) -> Property
 checkForArity as test = forAll (QC.elements as) $ liftSNat test
 
-stdReduced :: (DecidableZero r, Eq r, Num r, SingI n, NA.Division r, Noetherian r, IsMonomialOrder order)
+stdReduced :: (DecidableZero r, Eq r, Num r, SingI n, NA.Division r, Ring r, IsMonomialOrder order)
            => [OrderedPolynomial r order n] -> [OrderedPolynomial r order n]
 stdReduced ps = sortBy (comparing leadingMonomial) $ map (\f -> injectCoeff (NA.recip $ leadingCoeff f) * f) ps

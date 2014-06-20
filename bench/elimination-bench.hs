@@ -13,23 +13,23 @@ import           Data.Type.Natural
 import           Numeric.Algebra                         (LeftModule (..))
 import qualified Numeric.Algebra                         as NA
 
-x, y, z, w, s, a, b, c, t, u, v :: Polynomial Rational
+x, y, z, w, s, a, b, c, t, u, v :: Polynomial (Fraction Integer)
 [x, y, z, w, s, a, b, c, t, u, v, x', y'] = map (injectVar . flip Variable Nothing) "xyzwsabctuvXY"
 
 instance NFData Variable where
   rnf (Variable x y) = rnf x `seq` rnf y `seq` ()
 
-instance NFData (Polynomial Rational) where
+instance NFData (Polynomial (Fraction Integer)) where
   rnf (Polynomial dic) = rnf dic
 
-i1, i2, i3, i4 :: [Polynomial Rational]
+i1, i2, i3, i4 :: [Polynomial (Fraction Integer)]
 i1 = [x - (t + u), y - (t^2 + 2*t*u), z - (t^3 + 3*t^2*u)]
 i2 = [t^2 + x^2+y^2+z^2, t^2 + 2*x^2 - x*y -z^2, t+ y^3-z^3]
 i3 = [ 2 * s - a * y', b^2 - (x'^2 + y'^2), c^2 - ( (a-x') ^ 2 + y'^2)
      ]
 i4 = [ x - (3*u + 3*u*v^2 - u^3), y - (3*v + 3*u^2*v -  v^3), z - (3*u^2 - 3*v^2)]
 
-mkTestCase :: SingI n => String -> [Polynomial Rational] -> SNat n -> Benchmark
+mkTestCase :: SingI n => String -> [Polynomial (Fraction Integer)] -> SNat n -> Benchmark
 mkTestCase name ideal nth =
   bgroup name [ bench "lex" $ nf (calcGroebnerBasisWith Lex) ideal
               , bench "product" $ nf (calcGroebnerBasisWith (eliminationOrder nth)) ideal

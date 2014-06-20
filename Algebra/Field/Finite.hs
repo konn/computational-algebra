@@ -4,10 +4,10 @@
 module Algebra.Field.Finite (F(), withModulo) where
 import           Algebra.Wrapped
 import           Data.Proxy
-import           Data.Ratio
 import           Data.Reflection
-import qualified Data.Type.Natural as TN
-import qualified Numeric.Algebra   as NA
+import qualified Data.Type.Natural      as TN
+import qualified Numeric.Algebra        as NA
+import           Numeric.Field.Fraction
 
 -- | @p@ should be prime, and not statically checked.
 newtype F p = F { runF :: Int }

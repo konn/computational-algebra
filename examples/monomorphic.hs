@@ -7,9 +7,9 @@ import           Algebra.Ring.Polynomial.Monomorphic
 import           Algebra.Ring.Polynomial.Parser
 import           Data.Either
 import           Data.List                               (intercalate)
-import           Data.Ratio
 import qualified Data.Text                               as T
 import           Numeric.Algebra
+import           Numeric.Field.Fraction
 import           Prelude                                 hiding
                                                           (Fractional (..),
                                                           Integral (..), (*),

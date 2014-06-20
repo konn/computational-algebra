@@ -11,13 +11,12 @@ module Algebra.Prelude
 import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
-import           Data.Ratio               hiding ((%))
 import           Data.Singletons
 import           Numeric.Algebra          hiding (Order (..), (^))
 import qualified Numeric.Algebra          as NA
 import           Numeric.Domain.Class
 import           Numeric.Domain.Euclidean hiding (normalize)
-import           Numeric.Field.Fraction
+import           Numeric.Field.Fraction   hiding ((%))
 import           Prelude                  hiding (Fractional (..),
                                            Integral (..), Num (..), Rational,
                                            Real (..), gcd, lex, product,

@@ -3,7 +3,7 @@
 module ZeroDimSpec where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.ZeroDim
-import           Algebra.Ring.Noetherian
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
 import           Control.Monad
@@ -34,7 +34,7 @@ spec = parallel $ do
       `shouldBe` Just (V.fromList $ answer set)
     prop "solves any solvable cases" $
       forAll (resize 10 arbitrary) $ \(MatrixCase ms) ->
-      let mat = M.fromLists ms :: M.Matrix Rational
+      let mat = M.fromLists ms :: M.Matrix (Fraction Integer)
       in rank mat == M.ncols mat ==>
            forAll (vector (length $ head ms)) $ \v ->
              let ans = M.getCol 1 $ mat * M.colVector (V.fromList v)
@@ -97,7 +97,7 @@ isDescending xs = and $ zipWith (>=) xs (drop 1 xs)
 prop_isApproximateZero :: SingRep n
                        => Double
                        -> (forall m ord. (SingI m, IsMonomialOrder ord) =>
-                           Ideal (OrderedPolynomial Rational ord (S m)) -> [SV.Vector (Complex Double) (S m)])
+                           Ideal (OrderedPolynomial (Fraction Integer) ord (S m)) -> [SV.Vector (Complex Double) (S m)])
                        -> SNat n -> Property
 prop_isApproximateZero err solver sn =
   case sn of
@@ -120,9 +120,9 @@ rank mat =
   let Just (u, _, _, _,_, _) = M.luDecomp' mat
   in V.foldr (\a acc -> if a /= 0 then acc + 1 else acc) (0 :: Int) $ M.getDiag u
 
-data TestSet = TestSet { inputMat :: [[Rational]]
-                       , inputVec :: [Rational]
-                       , answer   :: [Rational]
+data TestSet = TestSet { inputMat :: [[Fraction Integer]]
+                       , inputVec :: [Fraction Integer]
+                       , answer   :: [Fraction Integer]
                        } deriving (Read, Show, Eq, Ord)
 
 linSet :: [TestSet]

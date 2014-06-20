@@ -35,24 +35,24 @@ import           Data.List               (intercalate)
 import           Data.Map                (Map)
 import qualified Data.Map.Strict         as M
 import           Data.Maybe
--- import           Data.Hashable
 import           Data.Monoid
 import           Data.Ord
-import           Data.Ratio
 import           Data.Type.Monomorphic
 import           Data.Type.Natural       hiding (max, one, promote, zero)
 import           Data.Vector.Sized       (Vector (..))
 import qualified Data.Vector.Sized       as V
-import           Numeric.Algebra.Domain.Euclidean hiding (normalize)
-import           Numeric.Algebra.Domain
+import           Numeric.Domain.Euclidean hiding (normalize)
+import           Numeric.Domain.Class
+import           Numeric.Field.Fraction
 import qualified Numeric.Ring.Class as   NA
-import           Numeric.Algebra.Instances ()
 import           Numeric.Algebra         hiding (Order (..))
 import           Numeric.Decidable.Zero
+import           Numeric.Decidable.Units
 import           Prelude                 hiding (lex, negate, recip, sum, (*),
-                                          (+), (-), (^), (^^))
+                                          (+), (-), (^), (^^), Rational, fromInteger)
 import qualified Prelude                 as P
 import Numeric.Semiring.Integral (IntegralSemiring)
+import Control.Applicative ((<$>))
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i.
 type Monomial (n :: Nat) = V.Vector Int n
@@ -390,8 +390,10 @@ instance (IsOrder order, Ring r, DecidableZero r, SingI n) => RightModule (Scala
 instance (DecidableZero r, Ring r, SingI n, IsOrder order, Show r) => Show (OrderedPolynomial r order n) where
   show = showPolynomialWithVars [(n, "X_"++ show n) | n <- [0..]]
 
-instance (SingI n, IsOrder order) => Show (OrderedPolynomial Rational order n) where
+
+instance (SingI n, IsOrder order) => Show (OrderedPolynomial (Fraction Integer) order n) where
   show = showPolynomialWith False [(n, "X_"++ show n) | n <- [0..]] showRational
+
 
 instance (SingI n, IsOrder order, Domain r, Ring r, DecidableZero r) => Domain (OrderedPolynomial r order n) where
 
@@ -418,13 +420,13 @@ showPolynomialWithVars dic p0@(Polynomial d)
 data Coefficient = Zero | Negative String | Positive String | Eps
                  deriving (Show, Eq, Ord)
 
-showRational :: (Integral a, Show a) => Ratio a -> Coefficient
-showRational r | r == 0    = Zero
-               | r >  0    = Positive $ formatRat r
-               | otherwise = Negative $ formatRat $ abs r
+showRational :: (Ord a, Show a, Euclidean a) => Fraction a -> Coefficient
+showRational r | isZero r  = Zero
+               | r >  zero = Positive $ formatRat r
+               | otherwise = Negative $ formatRat $ negate  r
   where
-    formatRat q | denominator q == 1 = show $ numerator q
-                | otherwise          = show (numerator q) ++ "/" ++ show (denominator q) ++ " "
+    formatRat q | denominator q == one = show $ numerator q
+                | otherwise            = show (numerator q) ++ "/" ++ show (denominator q) ++ " "
 
 showPolynomialWith  :: (DecidableZero a, Show a, SingI n, Ring a, IsOrder ordering)
                     => Bool -> [(Int, String)] -> (a -> Coefficient) -> OrderedPolynomial a ordering n -> String
@@ -479,8 +481,34 @@ instance (Ring r, DecidableZero r, SingI n, IsOrder ord) => DecidableZero (Order
   isZero f = isZero $ leadingCoeff f
 
 instance (DecidableZero r, Ring r, IsOrder ord, SingI n, IntegralSemiring r) => IntegralSemiring (OrderedPolynomial r ord n)
-instance (DecidableZero r, Field r, IsMonomialOrder ord, IntegralSemiring r) => Euclidean (OrderedPolynomial r ord One) where
+instance (Eq r, DecidableUnits r, DecidableZero r, Field r, IsMonomialOrder ord, IntegralSemiring r) => Euclidean (OrderedPolynomial r ord One) where
+  p `divide` q = divModPolynomial p q
+  degree f | isZero f  = Nothing
+           | otherwise = Just $ P.fromIntegral $ totalDegree' f
+  splitUnit f
+    | isZero f = (zero, f)
+    | otherwise = let lc = leadingCoeff f
+                  in (injectCoeff lc, injectCoeff (recip lc) * f)
 
+instance (Ring r, DecidableZero r, IsOrder ord, DecidableUnits r, SingRep n) => DecidableUnits (OrderedPolynomial r ord n) where
+  isUnit f =
+    let (lc, lm) = leadingTerm f
+    in lm == one && isUnit lc
+  recipUnit f | isUnit f  = injectCoeff <$> recipUnit (leadingCoeff f)
+              | otherwise = Nothing
+
+divModPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)
+                 => OrderedPolynomial r order n -> OrderedPolynomial r order n
+                 -> (OrderedPolynomial r order n, OrderedPolynomial r order n)
+divModPolynomial f0 g = loop f0 zero
+  where
+    lm = leadingMonomial g
+    loop p quo
+        | isZero p = (quo, p)
+        | lm `divs` leadingMonomial p =
+            let q   = toPolynomial $ leadingTerm p `tryDiv` leadingTerm g
+            in loop (p - (q * g)) (quo + q)
+        | otherwise = (quo, p)
 
 varX :: (DecidableZero r, Ring r, SingI n, IsOrder order) => OrderedPolynomial r order (S n)
 varX = var OZ

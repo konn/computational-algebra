@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds, NoMonomorphismRestriction, OverloadedStrings #-}
 module Main where
-import           Algebra.Ring.Noetherian
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
 import           Data.Type.Natural
@@ -13,7 +13,7 @@ import           Utils
 main :: IO ()
 main = hspec spec
 
-i1 :: Ideal (OrderedPolynomial Rational Lex Two)
+i1 :: Ideal (OrderedPolynomial (Fraction Integer) Lex Two)
 i1 = toIdeal []
 
 spec :: Spec

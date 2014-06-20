@@ -4,11 +4,11 @@ module Algebra.Ring.Polynomial.Parser ( monomial, expression, variable, variable
 import           Algebra.Ring.Polynomial.Monomorphic
 import           Control.Applicative                 hiding (many)
 import qualified Data.Map                            as M
-import           Data.Ratio
+import           Numeric.Field.Fraction              (Fraction, (%))
 import           Text.Peggy
 
 [peggy|
-expression :: Polynomial Rational
+expression :: Polynomial (Fraction Integer)
   = space* e:expr space*  !. { e }
 
 letter :: Char
@@ -21,21 +21,21 @@ variableWithPower :: (Variable, Integer)
   = variable "^" natural { ($1, $2) }
   / variable  { ($1, 1) }
 
-expr :: Polynomial Rational
+expr :: Polynomial (Fraction Integer)
   = expr "+" term { $1 + $2 }
   / expr "-" term { $1 - $2 }
   / term
 
-term :: Polynomial Rational
+term :: Polynomial (Fraction Integer)
    = number space* monoms { injectCoeff $1 * $3 }
    / number { injectCoeff $1 }
    / monoms
 
-monoms :: Polynomial Rational
+monoms :: Polynomial (Fraction Integer)
   = monoms space * fact { $1 * $3 }
   / fact
 
-fact :: Polynomial Rational
+fact :: Polynomial (Fraction Integer)
   = fact "^" natural { $1 ^ $2 }
   / "(" expr ")"
   / monomial { toPolyn [($1, 1)] }
@@ -43,9 +43,9 @@ fact :: Polynomial Rational
 monomial ::: Monomial
   = variableWithPower+ { M.fromListWith (+) $1 }
 
-number :: Rational
+number :: (Fraction Integer)
   = integer "/" integer { $1 % $2 }
-  / integer '.' [0-9]+ { realToFrac (read (show $1 ++ '.' : $2) :: Double) }
+  / integer '.' [0-9]+ { (read (show $1 ++ $2) :: Integer) % toInteger (length $2) }
   / integer { fromInteger $1 }
 
 integer :: Integer
@@ -60,8 +60,8 @@ delimiter :: ()
   / '-' ![0-9] {()}
 |]
 
-toPolyn :: [(Monomial, Ratio Integer)] -> Polynomial (Ratio Integer)
+toPolyn :: [(Monomial, Fraction Integer)] -> Polynomial (Fraction Integer)
 toPolyn = normalize . Polynomial . M.fromList
 
-parsePolyn :: String -> Either ParseError (Polynomial Rational)
+parsePolyn :: String -> Either ParseError (Polynomial (Fraction Integer))
 parsePolyn = parseString expression "polynomial"

@@ -3,7 +3,7 @@
 module PolynomialSpec where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.ZeroDim
-import           Algebra.Ring.Noetherian
+import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import qualified Data.Matrix                 as M
 import           Data.Type.Monomorphic

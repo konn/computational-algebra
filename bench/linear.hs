@@ -16,13 +16,13 @@ import           System.Process
 import           Test.QuickCheck
 import           Utils
 
-makeLinear :: Int -> Int -> IO [(M.Matrix Rational, V.Vector Rational)]
+makeLinear :: Int -> Int -> IO [(M.Matrix (Fraction Integer), V.Vector (Fraction Integer))]
 makeLinear count dpI =
   liftM (take count) $ sample' $ do
     Equation m v <- resize dpI arbitrarySolvable
     return (M.fromLists m, V.fromList v)
 
-mkTestCases :: [(M.Matrix Rational, V.Vector Rational)] -> IO [Benchmark]
+mkTestCases :: [(M.Matrix (Fraction Integer), V.Vector (Fraction Integer))] -> IO [Benchmark]
 mkTestCases lins0 = do
   lins <- return $!! (lins0 `using` rdeepseq)
   forM (zip [1..] lins) $ \(n,ex) -> do
