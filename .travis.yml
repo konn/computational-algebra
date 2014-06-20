@@ -13,15 +13,12 @@ before_install:
   - export PATH=/opt/ghc/$GHCVER/bin:$PATH
 
 install:
-  - git clone git://github.com/konn/algebra-extras.git
+  - git clone git://github.com/ekmett/algebra.git
+  - cd algebra
+  - git checkout euclidean
   - cabal-1.18 update
-  - case $GHCVER in
-      ^7\.8\..* | head )
-         echo "workaround for 7.8.1 fired...";
-         patch $HOME/.cabal/config < config.patch;
-         cabal-1.18 update;;
-    esac
-  - cabal-1.18 install algebra-extras/algebra-extras.cabal
+  - cabal-1.18 install ./algebra.cabal
+  - cd ../
   - cabal-1.18 install --only-dependencies --enable-tests --enable-benchmarks
 
 script:
