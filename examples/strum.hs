@@ -2,8 +2,10 @@
 {-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction           #-}
 module Main where
 import           Algebra.Algorithms.Groebner
-import           Algebra.Prelude
+import           Algebra.Prelude             hiding (normalize)
 import           Control.Arrow               ((***))
+import           Data.List                   (sortBy)
+import           Data.Ord                    (comparing)
 import           Data.Singletons             (SingRep)
 import           Data.Type.Natural           (One)
 import           Data.Type.Ordinal           (Ordinal (..))
@@ -51,6 +53,45 @@ instance RightModule Integer Algebraic where
 instance RightModule (Fraction Integer) Algebraic where
   (*.) = flip (.*)
 
+instance Multiplicative Algebraic where
+  (*) = multA
+
+instance Eq Algebraic where
+  Algebraic f i == Algebraic g j
+    | not $ isZero $ resultant f g = False
+    | otherwise =
+        let sh = strum $ gcd f g
+            [i', j'] = sortBy (comparing size) [i, j]
+        in countChangeIn (i `intersect` j) sh == 1
+
+intersect :: (Num a, Ord a) => Interval a -> Interval a -> Interval a
+intersect i j | disjoint i j = Interval 0 0
+              | lower i <= lower j = Interval (lower j) (upper i)
+              | lower j >  lower i = Interval (lower i) (upper j)
+intersect _ _ = error "intersect"
+
+instance Ord Algebraic where
+  compare a@(Algebraic f i) b@(Algebraic g j)
+    | a == b = EQ
+    | otherwise =
+    let sf = strum f
+        sg = strum g
+        (i', j') = until (uncurry disjoint) (improveWith sf *** improveWith sg) (i, j)
+    in if upper i' <= lower j' then LT else  GT
+
+disjoint :: Ord a => Interval a -> Interval a -> Bool
+disjoint i j = upper i < lower j || upper j < lower i
+
+instance Commutative Algebraic
+instance Unital Algebraic where
+  one = Algebraic (varX - one) (Interval (2/1) (3/2))
+instance Semiring Algebraic
+instance Abelian Algebraic
+instance Rig Algebraic
+instance IntegralSemiring Algebraic
+instance Division Algebraic where
+  recip = recipA
+
 scale :: (Ord r, Multiplicative r, Monoidal r) => r -> Interval r -> Interval r
 scale k (Interval l r)
   | k < zero  = Interval (k * r) (k * l)
@@ -63,7 +104,7 @@ plusInt :: Group r => Interval r -> Interval r -> Interval r
 plusInt (Interval l u) (Interval l' u') = Interval (l + l') (u + u')
 
 rootSumPoly :: Polynomial Rational One -> Polynomial Rational One -> Polynomial Rational One
-rootSumPoly f g = monoize $ sqFreePart $ presultant (liftP f) (substWith (.*.) (injectCoeff varX - varX :- Nil) $ liftP g)
+rootSumPoly f g = normalize $ presultant (liftP f) (substWith (.*.) (injectCoeff varX - varX :- Nil) $ liftP g)
   where
     liftP :: Polynomial Rational One -> Polynomial (Polynomial Rational One) One
     liftP = mapCoeff injectCoeff
@@ -73,20 +114,49 @@ sqFreePart :: (DecidableUnits r, Eq r, Domain r, DecidableZero r, Division r, Co
 sqFreePart f = snd $ head $ f `divPolynomial` [gcd f (diff OZ f)]
 
 plusA :: Algebraic -> Algebraic -> Algebraic
-plusA (Algebraic f i0) (Algebraic g j0)
+plusA a@(Algebraic f i0) b@(Algebraic g j0)
   | totalDegree' f == 1 && isZero (coeff one f) = Algebraic g j0
   | totalDegree' g == 1 && isZero (coeff one g) = Algebraic f i0
   | otherwise =
   let !fg = rootSumPoly f g
-      sols = isolateRoots fg
-      lens = map size sols
-      sf = strum f
+      iij = catcher plusInt fg a b
+  in normA $ Algebraic fg iij
+
+normA :: Algebraic -> Algebraic
+normA (Algebraic f i)
+  | substWith (*) (zero :- Nil) f == zero && zero `isIn` i = Algebraic varX (Interval zero zero)
+  | otherwise = Algebraic (shiftP f) i
+
+isIn :: Ord a => a -> Interval a -> Bool
+x `isIn` Interval i j = i < x && x <= j
+
+catcher :: (Interval Rational -> Interval Rational -> Interval Rational)
+        -> OrderedPolynomial Rational Grevlex One -> Algebraic -> Algebraic -> Interval Rational
+catcher app h (Algebraic f i0) (Algebraic g j0) =
+  let sf = strum f
       sg = strum g
-      (i', j') = until (\(i,j) -> all (size (plusInt i j) <) lens)
-                            (improveWith sf *** improveWith sg)
-                            (i0, j0)
-      iij = i' `plusInt` j'
-  in  Algebraic fg iij
+      lens = map size $ isolateRoots h
+      (i', j') = until (\(i,j) -> all (size (app i j) <) lens)
+                 (improveWith sf *** improveWith sg)
+                 (i0, j0)
+  in i' `app` j'
+
+normalize :: (Eq r, Ring r, DecidableZero r, DecidableUnits r, Division r, Commutative r, IntegralSemiring r, IsMonomialOrder order) => OrderedPolynomial r order One -> OrderedPolynomial r order One
+normalize = monoize . sqFreePart
+
+shiftP :: (Domain r, Division r, Eq r, Commutative r, DecidableUnits r,
+           DecidableZero r, IsMonomialOrder order)
+       => OrderedPolynomial r order One -> OrderedPolynomial r order One
+shiftP f | isZero (coeff one f) = f `quot` varX
+         | otherwise = f
+
+stabilize :: Algebraic -> Algebraic
+stabilize ar@(Algebraic f int)
+  | lower int * upper int >= 0 = ar
+  | otherwise =
+    let lh = Interval (lower int) 0
+        uh = Interval 0 (upper int)
+    in Algebraic f $ if countRootsIn f lh == 0 then uh else lh
 
 rootMultPoly :: Polynomial Rational One -> Polynomial Rational One -> Polynomial Rational One
 rootMultPoly f g =
@@ -94,10 +164,54 @@ rootMultPoly f g =
       d = totalDegree lm
       g' = sum $  map (\(k, m) -> toPolynomial (injectCoeff k * varX^(P.fromIntegral $ totalDegree m),
                                                 (OrderedMonomial $ d - totalDegree m :- Nil)) ) ts
-  in monoize $ sqFreePart $ presultant (liftP f) g'
+  in normalize $ presultant (liftP f) g'
   where
     liftP :: Polynomial Rational One -> Polynomial (Polynomial Rational One) One
     liftP = mapCoeff injectCoeff
+
+multInt :: (Num a, Ord a, Multiplicative a) => Interval a -> Interval a -> Interval a
+multInt i j
+  | lower i < 0  && lower j < 0 = Interval (upper i * upper j) (lower i * lower j)
+  | lower i >= 0 && lower j < 0 = Interval (upper i * lower j) (lower i * upper j)
+  | lower i < 0  && lower j >= 0 = Interval (upper j * lower i) (lower j * upper i)
+  | lower i >= 0 && lower j >= 0 = Interval (lower j * lower i) (upper j * upper i)
+multInt _ _ = error "multInt"
+
+multA :: Algebraic -> Algebraic -> Algebraic
+multA a b =
+  let fg = rootMultPoly (eqn a) (eqn b)
+      int = catcher multInt fg (stabilize a) (stabilize b)
+  in Algebraic fg int
+
+improveNonzero :: Algebraic -> Interval Rational
+improveNonzero (Algebraic f int0) = go int0
+  where
+    ss = strum f
+    go int =
+      let (lh, bh) = bisect int
+      in if countChangeIn lh ss == 0
+         then bh
+         else go lh
+
+recipInt :: (Num r, Ord r, Division r) => Interval r -> Interval r
+recipInt i | lower i < 0 = Interval (recip $ upper i) (recip $ lower i)
+           | otherwise   = Interval (recip $ lower i) (recip $ upper i)
+
+recipA :: Algebraic -> Algebraic
+recipA a =
+  let fi = rootRecipPoly (eqn a)
+      sf = strum fi
+      i0 = improveNonzero a
+      lens = map size $ isolateRoots fi
+      i'    = until (\i -> any (> size (recipInt i)) lens) (improveWith sf) i0
+  in Algebraic fi $ recipInt i'
+
+rootRecipPoly :: Polynomial Rational One -> Polynomial Rational One
+rootRecipPoly f =
+  let ts@((_, lm):_) = getTerms f
+      d = totalDegree lm
+      f' = sum $  map (\(k, m) -> toPolynomial (k, OrderedMonomial $ d - totalDegree m :- Nil) ) ts
+  in normalize f'
 
 monoize :: (Ring r, DecidableZero r, Division r, SingRep n, IsOrder order)
         => OrderedPolynomial r order n -> OrderedPolynomial r order n
