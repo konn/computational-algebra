@@ -4,8 +4,6 @@ module Main where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Prelude             hiding (normalize)
 import           Control.Arrow               ((***))
-import           Data.List                   (sortBy)
-import           Data.Ord                    (comparing)
 import           Data.Singletons             (SingRep)
 import           Data.Type.Natural           (One)
 import           Data.Type.Ordinal           (Ordinal (..))
@@ -14,14 +12,19 @@ import           GHC.Num                     (Num)
 import           Numeric.Decidable.Zero      (isZero)
 import qualified Numeric.Field.Fraction      as F
 import           Numeric.Semiring.Integral   (IntegralSemiring)
-import           Prelude                     (Show (..), filter)
-import           Prelude                     (abs)
+import           Prelude                     (Show (..), abs, filter)
 import qualified Prelude                     as P
 
+-- Invariants:
+--   (1) eqn is square-free and does not have x as a factor
+--   (2) strumseq is the standard strum sequence of eqn
+--   (3) interval contains exactly one root of eqn
 data Algebraic = Algebraic { eqn      :: Polynomial Rational One
                            , strumseq :: [Polynomial Rational One]
                            , interval :: Interval Rational
-                           } deriving (Show)
+                           }
+               | Rational !Rational
+                 deriving (Show)
 
 instance Additive Algebraic where
   (+) = plusA
@@ -30,7 +33,7 @@ instance Group Algebraic where
   negate r = (-1 :: Integer) .* r
 
 instance Monoidal Algebraic where
-  zero = Algebraic varX [varX, one] (Interval 0 0)
+  zero = Rational zero
 
 instance LeftModule Natural Algebraic where
   (.*) n = (.*) $ P.toInteger n
@@ -39,14 +42,16 @@ instance RightModule Natural Algebraic where
   (*.) = flip (.*)
 
 instance LeftModule Integer Algebraic where
+  n .* Rational r = Rational (n .* r)
   n .* Algebraic f _ int
    | n == 0 = zero
    | otherwise = let f' = (subst' varX (injectCoeff (1 %% n) * varX) f)
                  in Algebraic f' (strum f') (scale (n %% 1) int)
 
 instance LeftModule (Fraction Integer) Algebraic where
+  q .* Rational r = Rational (q * r)
   q .* Algebraic f _ int
-   | isZero q  = Algebraic varX [varX, one] (Interval 0 0)
+   | isZero q  = zero
    | otherwise = let f' = subst' varX (injectCoeff (recip q) * varX) f
                  in Algebraic f' (strum f') (scale q int)
 
@@ -60,11 +65,13 @@ instance Multiplicative Algebraic where
   (*) = multA
 
 instance Eq Algebraic where
+  Rational p      == Rational q = p == q
   Algebraic f _ i == Algebraic g _ j
     | not $ isZero $ resultant f g = False
     | otherwise =
         let sh = strum $ gcd f g
         in countChangeIn (i `intersect` j) sh == 1
+  _ == _ = False
 
 intersect :: (Num a, Ord a) => Interval a -> Interval a -> Interval a
 intersect i j | disjoint i j = Interval 0 0
@@ -73,7 +80,20 @@ intersect i j | disjoint i j = Interval 0 0
 intersect _ _ = error "intersect"
 
 instance Ord Algebraic where
-  compare a@(Algebraic f sf i) b@(Algebraic g sg j)
+  compare (Rational q) (Rational r) = compare q r
+  compare (Rational q) (Algebraic f sf i) =
+    let i' = until (not . (q `isIn`)) (improveWith sf) i
+    in if q <= lower i'
+       then LT
+       else if isZero (f `modPolynomial` [varX - injectCoeff q])
+            then EQ
+            else GT
+  compare a@(Algebraic _ _ _) b@(Rational _) = flipOrd $ compare b a
+    where
+      flipOrd EQ = EQ
+      flipOrd LT = GT
+      flipOrd GT = LT
+  compare a@(Algebraic _ sf i) b@(Algebraic _ sg j)
     | a == b = EQ
     | otherwise =
     let (i', j') = until (uncurry disjoint) (improveWith sf *** improveWith sg) (i, j)
@@ -84,7 +104,7 @@ disjoint i j = upper i < lower j || upper j < lower i
 
 instance Commutative Algebraic
 instance Unital Algebraic where
-  one = Algebraic (varX - one) [varX - one, one] (Interval (2/1) (3/2))
+  one = Rational one
 instance Semiring Algebraic
 instance Abelian Algebraic
 instance Rig Algebraic
@@ -113,7 +133,13 @@ sqFreePart :: (DecidableUnits r, Eq r, Domain r, DecidableZero r, Division r, Co
            => OrderedPolynomial r order One -> OrderedPolynomial r order One
 sqFreePart f = snd $ head $ f `divPolynomial` [gcd f (diff OZ f)]
 
+
 plusA :: Algebraic -> Algebraic -> Algebraic
+plusA (Rational r) (Rational q) = Rational (r + q)
+plusA a@(Algebraic _ _ _) b@(Rational _) = plusA b a
+plusA (Rational r) (Algebraic f _ i)  =
+  let f' = subst' varX (varX - injectCoeff r) f
+  in Algebraic f' (strum f') (Interval (lower i + r) (upper i + r))
 plusA a@(Algebraic f sf i0) b@(Algebraic g sg j0)
   | totalDegree' f == 1 && isZero (coeff one f) = Algebraic g sg j0
   | totalDegree' g == 1 && isZero (coeff one g) = Algebraic f sf i0
@@ -123,21 +149,27 @@ plusA a@(Algebraic f sf i0) b@(Algebraic g sg j0)
   in normA $ Algebraic fg (strum fg) iij
 
 normA :: Algebraic -> Algebraic
+normA (Rational a) = Rational a
 normA (Algebraic f sf i)
-  | substWith (*) (zero :- Nil) f == zero && zero `isIn` i = Algebraic varX [varX, 1] (Interval zero zero)
+  | substWith (*) (zero :- Nil) f == zero && zero `isIn` i = Rational zero
+  | totalDegree' f == 1 = Rational $ negate $ coeff one f / leadingCoeff f
   | otherwise = Algebraic (shiftP f) sf i
 
 isIn :: Ord a => a -> Interval a -> Bool
 x `isIn` Interval i j = i < x && x <= j
 
+algebraic :: Polynomial Rational One -> Interval Rational -> Algebraic
+algebraic f i = Algebraic f (strum f) i
+
 catcher :: (Interval Rational -> Interval Rational -> Interval Rational)
         -> OrderedPolynomial Rational Grevlex One -> Algebraic -> Algebraic -> Interval Rational
-catcher app h (Algebraic f sf i0) (Algebraic g sg j0) =
+catcher app h (Algebraic _ sf i0) (Algebraic _ sg j0) =
   let lens = map size $ isolateRoots h
       (i', j') = until (\(i,j) -> all (size (app i j) <) lens)
                  (improveWith sf *** improveWith sg)
                  (i0, j0)
   in i' `app` j'
+catcher _ _ _ _ = error "rational is impossible"
 
 normalize :: (Eq r, Ring r, DecidableZero r, DecidableUnits r, Division r, Commutative r, IntegralSemiring r, IsMonomialOrder order) => OrderedPolynomial r order One -> OrderedPolynomial r order One
 normalize = monoize . sqFreePart
@@ -149,6 +181,7 @@ shiftP f | isZero (coeff one f) = f `quot` varX
          | otherwise = f
 
 stabilize :: Algebraic -> Algebraic
+stabilize r@(Rational _) = r
 stabilize ar@(Algebraic f ss int)
   | lower int * upper int >= 0 = ar
   | otherwise =
@@ -182,13 +215,14 @@ multA a b =
   in Algebraic fg (strum fg) int
 
 improveNonzero :: Algebraic -> Interval Rational
-improveNonzero (Algebraic f ss int0) = go int0
+improveNonzero (Algebraic _ ss int0) = go int0
   where
     go int =
       let (lh, bh) = bisect int
       in if countChangeIn lh ss == 0
          then bh
          else go lh
+improveNonzero _ = error "improveNonzero: Rational"
 
 recipInt :: (Num r, Ord r, Division r) => Interval r -> Interval r
 recipInt i | lower i < 0 = Interval (recip $ upper i) (recip $ lower i)
@@ -277,6 +311,7 @@ isolateRoots f =
 
 improve :: Algebraic -> Algebraic
 improve (Algebraic f ss int) = Algebraic f ss $ improveWith ss int
+improve a = a
 
 improveWith :: (Ord a, Ring a, DecidableZero a, Division a)
             => [OrderedPolynomial a order One] -> Interval a -> Interval a
