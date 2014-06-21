@@ -212,6 +212,7 @@ calcOrderWeight' :: forall vs n. SList (vs :: [Nat]) -> V.Vector Int n -> Int
 calcOrderWeight' SNil _ = 0
 calcOrderWeight' (SCons n ns) (x :- xs) =
   x * sNatToInt n + calcOrderWeight' ns xs
+calcOrderWeight' (SCons _ _) Nil = 0
                                                            
 weightOrder :: forall ns ord m. (IsOrder ord, SingI ns)
             => Proxy (WeightOrder ns ord) -> Monomial m -> Monomial m -> Ordering
@@ -482,14 +483,14 @@ instance (Ring r, DecidableZero r, SingI n, IsOrder ord) => DecidableZero (Order
 
 instance (DecidableZero r, Ring r, IsOrder ord, SingI n, IntegralSemiring r) => IntegralSemiring (OrderedPolynomial r ord n)
 instance (Eq r, DecidableUnits r, DecidableZero r, Field r, IsMonomialOrder ord, IntegralSemiring r) => Euclidean (OrderedPolynomial r ord One) where
-  f0 `divide` g = loop f0 zero
+  f0 `divide` g = step f0 zero
     where
       lm = leadingMonomial g
-      loop p quo
+      step p quo
           | isZero p = (quo, p)
           | lm `divs` leadingMonomial p =
               let q   = toPolynomial $ leadingTerm p `tryDiv` leadingTerm g
-              in loop (p - (q * g)) (quo + q)
+              in step (p - (q * g)) (quo + q)
           | otherwise = (quo, p)
   degree f | isZero f  = Nothing
            | otherwise = Just $ P.fromIntegral $ totalDegree' f
@@ -502,14 +503,14 @@ pDivModPoly :: (Euclidean k, SingRep n, IsOrder ord)
             => OrderedPolynomial k ord n -> OrderedPolynomial k ord n
             -> (OrderedPolynomial k ord n, OrderedPolynomial k ord n)
 f0 `pDivModPoly` g =
-  loop (injectCoeff (pow (leadingCoeff g) (P.fromIntegral $ totalDegree' f0 - totalDegree' g + 1 :: Natural)) * f0) zero
+  step (injectCoeff (pow (leadingCoeff g) (P.fromIntegral $ totalDegree' f0 - totalDegree' g + 1 :: Natural)) * f0) zero
   where
     lm = leadingMonomial g
-    loop p quo
+    step p quo
         | isZero p = (quo, p)
         | lm `divs` leadingMonomial p =
             let q   = toPolynomial $ (leadingCoeff p `quot` leadingCoeff g, leadingMonomial p / leadingMonomial g)
-            in loop (p - (q * g)) (quo + q)
+            in step (p - (q * g)) (quo + q)
         | otherwise = (quo, p)
 
 instance (Ring r, DecidableZero r, IsOrder ord, DecidableUnits r, SingRep n) => DecidableUnits (OrderedPolynomial r ord n) where

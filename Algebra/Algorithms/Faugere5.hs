@@ -3,6 +3,7 @@
 {-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction, ParallelListComp  #-}
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TemplateHaskell, TupleSections #-}
 {-# LANGUAGE TypeOperators, ViewPatterns                                     #-}
+{-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 module Algebra.Algorithms.Faugere5 (f5Original, showSingular) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Prelude
@@ -36,6 +37,7 @@ import qualified Data.Vector.Mutable         as MV
 import           Numeric.Decidable.Zero      (isZero)
 import           Text.Printf                 (printf)
 
+
 {-
 unsafeIOToST :: Monad m => t -> m ()
 unsafeIOToST _ = return ()
@@ -56,7 +58,7 @@ showsIf False _ = id
 instance (DecidableZero r, Ring r, Show r, SingRep n, IsOrder ord)
          => Show (PolyRepr r ord n) where
   showsPrec _ (PolyRepr (n, m) p) = showParen True $
-    showsIf (not $ m == one) (shows m . showChar ' ') . showString "F_" . shows n . showString ", " . shows p
+    showsIf (m /= one) (shows m . showChar ' ') . showString "F_" . shows n . showString ", " . shows p
 
 type RefVector s a = STRef s (MV.MVector s a)
 
@@ -92,7 +94,7 @@ preReduction fs = map monoize $ go [] fs
       let r = y `modPolynomial` (xs++ys)
       in if r == y
          then go (xs++[y]) ys
-         else if isZero r then go [] (xs ++ ys) else go [] (xs ++ r : ys)
+         else go [] (xs ++ if isZero r then ys else r : ys)
 
 
 f5Original :: (Show r, Ord r, Eq r, DecidableZero r, SingRep n, Field r, IsMonomialOrder ord)
@@ -188,8 +190,8 @@ f5Core i bs g = do
       modifySTRef' g' (IS.insert k)
   readSTRef g'
 
+replace :: Eq b => b -> b -> [b] -> [b]
 replace f t = map (\c -> if c == f then t else c)
-
 
 mapMaybeM :: Monad m => (t -> m (Maybe a)) -> [t] -> m [a]
 mapMaybeM f as = go as id
@@ -206,7 +208,7 @@ reduction :: (Eq r, ?labPolys :: (RefVector s (PolyRepr r ord n)),
               SingRep n, DecidableZero r, Field r,
               IsMonomialOrder ord)
           => [Int] -> [OrderedPolynomial r ord n] -> IntSet -> IntSet -> ST s IntSet
-reduction t0 bs g g' = do
+reduction t0 bs g g' =
   loop IS.empty . H.fromList =<< mapM (\l -> flip Entry l . view signature <$> readAt ?labPolys l) t0
   where
     loop !completed !todo =
@@ -278,7 +280,7 @@ spols :: (?labPolys :: (RefVector s (PolyRepr r ord n)),
           SingRep n, Show r,
           DecidableZero r, Field r, IsMonomialOrder ord)
       => [CriticalPair ord n] -> ST s [Int]
-spols bs = do
+spols bs =
   map payload . T.toList <$> foldrM step H.empty (sortBy (comparing $ view _1) bs)
   where
     step (_, _, k, _,l) fs = do
@@ -365,12 +367,12 @@ criticalPair k l i g = do
   when ((u1 *@ rk)^.signature == (u2 *@ rl)^.signature ||
         k1 == i && p1 || k2 == i && p2 || q1 || q2) $ unsafeIOToST $
     printf "  (%d,%d): %s, %s was rejected\n" (k+1) (l+1) (show $ (u1*@rk)^.signature._2) (show $ (u2*@rl)^.signature._2)
-  if (u1 *@ rk)^.signature == (u2 *@ rl)^.signature ||
+  return $! if (u1 *@ rk)^.signature == (u2 *@ rl)^.signature ||
      k1 == i && p1 || k2 == i && p2 || q1 || q2
-    then return Nothing
-    else if (u1 *@ rk)^.signature < (u2 *@ rl)^.signature
-         then return $ Just (t, u2, l, u1, k)
-         else return $ Just (t, u1, k, u2, l)
+    then Nothing
+    else Just $ if (u1 *@ rk)^.signature < (u2 *@ rl)^.signature
+         then (t, u2, l, u1, k)
+         else (t, u1, k, u2, l)
 
 isTopReducible :: (?labPolys :: RefVector s (PolyRepr r ord n), SingRep n,
                    DecidableZero r, IsMonomialOrder ord, Ring r)
