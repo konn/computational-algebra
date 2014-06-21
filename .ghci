@@ -1,2 +1,3 @@
 :set -ishare -itests -ibench
+:set prompt "ghci> "
 
