@@ -5,6 +5,8 @@
 module Algebra.Instances () where
 import           Control.Lens
 import           Data.Complex
+import           Data.Convertible.Base    (Convertible (..))
+import qualified Data.Ratio               as P
 import           Data.Type.Natural        (bugInGHC)
 import qualified Data.Vector.Sized        as V
 import           Numeric.Algebra
@@ -96,3 +98,14 @@ instance Ring Double where
 instance DecidableZero Double where
   isZero 0 = True
   isZero _ = False
+
+instance Euclidean d => Fractional (Fraction d) where
+  fromRational r = fromInteger (P.numerator r) % fromInteger (P.denominator r)
+  recip = NA.recip
+  (/) = (NA./)
+
+instance Convertible (Fraction Integer) Double where
+  safeConvert a = Right $ P.fromInteger (numerator a) P./ P.fromInteger (denominator a)
+
+instance Convertible (Fraction Integer) (Complex Double) where
+  safeConvert a = Right $ P.fromInteger (numerator a) P./ P.fromInteger (denominator a) :+ 0

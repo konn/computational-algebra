@@ -47,7 +47,7 @@ library
                      Algebra.Ring.Polynomial.Quotient
                      Algebra.Ring.Polynomial.Parser
                      Algebra.Scalar Algebra.Internal Algebra.Instances Algebra.Wrapped
-                     Algebra.Matrix Algebra.Repa Algebra.Prelude
+                     Algebra.Matrix Algebra.Repa Algebra.Prelude Algebra.Algorithms.Signature
     exposed: True
     buildable: True
     other-modules: Algebra.Algorithms.FGLM
@@ -205,7 +205,7 @@ test-suite specs
                    monomorphic ==0.0.3.1.*, quickcheck-instances -any,
                    reflection ==1.4.*, sized-vector ==1.4.0.0.*, smallcheck -any,
                    tagged ==0.7.2.*, test-framework -any, test-framework-hunit -any,
-                   type-natural ==0.2.1.0.*, vector ==0.10.0.1.*,
+                   type-natural ==0.2.1.0.*, vector ==0.10.0.1.*,convertible,
                    equational-reasoning ==0.2.0.2.*, process ==1.1.0.2.*,
                    text ==0.11.3.1.*, singletons ==0.8.6.*, matrix ==0.3.0.0.*
     type: exitcode-stdio-1.0
@@ -213,7 +213,7 @@ test-suite specs
     buildable: True
     hs-source-dirs: tests share
     other-modules: Utils GroebnerSpec ZeroDimSpec
-                   Faugere5Spec
+                   Faugere5Spec SignatureSpec
     ghc-options: -Wall -threaded
 test-suite new-div-test
     build-depends: constraints ==0.3.5.*, HUnit -any,

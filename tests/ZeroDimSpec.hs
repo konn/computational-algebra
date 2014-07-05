@@ -9,6 +9,7 @@ import           Algebra.Ring.Polynomial.Quotient
 import           Control.Monad
 import           Control.Monad.Random
 import           Data.Complex
+import           Data.Convertible                 (convert)
 import qualified Data.Matrix                      as M
 import           Data.Maybe
 import           Data.Type.Monomorphic
@@ -16,6 +17,7 @@ import           Data.Type.Natural                hiding (one, promote, zero)
 import           Data.Type.Ordinal
 import qualified Data.Vector                      as V
 import qualified Data.Vector.Sized                as SV
+import           Numeric.Field.Fraction           (Fraction, (%))
 import           SingularBridge
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
@@ -103,7 +105,7 @@ prop_isApproximateZero err solver sn =
   case sn of
     SS _ -> forAll (zeroDimOf sn) $ \(ZeroDimIdeal ideal) ->
       let anss = solver ideal
-          mul r d = fromRational r * d
+          mul r d = convert r * d
       in all (\as -> all ((<err) . magnitude . substWith mul as) $ generators ideal) anss
 
 prop_univPoly :: SingI n => SNat n -> Property
@@ -123,19 +125,19 @@ rank mat =
 data TestSet = TestSet { inputMat :: [[Fraction Integer]]
                        , inputVec :: [Fraction Integer]
                        , answer   :: [Fraction Integer]
-                       } deriving (Read, Show, Eq, Ord)
+                       } deriving (Show, Eq, Ord)
 
 linSet :: [TestSet]
 linSet =
   [TestSet
    [[1 ,0 ,0 ,0 ,0 ]
    ,[0 ,(-2) ,(-2) ,(-2) ,(-2) ]
-   ,[0 ,0 ,3 / 2,0 ,(-1) / 2]
-   ,[0 ,0 ,0 ,0 ,(-5) / 2]
+   ,[0 ,0 ,3 % 2,0 ,(-1) % 2]
+   ,[0 ,0 ,0 ,0 ,(-5) % 2]
    ,[0 ,1 ,1 ,1 ,1 ]
    ,[0 ,0 ,(-2) ,1 ,(-1) ]
    ]
-   [0 ,(-2) ,19 / 5,14 / 5,1 ,0 ]
-   [0 ,(-81) / 25,54 / 25,16 / 5,(-28) / 25]
+   [0 ,(-2) ,19 % 5,14 % 5,1 ,0 ]
+   [0 ,(-81) % 25,54 % 25,16 % 5,(-28) % 25]
   ]
 

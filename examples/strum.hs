@@ -257,6 +257,7 @@ strum f = zipWith (*) (cycle [1,1,-1,-1]) $
           map (\(p,_,_) -> p * injectCoeff (recip $ abs (leadingCoeff p))) $
           reverse $ prs f (diff OZ f)
 
+
 data Interval r = Interval { lower :: !r, upper :: !r } deriving (Eq, Ord)
 
 size :: Group r => Interval r -> r

@@ -45,6 +45,10 @@ unsafeIOToST _ = return ()
 
 type CriticalPair ord n = (OrderedMonomial ord n, OrderedMonomial ord n, Int, OrderedMonomial ord n, Int)
 type Rule ord n = [(OrderedMonomial ord n, Maybe Int)]
+type F5Context s r ord n =
+  (?labPolys :: RefVector s (PolyRepr r ord n),
+   ?rules :: RefVector s (Rule ord n))
+
 
 data PolyRepr r ord n =
   PolyRepr { _signature :: (Int, OrderedMonomial ord n)
@@ -61,11 +65,6 @@ instance (DecidableZero r, Ring r, Show r, SingRep n, IsOrder ord)
     showsIf (m /= one) (shows m . showChar ' ') . showString "F_" . shows n . showString ", " . shows p
 
 type RefVector s a = STRef s (MV.MVector s a)
-
-monoize :: (DecidableZero r, SingRep n, Field r, IsMonomialOrder order)
-        => OrderedPolynomial r order n -> OrderedPolynomial r order n
-monoize f | isZero f  = zero
-          | otherwise = recip (leadingCoeff f) .*. f
 
 makeLenses ''PolyRepr
 
@@ -95,7 +94,6 @@ preReduction fs = map monoize $ go [] fs
       in if r == y
          then go (xs++[y]) ys
          else go [] (xs ++ if isZero r then ys else r : ys)
-
 
 f5Original :: (Show r, Ord r, Eq r, DecidableZero r, SingRep n, Field r, IsMonomialOrder ord)
            => Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
@@ -403,9 +401,9 @@ showSingular = replace '%' '/' . showPolynomialWith True [(0, "x(0)"), (1, "x(1)
 
 ideal :: Ideal (OrderedPolynomial (Fraction Integer) Grevlex Three)
 ideal = toIdeal
-        [-5*x^3 *y + 3%2 *x^2 *z^2 - 5%4 *y^2 *z^2 + 5%4 *z^4
-        ,4%5 *x^3 + 3*x *y^2 - 4*x^2 *z + 4%7 *y^2 *z
-        ,-1%4 *x^4 - 4%3 *x^3 *y - x^2 *y *z
-        ,-2%5 *x *y,-5%3 *x^3]
+        [4%5 *x^2 *y *z - 5%3 *x^2 *z^2
+        ,5%2 *x^4 - 4%5 *x^3 *y
+        ,3%5 *x^4 - 3%2 *x^2 *y^2 + 3%5 *x^2 *y *z + 3%5 *y *z^3
+        ,-5%4 *x^3 - 4%3 *y^3 + 3%7 *y *z^2]
   where
     [x,y,z] = genVars sThree

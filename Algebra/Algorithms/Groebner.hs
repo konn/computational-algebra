@@ -290,10 +290,6 @@ reduceMinimalGroebnerBasis bs = runST $ do
     if q == zero then writeSTRef right ys else writeSTRef right (q : ys)
   readSTRef right
 
-monoize :: (Field k, IsPolynomial k n, IsMonomialOrder order)
-           => OrderedPolynomial k order n -> OrderedPolynomial k order n
-monoize f = injectCoeff (recip $ leadingCoeff f) * f
-
 -- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
 calcGroebnerBasisWith :: (Field k, IsPolynomial k n, IsMonomialOrder order, IsMonomialOrder order')
                       => order -> Ideal (OrderedPolynomial k order' n) -> [OrderedPolynomial k order n]

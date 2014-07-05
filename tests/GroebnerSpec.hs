@@ -10,6 +10,7 @@ import           Data.Type.Monomorphic
 import           Data.Type.Natural           hiding (one, promote, zero)
 import           Data.Vector.Sized           (Vector (..))
 import qualified Data.Vector.Sized           as SV
+import           Numeric.Field.Fraction      (Fraction)
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck             hiding (promote)

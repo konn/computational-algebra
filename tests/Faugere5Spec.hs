@@ -8,6 +8,7 @@ import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
 import Data.List                   (sort)
 import Data.Type.Natural           hiding (one, promote, zero)
+import Numeric.Field.Fraction      (Fraction)
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck             hiding (promote)

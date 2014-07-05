@@ -9,7 +9,7 @@ module Algebra.Ring.Polynomial
     , WeightedEliminationOrder, eliminationOrder, weightedEliminationOrder
     , lex, revlex, graded, grlex, grevlex, productOrder, productOrder', (*<), (>*)
     , transformMonomial, WeightProxy, weightOrder, totalDegree, totalDegree'
-    , IsPolynomial, coeff, lcmMonomial, gcdMonomial, sPolynomial, polynomial, substWith
+    , IsPolynomial, coeff, lcmMonomial, gcdMonomial, sPolynomial, polynomial, substWith, monoize
     , castMonomial, castPolynomial, toPolynomial, changeOrder, changeOrderProxy
     , changeMonomialOrder, changeMonomialOrderProxy, isRelativelyPrime
     , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars
@@ -53,6 +53,11 @@ import           Prelude                 hiding (lex, negate, recip, sum, (*), q
 import qualified Prelude                 as P
 import Numeric.Semiring.Integral (IntegralSemiring)
 import Control.Applicative ((<$>))
+
+monoize :: (DecidableZero r, SingRep n, Field r, IsMonomialOrder order)
+        => OrderedPolynomial r order n -> OrderedPolynomial r order n
+monoize f | isZero f  = zero
+          | otherwise = recip (leadingCoeff f) .*. f
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i.
 type Monomial (n :: Nat) = V.Vector Int n

@@ -37,11 +37,13 @@ import qualified Test.SmallCheck.Series           as SC
 import Data.Ord
 import Data.List (sortBy)
 import Numeric.Algebra (DecidableZero)
+import Numeric.Algebra (Ring)
+import Numeric.Domain.Euclidean (Euclidean)
 
 newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal :: Ideal (Polynomial (Fraction Integer) n)
                                       } deriving (Show, Eq, Ord)
 
-(%.) :: Integral a => a -> SC.Positive a -> Ratio a
+(%.) :: Euclidean a => a -> SC.Positive a -> Fraction a
 a %. SC.Positive b = a % b
 
 -- * Instances for SmallCheck.
@@ -86,6 +88,15 @@ instance Monad m => Serial m (ZeroDimIdeal Two) where
     (f, g, ideal) <- (,,) <$> xPoly <~> yPoly <~> series
     return $ ZeroDimIdeal $ f `addToIdeal` g `addToIdeal` ideal
 
+instance (Euclidean i, Integral i, Serial m i) => Serial m (Fraction i) where
+  series = pairToRatio <$> series
+    where
+      pairToRatio (n, SC.Positive d) = n % d
+instance (Euclidean i, Integral i, CoSerial m i) => CoSerial m (Fraction i) where
+  coseries rs = (. ratioToPair) <$> coseries rs
+    where
+      ratioToPair r = (numerator r, denominator r)
+
 arbVecOfSum :: SNat n -> Int -> Gen (Monomial n)
 arbVecOfSum SZ      _ = fail "boo"
 arbVecOfSum (SS SZ) n = return $ n :- Nil
@@ -107,7 +118,7 @@ instance (IsOrder ord, Arbitrary (Monomial n)) => Arbitrary (OrderedMonomial ord
 
 instance (SingI n, IsOrder ord)
       => Arbitrary (OrderedPolynomial (Fraction Integer) ord n) where
-  arbitrary = polynomial . M.fromList <$> listOf1 ((,) <$> arbitrary <*> arbitrary(Fraction Integer))
+  arbitrary = polynomial . M.fromList <$> listOf1 ((,) <$> arbitrary <*> arbitraryRational)
 
 instance (SingI n, IsOrder ord)
       => Arbitrary (HomogPoly (Fraction Integer) ord n) where
@@ -180,10 +191,13 @@ isNonTrivial (ZeroDimIdeal ideal) = reifyQuotient ideal $ maybe False ((>0).leng
 
 data Equation = Equation { coefficients :: [[(Fraction Integer)]]
                          , answers      :: [(Fraction Integer)]
-                         } deriving (Read, Show, Eq, Ord)
+                         } deriving (Show, Eq, Ord)
 
 newtype MatrixCase a = MatrixCase { getMatrix :: [[a]]
                                   } deriving (Read, Show, Eq, Ord)
+
+instance Arbitrary (Fraction Integer) where
+  arbitrary = arbitraryRational
 
 instance (Eq a, Num a, Arbitrary a) => Arbitrary (MatrixCase a) where
   arbitrary = flip suchThat (any (any (/= 0)) . getMatrix) $ sized $ \len -> do
