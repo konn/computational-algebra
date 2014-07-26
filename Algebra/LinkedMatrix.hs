@@ -2,24 +2,34 @@
 {-# LANGUAGE MultiParamTypeClasses, NamedFieldPuns, NoImplicitPrelude   #-}
 {-# LANGUAGE NoMonomorphismRestriction, RankNTypes, ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell                                            #-}
-module Algebra.LinkedMatrix where
+module Algebra.LinkedMatrix (Matrix, toList, fromList, swapRows, identity,
+                             swapCols, switchCols, switchRows, addRow,
+                             addCol, ncols, nrows, getRow, getCol,
+                             scaleRow, combineRows, combineCols, transpose,
+                             inBound, height, width, cmap, empty, rowVector,
+                             colVector,
+                             catRow, catCol, (<||>), (<-->), toRows, toCols,
+                             zeroMat, getDiag, trace, diagProd, diag,
+                             scaleCol, clearRow, clearCol, index, (!)) where
+import           Algebra.Wrapped
 import           Control.Applicative        ((<$>))
+import           Control.Applicative        ((<|>))
 import           Control.Lens               hiding (index)
 import           Control.Monad              (forM, zipWithM)
 import           Control.Monad.Identity     (runIdentity)
+import           Control.Monad.ST.Strict    (runST)
 import           Control.Monad.State.Strict (runState)
-import           Data.IntMap                (empty)
 import           Data.IntMap.Strict         (IntMap, alter, insertWith)
 import           Data.IntMap.Strict         (mapMaybeWithKey)
 import qualified Data.IntMap.Strict         as IM
 import           Data.List                  (sort)
-import           Data.Maybe                 (fromJust)
-import           Data.Maybe                 (isJust)
-import           Data.Maybe                 (mapMaybe)
-import           Data.Vector                (Vector, create)
-import           Data.Vector                (modify)
-import           Data.Vector                (generate)
+import           Data.Maybe                 (fromJust, mapMaybe)
+import           Data.Maybe                 (fromMaybe)
+import           Data.Tuple                 (swap)
+import           Data.Vector                (Vector, create, generate, thaw)
+import           Data.Vector                (unsafeFreeze)
 import qualified Data.Vector                as V
+import           Data.Vector.Mutable        (grow)
 import qualified Data.Vector.Mutable        as MV
 import           Numeric.Algebra            hiding ((<), (>))
 import           Numeric.Decidable.Zero     (isZero)
@@ -32,6 +42,9 @@ data Entry a = Entry { _value   :: !a
                      } deriving (Read, Show, Eq, Ord)
 
 makeLenses ''Entry
+
+newEntry :: a -> Entry a
+newEntry v = Entry v (-1,-1) Nothing Nothing
 
 data Matrix a = Matrix { _coefficients :: !(Vector (Entry a))
                        , _rowStart     :: !(IntMap Int)
@@ -48,9 +61,12 @@ data BuildState = BuildState { _colMap :: !(IntMap [Int])
                              }
 makeLenses ''BuildState
 
+empty :: Matrix a
+empty = Matrix V.empty IM.empty IM.empty 0 0
+
 fromList :: DecidableZero a => [[a]] -> Matrix a
 fromList xss =
-  let (as, bs) = runState (zipWithM initialize [0..] xss) (BuildState empty empty (-1))
+  let (as, bs) = runState (zipWithM initialize [0..] xss) (BuildState IM.empty IM.empty (-1))
       vec = V.fromList $ concat as
   in Matrix vec (head <$> _rowMap bs) (head <$> _colMap bs) h w
   where
@@ -69,6 +85,19 @@ fromList xss =
                        , _rowNext = head <$> nr
                        , _colNext = head <$> nc
                        }
+
+getDiag :: Monoidal a => Matrix a -> Vector a
+getDiag mat = V.generate (min (mat^.height) (mat^.width)) $ \i ->
+  fromMaybe zero $ traverseDir Nothing (\a _ e -> a <|> if i == e^.nthL Row
+                                                        then Just (e^.value )
+                                                        else Nothing) Row i mat
+
+diagProd :: (Unital c, Monoidal c) => Matrix c -> c
+diagProd = V.foldr' (*) one . getDiag
+
+trace :: Monoidal c => Matrix c -> c
+trace = V.foldr' (+) zero . getDiag
+
 toList :: Monoidal a => Matrix a -> [[a]]
 toList mat =
   let orig = replicate (_height mat) $ replicate (_width mat) zero
@@ -215,16 +244,48 @@ nextL :: Direction -> Lens' (Entry a) (Maybe Int)
 nextL Row    = rowNext
 nextL Column = colNext
 
-addDir :: Additive a => Direction -> Vector a -> Int -> Matrix a -> Matrix a
-addDir dir vec i mat = mat & coefficients %~ go
-  where
-    go = modify $ \mv -> do
-      traverseDirM () (\_ k e -> MV.write mv k (e & value %~ (+ vec V.! (e ^. nthL dir)))) dir i mat
+addDir :: forall a. (DecidableZero a, Additive a)
+       => Direction -> Vector a -> Int -> Matrix a -> Matrix a
+addDir dir vec i mat = runST $ do
+    mv <- thaw $ mat ^. coefficients
+    let n = MV.length mv
+        upd (dic, del) k e = do
+          let v' = e ^. value + IM.findWithDefault zero (e ^. nthL dir) mp
+          d' <- if isZero v'
+                then return $ k : del
+                else MV.write mv k (e & value .~ v') >> return del
+          return (IM.delete (e ^. nthL dir) dic, d')
+    (rest, dels) <- traverseDirM (mp, []) upd dir i mat
+    mv' <- if IM.null rest
+           then return mv
+           else grow mv (IM.size rest)
+    let app j (p, k, opo) v = do
+          let preOpo = mat ^. startL (perp dir) . at i
+          MV.write mv' k $ newEntry v
+                         & nextL dir .~ p
+                         & nextL (perp dir) .~ preOpo
+                         & coordL dir .~ i
+                         & nthL dir .~ j
 
-addRow :: Additive a => Vector a -> Int -> Matrix a -> Matrix a
+          return (Just k, k+1, alter (const $ Just k) j opo)
+    (l, _, opoStart) <- ifoldlMOf ifolded app (mat ^. startL dir . at i, n, mat ^. startL (perp dir)) rest
+    v' <- unsafeFreeze mv'
+    let mat' = mat & coefficients .~ v'
+                   & startL dir %~ alter (const l) i
+                   & startL (perp dir) .~ opoStart
+    return $ foldr clearAt mat' dels
+  where
+    mp :: IntMap a
+    mp = V.ifoldr (\k v d -> if isZero v then d else IM.insert k v d) IM.empty vec
+
+perp :: Direction -> Direction
+perp Row = Column
+perp Column = Row
+
+addRow :: DecidableZero a => Vector a -> Int -> Matrix a -> Matrix a
 addRow = addDir Row
 
-addCol :: Additive a => Vector a -> Int -> Matrix a -> Matrix a
+addCol :: DecidableZero a => Vector a -> Int -> Matrix a -> Matrix a
 addCol = addDir Column
 
 inBound :: (Int, Int) -> Matrix a -> Bool
@@ -245,11 +306,127 @@ index i j mat
 (!) :: Monoidal a => Matrix a -> (Int, Int) -> a
 (!) a (i, j) = fromJust $ index i j a
 
-combineDir :: (Multiplicative a, Monoidal a) => Direction -> a -> Int -> Int -> Matrix a -> Matrix a
-combineDir dir alpha i j mat = mat & coefficients %~ go
+combineDir :: (DecidableZero a, Multiplicative a) => Direction -> a -> Int -> Int -> Matrix a -> Matrix a
+combineDir dir alpha i j mat = addDir dir (V.map (alpha *) $ getDir dir i mat) j mat
+
+combineRows :: (DecidableZero a, Multiplicative a) => a -> Int -> Int -> Matrix a -> Matrix a
+combineRows = combineDir Row
+
+combineCols :: (DecidableZero a, Multiplicative a) => a -> Int -> Int -> Matrix a -> Matrix a
+combineCols = combineDir Column
+
+nrows, ncols :: Matrix a -> Int
+ncols = view width
+nrows = view height
+
+identity :: Unital a => Int -> Matrix a
+identity n =
+  let idMap = IM.fromList [(i,i) | i <- [0..n-1]]
+  in Matrix (V.fromList [newEntry one & idx .~ (i,i) | i <- [0..n-1]])
+            idMap idMap n n
+
+diag :: DecidableZero a => Vector a -> Matrix a
+diag v =
+  let n = V.length v
+      idMap = IM.fromList [(i,i) | i <- [0..n-1]]
+  in clearZero $ Matrix (V.imap (\i a -> newEntry a & idx .~ (i,i)) v)
+                 idMap idMap n n
+
+catDir :: DecidableZero b => Direction -> Matrix b -> Vector b -> Matrix b
+catDir dir mat vec = runST $ do
+  let seed = V.filter (not . isZero . snd) $ V.take (mat ^. lenL dir) $ V.indexed vec
+      n    = V.length $ mat ^. coefficients
+      curD = mat ^. countL dir
+      getNextIdx l | l == 0 = Nothing
+                   | otherwise = Just (n+l-1)
+  mv <- flip grow (V.length seed) =<< thaw (mat^.coefficients)
+  let upd (k, v) (l, opdic) = do
+        MV.write mv (n+l) $ newEntry v
+                          & nthL dir .~ k
+                          & coordL dir .~ curD
+                          & nextL dir .~ getNextIdx l
+                          & nextL (perp dir) .~ IM.lookup k opdic
+        return (l+1, alter (const $ Just $ n+l) k opdic)
+  (l, op') <- foldlMOf folded (flip upd) (0, mat ^. startL (perp dir)) seed
+  v <- unsafeFreeze mv
+  return $ mat & countL dir +~ 1
+               & startL dir %~ alter (const $ getNextIdx l) curD
+               & startL (perp dir) .~ op'
+               & coefficients .~ v
+
+rowVector :: DecidableZero a => Vector a -> Matrix a
+rowVector = fromList . (:[]) . V.toList
+
+colVector :: DecidableZero a => Vector a -> Matrix a
+colVector = fromList . map (:[]) . V.toList
+
+toDirs :: Monoidal a => Direction -> Matrix a -> [Vector a]
+toDirs dir mat = [ getDir dir i mat | i <- [0..mat^.countL dir-1]]
+
+toRows :: Monoidal a => Matrix a -> [Vector a]
+toRows = toDirs Row
+
+toCols :: Monoidal a => Matrix a -> [Vector a]
+toCols = toDirs Column
+
+appendDir :: DecidableZero b => Direction -> Matrix b -> Matrix b -> Matrix b
+appendDir dir m = foldl (catDir dir) m . toDirs dir
+
+(<-->) :: DecidableZero b => Matrix b -> Matrix b -> Matrix b
+(<-->) = appendDir Row
+
+(<||>) :: DecidableZero b => Matrix b -> Matrix b -> Matrix b
+(<||>) = appendDir Column
+
+catRow :: DecidableZero b => Matrix b -> Vector b -> Matrix b
+catRow = catDir Row
+
+catCol :: DecidableZero b => Matrix b -> Vector b -> Matrix b
+catCol = catDir Column
+
+switchRows :: Int -> Int -> Matrix a -> Matrix a
+switchRows = swapRows
+
+switchCols :: Int -> Int -> Matrix a -> Matrix a
+switchCols = swapCols
+
+cmap :: DecidableZero a => (a1 -> a) -> Matrix a1 -> Matrix a
+cmap f = clearZero . (coefficients . mapped . value %~ f)
+
+clearZero :: DecidableZero a => Matrix a -> Matrix a
+clearZero mat = V.ifoldr (\i v m -> if isZero (v^.value) then clearAt i m else m)
+                mat (mat ^. coefficients)
+
+transpose :: Matrix a -> Matrix a
+transpose mat = mat & rowStart .~ mat^.colStart
+                    & colStart .~ mat^.rowStart
+                    & height   .~ mat^.width
+                    & width    .~ mat^.height
+                    & coefficients . each . idx %~ swap
+
+zeroMat :: Int -> Int -> Matrix a
+zeroMat = Matrix V.empty IM.empty IM.empty
+
+{-
+gaussReduction :: (Normed a, DecidableZero a, Field a, Unital a)
+               => Matrix a -> (Matrix a, Matrix a)
+gaussReduction mat = go 1 1 mat (identity $ nrows mat)
   where
-    go = modify $ \mv -> do
-      let !is = getDir dir i mat
-      traverseDirM () (\_ k e -> MV.write mv k (e & value %~ (+ (alpha * is V.! (e ^. nthL dir))))) dir j mat
-
-
+    go i j a p
+      | i > nrows mat || j > ncols mat = (a, p)
+      | otherwise =
+        let (k, new) =  maximumBy (comparing $ norm . snd) [(l, a ! (l, j)) | l <- [i..nrows mat]]
+        in if isZero new
+           then go i (j + 1) a p
+           else let prc l a0 p0
+                      | l == i = prc (l+1) a0 p0
+                      | l > nrows mat = (a0, p0)
+                      | otherwise     =
+                        let coe = NA.negate (a0 ! (l, j))
+                            a'' = combineRows coe i l a0
+                            p'' = combineRows coe i l p0
+                        in prc (l+1) a'' p''
+                    (a', p') = prc 1 (scaleRow (NA.recip new) i $ switchRows i k a)
+                                     (scaleRow (NA.recip new) i $ switchRows i k p)
+                in go (i+1) (j+1) a' p'
+-}

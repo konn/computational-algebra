@@ -3,6 +3,7 @@
 {-# LANGUAGE TypeSynonymInstances                                        #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Matrix (Matrix(..), mapSM, delta, companion, Sparse(..), gaussReduction) where
+import qualified Algebra.LinkedMatrix             as LM
 import           Algebra.Ring.Polynomial
 import           Algebra.Wrapped                  (Normed (..))
 import           Control.Arrow
@@ -21,6 +22,10 @@ import qualified Data.Vector.Hybrid               as H
 import           Data.Vector.Hybrid.Internal
 import           Numeric.Algebra                  (DecidableZero)
 import           Numeric.Algebra                  (Ring)
+import           Numeric.Algebra                  (Additive)
+import           Numeric.Algebra                  (Multiplicative)
+import           Numeric.Algebra                  (Monoidal)
+import           Numeric.Algebra                  (Unital)
 import qualified Numeric.Algebra                  as NA
 import           Numeric.Field.Fraction
 import qualified Numeric.LinearAlgebra            as LA
@@ -157,6 +162,33 @@ instance (SM.Vectored a, SM.Eq0 a) => Num (Sparse a) where
 
 instance (SM.Vectored a, Show a) => Show (Sparse a) where
   showsPrec d = showsPrec d . rawSM
+
+instance Matrix LM.Matrix where
+  type Elem LM.Matrix a = (DecidableZero a, Unital a, Monoidal a, Multiplicative a, Additive a)
+  cmap = LM.cmap
+  (!) m pos = m LM.! (pos & both %~ pred)
+  index i j = LM.index (i-1) (j-1)
+  empty = LM.empty
+  buildMatrix h w f = LM.fromList [[(f (i,j)) | j <- [1..w]] | i <- [1..h]]
+  trans = LM.transpose
+  combineRows j s i = LM.combineRows s (i-1) (j-1)
+  switchRows i j = LM.switchRows (i-1) (j-1)
+  scaleRow a i = LM.scaleRow a (pred i)
+  zero = LM.zeroMat
+  identity = LM.identity
+  diag = LM.diag
+  getDiag = LM.getDiag
+  diagProd = LM.diagProd
+  trace = LM.trace
+  getRow = LM.getRow . pred
+  getCol = LM.getCol . pred
+  nrows = LM.nrows
+  ncols = LM.ncols
+  fromLists = LM.fromList
+  (<||>) = (LM.<||>)
+  (<-->) = (LM.<-->)
+  rowVector = LM.rowVector
+  colVector = LM.colVector
 
 instance Matrix Sparse where
   type Elem Sparse a = (Num a, SM.Vectored a, SM.Eq0 a)
