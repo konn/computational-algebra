@@ -1,10 +1,11 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
-{-# LANGUAGE GADTs, MultiParamTypeClasses, NoImplicitPrelude                 #-}
-{-# LANGUAGE NoMonomorphismRestriction, ParallelListComp, QuasiQuotes        #-}
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, TemplateHaskell, TypeFamilies  #-}
-{-# LANGUAGE TypeOperators, ViewPatterns                                     #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts                   #-}
+{-# LANGUAGE FlexibleInstances, GADTs, MultiParamTypeClasses                #-}
+{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction, ParallelListComp #-}
+{-# LANGUAGE QuasiQuotes, RankNTypes, ScopedTypeVariables, TemplateHaskell  #-}
+{-# LANGUAGE TypeFamilies, TypeOperators, ViewPatterns                      #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Algebra.Algorithms.Faugere4 where
+import qualified Algebra.LinkedMatrix    as LM
 import           Algebra.Matrix          hiding (trace)
 import qualified Algebra.Repa            as Repa
 import           Algebra.Ring.Ideal
@@ -20,6 +21,7 @@ import qualified Data.HashSet            as S
 import           Data.List
 import qualified Data.Matrix             as DM
 import           Data.Maybe
+import           Data.Proxy              (Proxy)
 import           Data.Type.Natural       hiding (one, zero)
 import qualified Data.Vector             as V
 import           Data.Vector.Sized       (Vector ((:-), Nil))
@@ -27,6 +29,7 @@ import qualified Data.Vector.Sized       as SV
 import           Debug.Trace
 import           Numeric.Algebra         hiding (sum, (<), (>), (\\))
 import qualified Numeric.Algebra         as NA
+import           Numeric.Decidable.Zero  (isZero)
 import           Numeric.Field.Fraction  (Fraction)
 import           Prelude                 hiding (Num (..), recip, subtract, (/),
                                           (^))
@@ -224,55 +227,55 @@ sequenceSV :: SV.Vector [a] n -> [SV.Vector a n]
 sequenceSV Nil = [Nil]
 sequenceSV (xs :- xss) = concatMap (\x -> map (x :-) $ sequenceSV xss) xs
 
-simplifyDM :: (Show r, IsPolynomial r n, IsMonomialOrder ord, Normed r, Field r, Num r,
-               Fractional r)
-         => [[OrderedPolynomial r ord n]]
+simplifyG :: (Show r, IsPolynomial r n, IsMonomialOrder ord, Elem mat r,
+              Matrix mat, Normed r, Commutative r, Field r)
+         => Proxy mat -> [[OrderedPolynomial r ord n]]
          -> OrderedMonomial ord n -> OrderedPolynomial r ord n
          -> (OrderedMonomial ord n, OrderedPolynomial r ord n)
-simplifyDM fss t f = go $ divisors t
+simplifyG pxy fss t f = go $ divisors t
   where
     go []       = (t, f)
     go (u : us) =
       case find (u >* f `elem`) fss of
         Nothing -> go us
         Just fs ->
-          let fs' = rowEchelonDM fs
+          let fs' = rowEchelonG pxy fs
               Just p = find (\g -> leadingMonomial g == leadingMonomial (u >* f)) fs'
           in if u /= t
-             then simplifyDM fss (t/u) p
+             then simplifyG pxy fss (t/u) p
              else (one, p)
 
-rowEchelonDM :: forall r ord n. (IsPolynomial r n, IsMonomialOrder ord, Field r, Num r,
-                               Normed r, Fractional r)
-           => [OrderedPolynomial r ord n]
+rowEchelonG :: (IsPolynomial r n, IsMonomialOrder ord, Matrix mat, Normed r,
+                DecidableZero r, Elem mat r, Commutative r, Field r)
+           => Proxy mat -> [OrderedPolynomial r ord n]
            -> [OrderedPolynomial r ord n]
-rowEchelonDM fs = {-# SCC "rowEchelon" #-}
-  let (mf, ts) = {-# SCC "buildMatrix" #-} polysToMatrixDM fs
-      mf' = matToPolysWithDM ts $ fst $ {-# SCC "eche/red" #-} gaussReduction mf
-  in nub mf' \\ [0]
+rowEchelonG pxy fs = {-# SCC "rowEchelon" #-}
+  let (mf, ts) = {-# SCC "buildMatrix" #-} polysToMatrixG fs
+      mf' = matToPolysWithG pxy ts $ fst $ {-# SCC "eche/red" #-} gaussReduction mf
+  in filter (not . isZero) $ nub mf'
 
-polysToMatrixDM :: (IsMonomialOrder ord, IsPolynomial r n, Num r)
-          => [OrderedPolynomial r ord n] -> (DM.Matrix r, [OrderedMonomial ord n])
-polysToMatrixDM fs =
+polysToMatrixG :: (Matrix mat, IsMonomialOrder ord, IsPolynomial r n, Elem mat r)
+          => [OrderedPolynomial r ord n] -> (mat r, [OrderedMonomial ord n])
+polysToMatrixG fs =
   let ts  = nub $ sortBy (flip compare) $ concatMap monomials fs
-  in (DM.fromLists $ map (\f -> map (\t -> coeff t f) ts) fs, ts)
+  in (fromLists $ map (\f -> map (\t -> coeff t f) ts) fs, ts)
 
-matToPolysWithDM :: (IsMonomialOrder ord, IsPolynomial r n, Num r)
-            => [OrderedMonomial ord n] -> DM.Matrix r -> [OrderedPolynomial r ord n]
-matToPolysWithDM ts mat =
+matToPolysWithG :: (IsMonomialOrder ord, IsPolynomial r n, Matrix mat, Elem mat r)
+            => Proxy mat -> [OrderedMonomial ord n] -> mat r -> [OrderedPolynomial r ord n]
+matToPolysWithG _ ts mat =
   map (NA.sum . zipWith (flip $ curry toPolynomial) ts . V.toList) $ toRows mat
 
-symbolicPPDM :: forall r ord n. (Show r, IsPolynomial r n, IsMonomialOrder ord, Field r, Num r,
-                               Normed r, Fractional r)
-           => [(OrderedMonomial ord n, OrderedPolynomial r ord n)]
+symbolicPPG :: (Show r, IsPolynomial r n, IsMonomialOrder ord, Field r, Num r,
+                Normed r, Fractional r, Matrix mat, Elem mat r)
+           => Proxy mat -> [(OrderedMonomial ord n, OrderedPolynomial r ord n)]
            -> [OrderedPolynomial r ord n]
            -> [[OrderedPolynomial r ord n]]
            -> [OrderedPolynomial r ord n]
-symbolicPPDM ls gs fss = {-# SCC "symbolicPP" #-}
+symbolicPPG pxy ls gs fss = {-# SCC "symbolicPP" #-}
   let fs0 = map mul ls
   in go fs0 (S.fromList $ concatMap monomials fs0) (S.fromList $ map leadingMonomial fs0)
   where
-    mul = uncurry (>*) . uncurry (simplifyDM fss)
+    mul = uncurry (>*) . uncurry (simplifyG pxy fss)
     go fs ts done
       | S.null (ts `S.difference` done) = fs
       | otherwise =
@@ -286,10 +289,11 @@ symbolicPPDM ls gs fss = {-# SCC "symbolicPP" #-}
                     in go (f' : fs) (ts' `S.union` ts'') done'
           Nothing -> go fs ts' done'
 
-faugere4DM :: (Show r, Normed r, Field r, Fractional r, IsMonomialOrder ord, IsPolynomial r n)
-         => Strategy r ord n -> Ideal (OrderedPolynomial r ord n)
+faugere4G :: (Show r, Normed r, Field r, Fractional r, IsMonomialOrder ord, IsPolynomial r n,
+              Matrix mat, Elem mat r)
+         => Proxy mat -> Strategy r ord n -> Ideal (OrderedPolynomial r ord n)
          -> Ideal (OrderedPolynomial r ord n)
-faugere4DM sel (generators -> fs) = {-# SCC "F_4" #-}
+faugere4G pxy sel (generators -> fs) = {-# SCC "F_4" #-}
   let (gs0, ps0) = foldl' (uncurry update) ([], []) fs
   in go gs0 ps0 []
   where
@@ -299,17 +303,19 @@ faugere4DM sel (generators -> fs) = {-# SCC "F_4" #-}
         let pd   = sel ps
             ps'  = ps \\ pd
             ls   = map leftP pd ++ map rightP pd
-            (fdp, fd) = redF4DM ls gs fds
+            (fdp, fd) = redF4G pxy ls gs fds
             (gs2, ps2) = foldl' (uncurry update) (gs, ps') fdp
         in go gs2 ps2 (fd:fds)
 
-redF4DM :: (Show r, IsPolynomial r n, IsMonomialOrder ord, Field r, Normed r, Fractional r)
-      => [(OrderedMonomial ord n, OrderedPolynomial r ord n)]
+redF4G :: (Show r, IsPolynomial r n, IsMonomialOrder ord, Normed r,
+           Elem mat r, Matrix mat, Commutative r, Field r, Num r, Fractional r)
+      => Proxy mat -> [(OrderedMonomial ord n, OrderedPolynomial r ord n)]
       -> [OrderedPolynomial r ord n]
       -> [[OrderedPolynomial r ord n]]
       -> ([OrderedPolynomial r ord n], [OrderedPolynomial r ord n])
-redF4DM ls gs fss = {-# SCC "reduction" #-}
-  let fs  = symbolicPPDM ls gs fss
-      fs' = rowEchelonDM fs
+redF4G pxy ls gs fss = {-# SCC "reduction" #-}
+  let fs  = symbolicPPG pxy ls gs fss
+      fs' = rowEchelonG pxy fs
   in ([ f | f <- fs', not $ leadingMonomial f `elem` map leadingMonomial fs], fs)
+
 
