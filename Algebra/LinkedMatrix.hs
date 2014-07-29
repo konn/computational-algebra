@@ -7,13 +7,11 @@ module Algebra.LinkedMatrix (Matrix, toList, fromList, swapRows, identity,
                              addCol, ncols, nrows, getRow, getCol,
                              scaleRow, combineRows, combineCols, transpose,
                              inBound, height, width, cmap, empty, rowVector,
-                             colVector,
+                             colVector, rowCount, colCount,
                              catRow, catCol, (<||>), (<-->), toRows, toCols,
                              zeroMat, getDiag, trace, diagProd, diag,
                              scaleCol, clearRow, clearCol, index, (!)) where
-import           Algebra.Wrapped
-import           Control.Applicative        ((<$>))
-import           Control.Applicative        ((<|>))
+import           Control.Applicative        ((<$>), (<|>))
 import           Control.Lens               hiding (index)
 import           Control.Monad              (forM, zipWithM)
 import           Control.Monad.Identity     (runIdentity)
@@ -23,8 +21,7 @@ import           Data.IntMap.Strict         (IntMap, alter, insertWith)
 import           Data.IntMap.Strict         (mapMaybeWithKey)
 import qualified Data.IntMap.Strict         as IM
 import           Data.List                  (sort)
-import           Data.Maybe                 (fromJust, mapMaybe)
-import           Data.Maybe                 (fromMaybe)
+import           Data.Maybe                 (fromJust, fromMaybe, mapMaybe)
 import           Data.Tuple                 (swap)
 import           Data.Vector                (Vector, create, generate, thaw)
 import           Data.Vector                (unsafeFreeze)
@@ -402,31 +399,21 @@ transpose mat = mat & rowStart .~ mat^.colStart
                     & colStart .~ mat^.rowStart
                     & height   .~ mat^.width
                     & width    .~ mat^.height
-                    & coefficients . each . idx %~ swap
+                    & coefficients . each %~ swapEntry
+  where
+    swapEntry ent = ent & idx     %~ swap
+                        & rowNext .~ ent ^. colNext
+                        & colNext .~ ent ^. rowNext
 
 zeroMat :: Int -> Int -> Matrix a
 zeroMat = Matrix V.empty IM.empty IM.empty
 
-{-
-gaussReduction :: (Normed a, DecidableZero a, Field a, Unital a)
-               => Matrix a -> (Matrix a, Matrix a)
-gaussReduction mat = go 1 1 mat (identity $ nrows mat)
-  where
-    go i j a p
-      | i > nrows mat || j > ncols mat = (a, p)
-      | otherwise =
-        let (k, new) =  maximumBy (comparing $ norm . snd) [(l, a ! (l, j)) | l <- [i..nrows mat]]
-        in if isZero new
-           then go i (j + 1) a p
-           else let prc l a0 p0
-                      | l == i = prc (l+1) a0 p0
-                      | l > nrows mat = (a0, p0)
-                      | otherwise     =
-                        let coe = NA.negate (a0 ! (l, j))
-                            a'' = combineRows coe i l a0
-                            p'' = combineRows coe i l p0
-                        in prc (l+1) a'' p''
-                    (a', p') = prc 1 (scaleRow (NA.recip new) i $ switchRows i k a)
-                                     (scaleRow (NA.recip new) i $ switchRows i k p)
-                in go (i+1) (j+1) a' p'
--}
+dirCount :: Direction -> Int -> Matrix a -> Int
+dirCount = traverseDir 0 (\a _ _ -> succ a)
+
+rowCount :: Int -> Matrix a -> Int
+rowCount = dirCount Row
+
+colCount :: Int -> Matrix a -> Int
+colCount = dirCount Column
+
