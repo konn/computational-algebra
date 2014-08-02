@@ -13,13 +13,18 @@ module Algebra.LinkedMatrix (Matrix, toList, fromList, swapRows, identity,
                              zeroMat, getDiag, trace, diagProd, diag,
                              scaleCol, clearRow, clearCol, index, (!),
                              structuredGauss) where
+import           Algebra.Wrapped
 import           Control.Applicative        ((<$>), (<|>))
+import           Control.Applicative        ((<*>))
 import           Control.Lens               hiding (index)
 import           Control.Monad              (forM, zipWithM)
 import           Control.Monad.Identity     (runIdentity)
 import           Control.Monad.ST.Strict    (runST)
 import           Control.Monad.State.Strict (runState)
 import           Control.Monad.State.Strict (evalState)
+import           Control.Monad.State.Strict (evalStateT)
+import           Control.Monad.Trans        (liftIO)
+import           Data.Foldable              (maximumBy)
 import           Data.IntMap.Strict         (IntMap, alter, insertWith)
 import           Data.IntMap.Strict         (mapMaybeWithKey)
 import           Data.IntMap.Strict         (minViewWithKey)
@@ -28,6 +33,7 @@ import           Data.IntSet                (IntSet)
 import qualified Data.IntSet                as IS
 import           Data.List                  (sort)
 import           Data.Maybe                 (fromJust, fromMaybe, mapMaybe)
+import           Data.Ord                   (comparing)
 import           Data.Semigroup
 import           Data.Tuple                 (swap)
 import           Data.Vector                (Vector, create, generate, thaw)
@@ -467,8 +473,14 @@ traverseRow a f = traverseDir a f Row
 traverseCol :: b -> (b -> Int -> Entry a -> b) -> Int -> Matrix a -> b
 traverseCol a f = traverseDir a f Column
 
-structuredGauss :: (DecidableZero a, Division a, Group a) => Matrix a -> Matrix a
-structuredGauss = evalState go . newGaussianState
+writeln = liftIO . putStrLn
+write  = liftIO . putStr
+pretty = liftIO . print
+
+
+structuredGauss :: (Show a, DecidableZero a, Division a, Group a)
+                => Matrix a -> IO (Matrix a, Matrix a)
+structuredGauss = evalStateT go . newGaussianState
   where
     countLight heavys = traverseRow (0 :: Int)
                            (\(!c) _ ent -> if (ent^.coordL Column) `IS.member` heavys
@@ -477,12 +489,16 @@ structuredGauss = evalState go . newGaussianState
     go = do
       old <- use input
       destRow <- use curRow
+      pcol <- use prevCol
+      write ("Start " ++ show (destRow, pcol) ++ " iteration with: ") >> pretty (toList old)
       (_, rest) <- uses (input.rowStart) . IM.split =<< use prevCol
       case minViewWithKey rest of
-        _ | destRow >= old ^. height -> use output
-        Nothing -> use output
+        _ | destRow >= old ^. height ->  (,) <$> use input <*> use output
+        Nothing -> (,) <$> use input <*> use output
         Just ((pivCol, _), _) -> do
+          writeln $ "pivot col " ++ show pivCol
           heavys <- use heavyCols
+          writeln $ "\tHeavy rows: " ++ init (tail $ show $ IS.toList heavys)
           prevCol .= pivCol
           let trav b _ ent =
                 let lc = countLight heavys (ent ^. coordL Row) old
@@ -491,20 +507,29 @@ structuredGauss = evalState go . newGaussianState
                   Just (p, l0)
                     | l0 <= lc  -> Just (p, l0)
                     | otherwise -> Just (ent, lc)
-              Just (pivot, _) = traverseCol Nothing trav pivCol old
+              Just (pivot, lcf) = traverseCol Nothing trav pivCol old
               pivRow = pivot ^. coordL Row
               pivCoe = pivot ^. value
+          writeln $ "\tpivot("++show lcf++"): " ++ show pivRow
           p0 <- use output
-          let (input', output') = traverseCol (old, p0) elim pivCol old
-                                  & both %~ switchRows destRow pivRow
-              elim (m, p) _ ent =
+          let elim (m, p) _ ent = do
+                writeln $ concat ["\teliminating ", show ent, " with ", show (toList m)]
                 if ent^.coordL Row /= pivRow
-                then let coe = negate (ent ^. value) / pivCoe
-                     in (m, p) & both %~ combineRows coe pivRow (ent ^. coordL Row)
-                else (m, p) & both %~ scaleRow (recip pivCoe) pivRow
+                  then do
+                    let coe = negate (ent ^. value) / pivCoe
+                    writeln $ concat ["\t\tcanceling ", show (ent^. coordL Row)
+                                     , "th row with coeff ", show coe]
+                    return $ (m, p) & both %~ combineRows coe pivRow (ent ^. coordL Row)
+                  else do
+                    writeln $ "\t\tsame row as " ++ show pivRow ++ ". Do Nothing."
+                    return $ (m, p)
+          (input', output') <- (traverseDirM (old, p0) elim Column pivCol old)
+                <&> both %~ scaleRow (recip pivCoe) destRow . switchRows destRow pivRow
+          writeln $ "\teliminated: " ++ show (toList input')
           input .= input'
           output .= output'
           newHeavyCols <- uses input getHeaviest
           heavyCols %= IS.union newHeavyCols
           curRow += 1
           go
+
