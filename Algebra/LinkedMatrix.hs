@@ -2,6 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses, NamedFieldPuns, NoImplicitPrelude   #-}
 {-# LANGUAGE NoMonomorphismRestriction, RankNTypes, ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell                                            #-}
+{-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.LinkedMatrix (Matrix, toList, fromList, swapRows, identity,
                              swapCols, switchCols, switchRows, addRow,
                              addCol, ncols, nrows, getRow, getCol,
@@ -10,27 +11,34 @@ module Algebra.LinkedMatrix (Matrix, toList, fromList, swapRows, identity,
                              colVector, rowCount, colCount,
                              catRow, catCol, (<||>), (<-->), toRows, toCols,
                              zeroMat, getDiag, trace, diagProd, diag,
-                             scaleCol, clearRow, clearCol, index, (!)) where
+                             scaleCol, clearRow, clearCol, index, (!),
+                             structuredGauss) where
 import           Control.Applicative        ((<$>), (<|>))
 import           Control.Lens               hiding (index)
 import           Control.Monad              (forM, zipWithM)
 import           Control.Monad.Identity     (runIdentity)
 import           Control.Monad.ST.Strict    (runST)
 import           Control.Monad.State.Strict (runState)
+import           Control.Monad.State.Strict (evalState)
 import           Data.IntMap.Strict         (IntMap, alter, insertWith)
 import           Data.IntMap.Strict         (mapMaybeWithKey)
+import           Data.IntMap.Strict         (minViewWithKey)
 import qualified Data.IntMap.Strict         as IM
+import           Data.IntSet                (IntSet)
+import qualified Data.IntSet                as IS
 import           Data.List                  (sort)
 import           Data.Maybe                 (fromJust, fromMaybe, mapMaybe)
+import           Data.Semigroup
 import           Data.Tuple                 (swap)
 import           Data.Vector                (Vector, create, generate, thaw)
 import           Data.Vector                (unsafeFreeze)
 import qualified Data.Vector                as V
 import           Data.Vector.Mutable        (grow)
 import qualified Data.Vector.Mutable        as MV
-import           Numeric.Algebra            hiding ((<), (>))
+import           Numeric.Algebra            hiding ((<), (<~), (>))
 import           Numeric.Decidable.Zero     (isZero)
-import           Prelude                    hiding (Num (..))
+import           Numeric.Field.Fraction
+import           Prelude                    hiding (Num (..), recip, (/))
 
 data Entry a = Entry { _value   :: !a
                      , _idx     :: !(Int, Int)
@@ -417,3 +425,86 @@ rowCount = dirCount Row
 colCount :: Int -> Matrix a -> Int
 colCount = dirCount Column
 
+data GaussianState a = GaussianState { _input     :: !(Matrix a)
+                                     , _output    :: !(Matrix a)
+                                     , _prevCol   :: !Int
+                                     , _heavyCols :: !IntSet
+                                     , _curRow    :: !Int
+                                     }
+makeLenses ''GaussianState
+
+data MaxEntry a b = MaxEntry { _weight :: !a
+                             , entry   :: b
+                             } deriving (Read, Show, Eq, Ord)
+
+instance (Ord a, Semigroup b) => Semigroup (MaxEntry a b) where
+  MaxEntry a as <> MaxEntry b bs =
+    case compare a b of
+      EQ -> MaxEntry a (as <> bs)
+      LT -> MaxEntry b bs
+      GT -> MaxEntry a as
+
+instance (Ord a, Bounded a, Monoid b) => Monoid (MaxEntry a b) where
+  mappend (MaxEntry a as) (MaxEntry b bs) =
+    case compare a b of
+      EQ -> MaxEntry a (as `mappend` bs)
+      LT -> MaxEntry b bs
+      GT -> MaxEntry a as
+  mempty = MaxEntry minBound mempty
+
+
+newGaussianState :: Unital a => Matrix a -> GaussianState a
+newGaussianState inp =
+  GaussianState inp (identity $ inp ^. height) (-1) (getHeaviest inp) 0
+
+getHeaviest :: Matrix a -> IntSet
+getHeaviest inp = entry $ mconcat $ map (\k -> MaxEntry (colCount k inp) (IS.singleton k)) $
+             IM.keys $ inp^.colStart
+
+traverseRow :: b -> (b -> Int -> Entry a -> b) -> Int -> Matrix a -> b
+traverseRow a f = traverseDir a f Row
+
+traverseCol :: b -> (b -> Int -> Entry a -> b) -> Int -> Matrix a -> b
+traverseCol a f = traverseDir a f Column
+
+structuredGauss :: (DecidableZero a, Division a, Group a) => Matrix a -> Matrix a
+structuredGauss = evalState go . newGaussianState
+  where
+    countLight heavys = traverseRow (0 :: Int)
+                           (\(!c) _ ent -> if (ent^.coordL Column) `IS.member` heavys
+                                        then c
+                                        else c+1)
+    go = do
+      old <- use input
+      destRow <- use curRow
+      (_, rest) <- uses (input.rowStart) . IM.split =<< use prevCol
+      case minViewWithKey rest of
+        _ | destRow >= old ^. height -> use output
+        Nothing -> use output
+        Just ((pivCol, _), _) -> do
+          heavys <- use heavyCols
+          prevCol .= pivCol
+          let trav b _ ent =
+                let lc = countLight heavys (ent ^. coordL Row) old
+                in case b of
+                  Nothing -> Just (ent, lc)
+                  Just (p, l0)
+                    | l0 <= lc  -> Just (p, l0)
+                    | otherwise -> Just (ent, lc)
+              Just (pivot, _) = traverseCol Nothing trav pivCol old
+              pivRow = pivot ^. coordL Row
+              pivCoe = pivot ^. value
+          p0 <- use output
+          let (input', output') = traverseCol (old, p0) elim pivCol old
+                                  & both %~ switchRows destRow pivRow
+              elim (m, p) _ ent =
+                if ent^.coordL Row /= pivRow
+                then let coe = negate (ent ^. value) / pivCoe
+                     in (m, p) & both %~ combineRows coe pivRow (ent ^. coordL Row)
+                else (m, p) & both %~ scaleRow (recip pivCoe) pivRow
+          input .= input'
+          output .= output'
+          newHeavyCols <- uses input getHeaviest
+          heavyCols %= IS.union newHeavyCols
+          curRow += 1
+          go
