@@ -1,5 +1,6 @@
-{-# LANGUAGE FlexibleContexts, MultiParamTypeClasses, NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings, PolyKinds, ScopedTypeVariables          #-}
+{-# LANGUAGE BangPatterns, FlexibleContexts, MultiParamTypeClasses #-}
+{-# LANGUAGE NoImplicitPrelude, OverloadedStrings, PolyKinds       #-}
+{-# LANGUAGE ScopedTypeVariables                                   #-}
 module Algebra.Ring.Polynomial.Factorize where
 import           Algebra.Field.Finite
 import           Algebra.Prelude
@@ -16,6 +17,8 @@ import           Data.Proxy                       (Proxy (..))
 import           Data.Reflection                  (Reifies)
 import           Data.Reflection                  (reflect)
 import           Data.Type.Natural                hiding (one)
+import           Data.Type.Ordinal                (Ordinal (..))
+import qualified Data.Vector.Sized                as SV
 import           Prelude                          (div)
 import           Prelude                          (mod)
 import           Prelude                          (toInteger)
@@ -99,4 +102,26 @@ equalDegreeFactorM f d = go f >>= \a -> return (a [])
 factorSquareFree :: (Reifies p Natural, MonadRandom m, Functor m) => Unipol (F p) -> m [Unipol (F p)]
 factorSquareFree f =
    concat <$> mapM (uncurry $ flip equalDegreeFactorM) (filter ((/= 1) . snd) $ distinctDegFactor f)
+
+
+
+squareFreePart :: forall p. (Reifies p Natural) => Unipol (F p) -> Unipol (F p)
+squareFreePart f =
+  let !n = fromIntegral $ totalDegree' f
+      u  = gcd f (diff 0 f)
+      v  = f `quot` u
+      p  = fromIntegral $ reflect (Proxy :: Proxy p)
+      f' = u `quot` gcd u (v ^ n)
+  in if f' == one
+     then v
+     else v * (squareFreePart $ transformMonomial (SV.map (`P.div` p)) f')
+
+sqfSub :: forall p. (Reifies p Natural) => Unipol (F p) -> Unipol (F p)
+sqfSub f =
+  let !n = fromIntegral $ totalDegree' f
+      u  = gcd f (diff 0 f)
+      v  = f `quot` u
+      p  = fromIntegral $ reflect (Proxy :: Proxy p)
+      f' = u `quot` gcd u (v ^ n)
+  in f'
 
