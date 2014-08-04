@@ -13,6 +13,7 @@ module Algebra.LinkedMatrix (Matrix, toList, fromList, swapRows, identity,
                              zeroMat, getDiag, trace, diagProd, diag,
                              scaleCol, clearRow, clearCol, index, (!),
                              structuredGauss) where
+import           Algebra.Instances          ()
 import           Algebra.Wrapped
 import           Control.Applicative        ((<$>), (<|>))
 import           Control.Applicative        ((<*>))
@@ -126,8 +127,8 @@ swapCols = swapper Column
 
 swapper :: Direction -> Int -> Int -> Matrix a -> Matrix a
 swapper dir i j mat =
-  let ith = IM.lookup i $ mat^.startL dir
-      jth = IM.lookup j $ mat^.startL dir
+  let ith = mat^.startL dir.at i
+      jth = mat^.startL dir.at j
   in  mat & startL dir %~ alter (const jth) i . alter (const ith) j
           & coefficients %~ go ith . go jth
   where
@@ -136,8 +137,8 @@ swapper dir i j mat =
       let !cur = vec V.! k
       in go (cur ^. nextL dir) (vec & ix k . coordL dir %~ change)
     change k | k == i = j
-         | k == j = i
-         | otherwise = k
+             | k == j = i
+             | otherwise = k
 
 scaleDir :: (DecidableZero a, Multiplicative a) => Direction -> a -> Int -> Matrix a -> Matrix a
 scaleDir dir a i mat
@@ -473,10 +474,16 @@ traverseRow a f = traverseDir a f Row
 traverseCol :: b -> (b -> Int -> Entry a -> b) -> Int -> Matrix a -> b
 traverseCol a f = traverseDir a f Column
 
+
 writeln = liftIO . putStrLn
 write  = liftIO . putStr
 pretty = liftIO . print
 
+{-
+writeln _ = return ()
+write _ = return ()
+pretty _ = return ()
+-}
 
 structuredGauss :: (Show a, DecidableZero a, Division a, Group a)
                 => Matrix a -> IO (Matrix a, Matrix a)
@@ -490,7 +497,7 @@ structuredGauss = evalStateT go . newGaussianState
       old <- use input
       destRow <- use curRow
       pcol <- use prevCol
-      write ("Start " ++ show (destRow, pcol) ++ " iteration with: ") >> pretty (toList old)
+      write ("Start (r,c) = " ++ show (destRow, pcol) ++ " iteration with: ") >> pretty (toList old)
       (_, rest) <- uses (input.rowStart) . IM.split =<< use prevCol
       case minViewWithKey rest of
         _ | destRow >= old ^. height ->  (,) <$> use input <*> use output
@@ -498,38 +505,60 @@ structuredGauss = evalStateT go . newGaussianState
         Just ((pivCol, _), _) -> do
           writeln $ "pivot col " ++ show pivCol
           heavys <- use heavyCols
-          writeln $ "\tHeavy rows: " ++ init (tail $ show $ IS.toList heavys)
+          writeln $ "\tHeavy cols: " ++ init (tail $ show $ IS.toList heavys)
           prevCol .= pivCol
-          let trav b _ ent =
-                let lc = countLight heavys (ent ^. coordL Row) old
-                in case b of
-                  Nothing -> Just (ent, lc)
-                  Just (p, l0)
-                    | l0 <= lc  -> Just (p, l0)
-                    | otherwise -> Just (ent, lc)
-              Just (pivot, lcf) = traverseCol Nothing trav pivCol old
-              pivRow = pivot ^. coordL Row
-              pivCoe = pivot ^. value
-          writeln $ "\tpivot("++show lcf++"): " ++ show pivRow
-          p0 <- use output
-          let elim (m, p) _ ent = do
-                writeln $ concat ["\teliminating ", show ent, " with ", show (toList m)]
-                if ent^.coordL Row /= pivRow
+          let trav b _ ent = do
+                if (ent ^. coordL Row) < destRow
                   then do
-                    let coe = negate (ent ^. value) / pivCoe
-                    writeln $ concat ["\t\tcanceling ", show (ent^. coordL Row)
-                                     , "th row with coeff ", show coe]
-                    return $ (m, p) & both %~ combineRows coe pivRow (ent ^. coordL Row)
+                  writeln ("\t\tskip row " ++ show (ent ^. coordL Row) ++  "; less than " ++ show destRow)
+                  return b
                   else do
-                    writeln $ "\t\tsame row as " ++ show pivRow ++ ". Do Nothing."
-                    return $ (m, p)
-          (input', output') <- (traverseDirM (old, p0) elim Column pivCol old)
-                <&> both %~ scaleRow (recip pivCoe) destRow . switchRows destRow pivRow
-          writeln $ "\teliminated: " ++ show (toList input')
-          input .= input'
-          output .= output'
-          newHeavyCols <- uses input getHeaviest
-          heavyCols %= IS.union newHeavyCols
-          curRow += 1
-          go
+                  let lc = countLight heavys (ent ^. coordL Row) old
+                  return $ case b of
+                    Nothing -> Just (ent, lc)
+                    Just (p, l0)
+                      | l0 <= lc  -> Just (p, l0)
+                      | otherwise -> Just (ent, lc)
+          writeln $ concat ["\ttraversing col ", show pivCol
+                           , " to pivot: ", show (traverseCol [] (\b i e -> (i, e) : b) pivCol old)]
+          mans <- traverseDirM Nothing trav Column pivCol old
+          case mans of
+            Nothing -> nextElim
+            Just (pivot, lcf) -> do
+              let pivRow = pivot ^. coordL Row
+                  pivCoe = pivot ^. value
+              writeln $ "\tpivot("++show lcf++"): " ++ show (pivot^.idx)
+              p0 <- use output
+              let elim (m, p) _ ent = do
+                    writeln $ concat ["\teliminating ", show ent, " with ", show (toList m)]
+                    if ent^.coordL Row /= pivRow
+                      then do
+                        let coe = negate (ent ^. value) / pivCoe
+                        writeln $ concat ["\t\tcanceling ", show (ent^. coordL Row)
+                                         , "th row with coeff ", show coe]
+                        return $ (m, p) & both %~ combineRows coe pivRow (ent ^. coordL Row)
+                      else do
+                        writeln $ "\t\tsame row as " ++ show pivRow ++ ". Do Nothing."
+                        return $ (m, p)
+              (input', output') <- (traverseDirM (old, p0) elim Column pivCol old)
+                    <&> both %~ scaleRow (recip pivCoe) destRow . switchRows destRow pivRow
+              writeln $ "\teliminated: " ++ show (toList input')
+              input .= input'
+              output .= output'
+              nextElim
+    nextElim = do
+      newHeavyCols <- uses input getHeaviest
+      heavyCols %= IS.union newHeavyCols
+      curRow += 1
+      writeln "----------\n"
+      go
 
+
+testCase :: Matrix (Fraction Integer)
+testCase = fromList [[0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,0]
+                    ,[0,0,0,0,0,0,1,1,1,0,0,1,0,0,0,1,0,0,0]
+                    ,[0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0]
+                    ,[0,0,0,0,0,1,0,0,0,0,1,-1,0,-1,1,0,-1,0,0]
+                    ,[0,0,0,0,1,1,0,1,0,0,1,0,0,0,1,0,0,0,0]
+                    ,[1,1,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0]
+                    ,[1,0,1,0,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0]]

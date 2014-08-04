@@ -318,4 +318,100 @@ redF4G pxy ls gs fss = {-# SCC "reduction" #-}
       fs' = rowEchelonG pxy fs
   in ([ f | f <- fs', not $ leadingMonomial f `elem` map leadingMonomial fs], fs)
 
+-- Structured
+
+simplifyLM :: (Show r, IsPolynomial r n, IsMonomialOrder ord,
+              Normed r, Commutative r, Field r)
+         => [[OrderedPolynomial r ord n]]
+         -> OrderedMonomial ord n -> OrderedPolynomial r ord n
+         -> (OrderedMonomial ord n, OrderedPolynomial r ord n)
+simplifyLM fss t f = go $ divisors t
+  where
+    go []       = (t, f)
+    go (u : us) =
+      case find (u >* f `elem`) fss of
+        Nothing -> go us
+        Just fs ->
+          let fs' = rowEchelonLM fs
+              Just p = find (\g -> leadingMonomial g == leadingMonomial (u >* f)) fs'
+          in if u /= t
+             then simplifyLM fss (t/u) p
+             else (one, p)
+
+rowEchelonLM :: (IsPolynomial r n, IsMonomialOrder ord, Normed r,Show r,
+                DecidableZero r, Division r, Commutative r, Field r)
+           => [OrderedPolynomial r ord n]
+           -> [OrderedPolynomial r ord n]
+rowEchelonLM fs = {-# SCC "rowEchelon" #-}
+  let (mf, ts) = {-# SCC "buildMatrix" #-} polysToMatrixLM fs
+      mf' = matToPolysWithLM ts $ trM "reduced" $ fst $ {-# SCC "eche/red" #-} LM.structuredGauss $
+            trM "reducing" mf
+  in filter (not . isZero) $ nub mf'
+
+trM :: (Show a, Monoidal a) => String -> LM.Matrix a -> LM.Matrix a
+trM str mat = trace (str ++ ": " ++ show (LM.toList mat)) $ mat
+
+polysToMatrixLM :: (IsMonomialOrder ord, IsPolynomial r n)
+          => [OrderedPolynomial r ord n] -> (LM.Matrix r, [OrderedMonomial ord n])
+polysToMatrixLM fs =
+  let ts  = nub $ sortBy (flip compare) $ concatMap monomials fs
+  in (fromLists $ map (\f -> map (\t -> coeff t f) ts) fs, ts)
+
+matToPolysWithLM :: (IsMonomialOrder ord, IsPolynomial r n)
+            => [OrderedMonomial ord n] -> LM.Matrix r -> [OrderedPolynomial r ord n]
+matToPolysWithLM ts mat =
+  map (NA.sum . zipWith (flip $ curry toPolynomial) ts . V.toList) $ toRows mat
+
+symbolicPPLM :: (Show r, IsPolynomial r n, IsMonomialOrder ord, Field r, Num r,
+                Normed r, Division r)
+           => [(OrderedMonomial ord n, OrderedPolynomial r ord n)]
+           -> [OrderedPolynomial r ord n]
+           -> [[OrderedPolynomial r ord n]]
+           -> [OrderedPolynomial r ord n]
+symbolicPPLM ls gs fss = {-# SCC "symbolicPP" #-}
+  let fs0 = map mul ls
+  in go fs0 (S.fromList $ concatMap monomials fs0) (S.fromList $ map leadingMonomial fs0)
+  where
+    mul = uncurry (>*) . uncurry (simplifyLM fss)
+    go fs ts done
+      | S.null (ts `S.difference` done) = fs
+      | otherwise =
+        let m = head $ S.toList $ ts `S.difference` done
+            done' = S.insert m done
+            ts'   = S.delete m ts
+        in case find (\f -> leadingMonomial f `divs` m) gs of
+          Just f -> let m' = m / leadingMonomial f
+                        f' = mul (m', f)
+                        ts'' = S.fromList (monomials f') `S.difference` done'
+                    in go (f' : fs) (ts' `S.union` ts'') done'
+          Nothing -> go fs ts' done'
+
+faugere4LM :: (Show r, Normed r, Field r, Fractional r, IsMonomialOrder ord, IsPolynomial r n)
+         => Strategy r ord n -> Ideal (OrderedPolynomial r ord n)
+         -> Ideal (OrderedPolynomial r ord n)
+faugere4LM sel (generators -> fs) = {-# SCC "F_4" #-}
+  let (gs0, ps0) = foldl' (uncurry update) ([], []) fs
+  in go gs0 ps0 []
+  where
+    go gs ps fds
+      | null ps   = toIdeal gs
+      | otherwise =
+        let pd   = sel ps
+            ps'  = ps \\ pd
+            ls   = map leftP pd ++ map rightP pd
+            (fdp, fd) = redF4LM ls gs fds
+            (gs2, ps2) = foldl' (uncurry update) (gs, ps') fdp
+        in go gs2 ps2 (fd:fds)
+
+redF4LM :: (Show r, IsPolynomial r n, IsMonomialOrder ord, Normed r,
+            Commutative r, Field r, Num r, Fractional r)
+      => [(OrderedMonomial ord n, OrderedPolynomial r ord n)]
+      -> [OrderedPolynomial r ord n]
+      -> [[OrderedPolynomial r ord n]]
+      -> ([OrderedPolynomial r ord n], [OrderedPolynomial r ord n])
+redF4LM ls gs fss = {-# SCC "reduction" #-}
+  let fs  = symbolicPPLM ls gs fss
+      fs' = rowEchelonLM fs
+  in ([ f | f <- fs', not $ leadingMonomial f `elem` map leadingMonomial fs], fs)
+
 
