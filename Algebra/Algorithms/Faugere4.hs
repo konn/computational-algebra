@@ -344,8 +344,7 @@ rowEchelonLM :: (IsPolynomial r n, IsMonomialOrder ord, Normed r,Show r,
            -> [OrderedPolynomial r ord n]
 rowEchelonLM fs = {-# SCC "rowEchelon" #-}
   let (mf, ts) = {-# SCC "buildMatrix" #-} polysToMatrixLM fs
-      mf' = matToPolysWithLM ts $ trM "reduced" $ fst $ {-# SCC "eche/red" #-} LM.structuredGauss $
-            trM "reducing" mf
+      mf' = matToPolysWithLM ts $ fst $ {-# SCC "eche/red" #-} LM.structuredGauss mf
   in filter (not . isZero) $ nub mf'
 
 trM :: (Show a, Monoidal a) => String -> LM.Matrix a -> LM.Matrix a
