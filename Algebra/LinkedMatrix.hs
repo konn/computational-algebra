@@ -73,6 +73,18 @@ data BuildState = BuildState { _colMap :: !(IntMap [Int])
                              }
 makeLenses ''BuildState
 
+data GaussianState a = GaussianState { _input     :: !(Matrix a)
+                                     , _output    :: !(Matrix a)
+                                     , _prevCol   :: !Int
+                                     , _heavyCols :: !IntSet
+                                     , _curRow    :: !Int
+                                     }
+makeLenses ''GaussianState
+
+data MaxEntry a b = MaxEntry { _weight :: !a
+                             , entry   :: b
+                             } deriving (Read, Show, Eq, Ord)
+
 empty :: Matrix a
 empty = Matrix V.empty IM.empty IM.empty 0 0
 
@@ -272,7 +284,7 @@ addDir dir vec i mat = runST $ do
            then return mv
            else grow mv (IM.size rest)
     let app j (p, k, opo) v = do
-          let preOpo = mat ^. startL (perp dir) . at i
+          let preOpo = mat ^. startL (perp dir) . at j
           MV.write mv' k $ newEntry v
                          & nextL dir .~ p
                          & nextL (perp dir) .~ preOpo
@@ -280,7 +292,7 @@ addDir dir vec i mat = runST $ do
                          & nthL dir .~ j
 
           return (Just k, k+1, alter (const $ Just k) j opo)
-    (l, _, opoStart) <- ifoldlMOf ifolded app (mat ^. startL dir . at i, n, mat ^. startL (perp dir)) rest
+    (l, _, opoStart) <- ifoldlM app (mat ^. startL dir . at i, n, mat ^. startL (perp dir)) rest
     v' <- unsafeFreeze mv'
     let mat' = mat & coefficients .~ v'
                    & startL dir %~ alter (const l) i
@@ -431,18 +443,6 @@ rowCount = dirCount Row
 
 colCount :: Int -> Matrix a -> Int
 colCount = dirCount Column
-
-data GaussianState a = GaussianState { _input     :: !(Matrix a)
-                                     , _output    :: !(Matrix a)
-                                     , _prevCol   :: !Int
-                                     , _heavyCols :: !IntSet
-                                     , _curRow    :: !Int
-                                     }
-makeLenses ''GaussianState
-
-data MaxEntry a b = MaxEntry { _weight :: !a
-                             , entry   :: b
-                             } deriving (Read, Show, Eq, Ord)
 
 instance (Ord a, Semigroup b) => Semigroup (MaxEntry a b) where
   MaxEntry a as <> MaxEntry b bs =
