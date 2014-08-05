@@ -33,6 +33,7 @@ import qualified Data.IntMap.Strict         as IM
 import           Data.IntSet                (IntSet)
 import qualified Data.IntSet                as IS
 import           Data.List                  (sort)
+import           Data.List                  (intercalate)
 import           Data.Maybe                 (fromJust, fromMaybe, mapMaybe)
 import           Data.Ord                   (comparing)
 import           Data.Semigroup
@@ -42,6 +43,7 @@ import           Data.Vector                (unsafeFreeze)
 import qualified Data.Vector                as V
 import           Data.Vector.Mutable        (grow)
 import qualified Data.Vector.Mutable        as MV
+import qualified Debug.Trace                as DT
 import           Numeric.Algebra            hiding ((<), (<~), (>))
 import           Numeric.Decidable.Zero     (isZero)
 import           Numeric.Field.Fraction
@@ -141,7 +143,7 @@ swapper :: Direction -> Int -> Int -> Matrix a -> Matrix a
 swapper dir i j mat =
   let ith = mat^.startL dir.at i
       jth = mat^.startL dir.at j
-  in  mat & startL dir %~ alter (const jth) i . alter (const ith) j
+  in  mat & startL dir   %~ alter (const jth) i . alter (const ith) j
           & coefficients %~ go ith . go jth
   where
     go Nothing v = v
@@ -268,6 +270,8 @@ nextL :: Direction -> Lens' (Entry a) (Maybe Int)
 nextL Row    = rowNext
 nextL Column = colNext
 
+
+
 addDir :: forall a. (DecidableZero a, Additive a)
        => Direction -> Vector a -> Int -> Matrix a -> Matrix a
 addDir dir vec i mat = runST $ do
@@ -302,14 +306,16 @@ addDir dir vec i mat = runST $ do
     mp :: IntMap a
     mp = V.ifoldr (\k v d -> if isZero v then d else IM.insert k v d) IM.empty vec
 
+tr = DT.trace
+
 perp :: Direction -> Direction
 perp Row = Column
 perp Column = Row
 
-addRow :: DecidableZero a => Vector a -> Int -> Matrix a -> Matrix a
+addRow :: (DecidableZero a) => Vector a -> Int -> Matrix a -> Matrix a
 addRow = addDir Row
 
-addCol :: DecidableZero a => Vector a -> Int -> Matrix a -> Matrix a
+addCol :: (DecidableZero a) => Vector a -> Int -> Matrix a -> Matrix a
 addCol = addDir Column
 
 inBound :: (Int, Int) -> Matrix a -> Bool
@@ -497,7 +503,7 @@ structuredGauss = evalStateT go . newGaussianState
       old <- use input
       destRow <- use curRow
       pcol <- use prevCol
-      write ("Start (r,c) = " ++ show (destRow, pcol) ++ " iteration with: ") >> pretty (toList old)
+      write ("Start (r,c) = " ++ show (destRow, pcol) ++ " iteration with: ") >> writeln (prettyMat old)
       (_, rest) <- uses (input.rowStart) . IM.split =<< use prevCol
       case minViewWithKey rest of
         _ | destRow >= old ^. height ->  (,) <$> use input <*> use output
@@ -530,19 +536,20 @@ structuredGauss = evalStateT go . newGaussianState
               writeln $ "\tpivot("++show lcf++"): " ++ show (pivot^.idx)
               p0 <- use output
               let elim (m, p) _ ent = do
-                    writeln $ concat ["\teliminating ", show ent, " with ", show (toList m)]
+                    writeln $ concat ["\teliminating ", prettyEntry ent, " with ", prettyMat m]
                     if ent^.coordL Row /= pivRow
                       then do
                         let coe = negate (ent ^. value) / pivCoe
                         writeln $ concat ["\t\tcanceling ", show (ent^. coordL Row)
                                          , "th row with coeff ", show coe]
+                        writeln $ "\t\tresult: " ++ prettyMat (m & combineRows coe pivRow (ent ^. coordL Row))
                         return $ (m, p) & both %~ combineRows coe pivRow (ent ^. coordL Row)
                       else do
                         writeln $ "\t\tsame row as " ++ show pivRow ++ ". Do Nothing."
-                        return $ (m, p)
-              (input', output') <- (traverseDirM (old, p0) elim Column pivCol old)
+                        return (m, p)
+              (input', output') <- (skim =<< traverseDirM (old, p0) elim Column pivCol old)
                     <&> both %~ scaleRow (recip pivCoe) destRow . switchRows destRow pivRow
-              writeln $ "\teliminated: " ++ show (toList input')
+              writeln $ "\teliminated: " ++ prettyMat input'
               input .= input'
               output .= output'
               nextElim
@@ -553,6 +560,29 @@ structuredGauss = evalStateT go . newGaussianState
       writeln "----------\n"
       go
 
+prettyMat :: Show a => Matrix a -> String
+prettyMat mat =
+  unlines [ "row start: " <> starter Row
+          , "col start: " <> starter Column
+          , "[" <> (intercalate ", " $ V.toList $ V.imap (\i e -> "(#" <> show i <> ") " <> prettyEntry e) $ mat^.coefficients) <> "]"
+          ]
+  where
+    starter dir = intercalate ", " (map (\(a,b) -> show a ++ " -> " ++ show b) (mat^.startL dir.to IM.toList))
+
+prettyEntry :: Show a => Entry a -> String
+prettyEntry ent =
+  concat [ show $ ent^.value, " "
+         , show $ ent^.idx
+         , "->("
+         ,showMaybe (ent^.nextL Row)
+         , ", "
+         ,showMaybe (ent^.nextL Column)
+         , ")"
+         ]
+  where
+    showMaybe = maybe "_" show
+
+skim (a,b) = writeln ("\telim result: " ++ prettyMat a) >> return (a,b)
 
 testCase :: Matrix (Fraction Integer)
 testCase = fromList [[0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,0]
