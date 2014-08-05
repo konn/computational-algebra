@@ -472,9 +472,11 @@ newGaussianState inp =
 
 getHeaviest :: IntSet -> Matrix a -> IntSet
 getHeaviest old inp =
-  let news = entry $ mconcat $ map (\k -> MaxEntry (colCount k inp) (IS.singleton k)) $
-             IS.toList $ IM.keysSet (inp^.colStart) IS.\\ old
-  in news `IS.union` old
+  if IS.size old >= inp^.width*5`div`100
+  then old
+  else  let news = entry $ mconcat $ map (\k -> MaxEntry (colCount k inp) (IS.singleton k)) $
+                   IS.toList $ IM.keysSet (inp^.colStart) IS.\\ old
+        in news `IS.union` old
 
 traverseRow :: b -> (b -> Int -> Entry a -> b) -> Int -> Matrix a -> b
 traverseRow a f = traverseDir a f Row
