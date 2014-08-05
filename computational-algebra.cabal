@@ -42,7 +42,7 @@ library
                    vector-algorithms ==0.5.4.2.*, repa ==3.2.3.3.*,
                    repa-algorithms ==3.2.4.1.*, peggy ==0.3.2.*,
                    control-monad-loop ==0.1.*
-    exposed-modules: Algebra.Algorithms.Faugere4
+    exposed-modules: Algebra.Algorithms.Faugere4 Algebra.LinkedMatrix
                      Algebra.Algorithms.Faugere5 Algebra.Algorithms.Groebner
                      Algebra.Algorithms.ZeroDim
                      Algebra.Ring.Ideal Algebra.Ring.Polynomial
