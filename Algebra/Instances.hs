@@ -3,6 +3,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 -- | This Library provides some *dangerous* instances for @Double@s and @Complex@.
 module Algebra.Instances () where
+import           Control.DeepSeq          (NFData (..))
 import           Control.Lens
 import           Data.Complex
 import           Data.Convertible.Base    (Convertible (..))
@@ -34,6 +35,9 @@ updateNth _      _ _              = bugInGHC
 -- | These Instances are not algebraically right, but for the sake of convenience.
 instance DecidableZero r => DecidableZero (Complex r) where
   isZero (a :+ b) = isZero a && isZero b
+
+instance (NFData a) => NFData (Fraction a) where
+  rnf a = rnf (numerator a) `seq` rnf (denominator a) `seq` ()
 
 instance Euclidean a => P.Num (Fraction a) where
   (+) = (NA.+)
