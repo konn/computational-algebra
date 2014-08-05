@@ -200,9 +200,9 @@ scaleCol = scaleDir Column
 
 mapDir :: (a -> a) -> Direction
        -> Int -> Matrix a -> Matrix a
-mapDir f dir i mat = traverseDir mat tr dir i mat
+mapDir f dir i mat = traverseDir mat trv dir i mat
   where
-    tr m k _ = m & coefficients . ix k . value %~ f
+    trv m k _ = m & coefficients . ix k . value %~ f
 
 traverseDir :: b -> (b -> Int -> Entry a -> b)
                -> Direction
