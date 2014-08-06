@@ -1,16 +1,18 @@
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances          #-}
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes            #-}
 {-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances #-}
-module Algebra.Field.Finite (F(), withModulo) where
+module Algebra.Field.Finite (F(), withModulo, FiniteField(..)) where
 import           Algebra.Wrapped
 import           Data.Proxy
-import qualified Data.Ratio                as R
+import qualified Data.Ratio                 as R
 import           Data.Reflection
-import qualified Data.Type.Natural         as TN
-import qualified Numeric.Algebra           as NA
+import qualified Data.Type.Natural          as TN
+import           Numeric.Algebra            (Field)
+import qualified Numeric.Algebra            as NA
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
-import           Numeric.Semiring.Integral (IntegralSemiring)
+import           Numeric.Rig.Characteristic (Characteristic)
+import           Numeric.Semiring.Integral  (IntegralSemiring)
 
 -- | @p@ should be prime, and not statically checked.
 newtype F (p :: k) = F { runF :: NA.Natural }
@@ -101,7 +103,7 @@ instance Reifies p NA.Natural => NA.Unital (F p) where
 
 instance Reifies p NA.Natural => IntegralSemiring (F p)
 
-instance Reifies p NA.Natural =>  DecidableUnits (F p) where
+instance Reifies p NA.Natural => DecidableUnits (F p) where
   isUnit = not . isZero
   recipUnit n
     | isZero n  = Nothing
@@ -129,3 +131,9 @@ instance Reifies TN.Z NA.Natural  where
 
 instance Reifies n NA.Natural => Reifies (TN.S n) NA.Natural where
   reflect _ = 1 + reflect (Proxy :: Proxy n)
+
+class (Field k, Characteristic k) => FiniteField k where
+  power :: proxy k -> NA.Natural
+
+instance Reifies p NA.Natural => FiniteField (F p) where
+  power _ = 1

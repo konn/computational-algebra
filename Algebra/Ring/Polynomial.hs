@@ -394,6 +394,10 @@ instance (IsOrder order, Ring r, DecidableZero r, SingI n) => LeftModule (Scalar
 instance (IsOrder order, Ring r, DecidableZero r, SingI n) => RightModule (Scalar r) (OrderedPolynomial r order n) where
   Polynomial dic *. Scalar r = polynomial $ fmap (r*) dic
 
+instance (IsOrder ord, Characteristic r, SingI n, DecidableZero r, Ring r)
+      => Characteristic (OrderedPolynomial r ord n) where
+  char _ = char (Proxy :: Proxy r)
+
 instance (DecidableZero r, Ring r, SingI n, IsOrder order, Show r) => Show (OrderedPolynomial r order n) where
   show = showPolynomialWithVars [(n, "X_"++ show n) | n <- [0..]]
 
