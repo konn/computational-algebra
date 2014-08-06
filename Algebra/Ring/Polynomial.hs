@@ -342,13 +342,14 @@ mapCoeff f (Polynomial dic) = polynomial $ M.map f dic
 normalize :: (DecidableZero r, IsOrder order, Ring r, SingI n)
           => OrderedPolynomial r order n -> OrderedPolynomial r order n
 normalize (Polynomial dic) =
-  Polynomial $ M.insertWith (+) one zero $ M.filter (not . isZero) dic
+  Polynomial $ M.filter (not . isZero) dic
 
 instance (Eq r, IsOrder order, Ring r, DecidableZero r, SingI n) => Eq (OrderedPolynomial r order n) where
   Polynomial f == Polynomial g = f == g
 
 injectCoeff :: (DecidableZero r, SingI n) => r -> OrderedPolynomial r order n
-injectCoeff r = Polynomial $ M.singleton (OrderedMonomial $ fromList sing []) r
+injectCoeff r | isZero r  = Polynomial M.empty
+              | otherwise = Polynomial $ M.singleton (OrderedMonomial $ fromList sing []) r
 
 (>*) :: (IsMonomialOrder ord, Ring r, DecidableZero r, SingI n)
      => OrderedMonomial ord n -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n
@@ -367,15 +368,15 @@ instance (IsOrder order, Ring r, DecidableZero r, SingI n) => Rig (OrderedPolyno
 instance (IsOrder order, Ring r, DecidableZero r, SingI n) => Group (OrderedPolynomial r order n) where
   negate (Polynomial dic) = Polynomial $ fmap negate dic
 instance (IsOrder order, Ring r, DecidableZero r, SingI n) => LeftModule Integer (OrderedPolynomial r order n) where
-  n .* Polynomial dic = Polynomial $ fmap (n .*) dic
+  n .* Polynomial dic = polynomial $ fmap (n .*) dic
 instance (IsOrder order, Ring r, DecidableZero r, SingI n) => RightModule Integer (OrderedPolynomial r order n) where
   (*.) = flip (.*)
 instance (IsOrder order, Ring r, DecidableZero r, SingI n) => Additive (OrderedPolynomial r order n) where
-  (Polynomial f) + (Polynomial g) = normalize $ Polynomial $ M.unionWith (+) f g
+  (Polynomial f) + (Polynomial g) = polynomial $ M.unionWith (+) f g
 instance (IsOrder order, Ring r, DecidableZero r, SingI n) => Monoidal (OrderedPolynomial r order n) where
   zero = injectCoeff zero
 instance (IsOrder order, Ring r, DecidableZero r, SingI n) => LeftModule Natural (OrderedPolynomial r order n) where
-  n .* Polynomial dic = Polynomial $ fmap (n .*) dic
+  n .* Polynomial dic = polynomial $ fmap (n .*) dic
 instance (IsOrder order, Ring r, DecidableZero r, SingI n) => RightModule Natural (OrderedPolynomial r order n) where
   (*.) = flip (.*)
 instance (IsOrder order, Ring r, DecidableZero r, SingI n) => Unital (OrderedPolynomial r order n) where
@@ -384,14 +385,14 @@ instance (IsOrder order, Ring r, DecidableZero r, SingI n) => Multiplicative (Or
   Polynomial (M.toList -> d1) *  Polynomial (M.toList -> d2) =
     let dic = (one, zero) : [ (a * b, r * r') | (a, r) <- d1, (b, r') <- d2, not $ isZero (r * r')
               ]
-    in Polynomial $ M.fromListWith (+) dic
+    in polynomial $ M.fromListWith (+) dic
 instance (IsOrder order, Ring r, DecidableZero r, SingI n) => Semiring (OrderedPolynomial r order n) where
 instance (IsOrder order, Ring r, DecidableZero r, SingI n) => Commutative (OrderedPolynomial r order n) where
 instance (IsOrder order, Ring r, DecidableZero r, SingI n) => Abelian (OrderedPolynomial r order n) where
 instance (IsOrder order, Ring r, DecidableZero r, SingI n) => LeftModule (Scalar r) (OrderedPolynomial r order n) where
-  Scalar r .* Polynomial dic = normalize $ Polynomial $ fmap (r*) dic
+  Scalar r .* Polynomial dic = polynomial $ fmap (r*) dic
 instance (IsOrder order, Ring r, DecidableZero r, SingI n) => RightModule (Scalar r) (OrderedPolynomial r order n) where
-  Polynomial dic *. Scalar r = normalize $ Polynomial $ fmap (r*) dic
+  Polynomial dic *. Scalar r = polynomial $ fmap (r*) dic
 
 instance (DecidableZero r, Ring r, SingI n, IsOrder order, Show r) => Show (OrderedPolynomial r order n) where
   show = showPolynomialWithVars [(n, "X_"++ show n) | n <- [0..]]
@@ -478,13 +479,13 @@ isConstantMonomial v = all (== 0) $ V.toList v
 instance (IsMonomialOrder order, Ring r, DecidableZero r, SingI n, Num r) => Num (OrderedPolynomial r order n) where
   (+) = (Numeric.Algebra.+)
   (*) = (Numeric.Algebra.*)
-  fromInteger = injectCoeff . P.fromInteger
+  fromInteger = normalize . injectCoeff . P.fromInteger
   signum f = if isZero f then zero else injectCoeff 1
   abs = id
   negate = ((P.negate 1 :: Integer) .*)
 
 instance (Ring r, DecidableZero r, SingI n, IsOrder ord) => DecidableZero (OrderedPolynomial r ord n) where
-  isZero f = isZero $ leadingCoeff f
+  isZero (Polynomial d) = M.null d
 
 instance (DecidableZero r, Ring r, IsOrder ord, SingI n, IntegralSemiring r) => IntegralSemiring (OrderedPolynomial r ord n)
 instance (Eq r, DecidableUnits r, DecidableZero r, Field r, IsMonomialOrder ord, IntegralSemiring r) => Euclidean (OrderedPolynomial r ord One) where
@@ -653,9 +654,9 @@ getTerms = map (snd &&& fst) . M.toDescList . terms
 monomials :: OrderedPolynomial a order n -> [OrderedMonomial order n]
 monomials = M.keys . terms
 
-transformMonomial :: (IsOrder o, Ring k, SingI n, SingI m)
+transformMonomial :: (IsOrder o, Ring k, SingI n, SingI m, DecidableZero k)
                   => (Monomial n -> Monomial m) -> OrderedPolynomial k o n -> OrderedPolynomial k o m
-transformMonomial tr (Polynomial d) = Polynomial $ M.mapKeys (OrderedMonomial . tr . getMonomial) d
+transformMonomial tr (Polynomial d) = polynomial $ M.mapKeys (OrderedMonomial . tr . getMonomial) d
 
 orderedBy :: IsOrder o => OrderedPolynomial k o n -> o -> OrderedPolynomial k o n
 p `orderedBy` _ = p
