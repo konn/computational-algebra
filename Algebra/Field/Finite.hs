@@ -1,13 +1,14 @@
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances          #-}
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes            #-}
 {-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances #-}
-module Algebra.Field.Finite (F(), withModulo, FiniteField(..)) where
+module Algebra.Field.Finite (F(), withModulo, FiniteField(..), order) where
 import           Algebra.Wrapped
 import           Data.Proxy
 import qualified Data.Ratio                 as R
 import           Data.Reflection
 import qualified Data.Type.Natural          as TN
 import           Numeric.Algebra            (Field)
+import           Numeric.Algebra            (char)
 import qualified Numeric.Algebra            as NA
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
@@ -134,6 +135,11 @@ instance Reifies n NA.Natural => Reifies (TN.S n) NA.Natural where
 
 class (Field k, Characteristic k) => FiniteField k where
   power :: proxy k -> NA.Natural
+  elements :: proxy k -> [k]
 
 instance Reifies p NA.Natural => FiniteField (F p) where
   power _ = 1
+  elements p = map F [0.. char p - 1]
+
+order :: FiniteField k => proxy k -> NA.Natural
+order p = char p ^ power p
