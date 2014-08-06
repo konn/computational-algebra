@@ -140,18 +140,23 @@ powerUnipol :: forall r. FiniteField r => Unipol r -> Natural
 powerUnipol _ = power (Proxy :: Proxy r)
 
 
-pthRoot :: Reifies p Natural => Unipol (F p) -> Unipol (F p)
+pthRoot :: (DecidableZero r, Ring r, Characteristic r) => Unipol r -> Unipol r
 pthRoot f =
   let !p = charUnipol f
-  in transformMonomial (SV.map (`P.div` fromIntegral p)) f
+  in if p == 0
+     then error "char R should be positive prime"
+     else transformMonomial (SV.map (`P.div` fromIntegral p)) f
 
-squareFreeDecomp :: Reifies p Natural
-                 => OrderedPolynomial (F p) Grevlex One -> IntMap (Unipol (F p))
+squareFreeDecomp :: (IntegralSemiring k, DecidableUnits k, Eq k,
+                     Characteristic k, Field k, DecidableZero k)
+                 => Unipol k -> IntMap (Unipol k)
 squareFreeDecomp f =
   let dcmp = yun f
       f'   = ifoldl (\i u g -> u `quot` (g ^ fromIntegral i)) f dcmp
       p    = fromIntegral $ charUnipol f
-  in if isZero (f' - one)
+  in if charUnipol f == 0
+     then dcmp
+     else if isZero (f' - one)
      then dcmp
      else IM.filter (not . isZero . subtract one) $
           IM.unionWith (*) dcmp $ IM.mapKeys (p*) $ squareFreeDecomp $ pthRoot f'

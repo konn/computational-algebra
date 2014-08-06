@@ -50,6 +50,8 @@ library
                      Algebra.Ring.Polynomial.Parser
                      Algebra.Scalar Algebra.Internal Algebra.Instances Algebra.Wrapped
                      Algebra.Matrix Algebra.Repa Algebra.Prelude Algebra.Algorithms.Signature
+                     Algebra.Ring.Polynomial.Factorize
+                     Algebra.Integer.PrimeTest
     exposed: True
     buildable: True
     other-modules: Algebra.Algorithms.FGLM
