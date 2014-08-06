@@ -2,18 +2,19 @@
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes            #-}
 {-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances #-}
 module Algebra.Field.Finite (F(), withModulo, FiniteField(..), order) where
+import           Algebra.NumberTheory.PrimeTest
 import           Algebra.Wrapped
 import           Data.Proxy
-import qualified Data.Ratio                 as R
+import qualified Data.Ratio                     as R
 import           Data.Reflection
-import qualified Data.Type.Natural          as TN
-import           Numeric.Algebra            (Field)
-import           Numeric.Algebra            (char)
-import qualified Numeric.Algebra            as NA
+import qualified Data.Type.Natural              as TN
+import           Numeric.Algebra                (Field)
+import           Numeric.Algebra                (char)
+import qualified Numeric.Algebra                as NA
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
-import           Numeric.Rig.Characteristic (Characteristic)
-import           Numeric.Semiring.Integral  (IntegralSemiring)
+import           Numeric.Rig.Characteristic     (Characteristic)
+import           Numeric.Semiring.Integral      (IntegralSemiring)
 
 -- | @p@ should be prime, and not statically checked.
 newtype F (p :: k) = F { runF :: NA.Natural }
@@ -50,14 +51,9 @@ instance Reifies p NA.Natural => Num (F p) where
   abs (F n) = withModulo $ abs n
   signum (F n) = withModulo $ signum n
 
-modPow :: (Integral a, Integral a1) => a -> a -> a1 -> a
-modPow i p = go i 1
-  where
-    go _ acc 0 = acc
-    go b acc e = go ((b*b) `mod` p) (if e `mod` 2 == 1 then (acc * b) `mod` p else acc) (e `div` 2)
-
 pow :: (Integral a1, Reifies p NA.Natural) => F p -> a1 -> F p
-pow a n = withModulo $ modPow (runF a) (reflect a) n
+pow a n = withModulo $ fromIntegral $ modPow (fromIntegral $ runF a :: Integer)
+          (fromIntegral (reflect a :: NA.Natural)) n
 
 instance Reifies p NA.Natural => NA.Additive (F p) where
   (+) = (+)

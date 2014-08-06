@@ -3,6 +3,7 @@
 {-# LANGUAGE PolyKinds, ScopedTypeVariables, TupleSections          #-}
 module Algebra.Ring.Polynomial.Factorize where
 import           Algebra.Field.Finite
+import           Algebra.NumberTheory.PrimeTest   hiding (modPow)
 import           Algebra.Prelude
 import           Algebra.Ring.Polynomial.Quotient
 import           Control.Applicative              ((<$>), (<|>))
@@ -45,21 +46,6 @@ modPow :: (Eq r, Ring r, DecidableZero r, Division r, Commutative r, SingI n, Is
        => OrderedPolynomial r ord n -> Natural -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n
 modPow a p f = withQuotient (principalIdeal f) $
                repeatedSquare (modIdeal a) p
-
-binRep :: Natural -> [Natural]
-binRep = flip go []
-  where
-    go 0 = id
-    go k = go (k `div` 2) . ((k `mod` 2) :)
-
-repeatedSquare :: Multiplicative r => r -> Natural -> r
-repeatedSquare a n =
-  let bits = tail $ binRep n
-  in go a bits
-  where
-    go b []        = b
-    go b (nk : ns) =
-      go (if nk == 1 then (b*b*a) else b*b) ns
 
 traceCharTwo :: (Unital m, Monoidal m) => Natural -> m -> m
 traceCharTwo m a = sum [ a ^ (2 ^ i) | i <- [0..pred m]]
