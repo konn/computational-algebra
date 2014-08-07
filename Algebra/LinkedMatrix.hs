@@ -479,7 +479,7 @@ traverseRow a f = traverseDir a f Row
 traverseCol :: b -> (b -> Int -> Entry a -> b) -> Int -> Matrix a -> b
 traverseCol a f = traverseDir a f Column
 
-structuredGauss :: (Show a, DecidableZero a, Division a, Group a)
+structuredGauss :: (DecidableZero a, Division a, Group a)
                 => Matrix a -> (Matrix a, Matrix a)
 structuredGauss = evalState go . newGaussianState
   where
