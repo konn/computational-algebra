@@ -23,7 +23,7 @@ import Utils
 f4Repa = faugere4 optimalStrategy
 f4DM = faugere4G (Proxy :: Proxy DM.Matrix) optimalStrategy
 f4SM = faugere4G (Proxy :: Proxy Sparse) optimalStrategy
-f4LM = faugere4LM optimalStrategy
+f4LM  = faugere4LM optimalStrategy
 
 ideal3 :: [OrderedPolynomial (Fraction Integer) Grevlex Three]
 ideal3 = [x^2 + y^2 + z^2 - 1, x^2 + y^2 + z^2 - 2*x, 2*x -3*y - z]
@@ -80,7 +80,7 @@ main = do
       , bench "F4-linked"  $ nf f4LM i3
       ]
     , bgroup "I4"
-      [ bench "buchberger" $ nf calcGroebnerBasis i4
+      [  bench "buchberger" $ nf calcGroebnerBasis i4
       , bench "F4-repa"    $ nf f4Repa i4
       , bench "F4-dm"      $ nf f4DM i4
       , bench "F4-sparse"  $ nf f4SM i4

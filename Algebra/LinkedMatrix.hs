@@ -4,12 +4,13 @@
 {-# LANGUAGE TemplateHaskell, TupleSections                             #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.LinkedMatrix (Matrix, toList, fromLists, fromList,
-                             swapRows, identity,
+                             swapRows, identity,nonZeroRows,nonZeroCols,
                              swapCols, switchCols, switchRows, addRow,
                              addCol, ncols, nrows, getRow, getCol,
                              scaleRow, combineRows, combineCols, transpose,
                              inBound, height, width, cmap, empty, rowVector,
-                             colVector, rowCount, colCount,
+                             colVector, rowCount, colCount, traverseRow,
+                             traverseCol, Entry, idx, value,
                              catRow, catCol, (<||>), (<-->), toRows, toCols,
                              zeroMat, getDiag, trace, diagProd, diag,
                              scaleCol, clearRow, clearCol, index, (!),
@@ -35,7 +36,6 @@ import           Data.Vector                (unsafeFreeze)
 import qualified Data.Vector                as V
 import           Data.Vector.Mutable        (grow)
 import qualified Data.Vector.Mutable        as MV
-import qualified Debug.Trace                as DT
 import           Numeric.Algebra            hiding ((<), (<~), (>))
 import           Numeric.Decidable.Zero     (isZero)
 import           Numeric.Field.Fraction
@@ -301,8 +301,6 @@ addDir dir vec i mat = runST $ do
     mp :: IntMap a
     mp = V.ifoldr (\k v d -> if isZero v then d else IM.insert k v d) IM.empty vec
 
-tr = DT.trace
-
 perp :: Direction -> Direction
 perp Row = Column
 perp Column = Row
@@ -565,6 +563,15 @@ multWithVector :: (Multiplicative a, Monoidal a)
 multWithVector mat v =
   V.generate (mat^.height) $ \i ->
   traverseRow zero (\acc _ ent -> acc + (ent^.value)*(v V.! (ent^.nthL Row))) i mat
+
+nonZeroDirs :: Direction -> Matrix r -> [Int]
+nonZeroDirs dir = view $ startL dir . to IM.keys
+
+nonZeroRows :: Matrix r -> [Int]
+nonZeroRows = nonZeroDirs Row
+
+nonZeroCols :: Matrix r -> [Int]
+nonZeroCols = nonZeroDirs Column
 
 testCase :: Matrix (Fraction Integer)
 testCase = fromLists [[0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,0]
