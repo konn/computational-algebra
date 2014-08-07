@@ -13,7 +13,7 @@ module Algebra.LinkedMatrix (Matrix, toList, fromLists, fromList,
                              catRow, catCol, (<||>), (<-->), toRows, toCols,
                              zeroMat, getDiag, trace, diagProd, diag,
                              scaleCol, clearRow, clearCol, index, (!),
-                             structuredGauss) where
+                             structuredGauss, multWithVector) where
 import           Algebra.Instances          ()
 import           Algebra.Wrapped            ()
 import           Control.Applicative        ((<$>), (<*>), (<|>))
@@ -559,6 +559,12 @@ prettyEntry ent =
          ]
   where
     showMaybe = maybe "_" show
+
+multWithVector :: (Multiplicative a, Monoidal a)
+               => Matrix a -> Vector a -> Vector a
+multWithVector mat v =
+  V.generate (mat^.height) $ \i ->
+  traverseRow zero (\acc _ ent -> acc + (ent^.value)*(v V.! (ent^.nthL Row))) i mat
 
 testCase :: Matrix (Fraction Integer)
 testCase = fromLists [[0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,0]
