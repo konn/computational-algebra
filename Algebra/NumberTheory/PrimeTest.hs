@@ -51,16 +51,16 @@ splitFactor d n =
      then (0, n)
      else splitFactor d r & _1 +~ 1
 
-isPseudoPrime :: (MonadRandom m)
+isPseudoPrime :: MonadRandom m
               => Integer -> m (Either Integer Bool)
 isPseudoPrime 2 = return $ Right True
 isPseudoPrime 3 = return $ Right True
 isPseudoPrime n = do
   a <- uniform [2..n P.- 2]
   let d = gcd a n
-  if d > 1
-    then return $ Left d
-    else return $
+  return $ if d > 1
+    then Left d
+    else
     let (v, m) = splitFactor 2 (n-1)
         b0 = modPow n a m
         bs = take (v+1) $ iterate (\b -> b*b `mod` n) b0

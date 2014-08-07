@@ -15,29 +15,19 @@ module Algebra.LinkedMatrix (Matrix, toList, fromLists, fromList,
                              scaleCol, clearRow, clearCol, index, (!),
                              structuredGauss) where
 import           Algebra.Instances          ()
-import           Algebra.Wrapped
-import           Control.Applicative        ((<$>), (<|>))
-import           Control.Applicative        ((<*>))
+import           Algebra.Wrapped            ()
+import           Control.Applicative        ((<$>), (<*>), (<|>))
 import           Control.Lens               hiding (index)
-import           Control.Monad              (forM, zipWithM)
 import           Control.Monad.Identity     (runIdentity)
 import           Control.Monad.ST.Strict    (runST)
-import           Control.Monad.State.Strict (runState)
-import           Control.Monad.State.Strict (evalState)
-import           Control.Monad.State.Strict (evalStateT)
-import           Control.Monad.Trans        (liftIO)
-import           Data.Foldable              (maximumBy)
-import           Data.IntMap.Strict         (IntMap, alter, insertWith)
-import           Data.IntMap.Strict         (mapMaybeWithKey)
-import           Data.IntMap.Strict         (minViewWithKey)
-import           Data.IntMap.Strict         (insert)
+import           Control.Monad.State.Strict (evalState, runState)
+import           Data.IntMap.Strict         (IntMap, alter, insert)
+import           Data.IntMap.Strict         (mapMaybeWithKey, minViewWithKey)
 import qualified Data.IntMap.Strict         as IM
 import           Data.IntSet                (IntSet)
 import qualified Data.IntSet                as IS
-import           Data.List                  (sort)
-import           Data.List                  (intercalate)
+import           Data.List                  (intercalate, sort)
 import           Data.Maybe                 (fromJust, fromMaybe, mapMaybe)
-import           Data.Ord                   (comparing)
 import           Data.Semigroup
 import           Data.Tuple                 (swap)
 import           Data.Vector                (Vector, create, generate, thaw)
