@@ -1,9 +1,10 @@
 {-# LANGUAGE BangPatterns, FlexibleContexts, LambdaCase                 #-}
 {-# LANGUAGE MultiParamTypeClasses, NamedFieldPuns, NoImplicitPrelude   #-}
 {-# LANGUAGE NoMonomorphismRestriction, RankNTypes, ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell                                            #-}
+{-# LANGUAGE TemplateHaskell, TupleSections                             #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
-module Algebra.LinkedMatrix (Matrix, toList, fromList, swapRows, identity,
+module Algebra.LinkedMatrix (Matrix, toList, fromLists, fromList,
+                             swapRows, identity,
                              swapCols, switchCols, switchRows, addRow,
                              addCol, ncols, nrows, getRow, getCol,
                              scaleRow, combineRows, combineCols, transpose,
@@ -29,6 +30,7 @@ import           Data.Foldable              (maximumBy)
 import           Data.IntMap.Strict         (IntMap, alter, insertWith)
 import           Data.IntMap.Strict         (mapMaybeWithKey)
 import           Data.IntMap.Strict         (minViewWithKey)
+import           Data.IntMap.Strict         (insert)
 import qualified Data.IntMap.Strict         as IM
 import           Data.IntSet                (IntSet)
 import qualified Data.IntSet                as IS
@@ -69,8 +71,8 @@ data Matrix a = Matrix { _coefficients :: !(Vector (Entry a))
 
 makeLenses ''Matrix
 
-data BuildState = BuildState { _colMap :: !(IntMap [Int])
-                             , _rowMap :: !(IntMap [Int])
+data BuildState = BuildState { _colMap :: !(IntMap Int)
+                             , _rowMap :: !(IntMap Int)
                              , _curIdx :: !Int
                              }
 makeLenses ''BuildState
@@ -90,27 +92,30 @@ data MaxEntry a b = MaxEntry { _weight :: !a
 empty :: Matrix a
 empty = Matrix V.empty IM.empty IM.empty 0 0
 
-fromList :: DecidableZero a => [[a]] -> Matrix a
-fromList xss =
-  let (as, bs) = runState (zipWithM initialize [0..] xss) (BuildState IM.empty IM.empty (-1))
-      vec = V.fromList $ concat as
-  in Matrix vec (head <$> _rowMap bs) (head <$> _colMap bs) h w
+fromLists :: DecidableZero a => [[a]] -> Matrix a
+fromLists xss = fromList $ concat $ zipWith (\i -> zipWith (i,,) [0..]) [0..] xss
+
+fromList :: DecidableZero a => [(Int, Int, a)] -> Matrix a
+fromList cs =
+  let (as, bs) = runState (mapM initialize $ filter (view $ _3 . to (not.isZero)) cs) (BuildState IM.empty IM.empty (-1))
+      vec = V.fromList as
+      h = maximum (0:map (view $ _1) cs) + 1
+      w = maximum (0:map (view $ _2) cs) + 1
+  in Matrix vec (bs^.rowMap) (bs^.colMap) h w
   where
-    h = length xss
-    w  = maximum $ map length xss
-    initialize i xs = do
-      forM (filter (not . isZero . snd) $ zip [0..] xs) $ \(j,c) -> do
+    initialize (i, j, c) =  do
         curIdx += 1
         n <- use curIdx
         nc <- use $ colMap.at j
         nr <- use $ rowMap.at i
-        colMap %= insertWith (++) j [n]
-        rowMap %= insertWith (++) i [n]
+        colMap %= insert j n
+        rowMap %= insert i n
         return $ Entry { _value = c
                        , _idx = (i, j)
-                       , _rowNext = head <$> nr
-                       , _colNext = head <$> nc
+                       , _rowNext = nr
+                       , _colNext = nc
                        }
+
 
 getDiag :: Monoidal a => Matrix a -> Vector a
 getDiag mat = V.generate (min (mat^.height) (mat^.width)) $ \i ->
@@ -385,10 +390,10 @@ catDir dir mat vec = runST $ do
                & coefficients .~ v
 
 rowVector :: DecidableZero a => Vector a -> Matrix a
-rowVector = fromList . (:[]) . V.toList
+rowVector = fromLists. (:[]) . V.toList
 
 colVector :: DecidableZero a => Vector a -> Matrix a
-colVector = fromList . map (:[]) . V.toList
+colVector = fromLists . map (:[]) . V.toList
 
 toDirs :: Monoidal a => Direction -> Matrix a -> [Vector a]
 toDirs dir mat = [ getDir dir i mat | i <- [0..mat^.countL dir-1]]
@@ -564,3 +569,13 @@ prettyEntry ent =
          ]
   where
     showMaybe = maybe "_" show
+
+testCase :: Matrix (Fraction Integer)
+testCase = fromLists [[0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,0]
+                    ,[0,0,0,0,0,0,1,1,1,0,0,1,0,0,0,1,0,0,0]
+                    ,[0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0]
+                    ,[0,0,0,0,0,1,0,0,0,0,1,-1,0,-1,1,0,-1,0,0]
+                    ,[0,0,0,0,1,1,0,1,0,0,1,0,0,0,1,0,0,0,0]
+                    ,[1,1,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0]
+                    ,[1,0,1,0,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0]
+                    ]

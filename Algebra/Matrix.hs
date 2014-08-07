@@ -169,7 +169,7 @@ instance Matrix LM.Matrix where
   (!) m pos = m LM.! (pos & both %~ pred)
   index i j = LM.index (i-1) (j-1)
   empty = LM.empty
-  buildMatrix h w f = LM.fromList [[(f (i,j)) | j <- [1..w]] | i <- [1..h]]
+  buildMatrix h w f = LM.fromList [(i, j, f (i,j)) | j <- [1..w], i <- [1..h]]
   trans = LM.transpose
   combineRows j s i = LM.combineRows s (i-1) (j-1)
   switchRows i j = LM.switchRows (i-1) (j-1)
@@ -184,7 +184,7 @@ instance Matrix LM.Matrix where
   getCol = LM.getCol . pred
   nrows = LM.nrows
   ncols = LM.ncols
-  fromLists = LM.fromList
+  fromLists = LM.fromLists
   (<||>) = (LM.<||>)
   (<-->) = (LM.<-->)
   rowVector = LM.rowVector
