@@ -4,9 +4,15 @@
 {-# LANGUAGE QuasiQuotes, RankNTypes, ScopedTypeVariables, TemplateHaskell  #-}
 {-# LANGUAGE TypeFamilies, TypeOperators, ViewPatterns                      #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
-module Algebra.Algorithms.Faugere4 (faugere4, faugere4G, faugere4LM,
-                                    faugere4Gen, cyclic,
-                                    optimalStrategy, sugarStrategy)  where
+module Algebra.Algorithms.Faugere4 (
+  -- * F_4 algorithms with various backends
+  faugere4LM, faugere4, faugere4G,
+  -- * Selection strategies
+  optimalStrategy, sugarStrategy,
+  -- * F_4 main algorithm
+  faugere4Gen,
+  -- * Examples
+  cyclic)  where
 import qualified Algebra.LinkedMatrix    as LM
 import           Algebra.Matrix          hiding (trace)
 import qualified Algebra.Repa            as Repa
@@ -23,9 +29,7 @@ import qualified Data.HashSet            as S
 import           Data.List
 import           Data.Maybe
 import           Data.Proxy              (Proxy (..))
-import           Data.Reflection         (give)
-import           Data.Reflection         (given)
-import           Data.Reflection         (Given)
+import           Data.Reflection         (Given (..))
 import           Data.Type.Natural       hiding (one, zero)
 import qualified Data.Vector             as V
 import           Data.Vector.Sized       (Vector ((:-), Nil))
@@ -34,11 +38,14 @@ import           Numeric.Algebra         hiding (sum, (<), (>), (\\))
 import qualified Numeric.Algebra         as NA
 import           Numeric.Decidable.Zero  (isZero)
 import           Numeric.Field.Fraction  (Fraction)
+import           Prelude                 (Num ())
 import           Prelude                 hiding (Num (..), recip, subtract, (/),
                                           (^))
-import           Prelude                 (Num ())
 import qualified Prelude                 as P
 
+-- * F_4 algorithm with various backends
+
+-- | F_4 with general matrix.
 faugere4G :: forall r ord mat n.
        (Normed r, Field r, IsMonomialOrder ord, IsPolynomial r n,
         Matrix mat, Elem mat r)
@@ -52,16 +59,55 @@ faugere4G =
       let ts  = nub $ sortBy (flip compare) $ concatMap monomials fs
       in (fromLists $ map (\f -> map (\t -> coeff t f) ts) fs, ts)
 
+-- ** Strategies
+optimalStrategy :: Strategy r ord n
+optimalStrategy ps =
+  let d = minimum $ map degPair ps
+  in filter ((==d) . degPair) ps
 
+sugarStrategy :: (DecidableZero r, SingI n, IsOrder ord, Ring r) => Strategy r ord n
+sugarStrategy ps =
+  let d = minimum $ map calcSug ps
+  in filter ((==d) . calcSug) ps
+
+
+-- | F_4 using repa
 faugere4 :: (Normed r, Field r, Fractional r, IsMonomialOrder ord, IsPolynomial r n,
              Repa.Elt r, Repa.Target (Repa.DefVec r) r, Repa.Source (Repa.DefVec r) r)
          => Strategy r ord n -> Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
 faugere4 = faugere4Gen polysToMatrix (fst . runIdentity . Repa.gaussReductionP) matToPolysWith
 
+-- | F_4 with linked list based matrix. This seems the most efficient
 faugere4LM :: (Eq r, DecidableZero r, Field r, SingI n, IsMonomialOrder ord)
            => Strategy r ord n -> Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
 faugere4LM =
   faugere4Gen polysToMatrixG (fst . LM.structuredGauss) (matToPolysWithG Proxy)
+
+-- * F_4 Main Algorithm
+
+-- | Generate F_4 algorithm with new backend
+faugere4Gen :: (IsMonomialOrder ord, IsPolynomial r n)
+            => ([OrderedPolynomial r ord n] -> (mat r, dic))
+               -- ^ Convert list of polynomials to matrix and intermediate data.
+            -> (mat r -> mat r)
+               -- ^ Gaussian elimination
+            -> (dic -> mat r -> [OrderedPolynomial r ord n])
+               -- ^ Retrieve polynomials data
+            -> Strategy r ord n -> Ideal (OrderedPolynomial r ord n)
+            -> Ideal (OrderedPolynomial r ord n)
+faugere4Gen fromPs gauss toPs sel (generators -> fs) = {-# SCC "F_4" #-}
+  let (gs0, ps0) = foldl' (uncurry update) ([], []) fs
+  in go gs0 ps0 []
+  where
+    go gs ps fds
+      | null ps   = toIdeal gs
+      | otherwise =
+        let pd   = sel ps
+            ps'  = ps \\ pd
+            ls   = map leftP pd ++ map rightP pd
+            (fdp, fd) = give (MatrixRepr fromPs gauss toPs) $ redF4 ls gs fds
+            (gs2, ps2) = foldl' (uncurry update) (gs, ps') fdp
+        in go gs2 ps2 (fd:fds)
 
 data Pair r ord n = Pair { lcmPair    :: OrderedMonomial ord n
                          , leftMonom  :: OrderedMonomial ord n
@@ -87,17 +133,6 @@ mkPair f g =
       ti  = lij / f0
       tj  = lij / g0
   in Pair lij ti f tj g
-
-
-optimalStrategy :: Strategy r ord n
-optimalStrategy ps =
-  let d = minimum $ map degPair ps
-  in filter ((==d) . degPair) ps
-
-sugarStrategy :: (DecidableZero r, SingI n, IsOrder ord, Ring r) => Strategy r ord n
-sugarStrategy ps =
-  let d = minimum $ map calcSug ps
-  in filter ((==d) . calcSug) ps
 
 calcSug :: (DecidableZero r, Ring r, SingI n, IsOrder ord) => Pair r ord n -> Int
 calcSug p =
@@ -186,43 +221,43 @@ withMatRepr :: Given (MatrixRepr r ord n)
 withMatRepr f = case given of
   MatrixRepr fromPs gauss toPs -> f fromPs gauss toPs
 
-simplifyGen :: (Given (MatrixRepr r ord n), IsMonomialOrder ord, IsPolynomial r n, DecidableZero r)
+simplify :: (Given (MatrixRepr r ord n), IsMonomialOrder ord, IsPolynomial r n, DecidableZero r)
          => [[OrderedPolynomial r ord n]]
          -> OrderedMonomial ord n -> OrderedPolynomial r ord n
          -> (OrderedMonomial ord n, OrderedPolynomial r ord n)
-simplifyGen fss t f = go $ divisors t
+simplify fss t f = go $ divisors t
   where
     go []       = (t, f)
     go (u : us) =
       case find (u >* f `elem`) fss of
         Nothing -> go us
         Just fs ->
-          let fs' = rowEchelonGen fs
+          let fs' = rowEchelon fs
               Just p = find (\g -> leadingMonomial g == leadingMonomial (u >* f)) fs'
           in if u /= t
-             then simplifyGen fss (t/u) p
+             then simplify fss (t/u) p
              else (one, p)
 
-rowEchelonGen :: (Given (MatrixRepr r ord n), Eq r,
+rowEchelon :: (Given (MatrixRepr r ord n), Eq r,
                   IsMonomialOrder ord, IsPolynomial r n, DecidableZero r)
            => [OrderedPolynomial r ord n]
            -> [OrderedPolynomial r ord n]
-rowEchelonGen fs = withMatRepr $ \fromPolys gauss toPolys ->
+rowEchelon fs = withMatRepr $ \fromPolys gauss toPolys ->
   {-# SCC "rowEchelon" #-}
   let (mf, ts) = {-# SCC "buildMatrix" #-} fromPolys fs
       mf' = toPolys ts $ {-# SCC "eche/red" #-} gauss mf
   in filter (not . isZero) $ nub mf'
 
-symbolicPPGen :: (Given (MatrixRepr r ord n), IsMonomialOrder ord, IsPolynomial r n, DecidableZero r)
+symbolicPP :: (Given (MatrixRepr r ord n), IsMonomialOrder ord, IsPolynomial r n, DecidableZero r)
            => [(OrderedMonomial ord n, OrderedPolynomial r ord n)]
            -> [OrderedPolynomial r ord n]
            -> [[OrderedPolynomial r ord n]]
            -> [OrderedPolynomial r ord n]
-symbolicPPGen ls gs fss = {-# SCC "symbolicPP" #-}
+symbolicPP ls gs fss = {-# SCC "symbolicPP" #-}
   let fs0 = map mul ls
   in go fs0 (S.fromList $ concatMap monomials fs0) (S.fromList $ map leadingMonomial fs0)
   where
-    mul = uncurry (>*) . uncurry (simplifyGen fss)
+    mul = uncurry (>*) . uncurry (simplify fss)
     go fs ts done
       | S.null (ts `S.difference` done) = fs
       | otherwise =
@@ -236,34 +271,14 @@ symbolicPPGen ls gs fss = {-# SCC "symbolicPP" #-}
                     in go (f' : fs) (ts' `S.union` ts'') done'
           Nothing -> go fs ts' done'
 
-faugere4Gen :: (IsMonomialOrder ord, IsPolynomial r n)
-            => ([OrderedPolynomial r ord n] -> (mat r, dic))
-            -> (mat r -> mat r)
-            -> (dic -> mat r -> [OrderedPolynomial r ord n])
-            -> Strategy r ord n -> Ideal (OrderedPolynomial r ord n)
-            -> Ideal (OrderedPolynomial r ord n)
-faugere4Gen fromPs gauss toPs sel (generators -> fs) = {-# SCC "F_4" #-}
-  let (gs0, ps0) = foldl' (uncurry update) ([], []) fs
-  in go gs0 ps0 []
-  where
-    go gs ps fds
-      | null ps   = toIdeal gs
-      | otherwise =
-        let pd   = sel ps
-            ps'  = ps \\ pd
-            ls   = map leftP pd ++ map rightP pd
-            (fdp, fd) = give (MatrixRepr fromPs gauss toPs) $ redF4Gen ls gs fds
-            (gs2, ps2) = foldl' (uncurry update) (gs, ps') fdp
-        in go gs2 ps2 (fd:fds)
-
-redF4Gen :: (Given (MatrixRepr r ord n), IsMonomialOrder ord, IsPolynomial r n)
+redF4 :: (Given (MatrixRepr r ord n), IsMonomialOrder ord, IsPolynomial r n)
       => [(OrderedMonomial ord n, OrderedPolynomial r ord n)]
       -> [OrderedPolynomial r ord n]
       -> [[OrderedPolynomial r ord n]]
       -> ([OrderedPolynomial r ord n], [OrderedPolynomial r ord n])
-redF4Gen ls gs fss = {-# SCC "reduction" #-}
-  let fs  = symbolicPPGen ls gs fss
-      fs' = rowEchelonGen fs
+redF4 ls gs fss = {-# SCC "reduction" #-}
+  let fs  = symbolicPP ls gs fss
+      fs' = rowEchelon fs
   in ([ f | f <- fs', not $ leadingMonomial f `elem` map leadingMonomial fs], fs)
 
 polysToMatrix :: (IsMonomialOrder ord, IsPolynomial r n, Num r, Repa.Target (Repa.DefVec r) r)
