@@ -2,14 +2,14 @@
 {-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, PatternGuards, IncoherentInstances #-}
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, OverlappingInstances #-}
 {-# LANGUAGE PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving   #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances, ViewPatterns  #-}
+{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances, ViewPatterns, NoMonomorphismRestriction  #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults -fwarn-incomplete-patterns #-}
 module Algebra.Ring.Polynomial
     ( Polynomial, Monomial, MonomialOrder, EliminationType, EliminationOrder
     , WeightedEliminationOrder, eliminationOrder, weightedEliminationOrder
     , lex, revlex, graded, grlex, grevlex, productOrder, productOrder', (*<), (>*)
     , transformMonomial, WeightProxy, weightOrder, totalDegree, totalDegree'
-    , IsPolynomial, coeff, lcmMonomial, gcdMonomial, sPolynomial, polynomial, substWith, monoize
+    , IsPolynomial, coeff, lcmMonomial, gcdMonomial, sPolynomial, polynomial, monoize
     , castMonomial, castPolynomial, toPolynomial, changeOrder, changeOrderProxy
     , changeMonomialOrder, changeMonomialOrderProxy, isRelativelyPrime
     , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars
@@ -19,7 +19,7 @@ module Algebra.Ring.Polynomial
     , leadingTerm, leadingMonomial, leadingCoeff, genVars, sArity
     , OrderedMonomial(..), Grevlex(..), mapCoeff,pDivModPoly
     , Revlex(..), Lex(..), Grlex(..), Graded(..)
-    , ProductOrder (..), WeightOrder(..), subst, diff
+    , ProductOrder (..), WeightOrder(..), subst, substWith, eval, evalUnivariate, substUnivariate, diff
     , IsOrder(..), IsMonomialOrder)  where
 import           Algebra.Internal
 import           Numeric.Ring.Class
@@ -588,12 +588,25 @@ lcmMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWit
 gcdMonomial :: OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
 gcdMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWithSame P.min m n
 
+-- | Substitute univariate polynomial using Horner's rule
+substUnivariate :: (Module r b, Unital b, Ring r, IsOrder order)
+                => b -> OrderedPolynomial r order One -> b
+substUnivariate u f =
+  foldr (\a b -> a .* u + b * u) one [ coeff (OrderedMonomial $ i :- Nil) f | i <- [0 .. totalDegree' f] ]
+
+evalUnivariate :: (Ring b, IsOrder order) => b -> OrderedPolynomial b order ('S 'Z) -> b
+evalUnivariate u f = 
+  foldr (\a b -> a * u + b * u) one [ coeff (OrderedMonomial $ i :- Nil) f | i <- [0 .. totalDegree' f] ]
+
 subst :: (Module r a, Ring a, Ring r, SingI n) => V.Vector a n -> OrderedPolynomial r order n -> a
 subst assign poly = sum $ map (uncurry (.*) . second extractPower) $ getTerms poly
   where
     extractPower = V.foldr (*) one . V.zipWithSame pow assign .
                    V.map (P.fromIntegral :: Int -> Natural) . getMonomial
 
+-- | Evaluate polynomial at some point.
+eval :: (Monoidal m, Unital m) => Vector m n -> OrderedPolynomial m order n -> m
+eval = substWith (*)
 
 substWith :: (Unital c, Monoidal m) => (d -> c -> m) -> V.Vector c n -> OrderedPolynomial d order n -> m
 substWith o assign poly = sum $ map (uncurry o . second extractPower) $ getTerms poly
