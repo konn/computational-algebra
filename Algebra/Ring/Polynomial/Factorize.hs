@@ -1,7 +1,10 @@
 {-# LANGUAGE BangPatterns, FlexibleContexts, MultiParamTypeClasses  #-}
 {-# LANGUAGE NoImplicitPrelude, OverloadedStrings, ParallelListComp #-}
 {-# LANGUAGE PolyKinds, ScopedTypeVariables, TupleSections          #-}
-module Algebra.Ring.Polynomial.Factorize where
+module Algebra.Ring.Polynomial.Factorize (factorise, Unipol, distinctDegFactor,
+                                          equalDegreeSplitM, equalDegreeFactorM,
+                                          squareFreePart, squareFreeDecomp,
+                                          generateIrreducible) where
 import           Algebra.Field.Finite
 import           Algebra.NumberTheory.PrimeTest   hiding (modPow)
 import           Algebra.Prelude
@@ -15,7 +18,6 @@ import           Control.Monad.Random             (MonadRandom, uniform)
 import           Data.IntMap                      (IntMap)
 import qualified Data.IntMap.Strict               as IM
 import           Data.Proxy                       (Proxy (..))
-import           Data.Reflection                  (Reifies, reflect)
 import           Data.Type.Natural                hiding (one)
 import           Data.Type.Ordinal                (Ordinal (..))
 import qualified Data.Vector.Sized                as SV
@@ -28,13 +30,14 @@ type Unipol r = OrderedPolynomial r Grevlex One
 
 -- | @distinctDegFactor f@ computes the distinct-degree decomposition of the given
 --   square-free polynomial over finite field @f@.
-distinctDegFactor :: forall p. Reifies p Natural
-                  => Unipol (F p)     -- ^ Square-free polynomial over finite field.
-                  -> [(Natural, Unipol (F p))]   -- ^ Distinct-degree decomposition.
+distinctDegFactor :: forall k. (Eq k, DecidableUnits k, DecidableZero k,
+                                IntegralSemiring k, FiniteField k)
+                  => Unipol k     -- ^ Square-free polynomial over finite field.
+                  -> [(Natural, Unipol k)]   -- ^ Distinct-degree decomposition.
 distinctDegFactor f0 = zip [1..] $ go id varX f0 []
   where
     go gs h f =
-      let h' = modPow h (reflect (Proxy :: Proxy p)) f
+      let h' = modPow h (order (Proxy :: Proxy k)) f
           g' = gcd (h' - varX) f
           f' = f `quot` g'
           gs' = gs . (g' :)
@@ -50,33 +53,32 @@ modPow a p f = withQuotient (principalIdeal f) $
 traceCharTwo :: (Unital m, Monoidal m) => Natural -> m -> m
 traceCharTwo m a = sum [ a ^ (2 ^ i) | i <- [0..pred m]]
 
-equalDegreeSplitM :: forall p m. (MonadRandom m, Reifies p Natural)
-                 => Unipol (F p)
+equalDegreeSplitM :: forall k m. (MonadRandom m, Eq k, DecidableUnits k,
+                                  DecidableZero k, IntegralSemiring k, FiniteField k)
+                 => Unipol k
                  -> Natural
-                 -> m (Maybe (Unipol (F p)))
+                 -> m (Maybe (Unipol k))
 equalDegreeSplitM f d
-  | even (reflect (Proxy :: Proxy p)) = return Nothing
   | fromIntegral (totalDegree' f) `mod` d /= 0 = return Nothing
   | otherwise = do
-    let q = fromIntegral $ charUnipol f
+    let q = fromIntegral $ order (Proxy :: Proxy k)
         n = totalDegree' f
-        els = map withModulo [0..pred q]
+        els = elements (Proxy :: Proxy k)
     e <- uniform [1..n-1]
-    c <- uniform $ tail els
-    cs <- replicateM (e-1) $ uniform els
-    let a = injectCoeff c * varX ^ fromIntegral e +
-            sum (zipWith (*) (map injectCoeff (c:cs)) [varX ^ l | l <-[0..]])
-            `asTypeOf` f
-    let g1 = gcd a f
+    cs <- replicateM e $ uniform els
+    let a = varX ^ fromIntegral e +
+            sum (zipWith (*) (map injectCoeff cs) [varX ^ l | l <-[0..]])
+        g1 = gcd a f
     return $ (guard (g1 /= one) >> return g1)
-         <|> do let b | q == 2    = traceCharTwo (powerUnipol f*d) a
+         <|> do let b | charUnipol f == 2  = traceCharTwo (powerUnipol f*d) a
                       | otherwise = modPow a ((pred $ q^d)`div`2) f
-                    g2 = gcd (b-1) f
+                    g2 = gcd (b-one) f
                 guard (g2 /= one && g2 /= f)
                 return g2
 
-equalDegreeFactorM :: (Reifies p Natural, MonadRandom m)
-                   => Unipol (F p) -> Natural -> m [Unipol (F p)]
+equalDegreeFactorM :: (Eq k, DecidableUnits k, DecidableZero k,
+                       IntegralSemiring k, FiniteField k, MonadRandom m)
+                   => Unipol k -> Natural -> m [Unipol k]
 equalDegreeFactorM f d = go f >>= \a -> return (a [])
   where
     go h | totalDegree' h == 0 = return id
@@ -89,11 +91,14 @@ equalDegreeFactorM f d = go f >>= \a -> return (a [])
              r <- go (h `quot` g)
              return $ l . r
 
-factorSquareFree :: (Reifies p Natural, MonadRandom m, Functor m) => Unipol (F p) -> m [Unipol (F p)]
+factorSquareFree :: (Eq k, DecidableUnits k, DecidableZero k, IntegralSemiring k,
+                     FiniteField k, MonadRandom m, Functor m)
+                 => Unipol k -> m [Unipol k]
 factorSquareFree f =
-   concat <$> mapM (uncurry $ flip equalDegreeFactorM) (filter ((/= 1) . snd) $ distinctDegFactor f)
+   concat <$> mapM (uncurry $ flip equalDegreeFactorM) (filter ((/= one) . snd) $ distinctDegFactor f)
 
-squareFreePart :: (Reifies p Natural) => Unipol (F p) -> Unipol (F p)
+squareFreePart :: (Eq k, DecidableUnits k, DecidableZero k, IntegralSemiring k, FiniteField k)
+               => Unipol k -> Unipol k
 squareFreePart f =
   let !n = fromIntegral $ totalDegree' f
       u  = gcd f (diff 0 f)
@@ -147,11 +152,13 @@ squareFreeDecomp f =
      else IM.filter (not . isZero . subtract one) $
           IM.unionWith (*) dcmp $ IM.mapKeys (p*) $ squareFreeDecomp $ pthRoot f'
 
-factorise :: (Functor m, Reifies p Natural, MonadRandom m)
-          => Unipol (F p) -> m [(Unipol (F p), Natural)]
+-- | Factorise a polynomial over finite field using Cantor-Zassenhaus algorithm
+factorise :: (Functor m, MonadRandom m, Eq k, DecidableUnits k, DecidableZero k, IntegralSemiring k, FiniteField k)
+          => Unipol k -> m [(Unipol k, Natural)]
 factorise f = do
   concat <$> mapM (\(r, h) -> map (,fromIntegral r) <$> factorSquareFree h) (IM.toList $  squareFreeDecomp f)
 
+-- | @generateIrreducible p n@ generates irreducible polynomial over F_@p@ of degree @n@.
 generateIrreducible :: (DecidableZero k, MonadRandom m, FiniteField k,
                         IntegralSemiring k, DecidableUnits k, Eq k)
                     => proxy k -> Natural -> m (Unipol k)

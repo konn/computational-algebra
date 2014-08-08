@@ -1,6 +1,6 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
-{-# LANGUAGE GADTs, MultiParamTypeClasses, RankNTypes, ScopedTypeVariables   #-}
-{-# LANGUAGE UndecidableInstances                                            #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts                #-}
+{-# LANGUAGE FlexibleInstances, GADTs, MultiParamTypeClasses, RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables, UndecidableInstances                   #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Ring.Polynomial.Quotient ( Quotient(), QIdeal(), reifyQuotient, modIdeal
                                         , modIdeal', quotRepr, withQuotient, vectorRep

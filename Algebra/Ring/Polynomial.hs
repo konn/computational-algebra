@@ -349,7 +349,7 @@ instance (Eq r, IsOrder order, Ring r, DecidableZero r, SingI n) => Eq (OrderedP
 
 injectCoeff :: (DecidableZero r, SingI n) => r -> OrderedPolynomial r order n
 injectCoeff r | isZero r  = Polynomial M.empty
-              | otherwise = Polynomial $ M.singleton (OrderedMonomial $ fromList sing []) r
+              | otherwise = Polynomial $ M.singleton one r
 
 (>*) :: (IsMonomialOrder ord, Ring r, DecidableZero r, SingI n)
      => OrderedMonomial ord n -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n
@@ -417,11 +417,12 @@ showPolynomialWithVars dic p0@(Polynomial d)
       showTerm (getMonomial -> deg, c)
           | isZero c = Nothing
           | otherwise =
-              let cstr = if isZero (c + one)
-                         then if any (not . isZero) (V.toList deg) then "-" else "-1"
-                         else if (not (isZero $ c - one) || isConstantMonomial deg)
-                              then show c ++ " "
-                              else ""
+              let cstr = if (not (isZero $ c - one) || isConstantMonomial deg)
+                         then show c ++ " "
+                         else if isZero (c - one) then ""
+                              else if isZero (c + one)
+                              then if any (not . isZero) (V.toList deg) then "-" else "-1"
+                              else  ""
               in Just $ cstr ++ unwords (mapMaybe showDeg (zip [0..] $ V.toList deg))
       showDeg (n, p) | p == 0    = Nothing
                      | p == 1    = Just $ showVar n
