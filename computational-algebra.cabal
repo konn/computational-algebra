@@ -13,7 +13,7 @@ category: Math
 author: Hiromi ISHII
 data-dir: ""
 extra-source-files: README.md examples/*.hs tests/*.hs bench/*.hs
-                    share/*.hs
+                    share/*.hs data/conway.txt
  
 source-repository head
     type: git
@@ -23,7 +23,8 @@ flag examples
     Default: False
  
 library
-    build-depends: criterion >= 0.8.1.0,
+    build-depends: template-haskell -any,
+                   criterion >= 0.8.1.0,
                    semigroups >= 0.15.2,
                    MonadRandom ==0.1.13.*, algebra ==3.1.*,
                    base >=4 && <5, bifunctors ==3.2.0.1.*,
@@ -54,7 +55,7 @@ library
                      Algebra.NumberTheory.PrimeTest
     exposed: True
     buildable: True
-    other-modules: Algebra.Algorithms.FGLM
+    other-modules: Algebra.Algorithms.FGLM Algebra.Field.Galois.Internal Algebra.Field.Galois.Conway
     ghc-options: -fwarn-name-shadowing -Odph -with-rtsopts="-qa"
  
 executable solve

@@ -2,9 +2,11 @@
 {-# LANGUAGE GADTs, MultiParamTypeClasses, NoMonomorphismRestriction        #-}
 {-# LANGUAGE PolyKinds, RankNTypes, ScopedTypeVariables, TypeFamilies       #-}
 {-# LANGUAGE UndecidableInstances                                           #-}
-module Algebra.Field.Galois (GF0, modPoly, modVec, reifyGF0, withGF0,
-                             GF', Conway, primitive, conway)  where
+module Algebra.Field.Galois (GF0(), modPoly, modVec, reifyGF0, withGF0,
+                             GF'(), Conway, primitive, conway,
+                             conwayFile, addConwayPolynomials)  where
 import           Algebra.Field.Finite
+import           Algebra.Field.Galois.Conway
 import           Algebra.Prelude
 import           Algebra.Ring.Polynomial.Factorize
 import           Control.Lens                      (imap)
@@ -172,133 +174,6 @@ primitive :: (IsGF0 p n f) => GF0 p (S n) f
 primitive = GF0 $ polyToVec varX
 
 -- | Phantom type for conway polynomials
-data Conway p n
-
 conway :: forall p n. (Reifies (Conway p n) (Unipol (F p)))
        => SNat p -> SNat n -> Unipol (F p)
 conway _ _ = reflect (Proxy :: Proxy (Conway p n))
-
--- p = 2
-instance Reifies (Conway Two One) (Unipol (F Two)) where
-  reflect _ = varX + 1
-
-instance Reifies (Conway Two Two) (Unipol (F Two)) where
-  reflect _ = varX^2 + varX + 1
-
-instance Reifies (Conway Two Three) (Unipol (F Two)) where
-  reflect _ = varX^3 + varX + 1
-
-instance Reifies (Conway Two Four) (Unipol (F Two)) where
-  reflect _ = varX^4 + varX + 1
-
-instance Reifies (Conway Two Five) (Unipol (F Two)) where
-  reflect _ = varX^5 + varX^2 + 1
-
-instance Reifies (Conway Two Six) (Unipol (F Two)) where
-  reflect _ = varX^6 + varX^4 + varX^3 + varX + 1
-
-instance Reifies (Conway Two Seven) (Unipol (F Two)) where
-  reflect _ = varX^7 + varX + 1
-
-instance Reifies (Conway Two Eight) (Unipol (F Two)) where
-  reflect _ = varX^8 + varX^4 + varX^3 + varX^2 + 1
-
-instance Reifies (Conway Two Nine) (Unipol (F Two)) where
-  reflect _ = varX^9 + varX^4 + 1
-
-instance Reifies (Conway Two Ten) (Unipol (F Two)) where
-  reflect _ = varX^10 + varX^6 + varX^5 + varX^3 + varX^2 + varX + 1
-
--- p = 3
-instance Reifies (Conway Three One) (Unipol (F Three)) where
-  reflect _ = varX + 1
-
-instance Reifies (Conway Three Two) (Unipol (F Three)) where
-  reflect _ = varX^2 + 2*varX + 2
-
-instance Reifies (Conway Three Three) (Unipol (F Three)) where
-  reflect _ = varX^3 + 2*varX + 1
-
-instance Reifies (Conway Three Four) (Unipol (F Three)) where
-  reflect _ = varX^4 + 2*varX^3 + 2
-
-instance Reifies (Conway Three Five) (Unipol (F Three)) where
-  reflect _ = varX^5 + 2*varX + 1
-
-instance Reifies (Conway Three Six) (Unipol (F Three)) where
-  reflect _ = varX^6 + 2*varX^4 + varX^2 + 2*varX + 2
-
-instance Reifies (Conway Three Seven) (Unipol (F Three)) where
-  reflect _ = varX^7 + 2*varX^2 + 1
-
-instance Reifies (Conway Three Eight) (Unipol (F Three)) where
-  reflect _ = varX^8 + 2*varX^5 + varX^4 + 2*varX^2 + 2*varX^2 + 2
-
-instance Reifies (Conway Three Nine) (Unipol (F Three)) where
-  reflect _ = varX^9 + 2*varX^3 + 2*varX^2 + varX + 1
-
-instance Reifies (Conway Three Ten) (Unipol (F Three)) where
-  reflect _ = varX^10 + 2*varX^6 + 2*varX^5 + 2*varX^4 + varX + 2
-
--- p = 5
-instance Reifies (Conway Five One) (Unipol (F Five)) where
-  reflect _ = varX + 3
-
-instance Reifies (Conway Five Two) (Unipol (F Five)) where
-  reflect _ = varX^2 + 4*varX + 2
-
-instance Reifies (Conway Five Three) (Unipol (F Five)) where
-  reflect _ = varX^3 + 3*varX + 3
-
-instance Reifies (Conway Five Four) (Unipol (F Five)) where
-  reflect _ = varX^4 + 4*varX^2 + 4*varX + 2
-
-instance Reifies (Conway Five Five) (Unipol (F Five)) where
-  reflect _ = varX^5 + 4*varX + 3
-
-instance Reifies (Conway Five Six) (Unipol (F Five)) where
-  reflect _ = varX^4 + 4*varX^3 + varX^2 + 2
-
-instance Reifies (Conway Five Seven) (Unipol (F Five)) where
-  reflect _ = varX^7 + 3*varX + 3
-
-instance Reifies (Conway Five Eight) (Unipol (F Five)) where
-  reflect _ = varX^8 + varX^4 + 3*varX^2 + 4*varX + 2
-
-instance Reifies (Conway Five Nine) (Unipol (F Five)) where
-  reflect _ = varX^9 + 2*varX^3 + varX + 3
-
-instance Reifies (Conway Five Ten) (Unipol (F Five)) where
-  reflect _ = varX^10 + 3*varX^5 + 3*varX^4 + 2*varX^3 + 4*varX^2 + varX + 2
-
--- p = 7
-
-instance Reifies (Conway Seven One) (Unipol (F Seven)) where
-  reflect _ = varX + 4
-
-instance Reifies (Conway Seven Two) (Unipol (F Seven)) where
-  reflect _ = varX^2 + 6*varX + 3
-
-instance Reifies (Conway Seven Three) (Unipol (F Seven)) where
-  reflect _ = varX^3 + 6*varX^2 + 4
-
-instance Reifies (Conway Seven Four) (Unipol (F Seven)) where
-  reflect _ = varX^4 + 5*varX^2 + 4*varX + 3
-
-instance Reifies (Conway Seven Five) (Unipol (F Seven)) where
-  reflect _ = varX^5 + varX + 4
-
-instance Reifies (Conway Seven Six) (Unipol (F Seven)) where
-  reflect _ = varX^6 + varX^4 + 5*varX^3 + 4*varX^2 + 6*varX + 3
-
-instance Reifies (Conway Seven Seven) (Unipol (F Seven)) where
-  reflect _ = varX^7 + 6*varX + 4
-
-instance Reifies (Conway Seven Eight) (Unipol (F Seven)) where
-  reflect _ = varX^8 + 4*varX^3 + 6*varX^2 + 2*varX + 3
-
-instance Reifies (Conway Seven Nine) (Unipol (F Seven)) where
-  reflect _ = varX^9 + 6*varX^4 + varX^3 + 6*varX + 4
-
-instance Reifies (Conway Seven Ten) (Unipol (F Seven)) where
-  reflect _ = varX^10 + varX^6 + varX^5 + 4*varX^4 + varX^3 + 2*varX^2 + 3*varX + 3
