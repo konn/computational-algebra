@@ -1,10 +1,10 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures, FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving            #-}
-{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction                #-}
-{-# LANGUAGE OverlappingInstances, OverloadedStrings, ParallelListComp       #-}
-{-# LANGUAGE PolyKinds, ScopedTypeVariables, StandaloneDeriving              #-}
-{-# LANGUAGE TemplateHaskell, TypeFamilies, TypeSynonymInstances             #-}
-{-# LANGUAGE UndecidableInstances                                            #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures            #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs               #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses        #-}
+{-# LANGUAGE NoMonomorphismRestriction, OverlappingInstances          #-}
+{-# LANGUAGE OverloadedStrings, ParallelListComp, PolyKinds           #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies, TypeSynonymInstances, UndecidableInstances #-}
 {-# OPTIONS_GHC -fwarn-name-shadowing #-}
 -- | Algorithms for zero-dimensional ideals.
 module Algebra.Algorithms.ZeroDim (univPoly, radical, isRadical, solveWith,
@@ -316,9 +316,13 @@ fglm ideal =
 fglmMap :: forall k ord n. (Normed k, Ord k, Field k, IsMonomialOrder ord, IsPolynomial k n)
         => (OrderedPolynomial k ord (S n) -> V.Vector k)
         -- ^ Linear map from polynomial ring.
-        -> ( [OrderedPolynomial k Lex (S n)] -- ^ lex-Groebner basis of the kernel of the given linear map.
-           , [OrderedPolynomial k Lex (S n)] -- ^ The vector basis of the image of the linear map.
-           )
+        -> ( [OrderedPolynomial k Lex (S n)]
+           , [OrderedPolynomial k Lex (S n)]
+           ) -- ^ The tuple of:
+             --
+             --     * lex-Groebner basis of the kernel of the given linear map.
+             --
+             --     * The vector basis of the image of the linear map.
 fglmMap l = runST $ do
   env <- FGLMEnv l <$> newSTRef [] <*> newSTRef [] <*> newSTRef Nothing <*> newSTRef one
   flip runReaderT env $ do
