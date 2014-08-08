@@ -2,8 +2,8 @@
 {-# LANGUAGE GADTs, MultiParamTypeClasses, NoMonomorphismRestriction        #-}
 {-# LANGUAGE PolyKinds, RankNTypes, ScopedTypeVariables, TypeFamilies       #-}
 {-# LANGUAGE UndecidableInstances                                           #-}
-module Algebra.Field.Galois (GF0(), modPoly, modVec, reifyGF0, withGF0,
-                             GF'(), Conway, primitive, conway,
+module Algebra.Field.Galois (GF0(), IsGF0,modPoly, modVec, reifyGF0,
+                             withGF0, GF'(), Conway, primitive, conway,
                              conwayFile, addConwayPolynomials)  where
 import           Algebra.Field.Finite
 import           Algebra.Field.Galois.Conway
@@ -163,6 +163,7 @@ withGF0 p n f = reifyGF0 p n $ V.fromList . SV.toList . SV.map naturalRepr . run
 proxyGF0 :: Proxy (F p) -> SNat n -> Proxy f -> Proxy (GF0 p n f)
 proxyGF0 _ _ = reproxy
 
+-- | Type-constraint synonym to work with Galois field.
 class (SingI n, Reifies p Natural, Reifies f (Unipol (F p))) => IsGF0 p n f
 instance (SingI n, Reifies p Natural, Reifies f (Unipol (F p))) => IsGF0 p n f
 
