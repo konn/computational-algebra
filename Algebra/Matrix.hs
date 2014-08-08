@@ -1,8 +1,10 @@
-{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
-{-# LANGUAGE KindSignatures, MultiParamTypeClasses, TypeFamilies         #-}
-{-# LANGUAGE TypeSynonymInstances                                        #-}
+{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances, GADTs   #-}
+{-# LANGUAGE KindSignatures, MultiParamTypeClasses                         #-}
+{-# LANGUAGE NoMonomorphismRestriction, TypeFamilies, TypeSynonymInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Algebra.Matrix (Matrix(..), mapSM, delta, companion, Sparse(..), gaussReduction) where
+module Algebra.Matrix (Matrix(..), mapSM, delta, companion, Sparse(..),
+                       gaussReduction, maxNorm, intDet, rankWith) where
+import           Algebra.Field.Finite
 import qualified Algebra.LinkedMatrix             as LM
 import           Algebra.Ring.Polynomial
 import           Algebra.Wrapped                  (Normed (..))
@@ -12,6 +14,7 @@ import           Data.Complex
 import           Data.List
 import qualified Data.Matrix                      as DM
 import           Data.Maybe
+import           Data.Numbers.Primes
 import           Data.Ord
 import           Data.Singletons                  (SingI)
 import           Data.Type.Ordinal
@@ -27,6 +30,8 @@ import           Numeric.Algebra                  (Multiplicative)
 import           Numeric.Algebra                  (Monoidal)
 import           Numeric.Algebra                  (Unital)
 import qualified Numeric.Algebra                  as NA
+import           Numeric.Decidable.Zero           (isZero)
+import           Numeric.Domain.Euclidean         (chineseRemainder)
 import           Numeric.Field.Fraction
 import qualified Numeric.LinearAlgebra            as LA
 import           Sparse.Matrix                    (_Mat)
@@ -258,16 +263,22 @@ instance SM.Vectored (Fraction Integer) where
 instance SM.Eq0 (Fraction Integer)
 
 -- | @gaussReduction a = (a', p)@ where @a'@ is row echelon form and @p@ is pivoting matrix.
-gaussReduction :: (Matrix mat, Elem mat a, Normed a, Ord (Norm a), Eq a, NA.Field a)
+gaussReduction :: (Show a, Matrix mat, Elem mat a, Normed a, Ord (Norm a), Eq a, NA.Field a)
                => mat a -> (mat a, mat a)
-gaussReduction mat = {-# SCC "gaussRed" #-} go 1 1 mat (identity $ nrows mat)
+gaussReduction mat =
+  let (a, b, _) = gaussReduction' mat in (a, b)
+
+-- | @gaussReduction a = (a', p)@ where @a'@ is row echelon form and @p@ is pivoting matrix.
+gaussReduction' :: (Show a, Matrix mat, Elem mat a, Normed a, Ord (Norm a), Eq a, NA.Field a)
+               => mat a -> (mat a, mat a, a)
+gaussReduction' mat = {-# SCC "gaussRed" #-} go 1 1 mat (identity $ nrows mat) NA.one
   where
-    go i j a p
-      | i > nrows mat || j > ncols mat = (a, p)
+    go i j a p acc
+      | i > nrows mat || j > ncols mat = (a, p, acc)
       | otherwise =
-        let (k, new) =  maximumBy (comparing $ norm . snd) [(l, a ! (l, j)) | l <- [i..nrows mat]]
+        let (k, new) = maximumBy (comparing $ norm . snd) [(l, a ! (l, j)) | l <- [i..nrows mat]]
         in if new == NA.zero
-           then go i (j + 1) a p
+           then go i (j + 1) a p NA.zero
            else let prc l a0 p0
                       | l == i = prc (l+1) a0 p0
                       | l > nrows mat = (a0, p0)
@@ -278,4 +289,33 @@ gaussReduction mat = {-# SCC "gaussRed" #-} go 1 1 mat (identity $ nrows mat)
                         in prc (l+1) a'' p''
                     (a', p') = prc 1 (scaleRow (NA.recip new) i $ switchRows i k a)
                                      (scaleRow (NA.recip new) i $ switchRows i k p)
-                in go (i+1) (j+1) a' p'
+                    offset = if i == k then id else NA.negate
+                in go (i+1) (j+1) a' p' (offset $ acc NA.* new)
+
+maxNorm :: (Elem mat a, Normed a, Matrix mat) => mat a -> Norm a
+maxNorm = maximum . concat . map (map norm . V.toList) . toRows
+
+rankWith :: (Elem mat r, DecidableZero r, Matrix mat) => (mat r -> mat r) -> mat r -> Int
+rankWith gauss mat = V.foldr (\a b -> if isZero a then b else b + 1) 0 $ getDiag $ gauss mat
+
+intDet :: LM.Matrix Integer -> Integer
+intDet mat =
+  let b = maxNorm mat
+      n = fromIntegral $ ncols mat
+      c = n^(n `div` 2) * b^n
+      r = ceiling $ logBase (2 :: Double) (2*fromIntegral c + 1)
+      ps = take (fromInteger r) primes
+      m  = product ps
+      d  = chineseRemainder [ (p,
+                               reifyPrimeField p $ \pxy -> shiftHalf p $ naturalRepr $ view _3 $
+                                                           gaussReduction' (cmap (modNat' pxy) mat))
+                            | p <- ps]
+      off = d `div` m
+  in if d == 0
+     then 0
+     else minimumBy (comparing abs) [d - m * off, d - m * (off + 1)]
+
+shiftHalf :: Integral a => a -> a -> a
+shiftHalf p n =
+  let s = p `div` 2
+  in (n + s) `mod` p - s

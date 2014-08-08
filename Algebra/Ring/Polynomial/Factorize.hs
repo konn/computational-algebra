@@ -130,7 +130,6 @@ charUnipol _ = char (Proxy :: Proxy r)
 powerUnipol :: forall r. FiniteField r => Unipol r -> Natural
 powerUnipol _ = power (Proxy :: Proxy r)
 
-
 pthRoot :: (DecidableZero r, Ring r, Characteristic r) => Unipol r -> Unipol r
 pthRoot f =
   let !p = charUnipol f

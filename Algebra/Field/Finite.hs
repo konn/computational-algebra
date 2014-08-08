@@ -2,7 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes            #-}
 {-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances #-}
 module Algebra.Field.Finite (F(), naturalRepr, reifyPrimeField, withPrimeField,
-                             modNat, FiniteField(..), order) where
+                             modNat, modNat', FiniteField(..), order) where
 import           Algebra.NumberTheory.PrimeTest
 import           Algebra.Wrapped
 import           Data.Proxy
@@ -20,21 +20,29 @@ import           Numeric.Rig.Characteristic     (Characteristic)
 import           Numeric.Semiring.Integral      (IntegralSemiring)
 
 -- | Prime field of characteristic @p@. @p@ should be prime, and not statically checked.
-newtype F (p :: k) = F { runF :: Natural }
+newtype F (p :: k) = F { runF :: Integer }
 
-naturalRepr :: F p -> Natural
+naturalRepr :: F p -> Integer
 naturalRepr = runF
 
-instance Reifies p Natural => Show (F p) where
+instance Reifies p Integer => Show (F p) where
   showsPrec d n@(F p) = showsPrec d (p `mod` reflect n)
 
-modNat :: forall p. Reifies p Natural => Natural -> F p
-modNat i = F (i `mod` reflect (Proxy :: Proxy p))
+modNat :: Reifies p Integer => Integer -> F p
+modNat = modNat' Proxy
+{-# INLINE modNat #-}
 
-reifyPrimeField :: Natural -> (forall (p :: *). Reifies p Natural => Proxy (F p) -> a) -> a
+modNat' :: forall p. Reifies p Integer => Proxy (F p) -> Integer -> F p
+modNat' _ i =
+  let p = reflect (Proxy :: Proxy p)
+  in F (i `mod` p)
+{-# INLINE modNat' #-}
+
+
+reifyPrimeField :: Integer -> (forall (p :: *). Reifies p Integer => Proxy (F p) -> a) -> a
 reifyPrimeField p f = reify p (\pxy -> f (proxyF pxy))
 
-withPrimeField :: Natural -> (forall (p :: *). Reifies p Natural => F p) -> Natural
+withPrimeField :: Integer -> (forall (p :: *). Reifies p Integer => F p) -> Integer
 withPrimeField p f = reifyPrimeField p $ runF . asProxyTypeOf f
 
 proxyF :: Proxy (a :: k) -> Proxy (F a)
@@ -42,15 +50,15 @@ proxyF = reproxy
 
 -- instance Reifies p Int => Noetherian (F p)
 
-instance Reifies p Natural => Eq (F p) where
+instance Reifies p Integer => Eq (F p) where
   n == m = runF n `mod` reflect n == runF m `mod` reflect n
 
-instance Reifies p Natural => Normed (F p) where
-  type Norm (F p) = Natural
+instance Reifies p Integer => Normed (F p) where
+  type Norm (F p) = Integer
   norm n@(F p) = p `mod` reflect n
   liftNorm = F . (`mod` reflect (Proxy :: Proxy p))
 
-instance Reifies p Natural => Num (F p) where
+instance Reifies p Integer => Num (F p) where
   fromInteger n = modNat $ fromInteger n
   F a + F b = modNat $ a + b
   F a - F b =
@@ -61,67 +69,66 @@ instance Reifies p Natural => Num (F p) where
   abs (F n) = modNat $ abs n
   signum (F n) = modNat $ signum n
 
-pow :: (Integral a1, Reifies p Natural) => F p -> a1 -> F p
-pow a n = modNat $ fromIntegral $ modPow (fromIntegral $ runF a :: Integer)
-          (fromIntegral (reflect a :: Natural)) n
+pow :: (Integral a1, Reifies p Integer) => F p -> a1 -> F p
+pow a n = modNat $ modPow (runF a) (reflect a) n
 
-instance Reifies p Natural => NA.Additive (F p) where
+instance Reifies p Integer => NA.Additive (F p) where
   (+) = (+)
 
-instance Reifies p Natural => NA.Multiplicative (F p) where
+instance Reifies p Integer => NA.Multiplicative (F p) where
   (*) = (*)
   pow1p n p = pow n (p + 1)
 
-instance Reifies p Natural => NA.Monoidal (F p) where
+instance Reifies p Integer => NA.Monoidal (F p) where
   zero = 0
 
-instance Reifies p Natural => NA.LeftModule Natural (F p) where
+instance Reifies p Integer => NA.LeftModule Natural (F p) where
   n .* p = fromIntegral n * p
 
-instance Reifies p Natural => NA.RightModule Natural (F p) where
+instance Reifies p Integer => NA.RightModule Natural (F p) where
   p *. n = fromIntegral n * p
 
-instance Reifies p Natural => NA.LeftModule Integer (F p) where
+instance Reifies p Integer => NA.LeftModule Integer (F p) where
   n .* p = fromIntegral n * p
 
-instance Reifies p Natural => NA.RightModule Integer (F p) where
+instance Reifies p Integer => NA.RightModule Integer (F p) where
   p *. n = fromIntegral n * p
 
-instance Reifies p Natural => NA.Group (F p) where
+instance Reifies p Integer => NA.Group (F p) where
   (-) = (-)
   negate = negate
 
-instance Reifies p Natural => NA.Abelian (F p)
+instance Reifies p Integer => NA.Abelian (F p)
 
-instance Reifies p Natural => NA.Semiring (F p)
+instance Reifies p Integer => NA.Semiring (F p)
 
-instance Reifies p Natural => NA.Rig (F p) where
+instance Reifies p Integer => NA.Rig (F p) where
   fromNatural = fromInteger . toInteger
 
-instance Reifies p Natural => NA.Ring (F p) where
+instance Reifies p Integer => NA.Ring (F p) where
   fromInteger = fromInteger
 
-instance Reifies p Natural => NA.DecidableZero (F p) where
+instance Reifies p Integer => NA.DecidableZero (F p) where
   isZero n@(F p) = p `mod` reflect n == 0
 
-instance Reifies p Natural => NA.Unital (F p) where
+instance Reifies p Integer => NA.Unital (F p) where
   one = 1
   pow = pow
 
-instance Reifies p Natural => IntegralSemiring (F p)
+instance Reifies p Integer => IntegralSemiring (F p)
 
-instance Reifies p Natural => DecidableUnits (F p) where
+instance Reifies p Integer => DecidableUnits (F p) where
   isUnit = not . isZero
   recipUnit n
     | isZero n  = Nothing
     | otherwise = Just $ recip n
 
-instance Reifies p Natural => NA.Division (F p) where
+instance Reifies p Integer => NA.Division (F p) where
   recip = recip
   (/)   = (/)
   (^)   = pow
 
-instance Reifies p Natural => Fractional (F p) where
+instance Reifies p Integer => Fractional (F p) where
   a / b = a * recip b
   fromRational r =
     modNat (fromInteger $ R.numerator r) * recip (modNat (fromInteger $ R.denominator r))
@@ -131,24 +138,24 @@ instance Reifies p Natural => Fractional (F p) where
         (_,_,r) = head $ euclid p (fromIntegral $ runF n)
     in modNat $ fromInteger $ r `mod` p
 
-instance Reifies p Natural => NA.Commutative (F p)
+instance Reifies p Integer => NA.Commutative (F p)
 
-instance Reifies p Natural => NA.Characteristic (F p) where
+instance Reifies p Integer => NA.Characteristic (F p) where
   char _ = fromIntegral $ reflect (Proxy :: Proxy p)
 
-instance Reifies TN.Z Natural  where
+instance Reifies TN.Z Integer  where
   reflect _ = 0
 
-instance Reifies n Natural => Reifies (TN.S n) Natural where
+instance Reifies n Integer => Reifies (TN.S n) Integer where
   reflect _ = 1 + reflect (Proxy :: Proxy n)
 
 class (Field k, Characteristic k) => FiniteField k where
   power :: proxy k -> Natural
   elements :: proxy k -> [k]
 
-instance Reifies p Natural => FiniteField (F p) where
+instance Reifies p Integer => FiniteField (F p) where
   power _ = 1
-  elements p = map F [0.. char p - 1]
+  elements p = map modNat [0.. fromIntegral (char p - 1)]
 
 order :: FiniteField k => proxy k -> Natural
 order p = char p ^ power p
