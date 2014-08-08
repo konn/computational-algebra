@@ -15,6 +15,7 @@ import           Numeric.Algebra                (Natural)
 import qualified Numeric.Algebra                as NA
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
+import           Numeric.Domain.Euclidean       (euclid)
 import           Numeric.Rig.Characteristic     (Characteristic)
 import           Numeric.Semiring.Integral      (IntegralSemiring)
 
@@ -125,7 +126,10 @@ instance Reifies p Natural => Fractional (F p) where
   fromRational r =
     modNat (fromInteger $ R.numerator r) * recip (modNat (fromInteger $ R.denominator r))
   recip 0 = error "divide by 0"
-  recip n = pow n (reflect n - 2)
+  recip n =
+    let p = fromIntegral $ reflect n
+        (_,_,r) = head $ euclid p (fromIntegral $ runF n)
+    in modNat $ fromInteger $ r `mod` p
 
 instance Reifies p Natural => NA.Commutative (F p)
 

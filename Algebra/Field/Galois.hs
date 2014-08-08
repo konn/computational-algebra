@@ -2,7 +2,7 @@
 {-# LANGUAGE GADTs, MultiParamTypeClasses, NoMonomorphismRestriction        #-}
 {-# LANGUAGE PolyKinds, RankNTypes, ScopedTypeVariables, TypeFamilies       #-}
 {-# LANGUAGE UndecidableInstances                                           #-}
-module Algebra.Field.Galois (GF0(), IsGF0,modPoly, modVec, reifyGF0,
+module Algebra.Field.Galois (GF0(), IsGF0, modPoly, modVec, reifyGF0,
                              withGF0, GF'(), Conway, primitive, conway,
                              conwayFile, addConwayPolynomials)  where
 import           Algebra.Field.Finite
@@ -126,7 +126,10 @@ instance (Reifies p Natural, Reifies f (Unipol (F p)), SingI n)
 
 instance (Reifies p Natural, Reifies f (Unipol (F p)), SingI n)
       => Division (GF0 p n f) where
-  recip f = pow f (order (Proxy :: Proxy (GF0 p n f)) P.- 2)
+  recip f =
+    let p = reflect (Proxy :: Proxy f)
+        (_,_,r) = head $ euclid p $ vecToPoly $ runGF0 f
+    in GF0 $ polyToVec $ r `rem` p
 
 instance (Reifies p Natural, Reifies f (Unipol (F p)), SingI n) => P.Num (GF0 p n f) where
   (+) = (+)
