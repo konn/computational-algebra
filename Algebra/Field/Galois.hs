@@ -33,6 +33,12 @@ import qualified Prelude                           as P
 --   @f@ stands for the irreducible polynomial over @F_p@ of degree @n@.
 data GF0 p n f = GF0 { runGF0 :: SV.Vector (F p) n } deriving (Eq)
 
+-- | Galois Field of order @p^n@. This uses conway polynomials
+--   as canonical minimal polynomial and it should be known at
+--   compile-time (i.e. @Reifies (Conway p n) (Unipol (F n))@
+--   instances should be defined to use field operations).
+type GF' p n = GF0 p n (Conway p n)
+
 modPoly :: (SingI n, Reifies p Natural) => Unipol (F p) -> GF0 p n f
 modPoly = GF0 . polyToVec
 
@@ -157,8 +163,6 @@ withGF0 p n f = reifyGF0 p n $ V.fromList . SV.toList . SV.map naturalRepr . run
 proxyGF0 :: Proxy (F p) -> SNat n -> Proxy f -> Proxy (GF0 p n f)
 proxyGF0 _ _ = reproxy
 
-type GF' p n = GF0 p n (Conway p n)
-
 class (SingI n, Reifies p Natural, Reifies f (Unipol (F p))) => IsGF0 p n f
 instance (SingI n, Reifies p Natural, Reifies f (Unipol (F p))) => IsGF0 p n f
 
@@ -173,7 +177,7 @@ instance IsGF0 p n f => FiniteField (GF0 p n f) where
 primitive :: (IsGF0 p n f) => GF0 p (S n) f
 primitive = GF0 $ polyToVec varX
 
--- | Phantom type for conway polynomials
+-- | Conway polynomial (if definition is known).
 conway :: forall p n. (Reifies (Conway p n) (Unipol (F p)))
        => SNat p -> SNat n -> Unipol (F p)
 conway _ _ = reflect (Proxy :: Proxy (Conway p n))

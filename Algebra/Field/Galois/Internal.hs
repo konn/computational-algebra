@@ -12,6 +12,7 @@ import Numeric                    (readInt)
 import Prelude                    (lex)
 import Data.Reflection (Reifies (..))
 
+-- | Phantom type for conway polynomials
 data Conway p n
 
 parseLine :: String -> [(Integer, Integer, [Integer])]
