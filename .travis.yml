@@ -12,12 +12,12 @@ before_install:
 
 install:
   - cabal-1.18 update
-  - cabal-1.18 install --only-dependencies --enable-tests --enable-benchmarks
   - git clone git://github.com/ekmett/algebra.git
   - cd algebra
   - git checkout euclidean
-  - cabal-1.18 install ./algebra.cabal
+  - cabal-1.18 install ./algebra.cabal --constraint="representable-tries==3.0.2" --constraint="representable-functors==3.2.0.2"
   - cd ../
+  - cabal-1.18 install --only-dependencies --enable-tests --enable-benchmarks
 
 script:
   - cabal-1.18 configure --enable-tests --enable-benchmarks -v2  # -v2 provides useful information for debugging
