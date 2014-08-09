@@ -295,10 +295,11 @@ benchmark monomial-order-bench
                    type-natural ==0.2.1.0.*, vector ==0.10.0.1.*, matrix ==0.3.0.0.*
     type: exitcode-stdio-1.0
     main-is: monomials.hs
-    buildable: True
+    buildable: False
     hs-source-dirs: bench share
     other-modules: SingularBench Utils
     ghc-options: -O2 -threaded -rtsopts
+
 benchmark linear-bench
     build-depends: constraints ==0.3.5.*, HUnit -any,
                    MonadRandom ==0.1.13.*, QuickCheck ==2.6.*, algebra ==3.1.*,
