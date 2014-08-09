@@ -224,7 +224,7 @@ test-suite specs
     buildable: True
     hs-source-dirs: tests share
     other-modules: Utils GroebnerSpec ZeroDimSpec
-                   Faugere5Spec SignatureSpec
+                   Faugere5Spec
     ghc-options: -Wall -threaded
 test-suite new-div-test
     build-depends: constraints ==0.3.5.*, HUnit -any,

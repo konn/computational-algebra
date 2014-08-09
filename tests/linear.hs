@@ -1,6 +1,7 @@
 module Main where
-import qualified Data.Matrix           as M
-import qualified Data.Vector           as V
+import qualified Data.Matrix            as M
+import qualified Data.Vector            as V
+import           Numeric.Field.Fraction (Fraction)
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
