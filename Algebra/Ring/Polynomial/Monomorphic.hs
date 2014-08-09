@@ -1,27 +1,33 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs           #-}
-{-# LANGUAGE MultiParamTypeClasses, PolyKinds, RecordWildCards, TypeFamilies #-}
-{-# LANGUAGE TypeOperators, ViewPatterns, OverlappingInstances               #-}
+{-# LANGUAGE DataKinds, ExplicitForAll, FlexibleContexts, FlexibleInstances #-}
+{-# LANGUAGE GADTs, MultiParamTypeClasses, OverlappingInstances, PolyKinds  #-}
+{-# LANGUAGE RecordWildCards, TypeFamilies, TypeOperators, ViewPatterns     #-}
 {-# OPTIONS_GHC -fno-warn-orphans                             #-}
 module Algebra.Ring.Polynomial.Monomorphic where
+import           Algebra.Ring.Ideal
+import           Algebra.Ring.Polynomial  (IsMonomialOrder,
+                                           OrderedMonomial (..),
+                                           OrderedPolynomial)
+import qualified Algebra.Ring.Polynomial  as Poly
 import           Algebra.Scalar
-import qualified Algebra.Ring.Polynomial as Poly
 import           Control.Arrow
+import           Control.Lens
 import           Data.List
-import qualified Data.Map                as M
+import qualified Data.Map                 as M
 import           Data.Maybe
-import Data.Type.Natural hiding (one, zero, promote, max)
 import           Data.Type.Monomorphic
-import qualified Numeric.Algebra         as NA
-import qualified Numeric.Ring.Class      as NA
-import Algebra.Ring.Ideal
-import qualified Data.Vector.Sized as V
-import Control.Lens
-import Numeric.Field.Fraction (Fraction)
-import Numeric.Domain.Euclidean (Euclidean)
+import           Data.Type.Natural        hiding (max, one, promote, zero)
+import qualified Data.Vector.Sized        as V
+import qualified Numeric.Algebra          as NA
+import           Numeric.Domain.Euclidean (Euclidean)
+import           Numeric.Field.Fraction   (Fraction)
+import qualified Numeric.Ring.Class       as NA
 
 data Variable = Variable { varName  :: Char
                          , varIndex :: Maybe Int
                          } deriving (Eq, Ord)
+
+varChar :: Char -> Variable
+varChar = flip Variable Nothing
 
 instance (Eq r, Num r, NA.Ring r) => Num (Polynomial r) where
   fromInteger n = Polynomial $ M.singleton M.empty $ fromInteger n
@@ -67,11 +73,11 @@ instance (Eq r, NA.Ring r) => NA.Unital (Polynomial r) where
 instance (Eq r, NA.Ring r) => NA.Monoidal (Polynomial r) where
   zero = Polynomial $ M.singleton M.empty NA.zero
 instance (Eq r, NA.Ring r) => NA.LeftModule NA.Natural (Polynomial r) where
-  n .* Polynomial dic = Polynomial $ fmap (n NA..*) dic  
+  n .* Polynomial dic = Polynomial $ fmap (n NA..*) dic
 instance (Eq r, NA.Ring r) => NA.RightModule NA.Natural (Polynomial r) where
   (*.) = flip (NA..*)
 instance (Eq r, NA.Ring r) => NA.LeftModule Integer (Polynomial r) where
-  n .* Polynomial dic = Polynomial $ fmap (n NA..*) dic  
+  n .* Polynomial dic = Polynomial $ fmap (n NA..*) dic
 instance (Eq r, NA.Ring r) => NA.RightModule Integer (Polynomial r) where
   (*.) = flip (NA..*)
 instance (Eq r, NA.Ring r) => NA.Semiring (Polynomial r)
@@ -83,6 +89,17 @@ instance (Eq r, NA.Ring r) => NA.LeftModule (Scalar r) (Polynomial r) where
   Scalar r .* Polynomial dic = normalize $ Polynomial $ fmap (r NA.*) dic
 instance (Eq r, NA.Ring r) => NA.RightModule (Scalar r) (Polynomial r) where
   Polynomial dic *. Scalar r = normalize $ Polynomial $ fmap (r NA.*) dic
+
+promoteWithVars :: (NA.DecidableZero r, IsMonomialOrder ord, NA.Ring r, SingI n)
+                => V.Vector Variable n -> Polynomial r -> OrderedPolynomial r ord n
+promoteWithVars vs = Poly.polynomial . M.mapKeys (fromJust . buildMonomial vs) . unPolynomial
+
+buildMonomial :: IsMonomialOrder ord
+              => V.Vector Variable n -> Monomial -> Maybe (OrderedMonomial ord n)
+buildMonomial vs dic =
+  if all (`V.elem` vs) $ M.keys dic
+  then Just $ OrderedMonomial $ V.map (maybe 0 fromInteger . flip M.lookup dic) vs
+  else Nothing
 
 buildVarsList :: Polynomial r -> [Variable]
 buildVarsList = nub . sort . concatMap M.keys . M.keys . unPolynomial
