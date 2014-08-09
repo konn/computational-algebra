@@ -273,13 +273,13 @@ instance SM.Vectored (Fraction Integer) where
 instance SM.Eq0 (Fraction Integer)
 
 -- | @gaussReduction a = (a', p)@ where @a'@ is row echelon form and @p@ is pivoting matrix.
-gaussReduction :: (Show a, Matrix mat, Elem mat a, Normed a, Ord (Norm a), Eq a, NA.Field a)
+gaussReduction :: (Matrix mat, Elem mat a, Normed a, Ord (Norm a), Eq a, NA.Field a)
                => mat a -> (mat a, mat a)
 gaussReduction mat =
   let (a, b, _) = gaussReduction' mat in (a, b)
 
 -- | @gaussReduction a = (a', p)@ where @a'@ is row echelon form and @p@ is pivoting matrix.
-gaussReduction' :: (Show a, Matrix mat, Elem mat a, Normed a, Ord (Norm a), Eq a, NA.Field a)
+gaussReduction' :: (Matrix mat, Elem mat a, Normed a, Ord (Norm a), Eq a, NA.Field a)
                => mat a -> (mat a, mat a, a)
 gaussReduction' mat = {-# SCC "gaussRed" #-} go 1 1 mat (identity $ nrows mat) NA.one
   where
