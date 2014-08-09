@@ -5,7 +5,7 @@ ghc:
 install:
   - travis_retry sudo apt-get update -qq
   - travis_retry sudo apt-get install -qq libgsl0-dev liblapack-dev
-  - cabal install --only-dependencies --enable-tests --enable-benchmarks
+  - travis_retry cabal install --only-dependencies --enable-tests --enable-benchmarks
   - git clone git://github.com/ekmett/algebra.git
   - cd algebra
   - git checkout euclidean
