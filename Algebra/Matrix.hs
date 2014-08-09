@@ -11,6 +11,7 @@ import           Algebra.Wrapped                  (Normed (..))
 import           Control.Arrow
 import           Control.Lens
 import           Data.Complex
+import qualified Data.IntSet                      as IS
 import           Data.List
 import qualified Data.Matrix                      as DM
 import           Data.Maybe
@@ -31,6 +32,7 @@ import           Numeric.Algebra                  (Monoidal)
 import           Numeric.Algebra                  (Unital)
 import qualified Numeric.Algebra                  as NA
 import           Numeric.Decidable.Zero           (isZero)
+import qualified Numeric.Decidable.Zero           as NA
 import           Numeric.Domain.Euclidean         (chineseRemainder)
 import           Numeric.Field.Fraction
 import qualified Numeric.LinearAlgebra            as LA
@@ -76,6 +78,10 @@ class Matrix mat where
   (!) :: Elem mat a => mat a -> (Int, Int) -> a
   (<||>) :: Elem mat a => mat a -> mat a -> mat a
   (<-->) :: Elem mat a => mat a -> mat a -> mat a
+  nonZeroRows :: (NA.DecidableZero a, Elem mat a) => mat a -> [Int]
+  nonZeroRows = map fst . filter (V.any (not . NA.isZero) . snd) . zip [1..] . toRows
+  nonZeroCols :: (NA.DecidableZero a, Elem mat a) => mat a -> [Int]
+  nonZeroCols = map fst . filter (V.any (not . NA.isZero) . snd) . zip [1..] . toCols
 
 instance Matrix DM.Matrix where
   type Elem DM.Matrix a = Num a
@@ -194,6 +200,8 @@ instance Matrix LM.Matrix where
   (<-->) = (LM.<-->)
   rowVector = LM.rowVector
   colVector = LM.colVector
+  nonZeroRows = LM.nonZeroRows
+  nonZeroCols = LM.nonZeroCols
 
 instance Matrix Sparse where
   type Elem Sparse a = (Num a, SM.Vectored a, SM.Eq0 a)
@@ -234,6 +242,8 @@ instance Matrix Sparse where
     Sparse (m + modifyKey (_2 %~ (+ fromIntegral c1)) n) (max r r') (c1 + c2)
   Sparse m r1 c <--> Sparse n r2 c' =
     Sparse (m + modifyKey (_1 %~ (+ fromIntegral r1)) n) (r1 + r2) (max c c')
+  nonZeroRows (Sparse mat _ _) = IS.toList $ IS.fromList $ map (succ . fromIntegral) (mat ^.. SM.keys.each._1)
+  nonZeroCols (Sparse mat _ _) = IS.toList $ IS.fromList $ map (succ . fromIntegral) (mat ^.. SM.keys.each._2)
 
 modifyKey :: (SM.Vectored a) => (SM.Key -> SM.Key) -> SM.Mat a -> SM.Mat a
 modifyKey f m =
@@ -295,8 +305,9 @@ gaussReduction' mat = {-# SCC "gaussRed" #-} go 1 1 mat (identity $ nrows mat) N
 maxNorm :: (Elem mat a, Normed a, Matrix mat) => mat a -> Norm a
 maxNorm = maximum . concat . map (map norm . V.toList) . toRows
 
-rankWith :: (Elem mat r, DecidableZero r, Matrix mat) => (mat r -> mat r) -> mat r -> Int
-rankWith gauss mat = V.foldr (\a b -> if isZero a then b else b + 1) 0 $ getDiag $ gauss mat
+rankWith :: (Elem mat r, DecidableZero r, Matrix mat)
+         => (mat r -> mat r) -> mat r -> Int
+rankWith gauss = length . nonZeroRows . gauss
 
 intDet :: LM.Matrix Integer -> Integer
 intDet mat =
@@ -307,8 +318,9 @@ intDet mat =
       ps = take (fromInteger r) primes
       m  = product ps
       d  = chineseRemainder [ (p,
-                               reifyPrimeField p $ \pxy -> shiftHalf p $ naturalRepr $ view _3 $
-                                                           gaussReduction' (cmap (modNat' pxy) mat))
+                               reifyPrimeField p $ \pxy ->
+                               shiftHalf p $ naturalRepr $ view _3 $
+                               gaussReduction' (cmap (modNat' pxy) mat))
                             | p <- ps]
       off = d `div` m
   in if d == 0
