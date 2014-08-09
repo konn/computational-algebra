@@ -48,6 +48,7 @@ library
                      Algebra.Algorithms.Faugere5 Algebra.Algorithms.Groebner
                      Algebra.Algorithms.ZeroDim Algebra.Field.Galois
                      Algebra.Ring.Ideal Algebra.Ring.Polynomial
+                     Algebra.Ring.Polynomial.Monomorphic
                      Algebra.Ring.Polynomial.Quotient
                      Algebra.Ring.Polynomial.Parser Algebra.Field.Finite
                      Algebra.Scalar Algebra.Internal Algebra.Instances Algebra.Wrapped

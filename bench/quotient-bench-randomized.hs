@@ -1,6 +1,6 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs            #-}
-{-# LANGUAGE MultiParamTypeClasses, OverloadedStrings, PolyKinds, QuasiQuotes #-}
-{-# LANGUAGE TemplateHaskell, UndecidableInstances                            #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses, OverloadedStrings, PolyKinds   #-}
+{-# LANGUAGE QuasiQuotes, TemplateHaskell, UndecidableInstances    #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
 import Algebra.Ring.Ideal
@@ -16,6 +16,7 @@ import Data.List                        (foldl')
 import Data.Maybe
 import Data.Type.Natural                hiding (one)
 import Numeric.Algebra                  hiding ((>), (^))
+import Numeric.Field.Fraction           (Fraction)
 import Prelude                          hiding (product)
 import System.Process
 import Test.QuickCheck
