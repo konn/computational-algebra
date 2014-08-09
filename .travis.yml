@@ -13,11 +13,11 @@ before_install:
   - export PATH=/opt/ghc/$GHCVER/bin:$PATH
 
 install:
+  - cabal-1.18 update
   - cabal-1.18 install --only-dependencies --enable-tests --enable-benchmarks
   - git clone git://github.com/ekmett/algebra.git
   - cd algebra
   - git checkout euclidean
-  - cabal-1.18 update
   - cabal-1.18 install ./algebra.cabal
   - cd ../
 
