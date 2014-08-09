@@ -16,6 +16,7 @@ import           Data.Vector.Sized           (Vector (..))
 import qualified Data.Vector.Sized           as V
 import           Numeric.Algebra             hiding ((.*), (<), (^))
 import qualified Numeric.Algebra             as NA
+import           Numeric.Field.Fraction      (Fraction)
 import           Prelude                     hiding (Fractional (..),
                                               Integral (..), Num (..),
                                               Real (..), sum, (^^))

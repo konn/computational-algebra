@@ -22,6 +22,7 @@ import           Prelude                     hiding (Fractional (..),
 import qualified Prelude                     as P
 -- import           Progression.Main
 import Criterion.Main
+import Numeric.Field.Fraction (Fraction)
 import System.Environment
 import Test.QuickCheck
 import Utils

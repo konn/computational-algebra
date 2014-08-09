@@ -51,7 +51,10 @@ seed :: Polynomial (Fraction Integer) Three
 seed = -412742019532366985 * x -7641395389638504101 * y + 4362835172800530323 * z
 
 seedMat :: LA.Matrix Double
-seedMat = LA.fromLists $ map (map P.from(Fraction Integer)) $ reifyQuotient eqn02 $ \pxy -> matrixRep (modIdeal' pxy seed)
+seedMat = LA.fromLists $ map (map toDouble) $ reifyQuotient eqn02 $ \pxy -> matrixRep (modIdeal' pxy seed)
+
+toDouble :: P.Fractional a => Fraction Integer -> a
+toDouble rat = fromIntegral (numerator rat) P./ fromIntegral (denominator rat)
 
 fromRight :: Either t t1 -> t1
 fromRight (Right a) = a
