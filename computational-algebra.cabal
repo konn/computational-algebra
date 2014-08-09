@@ -49,7 +49,7 @@ library
                      Algebra.Algorithms.ZeroDim Algebra.Field.Galois
                      Algebra.Ring.Ideal Algebra.Ring.Polynomial
                      Algebra.Ring.Polynomial.Quotient
-                     Algebra.Ring.Polynomial.Parser
+                     Algebra.Ring.Polynomial.Parser Algebra.Field.Finite
                      Algebra.Scalar Algebra.Internal Algebra.Instances Algebra.Wrapped
                      Algebra.Matrix Algebra.Repa Algebra.Prelude Algebra.Algorithms.Signature
                      Algebra.Ring.Polynomial.Factorize
