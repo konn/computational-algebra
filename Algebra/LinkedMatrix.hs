@@ -4,7 +4,7 @@
 {-# LANGUAGE NoMonomorphismRestriction, PolyKinds, RankNTypes             #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell     #-}
 {-# LANGUAGE TupleSections, UndecidableInstances                          #-}
-{-# OPTIONS_GHC -funbox-strict-fields #-}
+{-# OPTIONS_GHC -funbox-strict-fields -fno-warn-type-defaults #-}
 module Algebra.LinkedMatrix (Matrix, toLists, fromLists, fromList,
                              swapRows, identity,nonZeroRows,nonZeroCols,
                              swapCols, switchCols, switchRows, addRow,
@@ -17,50 +17,57 @@ module Algebra.LinkedMatrix (Matrix, toLists, fromLists, fromList,
                              zeroMat, getDiag, trace, diagProd, diag,
                              scaleCol, clearRow, clearCol, index, (!),
                              nonZeroEntries, rankLM, splitIndependentDirs,
-                             structuredGauss, multWithVector, solveLinear) where
+                             structuredGauss, multWithVector, solveWiedemann,
+                             henselLift, solveHensel) where
+import           Algebra.Algorithms.ChineseRemainder
 import           Algebra.Field.Finite
-import           Algebra.Instances           ()
-import           Algebra.Prelude             hiding (fromList, (%))
+import           Algebra.Instances                   ()
+import           Algebra.Prelude                     hiding (fromList, (%))
 import           Algebra.Scalar
-import           Algebra.Wrapped             ()
-import           Control.Applicative         ((<$>), (<*>), (<|>))
-import           Control.Arrow               ((&&&))
-import           Control.DeepSeq             (rnf)
-import           Control.Lens                hiding (index, (<.>))
-import           Control.Monad               (replicateM)
-import           Control.Monad.Identity      (runIdentity)
-import           Control.Monad.Loops         (iterateUntil)
-import           Control.Monad.Random
-import           Control.Monad.ST.Strict     (runST)
-import           Control.Monad.State.Strict  (evalState, runState)
-import           Control.Parallel.Strategies (parMap, rseq)
-import           Data.IntMap.Strict          (IntMap, alter, insert,
-                                              mapMaybeWithKey, minViewWithKey)
-import qualified Data.IntMap.Strict          as IM
-import           Data.IntSet                 (IntSet)
-import qualified Data.IntSet                 as IS
-import           Data.List                   (find, findIndices, intercalate,
-                                              minimumBy, sort)
-import           Data.Maybe                  (fromJust, fromMaybe, mapMaybe)
-import           Data.Numbers.Primes         (primes)
-import           Data.Ord                    (comparing)
-import           Data.Proxy                  (Proxy (..))
-import           Data.Reflection             (Reifies (..), reify)
+import           Algebra.Wrapped                     ()
+import           Control.Applicative                 ((<$>), (<*>), (<|>))
+import           Control.Arrow                       ((&&&))
+import           Control.DeepSeq                     (rnf)
+import           Control.Lens                        hiding (index, (<.>))
+import           Control.Monad                       (replicateM)
+import           Control.Monad.Identity              (runIdentity)
+import           Control.Monad.Loops                 (iterateUntil)
+import           Control.Monad.Random                hiding (fromList)
+import           Control.Monad.ST.Strict             (runST)
+import           Control.Monad.State.Strict          (evalState, runState)
+import           Control.Parallel.Strategies         (parMap, rseq)
+import           Data.IntMap.Strict                  (IntMap, alter, insert,
+                                                      mapMaybeWithKey,
+                                                      minViewWithKey)
+import qualified Data.IntMap.Strict                  as IM
+import           Data.IntSet                         (IntSet)
+import qualified Data.IntSet                         as IS
+import           Data.List                           (find, findIndices,
+                                                      intercalate, minimumBy,
+                                                      sort)
+import           Data.Maybe                          (fromJust, fromMaybe,
+                                                      mapMaybe)
+import           Data.Numbers.Primes                 (primes)
+import           Data.Ord                            (comparing)
+import           Data.Proxy                          (Proxy (..))
+import           Data.Reflection                     (Reifies (..), reify)
 import           Data.Semigroup
-import           Data.Tuple                  (swap)
-import           Data.Type.Natural           (Five, One)
-import           Data.Vector                 (Vector, create, generate, thaw,
-                                              unsafeFreeze)
-import qualified Data.Vector                 as V
-import           Data.Vector.Mutable         (grow)
-import qualified Data.Vector.Mutable         as MV
-import qualified Debug.Trace                 as DT
-import           Numeric.Decidable.Zero      (isZero)
+import           Data.Tuple                          (swap)
+import           Data.Type.Natural                   (Five, One)
+import           Data.Vector                         (Vector, create, generate,
+                                                      thaw, unsafeFreeze)
+import qualified Data.Vector                         as V
+import           Data.Vector.Mutable                 (grow)
+import qualified Data.Vector.Mutable                 as MV
+import qualified Debug.Trace                         as DT
+import           Numeric.Decidable.Zero              (isZero)
 import           Numeric.Field.Fraction
-import           Numeric.Semiring.Integral   (IntegralSemiring)
-import           Prelude                     (abs)
-import           Prelude                     hiding (Num (..), gcd, product,
-                                              quot, recip, sum, (/), (^))
+import           Numeric.Semiring.Integral           (IntegralSemiring)
+import           Prelude                             (abs)
+import           Prelude                             hiding (Num (..), gcd,
+                                                      product, quot, recip, sum,
+                                                      (/), (^))
+import qualified Prelude                             as P
 
 data Entry a = Entry { _value   :: !a
                      , _idx     :: !(Int, Int)
@@ -697,10 +704,10 @@ krylovMinpol m b
       n = ncols m
 
 -- | Solving linear equation using linearly recurrent sequence (Wiedemann algorithm).
-solveLinear :: (Eq a, Field a, DecidableZero a, DecidableUnits a,
+solveWiedemann :: (Eq a, Field a, DecidableZero a, DecidableUnits a,
                 IntegralSemiring a, Random a, MonadRandom m)
             => Matrix a -> Vector a -> m (Either (Vector a) (Vector a))
-solveLinear a b = do
+solveWiedemann a b = do
   m <- krylovMinpol a b
   return $
     let m0 = injectCoeff (coeff one m)
@@ -763,5 +770,39 @@ triangulateModular mat0 =
       return $ (spec, anss)
 -}
 
+henselLift :: Integer           -- ^ prime number @p@
+           -> Matrix Integer -- ^ original matrix @M@
+           -> Matrix Integer -- ^ inverse matrix of @M@ mod @p@
+           -> V.Vector Integer  -- ^ coefficient vector @v@
+           -> [V.Vector Integer]  -- ^ vector @x@ with @Mx = b mod p@
+henselLift p m q b =
+  map (view _2) $ iterate step (1, V.replicate (V.length b) 0, b)
+  where
+    step (s, acc, r)
+      | otherwise =
+        let u = reifyPrimeField p $ \pxy ->
+              V.map (naturalRepr . modNat' pxy) $ q `multWithVector` r
+            r' = V.map (`quot` p) $ V.zipWith (-) r (m `multWithVector` u)
+        in (s*p, acc + V.map (s*) u, r')
 
+solveHensel :: Int -> Integer
+            -> Matrix (Fraction Integer)
+            -> Vector (Fraction Integer)
+            -> Maybe (Vector (Fraction Integer))
+solveHensel cyc p mat b =
+  let g0 = V.foldr (lcm . denominator . view _2) one $ nonZeroEntries mat
+      g1 = V.foldr (lcm . denominator) one b
+      g  = lcm g0 g1 % 1
+      mat' = cmap (numerator . (*g)) mat
+      b'   = V.map (numerator . (*g)) b
+      q = reifyPrimeField p $ \pxy ->
+        cmap naturalRepr $ snd $ structuredGauss $ cmap (modNat' pxy) mat'
+      hls = henselLift p mat' q b'
+  in go $ drop cyc $ zip [p^i | i <- [0..]] hls
+  where
+    go [] = Nothing
+    go ((q,x):xs) =
+      case V.mapM (recoverRat (floor $ sqrt $ fromIntegral q P./ 2) q) x of
+        Just x' | mat `multWithVector` x' == b -> Just x'
+        _ -> go (drop cyc xs)
 

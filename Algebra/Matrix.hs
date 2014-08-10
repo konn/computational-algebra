@@ -339,27 +339,3 @@ shiftHalf :: Integral a => a -> a -> a
 shiftHalf p n =
   let s = p `div` 2
   in (n + s) `mod` p - s
-
-{-
-solveHensel :: Int -> Integer
-            -> LM.Matrix Integer) -> V.Vector (Fraction Integer)
-            -> V.Vector (Fraction Integer)
-solveHensel checkCount p mat xs = reifyPrimeField p $ \pxy ->
-  let phi = modRat pxy
-      psi = shiftHalf p . naturalRepr
-      r = inverse $ cmap phi mat
-      go count c x q =
-        let t = V.map (fromInteger . psi) $ LM.multWithVector r $ V.map phi c
-            x' = V.zipWith (+) x (V.map (fromInteger . (q*)) t)
-            c' = V.map (`quot` p) $ V.zipWith (-) c $ LM.multWithVector mat t
-            q' = q*p
-        in if count + 1 >= checkCount
-           then case V.mapM (flip intToRat q) x' of
-             Nothing  -> go 0 c' x' q'
-             Just x'' ->
-               if LM.multWithVector (cmap fromInteger mat) x'' == xs
-               then x''
-               else go 0 c' x' q'
-           else go (count + 1) c' x' q'
-  in go 0 xs (V.replicate (nrows mat) 0) 1
--}
