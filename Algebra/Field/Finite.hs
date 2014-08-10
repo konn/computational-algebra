@@ -2,12 +2,14 @@
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes            #-}
 {-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances #-}
 module Algebra.Field.Finite (F(), naturalRepr, reifyPrimeField, withPrimeField,
-                             modNat, modNat', FiniteField(..), order) where
+                             modNat, modNat', modRat, modRat', FiniteField(..), order) where
 import           Algebra.NumberTheory.PrimeTest
 import           Algebra.Wrapped
 import           Control.Monad.Random           (uniform)
 import           Control.Monad.Random           (runRand)
 import           Control.Monad.Random           (Random (..))
+import           Data.Maybe                     (fromJust)
+import           Data.Maybe                     (fromMaybe)
 import           Data.Proxy
 import qualified Data.Ratio                     as R
 import           Data.Reflection
@@ -19,6 +21,9 @@ import qualified Numeric.Algebra                as NA
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
 import           Numeric.Domain.Euclidean       (euclid)
+import           Numeric.Field.Fraction         (Fraction)
+import           Numeric.Field.Fraction         (denominator)
+import           Numeric.Field.Fraction         (numerator)
 import           Numeric.Rig.Characteristic     (Characteristic)
 import           Numeric.Semiring.Integral      (IntegralSemiring)
 
@@ -121,10 +126,12 @@ instance Reifies p Integer => NA.Unital (F p) where
 instance Reifies p Integer => IntegralSemiring (F p)
 
 instance Reifies p Integer => DecidableUnits (F p) where
-  isUnit = not . isZero
-  recipUnit n
-    | isZero n  = Nothing
-    | otherwise = Just $ recip n
+  isUnit n = gcd (runF n) (reflect n) == 1
+  recipUnit n =
+    let p = fromIntegral $ reflect n
+        (u,_,r) = head $ euclid p (fromIntegral $ runF n)
+    in if u == 1 then Just $ modNat $ fromInteger $ r `mod` p else Nothing
+
 
 instance Reifies p Integer => NA.Division (F p) where
   recip = recip
@@ -135,11 +142,7 @@ instance Reifies p Integer => Fractional (F p) where
   a / b = a * recip b
   fromRational r =
     modNat (fromInteger $ R.numerator r) * recip (modNat (fromInteger $ R.denominator r))
-  recip 0 = error "divide by 0"
-  recip n =
-    let p = fromIntegral $ reflect n
-        (_,_,r) = head $ euclid p (fromIntegral $ runF n)
-    in modNat $ fromInteger $ r `mod` p
+  recip = fromMaybe (error "not unit") . recipUnit
 
 instance Reifies p Integer => NA.Commutative (F p)
 
@@ -166,3 +169,9 @@ order p = char p ^ power p
 instance Reifies p Integer => Random (F p) where
   random = runRand $ uniform (elements Proxy)
   randomR (a, b) = runRand $ uniform $ map modNat [naturalRepr a..naturalRepr b]
+
+modRat :: FiniteField k => Proxy k -> Fraction Integer -> k
+modRat _ q = NA.fromInteger (numerator q) NA./ NA.fromInteger (denominator q)
+
+modRat' :: FiniteField k => Fraction Integer -> k
+modRat' = modRat Proxy
