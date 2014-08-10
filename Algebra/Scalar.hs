@@ -1,5 +1,6 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses, StandaloneDeriving                       #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances               #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
+{-# LANGUAGE StandaloneDeriving                                #-}
 module Algebra.Scalar (Scalar(..), (.*.)) where
 import           Numeric.Algebra
 import qualified Numeric.Algebra as NA

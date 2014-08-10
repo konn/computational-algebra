@@ -1,7 +1,9 @@
-{-# LANGUAGE BangPatterns, FlexibleContexts, LambdaCase                 #-}
-{-# LANGUAGE MultiParamTypeClasses, NamedFieldPuns, NoImplicitPrelude   #-}
-{-# LANGUAGE NoMonomorphismRestriction, RankNTypes, ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell, TupleSections                             #-}
+{-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, KindSignatures, LambdaCase       #-}
+{-# LANGUAGE MultiParamTypeClasses, NamedFieldPuns, NoImplicitPrelude     #-}
+{-# LANGUAGE NoMonomorphismRestriction, PolyKinds, RankNTypes             #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell     #-}
+{-# LANGUAGE TupleSections, UndecidableInstances                          #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.LinkedMatrix (Matrix, toList, fromLists, fromList,
                              swapRows, identity,nonZeroRows,nonZeroCols,
@@ -10,16 +12,24 @@ module Algebra.LinkedMatrix (Matrix, toList, fromLists, fromList,
                              scaleRow, combineRows, combineCols, transpose,
                              inBound, height, width, cmap, empty, rowVector,
                              colVector, rowCount, colCount, traverseRow,
-                             traverseCol, Entry, idx, value,
+                             traverseCol, Entry, idx, value, substMatrix,
                              catRow, catCol, (<||>), (<-->), toRows, toCols,
                              zeroMat, getDiag, trace, diagProd, diag,
                              scaleCol, clearRow, clearCol, index, (!),
-                             structuredGauss, multWithVector) where
+                             structuredGauss, multWithVector, solveLinear) where
+import           Algebra.Field.Finite
 import           Algebra.Instances          ()
+import           Algebra.Prelude            hiding (fromList)
+import           Algebra.Scalar
 import           Algebra.Wrapped            ()
 import           Control.Applicative        ((<$>), (<*>), (<|>))
-import           Control.Lens               hiding (index)
+import           Control.Lens               hiding (index, (<.>))
+import           Control.Monad              (replicateM)
 import           Control.Monad.Identity     (runIdentity)
+import           Control.Monad.Loops        (iterateUntil)
+import           Control.Monad.Random       (getRandom)
+import           Control.Monad.Random       (MonadRandom)
+import           Control.Monad.Random       (Random)
 import           Control.Monad.ST.Strict    (runST)
 import           Control.Monad.State.Strict (evalState, runState)
 import           Data.IntMap.Strict         (IntMap, alter, insert)
@@ -28,18 +38,25 @@ import qualified Data.IntMap.Strict         as IM
 import           Data.IntSet                (IntSet)
 import qualified Data.IntSet                as IS
 import           Data.List                  (intercalate, sort)
+import           Data.List                  (minimumBy)
 import           Data.Maybe                 (fromJust, fromMaybe, mapMaybe)
+import           Data.Ord                   (comparing)
+import           Data.Proxy                 (Proxy (..))
+import           Data.Reflection            (Reifies (..))
+import           Data.Reflection            (reify)
 import           Data.Semigroup
 import           Data.Tuple                 (swap)
+import           Data.Type.Natural          (Five, One)
 import           Data.Vector                (Vector, create, generate, thaw)
 import           Data.Vector                (unsafeFreeze)
 import qualified Data.Vector                as V
 import           Data.Vector.Mutable        (grow)
 import qualified Data.Vector.Mutable        as MV
-import           Numeric.Algebra            hiding ((<), (<~), (>))
 import           Numeric.Decidable.Zero     (isZero)
 import           Numeric.Field.Fraction
-import           Prelude                    hiding (Num (..), recip, (/))
+import           Numeric.Semiring.Integral  (IntegralSemiring)
+import           Prelude                    hiding (Num (..), product, quot,
+                                             recip, sum, (/), (^))
 
 data Entry a = Entry { _value   :: !a
                      , _idx     :: !(Int, Int)
@@ -582,3 +599,97 @@ testCase = fromLists [[0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,0]
                     ,[1,1,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0]
                     ,[1,0,1,0,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0]
                     ]
+
+newtype Square n r = Square { runSquare :: Matrix r
+                            } deriving (Show, Eq, Ord, Additive, Multiplicative)
+
+deriving instance (DecidableZero r, Semiring r, Additive r, Multiplicative r)
+               => LeftModule (Scalar r) (Square n r)
+deriving instance (DecidableZero r, Semiring r, Additive r, Multiplicative r)
+               => RightModule (Scalar r) (Square n r)
+
+instance (Unital r, Multiplicative r, Reifies n Integer, DecidableZero r) => Unital (Square n r) where
+  one = Square $ identity $ fromInteger $ reflect (Proxy :: Proxy n)
+
+instance (Additive r, DecidableZero r, Multiplicative r) => Multiplicative (Matrix r) where
+  m * n = fromList [ (i,j,sum $ V.zipWith (*) (getRow i m) (getCol j n))
+                   | i <- nonZeroRows m
+                   , j <- nonZeroCols n
+                   ]
+
+
+instance (DecidableZero r, RightModule Natural r) => RightModule Natural (Matrix r) where
+  m *. n = cmap (*. n) m
+
+instance (DecidableZero r, LeftModule Natural r) => LeftModule Natural (Matrix r) where
+  n .* m = cmap (n .*) m
+
+instance (DecidableZero r, RightModule Integer r) => RightModule Integer (Matrix r) where
+  m *. n = cmap (*. n) m
+
+instance (DecidableZero r, LeftModule Integer r) => LeftModule Integer (Matrix r) where
+  n .* m = cmap (n .*) m
+
+instance (RightModule Natural r, LeftModule Natural r, Additive r, DecidableZero r)
+      => Monoidal (Matrix r) where
+  zero = zeroMat 0 0
+
+instance (DecidableZero r, Additive r) => Additive (Matrix r) where
+  m + n =
+    let dir = minimumBy (comparing $ length . flip nonZeroDirs n)
+              [Row, Column]
+    in foldr (\i l -> addDir dir (getDir dir i n) i l) m (nonZeroDirs dir n)
+
+instance (DecidableZero r, Semiring r, Additive r, Multiplicative r)
+      => LeftModule (Scalar r) (Matrix r) where
+  Scalar r .* mat = cmap (r*) mat
+
+instance (DecidableZero r, Semiring r, Additive r, Multiplicative r)
+      => RightModule (Scalar r) (Matrix r) where
+  mat *. Scalar r = cmap (*r) mat
+
+instance (DecidableZero r, Group r) => Group (Matrix r) where
+  negate = cmap negate
+
+instance (DecidableZero r, Abelian r) => Abelian (Matrix r)
+
+instance (DecidableZero r, Semiring r) => Semiring (Matrix r)
+
+substMatrix :: (Ring r, DecidableZero r)
+            => Matrix r -> Polynomial r One -> Matrix r
+substMatrix m f =
+  let n = ncols m
+  in if n == nrows m
+     then reify (toInteger n) $ \pxy -> runSquare $ substUnivariate (toSquare pxy m) f
+     else error "Matrix must be square"
+
+toSquare :: Reifies n Integer => proxy n -> Matrix r -> Square n r
+toSquare _ = Square
+
+(<.>) :: (Multiplicative m, Monoidal m) => Vector m -> Vector m -> m
+v <.> u = sum $ V.zipWith (*) v u
+
+krylovMinpol :: (Eq a, Ring a, DecidableZero a, DecidableUnits a,
+                 Field a, IntegralSemiring a,
+                 Random a, MonadRandom m)
+             => Matrix a -> Vector a -> m (Polynomial a One)
+krylovMinpol m b
+  | V.all isZero b = return one
+  | otherwise = reify (toInteger n) $ \pxy -> do
+    iterateUntil (\h -> V.all isZero $ multWithVector (substMatrix m h) b) $ do
+      u <- replicateM n getRandom
+      return $ minpolRecurrent (fromIntegral n)
+        [ V.fromList u <.> multWithVector (runSquare $ toSquare pxy m ^ fromIntegral i) b
+        | i <- [0..2*n-1]]
+    where
+      n = ncols m
+
+-- | Solving linear equation using linearly recurrent sequence (Wiedemann algorithm).
+solveLinear :: (Eq a, Field a, DecidableZero a, DecidableUnits a,
+                IntegralSemiring a, Random a, MonadRandom m)
+            => Matrix a -> Vector a -> m (Vector a)
+solveLinear a b = do
+  m <- krylovMinpol a b
+  let m0 = injectCoeff (coeff one m)
+      h  = negate (m - m0) `quot` (m0 * varX)
+  return $ substMatrix a h `multWithVector` b

@@ -18,8 +18,9 @@ module Algebra.Ring.Polynomial
     , divs, isPowerOf, tryDiv, fromList, Coefficient(..)
     , leadingTerm, leadingMonomial, leadingCoeff, genVars, sArity
     , OrderedMonomial(..), Grevlex(..), mapCoeff,pDivModPoly
-    , Revlex(..), Lex(..), Grlex(..), Graded(..)
-    , ProductOrder (..), WeightOrder(..), subst, substWith, eval, evalUnivariate, substUnivariate, diff
+    , Revlex(..), Lex(..), Grlex(..), Graded(..), reversal, padeApprox
+    , ProductOrder (..), WeightOrder(..), subst, substWith, eval, evalUnivariate
+    , substUnivariate, diff, minpolRecurrent
     , IsOrder(..), IsMonomialOrder)  where
 import           Algebra.Internal
 import           Numeric.Ring.Class
@@ -589,14 +590,17 @@ gcdMonomial :: OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial
 gcdMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWithSame P.min m n
 
 -- | Substitute univariate polynomial using Horner's rule
-substUnivariate :: (Module r b, Unital b, Ring r, IsOrder order)
+substUnivariate :: (Module (Scalar r) b, Unital b, Ring r, IsOrder order)
                 => b -> OrderedPolynomial r order One -> b
 substUnivariate u f =
-  foldr (\a b -> a .* u + b * u) one [ coeff (OrderedMonomial $ i :- Nil) f | i <- [0 .. totalDegree' f] ]
+  let n = totalDegree' f
+  in foldr (\a b -> Scalar a .* one + b * u) (Scalar (coeff (OrderedMonomial $ n :- Nil) f) .* one)
+           [ coeff (OrderedMonomial $ i :- Nil) f | i <- [0 .. n-1] ]
 
 evalUnivariate :: (Ring b, IsOrder order) => b -> OrderedPolynomial b order ('S 'Z) -> b
-evalUnivariate u f = 
-  foldr (\a b -> a * u + b * u) one [ coeff (OrderedMonomial $ i :- Nil) f | i <- [0 .. totalDegree' f] ]
+evalUnivariate u f =
+  let n = totalDegree' f
+  in foldr1 (\a b -> a + b * u)  [ coeff (OrderedMonomial $ i :- Nil) f | i <- [0 .. n] ]
 
 subst :: (Module r a, Ring a, Ring r, SingI n) => V.Vector a n -> OrderedPolynomial r order n -> a
 subst assign poly = sum $ map (uncurry (.*) . second extractPower) $ getTerms poly
@@ -707,6 +711,9 @@ initSV :: V.Vector a (S n) -> V.Vector a n
 initSV (_ :- Nil) = Nil
 initSV (x :- xs@(_ :- _))  = x :- initSV xs
 
+reversal :: (Ring k, DecidableZero k, IsOrder o)
+         => Int -> OrderedPolynomial k o One -> OrderedPolynomial k o One
+reversal k = transformMonomial (\(i :- Nil) -> (k - i) :- Nil)
 
 sArity :: OrderedPolynomial k ord n -> SNat n
 sArity (Polynomial dic) = V.sLength $ getMonomial $ fst $ M.findMin dic
@@ -720,4 +727,20 @@ sArity (Polynomial dic) = V.sLength $ getMonomial $ fst $ M.findMin dic
 "sArity/sing" forall (v :: SingI n => OrderedPolynomial k ord n).           sArity (v :: OrderedPolynomial k ord n) = sing :: SNat n
   #-}
 
+padeApprox :: (Field r, Eq r, DecidableUnits r, DecidableZero r, IntegralSemiring r,
+              IsMonomialOrder order)
+           => Natural -> Natural -> OrderedPolynomial r order One
+           -> (OrderedPolynomial r order One, OrderedPolynomial r order One)
+padeApprox k nmk g =
+  let (r, _, t) = last $ filter ((< P.fromIntegral k) . totalDegree' . view _1) $ euclid (pow varX (k+nmk)) g
+  in (r, t)
 
+
+minpolRecurrent :: forall k. (Eq k, IntegralSemiring k, DecidableUnits k, DecidableZero k, Field k)
+                => Natural -> [k] -> Polynomial k One
+minpolRecurrent n xs =
+  let h = sum $ zipWith (\a b -> injectCoeff a * b) xs [pow varX i | i <- [0.. pred (2 * n)]]
+          :: Polynomial k One
+      (s, t) = padeApprox n n h
+      d = max (1 + totalDegree' s) (totalDegree' t)
+  in reversal d (recip (coeff one t) .*. t)
