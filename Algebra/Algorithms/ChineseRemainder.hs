@@ -1,6 +1,6 @@
 {-# LANGUAGE ViewPatterns #-}
 module Algebra.Algorithms.ChineseRemainder where
-
+import Algebra.Instances        ()
 import Data.List                (findIndices)
 import Numeric.Domain.Euclidean (euclid)
 import Numeric.Domain.Euclidean (chineseRemainder)
@@ -10,7 +10,9 @@ recoverRat :: Integer                    -- ^ Bound for numerator
            -> Integer                    -- ^ modulus
            -> Integer                    -- ^ integer corresponds to the rational number.
            -> Maybe (Fraction Integer)   -- ^ recovered rational number
-recoverRat (abs -> k) m g =
+recoverRat (abs -> k) m g
+  | g == 0 = Just 0
+  | otherwise =
   let ps = euclid m g
       ixs = findIndices (\(rj, _, _) -> abs rj < k) ps
   in if null ixs
@@ -28,7 +30,9 @@ recoverRat (abs -> k) m g =
                then Just (r' % t')
                else Nothing
 
-rationalChineseRemainder :: Integer -> [(Integer, Integer)] -> Maybe (Fraction Integer)
+rationalChineseRemainder :: Integer
+                         -> [(Integer, Integer)]
+                         -> Maybe (Fraction Integer)
 rationalChineseRemainder k mvs =
   let m = product $ map fst mvs
       g = chineseRemainder mvs
