@@ -3,7 +3,8 @@
 {-# LANGUAGE NoMonomorphismRestriction, TypeFamilies, TypeSynonymInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Matrix (Matrix(..), mapSM, delta, companion, Sparse(..),
-                       gaussReduction, maxNorm, intDet, rankWith) where
+                       gaussReduction, maxNorm, intDet, rankWith, det,
+                       inverse, inverseWith) where
 import           Algebra.Field.Finite
 import qualified Algebra.LinkedMatrix             as LM
 import           Algebra.Ring.Polynomial
@@ -17,6 +18,8 @@ import qualified Data.Matrix                      as DM
 import           Data.Maybe
 import           Data.Numbers.Primes
 import           Data.Ord
+import           Data.Proxy                       (Proxy (..))
+import           Data.Reflection                  (Reifies)
 import           Data.Singletons                  (SingI)
 import           Data.Type.Ordinal
 import qualified Data.Vector                      as V
@@ -31,7 +34,6 @@ import           Numeric.Algebra                  (Multiplicative)
 import           Numeric.Algebra                  (Monoidal)
 import           Numeric.Algebra                  (Unital)
 import qualified Numeric.Algebra                  as NA
-import           Numeric.Decidable.Zero           (isZero)
 import qualified Numeric.Decidable.Zero           as NA
 import           Numeric.Domain.Euclidean         (chineseRemainder)
 import           Numeric.Field.Fraction
@@ -302,6 +304,10 @@ gaussReduction' mat = {-# SCC "gaussRed" #-} go 1 1 mat (identity $ nrows mat) N
                     offset = if i == k then id else NA.negate
                 in go (i+1) (j+1) a' p' (offset $ acc NA.* new)
 
+det :: (Elem mat a, Eq a, Ring a, NA.Division a, NA.Commutative a, Normed a, Matrix mat)
+    => mat a -> a
+det = view _3 . gaussReduction'
+
 maxNorm :: (Elem mat a, Normed a, Matrix mat) => mat a -> Norm a
 maxNorm = maximum . concat . map (map norm . V.toList) . toRows
 
@@ -327,7 +333,56 @@ intDet mat =
      then 0
      else minimumBy (comparing abs) [d - m * off, d - m * (off + 1)]
 
+inverse :: (Elem mat a, Eq a, Ring a, NA.Division a, NA.Commutative a, Normed a, Matrix mat)
+        => mat a -> mat a
+inverse = snd . gaussReduction
+
+inverseWith :: (mat a -> (mat a, mat a)) -> mat a -> mat a
+inverseWith = (snd .)
+
 shiftHalf :: Integral a => a -> a -> a
 shiftHalf p n =
   let s = p `div` 2
   in (n + s) `mod` p - s
+
+modRat :: FiniteField k => Proxy k -> Fraction Integer -> k
+modRat pxy q = NA.fromInteger (numerator q) NA./ NA.fromInteger (denominator q)
+
+{-
+solveHensel :: Int -> Integer
+            -> LM.Matrix Integer -> V.Vector (Fraction Integer)
+            -> V.Vector Integer
+solveHensel checkCount p mat xs = reifyPrimeField p $ \pxy ->
+  let phi = modNat' pxy
+      psi = shiftHalf p . naturalRepr
+      r = inverse $ cmap phi mat
+      go count c x q =
+        let t = V.map psi $ LM.multWithVector r $ V.map phi c
+            x' = V.zipWith (+) x (V.map (fromInteger . (q*)) t)
+            c' = V.map (`quot` p) $ V.zipWith (-) c $ LM.multWithVector mat t
+            q' = q*p
+        in if count + 1 >= checkCount
+           then case V.mapM (flip intToRat q) x' of
+             Nothing  -> go 0 c' x' q'
+             Just x'' ->
+               if LM.multWithVector (cmap fromInteger mat) x'' == xs
+               then x''
+               else go 0 c' x' q'
+           else go (count + 1) c' x' q'
+  in go 0 xs (V.replicate (nrows mat) 0) 1
+-}
+
+intToRat :: Integer -> Integer -> Maybe (Fraction Integer)
+intToRat x q =
+  if x <= sqhq
+  then Just $ x % 1
+  else go q x 0 1
+  where
+    sqhq = floor $ sqrt $ fromIntegral q / 2
+    go f f' a a' =
+      if abs f <= sqhq
+      then if abs a <= sqhq
+           then Just $ f % a
+           else Nothing
+      else let q'  = f `quot` f'
+           in go f' (f - q' * f') a' (a - q' * a')
