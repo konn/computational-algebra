@@ -5,7 +5,7 @@
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell     #-}
 {-# LANGUAGE TupleSections, UndecidableInstances                          #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
-module Algebra.LinkedMatrix (Matrix, toList, fromLists, fromList,
+module Algebra.LinkedMatrix (Matrix, toLists, fromLists, fromList,
                              swapRows, identity,nonZeroRows,nonZeroCols,
                              swapCols, switchCols, switchRows, addRow,
                              addCol, ncols, nrows, getRow, getCol,
@@ -16,47 +16,51 @@ module Algebra.LinkedMatrix (Matrix, toList, fromLists, fromList,
                              catRow, catCol, (<||>), (<-->), toRows, toCols,
                              zeroMat, getDiag, trace, diagProd, diag,
                              scaleCol, clearRow, clearCol, index, (!),
+                             nonZeroEntries, rankLM, splitIndependentDirs,
                              structuredGauss, multWithVector, solveLinear) where
 import           Algebra.Field.Finite
-import           Algebra.Instances          ()
-import           Algebra.Prelude            hiding (fromList)
+import           Algebra.Instances           ()
+import           Algebra.Prelude             hiding (fromList, (%))
 import           Algebra.Scalar
-import           Algebra.Wrapped            ()
-import           Control.Applicative        ((<$>), (<*>), (<|>))
-import           Control.Lens               hiding (index, (<.>))
-import           Control.Monad              (replicateM)
-import           Control.Monad.Identity     (runIdentity)
-import           Control.Monad.Loops        (iterateUntil)
-import           Control.Monad.Random       (getRandom)
-import           Control.Monad.Random       (MonadRandom)
-import           Control.Monad.Random       (Random)
-import           Control.Monad.ST.Strict    (runST)
-import           Control.Monad.State.Strict (evalState, runState)
-import           Data.IntMap.Strict         (IntMap, alter, insert)
-import           Data.IntMap.Strict         (mapMaybeWithKey, minViewWithKey)
-import qualified Data.IntMap.Strict         as IM
-import           Data.IntSet                (IntSet)
-import qualified Data.IntSet                as IS
-import           Data.List                  (intercalate, sort)
-import           Data.List                  (minimumBy)
-import           Data.Maybe                 (fromJust, fromMaybe, mapMaybe)
-import           Data.Ord                   (comparing)
-import           Data.Proxy                 (Proxy (..))
-import           Data.Reflection            (Reifies (..))
-import           Data.Reflection            (reify)
+import           Algebra.Wrapped             ()
+import           Control.Applicative         ((<$>), (<*>), (<|>))
+import           Control.Arrow               ((&&&))
+import           Control.DeepSeq             (rnf)
+import           Control.Lens                hiding (index, (<.>))
+import           Control.Monad               (replicateM)
+import           Control.Monad.Identity      (runIdentity)
+import           Control.Monad.Loops         (iterateUntil)
+import           Control.Monad.Random
+import           Control.Monad.ST.Strict     (runST)
+import           Control.Monad.State.Strict  (evalState, runState)
+import           Control.Parallel.Strategies (parMap, rseq)
+import           Data.IntMap.Strict          (IntMap, alter, insert,
+                                              mapMaybeWithKey, minViewWithKey)
+import qualified Data.IntMap.Strict          as IM
+import           Data.IntSet                 (IntSet)
+import qualified Data.IntSet                 as IS
+import           Data.List                   (find, findIndices, intercalate,
+                                              minimumBy, sort)
+import           Data.Maybe                  (fromJust, fromMaybe, mapMaybe)
+import           Data.Numbers.Primes         (primes)
+import           Data.Ord                    (comparing)
+import           Data.Proxy                  (Proxy (..))
+import           Data.Reflection             (Reifies (..), reify)
 import           Data.Semigroup
-import           Data.Tuple                 (swap)
-import           Data.Type.Natural          (Five, One)
-import           Data.Vector                (Vector, create, generate, thaw)
-import           Data.Vector                (unsafeFreeze)
-import qualified Data.Vector                as V
-import           Data.Vector.Mutable        (grow)
-import qualified Data.Vector.Mutable        as MV
-import           Numeric.Decidable.Zero     (isZero)
+import           Data.Tuple                  (swap)
+import           Data.Type.Natural           (Five, One)
+import           Data.Vector                 (Vector, create, generate, thaw,
+                                              unsafeFreeze)
+import qualified Data.Vector                 as V
+import           Data.Vector.Mutable         (grow)
+import qualified Data.Vector.Mutable         as MV
+import qualified Debug.Trace                 as DT
+import           Numeric.Decidable.Zero      (isZero)
 import           Numeric.Field.Fraction
-import           Numeric.Semiring.Integral  (IntegralSemiring)
-import           Prelude                    hiding (Num (..), product, quot,
-                                             recip, sum, (/), (^))
+import           Numeric.Semiring.Integral   (IntegralSemiring)
+import           Prelude                     (abs)
+import           Prelude                     hiding (Num (..), gcd, product,
+                                              quot, recip, sum, (/), (^))
 
 data Entry a = Entry { _value   :: !a
                      , _idx     :: !(Int, Int)
@@ -100,17 +104,18 @@ empty :: Matrix a
 empty = Matrix V.empty IM.empty IM.empty 0 0
 
 fromLists :: DecidableZero a => [[a]] -> Matrix a
-fromLists xss = fromList $ concat $ zipWith (\i -> zipWith (i,,) [0..]) [0..] xss
+fromLists xss = fromList $ concat $ zipWith (\i -> zipWith (\j -> ((i,j),)) [0..]) [0..] xss
 
-fromList :: DecidableZero a => [(Int, Int, a)] -> Matrix a
+fromList :: DecidableZero a => [((Int, Int), a)] -> Matrix a
 fromList cs =
-  let (as, bs) = runState (mapM initialize $ filter (view $ _3 . to (not.isZero)) cs) (BuildState IM.empty IM.empty (-1))
+  let (as, bs) = runState (mapM initialize $ filter (view $ _2 . to (not.isZero)) cs)
+                 (BuildState IM.empty IM.empty (-1))
       vec = V.fromList as
-      h = maximum (0:map (view $ _1) cs) + 1
-      w = maximum (0:map (view $ _2) cs) + 1
+      h = maximum (0:map (view $ _1._1) cs) + 1
+      w = maximum (0:map (view $ _1._2) cs) + 1
   in Matrix vec (bs^.rowMap) (bs^.colMap) h w
   where
-    initialize (i, j, c) =  do
+    initialize ((i, j), c) =  do
         curIdx += 1
         n <- use curIdx
         nc <- use $ colMap.at j
@@ -136,8 +141,8 @@ diagProd = V.foldr' (*) one . getDiag
 trace :: Monoidal c => Matrix c -> c
 trace = V.foldr' (+) zero . getDiag
 
-toList :: Monoidal a => Matrix a -> [[a]]
-toList mat =
+toLists :: Monoidal a => Matrix a -> [[a]]
+toLists mat =
   let orig = replicate (_height mat) $ replicate (_width mat) zero
   in go (V.toList $ _coefficients mat) orig
   where
@@ -394,6 +399,10 @@ catDir dir mat vec = runST $ do
                & startL (perp dir) .~ op'
                & coefficients .~ v
 
+dirVector :: DecidableZero a => Direction -> Vector a -> Matrix a
+dirVector Row = rowVector
+dirVector Column = colVector
+
 rowVector :: DecidableZero a => Vector a -> Matrix a
 rowVector = fromLists. (:[]) . V.toList
 
@@ -550,8 +559,11 @@ structuredGauss = evalState go . newGaussianState
       heavyCols %= IS.union newHeavyCols
       go
 
+nonZeroEntries :: Matrix a -> Vector ((Int, Int), a)
+nonZeroEntries mat = V.map (view idx &&& view value) $ mat ^. coefficients
+
 matListView :: (Show a, Monoidal a) => Matrix a -> String
-matListView = unlines . map (('\t':).show) . toList
+matListView = unlines . map (('\t':).show) . toLists
 
 prettyMat :: Show a => Matrix a -> String
 prettyMat mat =
@@ -612,7 +624,7 @@ instance (Unital r, Multiplicative r, Reifies n Integer, DecidableZero r) => Uni
   one = Square $ identity $ fromInteger $ reflect (Proxy :: Proxy n)
 
 instance (Additive r, DecidableZero r, Multiplicative r) => Multiplicative (Matrix r) where
-  m * n = fromList [ (i,j,sum $ V.zipWith (*) (getRow i m) (getCol j n))
+  m * n = fromList [ ((i,j),sum $ V.zipWith (*) (getRow i m) (getCol j n))
                    | i <- nonZeroRows m
                    , j <- nonZeroCols n
                    ]
@@ -687,9 +699,69 @@ krylovMinpol m b
 -- | Solving linear equation using linearly recurrent sequence (Wiedemann algorithm).
 solveLinear :: (Eq a, Field a, DecidableZero a, DecidableUnits a,
                 IntegralSemiring a, Random a, MonadRandom m)
-            => Matrix a -> Vector a -> m (Vector a)
+            => Matrix a -> Vector a -> m (Either (Vector a) (Vector a))
 solveLinear a b = do
   m <- krylovMinpol a b
-  let m0 = injectCoeff (coeff one m)
-      h  = negate (m - m0) `quot` (m0 * varX)
-  return $ substMatrix a h `multWithVector` b
+  return $
+    let m0 = injectCoeff (coeff one m)
+        g = (m - m0) `quot` varX
+    in if isZero (coeff one m)
+       then Left $ substMatrix a g `multWithVector` b
+       else let h = negate g `quot` m0
+            in Right $ substMatrix a h `multWithVector` b
+
+rankLM :: (DecidableZero r, Division r, Group r) => Matrix r -> Int
+rankLM mat =
+  let m' = fst $ structuredGauss mat
+  in min (length $ nonZeroRows m') (length $ nonZeroCols m')
+
+splitIndependentDirs :: (DecidableZero a, Field a)
+                     => Direction -> Matrix a
+                     -> (Matrix a, [Int], [Int])
+                     -- ^ @(m', bs, as)@ with @m@ is full-rank submatrix,
+                     --   @bs@ are independent and @as@ are dependent.
+splitIndependentDirs dir mat =
+  case nonZeroDirs dir mat of
+    []  -> (zero, [], [])
+    [a] -> (dirVector dir $ getDir dir a mat, [a], [])
+    (x:xs)  -> go 1 xs (dirVector dir $ getDir dir x mat) [x] []
+  where
+    n = min (nrows mat) (ncols mat)
+    go _ []     nat ok bad = (nat, ok, bad)
+    go i (k:ks) nat ok bad
+      | i >= n = (nat, ok, bad)
+      | otherwise =
+        let nat' = catDir dir nat $ getDir dir k mat
+        in if rankLM nat' == i
+           then go i     ks nat  ok     (k:bad)
+           else go (i+1) ks nat' (k:ok) bad
+
+{-
+triangulateModular :: (MonadRandom m, RandomGen g, MonadSplit g m)
+                   => Matrix (Fraction Integer) -> m (Matrix (Fraction Integer), [Vector (Fraction Integer)])
+triangulateModular mat0 =
+  let ds = V.map (denominator.snd) $ nonZeroEntries mat0
+      ps = filter (\q -> V.all (\k -> k `mod` q /= 0) ds) primes
+  in go ps
+  where
+    go (p:ps) = do
+      let (indepRows, depRows, indepCols, depCols) = reifyPrimeField p $ \pxy ->
+            let mat = cmap (modRat pxy) mat0
+                (koho, irs, drs) = splitIndependentDirs Row mat
+                (_, ics, dcs) = splitIndependentDirs Column koho
+            in (irs, drs, ics, dcs)
+      gs <- replicateM (length depCols) getSplit
+      let rdic = IM.fromList $ zip indepRows [0..]
+          cdic = IM.fromList $ zip indepCols [0..]
+          newIdx (i, j) = (,) <$> IM.lookup i rdic <*> IM.lookup j cdic
+          spec = fromList $ mapMaybe (\(ind, c) -> (,c) <$> newIdx ind) $ V.toList $
+                 nonZeroEntries mat0
+          anss = DT.trace (show $ toLists spec) $
+                 parMap rseq (\(g, c) -> view _Right $ evalRand (solveLinear spec c) g) $
+                 zip gs (map (flip getCol spec) depCols)
+
+      return $ (spec, anss)
+-}
+
+
+

@@ -18,8 +18,6 @@ import qualified Data.Matrix                      as DM
 import           Data.Maybe
 import           Data.Numbers.Primes
 import           Data.Ord
-import           Data.Proxy                       (Proxy (..))
-import           Data.Reflection                  (Reifies)
 import           Data.Singletons                  (SingI)
 import           Data.Type.Ordinal
 import qualified Data.Vector                      as V
@@ -27,12 +25,9 @@ import qualified Data.Vector.Algorithms.Insertion as Sort
 import qualified Data.Vector.Generic              as GV
 import qualified Data.Vector.Hybrid               as H
 import           Data.Vector.Hybrid.Internal
-import           Numeric.Algebra                  (DecidableZero)
-import           Numeric.Algebra                  (Ring)
-import           Numeric.Algebra                  (Additive)
-import           Numeric.Algebra                  (Multiplicative)
-import           Numeric.Algebra                  (Monoidal)
-import           Numeric.Algebra                  (Unital)
+import           Numeric.Algebra                  (Additive, DecidableZero)
+import           Numeric.Algebra                  (Monoidal, Multiplicative)
+import           Numeric.Algebra                  (Ring, Unital)
 import qualified Numeric.Algebra                  as NA
 import qualified Numeric.Decidable.Zero           as NA
 import           Numeric.Domain.Euclidean         (chineseRemainder)
@@ -182,7 +177,7 @@ instance Matrix LM.Matrix where
   (!) m pos = m LM.! (pos & both %~ pred)
   index i j = LM.index (i-1) (j-1)
   empty = LM.empty
-  buildMatrix h w f = LM.fromList [(i, j, f (i,j)) | j <- [1..w], i <- [1..h]]
+  buildMatrix h w f = LM.fromList [((i, j), f (i,j)) | j <- [1..w], i <- [1..h]]
   trans = LM.transpose
   combineRows j s i = LM.combineRows s (i-1) (j-1)
   switchRows i j = LM.switchRows (i-1) (j-1)
@@ -345,19 +340,16 @@ shiftHalf p n =
   let s = p `div` 2
   in (n + s) `mod` p - s
 
-modRat :: FiniteField k => Proxy k -> Fraction Integer -> k
-modRat pxy q = NA.fromInteger (numerator q) NA./ NA.fromInteger (denominator q)
-
 {-
 solveHensel :: Int -> Integer
-            -> LM.Matrix Integer -> V.Vector (Fraction Integer)
-            -> V.Vector Integer
+            -> LM.Matrix Integer) -> V.Vector (Fraction Integer)
+            -> V.Vector (Fraction Integer)
 solveHensel checkCount p mat xs = reifyPrimeField p $ \pxy ->
-  let phi = modNat' pxy
+  let phi = modRat pxy
       psi = shiftHalf p . naturalRepr
       r = inverse $ cmap phi mat
       go count c x q =
-        let t = V.map psi $ LM.multWithVector r $ V.map phi c
+        let t = V.map (fromInteger . psi) $ LM.multWithVector r $ V.map phi c
             x' = V.zipWith (+) x (V.map (fromInteger . (q*)) t)
             c' = V.map (`quot` p) $ V.zipWith (-) c $ LM.multWithVector mat t
             q' = q*p
@@ -371,18 +363,3 @@ solveHensel checkCount p mat xs = reifyPrimeField p $ \pxy ->
            else go (count + 1) c' x' q'
   in go 0 xs (V.replicate (nrows mat) 0) 1
 -}
-
-intToRat :: Integer -> Integer -> Maybe (Fraction Integer)
-intToRat x q =
-  if x <= sqhq
-  then Just $ x % 1
-  else go q x 0 1
-  where
-    sqhq = floor $ sqrt $ fromIntegral q / 2
-    go f f' a a' =
-      if abs f <= sqhq
-      then if abs a <= sqhq
-           then Just $ f % a
-           else Nothing
-      else let q'  = f `quot` f'
-           in go f' (f - q' * f') a' (a - q' * a')

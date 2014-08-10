@@ -54,7 +54,7 @@ library
                      Algebra.Scalar Algebra.Internal Algebra.Instances Algebra.Wrapped
                      Algebra.Matrix Algebra.Repa Algebra.Prelude Algebra.Algorithms.Signature
                      Algebra.Ring.Polynomial.Factorize
-                     Algebra.NumberTheory.PrimeTest
+                     Algebra.Algorithms.PrimeTest Algebra.Algorithms.ChineseRemainder
     exposed: True
     buildable: True
     other-modules: Algebra.Algorithms.FGLM Algebra.Field.Galois.Internal Algebra.Field.Galois.Conway
