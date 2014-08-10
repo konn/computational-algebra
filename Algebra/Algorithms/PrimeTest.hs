@@ -1,5 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
-module Algebra.NumberTheory.PrimeTest (repeatedSquare, modPow,
+module Algebra.Algorithms.PrimeTest (repeatedSquare, modPow,
                                        fermatTest, isPseudoPrime) where
 import           Algebra.Prelude
 import           Control.Lens             ((&), (+~), _1)

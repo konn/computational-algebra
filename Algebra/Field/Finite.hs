@@ -3,29 +3,29 @@
 {-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances #-}
 module Algebra.Field.Finite (F(), naturalRepr, reifyPrimeField, withPrimeField,
                              modNat, modNat', modRat, modRat', FiniteField(..), order) where
-import           Algebra.NumberTheory.PrimeTest
+import           Algebra.Algorithms.PrimeTest
 import           Algebra.Wrapped
-import           Control.Monad.Random           (uniform)
-import           Control.Monad.Random           (runRand)
-import           Control.Monad.Random           (Random (..))
-import           Data.Maybe                     (fromJust)
-import           Data.Maybe                     (fromMaybe)
+import           Control.Monad.Random         (uniform)
+import           Control.Monad.Random         (runRand)
+import           Control.Monad.Random         (Random (..))
+import           Data.Maybe                   (fromJust)
+import           Data.Maybe                   (fromMaybe)
 import           Data.Proxy
-import qualified Data.Ratio                     as R
+import qualified Data.Ratio                   as R
 import           Data.Reflection
-import qualified Data.Type.Natural              as TN
-import           Numeric.Algebra                (Field)
-import           Numeric.Algebra                (char)
-import           Numeric.Algebra                (Natural)
-import qualified Numeric.Algebra                as NA
+import qualified Data.Type.Natural            as TN
+import           Numeric.Algebra              (Field)
+import           Numeric.Algebra              (char)
+import           Numeric.Algebra              (Natural)
+import qualified Numeric.Algebra              as NA
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
-import           Numeric.Domain.Euclidean       (euclid)
-import           Numeric.Field.Fraction         (Fraction)
-import           Numeric.Field.Fraction         (denominator)
-import           Numeric.Field.Fraction         (numerator)
-import           Numeric.Rig.Characteristic     (Characteristic)
-import           Numeric.Semiring.Integral      (IntegralSemiring)
+import           Numeric.Domain.Euclidean     (euclid)
+import           Numeric.Field.Fraction       (Fraction)
+import           Numeric.Field.Fraction       (denominator)
+import           Numeric.Field.Fraction       (numerator)
+import           Numeric.Rig.Characteristic   (Characteristic)
+import           Numeric.Semiring.Integral    (IntegralSemiring)
 
 -- | Prime field of characteristic @p@. @p@ should be prime, and not statically checked.
 newtype F (p :: k) = F { runF :: Integer }
