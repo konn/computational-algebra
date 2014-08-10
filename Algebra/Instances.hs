@@ -3,8 +3,14 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 -- | This Library provides some *dangerous* instances for @Double@s and @Complex@.
 module Algebra.Instances () where
+import           Control.Applicative      ((<$>))
 import           Control.DeepSeq          (NFData (..))
 import           Control.Lens
+import           Control.Monad.Random     (Random (..))
+import           Control.Monad.Random     (runRand)
+import           Control.Monad.Random     (getRandom)
+import           Control.Monad.Random     (Rand)
+import           Control.Monad.Random     (getRandomR)
 import           Data.Complex
 import           Data.Convertible.Base    (Convertible (..))
 import qualified Data.Ratio               as P
@@ -113,3 +119,17 @@ instance Convertible (Fraction Integer) Double where
 
 instance Convertible (Fraction Integer) (Complex Double) where
   safeConvert a = Right $ P.fromInteger (numerator a) P./ P.fromInteger (denominator a) :+ 0
+
+instance (Random (Fraction Integer)) where
+  random = runRand $ do
+    i <- getRandom
+    j <- getRandom
+    return $ i % (P.abs j + 1)
+  randomR (a, b) = runRand $ do
+    j <- succ . P.abs <$> getRandom
+    let g = foldl1 lcm  [denominator a, denominator b, j]
+        lb = g * numerator a `quot` denominator a
+        ub = g * numerator b `quot` denominator b
+    i <- getRandomR (lb, ub)
+    return $ i % g
+

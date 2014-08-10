@@ -5,6 +5,9 @@ module Algebra.Field.Finite (F(), naturalRepr, reifyPrimeField, withPrimeField,
                              modNat, modNat', FiniteField(..), order) where
 import           Algebra.NumberTheory.PrimeTest
 import           Algebra.Wrapped
+import           Control.Monad.Random           (uniform)
+import           Control.Monad.Random           (runRand)
+import           Control.Monad.Random           (Random (..))
 import           Data.Proxy
 import qualified Data.Ratio                     as R
 import           Data.Reflection
@@ -159,3 +162,7 @@ instance Reifies p Integer => FiniteField (F p) where
 
 order :: FiniteField k => proxy k -> Natural
 order p = char p ^ power p
+
+instance Reifies p Integer => Random (F p) where
+  random = runRand $ uniform (elements Proxy)
+  randomR (a, b) = runRand $ uniform $ map modNat [naturalRepr a..naturalRepr b]
