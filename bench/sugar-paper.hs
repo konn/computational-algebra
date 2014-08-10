@@ -1,7 +1,7 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs      #-}
-{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction           #-}
-{-# LANGUAGE OverloadedStrings, PolyKinds, QuasiQuotes, TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies, UndecidableInstances                         #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction      #-}
+{-# LANGUAGE OverloadedStrings, PolyKinds, TypeFamilies            #-}
+{-# LANGUAGE UndecidableInstances                                  #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
 import           Algebra.Algorithms.Groebner
@@ -10,7 +10,6 @@ import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Monomorphic (promoteWithVars, varChar)
 import qualified Algebra.Ring.Polynomial.Monomorphic as MP
 import           Algebra.Ring.Polynomial.Parser
-import           Control.DeepSeq
 import           Control.Parallel.Strategies
 import           Criterion.Main
 import           Data.Type.Natural
@@ -72,7 +71,7 @@ mkTC name ideal =
 
 main :: IO ()
 main = do
-  ideal1 <- return $! (toIdeal i1 `using` rdeepseq)
+  -- ideal1 <- return $! (toIdeal i1 `using` rdeepseq)
   ideal2 <- return $! (toIdeal i2 `using` rdeepseq)
   ideal3 <- return $! (toIdeal i3 `using` rdeepseq)
   ideal4 <- return $! (toIdeal i4 `using` rdeepseq)

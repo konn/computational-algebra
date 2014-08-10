@@ -10,7 +10,7 @@ import           Algebra.Ring.Polynomial  (IsMonomialOrder,
 import qualified Algebra.Ring.Polynomial  as Poly
 import           Algebra.Scalar
 import           Control.Arrow
-import           Control.Lens
+import           Control.Lens             hiding (assign)
 import           Data.List
 import qualified Data.Map                 as M
 import           Data.Maybe

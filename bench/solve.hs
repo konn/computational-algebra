@@ -1,6 +1,6 @@
 {-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts                   #-}
 {-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, OverlappingInstances #-}
-{-# LANGUAGE PolyKinds, QuasiQuotes, TemplateHaskell                        #-}
+{-# LANGUAGE PolyKinds                                                      #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
 import           Algebra.Algorithms.ZeroDim
@@ -13,24 +13,22 @@ import           Control.Monad
 import           Control.Monad.Random
 import           Control.Parallel.Strategies
 import           Criterion
-import           Data.Type.Natural           hiding (one)
+import           Criterion.Main
+import           Data.Type.Natural           hiding (cases, one)
 import           Numeric.Algebra             hiding ((<), (^))
 import qualified Numeric.Algebra             as NA
+import           Numeric.Field.Fraction      (Fraction)
 import           Prelude                     hiding (Fractional (..),
                                               Integral (..), Num (..),
                                               Real (..), sum, (^^))
 import qualified Prelude                     as P
--- import           Progression.Main
-import Criterion.Main
-import Numeric.Field.Fraction (Fraction)
-import System.Environment
-import Test.QuickCheck
-import Utils
+import           Test.QuickCheck
+import           Utils
 
 x, y, z :: Polynomial (Fraction Integer) Three
 [x, y, z] = genVars sThree
 
-(.*) :: SingI n => (Fraction Integer) -> Polynomial (Fraction Integer) n -> Polynomial (Fraction Integer) n
+(.*) :: SingI n => Fraction Integer -> Polynomial (Fraction Integer) n -> Polynomial (Fraction Integer) n
 (.*) = (.*.)
 
 infixl 7 .*
