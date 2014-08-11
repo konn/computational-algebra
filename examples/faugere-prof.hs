@@ -5,4 +5,4 @@ import Control.DeepSeq
 import Data.Type.Natural           (sFour)
 
 main :: IO ()
-main = faugere4 optimalStrategy (cyclic sFour) `deepseq` return ()
+main = faugere4LM optimalStrategy (cyclic sFour) `deepseq` return ()

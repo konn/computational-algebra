@@ -6,7 +6,7 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Algebra.Algorithms.Faugere4 (
   -- * F_4 algorithms with various backends
-  faugere4LM, faugere4, faugere4G,
+  faugere4LM, faugere4, faugere4G, faugere4Modular,
   -- * Selection strategies
   optimalStrategy, sugarStrategy,
   -- * F_4 main algorithm
@@ -40,9 +40,10 @@ import           Numeric.Decidable.Zero  (isZero)
 import           Numeric.Field.Fraction  (Fraction)
 import           Prelude                 (Num ())
 
-import           Data.Proxy (Proxy)
-import           Prelude    hiding (Num (..), recip, subtract, (/), (^))
-import qualified Prelude    as P
+import           Data.Proxy  (Proxy)
+import qualified Debug.Trace as DT
+import           Prelude     hiding (Num (..), recip, subtract, (/), (^))
+import qualified Prelude     as P
 
 -- * F_4 algorithm with various backends
 
@@ -83,8 +84,24 @@ faugere4LM =
     fromPs fs =
       let ts = nub $ sortBy (flip compare) $ concatMap monomials fs
           d0 = HM.fromList $ zip ts [0..]
-      in (LM.fromList $ concat $ zipWith (\i f -> [ (i, d0  HM.! t, c) | (c, t) <- getTerms f]) [0..] fs,
+      in (LM.fromList $ concat $ zipWith (\i f -> [ ((i, d0  HM.! t), c) | (c, t) <- getTerms f]) [0..] fs,
           V.fromList $ map (toPolynomial . (one,)) ts)
+
+faugere4Modular :: (SingI n, IsMonomialOrder ord)
+                => Strategy (Fraction Integer) ord n
+                -> Ideal (OrderedPolynomial (Fraction Integer) ord n)
+                -> Ideal (OrderedPolynomial (Fraction Integer) ord n)
+faugere4Modular =
+  faugere4Gen fromPs (fst . LM.triangulateModular) toPs
+  where
+    toPs dic mat =
+      V.toList $ LM.multWithVector (cmap injectCoeff mat) dic
+    fromPs fs =
+      let ts = nub $ sortBy (flip compare) $ concatMap monomials fs
+          d0 = HM.fromList $ zip ts [0..]
+      in (LM.fromList $ concat $ zipWith (\i f -> [ ((i, d0  HM.! t), c) | (c, t) <- getTerms f]) [0..] fs,
+          V.fromList $ map (toPolynomial . (one,)) ts)
+
 
 -- ** Strategies
 optimalStrategy :: Strategy r ord n
@@ -220,7 +237,8 @@ withMatRepr :: Given (MatrixRepr r ord n)
 withMatRepr f = case given of
   MatrixRepr fromPs gauss toPs -> f fromPs gauss toPs
 
-simplify :: (Given (MatrixRepr r ord n), IsMonomialOrder ord, IsPolynomial r n, DecidableZero r)
+simplify :: (Given (MatrixRepr r ord n),
+             IsMonomialOrder ord, IsPolynomial r n, DecidableZero r)
          => [[OrderedPolynomial r ord n]]
          -> OrderedMonomial ord n -> OrderedPolynomial r ord n
          -> (OrderedMonomial ord n, OrderedPolynomial r ord n)
@@ -238,7 +256,7 @@ simplify fss t f = go $ divisors t
              else (one, p)
 
 rowEchelon :: (Given (MatrixRepr r ord n), Eq r,
-                  IsMonomialOrder ord, IsPolynomial r n, DecidableZero r)
+               IsMonomialOrder ord, IsPolynomial r n, DecidableZero r)
            => [OrderedPolynomial r ord n]
            -> [OrderedPolynomial r ord n]
 rowEchelon fs = withMatRepr $ \fromPolys gauss toPolys ->
@@ -279,3 +297,10 @@ redF4 ls gs fss = {-# SCC "reduction" #-}
   let fs  = symbolicPP ls gs fss
       fs' = rowEchelon fs
   in ([ f | f <- fs', not $ leadingMonomial f `elem` map leadingMonomial fs], fs)
+
+ideal3 :: Ideal (Polynomial (Fraction Integer) Three)
+ideal3 = toIdeal [x^^^2 + y^^^2 + z^^^2 - 1, x^^^2 + y^^^2 + z^^^2 - 2*x, 2*x -3*y - z]
+  where
+    (^^^) :: (Unital r, Multiplicative r) => r -> Natural -> r
+    (^^^) = pow
+    [x,y,z] = genVars sThree

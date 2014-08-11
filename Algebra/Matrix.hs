@@ -3,7 +3,7 @@
 {-# LANGUAGE NoMonomorphismRestriction, TypeFamilies, TypeSynonymInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Matrix (Matrix(..), mapSM, delta, companion, Sparse(..),
-                       gaussReduction, maxNorm, intDet, rankWith, det,
+                       gaussReduction, maxNorm, rankWith, det,
                        inverse, inverseWith) where
 import           Algebra.Field.Finite
 import qualified Algebra.LinkedMatrix             as LM
@@ -310,32 +310,9 @@ rankWith :: (Elem mat r, DecidableZero r, Matrix mat)
          => (mat r -> mat r) -> mat r -> Int
 rankWith gauss = length . nonZeroRows . gauss
 
-intDet :: LM.Matrix Integer -> Integer
-intDet mat =
-  let b = maxNorm mat
-      n = fromIntegral $ ncols mat
-      c = n^(n `div` 2) * b^n
-      r = ceiling $ logBase (2 :: Double) (2*fromIntegral c + 1)
-      ps = take (fromInteger r) primes
-      m  = product ps
-      d  = chineseRemainder [ (p,
-                               reifyPrimeField p $ \pxy ->
-                               shiftHalf p $ naturalRepr $ view _3 $
-                               gaussReduction' (cmap (modNat' pxy) mat))
-                            | p <- ps]
-      off = d `div` m
-  in if d == 0
-     then 0
-     else minimumBy (comparing abs) [d - m * off, d - m * (off + 1)]
-
 inverse :: (Elem mat a, Eq a, Ring a, NA.Division a, NA.Commutative a, Normed a, Matrix mat)
         => mat a -> mat a
 inverse = snd . gaussReduction
 
 inverseWith :: (mat a -> (mat a, mat a)) -> mat a -> mat a
 inverseWith = (snd .)
-
-shiftHalf :: Integral a => a -> a -> a
-shiftHalf p n =
-  let s = p `div` 2
-  in (n + s) `mod` p - s

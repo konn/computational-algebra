@@ -3,12 +3,12 @@
 {-# LANGUAGE MultiParamTypeClasses, NamedFieldPuns, NoImplicitPrelude     #-}
 {-# LANGUAGE NoMonomorphismRestriction, PolyKinds, RankNTypes             #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell     #-}
-{-# LANGUAGE TupleSections, UndecidableInstances                          #-}
+{-# LANGUAGE TupleSections, UndecidableInstances, ViewPatterns            #-}
 {-# OPTIONS_GHC -funbox-strict-fields -fno-warn-type-defaults #-}
 module Algebra.LinkedMatrix (Matrix, toLists, fromLists, fromList,
                              swapRows, identity,nonZeroRows,nonZeroCols,
                              swapCols, switchCols, switchRows, addRow,
-                             addCol, ncols, nrows, getRow, getCol,
+                             addCol, ncols, nrows, getRow, getCol, triangulateModular,
                              scaleRow, combineRows, combineCols, transpose,
                              inBound, height, width, cmap, empty, rowVector,
                              colVector, rowCount, colCount, traverseRow,
@@ -18,7 +18,7 @@ module Algebra.LinkedMatrix (Matrix, toLists, fromLists, fromList,
                              scaleCol, clearRow, clearCol, index, (!),
                              nonZeroEntries, rankLM, splitIndependentDirs,
                              structuredGauss, multWithVector, solveWiedemann,
-                             henselLift, solveHensel) where
+                             henselLift, solveHensel, structuredGauss') where
 import           Algebra.Algorithms.ChineseRemainder
 import           Algebra.Field.Finite
 import           Algebra.Instances                   ()
@@ -27,6 +27,7 @@ import           Algebra.Scalar
 import           Algebra.Wrapped                     ()
 import           Control.Applicative                 ((<$>), (<*>), (<|>))
 import           Control.Arrow                       ((&&&))
+import           Control.Arrow                       ((>>>))
 import           Control.DeepSeq                     (rnf)
 import           Control.Lens                        hiding (index, (<.>))
 import           Control.Monad                       (replicateM)
@@ -36,6 +37,7 @@ import           Control.Monad.Random                hiding (fromList)
 import           Control.Monad.ST.Strict             (runST)
 import           Control.Monad.State.Strict          (evalState, runState)
 import           Control.Parallel.Strategies         (parMap, rseq)
+import           Data.Function                       (on)
 import           Data.IntMap.Strict                  (IntMap, alter, insert,
                                                       mapMaybeWithKey,
                                                       minViewWithKey)
@@ -45,6 +47,7 @@ import qualified Data.IntSet                         as IS
 import           Data.List                           (find, findIndices,
                                                       intercalate, minimumBy,
                                                       sort)
+import           Data.List                           (sortBy)
 import           Data.Maybe                          (fromJust, fromMaybe,
                                                       mapMaybe)
 import           Data.Numbers.Primes                 (primes)
@@ -57,6 +60,7 @@ import           Data.Type.Natural                   (Five, One)
 import           Data.Vector                         (Vector, create, generate,
                                                       thaw, unsafeFreeze)
 import qualified Data.Vector                         as V
+import qualified Data.Vector.Algorithms.Intro        as V
 import           Data.Vector.Mutable                 (grow)
 import qualified Data.Vector.Mutable                 as MV
 import qualified Debug.Trace                         as DT
@@ -85,7 +89,7 @@ data Matrix a = Matrix { _coefficients :: !(Vector (Entry a))
                        , _colStart     :: !(IntMap Int)
                        , _height       :: !Int
                        , _width        :: !Int
-                       } deriving (Read, Show, Eq, Ord)
+                       } deriving (Read, Show)
 
 makeLenses ''Matrix
 
@@ -100,8 +104,15 @@ data GaussianState a = GaussianState { _input     :: !(Matrix a)
                                      , _prevCol   :: !Int
                                      , _heavyCols :: !IntSet
                                      , _curRow    :: !Int
+                                     , _detAcc    :: !a
                                      }
 makeLenses ''GaussianState
+
+instance Eq a => Eq (Matrix a) where
+  n == m =
+    n^.height == m^.height && n^.width == m^.width && content n == content m
+    where
+      content = sortBy (comparing fst) . V.toList . nonZeroEntries
 
 data MaxEntry a b = MaxEntry { _weight :: !a
                              , entry   :: b
@@ -111,7 +122,18 @@ empty :: Matrix a
 empty = Matrix V.empty IM.empty IM.empty 0 0
 
 fromLists :: DecidableZero a => [[a]] -> Matrix a
-fromLists xss = fromList $ concat $ zipWith (\i -> zipWith (\j -> ((i,j),)) [0..]) [0..] xss
+fromLists xss =
+  fromList (concat $ zipWith (\i -> zipWith (\j -> ((i,j),)) [0..]) [0..] xss)
+  & width  .~ maximum (0 : map length xss)
+  & height .~ length xss
+
+fromCols :: DecidableZero a => [Vector a] -> Matrix a
+fromCols xss =
+  let h = maximum $ map V.length xss
+      w = length xss
+  in fromList (concat $ zipWith (\i -> V.toList . V.imap (\j -> ((j,i),))) [0..] xss)
+     & width .~ w
+     & height .~ h
 
 fromList :: DecidableZero a => [((Int, Int), a)] -> Matrix a
 fromList cs =
@@ -494,7 +516,7 @@ instance (Ord a, Bounded a, Monoid b) => Monoid (MaxEntry a b) where
 
 newGaussianState :: Unital a => Matrix a -> GaussianState a
 newGaussianState inp =
-  GaussianState inp (identity $ inp ^. height) (-1) (getHeaviest IS.empty inp) 0
+  GaussianState inp (identity $ inp ^. height) (-1) (getHeaviest IS.empty inp) 0 one
 
 getHeaviest :: IntSet -> Matrix a -> IntSet
 getHeaviest old inp =
@@ -512,7 +534,11 @@ traverseCol a f = traverseDir a f Column
 
 structuredGauss :: (DecidableZero a, Division a, Group a)
                 => Matrix a -> (Matrix a, Matrix a)
-structuredGauss = evalState go . newGaussianState
+structuredGauss = structuredGauss' >>> view _1 &&& view _2
+
+structuredGauss' :: (DecidableZero a, Division a, Group a)
+                 => Matrix a -> (Matrix a, Matrix a, a)
+structuredGauss' = evalState go . newGaussianState
   where
     countLight heavys = traverseRow (0 :: Int)
                            (\(!c) _ ent -> if (ent^.coordL Column) `IS.member` heavys
@@ -524,8 +550,8 @@ structuredGauss = evalState go . newGaussianState
       pcol <- use prevCol
       (_, rest) <- uses (input.colStart) (IM.split pcol)
       case minViewWithKey rest of
-        _ | destRow >= old ^. height -> (,) <$> use input <*> use output
-        Nothing -> (,) <$> use input <*> use output
+        _ | destRow >= old ^. height -> (,,) <$> use input <*> use output <*> use detAcc
+        Nothing -> (,,) <$> use input <*> use output <*> use detAcc
         Just ((pivCol, _), _) -> do
           heavys <- use heavyCols
           prevCol .= pivCol
@@ -546,6 +572,7 @@ structuredGauss = evalState go . newGaussianState
             Just (pivot, _) -> do
               let pivRow = pivot ^. coordL Row
                   pivCoe = pivot ^. value
+                  sgn    = if pivRow == destRow then one else negate one
               p0 <- use output
               let elim (m, p) _ ent = do
                     if ent^.coordL Row /= pivRow
@@ -559,6 +586,7 @@ structuredGauss = evalState go . newGaussianState
               input .= input'
               output .= output'
               curRow += 1
+              detAcc %= (*(pivCoe*sgn))
               nextElim
     nextElim = do
       oldHeavys <- use heavyCols
@@ -620,7 +648,7 @@ testCase = fromLists [[0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,0]
                     ]
 
 newtype Square n r = Square { runSquare :: Matrix r
-                            } deriving (Show, Eq, Ord, Additive, Multiplicative)
+                            } deriving (Show, Eq, Additive, Multiplicative)
 
 deriving instance (DecidableZero r, Semiring r, Additive r, Multiplicative r)
                => LeftModule (Scalar r) (Square n r)
@@ -634,7 +662,8 @@ instance (Additive r, DecidableZero r, Multiplicative r) => Multiplicative (Matr
   m * n = fromList [ ((i,j),sum $ V.zipWith (*) (getRow i m) (getCol j n))
                    | i <- nonZeroRows m
                    , j <- nonZeroCols n
-                   ]
+                   ] & width .~ n^.width
+                     & height .~ m^.height
 
 
 instance (DecidableZero r, RightModule Natural r) => RightModule Natural (Matrix r) where
@@ -739,36 +768,91 @@ splitIndependentDirs dir mat =
       | i >= n = (nat, ok, bad)
       | otherwise =
         let nat' = catDir dir nat $ getDir dir k mat
-        in if rankLM nat' == i
+        in if ({-# SCC "rankLM" #-} rankLM nat') == i
            then go i     ks nat  ok     (k:bad)
            else go (i+1) ks nat' (k:ok) bad
 
-{-
-triangulateModular :: (MonadRandom m, RandomGen g, MonadSplit g m)
-                   => Matrix (Fraction Integer) -> m (Matrix (Fraction Integer), [Vector (Fraction Integer)])
+intDet :: Matrix Integer -> Integer
+intDet mat =
+  let b = V.maximum $ V.map (abs . snd) $ nonZeroEntries mat
+      n = fromIntegral $ ncols mat
+      c = n^(n `div` 2) * b^n
+      r = ceiling $ logBase (2 :: Double) (2*fromIntegral c + 1)
+      ps = take (fromInteger r) primes
+      m  = product ps
+      d  = chineseRemainder [ (p,
+                               reifyPrimeField p $ \pxy ->
+                               shiftHalf p $ naturalRepr $ view _3 $
+                               structuredGauss' (cmap (modNat' pxy) mat))
+                            | p <- ps]
+      off = d `div` m
+  in if d == 0
+     then 0
+     else minimumBy (comparing abs) [d - m * off, d - m * (off + 1)]
+
+shiftHalf :: Integral a => a -> a -> a
+shiftHalf p n =
+  let s = p `div` 2
+  in (n P.+ s) `mod` p P.- s
+
+triangulateModular :: Matrix (Fraction Integer)
+                   -> (Matrix (Fraction Integer),
+                       Matrix (Fraction Integer))
 triangulateModular mat0 =
-  let ds = V.map (denominator.snd) $ nonZeroEntries mat0
-      ps = filter (\q -> V.all (\k -> k `mod` q /= 0) ds) primes
+  let ds = V.foldr (lcm' . abs . denominator.snd) 1 $ nonZeroEntries mat0
+      mN = V.foldr (lcm' . abs . numerator . snd) 1 $ nonZeroEntries mat0
+      l  = lcm' ds mN
+      ps = filter ((/= 0) . (mod l)) primes
   in go ps
   where
-    go (p:ps) = do
-      let (indepRows, depRows, indepCols, depCols) = reifyPrimeField p $ \pxy ->
+    go (p:ps) =
+      let (indepRows, _, indepCols, depCols) = reifyPrimeField p $ \pxy ->
             let mat = cmap (modRat pxy) mat0
-                (koho, irs, drs) = splitIndependentDirs Row mat
-                (_, ics, dcs) = splitIndependentDirs Column koho
-            in (irs, drs, ics, dcs)
-      gs <- replicateM (length depCols) getSplit
-      let rdic = IM.fromList $ zip indepRows [0..]
-          cdic = IM.fromList $ zip indepCols [0..]
-          newIdx (i, j) = (,) <$> IM.lookup i rdic <*> IM.lookup j cdic
-          spec = fromList $ mapMaybe (\(ind, c) -> (,c) <$> newIdx ind) $ V.toList $
-                 nonZeroEntries mat0
-          anss = DT.trace (show $ toLists spec) $
-                 parMap rseq (\(g, c) -> view _Right $ evalRand (solveLinear spec c) g) $
-                 zip gs (map (flip getCol spec) depCols)
+                (koho, IS.fromList -> irs, IS.fromList -> drs) =
+                  {-# SCC "splitRow" #-} splitIndependentDirs Row mat
+                (_, IS.fromList -> ics, IS.fromList -> dcs) =
+                  {-# SCC "splitCol" #-} splitIndependentDirs Column koho
+            in (irs,
+                drs `IS.union` (IS.fromList (nonZeroRows mat0) IS.\\ irs),
+                ics,
+                dcs `IS.union` (IS.fromList (nonZeroCols $ extract irdic colIdentDic) IS.\\ ics))
+          colIdentDic = IM.fromList $ zip [0..ncols mat0 - 1] [0..]
+          irdic = IM.fromList $ zip (IS.toAscList indepRows) [0..]
+          icdic = IM.fromList $ zip (IS.toAscList indepCols) [0..]
+          dcdic = IM.fromList $ zip (IS.toDescList depCols) [0..]
+          newIdx rd cd (i, j) = (,) <$> IM.lookup i rd <*> IM.lookup j cd
+          extract rd cd = fromList $ mapMaybe (\(ind, c) -> (,c) <$> newIdx rd cd ind) $
+                          V.toList $ nonZeroEntries mat0
+          spec = extract irdic icdic
+          Just q = find (\r -> {-# SCC "checkDet" #-} reifyPrimeField r $ \pxy ->
+                          not $ isZero $ view _3 $
+                          structuredGauss' $ cmap (modRat pxy) spec) primes
+          anss = parMap rseq (fromJust . solveHensel 10 q spec) $
+                 toCols $ extract irdic dcdic
+          permMat = build [] (ncols mat0 - 1)
+                    (zip (IS.toDescList indepCols) $ reverse $ toCols $ identity $ nrows spec) $
+                    zip (IS.toDescList depCols) anss
+          origDeled = extract irdic colIdentDic & width .~ mat0^.width
+     in if (spec * permMat) == origDeled
+        then (permMat, spec)
+        else go ps
+    build ans i mns vecs
+      | i < 0 = fromCols ans
+      | otherwise = {-# SCC "building" #-}
+        case vecs of
+          ((k, v) : vs) | i == k -> build (v : ans) (i-1) mns vs
+          _ ->
+            case mns of
+              ((l,m):mn) | i == l -> build (m : ans) (i-1) mn vecs
+              _ -> build (V.empty : ans) (i-1) mns vecs
 
-      return $ (spec, anss)
--}
+clearDenom :: Euclidean a => Matrix (Fraction a) -> Matrix a
+clearDenom mat =
+  let g = V.foldr' (lcm' . denominator . snd) one $ nonZeroEntries mat
+  in cmap (numerator . (* (g % one))) mat
+
+lcm' :: Euclidean r => r -> r -> r
+lcm' n m = n * m `quot` gcd n m
 
 henselLift :: Integer           -- ^ prime number @p@
            -> Matrix Integer -- ^ original matrix @M@
@@ -785,11 +869,12 @@ henselLift p m q b =
             r' = V.map (`quot` p) $ V.zipWith (-) r (m `multWithVector` u)
         in (s*p, acc + V.map (s*) u, r')
 
+
 solveHensel :: Int -> Integer
             -> Matrix (Fraction Integer)
             -> Vector (Fraction Integer)
             -> Maybe (Vector (Fraction Integer))
-solveHensel cyc p mat b =
+solveHensel cyc p mat b = {-# SCC "solveHensel" #-}
   let g0 = V.foldr (lcm . denominator . view _2) one $ nonZeroEntries mat
       g1 = V.foldr (lcm . denominator) one b
       g  = lcm g0 g1 % 1
@@ -806,3 +891,5 @@ solveHensel cyc p mat b =
         Just x' | mat `multWithVector` x' == b -> Just x'
         _ -> go (drop cyc xs)
 
+
+tr str a = DT.trace (str <> show a) a

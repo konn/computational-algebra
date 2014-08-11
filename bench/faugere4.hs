@@ -2,20 +2,19 @@
 module Main where
 import           Algebra.Algorithms.Faugere4
 import           Algebra.Algorithms.Groebner
+import qualified Algebra.LinkedMatrix        as LM
 import           Algebra.Matrix
 import           Algebra.Prelude
-import           Algebra.Ring.Polynomial
 import           Control.DeepSeq
 import           Control.Parallel.Strategies
 import           Criterion
 import           Criterion.Main
 import qualified Data.Matrix                 as DM
 import           Data.Proxy                  (Proxy (..))
-import           Data.Type.Natural           (sFive, sFour, sThree)
+import           Data.Type.Natural           (sFour, sThree)
 import           Data.Type.Natural           (sSix)
 import           Data.Type.Natural           (Three)
 import           Data.Type.Natural           (Six)
-import           Numeric.Field.Fraction      (Fraction)
 import           Test.QuickCheck
 
 import Utils
@@ -24,6 +23,8 @@ f4Repa = faugere4 optimalStrategy
 f4DM = faugere4G (Proxy :: Proxy DM.Matrix) optimalStrategy
 f4SM = faugere4G (Proxy :: Proxy Sparse) optimalStrategy
 f4LM  = faugere4LM optimalStrategy
+f4LMN = faugere4G  (Proxy :: Proxy LM.Matrix) optimalStrategy
+f4Mod  = faugere4Modular optimalStrategy
 
 ideal3 :: [OrderedPolynomial (Fraction Integer) Grevlex Three]
 ideal3 = [x^2 + y^2 + z^2 - 1, x^2 + y^2 + z^2 - 2*x, 2*x -3*y - z]
@@ -46,6 +47,8 @@ ideal6 = [ z^5 + y^4 + x^3 - 1, z^3 + y^3 + x^2 - 1]
   where
     [x,y,z] = genVars sThree
 
+buildCase :: NFData b => a -> String -> (a -> b) -> Benchmark
+buildCase i name calc = bench name $ nf calc i
 
 main :: IO ()
 main = do
@@ -58,53 +61,74 @@ main = do
   rand0 <- sample' $ idealOfDim sThree
   rnd <- return $!! (head (drop 2 rand0) `using` rdeepseq)
   defaultMain $
-    [ bgroup "cyclic-3"
-      [ bench "buchberger" $ nf calcGroebnerBasis i1
-      , bench "F4-repa"    $ nf f4Repa i1
-      , bench "F4-dm"      $ nf f4DM i1
-      , bench "F4-sparse"  $ nf f4SM i1
-      , bench "F4-linked"  $ nf f4LM i1
+    [ bgroup "cyclic-3" $
+      map (uncurry $ buildCase i1)
+      [("buchberger", toIdeal . calcGroebnerBasis)
+      , ("F4-repa", f4Repa)
+      , ("F4-dm", f4DM)
+      , ("F4-sparse", f4SM)
+      , ("F4-link-naive", f4LMN)
+      , ("F4-link-str", f4LM)
+      , ("F4-modular" , f4Mod)
       ]
-    , bgroup "cyclic-4"
-      [ bench "buchberger" $ nf calcGroebnerBasis i2
-      , bench "F4-repa"    $ nf f4Repa i2
-      , bench "F4-dm"      $ nf f4DM i2
-      , bench "F4-sparse"  $ nf f4SM i2
-      , bench "F4-linked"  $ nf f4LM i2
+    , bgroup "cyclic-4" $
+      map (uncurry $ buildCase i2)
+      [("buchberger", toIdeal . calcGroebnerBasis)
+      , ("F4-repa", f4Repa)
+      , ("F4-dm", f4DM)
+      , ("F4-sparse", f4SM)
+      , ("F4-link-naive", f4LMN)
+      , ("F4-link-str", f4LM)
+      , ("F4-modular" , f4Mod)
       ]
-    , bgroup "I3"
-      [ bench "buchberger" $ nf calcGroebnerBasis i3
-      , bench "F4-repa"    $ nf f4Repa i3
-      , bench "F4-dm"      $ nf f4DM i3
-      , bench "F4-sparse"  $ nf f4SM i3
-      , bench "F4-linked"  $ nf f4LM i3
+    , bgroup "I3" $
+      map (uncurry $ buildCase i3)
+      [("buchberger", toIdeal . calcGroebnerBasis)
+      , ("F4-repa", f4Repa)
+      , ("F4-dm", f4DM)
+      , ("F4-sparse", f4SM)
+      , ("F4-link-naive", f4LMN)
+      , ("F4-link-str", f4LM)
+      , ("F4-modular" , f4Mod)
       ]
-    , bgroup "I4"
-      [  bench "buchberger" $ nf calcGroebnerBasis i4
-      , bench "F4-repa"    $ nf f4Repa i4
-      , bench "F4-dm"      $ nf f4DM i4
-      , bench "F4-sparse"  $ nf f4SM i4
-      , bench "F4-linked"  $ nf f4LM i4
+    , bgroup "I4" $
+      map (uncurry $ buildCase i4)
+      [("buchberger", toIdeal . calcGroebnerBasis)
+      , ("F4-repa", f4Repa)
+      , ("F4-dm", f4DM)
+      , ("F4-sparse", f4SM)
+      , ("F4-link-naive", f4LMN)
+      , ("F4-link-str", f4LM)
+      , ("F4-modular" , f4Mod)
       ]
-    , bgroup "I5"
-      [ bench "buchberger" $ nf calcGroebnerBasis i5
-      , bench "F4-repa"    $ nf f4Repa i5
-      , bench "F4-dm"      $ nf f4DM i5
-      , bench "F4-sparse"  $ nf f4SM i5
-      , bench "F4-linked"  $ nf f4LM i5
+    , bgroup "I5" $
+      map (uncurry $ buildCase i5)
+      [("buchberger", toIdeal . calcGroebnerBasis)
+      , ("F4-repa", f4Repa)
+      , ("F4-dm", f4DM)
+      , ("F4-sparse", f4SM)
+      , ("F4-link-naive", f4LMN)
+      , ("F4-link-str", f4LM)
+      , ("F4-modular" , f4Mod)
       ]
-    , bgroup "I6"
-      [ bench "buchberger" $ nf calcGroebnerBasis i6
-      , bench "F4-repa"    $ nf f4Repa i6
-      , bench "F4-dm"      $ nf f4DM i6
-      , bench "F4-sparse"  $ nf f4SM i6
-      , bench "F4-linked"  $ nf f4LM i6
+    , bgroup "I6" $
+      map (uncurry $ buildCase i6)
+      [("buchberger", toIdeal . calcGroebnerBasis)
+      , ("F4-repa", f4Repa)
+      , ("F4-dm", f4DM)
+      , ("F4-sparse", f4SM)
+      , ("F4-link-naive", f4LMN)
+      , ("F4-link-str", f4LM)
+      , ("F4-modular" , f4Mod)
       ]
-    , bgroup "random-3ary"
-      [ bench "buchberger" $ nf calcGroebnerBasis rnd
-      , bench "F4-repa"    $ nf f4Repa rnd
-      , bench "F4-dm"      $ nf f4DM rnd
-      , bench "F4-sparse"  $ nf f4SM rnd
-      , bench "F4-linked"  $ nf f4LM rnd
+    , bgroup "random-3ary" $
+      map (uncurry $ buildCase rnd)
+      [("buchberger", toIdeal . calcGroebnerBasis)
+      , ("F4-repa", f4Repa)
+      , ("F4-dm", f4DM)
+      , ("F4-sparse", f4SM)
+      , ("F4-link-naive", f4LMN)
+      , ("F4-link-str", f4LM)
+      , ("F4-modular" , f4Mod)
       ]
     ]
