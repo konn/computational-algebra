@@ -5,8 +5,8 @@ module Algebra.Ring.Polynomial.Factorize (factorise, Unipol, distinctDegFactor,
                                           equalDegreeSplitM, equalDegreeFactorM,
                                           squareFreePart, squareFreeDecomp,
                                           generateIrreducible) where
+import           Algebra.Algorithms.PrimeTest     hiding (modPow)
 import           Algebra.Field.Finite
-import           Algebra.NumberTheory.PrimeTest   hiding (modPow)
 import           Algebra.Prelude
 import           Algebra.Ring.Polynomial.Quotient
 import           Control.Applicative              ((<$>), (<|>))
