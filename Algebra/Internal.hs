@@ -13,7 +13,7 @@ toProxy :: a -> Proxy a
 toProxy _ = Proxy
 
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ < 708
-withSingI :: S.Sing n -> (S.SingI n => r) -> r
+withSingI :: Sing n -> (SingI n => r) -> r
 withSingI n f = case singInstance n of
   SingInstance -> f
 #endif
