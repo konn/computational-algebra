@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds, ExplicitForAll, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, MultiParamTypeClasses, OverlappingInstances, PolyKinds  #-}
 {-# LANGUAGE RecordWildCards, TemplateHaskell, TypeFamilies, TypeOperators  #-}
-{-# LANGUAGE ViewPatterns                                                   #-}
+{-# LANGUAGE UndecidableInstances, ViewPatterns                             #-}
 {-# OPTIONS_GHC -fno-warn-orphans                             #-}
 module Algebra.Ring.Polynomial.Monomorphic where
 import           Algebra.Ring.Ideal
