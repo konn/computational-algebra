@@ -80,6 +80,9 @@ library
     buildable: True
     other-modules: Algebra.Algorithms.FGLM Algebra.Field.Galois.Internal Algebra.Field.Galois.Conway
     ghc-options: -fwarn-name-shadowing -Odph -with-rtsopts="-qa"
+    extensions: CPP
+    if impl(ghc >= 7.8)
+       extensions: AllowAmbiguousTypes
  
 executable solve
     build-depends: semigroups >= 0.15.2,
