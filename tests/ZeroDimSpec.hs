@@ -60,7 +60,7 @@ spec = parallel $ do
       checkForArity [2..4] $ \sdim ->
         case sdim of
           SZ -> error "impossible"
-          SS _ ->
+          SS k -> withSingI k $
             forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
             let base = reifyQuotient (mapIdeal (changeOrder Lex) ideal) $ \ii ->
                   map quotRepr $ fromJust $ standardMonomials' ii
@@ -69,14 +69,14 @@ spec = parallel $ do
       checkForArity [2..4] $ \sdim ->
         case sdim of
           SZ -> error "impossible"
-          SS _ ->
+          SS k -> withSingI k $
             forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
             stdReduced (fst $ fglm ideal) == stdReduced (calcGroebnerBasisWith Lex ideal)
     prop "returns lex base in descending order" $
       checkForArity [2..4] $ \sdim ->
       case sdim of
           SZ -> error "impossible"
-          SS _ ->
+          SS k -> withSingI k $
             forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
             isDescending (map leadingMonomial $ fst $ fglm ideal)
   describe "solve'" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
@@ -96,14 +96,14 @@ spec = parallel $ do
 isDescending :: Ord a => [a] -> Bool
 isDescending xs = and $ zipWith (>=) xs (drop 1 xs)
 
-prop_isApproximateZero :: SingRep n
+prop_isApproximateZero :: SingI n
                        => Double
                        -> (forall m ord. (SingI m, IsMonomialOrder ord) =>
                            Ideal (OrderedPolynomial (Fraction Integer) ord (S m)) -> [SV.Vector (Complex Double) (S m)])
                        -> SNat n -> Property
 prop_isApproximateZero err solver sn =
   case sn of
-    SS _ -> forAll (zeroDimOf sn) $ \(ZeroDimIdeal ideal) ->
+    SS k -> withSingI k $ forAll (zeroDimOf sn) $ \(ZeroDimIdeal ideal) ->
       let anss = solver ideal
           mul r d = convert r * d
       in all (\as -> all ((<err) . magnitude . substWith mul as) $ generators ideal) anss

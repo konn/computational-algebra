@@ -8,7 +8,6 @@ import           Algebra.Wrapped
 import           Control.Monad.Random         (uniform)
 import           Control.Monad.Random         (runRand)
 import           Control.Monad.Random         (Random (..))
-import           Data.Maybe                   (fromJust)
 import           Data.Maybe                   (fromMaybe)
 import           Data.Proxy
 import qualified Data.Ratio                   as R
@@ -54,7 +53,7 @@ withPrimeField :: Integer -> (forall (p :: *). Reifies p Integer => F p) -> Inte
 withPrimeField p f = reifyPrimeField p $ runF . asProxyTypeOf f
 
 proxyF :: Proxy (a :: k) -> Proxy (F a)
-proxyF = reproxy
+proxyF Proxy = Proxy
 
 -- instance Reifies p Int => Noetherian (F p)
 

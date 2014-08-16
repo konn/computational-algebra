@@ -1,9 +1,10 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures, FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving            #-}
-{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction                #-}
-{-# LANGUAGE OverloadedStrings, ParallelListComp, PolyKinds                  #-}
-{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell        #-}
-{-# LANGUAGE TypeFamilies, TypeSynonymInstances, UndecidableInstances        #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures                  #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                     #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses              #-}
+{-# LANGUAGE NoMonomorphismRestriction, OverloadedStrings, ParallelListComp #-}
+{-# LANGUAGE PolyKinds, ScopedTypeVariables, StandaloneDeriving             #-}
+{-# LANGUAGE TemplateHaskell, TypeFamilies, TypeSynonymInstances            #-}
+{-# LANGUAGE UndecidableInstances                                           #-}
 {-# OPTIONS_GHC -fwarn-name-shadowing #-}
 module Algebra.Wrapped (WrappedField(..), Normed(..), fmapUnwrap, fmapWrap) where
 import           Control.Lens
@@ -88,7 +89,7 @@ instance (Eq r, Division r, Group r, Ring r, Normed r)
   WrapField a + WrapField b = WrapField $ a + b
   WrapField a - WrapField b = WrapField $ a - b
   WrapField a * WrapField b = WrapField $ a * b
-  negate = unwrapped %~ negate
+  negate = _Unwrapping WrapField %~ negate
   fromInteger = WrapField . NA.fromInteger
   abs n = liftNorm (norm n)
   signum n | abs n == zero = zero

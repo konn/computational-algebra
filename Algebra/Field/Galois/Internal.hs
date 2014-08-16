@@ -40,7 +40,7 @@ buildInstance (p,n,cs) =
   let tp = toNatType p
       tn = toNatType n
   in [d| instance Reifies (Conway $tp $tn)
-                          (OrderedPolynomial (F $tp) Grevlex One) where
+                          (OrderedPolynomial (F $tp) Grevlex (S Z)) where
            reflect _ = $(toPoly cs)
            {-# INLINE reflect #-}
        |]

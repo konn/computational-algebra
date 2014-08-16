@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds, ExplicitForAll, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, MultiParamTypeClasses, OverlappingInstances, PolyKinds  #-}
-{-# LANGUAGE RecordWildCards, TypeFamilies, TypeOperators, ViewPatterns     #-}
+{-# LANGUAGE RecordWildCards, TemplateHaskell, TypeFamilies, TypeOperators  #-}
+{-# LANGUAGE ViewPatterns                                                   #-}
 {-# OPTIONS_GHC -fno-warn-orphans                             #-}
 module Algebra.Ring.Polynomial.Monomorphic where
 import           Algebra.Ring.Ideal
@@ -25,6 +26,12 @@ import qualified Numeric.Ring.Class       as NA
 data Variable = Variable { varName  :: Char
                          , varIndex :: Maybe Int
                          } deriving (Eq, Ord)
+type Monomial = M.Map Variable Integer
+newtype Polynomial k = Polynomial { unPolynomial :: M.Map Monomial k }
+    deriving (Eq, Ord)
+
+makeWrapped ''Polynomial
+
 
 varChar :: Char -> Variable
 varChar = flip Variable Nothing
@@ -41,14 +48,6 @@ instance (Eq r, Num r, NA.Ring r) => Num (Polynomial r) where
 
 instance Show Variable where
   showsPrec _ v = showChar (varName v) . maybe id ((showChar '_' .) . shows) (varIndex v)
-
-type Monomial = M.Map Variable Integer
-
-newtype Polynomial k = Polynomial { unPolynomial :: M.Map Monomial k }
-    deriving (Eq, Ord)
-
-instance (NA.Monoidal r, Eq r) => Wrapped (M.Map Monomial r) (M.Map Monomial r') (Polynomial r) (Polynomial r') where
-  wrapped = iso (normalize . Polynomial) unPolynomial
 
 normalize :: (Eq k, NA.Monoidal k) => Polynomial k -> Polynomial k
 normalize (Polynomial dic) =
@@ -223,7 +222,7 @@ showRatPolynomial f =
         case singInstance (Poly.sArity f') of
           SingInstance -> Poly.showPolynomialWith False dic Poly.showRational f'
   where
-    dic = zip [1 :: Int ..] $ map show $ buildVarsList f
+    dic = zip [0 :: Int ..] $ map show $ buildVarsList f
 
 injectVar :: NA.Unital r => Variable -> Polynomial r
 injectVar var = Polynomial $ M.singleton (M.singleton var 1) NA.one
@@ -237,5 +236,5 @@ subst assign poly = NA.sum $ map (uncurry (NA.*.) . first extractPower) $ M.toLi
     extractPower = NA.product . map (uncurry NA.pow) . map (flip (M.findWithDefault NA.zero) assign *** (fromInteger :: Integer -> NA.Natural)) . M.toList
 
 diff :: (Eq r, NA.Ring r) => Variable -> Polynomial r -> Polynomial r
-diff var = unwrapped %~ M.mapKeysWith (NA.+) (at var._Just %~ max 0 . pred)
-                      . M.mapWithKey (\k v -> v NA.* NA.fromIntegral (M.findWithDefault NA.zero var k))
+diff var = _Wrapped %~ M.mapKeysWith (NA.+) (at var._Just %~ max 0 . pred)
+                       . M.mapWithKey (\k v -> v NA.* NA.fromIntegral (M.findWithDefault NA.zero var k))

@@ -37,6 +37,7 @@ import           Control.Monad.Random                hiding (fromList)
 import           Control.Monad.ST.Strict             (runST)
 import           Control.Monad.State.Strict          (evalState, runState)
 import           Control.Parallel.Strategies         (parMap, rseq)
+import           Control.Parallel.Strategies         (rdeepseq)
 import           Data.Function                       (on)
 import           Data.IntMap.Strict                  (IntMap, alter, insert,
                                                       mapMaybeWithKey,
@@ -60,7 +61,6 @@ import           Data.Type.Natural                   (Five, One)
 import           Data.Vector                         (Vector, create, generate,
                                                       thaw, unsafeFreeze)
 import qualified Data.Vector                         as V
-import qualified Data.Vector.Algorithms.Intro        as V
 import           Data.Vector.Mutable                 (grow)
 import qualified Data.Vector.Mutable                 as MV
 import qualified Debug.Trace                         as DT
@@ -68,7 +68,7 @@ import           Numeric.Decidable.Zero              (isZero)
 import           Numeric.Field.Fraction
 import           Numeric.Semiring.Integral           (IntegralSemiring)
 import           Prelude                             (abs)
-import           Prelude                             hiding (Num (..), gcd,
+import           Prelude                             hiding (Num (..), gcd, lcm,
                                                       product, quot, recip, sum,
                                                       (/), (^))
 import qualified Prelude                             as P
@@ -827,7 +827,7 @@ triangulateModular mat0 =
           Just q = find (\r -> {-# SCC "checkDet" #-} reifyPrimeField r $ \pxy ->
                           not $ isZero $ view _3 $
                           structuredGauss' $ cmap (modRat pxy) spec) primes
-          anss = parMap rseq (fromJust . solveHensel 10 q spec) $
+          anss = parMap rdeepseq (fromJust . solveHensel 10 q spec) $
                  toCols $ extract irdic dcdic
           permMat = build [] (ncols mat0 - 1)
                     (zip (IS.toDescList indepCols) $ reverse $ toCols $ identity $ nrows spec) $

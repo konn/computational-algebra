@@ -104,7 +104,7 @@ toCoeffList on f =
   let v = var on  `asTypeOf` f
   in [ coeff (leadingMonomial $ v ^^ i) f | i <- [0.. fromIntegral (totalDegree' f)]]
 
-showSols :: (SingRep n, IsOrder order, Convertible a Double)
+showSols :: (SingI n, IsOrder order, Convertible a Double)
          => Double -> Ideal (OrderedPolynomial a order n) -> [SV.Vector (Complex Double) n1] -> IO ()
 showSols err eqn sols = do
   let (rs, is) = partition (all ((<err).P.abs.imagPart)) $ map SV.toList sols

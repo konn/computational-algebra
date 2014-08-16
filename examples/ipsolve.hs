@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns, DataKinds, ExistentialQuantification             #-}
+{-# LANGUAGE BangPatterns, CPP, DataKinds, ExistentialQuantification        #-}
 {-# LANGUAGE FlexibleContexts, GADTs, KindSignatures, MultiParamTypeClasses #-}
 {-# LANGUAGE NoImplicitPrelude, RankNTypes, ScopedTypeVariables             #-}
 {-# LANGUAGE TemplateHaskell, TypeOperators, UndecidableInstances           #-}
@@ -6,7 +6,6 @@ module Main where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances           ()
 import           Algebra.Prelude
-import           Algebra.Ring.Ideal
 import           Control.Applicative         ((<$>))
 import           Control.Lens                (ix, makeLenses, view, (&), (.~))
 import           Data.Constraint
@@ -18,6 +17,9 @@ import           Data.Vector.Sized           (Vector (..))
 import qualified Data.Vector.Sized           as V
 import qualified Prelude                     as P
 import           Proof.Equational
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
+import Data.Singletons.Prelude (SList)
+#endif
 
 newtype IsOrder_ = IsOrder_ { cmp :: forall n. Monomial n -> Monomial n -> Ordering }
 data MOrder a = MOrder
@@ -62,8 +64,8 @@ solveIP' c mat b =
   reify (IsOrder_ $ costCmp c) $ \pxy ->
   let n    = sing :: SNat n
       m    = sing :: SNat m
-      ord  = ProductOrder (sS m) Grevlex (toMOrder pxy)
-      vlen = sS m %+ n
+      ord  = ProductOrder (SS m) Grevlex (toMOrder pxy)
+      vlen = SS m %+ n
       pf1  = plusLeqL m n
       pf2 = leqSucc (m %+ n)
   in case (propToClassLeq pf1, propToBoolLeq pf1, propToBoolLeq (pf1 `leqTrans` pf2)) of
@@ -75,7 +77,7 @@ solveIP' c mat b =
               (xsw, ys)  = splitAt (sNatToInt m+1) $ genVars vlen
               gs  = calcGroebnerBasis $ toIdeal $ product xsw - one : zipWith (-) ys as
               ans = b' `modPolynomial` gs
-              (cond, solution) = V.splitAt (sS m) $ getMonomial $ leadingMonomial ans
+              (cond, solution) = V.splitAt (SS m) $ getMonomial $ leadingMonomial ans
           in if V.all (== 0) cond
              then Just $ coerce (plusMinusEqR n m) solution
              else Nothing
@@ -92,7 +94,7 @@ data IPProblem n m = IPProblem { objectCnstr :: Vector Int n
                                } deriving (Show, Eq)
 makeLenses ''Cnstr
 
-solveCnstrs :: forall n m. (SingRep m, SingRep n) => IPProblem n m -> Maybe (Vector Int n)
+solveCnstrs :: forall n m. (SingI m, SingI n) => IPProblem n m -> Maybe (Vector Int n)
 solveCnstrs ipp =
   let sn = sing :: SNat n
       sm = sing :: SNat m
@@ -104,7 +106,7 @@ solveCnstrs ipp =
 extractProblem :: IPProblem n m -> (Vector Int n, Vector (Vector Int n) m, Vector Int m)
 extractProblem (IPProblem obj css) = (obj, V.map (view lhs) css, V.map (view rhs) css)
 
-nfProblem :: forall n m . SingRep m => IPProblem n m -> IPProblem (n :+ m) m
+nfProblem :: forall n m . SingI m => IPProblem n m -> IPProblem (n :+ m) m
 nfProblem (IPProblem obj css) =
   IPProblem (obj `V.append` V.replicate (sing :: SNat m) 0)
             (nfCnstrs css)
@@ -113,7 +115,7 @@ enumOrd' :: SNat n -> V.Vector (V.Ordinal n) n
 enumOrd' SZ = Nil
 enumOrd' (SS n) = V.OZ :- V.map V.OS (enumOrd' n)
 
-nfCnstrs :: forall n m. (SingRep m)
+nfCnstrs :: forall n m. (SingI m)
          => Vector (Cnstr n) m -> Vector (Cnstr (n :+ m)) m
 nfCnstrs css = V.zipWithSame conv css (enumOrd' (sing :: SNat m))
   where

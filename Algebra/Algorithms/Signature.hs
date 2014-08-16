@@ -22,7 +22,7 @@ import           Data.Monoid                 ((<>))
 import           Data.Reflection             (Given)
 import           Data.Reflection             (given)
 import           Data.Reflection             (give)
-import           Data.Singletons             (SingRep)
+import           Data.Singletons             (SingI)
 import           Debug.Trace
 import           Numeric.Decidable.Zero      (isZero)
 
@@ -64,7 +64,7 @@ instance (LeftModule Natural a, DecidableZero a, Additive a) => LeftModule Natur
 instance (RightModule Natural a, DecidableZero a, Additive a) => RightModule Natural (IntMap a) where
   m *. i = mapMaybe (\d -> let c = d *. i in if isZero c then Nothing else Just c) m
 
-instance (SingRep n, IsMonomialOrder ord, Given (SomeModuleOrder ord n)) => Ord (Signature ord n) where
+instance (SingI n, IsMonomialOrder ord, Given (SomeModuleOrder ord n)) => Ord (Signature ord n) where
   compare =
     case given :: SomeModuleOrder ord n of
       SomeModuleOrder mord -> compareSignature mord
@@ -75,11 +75,11 @@ instance (DecidableZero a, Module Natural a, Additive a) => Monoidal (IntMap a) 
 instance (DecidableZero a, Group a) => Group (IntMap a) where
   negate = IM.map negate
 
-injectModuleTerm :: (DecidableZero a, SingRep n, Ring a, IsOrder ord)
+injectModuleTerm :: (DecidableZero a, SingI n, Ring a, IsOrder ord)
                  => Signature ord n -> IntMap (OrderedPolynomial a ord n)
 injectModuleTerm = generator &&& monomial >>> second (curry toPolynomial one) >>> uncurry singleton
 
-mlt :: (Given (SomeModuleOrder ord n), DecidableZero r, SingRep n, Ring r, IsMonomialOrder ord)
+mlt :: (Given (SomeModuleOrder ord n), DecidableZero r, SingI n, Ring r, IsMonomialOrder ord)
     => PolynomialModule r ord n -> Signature ord n
 mlt m | IM.null m = error "zero module element"
       | otherwise = maximum $ concatMap (\(i, p) -> map (Signature i) $ monomials p) $ IM.toList $ m
@@ -93,7 +93,7 @@ data LabeledPoly r ord n = LabPoly { signature :: Signature ord n
                                    } deriving (Show, Eq)
 
 class ModuleOrdering sord where
-  compareSignature :: (SingRep n, IsMonomialOrder ord)
+  compareSignature :: (SingI n, IsMonomialOrder ord)
                    => sord ord n -> Signature ord n -> Signature ord n -> Ordering
 
 -- | Preferring the module position
@@ -109,20 +109,20 @@ instance ModuleOrdering Schreyer where
   compareSignature (Schreyer ms) (Signature i t) (Signature j u) =
     compare (t * (ms !! i)) (u * (ms !! j)) <> compare i j
 
-lm :: (DecidableZero r, SingRep n, Ring r, IsOrder order)
+lm :: (DecidableZero r, SingI n, Ring r, IsOrder order)
    => LabeledPoly r order n -> OrderedMonomial order n
 lm = leadingMonomial . poly
 
-lc :: (DecidableZero r, SingRep n, Ring r, IsOrder order)
+lc :: (DecidableZero r, SingI n, Ring r, IsOrder order)
    => LabeledPoly r order n -> r
 lc = leadingCoeff . poly
 
-(@*) :: (DecidableZero r, SingRep n, Ring r, IsOrder order)
+(@*) :: (DecidableZero r, SingI n, Ring r, IsOrder order)
      => OrderedMonomial order n -> IntMap (OrderedPolynomial r order n) -> IntMap (OrderedPolynomial r order n)
 m @* pm = IM.map (\ k -> toPolynomial (one, m) * k) pm
 
 sLabPoly :: forall r ord n. (Given (SomeModuleOrder ord n), DecidableZero r, Show r,
-                             SingRep n, Ring r, IsMonomialOrder ord)
+                             SingI n, Ring r, IsMonomialOrder ord)
          => LabeledPoly r ord n -> LabeledPoly r ord n -> LabeledPoly r ord n
 sLabPoly f g =
   let uf = lcmMonomial (lm f) (lm g) / lm f
@@ -164,7 +164,7 @@ calcGBWithSignature mord (map monoize . filter (not . isZero) . generators -> is
                in go (H.union ps' ps'') (gs ++ [r])
              else go ps' gs
 
-nonMinimal :: (Show r, Given (SomeModuleOrder ord n), DecidableZero r, SingRep n
+nonMinimal :: (Show r, Given (SomeModuleOrder ord n), DecidableZero r, SingI n
               , Ring r, IsMonomialOrder ord)
            => LabeledPoly r ord n -> LabeledPoly r ord n -> Bool
 nonMinimal f g =
@@ -176,7 +176,7 @@ nonMinimal f g =
 (|*) :: OrderedMonomial ord n -> Signature ord n -> Signature ord n
 u |* Signature i t = Signature i (u*t)
 
-notRedundant :: (DecidableZero r, SingRep n, Ring r, IsOrder ord)
+notRedundant :: (DecidableZero r, SingI n, Ring r, IsOrder ord)
                 => [LabeledPoly r ord n] -> LabeledPoly r ord n -> Bool
 notRedundant gs f = any (\ h -> (signature h `divsSiv` signature f) && (lm h `divs` lm f)) gs
 
@@ -184,7 +184,7 @@ divsSiv :: Signature ord n -> Signature ord n -> Bool
 divsSiv (Signature i t) (Signature j u) = i == j && t `divs` u
 
 sigSafeRed :: forall r ord n. (Given (SomeModuleOrder ord n), DecidableZero r,
-                               SingRep n, Field r, IsMonomialOrder ord, Show r)
+                               SingI n, Field r, IsMonomialOrder ord, Show r)
            => [LabeledPoly r ord n] -> LabeledPoly r ord n -> LabeledPoly r ord n
 sigSafeRed gs f = go f
   where
@@ -203,6 +203,6 @@ sigSafeRed gs f = go f
          else Nothing
 
 infixl 7 *?
-(*?) :: (DecidableZero r, SingRep n, Ring r, IsOrder ord)
+(*?) :: (DecidableZero r, SingI n, Ring r, IsOrder ord)
      => (r, OrderedMonomial ord n) -> LabeledPoly r ord n -> LabeledPoly r ord n
 (c, t) *? (LabPoly s f) = LabPoly (t |* s) (toPolynomial (c, t) * f)

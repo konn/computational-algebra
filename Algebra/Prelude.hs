@@ -19,7 +19,7 @@ import           Numeric.Domain.Euclidean hiding (normalize)
 import           Numeric.Field.Fraction   hiding ((%))
 import           Prelude                  hiding (Fractional (..),
                                            Integral (..), Num (..), Rational,
-                                           Real (..), gcd, lex, product,
+                                           Real (..), gcd, lcm, lex, product,
                                            subtract, sum, (^), (^^))
 import           Prelude                  (fromRational)
 

@@ -1,8 +1,11 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances  #-}
-{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, PatternGuards, IncoherentInstances #-}
-{-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, OverlappingInstances #-}
-{-# LANGUAGE PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving   #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances, ViewPatterns, NoMonomorphismRestriction  #-}
+{-# LANGUAGE CPP, ConstraintKinds, DataKinds, FlexibleContexts          #-}
+{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving       #-}
+{-# LANGUAGE IncoherentInstances, LiberalTypeSynonyms                   #-}
+{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction           #-}
+{-# LANGUAGE OverlappingInstances, PatternGuards, PolyKinds, RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell   #-}
+{-# LANGUAGE TypeFamilies, TypeOperators, TypeSynonymInstances          #-}
+{-# LANGUAGE UndecidableInstances, ViewPatterns                         #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults -fwarn-incomplete-patterns #-}
 module Algebra.Ring.Polynomial
     ( Polynomial, Monomial, MonomialOrder, EliminationType, EliminationOrder
@@ -23,45 +26,58 @@ module Algebra.Ring.Polynomial
     , substUnivariate, diff, minpolRecurrent
     , IsOrder(..), IsMonomialOrder)  where
 import           Algebra.Internal
-import           Numeric.Ring.Class
-import           Data.Type.Ordinal
 import           Algebra.Scalar
-import           Proof.Equational        (symmetry, coerce)
+import           Control.Applicative       ((<$>))
 import           Control.Arrow
 import           Control.DeepSeq
-import           Control.Lens            hiding (assign, coerce)
+import           Control.Lens              hiding (assign, coerce)
 import           Data.Function
 import           Data.Hashable
-import           Data.List               (intercalate)
-import           Data.Map                (Map)
-import qualified Data.Map.Strict         as M
+import           Data.List                 (intercalate)
+import           Data.Map                  (Map)
+import qualified Data.Map.Strict           as M
 import           Data.Maybe
 import           Data.Monoid
 import           Data.Ord
 import           Data.Type.Monomorphic
-import           Data.Type.Natural       hiding (max, one, promote, zero)
-import           Data.Vector.Sized       (Vector (..))
-import qualified Data.Vector.Sized       as V
-import           Numeric.Domain.Euclidean hiding (normalize)
-import           Numeric.Domain.Class
-import           Numeric.Field.Fraction
-import qualified Numeric.Ring.Class as   NA
-import           Numeric.Algebra         hiding (Order (..))
-import           Numeric.Decidable.Zero
+import           Data.Type.Natural         hiding (max, one, promote, zero)
+import           Data.Type.Ordinal
+import           Data.Vector.Sized         (Vector (..))
+import qualified Data.Vector.Sized         as V
+import           Numeric.Algebra           hiding (Order (..))
 import           Numeric.Decidable.Units
-import           Prelude                 hiding (lex, negate, recip, sum, (*), quot,rem,
-                                          (+), (-), (^), (^^), Rational, fromInteger, (/))
-import qualified Prelude                 as P
-import Numeric.Semiring.Integral (IntegralSemiring)
-import Control.Applicative ((<$>))
-
-monoize :: (DecidableZero r, SingRep n, Field r, IsMonomialOrder order)
-        => OrderedPolynomial r order n -> OrderedPolynomial r order n
-monoize f | isZero f  = zero
-          | otherwise = recip (leadingCoeff f) .*. f
+import           Numeric.Decidable.Zero
+import           Numeric.Domain.Class
+import           Numeric.Domain.Euclidean  hiding (normalize)
+import           Numeric.Field.Fraction
+import           Numeric.Ring.Class
+import qualified Numeric.Ring.Class        as NA
+import           Numeric.Semiring.Integral (IntegralSemiring)
+import           Prelude                   hiding (Rational, fromInteger, lex,
+                                            negate, quot, recip, rem, sum, (*),
+                                            (+), (-), (/), (^), (^^))
+import qualified Prelude                   as P
+import           Proof.Equational          (coerce, symmetry)
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
+import Data.Singletons.Prelude (SList, Sing (SCons, SNil))
+#else
+import Data.Singletons (SList, Sing (SCons, SNil))
+#endif
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i.
 type Monomial (n :: Nat) = V.Vector Int n
+
+
+-- | A wrapper for monomials with a certain (monomial) order.
+newtype OrderedMonomial (ordering :: *) n = OrderedMonomial { getMonomial :: Monomial n }
+
+makeLenses ''OrderedMonomial
+makeWrapped ''OrderedMonomial
+
+monoize :: (DecidableZero r, SingI n, Field r, IsMonomialOrder order)
+        => OrderedPolynomial r order n -> OrderedPolynomial r order n
+monoize f | isZero f  = zero
+          | otherwise = recip (leadingCoeff f) .*. f
 
 instance Hashable r => Hashable (OrderedPolynomial r ord n) where
   hashWithSalt salt poly = hashWithSalt salt $ getTerms poly
@@ -118,7 +134,7 @@ revlex _ _ = bugInGHC
 -- | Convert ordering into graded one.
 graded :: (Monomial n -> Monomial n -> Ordering) -> (Monomial n -> Monomial n -> Ordering)
 graded cmp xs ys = comparing (V.sum) xs ys <> cmp xs ys
-{-# INLINE graded #-}
+{-# INLINE[2] graded #-}
 {-# RULES
 "graded/grevlex" graded grevlex = grevlex
 "graded/grlex"   graded grlex   = grlex
@@ -134,15 +150,15 @@ grevlex :: MonomialOrder
 grevlex = graded revlex
 {-# INLINE grevlex #-}
 
--- | A wrapper for monomials with a certain (monomial) order.
-newtype OrderedMonomial (ordering :: *) n = OrderedMonomial { getMonomial :: Monomial n }
 deriving instance Hashable (Monomial n) => Hashable (OrderedMonomial ordering n)
 deriving instance (Eq (Monomial n)) => Eq (OrderedMonomial ordering n)
 instance SingI n => Show (OrderedMonomial ord n) where
   show xs =
     let vs = catMaybes $ V.toList $
-            V.zipWithSame (\n i -> if i > 0 then Just ("X_" ++ show n ++ if i == 1 then "" else "^" ++ show i) else Nothing)
-            (V.unsafeFromList' [0..])
+            V.zipWithSame (\n i -> if i > 0
+                                   then Just ("X_" ++ show n ++ if i == 1 then "" else "^" ++ show i)
+                                   else Nothing)
+            (V.unsafeFromList' [0 :: Int ..])
             $ getMonomial xs
     in if null vs then "1" else unwords vs
 
@@ -150,14 +166,11 @@ instance Multiplicative (OrderedMonomial ord n) where
   OrderedMonomial n * OrderedMonomial m = OrderedMonomial $ V.zipWithSame (+) n m
 
 instance SingI n => Division (OrderedMonomial ord n) where
-  recip = unwrapped %~ V.map P.negate
+  recip = _Wrapped %~ V.map P.negate
   OrderedMonomial n / OrderedMonomial m = OrderedMonomial $ V.zipWithSame (-) n m
 
 instance SingI n => Unital (OrderedMonomial ord n) where
   one = OrderedMonomial $ fromList sing []
-
-instance Wrapped (Monomial n) (Monomial m) (OrderedMonomial o n) (OrderedMonomial o' m) where
-  wrapped = iso OrderedMonomial getMonomial
 
 -- | Class to lookup ordering from its (type-level) name.
 class IsOrder (ordering :: *) where
@@ -219,7 +232,7 @@ calcOrderWeight' SNil _ = 0
 calcOrderWeight' (SCons n ns) (x :- xs) =
   x * sNatToInt n + calcOrderWeight' ns xs
 calcOrderWeight' (SCons _ _) Nil = 0
-                                                           
+
 weightOrder :: forall ns ord m. (IsOrder ord, SingI ns)
             => Proxy (WeightOrder ns ord) -> Monomial m -> Monomial m -> Ordering
 weightOrder Proxy m m' = comparing (calcOrderWeight (Proxy :: Proxy ns)) m m'
@@ -262,7 +275,7 @@ instance SingI n => EliminationType n Lex
 instance (SingI n, IsMonomialOrder ord, IsMonomialOrder ord') => EliminationType n (ProductOrder n ord ord')
 instance (IsMonomialOrder ord) => EliminationType Z (WeightOrder '[] ord)
 instance (SingI ns, IsMonomialOrder ord, EliminationType n (WeightOrder ns ord))
-    => EliminationType (S n) (WeightOrder (One ': ns) ord)
+    => EliminationType (S n) (WeightOrder (S Z ': ns) ord)
 
 type EliminationOrder n = ProductOrder n Grevlex Grevlex
 
@@ -315,22 +328,26 @@ type IsPolynomial r n = (Ring r, SingI n, DecidableZero r, Eq r)
 coeff :: (IsOrder order, Ring r, SingI n) => OrderedMonomial order n -> OrderedPolynomial r order n -> r
 coeff d = M.findWithDefault zero d . terms
 
-instance (SingI n, DecidableZero r, Ring r, Ring q,
-          IsOrder order', SingI m, DecidableZero q, IsOrder order)
-         => Wrapped (Map (OrderedMonomial order n) r) (Map (OrderedMonomial order' m) q)
-                    (OrderedPolynomial r order n)     (OrderedPolynomial q order' m) where
-    wrapped = iso polynomial terms
+instance (SingI n, DecidableZero r, Ring r, IsOrder order)
+         => Wrapped (OrderedPolynomial r order n) where
+  type Unwrapped (OrderedPolynomial r order n) = Map (OrderedMonomial order n) r
+  _Wrapped' = iso terms polynomial
+
+instance (SingI n, DecidableZero r, Ring r, IsOrder ord
+         ,SingI m, DecidableZero q, Ring q, IsOrder ord'
+         ,t ~ OrderedPolynomial q ord' m)
+         => Rewrapped (OrderedPolynomial r ord n) t
 
 castMonomial :: (IsOrder o, IsOrder o', SingI m, n :<= m) => OrderedMonomial o n -> OrderedMonomial o' m
-castMonomial = unwrapped %~ fromList sing . V.toList
+castMonomial = _Wrapped %~ fromList sing . V.toList
 
 scastMonomial :: (n :<= m) => SNat m -> OrderedMonomial o n -> OrderedMonomial o m
-scastMonomial sdim = unwrapped %~ fromList sdim . V.toList
+scastMonomial sdim = _Wrapped %~ fromList sdim . V.toList
 
 castPolynomial :: (Ring r, DecidableZero r, SingI n, SingI m, IsOrder o, IsOrder o', n :<= m)
                => OrderedPolynomial r o n
                -> OrderedPolynomial r o' m
-castPolynomial = unwrapped %~ M.mapKeys castMonomial
+castPolynomial = _Wrapped %~ M.mapKeys castMonomial
 
 scastPolynomial :: (IsOrder o, IsOrder o', DecidableZero r, Ring r, SingI n, n :<= m, SingI m)
                 => SNat m -> OrderedPolynomial r o n -> OrderedPolynomial r o' m
@@ -494,7 +511,7 @@ instance (Ring r, DecidableZero r, SingI n, IsOrder ord) => DecidableZero (Order
   isZero (Polynomial d) = M.null d
 
 instance (DecidableZero r, Ring r, IsOrder ord, SingI n, IntegralSemiring r) => IntegralSemiring (OrderedPolynomial r ord n)
-instance (Eq r, DecidableUnits r, DecidableZero r, Field r, IsMonomialOrder ord, IntegralSemiring r) => Euclidean (OrderedPolynomial r ord One) where
+instance (Eq r, DecidableUnits r, DecidableZero r, Field r, IsMonomialOrder ord, IntegralSemiring r) => Euclidean (OrderedPolynomial r ord (S Z)) where
   f0 `divide` g = step f0 zero
     where
       lm = leadingMonomial g
@@ -511,7 +528,7 @@ instance (Eq r, DecidableUnits r, DecidableZero r, Field r, IsMonomialOrder ord,
     | otherwise = let lc = leadingCoeff f
                   in (injectCoeff lc, injectCoeff (recip lc) * f)
 
-pDivModPoly :: (Euclidean k, SingRep n, IsOrder ord)
+pDivModPoly :: (Euclidean k, SingI n, IsOrder ord)
             => OrderedPolynomial k ord n -> OrderedPolynomial k ord n
             -> (OrderedPolynomial k ord n, OrderedPolynomial k ord n)
 f0 `pDivModPoly` g =
@@ -525,7 +542,7 @@ f0 `pDivModPoly` g =
             in step (p - (q * g)) (quo + q)
         | otherwise = (quo, p)
 
-instance (Ring r, DecidableZero r, IsOrder ord, DecidableUnits r, SingRep n) => DecidableUnits (OrderedPolynomial r ord n) where
+instance (Ring r, DecidableZero r, IsOrder ord, DecidableUnits r, SingI n) => DecidableUnits (OrderedPolynomial r ord n) where
   isUnit f =
     let (lc, lm) = leadingTerm f
     in lm == one && isUnit lc
@@ -545,7 +562,7 @@ varMonom OZ =
     _   -> error "impossible"
 varMonom (OS n) =
   case sing :: SNat n of
-    SS _ -> 0 :- varMonom n
+    SS sn -> case singInstance sn of SingInstance -> 0 :- varMonom n
     _    -> error "impossible"
 
 toPolynomial :: (IsOrder order, Ring r, DecidableZero r, SingI n) => (r, OrderedMonomial order n) -> OrderedPolynomial r order n
@@ -626,7 +643,7 @@ subst' :: (Ring r, DecidableZero r, SingI n, IsOrder ord)
 subst' p val f
   | v <- leadingMonomial p
   , totalDegree v == 1 =
-    substWith (.*.) (V.zipWithSame (\i mn -> if i == 0 then mn else val) (getMonomial v) allVars) f 
+    substWith (.*.) (V.zipWithSame (\i mn -> if i == 0 then mn else val) (getMonomial v) allVars) f
   | otherwise = error "Not an "
 
 allVars :: forall k ord n . (IsOrder ord, Ring k, DecidableZero k, SingI n)
@@ -636,7 +653,7 @@ allVars = V.unsafeFromList' $ genVars (sing :: SNat n)
 -- | Partially difference at (m+1)-th variable
 diff :: forall n ord r. (DecidableZero r, Ring r, SingI n, IsMonomialOrder ord)
      => Ordinal n -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n
-diff mthVar = unwrapped %~ M.mapKeysWith (+) (unwrapped %~ dropDegree)
+diff mthVar = _Wrapped %~ M.mapKeysWith (+) (_Wrapped %~ dropDegree)
                          . M.mapMaybeWithKey (\k c -> if (V.sIndex mthVar (getMonomial k) > 0)
                                                       then Just $ c * NA.fromIntegral (V.sIndex mthVar (getMonomial k))
                                                       else Nothing)
@@ -664,11 +681,11 @@ changeMonomialOrderProxy _ = OrderedMonomial . getMonomial
 
 changeOrder :: (DecidableZero k, Ring k, Eq (Monomial n), IsOrder o, IsOrder o',  SingI n)
             => o' -> OrderedPolynomial k o n -> OrderedPolynomial k o' n
-changeOrder _ = unwrapped %~ M.mapKeys (OrderedMonomial . getMonomial)
+changeOrder _ = _Wrapped %~ M.mapKeys (OrderedMonomial . getMonomial)
 
 changeOrderProxy :: (DecidableZero k, Ring k, Eq (Monomial n), IsOrder o, IsOrder o',  SingI n)
             => Proxy o' -> OrderedPolynomial k o n -> OrderedPolynomial k o' n
-changeOrderProxy _ = unwrapped %~ M.mapKeys (OrderedMonomial . getMonomial)
+changeOrderProxy _ = _Wrapped %~ M.mapKeys (OrderedMonomial . getMonomial)
 
 getTerms :: OrderedPolynomial k order n -> [(k, OrderedMonomial order n)]
 getTerms = map (snd &&& fst) . M.toDescList . terms
@@ -717,15 +734,6 @@ reversal k = transformMonomial (\(i :- Nil) -> (k - i) :- Nil)
 
 sArity :: OrderedPolynomial k ord n -> SNat n
 sArity (Polynomial dic) = V.sLength $ getMonomial $ fst $ M.findMin dic
-{-# RULES
-"sArity/zero" forall (v :: OrderedPolynomial k ord Z).                     sArity v = SZ
-"sArity/one" forall (v :: OrderedPolynomial k ord (S Z)).                  sArity v = SS SZ
-"sArity/two" forall (v :: OrderedPolynomial k ord (S (S Z))).              sArity v = SS (SS SZ)
-"sArity/three" forall (v :: OrderedPolynomial k ord (S (S (S Z)))).        sArity v = SS (SS (sS SZ))
-"sArity/four" forall (v :: OrderedPolynomial k ord (S (S (S (S Z))))).     sArity v = SS (SS (SS (SS SZ)))
-"sArity/five" forall (v :: OrderedPolynomial k ord (S (S (S (S (S Z)))))). sArity v = SS (SS (SS (SS (SS SZ))))
-"sArity/sing" forall (v :: SingI n => OrderedPolynomial k ord n).           sArity (v :: OrderedPolynomial k ord n) = sing :: SNat n
-  #-}
 
 padeApprox :: (Field r, Eq r, DecidableUnits r, DecidableZero r, IntegralSemiring r,
               IsMonomialOrder order)

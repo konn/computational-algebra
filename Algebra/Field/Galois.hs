@@ -7,11 +7,11 @@ module Algebra.Field.Galois (GF0(), IsGF0, modPoly, modVec, reifyGF0,
                              conwayFile, addConwayPolynomials)  where
 import           Algebra.Field.Finite
 import           Algebra.Field.Galois.Conway
+import           Algebra.Internal
 import           Algebra.Prelude
 import           Algebra.Ring.Polynomial.Factorize
 import           Control.Lens                      (imap)
 import           Control.Monad.Random              (MonadRandom)
-import           Data.Proxy
 import qualified Data.Ratio                        as Rat
 import           Data.Reflection
 import           Data.Type.Monomorphic             (promote)
@@ -93,8 +93,8 @@ instance (SingI n, Reifies f (Unipol (F p)), Reifies p Integer)
 instance (SingI n, Reifies f (Unipol (F p)), Reifies p Integer) => Unital (GF0 p n f) where
   one =
     case sing :: SNat n of
-      SZ -> GF0 Nil
-      SS _ -> GF0 $ one :- SV.replicate' zero
+      SZ   -> GF0 Nil
+      SS k -> withSingI k $ GF0 $ one :- SV.replicate' zero
 
 instance (SingI n, Reifies f (Unipol (F p)), Reifies p Integer) => Semiring (GF0 p n f)
 
@@ -102,7 +102,7 @@ instance (SingI n, Reifies f (Unipol (F p)), Reifies p Integer) => Rig (GF0 p n 
   fromNatural n =
     case sing :: SNat n of
       SZ -> GF0 Nil
-      SS _ -> GF0 $ fromNatural n :- SV.replicate' zero
+      SS k -> withSingI k $ GF0 $ fromNatural n :- SV.replicate' zero
 
 instance (SingI n, Reifies f (Unipol (F p)), Reifies p Integer) => Commutative (GF0 p n f)
 
@@ -110,7 +110,7 @@ instance (SingI n, Reifies f (Unipol (F p)), Reifies p Integer) => Ring (GF0 p n
   fromInteger n =
     case sing :: SNat n of
       SZ -> GF0 Nil
-      SS _ -> GF0 $ fromInteger n :- SV.replicate' zero
+      SS k -> withSingI k $ GF0 $ fromInteger n :- SV.replicate' zero
 
 instance (SingI n, Reifies p Integer) => DecidableZero (GF0 p n f) where
   isZero (GF0 sv) = SV.all isZero sv
@@ -164,7 +164,7 @@ withGF0 :: MonadRandom m
 withGF0 p n f = reifyGF0 p n $ V.fromList . SV.toList . SV.map naturalRepr . runGF0 . asProxyTypeOf f
 
 proxyGF0 :: Proxy (F p) -> SNat n -> Proxy f -> Proxy (GF0 p n f)
-proxyGF0 _ _ = reproxy
+proxyGF0 _ _ Proxy = Proxy
 
 -- | Type-constraint synonym to work with Galois field.
 class (SingI n, Reifies p Integer, Reifies f (Unipol (F p))) => IsGF0 p n f

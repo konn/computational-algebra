@@ -4,7 +4,7 @@ module Main where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Prelude             hiding (normalize)
 import           Control.Arrow               ((***))
-import           Data.Singletons             (SingRep)
+import           Data.Singletons             (SingI)
 import           Data.Type.Natural           (One)
 import           Data.Type.Ordinal           (Ordinal (..))
 import           Data.Vector.Sized           (Vector (..))
@@ -244,7 +244,7 @@ rootRecipPoly f =
       f' = sum $  map (\(k, m) -> toPolynomial (k, OrderedMonomial $ d - totalDegree m :- Nil) ) ts
   in normalize f'
 
-monoize :: (Ring r, DecidableZero r, Division r, SingRep n, IsOrder order)
+monoize :: (Ring r, DecidableZero r, Division r, SingI n, IsOrder order)
         => OrderedPolynomial r order n -> OrderedPolynomial r order n
 monoize f =
   let lc = leadingCoeff f

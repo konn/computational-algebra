@@ -5,7 +5,6 @@
 module Algebra.Matrix (Matrix(..), mapSM, delta, companion, Sparse(..),
                        gaussReduction, maxNorm, rankWith, det,
                        inverse, inverseWith) where
-import           Algebra.Field.Finite
 import qualified Algebra.LinkedMatrix             as LM
 import           Algebra.Ring.Polynomial
 import           Algebra.Wrapped                  (Normed (..))
@@ -16,7 +15,6 @@ import qualified Data.IntSet                      as IS
 import           Data.List
 import qualified Data.Matrix                      as DM
 import           Data.Maybe
-import           Data.Numbers.Primes
 import           Data.Ord
 import           Data.Singletons                  (SingI)
 import           Data.Type.Ordinal
@@ -30,14 +28,14 @@ import           Numeric.Algebra                  (Monoidal, Multiplicative)
 import           Numeric.Algebra                  (Ring, Unital)
 import qualified Numeric.Algebra                  as NA
 import qualified Numeric.Decidable.Zero           as NA
-import           Numeric.Domain.Euclidean         (chineseRemainder)
 import           Numeric.Field.Fraction
 import qualified Numeric.LinearAlgebra            as LA
 import           Sparse.Matrix                    (_Mat)
 import qualified Sparse.Matrix                    as SM
+import GHC.Exts (Constraint)
 
 class Matrix mat where
-  type Elem mat a
+  type Elem mat a :: Constraint
   cmap  :: (Elem mat a, Elem mat b) => (a -> b) -> mat a -> mat b
   empty :: Elem mat b => mat b
   fromLists :: Elem mat a => [[a]] -> mat a
@@ -139,7 +137,7 @@ instance Matrix LA.Matrix where
   m <||> n = LA.fromColumns $ LA.toColumns m ++ LA.toColumns n
   m <--> n = LA.fromRows $ LA.toRows m ++ LA.toRows n
 
-mapSM :: (SM.Vectored a, SM.Vectored b) => (a -> b) -> SM.Mat a -> SM.Mat b
+mapSM :: (SM.Arrayed a, SM.Arrayed b) => (a -> b) -> SM.Mat a -> SM.Mat b
 mapSM f m =
   case m ^._Mat of
     V ks as  -> V ks (GV.fromList $ map f $ GV.toList as) ^.from _Mat
@@ -149,7 +147,7 @@ data Sparse r = Sparse { rawSM :: !(SM.Mat r)
                        , rows  :: !Int
                        }
 
-instance (SM.Vectored a, SM.Eq0 a) => Num (Sparse a) where
+instance (SM.Arrayed a, SM.Eq0 a) => Num (Sparse a) where
   {-# SPECIALIZE instance Num (Sparse Int) #-}
   {-# SPECIALIZE instance Num (Sparse Double) #-}
   {-# SPECIALIZE instance Num (Sparse (Complex Double)) #-}
@@ -168,7 +166,7 @@ instance (SM.Vectored a, SM.Eq0 a) => Num (Sparse a) where
   Sparse m r c - Sparse n r' c' = Sparse (m - n) (max r r') (max c c')
   {-# INLINE (-) #-}
 
-instance (SM.Vectored a, Show a) => Show (Sparse a) where
+instance (SM.Arrayed a, Show a) => Show (Sparse a) where
   showsPrec d = showsPrec d . rawSM
 
 instance Matrix LM.Matrix where
@@ -201,7 +199,7 @@ instance Matrix LM.Matrix where
   nonZeroCols = LM.nonZeroCols
 
 instance Matrix Sparse where
-  type Elem Sparse a = (Num a, SM.Vectored a, SM.Eq0 a)
+  type Elem Sparse a = (Num a, SM.Arrayed a, SM.Eq0 a)
   cmap f (Sparse raw nc nr) = Sparse (mapSM f raw) nc nr
   empty = Sparse (SM.fromList []) 0 0
   fromLists ls =
@@ -242,7 +240,7 @@ instance Matrix Sparse where
   nonZeroRows (Sparse mat _ _) = IS.toList $ IS.fromList $ map (succ . fromIntegral) (mat ^.. SM.keys.each._1)
   nonZeroCols (Sparse mat _ _) = IS.toList $ IS.fromList $ map (succ . fromIntegral) (mat ^.. SM.keys.each._2)
 
-modifyKey :: (SM.Vectored a) => (SM.Key -> SM.Key) -> SM.Mat a -> SM.Mat a
+modifyKey :: (SM.Arrayed a) => (SM.Key -> SM.Key) -> SM.Mat a -> SM.Mat a
 modifyKey f m =
   m & _Mat %~ H.modify (Sort.sortBy (comparing fst)). H.map (first f)
 
@@ -264,8 +262,8 @@ companion on poly =
   then delta j (k+1)
   else NA.negate $ coeff (NA.pow vx (fromIntegral $ j-1 :: NA.Natural)) poly
 
-instance SM.Vectored (Fraction Integer) where
-  type Vec (Fraction Integer) = V.Vector
+instance SM.Arrayed (Fraction Integer) where
+  type Arr (Fraction Integer) = V.Vector
 
 instance SM.Eq0 (Fraction Integer)
 

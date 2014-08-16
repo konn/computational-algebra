@@ -1,25 +1,26 @@
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE DataKinds, DeriveGeneric, FlexibleContexts, FlexibleInstances #-}
-{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, MultiParamTypeClasses      #-}
-{-# LANGUAGE OverlappingInstances, RankNTypes, ScopedTypeVariables         #-}
-{-# LANGUAGE StandaloneDeriving, UndecidableInstances                      #-}
+{-# LANGUAGE CPP, DataKinds, DeriveGeneric, FlexibleContexts             #-}
+{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving        #-}
+{-# LANGUAGE KindSignatures, MultiParamTypeClasses, OverlappingInstances #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, StandaloneDeriving         #-}
+{-# LANGUAGE UndecidableInstances                                        #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Utils (ZeroDimIdeal(..), polyOfDim, arbitraryRational,homogPolyOfDim,arbVecOfSum,
               arbitrarySolvable, zeroDimOf, zeroDimG, unaryPoly, stdReduced,
               quotOfDim, isNonTrivial, Equation(..), liftSNat, checkForArity,
               MatrixCase(..), idealOfDim) where
-import qualified Data.Matrix                   as M hiding (fromList)
+import           Algebra.Internal
 import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial          hiding (Positive)
 import           Algebra.Ring.Polynomial.Quotient
 import           Control.Applicative
-import           Proof.Equational ((:=:)(..))
 import           Control.Lens
 import           Control.Monad
-import Data.Constraint
+import           Data.Constraint
+import           Data.List                        (sortBy)
 import qualified Data.Map                         as M
+import qualified Data.Matrix                      as M hiding (fromList)
+import           Data.Ord
 import           Data.Proxy
-import           Numeric.Field.Fraction
 import           Data.Reflection                  hiding (Z)
 import           Data.Type.Monomorphic
 import qualified Data.Type.Monomorphic            as M
@@ -28,17 +29,21 @@ import           Data.Type.Ordinal
 import qualified Data.Vector                      as V
 import           Data.Vector.Sized                (Vector (..))
 import qualified Data.Vector.Sized                as SV
+import           Numeric.Algebra                  (DecidableZero)
+import           Numeric.Algebra                  (Ring)
 import qualified Numeric.Algebra                  as NA
+import           Numeric.Domain.Euclidean         (Euclidean)
+import           Numeric.Field.Fraction
+import           Proof.Equational                 ((:=:) (..))
 import           Test.QuickCheck
 import qualified Test.QuickCheck                  as QC
 import           Test.QuickCheck.Instances        ()
+import qualified Test.QuickCheck.Modifiers        as QC
 import           Test.SmallCheck.Series
 import qualified Test.SmallCheck.Series           as SC
-import Data.Ord
-import Data.List (sortBy)
-import Numeric.Algebra (DecidableZero)
-import Numeric.Algebra (Ring)
-import Numeric.Domain.Euclidean (Euclidean)
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
+import Data.Type.Equality
+#endif
 
 newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal :: Ideal (Polynomial (Fraction Integer) n)
                                       } deriving (Show, Eq, Ord)
@@ -67,7 +72,7 @@ instance (Num r, Ord r, Ring r, Serial m r) => Serial m (Ideal r) where
   series = newtypeCons toIdeal
 
 appendLM :: (Fraction Integer) -> Monomial Two -> Polynomial (Fraction Integer) Two -> Polynomial (Fraction Integer) Two
-appendLM coef lm = unwrapped %~ M.insert (OrderedMonomial lm) coef
+appendLM coef lm = _Wrapped %~ M.insert (OrderedMonomial lm) coef
 
 xPoly :: Monad m => SC.Series m (Polynomial (Fraction Integer) Two)
 xPoly = do
@@ -83,7 +88,7 @@ yPoly = do
       guard $ leadingMonomial p < OrderedMonomial (d :- 0 :- Nil)
       return $ appendLM c (0 :- d :- Nil) p
 
-instance Monad m => Serial m (ZeroDimIdeal Two) where
+instance Monad m => Serial m (ZeroDimIdeal (S (S Z))) where
   series = do
     (f, g, ideal) <- (,,) <$> xPoly <~> yPoly <~> series
     return $ ZeroDimIdeal $ f `addToIdeal` g `addToIdeal` ideal
@@ -156,13 +161,13 @@ quotOfDim _ = arbitrary
 
 genLM :: forall n. SNat n -> QC.Gen [Polynomial (Fraction Integer) n]
 genLM SZ = return []
-genLM (SS n) = do
+genLM (SS n) = withSingI n $ do
   fs <- map (shiftR sOne) <$> genLM n
   QC.NonNegative deg <- arbitrary
   coef <- arbitraryRational `suchThat` (/= 0)
   xf <- arbitrary :: QC.Gen (Polynomial (Fraction Integer) n)
-  let xlm = OrderedMonomial $ fromList (sS n) [deg + 1]
-      f = xf & unwrapped %~ M.insert xlm coef . M.filterWithKey (\k _ -> k < xlm)
+  let xlm = OrderedMonomial $ fromList (SS n) [deg + 1]
+      f = xf & _Wrapped %~ M.insert xlm coef . M.filterWithKey (\k _ -> k < xlm)
   return $ f : fs
 
 zeroDimOf :: SNat n -> QC.Gen (ZeroDimIdeal n)
@@ -182,9 +187,9 @@ zeroDimG = do
 arbitraryRational :: QC.Gen (Fraction Integer)
 arbitraryRational = do
   a <- QC.arbitrarySizedIntegral
-  QC.NonZero b <- QC.arbitrarySizedIntegral
-                    `suchThat` \(QC.NonZero b) -> gcd a b == 1 && b /= 0
-  return $ a % b
+  b <- QC.arbitrarySizedIntegral
+                    `suchThat` \b -> gcd a b == 1 && b /= 0
+  return $ a % abs b
 
 isNonTrivial :: SingI n => ZeroDimIdeal n -> Bool
 isNonTrivial (ZeroDimIdeal ideal) = reifyQuotient ideal $ maybe False ((>0).length) . standardMonomials'

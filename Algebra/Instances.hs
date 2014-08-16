@@ -23,12 +23,12 @@ import           Numeric.Decidable.Zero
 import           Numeric.Domain.Euclidean (Euclidean)
 import           Numeric.Domain.Euclidean (splitUnit)
 import           Numeric.Field.Fraction
-import           Prelude                  hiding (Num (..))
+import           Prelude                  hiding (Num (..), lcm)
 import qualified Prelude                  as P
 
 type instance Index (V.Vector a n) = V.Index n
 type instance IxValue (V.Vector a n) = a
-instance Functor f => Ixed f (V.Vector a  n) where
+instance  Ixed (V.Vector a  n) where
   ix idx = ilens getter setter
     where
       getter v = (idx, V.sIndex idx v)

@@ -10,11 +10,6 @@ before_install:
 install:
   - cabal update
   - cabal install -j2 --only-dependencies --enable-tests --enable-benchmarks
-  - git clone git://github.com/ekmett/algebra.git
-  - cd algebra
-  - git checkout euclidean
-  - cabal install ./algebra.cabal
-  - cd ../
 
 script:
   - cabal configure --enable-tests --enable-benchmarks -v2  # -v2 provides useful information for debugging

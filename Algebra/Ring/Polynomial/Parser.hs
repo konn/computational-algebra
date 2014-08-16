@@ -1,67 +1,67 @@
-{-# LANGUAGE FlexibleContexts, QuasiQuotes, TemplateHaskell #-}
-module Algebra.Ring.Polynomial.Parser ( monomial, expression, variable, variableWithPower
-                                      , number, integer, natural, parsePolyn) where
+{-# LANGUAGE FlexibleContexts, QuasiQuotes, TemplateHaskell, TupleSections #-}
+module Algebra.Ring.Polynomial.Parser
+       ( monomial, expression, variable, variableWithPower
+       , number, integer, natural, parsePolyn)
+       where
 import           Algebra.Ring.Polynomial.Monomorphic
 import           Control.Applicative                 hiding (many)
 import qualified Data.Map                            as M
+import           Data.Monoid                         (mempty)
+import qualified Data.Ratio                          as P
 import           Numeric.Field.Fraction              (Fraction, (%))
-import           Text.Peggy
+import           Text.Trifecta
 
-[peggy|
-expression :: Polynomial (Fraction Integer)
-  = space* e:expr space*  !. { e }
+expression :: Parser (Polynomial (Fraction Integer))
+expression  = spaces *> expr <* eof
 
-letter :: Char
-  = [a-zA-Z]
+expr :: Parser (Polynomial (Fraction Integer))
+expr = chainl1 term ops
+  where
+    ops = (+) <$ symbolic '+'
+      <|> (-) <$ symbolic '-'
 
-variable :: Variable
-  = letter ('_' integer)? { Variable $1 (fromInteger <$> $2) }
 
-variableWithPower :: (Variable, Integer)
-  = variable "^" natural { ($1, $2) }
-  / variable  { ($1, 1) }
+term :: Parser (Polynomial (Fraction Integer))
+term = (*) <$> (injectCoeff <$> number)
+           <*  spaces
+           <*> factor
+   <|> injectCoeff <$> number
+   <|> factor
 
-expr :: Polynomial (Fraction Integer)
-  = expr "+" term { $1 + $2 }
-  / expr "-" term { $1 - $2 }
-  / term
+factor :: Parser (Polynomial (Fraction Integer))
+factor = toPolyn . (:[]) . (,1) <$> monomial
+     <|> parens expr
+     <|> (^) <$> factor <* symbolic '^' <*> natural
 
-term :: Polynomial (Fraction Integer)
-   = number space* monoms { injectCoeff $1 * $3 }
-   / number { injectCoeff $1 }
-   / monoms
+monomial :: Parser Monomial
+monomial = M.fromListWith (+) <$> many variableWithPower
 
-monoms :: Polynomial (Fraction Integer)
-  = monoms space * fact { $1 * $3 }
-  / fact
+variableWithPower :: Parser (Variable, Integer)
+variableWithPower =
+      (,)  <$> variable <*> option 1 (symbolic '^' *> natural)
 
-fact :: Polynomial (Fraction Integer)
-  = fact "^" natural { $1 ^ $2 }
-  / "(" expr ")"
-  / monomial { toPolyn [($1, 1)] }
+variable :: Parser Variable
+variable = lexeme $ Variable <$> letter
+                             <*> optional (fromInteger <$ char '_' <*> integer)
 
-monomial ::: Monomial
-  = variableWithPower+ { M.fromListWith (+) $1 }
+lexeme :: CharParsing f => f a -> f a
+lexeme p = p <* spaces
 
-number :: (Fraction Integer)
-  = integer "/" integer { $1 % $2 }
-  / integer '.' [0-9]+ { (read (show $1 ++ $2) :: Integer) % toInteger (length $2) }
-  / integer { fromInteger $1 }
+number :: Parser (Fraction Integer)
+number = try ((%) <$> integer <* symbolic '/' <*> integer)
+     <|> either (%1) d2f <$> integerOrDouble
 
-integer :: Integer
-  = "-" natural { negate $1 }
-  / natural
-
-natural :: Integer
-  = [1-9] [0-9]* { read ($1 : $2) }
-
-delimiter :: ()
-  = [()^+] { () }
-  / '-' ![0-9] {()}
-|]
+d2f :: Real a => a -> Fraction Integer
+d2f d =
+  let r = toRational d
+  in P.numerator r % P.denominator r
 
 toPolyn :: [(Monomial, Fraction Integer)] -> Polynomial (Fraction Integer)
 toPolyn = normalize . Polynomial . M.fromList
 
-parsePolyn :: String -> Either ParseError (Polynomial (Fraction Integer))
-parsePolyn = parseString expression "polynomial"
+parsePolyn :: String -> Either String (Polynomial (Fraction Integer))
+parsePolyn = eithResult . parseString expression mempty
+
+eithResult :: Result b -> Either String b
+eithResult (Success a) = Right a
+eithResult (Failure d) = Left $ show d

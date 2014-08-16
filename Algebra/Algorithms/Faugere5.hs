@@ -28,7 +28,7 @@ import           Data.List                   (tails)
 import           Data.Maybe                  (listToMaybe)
 import           Data.Monoid                 ((<>))
 import           Data.Ord                    (comparing)
-import           Data.Singletons             (SingRep)
+import           Data.Singletons             (SingI)
 import           Data.STRef                  (STRef, modifySTRef', newSTRef)
 import           Data.STRef                  (readSTRef, writeSTRef)
 import           Data.Type.Natural           (Three, sThree)
@@ -59,7 +59,7 @@ showsIf :: Bool -> ShowS -> ShowS
 showsIf True  a = a
 showsIf False _ = id
 
-instance (DecidableZero r, Ring r, Show r, SingRep n, IsOrder ord)
+instance (DecidableZero r, Ring r, Show r, SingI n, IsOrder ord)
          => Show (PolyRepr r ord n) where
   showsPrec _ (PolyRepr (n, m) p) = showParen True $
     showsIf (m /= one) (shows m . showChar ' ') . showString "F_" . shows n . showString ", " . shows p
@@ -68,23 +68,23 @@ type RefVector s a = STRef s (MV.MVector s a)
 
 makeLenses ''PolyRepr
 
-instance (IsMonomialOrder ord, SingRep n) => Eq (PolyRepr r ord n) where
+instance (IsMonomialOrder ord, SingI n) => Eq (PolyRepr r ord n) where
   (==) = (==) `on` view signature
 
-instance (IsMonomialOrder ord, SingRep n) => Ord (PolyRepr r ord n) where
+instance (IsMonomialOrder ord, SingI n) => Ord (PolyRepr r ord n) where
   compare = comparing $ view signature
 
-(*@) :: (Ring r, DecidableZero r, IsMonomialOrder ord, SingRep n)
+(*@) :: (Ring r, DecidableZero r, IsMonomialOrder ord, SingI n)
      => OrderedMonomial ord n -> PolyRepr r ord n -> PolyRepr r ord n
 (*@) v = (signature._2 %~ (v*)) >>> (poly %~ (toPolynomial (one, v) *))
 
-nf :: (DecidableZero r, Eq r, SingRep n, Field r, IsMonomialOrder ord)
+nf :: (DecidableZero r, Eq r, SingI n, Field r, IsMonomialOrder ord)
    => PolyRepr r ord n -> [OrderedPolynomial r ord n] -> PolyRepr r ord n
 nf r g = r & poly %~ (`modPolynomial` g)
 
 infixl 7 *@
 
-preReduction :: (Eq r, DecidableZero r, SingRep n, Field r, IsMonomialOrder order)
+preReduction :: (Eq r, DecidableZero r, SingI n, Field r, IsMonomialOrder order)
              => [OrderedPolynomial r order n] -> [OrderedPolynomial r order n]
 preReduction fs = map monoize $ go [] fs
   where
@@ -95,7 +95,7 @@ preReduction fs = map monoize $ go [] fs
          then go (xs++[y]) ys
          else go [] (xs ++ if isZero r then ys else r : ys)
 
-f5Original :: (Show r, Ord r, Eq r, DecidableZero r, SingRep n, Field r, IsMonomialOrder ord)
+f5Original :: (Show r, Ord r, Eq r, DecidableZero r, SingI n, Field r, IsMonomialOrder ord)
            => Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
 f5Original = toIdeal . sort . generators . mainLoop
 
@@ -128,7 +128,7 @@ mainLoop (preReduction . filter (not . isZero) . generators -> ij)
         --  ["reduced(", show i, "th): ", show (isGroebnerBasis $ toIdeal bs'), ", ", show bs']
         loop bs' g'' xs
 
-interred :: (Eq k, SingRep n, DecidableZero k,
+interred :: (Eq k, SingI n, DecidableZero k,
              Field k, IsMonomialOrder order)
          => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
 interred = reduceMinimalGroebnerBasis . minimizeGroebnerBasis
@@ -139,7 +139,7 @@ toPolys = mapM (liftM (view poly) . readAt ?labPolys) . IS.toList
 
 setupReducedBasis :: (Show r, Eq r, ?labPolys::STRef s (MV.MVector s (PolyRepr r ord n)),
                      ?rules::STRef s (MV.MVector s (Rule ord n)),
-                     DecidableZero r, SingRep n, Field r,
+                     DecidableZero r, SingI n, Field r,
                      IsMonomialOrder ord)
                  => IntSet -> ST s IntSet
 setupReducedBasis gs = do
@@ -164,7 +164,7 @@ setupReducedBasis gs = do
 
 f5Core :: ( ?labPolys :: (RefVector s (PolyRepr r ord n)),
            ?rules :: (RefVector s (Rule ord n)), Show r,
-           Eq r, Field r, SingRep n, DecidableZero r, IsMonomialOrder ord)
+           Eq r, Field r, SingI n, DecidableZero r, IsMonomialOrder ord)
        => Int
        -> [OrderedPolynomial r ord n]
        -> IntSet
@@ -203,7 +203,7 @@ mapMaybeM f as = go as id
 
 reduction :: (Eq r, ?labPolys :: (RefVector s (PolyRepr r ord n)),
               ?rules :: (RefVector s (Rule ord n)), Show r,
-              SingRep n, DecidableZero r, Field r,
+              SingI n, DecidableZero r, Field r,
               IsMonomialOrder ord)
           => [Int] -> [OrderedPolynomial r ord n] -> IntSet -> IntSet -> ST s IntSet
 reduction t0 bs g g' =
@@ -220,7 +220,7 @@ reduction t0 bs g g' =
           loop (completed `IS.union` IS.fromList new) (todo' `H.union` H.fromList redo')
 
 findReductor :: (Eq r, ?labPolys :: RefVector s (PolyRepr r ord n),
-                ?rules :: RefVector s (Rule ord n), SingRep n,
+                ?rules :: RefVector s (Rule ord n), SingI n,
                 DecidableZero r, IsMonomialOrder ord, Ring r)
              => Int -> IntSet -> IntSet -> ST s (Maybe Int)
 findReductor k g g' = do
@@ -239,7 +239,7 @@ findReductor k g g' = do
   listToMaybe <$> filterM cond (IS.toList g')
 
 topReduction :: (Eq r, ?labPolys :: (RefVector s (PolyRepr r ord n)),
-                 ?rules :: (RefVector s (Rule ord n)), SingRep n, Show r,
+                 ?rules :: (RefVector s (Rule ord n)), SingI n, Show r,
                  DecidableZero r, Field r, IsMonomialOrder ord)
              => Int -> IntSet -> IntSet -> ST s ([Int], [Int])
 topReduction k g g' = do
@@ -275,7 +275,7 @@ topReduction k g g' = do
 
 spols :: (?labPolys :: (RefVector s (PolyRepr r ord n)),
           ?rules :: (RefVector s (Rule ord n)), Eq r,
-          SingRep n, Show r,
+          SingI n, Show r,
           DecidableZero r, Field r, IsMonomialOrder ord)
       => [CriticalPair ord n] -> ST s [Int]
 spols bs =
@@ -316,7 +316,7 @@ addLabPoly :: (?labPolys::STRef s (MV.MVector s a),
 addLabPoly r = snoc ?labPolys r >> snoc ?rules []
 
 addRule :: (IsMonomialOrder ord, DecidableZero r, ?labPolys :: (RefVector s (PolyRepr r ord n)),
-            ?rules :: (RefVector s (Rule ord n)), SingRep n)
+            ?rules :: (RefVector s (Rule ord n)), SingI n)
         => (Int, OrderedMonomial ord n) -> Maybe Int -> ST s ()
 addRule (n, m) k = do
   cst <- readSTRef ?rules >>= V.freeze
@@ -341,7 +341,7 @@ rewrite u k = do
 
 criticalPair :: (?labPolys :: RefVector s (PolyRepr r ord n)
                 ,?rules::RefVector s (Rule ord n), Show r, Ring r
-                ,Eq r, SingRep n, DecidableZero r, IsMonomialOrder ord)
+                ,Eq r, SingI n, DecidableZero r, IsMonomialOrder ord)
              => Int
              -> Int
              -> Int
@@ -372,7 +372,7 @@ criticalPair k l i g = do
          then (t, u2, l, u1, k)
          else (t, u1, k, u2, l)
 
-isTopReducible :: (?labPolys :: RefVector s (PolyRepr r ord n), SingRep n,
+isTopReducible :: (?labPolys :: RefVector s (PolyRepr r ord n), SingI n,
                    DecidableZero r, IsMonomialOrder ord, Ring r)
                => OrderedMonomial ord n -> IntSet -> ST s Bool
 isTopReducible f gs =
@@ -395,7 +395,7 @@ snoc m x = do
 lengthMV :: STRef s1 (MV.MVector s a) -> ST s1 Int
 lengthMV = liftM MV.length . readSTRef
 
-showSingular :: (DecidableZero r, SingRep n, IsOrder ord, Show r, Ring r)
+showSingular :: (DecidableZero r, SingI n, IsOrder ord, Show r, Ring r)
              => OrderedPolynomial r ord n -> String
 showSingular = replace '%' '/' . showPolynomialWith True [(0, "x(0)"), (1, "x(1)"), (2, "x(2)")] (Positive . show)
 

@@ -1,7 +1,8 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, FlexibleInstances #-}
-{-# LANGUAGE GADTs, MultiParamTypeClasses, NoImplicitPrelude                 #-}
-{-# LANGUAGE ParallelListComp, PolyKinds, RankNTypes, ScopedTypeVariables    #-}
-{-# LANGUAGE TemplateHaskell, TypeFamilies, TypeOperators, ViewPatterns      #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts               #-}
+{-# LANGUAGE FlexibleInstances, GADTs, MultiParamTypeClasses            #-}
+{-# LANGUAGE NoImplicitPrelude, ParallelListComp, PolyKinds, RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables, TemplateHaskell, TypeFamilies         #-}
+{-# LANGUAGE TypeOperators, ViewPatterns                                #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Algebra.Algorithms.Groebner (
                                    -- * Polynomial division
@@ -88,7 +89,7 @@ infixl 7 `modPolynomial`
 infixl 7 `divModPolynomial`
 
 -- | Test if the given ideal is Groebner basis, using Buchberger criteria and relatively primeness.
-isGroebnerBasis :: (Eq r, SingRep n, DecidableZero r, Field r, IsMonomialOrder order)
+isGroebnerBasis :: (Eq r, SingI n, DecidableZero r, Field r, IsMonomialOrder order)
                 => Ideal (OrderedPolynomial r order n) -> Bool
 isGroebnerBasis (nub . generators -> ideal) = all check $ combinations ideal
   where

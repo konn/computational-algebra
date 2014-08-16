@@ -9,7 +9,7 @@ import Data.Type.Natural           (sFive)
 
 main :: IO ()
 main = do
-  _ <- evaluate $ faugere4Modular optimalStrategy (cyclic sFive)
+  _ <- evaluate $ faugere4Modular optimalStrategy (cyclic sFour)
   return ()
 
 testCase :: Matrix (Fraction Integer)

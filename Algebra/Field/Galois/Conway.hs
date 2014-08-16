@@ -1,5 +1,6 @@
-{-# LANGUAGE DataKinds, FlexibleInstances, MultiParamTypeClasses #-}
-{-# LANGUAGE TemplateHaskell                                     #-}
+{-# LANGUAGE AllowAmbiguousTypes, DataKinds, FlexibleInstances           #-}
+{-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, TemplateHaskell #-}
+{-# LANGUAGE TypeSynonymInstances                                        #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Field.Galois.Conway (Conway, addConwayPolynomials, conwayFile) where
 import Algebra.Field.Galois.Internal
