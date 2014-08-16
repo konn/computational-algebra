@@ -3,6 +3,7 @@
 module ZeroDimSpec where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.ZeroDim
+import           Algebra.Internal
 import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
