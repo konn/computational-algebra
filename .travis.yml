@@ -33,5 +33,5 @@ script:
     fi
  
 matrix:
-  - allow_failures:
-     - env: GHCVER=head
+  allow_failures:
+    - env: GHCVER=head
