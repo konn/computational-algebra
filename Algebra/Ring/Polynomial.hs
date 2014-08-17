@@ -1,6 +1,6 @@
 {-# LANGUAGE CPP, ConstraintKinds, DataKinds, FlexibleContexts          #-}
 {-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving       #-}
-{-# LANGUAGE IncoherentInstances, LiberalTypeSynonyms                   #-}
+{-# LANGUAGE LiberalTypeSynonyms                   #-}
 {-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction           #-}
 {-# LANGUAGE OverlappingInstances, PatternGuards, PolyKinds, RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell   #-}
@@ -422,9 +422,6 @@ instance (DecidableZero r, Ring r, SingI n, IsOrder order, Show r) => Show (Orde
 
 instance (SingI n, IsOrder order) => Show (OrderedPolynomial (Fraction Integer) order n) where
   show = showPolynomialWith False [(n, "X_"++ show n) | n <- [0..]] showRational
-
-
-instance (SingI n, IsOrder order, Domain r, Ring r, DecidableZero r) => Domain (OrderedPolynomial r order n) where
 
 showPolynomialWithVars :: (DecidableZero a, Show a, SingI n, Ring a, IsOrder ordering)
                        => [(Int, String)] -> OrderedPolynomial a ordering n -> String
