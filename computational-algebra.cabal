@@ -138,7 +138,7 @@ executable faugere-prof
     main-is: faugere-prof.hs
     buildable: True
     hs-source-dirs: share examples
-    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded -eventlog
+    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
 
 executable hensel-prof
     build-depends: criterion >= 0.8.1.0,

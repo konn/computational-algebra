@@ -60,6 +60,7 @@ main = do
   i6 <- return $!! (toIdeal ideal6 `using` rdeepseq)
   rand0 <- sample' $ idealOfDim sThree
   rnd <- return $!! (head (drop 2 rand0) `using` rdeepseq)
+  putStrLn $ concat [ "random ideal: ", show rnd ]
   defaultMain $
     [ bgroup "cyclic-3" $
       map (uncurry $ buildCase i1)

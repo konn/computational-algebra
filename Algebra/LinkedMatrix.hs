@@ -35,7 +35,6 @@ import           Control.Monad.ST.Strict             (runST)
 import           Control.Monad.State.Strict          (evalState, runState)
 import           Control.Parallel.Strategies         (parMap)
 import           Control.Parallel.Strategies         (rdeepseq)
-import           Control.Parallel.Strategies         (r0)
 import           Data.Foldable                       (foldMap)
 import           Data.IntMap.Strict                  (IntMap, alter, insert,
                                                       mapMaybeWithKey,
@@ -48,27 +47,29 @@ import           Data.List                           (find, intercalate,
 import           Data.List                           (sortBy)
 import           Data.Maybe                          (fromJust, fromMaybe,
                                                       mapMaybe)
--- import           Data.Monoid                         (First (..))
-import           Data.Numbers.Primes       (primes)
-import           Data.Ord                  (comparing)
-import           Data.Proxy                (Proxy (..))
-import           Data.Reflection           (Reifies (..), reify)
-import           Data.Semigroup            hiding (First (..))
-import           Data.Tuple                (swap)
-import           Data.Type.Natural         (Five, Nat (S, Z), One, Two)
-import           Data.Vector               (Vector, create, generate, thaw,
-                                            unsafeFreeze)
-import qualified Data.Vector               as V
-import           Data.Vector.Mutable       (grow)
-import qualified Data.Vector.Mutable       as MV
-import qualified Debug.Trace               as DT
-import           Numeric.Decidable.Zero    (isZero)
+import           Data.Monoid                         (First (..))
+import           Data.Numbers.Primes                 (primes)
+import           Data.Ord                            (comparing)
+import           Data.Proxy                          (Proxy (..))
+import           Data.Reflection                     (Reifies (..), reify)
+import           Data.Semigroup                      hiding (First (..))
+import           Data.Tuple                          (swap)
+import           Data.Type.Natural                   (Five, Nat (S, Z), One,
+                                                      Two)
+import           Data.Vector                         (Vector, create, generate,
+                                                      thaw, unsafeFreeze)
+import qualified Data.Vector                         as V
+import           Data.Vector.Mutable                 (grow)
+import qualified Data.Vector.Mutable                 as MV
+import qualified Debug.Trace                         as DT
+import           Numeric.Decidable.Zero              (isZero)
 import           Numeric.Field.Fraction
-import           Numeric.Semiring.Integral (IntegralSemiring)
-import           Prelude                   (abs)
-import           Prelude                   hiding (Num (..), gcd, lcm, product,
-                                            quot, recip, sum, (/), (^))
-import qualified Prelude                   as P
+import           Numeric.Semiring.Integral           (IntegralSemiring)
+import           Prelude                             (abs)
+import           Prelude                             hiding (Num (..), gcd, lcm,
+                                                      product, quot, recip, sum,
+                                                      (/), (^))
+import qualified Prelude                             as P
 
 data Entry a = Entry { _value   :: !a
                      , _idx     :: !(Int, Int)
@@ -794,14 +795,14 @@ shiftHalf p n =
 triangulateModular :: Matrix (Fraction Integer)
                    -> (Matrix (Fraction Integer),
                        Matrix (Fraction Integer))
-triangulateModular (trMat "input" -> mat0) =
-  let ds = V.foldr (lcm' . abs . denominator.snd) 1 $ nonZeroEntries mat0
-      mN = V.foldr (lcm' . abs . numerator . snd) 1 $ nonZeroEntries mat0
-      l  = lcm' ds mN
-      ps = filter ((/= 0) . (mod l)) primes
+triangulateModular mat0 =
+  let ps = filter ((/= 0) . (mod l)) primes
   in go ps
   where
-    go ((tr "modulo" -> p):ps) =
+    ds = V.foldr (lcm' . abs . denominator.snd) 1 $ nonZeroEntries mat0
+    mN = V.foldr (lcm' . abs . numerator . snd) 1 $ nonZeroEntries mat0
+    l  = lcm' ds mN
+    go (p:ps) =
       let (indepRows, _, indepCols, depCols) = reifyPrimeField p $ \pxy ->
             let mat = cmap (modRat pxy) mat0
                 (koho, IS.fromList -> irs, IS.fromList -> drs) =
@@ -817,14 +818,17 @@ triangulateModular (trMat "input" -> mat0) =
           icdic = IM.fromList $ zip (IS.toAscList indepCols) [0..]
           dcdic = IM.fromList $ zip (IS.toDescList depCols) [0..]
           newIdx rd cd (i, j) = (,) <$> IM.lookup i rd <*> IM.lookup j cd
-          extract rd cd = fromList $ mapMaybe (\(ind, c) -> (,c) <$> newIdx rd cd ind) $
-                          V.toList $ nonZeroEntries mat0
-          spec = trMat "square non-singular" $! extract irdic icdic
-          qs = filter (\r -> {-# SCC "checkDet" #-} reifyPrimeField r $ \pxy ->
+          extract rd cd = fromList (mapMaybe (\(ind, c) -> (,c) <$> newIdx rd cd ind) $
+                          V.toList $ nonZeroEntries mat0)
+                          & height .~ IM.size rd
+                          & width  .~ IM.size cd
+          spec = extract irdic icdic
+          qs = filter (\r -> ds `mod` r /= 0 && ({-# SCC "checkDet" #-} reifyPrimeField r $ \pxy ->
                           not $ isZero $ view _3 $
-                          structuredGauss' $ cmap (modRat pxy) spec) primes
-          anss = parMap rdeepseq (\xs -> fromJust $ (\q -> solveHensel 10 q spec xs) $ head qs) $
-                 toCols $ trMat "dependents" $! extract irdic dcdic
+                          structuredGauss' $ cmap (modRat pxy) $ spec)) primes
+          anss = parMap rdeepseq (\xs -> fromJust $ ala First foldMap $
+                                         map (\q -> solveHensel 10 q spec xs) qs) $
+                 toCols $ extract irdic dcdic
           permMat = build [] (ncols mat0 - 1)
                     (zip (IS.toDescList indepCols) $ reverse $ toCols $ identity $ nrows spec) $
                     zip (IS.toDescList depCols) anss
@@ -847,7 +851,7 @@ triangulateModular (trMat "input" -> mat0) =
 
 infixr 9 .!
 
-trMat lab mat = DT.trace (lab <> ": " <> show (toLists mat)) mat
+-- trMat lab mat = DT.trace (lab <> ": " <> show (toLists mat)) mat
 
 clearDenom :: Euclidean a => Matrix (Fraction a) -> (a, Matrix a)
 clearDenom mat =
@@ -897,21 +901,6 @@ solveHensel cyc p mat b = {-# SCC "solveHensel" #-}
         _ -> go mans (drop cyc xs)
 
 killerMat :: Matrix (Fraction Integer)
-killerMat = fromLists [[0,0,0,0,2,-3]
-                      ,[0,0,0,2,0,0]
-                      ,[0,2,-3,0,0,0]
-                      ,[1,0,1,0,-2,0]
-                      ,[2,-3,0,-1,0,0]
-                      ,[1,0,1,0,0,0]]
+killerMat = fromLists [[1,9 / 5,-9 / 10],[1,0,0]]
 
-killerVec :: V.Vector (Fraction Integer)
-killerVec = V.fromList [0,-3,-1,0,0,0]
-
-wrongVec :: V.Vector (Fraction Integer)
-wrongVec = V.fromList [-3 / 13,-2 / 13,3 / 13,-166 / 127,-49 / 127,-98 / 127]
-
-rightVec :: V.Vector (Fraction Integer)
-rightVec = V.fromList [-6 / 13,5 / 26,6 / 13,-3 / 2,0,0]
-
-tr :: Show a => String -> a -> a
-tr str a = DT.trace (str <> ": " <>show a) a
+-- tr str a = DT.trace (str <> ": " <>show a) a
