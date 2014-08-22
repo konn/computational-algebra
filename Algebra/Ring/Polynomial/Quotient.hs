@@ -1,6 +1,7 @@
-{-# LANGUAGE CPP, ConstraintKinds, DataKinds, FlexibleContexts           #-}
-{-# LANGUAGE FlexibleInstances, GADTs, MultiParamTypeClasses, RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables, UndecidableInstances                   #-}
+{-# LANGUAGE CPP, ConstraintKinds, DataKinds  #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs, MagicHash #-}
+{-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes          #-}
+{-# LANGUAGE ScopedTypeVariables, UndecidableInstances             #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Ring.Polynomial.Quotient ( Quotient(), QIdeal(), reifyQuotient, modIdeal
                                         , modIdeal', quotRepr, withQuotient, vectorRep
@@ -184,19 +185,18 @@ buildQIdeal ideal =
          Just ms -> ZeroDimIdeal bs ms (buildMultTable bs ms)
 
 -- | Reifies the ideal at the type-level. The ideal can be recovered with 'reflect'.
-reifyQuotient :: (Field r, IsPolynomial r n, IsMonomialOrder ord)
+reifyQuotient :: (IsMonomialOrder ord, SingI n, Field r, DecidableZero r, Eq r)
               => Ideal (OrderedPolynomial r ord n)
-              -> (forall ideal. Reifies ideal (QIdeal r ord n) => Proxy ideal -> a)
+              -> (forall (ideal :: *). Reifies ideal (QIdeal r ord n) => Proxy ideal -> a)
               -> a
 reifyQuotient ideal = reify (buildQIdeal ideal)
 
 -- | Computes polynomial modulo ideal.
 withQuotient :: (Field r, IsPolynomial r n, IsMonomialOrder ord)
              => Ideal (OrderedPolynomial r ord n)
-             -> (forall ideal. Reifies ideal (QIdeal r ord n) => Quotient r ord n ideal)
+             -> (forall (ideal :: *). Reifies ideal (QIdeal r ord n) => Quotient r ord n ideal)
              -> OrderedPolynomial r ord n
 withQuotient ideal v = reifyQuotient ideal (quotRepr_ . asProxyOf v)
-
 
 asProxyOf :: f s -> Proxy s -> f s
 asProxyOf a _ = a

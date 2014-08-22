@@ -23,55 +23,52 @@ import           Algebra.Algorithms.ChineseRemainder
 import           Algebra.Field.Finite
 import           Algebra.Instances                   ()
 import           Algebra.Prelude                     hiding (fromList, (%))
-import           Algebra.Scalar
 import           Algebra.Wrapped                     ()
 import           Control.Applicative                 ((<$>), (<*>), (<|>))
 import           Control.Arrow                       ((&&&))
 import           Control.Arrow                       ((>>>))
-import           Control.DeepSeq                     (rnf)
 import           Control.Lens                        hiding (index, (<.>))
 import           Control.Monad                       (replicateM)
-import           Control.Monad.Identity              (runIdentity)
 import           Control.Monad.Loops                 (iterateUntil)
 import           Control.Monad.Random                hiding (fromList)
 import           Control.Monad.ST.Strict             (runST)
 import           Control.Monad.State.Strict          (evalState, runState)
-import           Control.Parallel.Strategies         (parMap, rseq)
+import           Control.Parallel.Strategies         (parMap)
 import           Control.Parallel.Strategies         (rdeepseq)
-import           Data.Function                       (on)
+import           Control.Parallel.Strategies         (r0)
+import           Data.Foldable                       (foldMap)
 import           Data.IntMap.Strict                  (IntMap, alter, insert,
                                                       mapMaybeWithKey,
                                                       minViewWithKey)
 import qualified Data.IntMap.Strict                  as IM
 import           Data.IntSet                         (IntSet)
 import qualified Data.IntSet                         as IS
-import           Data.List                           (find, findIndices,
-                                                      intercalate, minimumBy,
-                                                      sort)
+import           Data.List                           (find, intercalate,
+                                                      minimumBy, sort)
 import           Data.List                           (sortBy)
 import           Data.Maybe                          (fromJust, fromMaybe,
                                                       mapMaybe)
-import           Data.Numbers.Primes                 (primes)
-import           Data.Ord                            (comparing)
-import           Data.Proxy                          (Proxy (..))
-import           Data.Reflection                     (Reifies (..), reify)
-import           Data.Semigroup
-import           Data.Tuple                          (swap)
-import           Data.Type.Natural                   (Five, One)
-import           Data.Vector                         (Vector, create, generate,
-                                                      thaw, unsafeFreeze)
-import qualified Data.Vector                         as V
-import           Data.Vector.Mutable                 (grow)
-import qualified Data.Vector.Mutable                 as MV
-import qualified Debug.Trace                         as DT
-import           Numeric.Decidable.Zero              (isZero)
+-- import           Data.Monoid                         (First (..))
+import           Data.Numbers.Primes       (primes)
+import           Data.Ord                  (comparing)
+import           Data.Proxy                (Proxy (..))
+import           Data.Reflection           (Reifies (..), reify)
+import           Data.Semigroup            hiding (First (..))
+import           Data.Tuple                (swap)
+import           Data.Type.Natural         (Five, Nat (S, Z), One, Two)
+import           Data.Vector               (Vector, create, generate, thaw,
+                                            unsafeFreeze)
+import qualified Data.Vector               as V
+import           Data.Vector.Mutable       (grow)
+import qualified Data.Vector.Mutable       as MV
+import qualified Debug.Trace               as DT
+import           Numeric.Decidable.Zero    (isZero)
 import           Numeric.Field.Fraction
-import           Numeric.Semiring.Integral           (IntegralSemiring)
-import           Prelude                             (abs)
-import           Prelude                             hiding (Num (..), gcd, lcm,
-                                                      product, quot, recip, sum,
-                                                      (/), (^))
-import qualified Prelude                             as P
+import           Numeric.Semiring.Integral (IntegralSemiring)
+import           Prelude                   (abs)
+import           Prelude                   hiding (Num (..), gcd, lcm, product,
+                                            quot, recip, sum, (/), (^))
+import qualified Prelude                   as P
 
 data Entry a = Entry { _value   :: !a
                      , _idx     :: !(Int, Int)
@@ -638,14 +635,13 @@ nonZeroCols :: Matrix r -> [Int]
 nonZeroCols = nonZeroDirs Column
 
 testCase :: Matrix (Fraction Integer)
-testCase = fromLists [[0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,0]
-                    ,[0,0,0,0,0,0,1,1,1,0,0,1,0,0,0,1,0,0,0]
-                    ,[0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0]
-                    ,[0,0,0,0,0,1,0,0,0,0,1,-1,0,-1,1,0,-1,0,0]
-                    ,[0,0,0,0,1,1,0,1,0,0,1,0,0,0,1,0,0,0,0]
-                    ,[1,1,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0]
-                    ,[1,0,1,0,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0]
-                    ]
+testCase = fromLists [[0,0,0,0,0,0,2,-3,-1,0]
+                      ,[0,0,0,2,-3,-1,0,0,0,0]
+                      ,[0,2,-3,0,-1,0,0,0,0,0]
+                      ,[1,0,1,0,0,1,-2,0,0,0]
+                      ,[2,-3,0,-1,0,0,0,0,0,0]
+                      ,[1,0,1,0,0,1,0,0,0,-1]
+                      ,[1,0,1,0,0,1,-2,0,0,0]]
 
 newtype Square n r = Square { runSquare :: Matrix r
                             } deriving (Show, Eq, Additive, Multiplicative)
@@ -798,14 +794,14 @@ shiftHalf p n =
 triangulateModular :: Matrix (Fraction Integer)
                    -> (Matrix (Fraction Integer),
                        Matrix (Fraction Integer))
-triangulateModular mat0 =
+triangulateModular (trMat "input" -> mat0) =
   let ds = V.foldr (lcm' . abs . denominator.snd) 1 $ nonZeroEntries mat0
       mN = V.foldr (lcm' . abs . numerator . snd) 1 $ nonZeroEntries mat0
       l  = lcm' ds mN
       ps = filter ((/= 0) . (mod l)) primes
   in go ps
   where
-    go (p:ps) =
+    go ((tr "modulo" -> p):ps) =
       let (indepRows, _, indepCols, depCols) = reifyPrimeField p $ \pxy ->
             let mat = cmap (modRat pxy) mat0
                 (koho, IS.fromList -> irs, IS.fromList -> drs) =
@@ -823,12 +819,12 @@ triangulateModular mat0 =
           newIdx rd cd (i, j) = (,) <$> IM.lookup i rd <*> IM.lookup j cd
           extract rd cd = fromList $ mapMaybe (\(ind, c) -> (,c) <$> newIdx rd cd ind) $
                           V.toList $ nonZeroEntries mat0
-          spec = extract irdic icdic
-          Just q = find (\r -> {-# SCC "checkDet" #-} reifyPrimeField r $ \pxy ->
+          spec = trMat "square non-singular" $! extract irdic icdic
+          qs = filter (\r -> {-# SCC "checkDet" #-} reifyPrimeField r $ \pxy ->
                           not $ isZero $ view _3 $
                           structuredGauss' $ cmap (modRat pxy) spec) primes
-          anss = parMap rdeepseq (fromJust . solveHensel 10 q spec) $
-                 toCols $ extract irdic dcdic
+          anss = parMap rdeepseq (\xs -> fromJust $ (\q -> solveHensel 10 q spec xs) $ head qs) $
+                 toCols $ trMat "dependents" $! extract irdic dcdic
           permMat = build [] (ncols mat0 - 1)
                     (zip (IS.toDescList indepCols) $ reverse $ toCols $ identity $ nrows spec) $
                     zip (IS.toDescList depCols) anss
@@ -846,10 +842,17 @@ triangulateModular mat0 =
               ((l,m):mn) | i == l -> build (m : ans) (i-1) mn vecs
               _ -> build (V.empty : ans) (i-1) mns vecs
 
-clearDenom :: Euclidean a => Matrix (Fraction a) -> Matrix a
+(.!) :: (a -> b) -> (t -> a) -> t -> b
+(f .! g) x = f $! g x
+
+infixr 9 .!
+
+trMat lab mat = DT.trace (lab <> ": " <> show (toLists mat)) mat
+
+clearDenom :: Euclidean a => Matrix (Fraction a) -> (a, Matrix a)
 clearDenom mat =
   let g = V.foldr' (lcm' . denominator . snd) one $ nonZeroEntries mat
-  in cmap (numerator . (* (g % one))) mat
+  in (g, cmap (numerator . (* (g % one))) mat)
 
 lcm' :: Euclidean r => r -> r -> r
 lcm' n m = n * m `quot` gcd n m
@@ -883,13 +886,32 @@ solveHensel cyc p mat b = {-# SCC "solveHensel" #-}
       q = reifyPrimeField p $ \pxy ->
         cmap naturalRepr $ snd $ structuredGauss $ cmap (modNat' pxy) mat'
       hls = henselLift p mat' q b'
-  in go $ drop cyc $ zip [p^i | i <- [0..]] hls
+  in go Nothing $ drop cyc $ zip [p^i | i <- [0..]] hls
   where
-    go [] = Nothing
-    go ((q,x):xs) =
-      case V.mapM (recoverRat (floor $ sqrt $ fromIntegral q P./ 2) q) x of
+    go _ [] = Nothing
+    go prev ((q,x):xs) =
+      let mans = V.mapM (recoverRat (floor $ sqrt (fromIntegral q P./ 2 :: Double)) q) x
+      in case mans of
         Just x' | mat `multWithVector` x' == b -> Just x'
-        _ -> go (drop cyc xs)
+                | mans == prev -> Nothing
+        _ -> go mans (drop cyc xs)
 
+killerMat :: Matrix (Fraction Integer)
+killerMat = fromLists [[0,0,0,0,2,-3]
+                      ,[0,0,0,2,0,0]
+                      ,[0,2,-3,0,0,0]
+                      ,[1,0,1,0,-2,0]
+                      ,[2,-3,0,-1,0,0]
+                      ,[1,0,1,0,0,0]]
 
-tr str a = DT.trace (str <> show a) a
+killerVec :: V.Vector (Fraction Integer)
+killerVec = V.fromList [0,-3,-1,0,0,0]
+
+wrongVec :: V.Vector (Fraction Integer)
+wrongVec = V.fromList [-3 / 13,-2 / 13,3 / 13,-166 / 127,-49 / 127,-98 / 127]
+
+rightVec :: V.Vector (Fraction Integer)
+rightVec = V.fromList [-6 / 13,5 / 26,6 / 13,-3 / 2,0,0]
+
+tr :: Show a => String -> a -> a
+tr str a = DT.trace (str <> ": " <>show a) a

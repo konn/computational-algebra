@@ -145,7 +145,7 @@ data Pair r ord n = Pair { lcmPair    :: OrderedMonomial ord n
                          , leftPoly   :: OrderedPolynomial r ord n
                          , rightMonom :: OrderedMonomial ord n
                          , rightPoly  :: OrderedPolynomial r ord n
-                         } deriving (Show, Eq, Ord)
+                         } deriving (Eq, Ord)
 type Strategy r ord n = [Pair r ord n] -> [Pair r ord n]
 
 leftP, rightP :: Pair r ord n -> (OrderedMonomial ord n, OrderedPolynomial r ord n)

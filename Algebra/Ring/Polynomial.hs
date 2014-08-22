@@ -1,6 +1,6 @@
 {-# LANGUAGE CPP, ConstraintKinds, DataKinds, FlexibleContexts          #-}
 {-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving       #-}
-{-# LANGUAGE LiberalTypeSynonyms                   #-}
+{-# LANGUAGE LiberalTypeSynonyms, IncoherentInstances                   #-}
 {-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction           #-}
 {-# LANGUAGE OverlappingInstances, PatternGuards, PolyKinds, RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell   #-}
