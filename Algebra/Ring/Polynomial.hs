@@ -1,6 +1,6 @@
 {-# LANGUAGE CPP, ConstraintKinds, DataKinds, FlexibleContexts          #-}
 {-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving       #-}
-{-# LANGUAGE LiberalTypeSynonyms, IncoherentInstances                   #-}
+{-# LANGUAGE IncoherentInstances, LiberalTypeSynonyms                   #-}
 {-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction           #-}
 {-# LANGUAGE OverlappingInstances, PatternGuards, PolyKinds, RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell   #-}
@@ -18,15 +18,16 @@ module Algebra.Ring.Polynomial
     , scastMonomial, scastPolynomial, OrderedPolynomial, showPolynomialWithVars
     , showPolynomialWith, showRational, allVars, subst', homogenize, unhomogenize
     , normalize, injectCoeff, varX, var, varMonom, getTerms, shiftR, orderedBy, monomials
-    , divs, isPowerOf, tryDiv, fromList, Coefficient(..)
+    , divs, isPowerOf, tryDiv, fromList, Coefficient(..), maxNorm, oneNorm
     , leadingTerm, leadingMonomial, leadingCoeff, genVars, sArity
     , OrderedMonomial(..), Grevlex(..), mapCoeff,pDivModPoly
     , Revlex(..), Lex(..), Grlex(..), Graded(..), reversal, padeApprox
-    , ProductOrder (..), WeightOrder(..), subst, substWith, eval, evalUnivariate
-    , substUnivariate, diff, minpolRecurrent
+    , ProductOrder (..), WeightOrder(..), subst, substWith, eval, evalUnivariate, evalOn
+    , substUnivariate, diff, minpolRecurrent,content,pp
     , IsOrder(..), IsMonomialOrder)  where
 import           Algebra.Internal
 import           Algebra.Scalar
+import           Algebra.Wrapped
 import           Control.Applicative       ((<$>))
 import           Control.Arrow
 import           Control.DeepSeq
@@ -47,15 +48,13 @@ import qualified Data.Vector.Sized         as V
 import           Numeric.Algebra           hiding (Order (..))
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
-import           Numeric.Domain.Class
 import           Numeric.Domain.Euclidean  hiding (normalize)
 import           Numeric.Field.Fraction
-import           Numeric.Ring.Class
 import qualified Numeric.Ring.Class        as NA
 import           Numeric.Semiring.Integral (IntegralSemiring)
-import           Prelude                   hiding (Rational, fromInteger, lex,
-                                            negate, quot, recip, rem, sum, (*),
-                                            (+), (-), (/), (^), (^^))
+import           Prelude                   hiding (Rational, fromInteger, gcd,
+                                            lex, negate, quot, recip, rem, sum,
+                                            (*), (+), (-), (/), (^), (^^))
 import qualified Prelude                   as P
 import           Proof.Equational          (coerce, symmetry)
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
@@ -73,6 +72,19 @@ newtype OrderedMonomial (ordering :: *) n = OrderedMonomial { getMonomial :: Mon
 
 makeLenses ''OrderedMonomial
 makeWrapped ''OrderedMonomial
+
+content :: Euclidean c => OrderedPolynomial c order n -> c
+content = foldr (gcd . fst) zero . getTerms
+
+pp :: (IsMonomialOrder ord, Euclidean b, SingI n)
+   => OrderedPolynomial b ord n -> OrderedPolynomial b ord n
+pp f = mapCoeff (`quot` content f) f
+
+oneNorm :: (Normed b, Monoidal (Norm b)) => OrderedPolynomial b order n -> Norm b
+oneNorm = sum . map (norm . fst) . getTerms
+
+maxNorm :: Normed b => OrderedPolynomial b order n -> Norm b
+maxNorm = maximum . map (norm . fst) . getTerms
 
 monoize :: (DecidableZero r, SingI n, Field r, IsMonomialOrder order)
         => OrderedPolynomial r order n -> OrderedPolynomial r order n
@@ -550,16 +562,19 @@ varX :: (DecidableZero r, Ring r, SingI n, IsOrder order) => OrderedPolynomial r
 varX = var OZ
 
 var :: (DecidableZero r, Ring r, SingI m, IsOrder order) => Ordinal m -> OrderedPolynomial r order m
-var vIndex = polynomial $ M.singleton (OrderedMonomial $ varMonom vIndex) one
+var vIndex = polynomial $ M.singleton (varMonom vIndex) one
 
-varMonom :: forall n. SingI n => Ordinal n -> Monomial n
-varMonom OZ =
+varMonom :: SingI n => Ordinal n -> OrderedMonomial ord n
+varMonom = OrderedMonomial . varMonom'
+
+varMonom' :: forall n. SingI n => Ordinal n -> Monomial n
+varMonom' OZ =
   case sing :: SNat n of
     SS n -> 1 :- V.replicate n 0
     _   -> error "impossible"
-varMonom (OS n) =
+varMonom' (OS n) =
   case sing :: SNat n of
-    SS sn -> case singInstance sn of SingInstance -> 0 :- varMonom n
+    SS sn -> case singInstance sn of SingInstance -> 0 :- varMonom' n
     _    -> error "impossible"
 
 toPolynomial :: (IsOrder order, Ring r, DecidableZero r, SingI n) => (r, OrderedMonomial order n) -> OrderedPolynomial r order n
@@ -625,6 +640,29 @@ subst assign poly = sum $ map (uncurry (.*) . second extractPower) $ getTerms po
 -- | Evaluate polynomial at some point.
 eval :: (Monoidal m, Unital m) => Vector m n -> OrderedPolynomial m order n -> m
 eval = substWith (*)
+
+type family RepArgs (k :: Nat) (a :: *) (b :: *)
+type instance RepArgs Z     a b = b
+type instance RepArgs (S n) a b = a -> RepArgs n a b
+
+data NAry n a b where
+  ValueN :: b -> NAry Z a b
+  AppN   :: (a -> NAry n a b) -> NAry (S n) a b
+
+fromNAry :: NAry n a b -> RepArgs n a b
+fromNAry (ValueN b) = b
+fromNAry (AppN f)   = fromNAry . f
+
+fromVecFun0 :: Sing k -> (Vector a k -> b) -> NAry k a b
+fromVecFun0 SZ     f = ValueN $ f Nil
+fromVecFun0 (SS n) f = AppN $ \a -> fromVecFun0 n (f . (a:-))
+
+fromVecFun :: forall k a b. SingI k => (Vector a k -> b) -> NAry k a b
+fromVecFun = fromVecFun0 (sing :: SNat k)
+
+evalOn :: forall k a order . (SingI k, Monoidal a, Unital a)
+      => OrderedPolynomial a order k -> RepArgs k a a
+evalOn p = fromNAry $ (fromVecFun (flip eval p) :: NAry k a a)
 
 substWith :: (Unital c, Monoidal m) => (d -> c -> m) -> V.Vector c n -> OrderedPolynomial d order n -> m
 substWith o assign poly = sum $ map (uncurry o . second extractPower) $ getTerms poly

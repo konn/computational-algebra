@@ -6,7 +6,7 @@ module Algebra.Matrix (Matrix(..), mapSM, delta, companion, Sparse(..),
                        gaussReduction, maxNorm, rankWith, det,
                        inverse, inverseWith) where
 import qualified Algebra.LinkedMatrix             as LM
-import           Algebra.Ring.Polynomial
+import           Algebra.Ring.Polynomial          hiding (maxNorm)
 import           Algebra.Wrapped                  (Normed (..))
 import           Control.Arrow
 import           Control.Lens
@@ -23,6 +23,7 @@ import qualified Data.Vector.Algorithms.Insertion as Sort
 import qualified Data.Vector.Generic              as GV
 import qualified Data.Vector.Hybrid               as H
 import           Data.Vector.Hybrid.Internal
+import           GHC.Exts                         (Constraint)
 import           Numeric.Algebra                  (Additive, DecidableZero)
 import           Numeric.Algebra                  (Monoidal, Multiplicative)
 import           Numeric.Algebra                  (Ring, Unital)
@@ -32,7 +33,6 @@ import           Numeric.Field.Fraction
 import qualified Numeric.LinearAlgebra            as LA
 import           Sparse.Matrix                    (_Mat)
 import qualified Sparse.Matrix                    as SM
-import GHC.Exts (Constraint)
 
 class Matrix mat where
   type Elem mat a :: Constraint
