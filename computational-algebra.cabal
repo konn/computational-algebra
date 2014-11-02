@@ -47,7 +47,7 @@ library
                    trifecta == 1.5.*,
                    matrix ==0.3.*,
                    lens >=4.0 && < 4.4, 
-                   monad-loops ==0.4.*,
+                   monad-loops ==0.4.*,dlist,
                    monomorphic >=0.0.3 && < 0.1,
                    mtl >= 2.1 && < 2.3,
                    reflection >= 1.4 && < 1.6,
