@@ -194,7 +194,7 @@ clearDenom f =
   in (g, mapCoeff (numerator . ((g F.% one)*)) f)
 
 factorQBigPrime :: (Functor m, MonadRandom m)
-               => Unipol Integer -> m [([Unipol Integer], Natural)]
+               => Unipol Integer -> m (Integer, [([Unipol Integer], Natural)])
 factorQBigPrime f0 = do
   let (g, c) | leadingCoeff f0 < 0 = (- pp f0, - content f0)
              | otherwise = (pp f0, content f0)
