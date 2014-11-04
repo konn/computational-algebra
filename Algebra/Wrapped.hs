@@ -13,7 +13,8 @@ import qualified Data.Ratio               as P
 import           Numeric.Algebra          hiding ((/), (<))
 import qualified Numeric.Algebra          as NA
 import           Numeric.Domain.Euclidean (Euclidean)
-import           Numeric.Field.Fraction   (Fraction)
+import           Numeric.Field.Fraction   (Fraction, numerator, (%))
+import           Numeric.Field.Fraction   (denominator)
 import           Prelude                  hiding (lex, negate, recip, sum, (*),
                                            (+), (-), (^), (^^))
 import qualified Prelude                  as P
@@ -56,9 +57,6 @@ instance Normed a => Normed (WrappedField a) where
   norm = norm . unwrapField
   liftNorm = WrapField . liftNorm
 
-sq :: Multiplicative r => r -> r
-sq x = x*x
-
 instance Normed Double where
   type Norm Double = Double
   norm a = abs a
@@ -66,18 +64,19 @@ instance Normed Double where
 
 instance Normed Int where
   type Norm Int = Int
-  norm = sq
+  norm = abs
   liftNorm = id
 
 instance Normed Integer where
   type Norm Integer = Integer
-  norm = sq
+  norm = abs
   liftNorm = id
 
-instance (Ord d, Euclidean d) =>  Normed (Fraction d) where
-  type Norm (Fraction d) = Fraction d
-  norm = sq
-  liftNorm = id
+instance (Ord (Norm d), Euclidean d, Euclidean (Norm d),
+          Normed d, Multiplicative (Norm d)) =>  Normed (Fraction d) where
+  type Norm (Fraction d) = Fraction (Norm d)
+  norm f = norm (numerator f) % norm (denominator f)
+  liftNorm f = liftNorm (numerator f) % liftNorm (denominator f)
 
 instance (Monoidal a, Normed a, Additive (Norm a)) => Normed (Complex a) where
   type Norm (Complex a) = Norm a

@@ -1,34 +1,26 @@
-{-# LANGUAGE BangPatterns, FlexibleContexts, MultiParamTypeClasses  #-}
-{-# LANGUAGE NoImplicitPrelude, OverloadedStrings, ParallelListComp #-}
-{-# LANGUAGE PolyKinds, ScopedTypeVariables, TupleSections          #-}
+{-# LANGUAGE BangPatterns, FlexibleContexts, MultiParamTypeClasses       #-}
+{-# LANGUAGE NoImplicitPrelude, OverloadedStrings, ParallelListComp      #-}
+{-# LANGUAGE PolyKinds, ScopedTypeVariables, TupleSections, ViewPatterns #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Algebra.Ring.Polynomial.Factorize (factorise, Unipol, distinctDegFactor,
                                           equalDegreeSplitM, equalDegreeFactorM,
-                                          squareFreePart, squareFreeDecomp,factorQBigPrime,
-                                          generateIrreducible) where
+                                          squareFreePart, squareFreeDecomp,factorQBigPrime
+                                          ) where
 import           Algebra.Algorithms.PrimeTest     hiding (modPow)
 import           Algebra.Field.Finite
+import           Algebra.Field.Galois
 import           Algebra.Prelude
 import           Algebra.Ring.Polynomial.Quotient
-import           Control.Applicative              ((<$>), (<|>))
-import           Control.Applicative              ((<*>))
-import           Control.Arrow                    (second)
-import           Control.Arrow                    (first)
-import           Control.Arrow                    ((***))
-import           Control.Arrow                    ((<<<))
+import           Control.Applicative              ((<$>), (<*>), (<|>))
+import           Control.Arrow                    (first, (***), (<<<))
 import           Control.Lens                     (ifoldl)
-import           Control.Lens                     (imapM)
 import           Control.Monad                    (guard, replicateM)
 import           Control.Monad                    (when)
-import           Control.Monad.Loops              (untilJust)
-import           Control.Monad.Loops              (iterateUntil)
+import           Control.Monad.Loops              (iterateUntil, untilJust)
 import           Control.Monad.Random             (MonadRandom, uniform)
-import           Control.Monad.ST                 (runST)
-import           Control.Monad.ST.Strict          (ST)
+import           Control.Monad.ST.Strict          (ST, runST)
 import           Control.Monad.Trans              (lift)
-import           Control.Monad.Trans.Loop         (while)
-import           Control.Monad.Trans.Loop         (foreach)
-import           Control.Monad.Trans.Loop         (exit)
+import           Control.Monad.Trans.Loop         (continue, foreach, while)
 import qualified Data.DList                       as DL
 import           Data.IntMap                      (IntMap)
 import qualified Data.IntMap.Strict               as IM
@@ -38,11 +30,8 @@ import           Data.Monoid                      ((<>))
 import           Data.Numbers.Primes              (primes)
 import           Data.Ord                         (comparing)
 import           Data.Proxy                       (Proxy (..))
-import           Data.STRef.Strict                (newSTRef)
-import           Data.STRef.Strict                (readSTRef)
-import           Data.STRef.Strict                (STRef)
-import           Data.STRef.Strict                (modifySTRef)
-import           Data.STRef.Strict                (writeSTRef)
+import           Data.STRef.Strict                (STRef, modifySTRef, newSTRef)
+import           Data.STRef.Strict                (readSTRef, writeSTRef)
 import qualified Data.Traversable                 as F
 import           Data.Tuple                       (swap)
 import           Data.Type.Natural                hiding (one)
@@ -50,6 +39,7 @@ import           Data.Type.Ordinal                (Ordinal (..))
 import qualified Data.Vector                      as V
 import qualified Data.Vector.Sized                as SV
 import           Debug.Trace                      (trace)
+import           Debug.Trace                      (traceShow)
 import           Numeric.Decidable.Zero           (isZero)
 import qualified Numeric.Field.Fraction           as F
 import           Numeric.Semiring.Integral        (IntegralSemiring)
@@ -219,7 +209,8 @@ factorSqFreeQBP f
     p <- iterateUntil isSqFreeMod (uniform ps)
     reifyPrimeField p $ \fp -> do
       let fbar = mapCoeff (modNat' fp) f
-      gvec <- V.fromList . map (first $ normalizeMod p . mapCoeff naturalRepr) <$> factorise (monoize fbar)
+      gvec <- V.fromList . concatMap (uncurry (flip replicate) <<< (normalizeMod p . mapCoeff naturalRepr) *** fromEnum)
+              <$> factorise (monoize fbar)
       return $ runST $ do
         bb <- newSTRef b
         s  <- newSTRef 1
@@ -230,23 +221,21 @@ factorSqFreeQBP f
           ts0 <- lift $ readSTRef ts
           s0  <- lift $ readSTRef s
           b0  <- lift $ readSTRef bb
-          f0  <- lift $ readSTRef f'
           foreach (comb s0 ts0) $ \ss -> do
             let delta = ts0 L.\\ ss
-                g' = normalizeMod p $ b0 .*. product [fst $ gvec V.! i | i <- ss]
-                h' = normalizeMod p $ b0 .*. product [fst $ gvec V.! i | i <- delta]
+                g' = normalizeMod p $ b0 .*. product [ gvec V.! i | i <- ss]
+                h' = normalizeMod p $ b0 .*. product [ gvec V.! i | i <- delta]
             when (oneNorm g' * oneNorm h' <= floor b') $ do
               lift $ lift $ do
                 writeSTRef ts   delta
                 modifySTRef gs (pp g' :)
                 writeSTRef f' $ pp h'
-                writeSTRef bb $ leadingCoeff f0
-                modifySTRef s pred
-              exit
+                writeSTRef bb $ leadingCoeff $ pp h'
+              lift continue
           lift $ modifySTRef s (+1)
         (:) <$> readSTRef f' <*> readSTRef gs
   where
-    ps = takeWhile (< floor (4*b')) $ dropWhile (<= ceiling (2*b')) primes
+    ps = takeWhile (< floor (4*b')) $ dropWhile (<= ceiling (2*b')) $ tail primes
     b = leadingCoeff f
     a = maxNorm f
     b' = P.product [ sqrt (fromIntegral n P.+ 1), 2 P.^^ n, fromIntegral a,  fromIntegral b]
@@ -267,14 +256,5 @@ comb = (DL.toList .) . go
 normalizeMod :: Integer -> Unipol Integer -> Unipol Integer
 normalizeMod p f = mapCoeff chooseHalf f
   where
-    chooseHalf c = minimumBy (comparing P.abs) [p - c, c]
+    chooseHalf ((`rem` p) -> c) = minimumBy (comparing P.abs) [c, c - p]
 
--- | @generateIrreducible p n@ generates irreducible polynomial over F_@p@ of degree @n@.
-generateIrreducible :: (DecidableZero k, MonadRandom m, FiniteField k,
-                        IntegralSemiring k, DecidableUnits k, Eq k)
-                    => proxy k -> Natural -> m (Unipol k)
-generateIrreducible p n =
-  iterateUntil (\f -> all (\i -> one == gcd (varX^(order p^i) - varX) f ) [1.. n `div` 2]) $ do
-    cs <- replicateM (fromIntegral n) $ uniform (elements p)
-    let f = varX^n + sum [ injectCoeff c * (varX^i) | c <- cs | i <- [0..]]
-    return f

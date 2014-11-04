@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds, EmptyDataDecls, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, MultiParamTypeClasses, NoMonomorphismRestriction        #-}
-{-# LANGUAGE PolyKinds, RankNTypes, ScopedTypeVariables, TypeFamilies       #-}
-{-# LANGUAGE UndecidableInstances                                           #-}
+{-# LANGUAGE ParallelListComp, PolyKinds, RankNTypes, ScopedTypeVariables   #-}
+{-# LANGUAGE TypeFamilies, UndecidableInstances                             #-}
 module Algebra.Field.Galois (GF0(), IsGF0, modPoly, modVec, reifyGF0,
                              withGF0, GF'(), Conway, primitive, conway,
                              conwayFile, addConwayPolynomials)  where
@@ -9,29 +9,31 @@ import           Algebra.Field.Finite
 import           Algebra.Field.Galois.Conway
 import           Algebra.Internal
 import           Algebra.Prelude
-import           Algebra.Ring.Polynomial.Factorize
-import           Control.Lens                      (imap)
-import           Control.Monad.Random              (MonadRandom)
-import qualified Data.Ratio                        as Rat
+import           Control.Lens                (imap)
+import           Control.Monad               (replicateM)
+import           Control.Monad.Loops         (iterateUntil)
+import           Control.Monad.Random        (MonadRandom)
+import           Control.Monad.Random        (uniform)
+import qualified Data.Ratio                  as Rat
 import           Data.Reflection
-import           Data.Type.Monomorphic             (promote)
-import           Data.Type.Monomorphic             (Monomorphic (..))
-import           Data.Type.Natural                 hiding (one, promote, zero)
-import qualified Data.Type.Natural                 as TN
-import qualified Data.Vector                       as V
-import           Data.Vector.Sized                 (Vector ((:-), Nil))
-import qualified Data.Vector.Sized                 as SV
+import           Data.Type.Monomorphic       (promote)
+import           Data.Type.Monomorphic       (Monomorphic (..))
+import           Data.Type.Natural           hiding (one, promote, zero)
+import qualified Data.Type.Natural           as TN
+import qualified Data.Vector                 as V
+import           Data.Vector.Sized           (Vector ((:-), Nil))
+import qualified Data.Vector.Sized           as SV
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
-import           Numeric.Semiring.Integral         (IntegralSemiring)
-import           Prelude                           hiding (Fractional (..),
-                                                    Num (..), quot, rem, sum,
-                                                    (^))
-import qualified Prelude                           as P
+import           Numeric.Semiring.Integral   (IntegralSemiring)
+import           Prelude                     hiding (Fractional (..), Num (..),
+                                              gcd, quot, rem, sum, (^))
+import qualified Prelude                     as P
 
 -- | Galois field of order @p^n@.
 --   @f@ stands for the irreducible polynomial over @F_p@ of degree @n@.
 data GF0 p n f = GF0 { runGF0 :: SV.Vector (F p) n } deriving (Eq)
+type Unipol a = OrderedPolynomial a Grevlex One
 
 -- | Galois Field of order @p^n@. This uses conway polynomials
 --   as canonical minimal polynomial and it should be known at
@@ -50,7 +52,7 @@ instance (Reifies p Integer, Show (F p), SingI n) => Show (GF0 p n f)  where
   showsPrec d (GF0 (v :- vs)) =
     if SV.all isZero vs
     then showsPrec d v
-    else showChar '(' . shows (vecToPoly $ v :- vs) . showChar ')'
+    else showChar '<' . shows (vecToPoly $ v :- vs) . showChar '>'
 
 vecToPoly :: (SingI n, Ring r, DecidableZero r)
           => SV.Vector r n -> Unipol r
@@ -144,6 +146,16 @@ instance (Reifies p Integer, Reifies f (Unipol (F p)), SingI n) => P.Fractional 
   fromRational u = fromInteger (Rat.numerator u) / fromInteger (Rat.denominator u)
   (/) = (/)
   recip = recip
+
+-- | @generateIrreducible p n@ generates irreducible polynomial over F_@p@ of degree @n@.
+generateIrreducible :: (DecidableZero k, MonadRandom m, FiniteField k,
+                        IntegralSemiring k, DecidableUnits k, Eq k)
+                    => proxy k -> Natural -> m (Unipol k)
+generateIrreducible p n =
+  iterateUntil (\f -> all (\i -> one == gcd (varX^(order p^i) - varX) f ) [1.. n `div` 2]) $ do
+    cs <- replicateM (fromIntegral n) $ uniform (elements p)
+    let f = varX^n + sum [ injectCoeff c * (varX^i) | c <- cs | i <- [0..]]
+    return f
 
 reifyGF0 :: MonadRandom m => Natural -> Natural
          -> (forall (p :: *) (f :: *) (n :: Nat) . (Reifies p Integer, Reifies f (Unipol (F p)), SingI n)
