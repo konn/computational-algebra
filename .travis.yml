@@ -35,6 +35,7 @@ matrix:
             - hvr-ghc
   allow_failures:
     - env: GHCVER=head STACK_YAML=stack-head.yaml
+    - env: GHCVER=8.0.1 STACK_YAML=stack-ghc800.yaml
 
 before_install:
  # install Stack
