@@ -1,7 +1,7 @@
 {-# LANGUAGE ConstraintKinds, FlexibleContexts, MultiParamTypeClasses #-}
 {-# LANGUAGE NoImplicitPrelude, TemplateHaskell                       #-}
 module Algebra.Algorithms.FGLM (FGLMEnv(..), lMap, gLex, bLex, proced,
-                                monomial, look, (.==), (%==), image, Machine(..)) where
+                                monomial, look, (.==), (%==), image, Machine) where
 import           Algebra.Ring.Polynomial
 import           Control.Lens
 import           Control.Monad

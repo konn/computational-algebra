@@ -1,10 +1,10 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures            #-}
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs               #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses        #-}
-{-# LANGUAGE NoMonomorphismRestriction, OverlappingInstances          #-}
-{-# LANGUAGE OverloadedStrings, ParallelListComp, PolyKinds           #-}
-{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies, TypeSynonymInstances, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures     #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs        #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
+{-# LANGUAGE NoMonomorphismRestriction, OverloadedStrings      #-}
+{-# LANGUAGE ParallelListComp, PolyKinds, ScopedTypeVariables  #-}
+{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies #-}
+{-# LANGUAGE TypeSynonymInstances, UndecidableInstances        #-}
 {-# OPTIONS_GHC -fwarn-name-shadowing #-}
 -- | Algorithms for zero-dimensional ideals.
 module Algebra.Algorithms.ZeroDim (univPoly, radical, isRadical, solveWith,

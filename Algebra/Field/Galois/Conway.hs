@@ -3,7 +3,6 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Field.Galois.Conway (Conway, addConwayPolynomials, conwayFile) where
 import Algebra.Field.Galois.Internal
-import Control.Applicative           ((<$>))
 import Control.Monad                 (liftM)
 import Language.Haskell.TH           (runIO)
 import Language.Haskell.TH           (DecsQ)

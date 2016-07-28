@@ -1,16 +1,18 @@
-{-# LANGUAGE DataKinds, NoImplicitPrelude, NoMonomorphismRestriction, UndecidableInstances #-}
-{-# LANGUAGE PolyKinds, TemplateHaskell, FlexibleInstances, MultiParamTypeClasses, EmptyDataDecls          #-}
+{-# LANGUAGE DataKinds, EmptyDataDecls, FlexibleInstances          #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude              #-}
+{-# LANGUAGE NoMonomorphismRestriction, PolyKinds, TemplateHaskell #-}
+{-# LANGUAGE UndecidableInstances                                  #-}
 module Algebra.Field.Galois.Internal (Conway(), buildInstance, parseLine) where
 import Algebra.Field.Finite
 import Algebra.Prelude            hiding (lex)
 import Data.Char                  (isDigit)
 import Data.Char                  (digitToInt)
+import Data.Reflection            (Reifies (..))
 import Data.Type.Natural
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax (lift)
 import Numeric                    (readInt)
 import Prelude                    (lex)
-import Data.Reflection (Reifies (..))
 
 -- | Phantom type for conway polynomials
 data Conway p n
@@ -25,8 +27,8 @@ parseLine ('[':xs) =
 parseLine _ = []
 
 toNatType :: Integer -> TypeQ
-toNatType 0 = [t| Z |]
-toNatType n = appT [t| S |] (toNatType $ n - 1)
+toNatType 0 = [t| 'Z |]
+toNatType n = appT [t| 'S |] (toNatType $ n - 1)
 
 plusOp :: ExpQ -> ExpQ -> ExpQ
 plusOp e f = infixApp e [| (+) |] f
@@ -40,7 +42,7 @@ buildInstance (p,n,cs) =
   let tp = toNatType p
       tn = toNatType n
   in [d| instance Reifies (Conway $tp $tn)
-                          (OrderedPolynomial (F $tp) Grevlex (S Z)) where
+                          (OrderedPolynomial (F $tp) Grevlex ('S 'Z)) where
            reflect _ = $(toPoly cs)
            {-# INLINE reflect #-}
        |]

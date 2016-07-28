@@ -1,8 +1,8 @@
-{-# LANGUAGE ConstraintKinds, ExistentialQuantification, FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, NoImplicitPrelude  #-}
-{-# LANGUAGE NoMonomorphismRestriction, PolyKinds, ScopedTypeVariables    #-}
-{-# LANGUAGE TupleSections, TypeSynonymInstances, UndecidableInstances    #-}
-{-# LANGUAGE ViewPatterns                                                 #-}
+{-# LANGUAGE ConstraintKinds, ExistentialQuantification, FlexibleContexts  #-}
+{-# LANGUAGE FlexibleInstances, IncoherentInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction, PolyKinds       #-}
+{-# LANGUAGE ScopedTypeVariables, TupleSections, TypeSynonymInstances      #-}
+{-# LANGUAGE UndecidableInstances, ViewPatterns                            #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 -- | Provides general framework for signature-based algorithms
 module Algebra.Algorithms.Signature where

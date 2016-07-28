@@ -18,7 +18,7 @@ import qualified Data.Ratio                  as Rat
 import           Data.Reflection
 import           Data.Type.Monomorphic       (promote)
 import           Data.Type.Monomorphic       (Monomorphic (..))
-import           Data.Type.Natural           hiding (one, promote, zero)
+import           Data.Type.Natural           hiding (one, zero)
 import qualified Data.Type.Natural           as TN
 import qualified Data.Vector                 as V
 import           Data.Vector.Sized           (Vector ((:-), Nil))
@@ -190,7 +190,7 @@ instance IsGF0 p n f => FiniteField (GF0 p n f) where
   elements _ = map (GF0 . SV.unsafeFromList') $ sequence $
                replicate (sNatToInt (sing :: SNat n)) $ elements Proxy
 
-primitive :: (IsGF0 p n f) => GF0 p (S n) f
+primitive :: (IsGF0 p n f) => GF0 p ('S n) f
 primitive = GF0 $ polyToVec varX
 
 -- | Conway polynomial (if definition is known).

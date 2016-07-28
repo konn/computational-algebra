@@ -4,6 +4,7 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Algebra.Ring.Polynomial.Factorize (factorise, Unipol, distinctDegFactor,
                                           equalDegreeSplitM, equalDegreeFactorM,
+                                          henselStep, multiHensel,
                                           squareFreePart, squareFreeDecomp,factorQBigPrime
                                           ) where
 import           Algebra.Algorithms.PrimeTest     hiding (modPow)
@@ -14,6 +15,9 @@ import           Algebra.Ring.Polynomial.Quotient
 import           Control.Applicative              ((<$>), (<*>), (<|>))
 import           Control.Arrow                    (first, (***), (<<<))
 import           Control.Lens                     (ifoldl)
+import           Control.Lens                     ((%~), (&))
+import           Control.Lens                     (both)
+import           Control.Lens                     (each)
 import           Control.Monad                    (guard, replicateM)
 import           Control.Monad                    (when)
 import           Control.Monad.Loops              (iterateUntil, untilJust)
@@ -26,6 +30,8 @@ import           Data.IntMap                      (IntMap)
 import qualified Data.IntMap.Strict               as IM
 import           Data.List                        (minimumBy)
 import qualified Data.List                        as L
+import           Data.Maybe                       (fromJust)
+import           Data.Maybe                       (fromMaybe)
 import           Data.Monoid                      ((<>))
 import           Data.Numbers.Primes              (primes)
 import           Data.Ord                         (comparing)
@@ -40,6 +46,7 @@ import qualified Data.Vector                      as V
 import qualified Data.Vector.Sized                as SV
 import           Debug.Trace                      (trace)
 import           Debug.Trace                      (traceShow)
+import           Numeric.Decidable.Units          (recipUnit)
 import           Numeric.Decidable.Zero           (isZero)
 import qualified Numeric.Field.Fraction           as F
 import           Numeric.Semiring.Integral        (IntegralSemiring)
@@ -245,6 +252,70 @@ factorSqFreeQBP f
     isSqFreeMod p = reifyPrimeField p $ \fp ->
       let fbar = mapCoeff (modNat' fp) f
       in gcd fbar (diff OZ fbar) == one
+
+-- | Given that @f = gh (mod m)@ with @sg + th = 1 (mod m)@ and @leadingCoeff f@ isn't zero divisor mod m,
+--   @henselStep m f g h s t@ calculates the unique (g', h', s', t') s.t.
+--   @f = g' h' (mod m), g' = g (mod m), h' = h (mod m), s' = s (mod m), t' = t (mod m)@, @h'@ monic.
+henselStep :: (Eq r, Euclidean r, Commutative r)
+           => r        -- ^ modulus
+           -> Unipol r
+           -> Unipol r
+           -> Unipol r
+           -> Unipol r
+           -> Unipol r
+           -> (Unipol r, Unipol r, Unipol r, Unipol r)
+henselStep m f g h s t =
+  let modCoeff = mapCoeff (`rem` m^2)
+      divModSq u v = mapCoeff (F.% one) u `divide` mapCoeff (F.% one) v
+                     & both %~ mapCoeff (fromJust . modFraction (m^2))
+      e = modCoeff $ f - g * h
+      (q, r) = divModSq (s*e) h
+      g' = modCoeff $ g + t * e + q * g
+      h' = modCoeff $ h + r
+      b  = modCoeff $ s*g' + t*h' - one
+      (c, d) = divModSq (s*b) h'
+      s' = modCoeff $ s - d
+      t' = modCoeff $ t - t*b - c*g'
+  in (g', h', s', t')
+
+tr :: Show a => String -> a -> a
+tr msg a = trace (msg ++ show a) a
+
+multiHensel :: -- (Euclidean b, Commutative b, Eq b, Show b)
+--            => b -> Natural -> OrderedPolynomial b Grevlex One -> [OrderedPolynomial b Grevlex One] -> [OrderedPolynomial b Grevlex One]
+               Integer -> Natural -> Unipol Integer -> [Unipol Integer] -> [Unipol Integer]
+multiHensel p l f [_] =
+  let u = fromMaybe (error $ "lc(f) = " ++ (show $ leadingCoeff f) ++ " is zero divisor mod p!") $
+          recipMod (tr "p^l = " $ p^l) $ leadingCoeff f
+  in [mapCoeff ((`rem` p^l).(*u)) $ f]
+multiHensel p l f fs =
+  let (as, bs) = splitAt k fs
+      g0 = mapCoeff (`rem` p) $ leadingCoeff f .*. product as
+      r = length fs
+      k = r `div` 2
+      d = floor $ logBase 2 (fromIntegral l)
+      h0 = mapCoeff (`rem` p) $ product bs
+      (a, s0, t0) : _ = reifyPrimeField p $ \fp ->
+        map (each %~ mapCoeff naturalRepr) $ euclid (skim $ mapCoeff (modNat' fp) g0) (skim $ mapCoeff (modNat' fp) h0)
+      (gd, hd, _, _) = foldl (\(s, t, g, h) j -> henselStep (p^2^j) f g h s t)
+                         (s0, t0, mapCoeff (`rem` p) $ product as, h0)
+                         [0..d P.- 1]
+  in if a /= one
+     then error $ concat ["(f, as, bs, g0, h0) = ", show (f, as, bs, g0, h0), " is not bezout coprime!"]
+     else multiHensel p l (tr "gd = " gd) as ++ multiHensel p l (tr "hd = " hd) bs
+
+skim :: Show b => b -> b
+skim a = traceShow a a
+
+recipMod :: (Euclidean a, Eq a) => a -> a -> Maybe a
+recipMod m u =
+  let (a, r, _) : _ = euclid u m
+  in if a == one
+     then Just r else Nothing
+
+
+modFraction :: (Euclidean s, Eq s) => s -> Fraction s -> Maybe s
+modFraction m d = ((numerator d `rem` m) *) <$> recipMod m (denominator d)
 
 comb :: Int -> [a] -> [[a]]
 comb = (DL.toList .) . go

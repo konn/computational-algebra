@@ -1,9 +1,10 @@
-{-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, KindSignatures, LambdaCase       #-}
-{-# LANGUAGE MultiParamTypeClasses, NamedFieldPuns, NoImplicitPrelude     #-}
-{-# LANGUAGE NoMonomorphismRestriction, PolyKinds, RankNTypes             #-}
-{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell     #-}
-{-# LANGUAGE TupleSections, UndecidableInstances, ViewPatterns            #-}
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
+{-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, FlexibleInstances  #-}
+{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses, NamedFieldPuns, NoImplicitPrelude      #-}
+{-# LANGUAGE NoMonomorphismRestriction, PolyKinds, RankNTypes              #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell      #-}
+{-# LANGUAGE TupleSections, UndecidableInstances, ViewPatterns             #-}
 {-# OPTIONS_GHC -funbox-strict-fields -fno-warn-type-defaults #-}
 module Algebra.LinkedMatrix (Matrix, toLists, fromLists, fromList,
                              swapRows, identity,nonZeroRows,nonZeroCols,
@@ -24,26 +25,25 @@ import           Algebra.Field.Finite
 import           Algebra.Instances                   ()
 import           Algebra.Prelude                     hiding (fromList, (%))
 import           Algebra.Wrapped                     ()
-import           Control.Applicative                 ((<$>), (<*>), (<|>))
+import           Control.Applicative                 ((<|>))
 import           Control.Arrow                       ((&&&))
 import           Control.Arrow                       ((>>>))
 import           Control.Lens                        hiding (index, (<.>))
 import           Control.Monad                       (replicateM)
 import           Control.Monad.Loops                 (iterateUntil)
 import           Control.Monad.Random                hiding (fromList)
-import           Control.Monad.ST.Strict             (runST)
+import           Control.Monad.ST.Strict             (ST, runST)
 import           Control.Monad.State.Strict          (evalState, runState)
 import           Control.Parallel.Strategies         (parMap)
 import           Control.Parallel.Strategies         (rdeepseq)
-import           Data.Foldable                       (foldMap)
 import           Data.IntMap.Strict                  (IntMap, alter, insert,
                                                       mapMaybeWithKey,
                                                       minViewWithKey)
 import qualified Data.IntMap.Strict                  as IM
 import           Data.IntSet                         (IntSet)
 import qualified Data.IntSet                         as IS
-import           Data.List                           (find, intercalate,
-                                                      minimumBy, sort)
+import           Data.List                           (intercalate, minimumBy,
+                                                      sort)
 import           Data.List                           (sortBy)
 import           Data.Maybe                          (fromJust, fromMaybe,
                                                       mapMaybe)
@@ -54,14 +54,12 @@ import           Data.Proxy                          (Proxy (..))
 import           Data.Reflection                     (Reifies (..), reify)
 import           Data.Semigroup                      hiding (First (..))
 import           Data.Tuple                          (swap)
-import           Data.Type.Natural                   (Five, Nat (S, Z), One,
-                                                      Two)
+import           Data.Type.Natural                   (One)
 import           Data.Vector                         (Vector, create, generate,
                                                       thaw, unsafeFreeze)
 import qualified Data.Vector                         as V
 import           Data.Vector.Mutable                 (grow)
 import qualified Data.Vector.Mutable                 as MV
-import qualified Debug.Trace                         as DT
 import           Numeric.Decidable.Zero              (isZero)
 import           Numeric.Field.Fraction
 import           Numeric.Semiring.Integral           (IntegralSemiring)
@@ -168,9 +166,9 @@ diagProd = V.foldr' (*) one . getDiag
 trace :: Monoidal c => Matrix c -> c
 trace = V.foldr' (+) zero . getDiag
 
-toLists :: Monoidal a => Matrix a -> [[a]]
+toLists :: forall a. Monoidal a => Matrix a -> [[a]]
 toLists mat =
-  let orig = replicate (_height mat) $ replicate (_width mat) zero
+  let orig = replicate (_height mat) $ replicate (_width mat) (zero :: a)
   in go (V.toList $ _coefficients mat) orig
   where
     go [] m = m
@@ -265,17 +263,18 @@ traverseDirM ini f dir i mat = go (IM.lookup i (mat^.startL dir)) ini
       let !cur = vec V.! k
       go (cur ^. nextL dir) =<< f b k cur
 
-getDir :: Monoidal a
+getDir :: forall a. Monoidal a
        => Direction -> Int -> Matrix a -> Vector a
 getDir dir i mat =
   create $ do
-    v <- MV.replicate (mat ^. lenL dir) zero
+    v <- MV.replicate (mat ^. lenL dir) (zero :: a)
     traverseDirM () (trav v) dir i mat
     return v
   where
+    trav :: forall s. MV.MVector s a -> () -> Int -> Entry a -> ST s ()
     trav v _ _ ent = MV.write v (ent ^. nthL dir) (ent ^. value)
 
-igetDir :: Monoidal a
+igetDir :: forall a. Monoidal a
        => Direction -> Int -> Matrix a -> Vector (Maybe (Int, Entry a))
 igetDir dir i mat =
   create $ do
@@ -283,6 +282,7 @@ igetDir dir i mat =
     traverseDirM () (trav v) dir i mat
     return v
   where
+    trav :: forall s. MV.MVector s (Maybe (Int, Entry a)) -> () -> Int -> Entry a -> ST s ()
     trav v _ k ent = MV.write v (ent ^. nthL dir) (Just (k, ent))
 
 getRow :: Monoidal a => Int -> Matrix a -> Vector a
@@ -771,7 +771,7 @@ splitIndependentDirs dir mat =
 
 intDet :: Matrix Integer -> Integer
 intDet mat =
-  let b = V.maximum $ V.map (abs . snd) $ nonZeroEntries mat
+  let b = V.maximum $ V.map (P.fromInteger . abs . snd) $ nonZeroEntries mat
       n = fromIntegral $ ncols mat
       c = n^(n `div` 2) * b^n
       r = ceiling $ logBase (2 :: Double) (2*fromIntegral c + 1)

@@ -7,7 +7,6 @@
 module Algebra.Algorithms.Faugere5 (f5Original, showSingular) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Prelude
-import           Control.Applicative         ((<$>))
 import           Control.Arrow               ((>>>))
 import           Control.Lens                (makeLenses, view, (%~), (&), (.~))
 import           Control.Lens                ((^.), _1, _2)
@@ -45,10 +44,6 @@ unsafeIOToST _ = return ()
 
 type CriticalPair ord n = (OrderedMonomial ord n, OrderedMonomial ord n, Int, OrderedMonomial ord n, Int)
 type Rule ord n = [(OrderedMonomial ord n, Maybe Int)]
-type F5Context s r ord n =
-  (?labPolys :: RefVector s (PolyRepr r ord n),
-   ?rules :: RefVector s (Rule ord n))
-
 
 data PolyRepr r ord n =
   PolyRepr { _signature :: (Int, OrderedMonomial ord n)
@@ -298,7 +293,6 @@ spols bs =
               rn = (u *@ rk) & poly .~ s0
           n <- lengthMV ?labPolys
           addLabPoly rn
-          rs <- V.freeze =<< readSTRef ?rules
           --unsafeIOToST $ putStrLn $ concat
           --  [ "spol with: Rule = ", drop 9 $ show rs, ", ((k,u),n) = ", show ((k, u), n)]
           addRule (k, u*(rk^.signature._2)) (Just n)
@@ -319,7 +313,6 @@ addRule :: (IsMonomialOrder ord, DecidableZero r, ?labPolys :: (RefVector s (Pol
             ?rules :: (RefVector s (Rule ord n)), SingI n)
         => (Int, OrderedMonomial ord n) -> Maybe Int -> ST s ()
 addRule (n, m) k = do
-  cst <- readSTRef ?rules >>= V.freeze
   --unsafeIOToST $ putStr ("\tadding rule for" ++ show ((n,m),k) ++ ": ") >> print cst
   writeAt ?rules n . ((m, k):) =<< readAt ?rules n
   --unsafeIOToST . putStrLn . ("\tnew rule : "++).show =<< V.freeze =<< readSTRef ?rules

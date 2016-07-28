@@ -3,14 +3,10 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 -- | This Library provides some *dangerous* instances for @Double@s and @Complex@.
 module Algebra.Instances () where
-import           Control.Applicative      ((<$>))
 import           Control.DeepSeq          (NFData (..))
 import           Control.Lens
-import           Control.Monad.Random     (Random (..))
-import           Control.Monad.Random     (runRand)
-import           Control.Monad.Random     (getRandom)
-import           Control.Monad.Random     (Rand)
-import           Control.Monad.Random     (getRandomR)
+import           Control.Monad.Random     (Random (..), getRandom)
+import           Control.Monad.Random     (getRandomR, runRand)
 import           Data.Complex
 import           Data.Convertible.Base    (Convertible (..))
 import qualified Data.Ratio               as P
@@ -20,8 +16,7 @@ import qualified Data.Vector.Sized        as V
 import           Numeric.Algebra
 import qualified Numeric.Algebra          as NA
 import           Numeric.Decidable.Zero
-import           Numeric.Domain.Euclidean (Euclidean)
-import           Numeric.Domain.Euclidean (splitUnit)
+import           Numeric.Domain.Euclidean (Euclidean, splitUnit)
 import           Numeric.Field.Fraction
 import           Prelude                  hiding (Num (..), lcm)
 import qualified Prelude                  as P

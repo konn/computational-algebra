@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds, ExplicitForAll, FlexibleContexts, FlexibleInstances #-}
-{-# LANGUAGE GADTs, MultiParamTypeClasses, OverlappingInstances, PolyKinds  #-}
-{-# LANGUAGE RecordWildCards, TemplateHaskell, TypeFamilies, TypeOperators  #-}
+{-# LANGUAGE GADTs, MultiParamTypeClasses, PolyKinds, RecordWildCards       #-}
+{-# LANGUAGE TemplateHaskell, TypeFamilies, TypeOperators                   #-}
 {-# LANGUAGE UndecidableInstances, ViewPatterns                             #-}
 {-# OPTIONS_GHC -fno-warn-orphans                             #-}
 module Algebra.Ring.Polynomial.Monomorphic where

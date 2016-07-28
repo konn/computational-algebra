@@ -51,7 +51,7 @@ import qualified Data.Vector.Sized       as V
 import           Numeric.Algebra         hiding ((<), (>))
 import           Numeric.Decidable.Zero
 import           Prelude                 hiding (Num (..), recip, subtract, (^))
-import           Proof.Equational
+import           Proof.Equational        hiding ((:-))
 
 -- | Calculate a polynomial quotient and remainder w.r.t. second argument.
 divModPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)
@@ -321,7 +321,7 @@ groebnerTest f fs = f `modPolynomial` fs == zero
 -- | Calculate n-th elimination ideal using 'WeightedEliminationOrder' ordering.
 thEliminationIdeal :: forall n m ord k.
                       ( IsMonomialOrder ord, Field k, IsPolynomial k m, SingI m
-                      , (n :<<= m) ~ True)
+                      , (n :<<= m) ~ 'True)
                    => SNat n
                    -> Ideal (OrderedPolynomial k ord m)
                    -> Ideal (OrderedPolynomial k ord (m :-: n))
@@ -334,7 +334,7 @@ thEliminationIdeal n =
 
 -- | Calculate n-th elimination ideal using the specified n-th elimination type order.
 thEliminationIdealWith :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (m :-: n)
-                      , (n :<<= m) ~ True, EliminationType n ord, IsMonomialOrder ord')
+                      , (n :<<= m) ~ 'True, EliminationType n ord, IsMonomialOrder ord')
                    => ord
                    -> SNat n
                    -> Ideal (OrderedPolynomial k ord' m)
@@ -350,7 +350,7 @@ thEliminationIdealWith ord n ideal =
 -- This function should be used carefully because it does not check whether the given ordering is
 -- n-th elimintion type or not.
 unsafeThEliminationIdealWith :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (m :-: n)
-                                , (n :<<= m) ~ True, IsMonomialOrder ord')
+                                , (n :<<= m) ~ 'True, IsMonomialOrder ord')
                              => ord
                              -> SNat n
                              -> Ideal (OrderedPolynomial k ord' m)

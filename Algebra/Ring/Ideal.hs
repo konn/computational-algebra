@@ -3,7 +3,7 @@
 {-# LANGUAGE TypeSynonymInstances, UndecidableInstances             #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Ring.Ideal ( Ideal(..), addToIdeal, toIdeal, appendIdeal
-                               , generators, filterIdeal, mapIdeal, principalIdeal, isEmptyIdeal) where
+                          , generators, filterIdeal, mapIdeal, principalIdeal, isEmptyIdeal) where
 import           Control.DeepSeq
 import           Data.Function
 import           Data.Ord
@@ -11,7 +11,6 @@ import           Data.Vector.Sized (Vector (..))
 import qualified Data.Vector.Sized as V
 import           Numeric.Algebra
 import           Prelude           hiding (negate, subtract, (*), (+), (-))
-import qualified Prelude           as P
 
 data Ideal r = forall n. Ideal (V.Vector r n)
 

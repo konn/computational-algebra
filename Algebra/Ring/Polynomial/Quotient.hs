@@ -1,11 +1,11 @@
-{-# LANGUAGE CPP, ConstraintKinds, DataKinds  #-}
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs, MagicHash #-}
-{-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes          #-}
-{-# LANGUAGE ScopedTypeVariables, UndecidableInstances             #-}
+{-# LANGUAGE CPP, ConstraintKinds, DataKinds, FlexibleContexts          #-}
+{-# LANGUAGE FlexibleInstances, GADTs, MagicHash, MultiParamTypeClasses #-}
+{-# LANGUAGE PolyKinds, RankNTypes, ScopedTypeVariables                 #-}
+{-# LANGUAGE UndecidableInstances                                       #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Ring.Polynomial.Quotient ( Quotient(), QIdeal(), reifyQuotient, modIdeal
                                         , modIdeal', quotRepr, withQuotient, vectorRep
-                                        , genQuotVars, genQuotVars', gBasis, gBasis', matRep0
+                                        , genQuotVars, genQuotVars', gBasis', matRep0
                                         , standardMonomials, standardMonomials', matRepr'
                                         , reduce, multWithTable, multUnamb, isZeroDimensional) where
 import           Algebra.Algorithms.Groebner
@@ -61,7 +61,7 @@ matRepr' :: forall r ord n ideal.
           (Ord r, Normed r, Field r, IsPolynomial r n, IsMonomialOrder ord, Reifies ideal (QIdeal r ord n))
        => Quotient r ord n ideal -> M.Matrix r
 matRepr' f =
-  let ZeroDimIdeal bs vs _ = reflect f
+  let ZeroDimIdeal _bs vs _ = reflect f
       dim = length vs
   in fmapUnwrap $
      if null vs
@@ -107,7 +107,7 @@ stdMonoms :: forall r n ord. (IsMonomialOrder ord, IsPolynomial r n, Field r)
 stdMonoms basis = do
   let lms = map leadingTerm basis
       dim = sing :: SNat n
-      ordering = OrderedMonomial :: Monomial n -> OrderedMonomial ord n
+      _ordering = OrderedMonomial :: Monomial n -> OrderedMonomial ord n
       tests = zip (diag 1 0 dim) (diag 0 1 dim)
       mexp (val, test) = [ SV.foldr (+) 0 $ SV.zipWith (*) val $ getMonomial lm0
                          | (c, lm0) <- lms, c /= zero
@@ -137,14 +137,14 @@ standardMonomials :: forall ord ideal r n. ( IsMonomialOrder ord
                   => Maybe [Quotient r ord n ideal]
 standardMonomials = standardMonomials' (Proxy :: Proxy ideal)
 
-genQuotVars' :: forall ord n ideal r. ( Reifies ideal (QIdeal r ord (S n))
-                                      , IsMonomialOrder ord, IsPolynomial r (S n), Field r)
-             => Proxy ideal -> [Quotient r ord (S n) ideal]
-genQuotVars' pxy = map (modIdeal' pxy) $ genVars (sing :: SNat (S n))
+genQuotVars' :: forall ord n ideal r. ( Reifies ideal (QIdeal r ord ('S n))
+                                      , IsMonomialOrder ord, IsPolynomial r ('S n), Field r)
+             => Proxy ideal -> [Quotient r ord ('S n) ideal]
+genQuotVars' pxy = map (modIdeal' pxy) $ genVars (sing :: SNat ('S n))
 
-genQuotVars :: forall ord n ideal r. (IsMonomialOrder ord, Reifies ideal (QIdeal r ord (S n))
-                                     , IsPolynomial r (S n), Field r)
-             => [Quotient r ord (S n) ideal]
+genQuotVars :: forall ord n ideal r. (IsMonomialOrder ord, Reifies ideal (QIdeal r ord ('S n))
+                                     , IsPolynomial r ('S n), Field r)
+             => [Quotient r ord ('S n) ideal]
 genQuotVars = genQuotVars' (Proxy :: Proxy ideal)
 
 minimum' :: Ord a => [a] -> Maybe a
@@ -165,11 +165,6 @@ modIdeal = modIdeal' (Proxy :: Proxy ideal)
 gBasis' :: (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r)
        => Proxy ideal -> [OrderedPolynomial r ord n]
 gBasis' pxy = _gBasis (reflect pxy)
-
-gBasis :: forall ideal r ord n. (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n),
-                                     IsPolynomial r n, Field r)
-       => [OrderedPolynomial r ord n]
-gBasis = gBasis' (Proxy :: Proxy ideal)
 
 -- | Polynomial modulo ideal given by @Proxy@.
 modIdeal' :: (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r)

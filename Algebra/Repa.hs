@@ -3,8 +3,6 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Repa where
 import           Algebra.Wrapped
-import           Control.Applicative
-import           Control.Arrow
 import           Data.Array.Repa                   hiding (map)
 import           Data.Array.Repa.Algorithms.Matrix
 import           Data.Array.Repa.Eval
@@ -14,7 +12,7 @@ import           Data.Ord
 import qualified Data.Vector                       as V
 import qualified Numeric.Algebra                   as NA
 import           Numeric.Field.Fraction
-import           Numeric.Field.Fraction            (Fraction)
+import           Prelude                           hiding (traverse)
 
 type Matrix a = Array (DefVec a) DIM2 a
 

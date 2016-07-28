@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances          #-}
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes            #-}
 {-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Field.Finite (F(), naturalRepr, reifyPrimeField, withPrimeField,
                              modNat, modNat', modRat, modRat', FiniteField(..), order) where
 import           Algebra.Algorithms.PrimeTest
@@ -148,10 +149,10 @@ instance Reifies p Integer => NA.Commutative (F p)
 instance Reifies p Integer => NA.Characteristic (F p) where
   char _ = fromIntegral $ reflect (Proxy :: Proxy p)
 
-instance Reifies TN.Z Integer  where
+instance Reifies 'TN.Z Integer  where
   reflect _ = 0
 
-instance Reifies n Integer => Reifies (TN.S n) Integer where
+instance Reifies n Integer => Reifies ('TN.S n) Integer where
   reflect _ = 1 + reflect (Proxy :: Proxy n)
 
 class (Field k, Characteristic k) => FiniteField k where
