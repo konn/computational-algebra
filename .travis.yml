@@ -43,8 +43,8 @@ before_install:
  - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
  - unset CC
  - export PATH=$HOME/.local/bin:/opt/ghc/$GHCVER/bin:$PATH
- - sudo apt-get -qq update
- - sudo apt-get install -y libgsl0-dev liblapack-dev
+ - apt-get -qq update
+ - apt-get install -y libgsl0-dev liblapack-dev
 
 install:
  - stack --version
