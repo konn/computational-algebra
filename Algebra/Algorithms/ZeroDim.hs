@@ -48,7 +48,6 @@ import qualified Data.Vector.Sized                as SV
 import           Debug.Trace
 import           Numeric.Algebra                  hiding ((/), (<))
 import qualified Numeric.Algebra                  as NA
-import           Numeric.LinearAlgebra            ((@>))
 import qualified Numeric.LinearAlgebra            as LA
 import           Prelude                          hiding (lex, negate, recip,
                                                    sum, (*), (+), (-), (^),
@@ -62,8 +61,8 @@ tr = join traceShow
 solveM :: forall m r ord n.
           (Normed r, Ord r, MonadRandom m, Field r, IsPolynomial r n, IsMonomialOrder ord,
            Convertible r Double)
-       => Ideal (OrderedPolynomial r ord (S n))
-       -> m [SV.Vector (Complex Double) (S n)]
+       => Ideal (OrderedPolynomial r ord ('S n))
+       -> m [SV.Vector (Complex Double) ('S n)]
 solveM ideal = {-# SCC "solveM" #-} reifyQuotient (radical ideal) $ \pxy ->
   case standardMonomials' pxy of
     Just bs -> step 10 (length bs)
@@ -71,7 +70,7 @@ solveM ideal = {-# SCC "solveM" #-} reifyQuotient (radical ideal) $ \pxy ->
   where
     step bd len = {-# SCC "solveM/step" #-}do
       coeffs <- {-# SCC "solveM/coeff-gen" #-}
-        replicateM (sNatToInt (sing :: SNat ((S (S n))))) $ getRandomR (-bd, bd)
+        replicateM (sNatToInt (sing :: SNat (('S ('S n))))) $ getRandomR (-bd, bd)
       let vars = one : SV.toList allVars
           f = sum $ zipWith (.*.) (map (NA.fromInteger :: Integer -> r) coeffs) vars
       case solveWith f ideal of
@@ -79,9 +78,9 @@ solveM ideal = {-# SCC "solveM" #-} reifyQuotient (radical ideal) $ \pxy ->
         Just sols -> return sols
 
 solveWith :: (DecidableZero r, Normed r, Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord, Convertible r Double)
-          => OrderedPolynomial r ord (S n)
-          -> Ideal (OrderedPolynomial r ord (S n))
-          -> Maybe [SV.Vector (Complex Double) (S n)]
+          => OrderedPolynomial r ord ('S n)
+          -> Ideal (OrderedPolynomial r ord ('S n))
+          -> Maybe [SV.Vector (Complex Double) ('S n)]
 solveWith f0 i0 = {-# SCC "solveWith" #-}
   reifyQuotient (radical i0) $ \pxy ->
     let ideal = gBasis' pxy
@@ -102,10 +101,10 @@ solveWith f0 i0 = {-# SCC "solveWith" #-}
                       answer = mapCoeff toComplex $ injectCoeff (recip r) * (toPolynomial (leadingTerm g) - g)
                   in Left answer
             mf = AM.fromLists $ map (map toComplex) $ matrixRep f
-            (_, evecs) = LA.eig $ LA.ctrans mf
+            (_, evecs) = LA.eig $ LA.tr mf
             calc vec ={-# SCC "calc" #-}
-              let c = vec @> cind
-                  phi (idx, Right nth) acc = acc & ix idx .~ (vec @> nth) / c
+              let c = vec LA.! cind
+                  phi (idx, Right nth) acc = acc & ix idx .~ (vec LA.! nth) / c
                   phi (idx, Left g)    acc = acc & ix idx .~ substWith (*) acc g
               in if c == 0
                  then Nothing
@@ -114,8 +113,8 @@ solveWith f0 i0 = {-# SCC "solveWith" #-}
 
 solve' :: (Field r, IsPolynomial r n, IsMonomialOrder ord, Convertible r Double)
        => Double
-       -> Ideal (OrderedPolynomial r ord (S n))
-       -> [SV.Vector (Complex Double) (S n)]
+       -> Ideal (OrderedPolynomial r ord ('S n))
+       -> [SV.Vector (Complex Double) ('S n)]
 solve' err ideal =
   reifyQuotient ideal $ \ii ->
   if gBasis' ii == [one]
@@ -253,17 +252,17 @@ radical ideal = {-# SCC "radical" #-}
 
 -- | Test if the given zero-dimensional ideal is radical or not.
 isRadical :: forall r ord n. (Normed r, Ord r, IsPolynomial r n, Field r, IsMonomialOrder ord)
-          => Ideal (OrderedPolynomial r ord (S n)) -> Bool
+          => Ideal (OrderedPolynomial r ord ('S n)) -> Bool
 isRadical ideal =
-  let gens  = map (\on -> reduction on $ univPoly on ideal) $ enumOrdinal (sing :: SNat (S n))
+  let gens  = map (\on -> reduction on $ univPoly on ideal) $ enumOrdinal (sing :: SNat ('S n))
   in all (`isIdealMember` ideal) gens
 
 solve'' :: forall r ord n.
            (Show r, Sparse.Eq0 r, Normed r, Ord r, Field r, IsPolynomial r n,
             IsMonomialOrder ord, Convertible r Double)
        => Double
-       -> Ideal (OrderedPolynomial r ord (S n))
-       -> [SV.Vector (Complex Double) (S n)]
+       -> Ideal (OrderedPolynomial r ord ('S n))
+       -> [SV.Vector (Complex Double) ('S n)]
 solve'' err ideal =
   reifyQuotient (radical ideal) $ \ii ->
   let gbs = gBasis' ii
@@ -306,18 +305,18 @@ toDM = AM.fromCols . AM.toCols
 -- | Calculate the Groebner basis w.r.t. lex ordering of the zero-dimensional ideal using FGLM algorithm.
 --   If the given ideal is not zero-dimensional this function may diverge.
 fglm :: (DecidableZero r, Normed r, Ord r, SingI n, Field r, IsMonomialOrder ord)
-     => Ideal (OrderedPolynomial r ord (S n))
-     -> ([OrderedPolynomial r Lex (S n)], [OrderedPolynomial r Lex (S n)])
+     => Ideal (OrderedPolynomial r ord ('S n))
+     -> ([OrderedPolynomial r Lex ('S n)], [OrderedPolynomial r Lex ('S n)])
 fglm ideal =
   let (gs, bs) = reifyQuotient ideal $ \pxy -> fglmMap (\f -> vectorRep $ modIdeal' pxy f)
   in (gs, bs)
 
 -- | Compute the kernel and image of the given linear map using generalized FGLM algorithm.
 fglmMap :: forall k ord n. (Normed k, Ord k, Field k, IsMonomialOrder ord, IsPolynomial k n)
-        => (OrderedPolynomial k ord (S n) -> V.Vector k)
+        => (OrderedPolynomial k ord ('S n) -> V.Vector k)
         -- ^ Linear map from polynomial ring.
-        -> ( [OrderedPolynomial k Lex (S n)]
-           , [OrderedPolynomial k Lex (S n)]
+        -> ( [OrderedPolynomial k Lex ('S n)]
+           , [OrderedPolynomial k Lex ('S n)]
            ) -- ^ The tuple of:
              --
              --     * lex-Groebner basis of the kernel of the given linear map.
@@ -353,7 +352,7 @@ mainLoop = do
       gLex %== (g :)
 
 toContinue :: (DecidableZero r, Ord r, SingI n, Field r, IsOrder o)
-           => Machine s r o (S n) Bool
+           => Machine s r o ('S n) Bool
 toContinue = do
   mans <- look proced
   case mans of

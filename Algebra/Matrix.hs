@@ -10,6 +10,7 @@ import           Algebra.Ring.Polynomial          hiding (maxNorm)
 import           Algebra.Wrapped                  (Normed (..))
 import           Control.Arrow
 import           Control.Lens
+import           Control.Monad                    (when)
 import           Data.Complex
 import qualified Data.IntSet                      as IS
 import           Data.List
@@ -31,6 +32,7 @@ import qualified Numeric.Algebra                  as NA
 import qualified Numeric.Decidable.Zero           as NA
 import           Numeric.Field.Fraction
 import qualified Numeric.LinearAlgebra            as LA
+import qualified Numeric.LinearAlgebra.Devel      as LA
 import           Sparse.Matrix                    (_Mat)
 import qualified Sparse.Matrix                    as SM
 
@@ -109,33 +111,43 @@ swapIJ :: Eq a => a -> a -> a -> a
 swapIJ i j k = if k == i then j else if k == j then i else k
 
 instance Matrix LA.Matrix where
-  type Elem LA.Matrix a = (Num a, LA.Element a, LA.Container LA.Vector a)
+  type Elem LA.Matrix a = (Num a, LA.Numeric  a, LA.Element a, LA.Container LA.Vector a)
   empty = LA.fromLists [[]]
   fromLists = LA.fromLists
   cmap = LA.cmap
   ncols = LA.cols
   nrows = LA.rows
-  trans = LA.trans
+  trans = LA.tr
   identity = LA.ident
   fromCols = LA.fromColumns . map (LA.fromList . V.toList)
   diag = LA.diag . LA.fromList . V.toList
   getDiag = V.fromList . LA.toList . LA.takeDiag
   trace = LA.sumElements . LA.takeDiag
   diagProd = LA.prodElements . LA.takeDiag
-  zero i j = LA.buildMatrix i j (const 0)
+  zero i j = LA.konst 0 (i, j)
   colVector = LA.asColumn . LA.fromList . V.toList
   rowVector = LA.asRow . LA.fromList . V.toList
   toCols = map (V.fromList . LA.toList) . LA.toColumns
   toRows = map (V.fromList . LA.toList) . LA.toRows
   getCol i = V.fromList . LA.toList . (!! (i - 1)) . LA.toColumns
   getRow i = V.fromList . LA.toList . (!! (i - 1)) . LA.toRows
-  switchRows i j m = LA.extractRows (map (swapIJ (i-1) (j-1)) [0.. nrows m - 1]) m
+  switchRows i j m = m LA.? map (swapIJ (i-1) (j-1)) [0.. nrows m - 1]
   combineRows j s i m = LA.mapMatrixWithIndex (\(k,l) v -> if k == j - 1 then s * (m ! (i,l+1)) + v else v) m
-  buildMatrix w h f = LA.buildMatrix w h (\(i, j) -> f (i-1, j-1))
-  scaleRow a i = LA.mapMatrixWithIndex (\(k, l) v -> if k == i - 1 then a * v else v)
-  m ! (i, j) = m LA.@@> (i - 1, j - 1)
+  buildMatrix w h f = LA.build (w, h) (\i j -> f (toIntLA i+1, toIntLA j+1))
+  scaleRow a i = (fst .) $ LA.mutable $ \(k, l) m -> do
+    v <- LA.readMatrix m k l
+    when (k == i - 1) $
+      LA.writeMatrix m k l (a * v)
+  m ! (i, j) = m `LA.atIndex` (i - 1, j - 1)
   m <||> n = LA.fromColumns $ LA.toColumns m ++ LA.toColumns n
   m <--> n = LA.fromRows $ LA.toRows m ++ LA.toRows n
+
+mapMatrixWithIndexLA :: LA.Element  a => ((Int, Int) -> a) -> LA.Matrix a -> LA.Matrix a
+mapMatrixWithIndexLA f = (fst .) $ LA.mutable $ \(l, k) m -> do
+  LA.writeMatrix m l k (f (l+1, k+1))
+
+toIntLA :: LA.Container LA.Matrix e => e -> Int
+toIntLA e = fromIntegral $ LA.toZ ((1 LA.>< 1) [e]) `LA.atIndex` (0, 0)
 
 mapSM :: (SM.Arrayed a, SM.Arrayed b) => (a -> b) -> SM.Mat a -> SM.Mat b
 mapSM f m =
