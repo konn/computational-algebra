@@ -21,6 +21,7 @@ extra-deps:
 - repa-algorithms-3.4.0.1
 - semigroupoids-4.3
 - vector-0.10.12.3
+- lazysmallcheck-0.6
 
 # flags:
 #   semigroups:
