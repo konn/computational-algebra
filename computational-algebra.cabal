@@ -59,6 +59,7 @@ library
                      , parallel             >= 3.2
                      , hybrid-vectors       >=0.1
                      , vector-algorithms
+                     , mono-traversable     >= 0.10
                      , control-monad-loop   >=0.1
                      , primes               >= 0.2.1
     
@@ -80,6 +81,7 @@ library
                        Algebra.Matrix Algebra.Prelude Algebra.Algorithms.Signature
                        Algebra.Ring.Polynomial.Factorize
                        Algebra.Algorithms.PrimeTest Algebra.Algorithms.ChineseRemainder
+                       Algebra.Ring.Polynomial.Class
     exposed:           True
     buildable:         True
     other-modules:     Algebra.Algorithms.FGLM Algebra.Field.Galois.Internal Algebra.Field.Galois.Conway

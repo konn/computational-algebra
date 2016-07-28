@@ -1,9 +1,16 @@
 resolver: lts-6.9
+packages: 
+- '.'
+- location:
+    git: https://github.com/konn/sized-vector.git
+    commit: 34741751ee00944d0bed6ab12556799cc9f9ab57
+  extra-dep: true
+
 extra-deps:
 - algebra-4.2
 - equational-reasoning-0.4.0.0
 - monomorphic-0.0.3.3
-- sized-vector-1.4.3.1
+- sized-vector-1.4.4.0
 - sparse-0.9.2
 - type-natural-0.4.1.0
 - unamb-0.2.5

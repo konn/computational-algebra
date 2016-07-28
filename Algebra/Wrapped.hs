@@ -1,12 +1,12 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures                  #-}
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                     #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses              #-}
-{-# LANGUAGE NoMonomorphismRestriction, OverloadedStrings, ParallelListComp #-}
-{-# LANGUAGE PolyKinds, ScopedTypeVariables, StandaloneDeriving             #-}
-{-# LANGUAGE TemplateHaskell, TypeFamilies, TypeSynonymInstances            #-}
-{-# LANGUAGE UndecidableInstances                                           #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures     #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs        #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
+{-# LANGUAGE NoMonomorphismRestriction, OverloadedStrings      #-}
+{-# LANGUAGE ParallelListComp, PolyKinds, ScopedTypeVariables  #-}
+{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies #-}
+{-# LANGUAGE TypeSynonymInstances, UndecidableInstances        #-}
 {-# OPTIONS_GHC -fwarn-name-shadowing #-}
-module Algebra.Wrapped (WrappedField(..), Normed(..), fmapUnwrap, fmapWrap) where
+module Algebra.Wrapped (WrappedField(..), Normed(..), WrapCoeff(..), fmapUnwrap, fmapWrap) where
 import           Control.Lens
 import           Data.Complex
 import qualified Data.Ratio               as P
@@ -109,3 +109,26 @@ fmapWrap = unsafeCoerce
 "fmap/unwrap" forall (x :: Functor f => f (WrappedField r)) . fmap unwrapField x = fmapUnwrap x
 "fmap/wrap"   forall (x :: Functor f => f r) . fmap WrapField   x = fmapWrap x
   #-}
+
+newtype WrapCoeff a = WrapCoeff { runCoeff :: a }
+                deriving (Abelian, Additive, Multiplicative,
+                          Semiring, Unital, Commutative, Show, Eq, Ord)
+
+deriving instance Monoidal a => Monoidal (WrapCoeff a)
+deriving instance Ring a  => Ring (WrapCoeff a)
+deriving instance (Rig a) => Rig (WrapCoeff a)
+deriving instance Group a => Group (WrapCoeff a)
+deriving instance {-# OVERLAPPING #-} RightModule Natural a => RightModule Natural (WrapCoeff a)
+deriving instance {-# OVERLAPPING #-} LeftModule  Natural a => LeftModule  Natural (WrapCoeff a)
+deriving instance {-# OVERLAPPING #-} RightModule Integer a => RightModule Integer (WrapCoeff a)
+deriving instance {-# OVERLAPPING #-} LeftModule Integer a => LeftModule Integer (WrapCoeff a)
+
+makeWrapped ''WrapCoeff
+
+instance {-# INCOHERENT #-} Semiring a => LeftModule a (WrapCoeff a) where
+  a .* WrapCoeff b = WrapCoeff $ a * b
+  {-# INLINE (.*) #-}
+
+instance {-# INCOHERENT #-} Semiring a => RightModule a (WrapCoeff a) where
+  WrapCoeff b *. a = WrapCoeff (b * a)
+  {-# INLINE (*.) #-}
