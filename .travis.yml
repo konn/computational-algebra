@@ -15,6 +15,7 @@ matrix:
         apt:
           packages:
             - ghc-7.10.3
+            - libgsl0-dev liblapack-dev
           sources:
             - hvr-ghc
     - env: GHCVER=8.0.1 STACK_YAML=stack-ghc800.yaml
@@ -23,6 +24,7 @@ matrix:
         apt:
           packages:
             - ghc-8.0.1
+            - libgsl0-dev liblapack-dev
           sources:
             - hvr-ghc
     - env: GHCVER=head STACK_YAML=stack-head.yaml
@@ -31,6 +33,7 @@ matrix:
         apt:
           packages:
             - ghc-head
+            - libgsl0-dev liblapack-dev
           sources:
             - hvr-ghc
   allow_failures:
@@ -45,7 +48,6 @@ before_install:
  - unset CC
  - export PATH=$HOME/.local/bin:/opt/ghc/$GHCVER/bin:$PATH
  - apt-get -qq update
- - apt-get install -y libgsl0-dev liblapack-dev
 
 install:
  - stack --version
