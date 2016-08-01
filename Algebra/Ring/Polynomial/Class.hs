@@ -36,7 +36,7 @@ instance (DecidableZero r, Ring r, Commutative r, Eq r) => CoeffRing r
 --   by n-elements.
 --   To effectively compute all terms, we need @'monomials'@ in addition to
 --   universality of free object.
-class (CoeffRing (Coefficient poly),
+class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly,
        Module (Scalar (Coefficient poly)) poly, Ring poly, Commutative poly)
    => IsPolynomial poly where
   {-# MINIMAL ((liftMap , monomials) | terms'), (sArity | sArity') , (fromMonomial | toPolynomial' | polynomial') #-}

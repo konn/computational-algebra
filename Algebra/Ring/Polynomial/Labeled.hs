@@ -10,13 +10,15 @@ module Algebra.Ring.Polynomial.Labeled
         IsSubsetOf) where
 import           Algebra.Ring.Polynomial.Class
 import           Algebra.Scalar
+import           Data.Function                 (on)
 import           Data.Singletons.Prelude
 import           Data.Singletons.Prelude.List  hiding (Group)
 import           Data.Singletons.TH
 import           Data.Type.Natural             (Nat (..))
 import           Data.Type.Ordinal
 import qualified Data.Vector.Sized             as S
-import           Numeric.Algebra
+import           Numeric.Algebra               hiding (Order (..))
+import           Numeric.Decidable.Zero
 import           Prelude                       hiding (Integral (..), Num (..),
                                                 product, sum)
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 800
@@ -112,6 +114,19 @@ instance (Wraps vars poly, RightModule (Scalar r) poly) => RightModule (Scalar r
   LabelPolynomial f *. a = LabelPolynomial $ f *. a
   {-# INLINE (*.) #-}
 
+instance (Wraps vars poly, DecidableZero poly) => DecidableZero (LabPolynomial poly vars) where
+  isZero = isZero . unLabelPolynomial
+
+instance (Wraps vars poly, Eq poly) => Eq (LabPolynomial poly vars) where
+  (==) = (==) `on` unLabelPolynomial
+  (/=) = (/=) `on` unLabelPolynomial
+
+instance (Wraps vars poly, Ord poly) => Ord (LabPolynomial poly vars) where
+  compare = compare `on` unLabelPolynomial
+  (<=) = (<=) `on` unLabelPolynomial
+  (>=) = (>=) `on` unLabelPolynomial
+  (<)  = (<) `on` unLabelPolynomial
+  (>)  = (>) `on` unLabelPolynomial
 
 instance (IsPolynomial poly, Wraps vars poly) => IsPolynomial (LabPolynomial poly vars) where
   type Coefficient (LabPolynomial poly vars) = Coefficient poly
