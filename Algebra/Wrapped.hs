@@ -7,6 +7,7 @@
 {-# LANGUAGE TypeSynonymInstances, UndecidableInstances        #-}
 {-# OPTIONS_GHC -fwarn-name-shadowing #-}
 module Algebra.Wrapped (WrappedField(..), Normed(..), WrapCoeff(..), fmapUnwrap, fmapWrap) where
+import           Algebra.Scalar
 import           Control.Lens
 import           Data.Complex
 import qualified Data.Ratio               as P
@@ -125,10 +126,10 @@ deriving instance {-# OVERLAPPING #-} LeftModule Integer a => LeftModule Integer
 
 makeWrapped ''WrapCoeff
 
-instance {-# INCOHERENT #-} Semiring a => LeftModule a (WrapCoeff a) where
-  a .* WrapCoeff b = WrapCoeff $ a * b
+instance {-# INCOHERENT #-} Semiring a => LeftModule (Scalar a) (WrapCoeff a) where
+  Scalar a .* WrapCoeff b = WrapCoeff $ a * b
   {-# INLINE (.*) #-}
 
-instance {-# INCOHERENT #-} Semiring a => RightModule a (WrapCoeff a) where
-  WrapCoeff b *. a = WrapCoeff (b * a)
+instance {-# INCOHERENT #-} Semiring a => RightModule (Scalar a) (WrapCoeff a) where
+  WrapCoeff b *. Scalar a = WrapCoeff (b * a)
   {-# INLINE (*.) #-}
