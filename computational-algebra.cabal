@@ -82,6 +82,7 @@ library
                        Algebra.Ring.Polynomial.Factorize
                        Algebra.Algorithms.PrimeTest Algebra.Algorithms.ChineseRemainder
                        Algebra.Ring.Polynomial.Class
+                       Algebra.Ring.Polynomial.Labeled
     exposed:           True
     buildable:         True
     other-modules:     Algebra.Algorithms.FGLM Algebra.Field.Galois.Internal Algebra.Field.Galois.Conway
@@ -91,7 +92,7 @@ library
 executable solve
     build-depends: semigroups >= 0.15.2,
                    constraints >=0.3, algebra >= 4.1,
-                   base >=4, type-natural >= 0.2,
+                   base >=4, type-natural >= 0.4.2,
                    computational-algebra -any, random >= 1.0,
                    hmatrix, matrix >= 0.3, sized-vector >= 1.4,
                    vector >= 0.10, convertible >= 1.1, lens >= 3.9,

@@ -6,13 +6,18 @@ packages:
     commit: 34741751ee00944d0bed6ab12556799cc9f9ab57
   extra-dep: true
 
+- location:
+    git: https://github.com/konn/type-natural.git
+    commit: 5ce51e3fc7e11248dea0871c84e0e2354628db34
+  extra-dep: true
+
 extra-deps:
 - algebra-4.2
 - equational-reasoning-0.4.0.0
 - monomorphic-0.0.3.3
 - sized-vector-1.4.4.0
 - sparse-0.9.2
-- type-natural-0.4.1.0
+# - type-natural-0.4.1.1
 - unamb-0.2.5
 - ghc-typelits-presburger-0.1.0.0
 - singletons-2.1
