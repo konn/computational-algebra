@@ -1,13 +1,21 @@
-{-# LANGUAGE CPP, ConstraintKinds, DataKinds, FlexibleInstances, GADTs    #-}
-{-# LANGUAGE KindSignatures, MultiParamTypeClasses, PolyKinds, RankNTypes #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances, ScopedTypeVariables            #-}
+{-# LANGUAGE CPP, ConstraintKinds, DataKinds, EmptyCase, FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances, GADTs, KindSignatures                     #-}
+{-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes                 #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell     #-}
+{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances            #-}
 module Algebra.Ring.Polynomial.Labeled
        (IsUniqueList, LabPolynomial(..),
-        UniqueResult(..)) where
-import           Algebra.Scalar
+        UniqueResult(..), canonicalMap,
+        canonicalMap',
+        IsSubsetOf) where
 import           Algebra.Ring.Polynomial.Class
+import           Algebra.Scalar
 import           Data.Singletons.Prelude
+import           Data.Singletons.Prelude.List  hiding (Group)
+import           Data.Singletons.TH
 import           Data.Type.Natural             (Nat (..))
+import           Data.Type.Ordinal
+import qualified Data.Vector.Sized             as S
 import           Numeric.Algebra
 import           Prelude                       hiding (Integral (..), Num (..),
                                                 product, sum)
@@ -20,7 +28,7 @@ data UniqueResult = Expected | VariableOccursTwice Symbol
 type family UniqueList' (x :: Symbol) (xs :: [Symbol]) :: UniqueResult where
   UniqueList' x '[] = 'Expected
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 800
-  UniqueList' x (x ': xs) = TypeError ('Text "The variable " :<>: 'Text x :<>: " occurs variables list twice!")
+  UniqueList' x (x ': xs) = TypeError ('Text "The variable " :<>: 'Text x :<>: " occurs more than once!")
 #else
   UniqueList' x (x ': xs) = 'VariableOccursTwice x
 #endif
@@ -112,22 +120,22 @@ instance (IsPolynomial poly, Wraps vars poly) => IsPolynomial (LabPolynomial pol
   liftMap mor = liftMap mor . unLabelPolynomial
   {-# INLINE liftMap #-}
 
-  terms = terms . unLabelPolynomial
-  {-# INLINE terms #-}
+  terms' = terms' . unLabelPolynomial
+  {-# INLINE terms' #-}
 
   monomials = monomials . unLabelPolynomial
   {-# INLINE monomials #-}
 
-  coeff m = coeff m . unLabelPolynomial
-  {-# INLINE coeff #-}
+  coeff' m = coeff' m . unLabelPolynomial
+  {-# INLINE coeff' #-}
 
   constantTerm = constantTerm . unLabelPolynomial
   {-# INLINE constantTerm #-}
 
-  sArity = sArity . unLabelPolynomial
+  sArity _ = sArity (Proxy :: Proxy poly)
   {-# INLINE sArity #-}
 
-  arity = arity . unLabelPolynomial
+  arity _ = arity (Proxy :: Proxy poly)
   {-# INLINE arity #-}
 
   fromMonomial m = LabelPolynomial (fromMonomial m :: poly)
@@ -139,8 +147,8 @@ instance (IsPolynomial poly, Wraps vars poly) => IsPolynomial (LabPolynomial pol
   polynomial' dic = LabelPolynomial (polynomial' dic :: poly)
   {-# INLINE polynomial' #-}
 
-  totalDegree = totalDegree . unLabelPolynomial
-  {-# INLINE totalDegree #-}
+  totalDegree' = totalDegree' . unLabelPolynomial
+  {-# INLINE totalDegree' #-}
 
 instance (IsOrderedPolynomial poly, Wraps vars poly) => IsOrderedPolynomial (LabPolynomial poly vars) where
   type MOrder (LabPolynomial poly vars) = MOrder poly
@@ -159,3 +167,49 @@ instance (IsOrderedPolynomial poly, Wraps vars poly) => IsOrderedPolynomial (Lab
 
   polynomial dic = LabelPolynomial (polynomial dic :: poly)
   {-# INLINE polynomial #-}
+
+  terms = terms . unLabelPolynomial
+  {-# INLINE terms #-}
+
+  coeff m = coeff m . unLabelPolynomial
+  {-# INLINE coeff #-}
+
+class    (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf (xs :: [a]) (ys :: [a])
+instance (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf (xs :: [a]) (ys :: [a])
+
+-- | So unsafe! Don't expose it!
+permute0 :: (SEq ('KProxy :: KProxy k))
+         => SList (xs :: [k]) -> SList ys -> S.Vector Integer (Length' xs)
+permute0 SNil _ = S.Nil
+permute0 (SCons x xs) ys =
+  case sElemIndex x xs of
+    SJust n  -> fromSing n S.:- permute0 xs ys
+    SNothing -> error "oops, you called permute0 for non-subset..."
+
+permute :: (IsSubsetOf xs ys , SEq ('KProxy :: KProxy k))
+        => SList (xs :: [k]) -> SList ys -> S.Vector Integer (Length' xs)
+permute = permute0
+
+canonicalMap :: forall xs ys poly poly'.
+                (SingI xs, SingI ys, IsSubsetOf xs ys,
+                 Wraps xs poly, Wraps ys poly',
+                 IsPolynomial poly, IsPolynomial poly',
+                 Coefficient poly ~ Coefficient poly')
+             => LabPolynomial poly xs -> LabPolynomial poly' ys
+canonicalMap (LabelPolynomial f) =
+  let sxs  = sing :: Sing xs
+      sys  = sing :: Sing ys
+      dics = permute sxs sys
+      ords = enumOrdinal (sArity $ Just ans)
+      mor o = var (ords !! fromInteger (dics S.%!! o)) :: poly'
+      ans   = liftMap mor f
+  in LabelPolynomial ans
+{-# INLINE canonicalMap #-}
+
+canonicalMap' :: (SingI xs, SingI ys, IsSubsetOf xs ys,
+                 Wraps xs poly, Wraps ys poly',
+                 IsPolynomial poly, IsPolynomial poly',
+                 Coefficient poly ~ Coefficient poly')
+              => proxy xs -> proxy ys -> LabPolynomial poly xs -> LabPolynomial poly' ys
+canonicalMap' _ _ = canonicalMap
+{-# INLINE canonicalMap' #-}
