@@ -75,9 +75,9 @@ class Matrix mat where
   (!) :: Elem mat a => mat a -> (Int, Int) -> a
   (<||>) :: Elem mat a => mat a -> mat a -> mat a
   (<-->) :: Elem mat a => mat a -> mat a -> mat a
-  nonZeroRows :: (NA.DecidableZero a, Elem mat a) => mat a -> [Int]
+  nonZeroRows :: (DecidableZero a, Elem mat a) => mat a -> [Int]
   nonZeroRows = map fst . filter (V.any (not . NA.isZero) . snd) . zip [1..] . toRows
-  nonZeroCols :: (NA.DecidableZero a, Elem mat a) => mat a -> [Int]
+  nonZeroCols :: (DecidableZero a, Elem mat a) => mat a -> [Int]
   nonZeroCols = map fst . filter (V.any (not . NA.isZero) . snd) . zip [1..] . toCols
 
 instance Matrix DM.Matrix where
@@ -182,7 +182,7 @@ instance (SM.Arrayed a, Show a) => Show (Sparse a) where
   showsPrec d = showsPrec d . rawSM
 
 instance Matrix LM.Matrix where
-  type Elem LM.Matrix a = (DecidableZero a, Unital a, Monoidal a, Multiplicative a, Additive a)
+  type Elem LM.Matrix a = (CoeffRing a, Unital a, Monoidal a, Multiplicative a, Additive a)
   cmap = LM.cmap
   (!) m pos = m LM.! (pos & both %~ pred)
   index i j = LM.index (i-1) (j-1)
@@ -263,11 +263,11 @@ delta :: (NA.Monoidal r, NA.Unital r) => Int -> Int -> r
 delta i j | i == j = NA.one
           | otherwise = NA.zero
 
-companion :: (SingI n, DecidableZero r, Matrix mat, Eq r,
+companion :: (SingI n, CoeffRing r, Matrix mat, Eq r,
               Elem mat r, IsMonomialOrder ord, Ring r)
           => Ordinal n -> OrderedPolynomial r ord n -> mat r
 companion on poly =
-  let deg = totalDegree' poly
+  let deg = fromIntegral $ totalDegree' poly
       vx  = leadingMonomial (var on `asTypeOf` poly)
   in buildMatrix deg deg $ \(j, k) ->
   if 1 <= k && k <= deg - 1
@@ -316,7 +316,7 @@ det = view _3 . gaussReduction'
 maxNorm :: (Elem mat a, Normed a, Matrix mat) => mat a -> Norm a
 maxNorm = maximum . concat . map (map norm . V.toList) . toRows
 
-rankWith :: (Elem mat r, DecidableZero r, Matrix mat)
+rankWith :: (Elem mat r, CoeffRing r, Matrix mat)
          => (mat r -> mat r) -> mat r -> Int
 rankWith gauss = length . nonZeroRows . gauss
 

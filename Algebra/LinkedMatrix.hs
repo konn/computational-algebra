@@ -700,7 +700,7 @@ instance (DecidableZero r, Abelian r) => Abelian (Matrix r)
 
 instance (DecidableZero r, Semiring r) => Semiring (Matrix r)
 
-substMatrix :: (Ring r, DecidableZero r)
+substMatrix :: (CoeffRing r)
             => Matrix r -> Polynomial r One -> Matrix r
 substMatrix m f =
   let n = ncols m

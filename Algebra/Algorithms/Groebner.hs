@@ -42,19 +42,21 @@ import           Data.Function
 import qualified Data.Heap               as H
 import           Data.List
 import           Data.Maybe
+import           Data.Singletons.Prelude (POrd (..))
 import           Data.STRef
 import           Data.Type.Monomorphic
-import           Data.Type.Natural       hiding (max, one, zero)
+import           Data.Type.Natural       hiding ((:<=), max, one, zero)
 import           Data.Vector.Sized       (Vector (..), sLength, singleton,
                                           toList)
 import qualified Data.Vector.Sized       as V
 import           Numeric.Algebra         hiding ((<), (>))
 import           Numeric.Decidable.Zero
 import           Prelude                 hiding (Num (..), recip, subtract, (^))
+import qualified Prelude                 as P
 import           Proof.Equational        hiding ((:-))
 
 -- | Calculate a polynomial quotient and remainder w.r.t. second argument.
-divModPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)
+divModPolynomial :: (IsMonomialOrder order, Eq r, CoeffRing r, SingI n, Field r)
                  => OrderedPolynomial r order n -> [OrderedPolynomial r order n]
                  -> ([(OrderedPolynomial r order n, OrderedPolynomial r order n)], OrderedPolynomial r order n)
 divModPolynomial f0 fs = loop f0 zero (zip (nub fs) (repeat zero))
@@ -71,14 +73,14 @@ divModPolynomial f0 fs = loop f0 zero (zip (nub fs) (repeat zero))
                      in loop (p - (q * g)) r dic'
 
 -- | Remainder of given polynomial w.r.t. the second argument.
-modPolynomial :: (IsPolynomial r n, Field r, IsMonomialOrder order)
+modPolynomial :: (Eq r, CoeffRing r, SingI n, Field r, IsMonomialOrder order)
               => OrderedPolynomial r order n
               -> [OrderedPolynomial r order n]
               -> OrderedPolynomial r order n
 modPolynomial = (snd .) . divModPolynomial
 
 -- | A Quotient of given polynomial w.r.t. the second argument.
-divPolynomial :: (IsPolynomial r n, Field r, IsMonomialOrder order)
+divPolynomial :: (Eq r, CoeffRing r, SingI n, Field r, IsMonomialOrder order)
               => OrderedPolynomial r order n
               -> [OrderedPolynomial r order n]
               -> [(OrderedPolynomial r order n, OrderedPolynomial r order n)]
@@ -98,7 +100,7 @@ isGroebnerBasis (nub . generators -> ideal) = all check $ combinations ideal
       in t*u == lcmMonomial t u || sPolynomial f g `modPolynomial` ideal == zero
 
 -- | The Naive buchberger's algorithm to calculate Groebner basis for the given ideal.
-simpleBuchberger :: (Field k, IsPolynomial k n, IsMonomialOrder order)
+simpleBuchberger :: (Eq k, Field k, CoeffRing k, SingI n, IsMonomialOrder order)
                  => Ideal (OrderedPolynomial k order n) -> [OrderedPolynomial k order n]
 simpleBuchberger ideal =
   let gs = nub $ generators ideal
@@ -110,7 +112,7 @@ simpleBuchberger ideal =
                ]
 
 -- | Buchberger's algorithm slightly improved by discarding relatively prime pair.
-primeTestBuchberger :: (Field r, IsPolynomial r n, IsMonomialOrder order)
+primeTestBuchberger :: (Eq r, Field r, CoeffRing r, SingI n, IsMonomialOrder order)
                     => Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
 primeTestBuchberger ideal =
   let gs = nub $ generators ideal
@@ -150,14 +152,14 @@ combinations xs = concat $ zipWith (map . (,)) xs $ drop 1 $ tails xs
 
 -- | Calculate Groebner basis applying (modified) Buchberger's algorithm.
 -- This function is same as 'syzygyBuchberger'.
-buchberger :: (Field r, IsPolynomial r n, IsMonomialOrder order)
+buchberger :: (Field r, CoeffRing r, SingI n, IsMonomialOrder order)
            => Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
 buchberger = syzygyBuchberger
 
 -- | Buchberger's algorithm greately improved using the syzygy theory with the sugar strategy.
 -- Utilizing priority queues, this function reduces division complexity and comparison time.
 -- If you don't have strong reason to avoid this function, this function is recommended to use.
-syzygyBuchberger :: (Field r, IsPolynomial r n, IsMonomialOrder order)
+syzygyBuchberger :: (Field r, CoeffRing r, SingI n, IsMonomialOrder order)
                     => Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
 syzygyBuchberger = syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)
 {-# INLINE syzygyBuchberger #-}
@@ -178,7 +180,7 @@ instance IsMonomialOrder ord => Ord (Monomorphic (OrderedMonomial ord)) where
       in cmpMonomial (Proxy :: Proxy ord) mm mm'
 
 -- | apply buchberger's algorithm using given selection strategy.
-syzygyBuchbergerWithStrategy :: ( Field r, IsPolynomial r n, IsMonomialOrder order, SelectionStrategy strategy
+syzygyBuchbergerWithStrategy :: (Eq r, Field r, CoeffRing r, SingI n, IsMonomialOrder order, SelectionStrategy strategy
                         , Ord (Weight strategy order))
                     => strategy -> Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
 syzygyBuchbergerWithStrategy strategy ideal = runST $ do
@@ -211,7 +213,7 @@ syzygyBuchbergerWithStrategy strategy ideal = runST $ do
 -- Buchberger's algorithm proccesses the pair with the most least weight first.
 -- This function requires the @Ord@ instance for the weight; this constraint is not required
 -- in the 'calcWeight' because of the ease of implementation. So use this function.
-calcWeight' :: (SelectionStrategy s, IsPolynomial r n, IsMonomialOrder ord, Ord (Weight s ord))
+calcWeight' :: (SelectionStrategy s, CoeffRing r, SingI n, IsMonomialOrder ord, Ord (Weight s ord))
             => s -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n -> Weight s ord
 calcWeight' s = calcWeight (toProxy s)
 {-# INLINE calcWeight' #-}
@@ -219,7 +221,7 @@ calcWeight' s = calcWeight (toProxy s)
 -- | Type-class for selection strategies in Buchberger's algorithm.
 class SelectionStrategy s where
   type Weight s ord :: *
-  calcWeight :: (IsPolynomial r n, IsMonomialOrder ord)
+  calcWeight :: (CoeffRing r, SingI n, IsMonomialOrder ord)
              => Proxy s -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n -> Weight s ord
 
 -- | Buchberger's normal selection strategy. This selects the pair with
@@ -263,7 +265,7 @@ instance SelectionStrategy s => SelectionStrategy (SugarStrategy s) where
   {-# INLINE calcWeight #-}
 
 
-minimizeGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
+minimizeGroebnerBasis :: (Eq k, Field k, CoeffRing k, SingI n, IsMonomialOrder order)
                       => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
 minimizeGroebnerBasis bs = runST $ do
   left  <- newSTRef $ map monoize $ filter (/= zero) bs
@@ -278,7 +280,7 @@ minimizeGroebnerBasis bs = runST $ do
   readSTRef right
 
 -- | Reduce minimum Groebner basis into reduced Groebner basis.
-reduceMinimalGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
+reduceMinimalGroebnerBasis :: (Eq k, Field k, CoeffRing k, SingI n, IsMonomialOrder order)
                            => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
 reduceMinimalGroebnerBasis bs = runST $ do
   left  <- newSTRef bs
@@ -292,36 +294,36 @@ reduceMinimalGroebnerBasis bs = runST $ do
   readSTRef right
 
 -- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
-calcGroebnerBasisWith :: (Field k, IsPolynomial k n, IsMonomialOrder order, IsMonomialOrder order')
+calcGroebnerBasisWith :: (Field k, CoeffRing k, SingI n, IsMonomialOrder order, IsMonomialOrder order')
                       => order -> Ideal (OrderedPolynomial k order' n) -> [OrderedPolynomial k order n]
 calcGroebnerBasisWith ord i = calcGroebnerBasis $  mapIdeal (changeOrder ord) i
 
 -- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
-calcGroebnerBasisWithStrategy :: ( Field k, IsPolynomial k n, IsMonomialOrder order
+calcGroebnerBasisWithStrategy :: ( Eq k, Field k, CoeffRing k, SingI n, IsMonomialOrder order
                                  , SelectionStrategy strategy, Ord (Weight strategy order))
                       => strategy -> Ideal (OrderedPolynomial k order n) -> [OrderedPolynomial k order n]
 calcGroebnerBasisWithStrategy strategy =
   reduceMinimalGroebnerBasis . minimizeGroebnerBasis . syzygyBuchbergerWithStrategy strategy
 
 -- | Caliculating reduced Groebner basis of the given ideal.
-calcGroebnerBasis :: (Field k, IsPolynomial k n, IsMonomialOrder order)
+calcGroebnerBasis :: (Eq k, Field k, CoeffRing k, SingI n, IsMonomialOrder order)
                   => Ideal (OrderedPolynomial k order n) -> [OrderedPolynomial k order n]
 calcGroebnerBasis = reduceMinimalGroebnerBasis . minimizeGroebnerBasis . syzygyBuchberger
 
 -- | Test if the given polynomial is the member of the ideal.
-isIdealMember :: (IsPolynomial k n, Field k, IsMonomialOrder o)
+isIdealMember :: (CoeffRing k, SingI n, Field k, IsMonomialOrder o)
               => OrderedPolynomial k o n -> Ideal (OrderedPolynomial k o n) -> Bool
 isIdealMember f ideal = groebnerTest f (calcGroebnerBasis ideal)
 
 -- | Test if the given polynomial can be divided by the given polynomials.
-groebnerTest :: (IsPolynomial k n, Field k, IsMonomialOrder order)
+groebnerTest :: (CoeffRing k, SingI n, Field k, IsMonomialOrder order)
              => OrderedPolynomial k order n -> [OrderedPolynomial k order n] -> Bool
 groebnerTest f fs = f `modPolynomial` fs == zero
 
 -- | Calculate n-th elimination ideal using 'WeightedEliminationOrder' ordering.
 thEliminationIdeal :: forall n m ord k.
-                      ( IsMonomialOrder ord, Field k, IsPolynomial k m, SingI m
-                      , (n :<<= m) ~ 'True)
+                      ( IsMonomialOrder ord, Field k, CoeffRing k, SingI m
+                      , (n :<= m) ~ 'True)
                    => SNat n
                    -> Ideal (OrderedPolynomial k ord m)
                    -> Ideal (OrderedPolynomial k ord (m :-: n))
@@ -333,8 +335,8 @@ thEliminationIdeal n =
             mapIdeal (changeOrderProxy Proxy) . thEliminationIdealWith (weightedEliminationOrder n) n
 
 -- | Calculate n-th elimination ideal using the specified n-th elimination type order.
-thEliminationIdealWith :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (m :-: n)
-                      , (n :<<= m) ~ 'True, EliminationType n ord, IsMonomialOrder ord')
+thEliminationIdealWith :: ( IsMonomialOrder ord, Field k, CoeffRing k, SingI m,
+                            SingI (m :-: n), (n :<= m) ~ 'True, EliminationType n ord, IsMonomialOrder ord')
                    => ord
                    -> SNat n
                    -> Ideal (OrderedPolynomial k ord' m)
@@ -349,8 +351,8 @@ thEliminationIdealWith ord n ideal =
 -- | Calculate n-th elimination ideal using the specified n-th elimination type order.
 -- This function should be used carefully because it does not check whether the given ordering is
 -- n-th elimintion type or not.
-unsafeThEliminationIdealWith :: ( IsMonomialOrder ord, Field k, IsPolynomial k m, IsPolynomial k (m :-: n)
-                                , (n :<<= m) ~ 'True, IsMonomialOrder ord')
+unsafeThEliminationIdealWith :: ( IsMonomialOrder ord, Field k, CoeffRing k, SingI m, SingI (m :-: n)
+                                , (n :<= m) ~ 'True, IsMonomialOrder ord')
                              => ord
                              -> SNat n
                              -> Ideal (OrderedPolynomial k ord' m)
@@ -364,8 +366,7 @@ unsafeThEliminationIdealWith ord n ideal =
 
 -- | An intersection ideal of given ideals (using 'WeightedEliminationOrder').
 intersection :: forall r k n ord.
-                ( IsMonomialOrder ord, Field r, IsPolynomial r k, IsPolynomial r n
-                , IsPolynomial r (k :+: n)
+                ( IsMonomialOrder ord, Field r, SingI k, CoeffRing r, SingI n
                 )
              => Vector (Ideal (OrderedPolynomial r ord n)) k
              -> Ideal (OrderedPolynomial r ord n)
@@ -373,14 +374,15 @@ intersection Nil = Ideal $ singleton one
 intersection idsv@(_ :- _) =
     let sk = sLength idsv
         sn = sing :: SNat n
-        ts  = take (sNatToInt sk) $ genVars (sk %+ sn)
+    in withSingI (sk %+ sn) $
+    let ts  = take (sNatToInt sk) $ genVars (sk %+ sn)
         tis = zipWith (\ideal t -> mapIdeal ((t *) . shiftR sk) ideal) (toList idsv) ts
         j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
     in case propToBoolLeq (plusLeqL sk sn) of
       Dict -> coerce (cong Proxy $ plusMinusEqR sn sk) $ thEliminationIdeal sk j
 
 -- | Ideal quotient by a principal ideals.
-quotByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
+quotByPrincipalIdeal :: (Field k, CoeffRing k, SingI n, IsMonomialOrder ord)
                      => Ideal (OrderedPolynomial k ord n)
                      -> OrderedPolynomial k ord n
                      -> Ideal (OrderedPolynomial k ord n)
@@ -389,7 +391,7 @@ quotByPrincipalIdeal i g =
       Ideal gs -> Ideal $ V.map (snd . head . (`divPolynomial` [g])) gs
 
 -- | Ideal quotient by the given ideal.
-quotIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
+quotIdeal :: forall k ord n. (CoeffRing k, SingI n, Field k, IsMonomialOrder ord)
           => Ideal (OrderedPolynomial k ord n)
           -> Ideal (OrderedPolynomial k ord n)
           -> Ideal (OrderedPolynomial k ord n)
@@ -400,15 +402,15 @@ quotIdeal i (Ideal g) =
           SingInstance -> intersection $ V.map (i `quotByPrincipalIdeal`) g
 
 -- | Saturation by a principal ideal.
-saturationByPrincipalIdeal :: (Field k, IsPolynomial k n, IsMonomialOrder ord)
+saturationByPrincipalIdeal :: (Field k, CoeffRing k, SingI n, IsMonomialOrder ord)
                            => Ideal (OrderedPolynomial k ord n)
                            -> OrderedPolynomial k ord n -> Ideal (OrderedPolynomial k ord n)
 saturationByPrincipalIdeal is g =
-  case propToClassLeq $ leqSucc (sArity g) of
+  case propToBoolLeq $ leqSucc (sArity' g) of
     Dict -> thEliminationIdeal sOne $ addToIdeal (one - (castPolynomial g * varX)) (mapIdeal (shiftR sOne) is)
 
 -- | Saturation ideal
-saturationIdeal :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
+saturationIdeal :: forall k ord n. (CoeffRing k, SingI n, Field k, IsMonomialOrder ord)
                 => Ideal (OrderedPolynomial k ord n)
                 -> Ideal (OrderedPolynomial k ord n)
                 -> Ideal (OrderedPolynomial k ord n)
@@ -429,7 +431,7 @@ resultant = go one
         | totalDegree' s > 0     =
           let r    = h `modPolynomial` [s]
               res' = res * negate one ^ (totalDegree' h * totalDegree' s)
-                     * (leadingCoeff s) ^ (totalDegree' h - totalDegree' r)
+                     * (leadingCoeff s) ^ (totalDegree' h P.- totalDegree' r)
           in go res' s r
         | isZero h || isZero s = zero
         | totalDegree' h > 0     = (leadingCoeff s ^ totalDegree' h) * res
@@ -443,13 +445,13 @@ hasCommonFactor :: forall k ord . (Eq k, Field k, DecidableZero k, IsMonomialOrd
                 -> Bool
 hasCommonFactor f g = isZero $ resultant f g
 
-lcmPolynomial :: forall k ord n. (IsPolynomial k n, Field k, IsMonomialOrder ord)
+lcmPolynomial :: forall k ord n. (CoeffRing k, SingI n, Field k, IsMonomialOrder ord)
               => OrderedPolynomial k ord n
               -> OrderedPolynomial k ord n
               -> OrderedPolynomial k ord n
 lcmPolynomial f g = head $ generators $ intersection (principalIdeal f :- principalIdeal g :- Nil)
 
-gcdPolynomial :: (IsPolynomial r n, Field r, IsMonomialOrder order)
+gcdPolynomial :: (CoeffRing r, SingI n, Field r, IsMonomialOrder order)
               => OrderedPolynomial r order n -> OrderedPolynomial r order n
               -> OrderedPolynomial r order n
 gcdPolynomial f g = snd $ head $ f * g `divPolynomial` [lcmPolynomial f g]

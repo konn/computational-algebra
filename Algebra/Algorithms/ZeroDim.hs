@@ -38,8 +38,8 @@ import           Data.Proxy
 import           Data.Reflection
 import           Data.Singletons
 import           Data.STRef
-import           Data.Type.Natural                (Nat (..), SNat,
-                                                   Sing (SS, SZ), sNatToInt)
+import           Data.Type.Natural                (Nat (..), SNat, Sing (SS),
+                                                   sNatToInt)
 import           Data.Type.Ordinal
 import qualified Data.Vector                      as V
 import qualified Data.Vector.Mutable              as MV
@@ -59,7 +59,7 @@ tr :: Show b => b -> b
 tr = join traceShow
 
 solveM :: forall m r ord n.
-          (Normed r, Ord r, MonadRandom m, Field r, IsPolynomial r n, IsMonomialOrder ord,
+          (Normed r, Ord r, MonadRandom m, Field r, CoeffRing r, SingI n, IsMonomialOrder ord,
            Convertible r Double)
        => Ideal (OrderedPolynomial r ord ('S n))
        -> m [SV.Vector (Complex Double) ('S n)]
@@ -77,7 +77,7 @@ solveM ideal = {-# SCC "solveM" #-} reifyQuotient (radical ideal) $ \pxy ->
         Nothing -> step (bd*2) len
         Just sols -> return sols
 
-solveWith :: (DecidableZero r, Normed r, Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord, Convertible r Double)
+solveWith :: (DecidableZero r, Normed r, Ord r, Field r, CoeffRing r, SingI n, IsMonomialOrder ord, Convertible r Double)
           => OrderedPolynomial r ord ('S n)
           -> Ideal (OrderedPolynomial r ord ('S n))
           -> Maybe [SV.Vector (Complex Double) ('S n)]
@@ -91,7 +91,7 @@ solveWith f0 i0 = {-# SCC "solveWith" #-}
         let f = modIdeal' pxy f0
             vars = sortBy (flip $ comparing snd) $
                    map (\on -> (on, leadingMonomial $ var on `asTypeOf` f0)) $
-                   enumOrdinal $ sArity f0
+                   enumOrdinal $ sArity' f0
             inds = flip map vars $ second $ \b ->
               case findIndex (==b) base of
                 Just ind -> Right ind
@@ -108,10 +108,10 @@ solveWith f0 i0 = {-# SCC "solveWith" #-}
                   phi (idx, Left g)    acc = acc & ix idx .~ substWith (*) acc g
               in if c == 0
                  then Nothing
-                 else Just $ foldr ({-# SCC "rewrite-answer" #-} phi) (SV.replicate (sArity f0) (error "indec!")) inds
+                 else Just $ foldr ({-# SCC "rewrite-answer" #-} phi) (SV.replicate (sArity' f0) (error "indec!")) inds
         in sequence $ map calc $ LA.toColumns evecs
 
-solve' :: (Field r, IsPolynomial r n, IsMonomialOrder ord, Convertible r Double)
+solve' :: (Field r, CoeffRing r, SingI n, IsMonomialOrder ord, Convertible r Double)
        => Double
        -> Ideal (OrderedPolynomial r ord ('S n))
        -> [SV.Vector (Complex Double) ('S n)]
@@ -129,19 +129,19 @@ solve' err ideal =
        , all ((<err) . magnitude . substWith mul xs) $ generators ideal
        ]
 
-subspMatrix :: (Normed r, Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord)
+subspMatrix :: (Normed r, Ord r, Field r, CoeffRing r, SingI n, IsMonomialOrder ord)
             => Ordinal n -> Ideal (OrderedPolynomial r ord n) -> M.Matrix r
 subspMatrix on ideal =
   let poly = univPoly on ideal
       v    = var on `asTypeOf` head (generators ideal)
-      dim  = totalDegree' poly
+      dim  = fromIntegral $ totalDegree' poly
       cfs  = [negate $ coeff (leadingMonomial $ pow v (j :: Natural)) poly | j <- [0..fromIntegral (dim - 1)]]
   in (M.fromLists [replicate (dim - 1) zero]
           M.<->
       fmapUnwrap (M.identity (dim - 1))) M.<|> M.colVector (V.fromList cfs)
 
 solveViaCompanion :: forall r ord n.
-                     (Normed r, Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord, Convertible r Double)
+                     (Normed r, Ord r, Field r, CoeffRing r, SingI n, IsMonomialOrder ord, Convertible r Double)
                   => Double
                   -> Ideal (OrderedPolynomial r ord n)
                   -> [SV.Vector (Complex Double) n]
@@ -175,14 +175,14 @@ matrixRep f = {-# SCC "matrixRep" #-}
 toComplex :: Convertible a Double => a -> Complex Double
 toComplex a = convert a :+ 0
 
-reduction :: (IsPolynomial r n, IsMonomialOrder ord, Field r)
+reduction :: (CoeffRing r, SingI n, IsMonomialOrder ord, Field r)
              => Ordinal n -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n
 reduction on f = {-# SCC "reduction" #-}
   let df = {-# SCC "differentiate" #-} diff on f
   in snd $ head $ f `divPolynomial` calcGroebnerBasis (toIdeal [f, df])
 
 -- | Calculate the monic generator of k[X_0, ..., X_n] `intersect` k[X_i].
-univPoly :: forall r ord n. (Ord r, Normed r, Field r, IsPolynomial r n, IsMonomialOrder ord)
+univPoly :: forall r ord n. (Ord r, Normed r, Field r, CoeffRing r, SingI n, IsMonomialOrder ord)
          => Ordinal n
          -> Ideal (OrderedPolynomial r ord n)
          -> OrderedPolynomial r ord n
@@ -244,21 +244,21 @@ solveLinear mat vec = {-# SCC "solveLinear" #-}
       return mv
 
 -- | Calculate the radical of the given zero-dimensional ideal.
-radical :: forall r ord n . (Normed r, Ord r, IsPolynomial r n, Field r, IsMonomialOrder ord)
+radical :: forall r ord n . (Normed r, Ord r, CoeffRing r, SingI n, Field r, IsMonomialOrder ord)
         => Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
 radical ideal = {-# SCC "radical" #-}
   let gens  = {-# SCC "calcGens" #-} map (\on -> reduction on $ univPoly on ideal) $ enumOrdinal (sing :: SNat n)
   in toIdeal $ calcGroebnerBasis $ toIdeal $ generators ideal ++ gens
 
 -- | Test if the given zero-dimensional ideal is radical or not.
-isRadical :: forall r ord n. (Normed r, Ord r, IsPolynomial r n, Field r, IsMonomialOrder ord)
+isRadical :: forall r ord n. (Normed r, Ord r, CoeffRing r, SingI n, Field r, IsMonomialOrder ord)
           => Ideal (OrderedPolynomial r ord ('S n)) -> Bool
 isRadical ideal =
   let gens  = map (\on -> reduction on $ univPoly on ideal) $ enumOrdinal (sing :: SNat ('S n))
   in all (`isIdealMember` ideal) gens
 
 solve'' :: forall r ord n.
-           (Show r, Sparse.Eq0 r, Normed r, Ord r, Field r, IsPolynomial r n,
+           (Show r, Sparse.Eq0 r, Normed r, Ord r, Field r, CoeffRing r, SingI n,
             IsMonomialOrder ord, Convertible r Double)
        => Double
        -> Ideal (OrderedPolynomial r ord ('S n))
@@ -312,7 +312,7 @@ fglm ideal =
   in (gs, bs)
 
 -- | Compute the kernel and image of the given linear map using generalized FGLM algorithm.
-fglmMap :: forall k ord n. (Normed k, Ord k, Field k, IsMonomialOrder ord, IsPolynomial k n)
+fglmMap :: forall k ord n. (Normed k, Ord k, Field k, IsMonomialOrder ord, CoeffRing k, SingI n)
         => (OrderedPolynomial k ord ('S n) -> V.Vector k)
         -- ^ Linear map from polynomial ring.
         -> ( [OrderedPolynomial k Lex ('S n)]
@@ -329,7 +329,7 @@ fglmMap l = runST $ do
     whileM_ toContinue $ nextMonomial >> mainLoop
     (,) <$> look gLex <*> (map (changeOrder Lex) <$> look bLex)
 
-mainLoop :: (DecidableZero r, Ord r, Normed r, SingI n, Field r, IsOrder o)
+mainLoop :: (DecidableZero r, Ord r, Normed r, SingI n, Field r, IsMonomialOrder o)
          => Machine s r o n ()
 mainLoop = do
   m <- look monomial
@@ -351,7 +351,7 @@ mainLoop = do
       proced .== Just (changeOrder Lex f)
       gLex %== (g :)
 
-toContinue :: (DecidableZero r, Ord r, SingI n, Field r, IsOrder o)
+toContinue :: (DecidableZero r, Ord r, SingI n, Field r, IsMonomialOrder o)
            => Machine s r o ('S n) Bool
 toContinue = do
   mans <- look proced
@@ -361,7 +361,7 @@ toContinue = do
       let xLast = SV.maximum allVars `asTypeOf` g
       return $ not $ leadingMonomial g `isPowerOf` leadingMonomial xLast
 
-nextMonomial :: (Ring r, DecidableZero r, SingI n) => Machine s r ord n ()
+nextMonomial :: (CoeffRing r, SingI n) => Machine s r ord n ()
 nextMonomial = do
   m <- look monomial
   gs <- map leadingMonomial <$> look gLex

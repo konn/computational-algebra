@@ -9,11 +9,10 @@ module Algebra.Ring.Polynomial.Factorize (factorise, Unipol, distinctDegFactor,
                                           ) where
 import           Algebra.Algorithms.PrimeTest     hiding (modPow)
 import           Algebra.Field.Finite
-import           Algebra.Field.Galois
 import           Algebra.Prelude
 import           Algebra.Ring.Polynomial.Quotient
-import           Control.Applicative              ((<$>), (<*>), (<|>))
-import           Control.Arrow                    (first, (***), (<<<))
+import           Control.Applicative              ((<|>))
+import           Control.Arrow                    ((***), (<<<))
 import           Control.Lens                     (ifoldl)
 import           Control.Lens                     ((%~), (&))
 import           Control.Lens                     (both)
@@ -46,7 +45,6 @@ import qualified Data.Vector                      as V
 import qualified Data.Vector.Sized                as SV
 import           Debug.Trace                      (trace)
 import           Debug.Trace                      (traceShow)
-import           Numeric.Decidable.Units          (recipUnit)
 import           Numeric.Decidable.Zero           (isZero)
 import qualified Numeric.Field.Fraction           as F
 import           Numeric.Semiring.Integral        (IntegralSemiring)
@@ -81,7 +79,7 @@ traceCharTwo :: (Unital m, Monoidal m) => Natural -> m -> m
 traceCharTwo m a = sum [ a ^ (2 ^ i) | i <- [0..pred m]]
 
 equalDegreeSplitM :: forall k m. (MonadRandom m, Eq k, DecidableUnits k,
-                                  DecidableZero k, IntegralSemiring k, FiniteField k)
+                                  CoeffRing k, IntegralSemiring k, FiniteField k)
                  => Unipol k
                  -> Natural
                  -> m (Maybe (Unipol k))
@@ -91,8 +89,8 @@ equalDegreeSplitM f d
     let q = fromIntegral $ order (Proxy :: Proxy k)
         n = totalDegree' f
         els = elements (Proxy :: Proxy k)
-    e <- uniform [1..n-1]
-    cs <- replicateM e $ uniform els
+    e <- uniform [1..n P.- 1]
+    cs <- replicateM (fromIntegral e) $ uniform els
     let a = varX ^ fromIntegral e +
             sum (zipWith (*) (map injectCoeff cs) [varX ^ l | l <-[0..]])
         g1 = gcd a f
@@ -157,7 +155,7 @@ charUnipol _ = char (Proxy :: Proxy r)
 powerUnipol :: forall r. FiniteField r => Unipol r -> Natural
 powerUnipol _ = power (Proxy :: Proxy r)
 
-pthRoot :: (DecidableZero r, Ring r, Characteristic r) => Unipol r -> Unipol r
+pthRoot :: (CoeffRing r, Characteristic r) => Unipol r -> Unipol r
 pthRoot f =
   let !p = charUnipol f
   in if p == 0
@@ -184,7 +182,7 @@ factorise :: (Functor m, MonadRandom m, Eq k, DecidableUnits k, DecidableZero k,
 factorise f = do
   concat <$> mapM (\(r, h) -> map (,fromIntegral r) <$> factorSquareFree h) (IM.toList $  squareFreeDecomp f)
 
-clearDenom :: (SingI n, Euclidean a)
+clearDenom :: (SingI n, CoeffRing a, Euclidean a)
            => Polynomial (Fraction a) n -> (a, Polynomial a n)
 clearDenom f =
   let g = foldr (lcm . denominator . fst) one $ getTerms f

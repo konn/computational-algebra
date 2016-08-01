@@ -54,11 +54,11 @@ instance (Reifies p Integer, Show (F p), SingI n) => Show (GF0 p n f)  where
     then showsPrec d v
     else showChar '<' . shows (vecToPoly $ v :- vs) . showChar '>'
 
-vecToPoly :: (SingI n, Ring r, DecidableZero r)
+vecToPoly :: (SingI n, CoeffRing r)
           => SV.Vector r n -> Unipol r
 vecToPoly v = sum $ imap (\i c -> injectCoeff c * varX^fromIntegral i) $ SV.toList v
 
-polyToVec :: forall n r. (Ring r, SingI n, DecidableZero r) => Unipol r -> SV.Vector r n
+polyToVec :: forall n r. (CoeffRing r, SingI n) => Unipol r -> SV.Vector r n
 polyToVec f = SV.unsafeFromList' [ coeff (leadingMonomial $ (varX ^ i) `asTypeOf` f) f
                                  | i <- [0..sNatToInt (sing :: SNat n)]]
 

@@ -50,7 +50,7 @@ type Table r ord n = HM.HashMap
                      (OrderedPolynomial r ord n)
 
 vectorRep :: forall r order ideal n.
-              (Field r, IsPolynomial r n, IsMonomialOrder order, Reifies ideal (QIdeal r order n))
+              (Field r, CoeffRing r, SingI n, IsMonomialOrder order, Reifies ideal (QIdeal r order n))
            => Quotient r order n ideal -> V.Vector r
 vectorRep f =
   let ZeroDimIdeal _ base _ = reflect f
@@ -58,7 +58,7 @@ vectorRep f =
   in V.fromList $ map (flip coeff mf) base
 
 matRepr' :: forall r ord n ideal.
-          (Ord r, Normed r, Field r, IsPolynomial r n, IsMonomialOrder ord, Reifies ideal (QIdeal r ord n))
+          (Ord r, Normed r, Field r, CoeffRing r, SingI n, IsMonomialOrder ord, Reifies ideal (QIdeal r ord n))
        => Quotient r ord n ideal -> M.Matrix r
 matRepr' f =
   let ZeroDimIdeal _bs vs _ = reflect f
@@ -71,19 +71,19 @@ matRepr' f =
           | (c, t) <- getTerms $ quotRepr_ f ]
 
 matRep0 :: forall r ord ideal n.
-           (Ord r, Field r, IsPolynomial r n, IsMonomialOrder ord, Reifies ideal (QIdeal r ord n))
+           (Ord r, Field r, CoeffRing r, SingI n, IsMonomialOrder ord, Reifies ideal (QIdeal r ord n))
         => Proxy ideal -> OrderedMonomial ord n -> M.Matrix r
 matRep0 pxy m =
   let ZeroDimIdeal _ bs table = reflect pxy
   in foldr1 (M.<|>) [ M.colVector $ vectorRep $ modIdeal' pxy (HM.lookupDefault zero (m, b) table)
                     | b <- bs  ]
 
-multUnamb :: (Reifies ideal (QIdeal r ord n), IsMonomialOrder ord, IsPolynomial r n, Field r)
+multUnamb :: (Reifies ideal (QIdeal r ord n), IsMonomialOrder ord, CoeffRing r, SingI n, Field r)
           => Quotient r ord n ideal -> Quotient r ord n ideal
           -> Quotient r ord n ideal
 multUnamb a b = unamb (a * b) (multUnamb a b)
 
-multWithTable :: (Reifies ideal (QIdeal r ord n), IsMonomialOrder ord, IsPolynomial r n, Field r)
+multWithTable :: (Reifies ideal (QIdeal r ord n), IsMonomialOrder ord, CoeffRing r, SingI n, Field r)
               => Quotient r ord n ideal -> Quotient r ord n ideal
               -> Quotient r ord n ideal
 multWithTable f g =
@@ -96,13 +96,13 @@ multWithTable f g =
 instance Show (OrderedPolynomial r ord n) => Show (Quotient r ord n ideal) where
   show (Quotient f) = show f
 
-buildMultTable :: (IsMonomialOrder ord, IsPolynomial r n, Field r)
+buildMultTable :: (IsMonomialOrder ord, CoeffRing r, SingI n, Field r)
                => [OrderedPolynomial r ord n] -> [OrderedMonomial ord n] -> Table r ord n
 buildMultTable bs ms =
     HM.fromList [ ((p, q), (toPolynomial (one, p) * toPolynomial (one, q)) `modPolynomial` bs)
                | p <- ms, q <- ms]
 
-stdMonoms :: forall r n ord. (IsMonomialOrder ord, IsPolynomial r n, Field r)
+stdMonoms :: forall r n ord. (IsMonomialOrder ord, CoeffRing r, SingI n, Field r)
              => [OrderedPolynomial r ord n] -> Maybe [OrderedMonomial ord n]
 stdMonoms basis = do
   let lms = map leadingTerm basis
@@ -124,7 +124,7 @@ stdMonoms basis = do
 
 -- | Find the standard monomials of the quotient ring for the zero-dimensional ideal,
 --   which are form the basis of it as k-vector space.
-standardMonomials' :: (Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r, IsMonomialOrder ord)
+standardMonomials' :: (Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r, IsMonomialOrder ord)
                    => Proxy ideal -> Maybe [Quotient r ord n ideal]
 standardMonomials' pxy =
   case reflect pxy of
@@ -133,17 +133,17 @@ standardMonomials' pxy =
 
 standardMonomials :: forall ord ideal r n. ( IsMonomialOrder ord
                                            , Reifies ideal (QIdeal r ord n)
-                                           , IsPolynomial r n, Field r)
+                                           , CoeffRing r, SingI n, Field r)
                   => Maybe [Quotient r ord n ideal]
 standardMonomials = standardMonomials' (Proxy :: Proxy ideal)
 
 genQuotVars' :: forall ord n ideal r. ( Reifies ideal (QIdeal r ord ('S n))
-                                      , IsMonomialOrder ord, IsPolynomial r ('S n), Field r)
+                                      , IsMonomialOrder ord, CoeffRing r, SingI n, Field r)
              => Proxy ideal -> [Quotient r ord ('S n) ideal]
 genQuotVars' pxy = map (modIdeal' pxy) $ genVars (sing :: SNat ('S n))
 
 genQuotVars :: forall ord n ideal r. (IsMonomialOrder ord, Reifies ideal (QIdeal r ord ('S n))
-                                     , IsPolynomial r ('S n), Field r)
+                                     , CoeffRing r, SingI n, Field r)
              => [Quotient r ord ('S n) ideal]
 genQuotVars = genQuotVars' (Proxy :: Proxy ideal)
 
@@ -158,20 +158,20 @@ diag d z (SS n)  = (d :- SV.unsafeFromList n (repeat z)) : map (z :-) (diag d z 
 
 -- | Polynomial modulo ideal.
 modIdeal :: forall ord r n ideal. ( IsMonomialOrder ord, Reifies ideal (QIdeal r ord n)
-                                  , IsPolynomial r n, Field r)
+                                  , CoeffRing r, SingI n, Field r)
            => OrderedPolynomial r ord n -> Quotient r ord n ideal
 modIdeal = modIdeal' (Proxy :: Proxy ideal)
 
-gBasis' :: (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r)
+gBasis' :: (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r)
        => Proxy ideal -> [OrderedPolynomial r ord n]
 gBasis' pxy = _gBasis (reflect pxy)
 
 -- | Polynomial modulo ideal given by @Proxy@.
-modIdeal' :: (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r)
+modIdeal' :: (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r)
           => Proxy ideal -> OrderedPolynomial r ord n -> Quotient r ord n ideal
 modIdeal' pxy f = Quotient $ f `modPolynomial` _gBasis (reflect pxy)
 
-buildQIdeal :: (IsMonomialOrder ord, IsPolynomial r n, Field r)
+buildQIdeal :: (IsMonomialOrder ord, CoeffRing r, SingI n, Field r)
             => Ideal (OrderedPolynomial r ord n) -> QIdeal r ord n
 buildQIdeal ideal =
     let bs = sortBy (comparing leadingMonomial) $! calcGroebnerBasis ideal
@@ -187,7 +187,7 @@ reifyQuotient :: (IsMonomialOrder ord, SingI n, Field r, DecidableZero r, Eq r)
 reifyQuotient ideal = reify (buildQIdeal ideal)
 
 -- | Computes polynomial modulo ideal.
-withQuotient :: (Field r, IsPolynomial r n, IsMonomialOrder ord)
+withQuotient :: (Field r, CoeffRing r, SingI n, IsMonomialOrder ord)
              => Ideal (OrderedPolynomial r ord n)
              -> (forall (ideal :: *). Reifies ideal (QIdeal r ord n) => Quotient r ord n ideal)
              -> OrderedPolynomial r ord n
@@ -200,35 +200,35 @@ asProxyOf a _ = a
 quotRepr :: Quotient r ord n ideal -> OrderedPolynomial r ord n
 quotRepr = quotRepr_
 
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => Additive (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => Additive (Quotient r ord n ideal) where
   f + g = Quotient $ quotRepr_ f + quotRepr_ g
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => LeftModule Natural (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => LeftModule Natural (Quotient r ord n ideal) where
   n .* f = Quotient $ n .* quotRepr_ f
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => RightModule Natural (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => RightModule Natural (Quotient r ord n ideal) where
   f *. n = Quotient $ quotRepr_ f *. n
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => Monoidal (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => Monoidal (Quotient r ord n ideal) where
   zero   = Quotient zero
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => LeftModule Integer (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => LeftModule Integer (Quotient r ord n ideal) where
   n .* f = Quotient $ n .* quotRepr_ f
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => RightModule Integer (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => RightModule Integer (Quotient r ord n ideal) where
   f *. n = Quotient $ quotRepr_ f *. n
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => Group (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => Group (Quotient r ord n ideal) where
   negate f = Quotient $ negate $ quotRepr_ f
   f - g    = Quotient $ quotRepr_ f - quotRepr_ g
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => Abelian (Quotient r ord n ideal) where
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => Multiplicative (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => Abelian (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => Multiplicative (Quotient r ord n ideal) where
   f * g = modIdeal $ quotRepr_ f * quotRepr_ g
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => Semiring (Quotient r ord n ideal) where
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => Unital (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => Semiring (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => Unital (Quotient r ord n ideal) where
   one   = modIdeal one
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => Rig (Quotient r ord n ideal) where
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => Ring (Quotient r ord n ideal) where
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => LeftModule (Scalar r) (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => Rig (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => Ring (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => LeftModule (Scalar r) (Quotient r ord n ideal) where
   r .* f = Quotient $ r .* quotRepr_ f
-instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => RightModule (Scalar r) (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => RightModule (Scalar r) (Quotient r ord n ideal) where
   f *. r = Quotient $ quotRepr_ f *. r
 
-instance (IsMonomialOrder ord, Num r, Reifies ideal (QIdeal r ord n), IsPolynomial r n, Field r) => Num (Quotient r ord n ideal) where
+instance (IsMonomialOrder ord, Num r, Reifies ideal (QIdeal r ord n), CoeffRing r, SingI n, Field r) => Num (Quotient r ord n ideal) where
   (+) = (NA.+)
   (*) = (NA.*)
   fromInteger = Quotient . P.fromInteger
