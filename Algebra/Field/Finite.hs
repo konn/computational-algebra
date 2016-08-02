@@ -14,6 +14,7 @@ import           Data.Proxy
 import qualified Data.Ratio                   as R
 import           Data.Reflection
 import qualified Data.Type.Natural            as TN
+import           GHC.TypeLits                 (KnownNat)
 import           Numeric.Algebra              (Field)
 import           Numeric.Algebra              (char)
 import           Numeric.Algebra              (Natural)
@@ -27,30 +28,30 @@ import           Numeric.Field.Fraction       (numerator)
 import           Numeric.Rig.Characteristic   (Characteristic)
 import           Numeric.Semiring.Integral    (IntegralSemiring)
 
--- | Prime field of characteristic @p@. @p@ should be prime, and not statically checked.
+-- | Prime field of characteristic @p@.
+--   @p@ should be prime, and not statically checked.
 newtype F (p :: k) = F { runF :: Integer }
 
 naturalRepr :: F p -> Integer
 naturalRepr = runF
 
-instance Reifies p Integer => Show (F p) where
+instance Reifies (p :: k) Integer => Show (F p) where
   showsPrec d n@(F p) = showsPrec d (p `mod` reflect n)
 
-modNat :: Reifies p Integer => Integer -> F p
+modNat :: Reifies (p :: k) Integer => Integer -> F p
 modNat = modNat' Proxy
 {-# INLINE modNat #-}
 
-modNat' :: forall proxy p. Reifies p Integer =>  proxy (F p) -> Integer -> F p
+modNat' :: forall proxy (p :: k). Reifies p Integer =>  proxy (F p) -> Integer -> F p
 modNat' _ i =
   let p = reflect (Proxy :: Proxy p)
   in F (i `mod` p)
 {-# INLINE modNat' #-}
 
+reifyPrimeField :: Integer -> (forall p. KnownNat p => Proxy (F p) -> a) -> a
+reifyPrimeField p f = reifyNat p (\pxy -> f (proxyF pxy))
 
-reifyPrimeField :: Integer -> (forall (p :: *). Reifies p Integer => Proxy (F p) -> a) -> a
-reifyPrimeField p f = reify p (\pxy -> f (proxyF pxy))
-
-withPrimeField :: Integer -> (forall (p :: *). Reifies p Integer => F p) -> Integer
+withPrimeField :: Integer -> (forall p. KnownNat p => F p) -> Integer
 withPrimeField p f = reifyPrimeField p $ runF . asProxyTypeOf f
 
 proxyF :: Proxy (a :: k) -> Proxy (F a)
