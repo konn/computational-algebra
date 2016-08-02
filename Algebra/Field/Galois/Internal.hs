@@ -3,19 +3,20 @@
 {-# LANGUAGE NoMonomorphismRestriction, PolyKinds, TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances                                  #-}
 module Algebra.Field.Galois.Internal (Conway(), buildInstance, parseLine) where
-import Algebra.Field.Finite
-import Algebra.Prelude            hiding (lex)
-import Data.Char                  (isDigit)
-import Data.Char                  (digitToInt)
-import Data.Reflection            (Reifies (..))
-import Data.Type.Natural
-import Language.Haskell.TH
-import Language.Haskell.TH.Syntax (lift)
-import Numeric                    (readInt)
-import Prelude                    (lex)
+import           Algebra.Field.Finite
+import           Algebra.Prelude            hiding (lex)
+import           Data.Char                  (isDigit)
+import           Data.Char                  (digitToInt)
+import           Data.Reflection            (Reifies (..))
+import           Data.Type.Natural
+import qualified GHC.TypeLits               as TL
+import           Language.Haskell.TH
+import           Language.Haskell.TH.Syntax (lift)
+import           Numeric                    (readInt)
+import           Prelude                    (lex)
 
 -- | Phantom type for conway polynomials
-data Conway p n
+data Conway (p :: TL.Nat) (n :: TL.Nat)
 
 parseLine :: String -> [(Integer, Integer, [Integer])]
 parseLine ('[':xs) =
@@ -26,10 +27,6 @@ parseLine ('[':xs) =
               ]
 parseLine _ = []
 
-toNatType :: Integer -> TypeQ
-toNatType 0 = [t| 'Z |]
-toNatType n = appT [t| 'S |] (toNatType $ n - 1)
-
 plusOp :: ExpQ -> ExpQ -> ExpQ
 plusOp e f = infixApp e [| (+) |] f
 
@@ -39,8 +36,8 @@ toPoly as =
 
 buildInstance :: (Integer, Integer, [Integer]) -> DecsQ
 buildInstance (p,n,cs) =
-  let tp = toNatType p
-      tn = toNatType n
+  let tp = litT $ numTyLit p
+      tn = litT $ numTyLit n
   in [d| instance Reifies (Conway $tp $tn)
                           (OrderedPolynomial (F $tp) Grevlex ('S 'Z)) where
            reflect _ = $(toPoly cs)

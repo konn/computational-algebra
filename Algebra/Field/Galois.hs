@@ -201,5 +201,5 @@ primitive =
 
 -- | Conway polynomial (if definition is known).
 conway :: forall p n. (Reifies (Conway p n) (Unipol (F p)))
-       => SNat p -> SNat n -> Unipol (F p)
+       => Sing p -> Sing n -> Unipol (F p)
 conway _ _ = reflect (Proxy :: Proxy (Conway p n))
