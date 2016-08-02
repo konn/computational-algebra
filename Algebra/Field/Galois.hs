@@ -53,7 +53,7 @@ instance (Reifies p Integer, Show (F p), SingI n) => Show (GF0 p n f)  where
   showsPrec d (GF0 (v :- vs)) =
     if SV.all isZero vs
     then showsPrec d v
-    else showChar '<' . shows (vecToPoly $ v :- vs) . showChar '>'
+    else showChar '<' . showString (showPolynomialWithVars [(0, "ξ")] $ vecToPoly $ v :- vs) . showChar '>'
 
 vecToPoly :: (CoeffRing r)
           => SV.Vector r n -> Unipol r
