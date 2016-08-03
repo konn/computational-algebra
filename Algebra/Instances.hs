@@ -9,10 +9,11 @@ import           Control.Monad.Random     (Random (..), getRandom)
 import           Control.Monad.Random     (getRandomR, runRand)
 import           Data.Complex
 import           Data.Convertible.Base    (Convertible (..))
+import           Data.Hashable
 import qualified Data.Ratio               as P
-import           Data.Type.Natural        (bugInGHC)
+import qualified Data.Sized.Builtin       as V
+import           Data.Type.Ordinal
 import qualified Data.Vector              as DV
-import qualified Data.Vector.Sized        as V
 import           Numeric.Algebra
 import qualified Numeric.Algebra          as NA
 import           Numeric.Decidable.Zero
@@ -21,18 +22,9 @@ import           Numeric.Field.Fraction
 import           Prelude                  hiding (Num (..), lcm)
 import qualified Prelude                  as P
 
-type instance Index (V.Vector a n) = V.Index n
-type instance IxValue (V.Vector a n) = a
-instance  Ixed (V.Vector a  n) where
-  ix idx = ilens getter setter
-    where
-      getter v = (idx, V.sIndex idx v)
-      setter v val = updateNth idx (const val) v
-
-updateNth :: V.Index n -> (a -> a) -> V.Vector a n -> V.Vector a n
-updateNth V.OZ     f (a V.:- as) = f a V.:- as
-updateNth (V.OS n) f (a V.:- b V.:- bs) = a V.:- updateNth n f (b V.:- bs)
-updateNth _      _ _              = bugInGHC
+updateNth :: (Ixed (f a), IxValue (f a) ~ a, Integral (Index (f a)))
+          => Ordinal n -> (a -> a) -> V.Sized f n a -> V.Sized f n a
+updateNth o f = ix o %~ f
 
 instance Additive r => Additive (DV.Vector r) where
   (+) = DV.zipWith (+)
@@ -132,3 +124,5 @@ instance (Random (Fraction Integer)) where
     i <- getRandomR (lb, ub)
     return $ i % g
 
+instance Hashable a => Hashable (DV.Vector a) where
+  hashWithSalt s = hashWithSalt s . DV.toList

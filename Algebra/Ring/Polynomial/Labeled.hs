@@ -1,39 +1,34 @@
-{-# LANGUAGE CPP, ConstraintKinds, DataKinds, EmptyCase, FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances, GADTs, KindSignatures                     #-}
-{-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes                 #-}
-{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell     #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances            #-}
+{-# LANGUAGE CPP, ConstraintKinds, DataKinds, EmptyCase, FlexibleContexts  #-}
+{-# LANGUAGE FlexibleInstances, GADTs, KindSignatures                      #-}
+{-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes                  #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell      #-}
+{-# LANGUAGE TypeFamilies, TypeInType, TypeOperators, UndecidableInstances #-}
 module Algebra.Ring.Polynomial.Labeled
        (IsUniqueList, LabPolynomial(..),
         UniqueResult(..), canonicalMap,
         canonicalMap',
         IsSubsetOf) where
-import           Algebra.Ring.Polynomial.Class
-import           Algebra.Scalar
-import           Data.Function                 (on)
+import Algebra.Internal
+import Algebra.Ring.Polynomial.Class
+import Algebra.Scalar
+
+import           Data.Function                (on)
 import           Data.Singletons.Prelude
-import           Data.Singletons.Prelude.List  hiding (Group)
-import           Data.Singletons.TH
-import           Data.Type.Natural             (Nat (..))
+import           Data.Singletons.Prelude.Enum (SEnum (..))
+import           Data.Singletons.Prelude.List hiding (Group)
+import qualified Data.Sized.Builtin           as S
+import           Data.Type.Natural.Class      (IsPeano (..), sOne)
 import           Data.Type.Ordinal
-import qualified Data.Vector.Sized             as S
-import           Numeric.Algebra               hiding (Order (..))
+import           Numeric.Algebra              hiding (Order (..))
 import           Numeric.Decidable.Zero
-import           Prelude                       hiding (Integral (..), Num (..),
-                                                product, sum)
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 800
-import GHC.TypeLits
-#endif
+import           Prelude                      hiding (Integral (..), Num (..),
+                                               product, sum)
 
 data UniqueResult = Expected | VariableOccursTwice Symbol
 
 type family UniqueList' (x :: Symbol) (xs :: [Symbol]) :: UniqueResult where
   UniqueList' x '[] = 'Expected
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 800
-  UniqueList' x (x ': xs) = TypeError ('Text "The variable " :<>: 'Text x :<>: " occurs more than once!")
-#else
-  UniqueList' x (x ': xs) = 'VariableOccursTwice x
-#endif
+  UniqueList' x (x ': xs) = TypeError ('Text "The variable " ':<>: 'Text x ':<>: 'Text " occurs more than once!")
   UniqueList' x (y ': xs) = UniqueList' x xs
 
 type family SumResult r r' where
@@ -49,17 +44,12 @@ type family UniqueList (xs :: [Symbol]) :: UniqueResult where
 class    ('Expected ~ UniqueList xs) => IsUniqueList (xs :: [Symbol])
 instance ('Expected ~ UniqueList xs) => IsUniqueList (xs :: [Symbol])
 
-
-type family Length' (xs :: [a]) where
-  Length' '[] = 'Z
-  Length' (x ': xs) = 'S (Length' xs)
-
 newtype LabPolynomial poly (vars :: [Symbol]) where
-  LabelPolynomial :: { unLabelPolynomial :: (IsUniqueList vars, Length' vars ~ Arity poly)
+  LabelPolynomial :: { unLabelPolynomial :: (IsUniqueList vars, Length vars ~ Arity poly)
                                        => poly }
                 -> LabPolynomial poly vars
 
-type Wraps vars poly = (IsUniqueList vars, Arity poly ~ Length' vars)
+type Wraps vars poly = (IsUniqueList vars, Arity poly ~ Length vars)
 
 instance (Wraps vars poly, Additive poly) => Additive (LabPolynomial poly vars) where
   LabelPolynomial f + LabelPolynomial g = LabelPolynomial $ f + g
@@ -189,21 +179,25 @@ instance (IsOrderedPolynomial poly, Wraps vars poly) => IsOrderedPolynomial (Lab
   coeff m = coeff m . unLabelPolynomial
   {-# INLINE coeff #-}
 
-class    (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf (xs :: [a]) (ys :: [a])
+class    (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf (xs :: [a]) (ys :: [a]) where
+  _suppress :: proxy xs -> proxy ys -> x -> x
+  _suppress _ _ = id
 instance (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf (xs :: [a]) (ys :: [a])
 
 -- | So unsafe! Don't expose it!
-permute0 :: (SEq ('KProxy :: KProxy k))
-         => SList (xs :: [k]) -> SList ys -> S.Vector Integer (Length' xs)
-permute0 SNil _ = S.Nil
+permute0 :: (SEq k) => SList (xs :: [k]) -> SList (ys :: [k]) -> Sized (Length xs) Integer
+permute0 SNil _ = S.NilL
 permute0 (SCons x xs) ys =
-  case sElemIndex x xs of
-    SJust n  -> fromSing n S.:- permute0 xs ys
+  case sElemIndex x ys of
+    SJust n  ->
+      let k = sLength xs
+      in coerceLength (plusComm k sOne) $ withKnownNat (sSucc k) $
+         withKnownNat k $ (fromSing n S.:< permute0 xs ys)
     SNothing -> error "oops, you called permute0 for non-subset..."
 
-permute :: (IsSubsetOf xs ys , SEq ('KProxy :: KProxy k))
-        => SList (xs :: [k]) -> SList ys -> S.Vector Integer (Length' xs)
-permute = permute0
+permute :: forall (xs :: [k])  ys. (IsSubsetOf xs ys , SEq k)
+        => SList xs -> SList ys -> Sized (Length xs) Integer
+permute = _suppress (Proxy :: Proxy xs) (Proxy :: Proxy ys) permute0
 
 canonicalMap :: forall xs ys poly poly'.
                 (SingI xs, SingI ys, IsSubsetOf xs ys,

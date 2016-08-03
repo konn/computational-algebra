@@ -1,12 +1,14 @@
-{-# LANGUAGE BangPatterns, FlexibleContexts, MultiParamTypeClasses       #-}
-{-# LANGUAGE NoImplicitPrelude, OverloadedStrings, ParallelListComp      #-}
-{-# LANGUAGE PolyKinds, ScopedTypeVariables, TupleSections, ViewPatterns #-}
+{-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, GADTs            #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, OverloadedStrings #-}
+{-# LANGUAGE ParallelListComp, PatternSynonyms, PolyKinds                #-}
+{-# LANGUAGE ScopedTypeVariables, TupleSections, ViewPatterns            #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
-module Algebra.Ring.Polynomial.Factorize (factorise, Unipol, distinctDegFactor,
-                                          equalDegreeSplitM, equalDegreeFactorM,
-                                          henselStep, multiHensel,
-                                          squareFreePart, squareFreeDecomp,factorQBigPrime
-                                          ) where
+module Algebra.Ring.Polynomial.Factorize
+       (factorise, Unipol, distinctDegFactor,
+        equalDegreeSplitM, equalDegreeFactorM,
+        henselStep, multiHensel,
+        squareFreePart, squareFreeDecomp,factorQBigPrime
+       ) where
 import           Algebra.Algorithms.PrimeTest     hiding (modPow)
 import           Algebra.Field.Finite
 import           Algebra.Prelude
@@ -35,14 +37,13 @@ import           Data.Monoid                      ((<>))
 import           Data.Numbers.Primes              (primes)
 import           Data.Ord                         (comparing)
 import           Data.Proxy                       (Proxy (..))
+import qualified Data.Sized.Builtin               as SV
 import           Data.STRef.Strict                (STRef, modifySTRef, newSTRef)
 import           Data.STRef.Strict                (readSTRef, writeSTRef)
 import qualified Data.Traversable                 as F
 import           Data.Tuple                       (swap)
-import           Data.Type.Natural                hiding (one)
-import           Data.Type.Ordinal                (Ordinal (..))
+import           Data.Type.Ordinal                (pattern OZ)
 import qualified Data.Vector                      as V
-import qualified Data.Vector.Sized                as SV
 import           Debug.Trace                      (trace)
 import           Debug.Trace                      (traceShow)
 import           Numeric.Decidable.Zero           (isZero)
@@ -51,7 +52,7 @@ import           Numeric.Semiring.Integral        (IntegralSemiring)
 import           Prelude                          (div, mod)
 import qualified Prelude                          as P
 
-type Unipol r = OrderedPolynomial r Grevlex One
+type Unipol r = OrderedPolynomial r Grevlex 1
 
 -- | @distinctDegFactor f@ computes the distinct-degree decomposition of the given
 --   square-free polynomial over finite field @f@.
@@ -59,7 +60,7 @@ distinctDegFactor :: forall k. (Eq k, DecidableUnits k, DecidableZero k,
                                 IntegralSemiring k, FiniteField k)
                   => Unipol k     -- ^ Square-free polynomial over finite field.
                   -> [(Natural, Unipol k)]   -- ^ Distinct-degree decomposition.
-distinctDegFactor f0 = zip [1..] $ go id varX f0 []
+distinctDegFactor f0 = zip [1..] $ go id (var OZ :: Unipol k) f0 []
   where
     go gs h f =
       let h' = modPow h (order (Proxy :: Proxy k)) f
@@ -70,7 +71,7 @@ distinctDegFactor f0 = zip [1..] $ go id varX f0 []
          then gs'
          else go gs' h' f'
 
-modPow :: (Eq r, Ring r, DecidableZero r, Division r, Commutative r, SingI n, IsMonomialOrder ord)
+modPow :: (CoeffRing r, Division r, KnownNat n, IsMonomialOrder n ord)
        => OrderedPolynomial r ord n -> Natural -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n
 modPow a p f = withQuotient (principalIdeal f) $
                repeatedSquare (modIdeal a) p
@@ -78,7 +79,7 @@ modPow a p f = withQuotient (principalIdeal f) $
 traceCharTwo :: (Unital m, Monoidal m) => Natural -> m -> m
 traceCharTwo m a = sum [ a ^ (2 ^ i) | i <- [0..pred m]]
 
-equalDegreeSplitM :: forall k m. (MonadRandom m, Eq k, DecidableUnits k,
+equalDegreeSplitM :: forall k m. (MonadRandom m, DecidableUnits k,
                                   CoeffRing k, IntegralSemiring k, FiniteField k)
                  => Unipol k
                  -> Natural
@@ -97,7 +98,7 @@ equalDegreeSplitM f d
     return $ (guard (g1 /= one) >> return g1)
          <|> do let b | charUnipol f == 2  = traceCharTwo (powerUnipol f*d) a
                       | otherwise = modPow a ((pred $ q^d)`div`2) f
-                    g2 = gcd (b-one) f
+                    g2 = gcd (b - one) f
                 guard (g2 /= one && g2 /= f)
                 return g2
 
@@ -117,7 +118,7 @@ equalDegreeFactorM f d = go f >>= \a -> return (a [])
              return $ l . r
 
 factorSquareFree :: (Eq k, DecidableUnits k, DecidableZero k, IntegralSemiring k,
-                     FiniteField k, MonadRandom m, Functor m)
+                     FiniteField k, MonadRandom m)
                  => Unipol k -> m [Unipol k]
 factorSquareFree f =
    concat <$> mapM (uncurry $ flip equalDegreeFactorM) (filter ((/= one) . snd) $ distinctDegFactor f)
@@ -133,7 +134,7 @@ squareFreePart f =
      then v
      else v * squareFreePart (pthRoot f')
 
-yun :: (Ring r, Eq r, Field r, DecidableZero r, DecidableUnits r, IntegralSemiring r)
+yun :: (CoeffRing r, Field r, DecidableUnits r, IntegralSemiring r)
     => Unipol r -> IntMap (Unipol r)
 yun f = let f' = diff OZ f
             u  = gcd f f'
@@ -177,18 +178,18 @@ squareFreeDecomp f =
           IM.unionWith (*) dcmp $ IM.mapKeys (p*) $ squareFreeDecomp $ pthRoot f'
 
 -- | Factorise a polynomial over finite field using Cantor-Zassenhaus algorithm
-factorise :: (Functor m, MonadRandom m, Eq k, DecidableUnits k, DecidableZero k, IntegralSemiring k, FiniteField k)
+factorise :: (MonadRandom m, DecidableUnits k, CoeffRing k, IntegralSemiring k, FiniteField k)
           => Unipol k -> m [(Unipol k, Natural)]
 factorise f = do
   concat <$> mapM (\(r, h) -> map (,fromIntegral r) <$> factorSquareFree h) (IM.toList $  squareFreeDecomp f)
 
-clearDenom :: (SingI n, CoeffRing a, Euclidean a)
+clearDenom :: (KnownNat n, CoeffRing a, Euclidean a)
            => Polynomial (Fraction a) n -> (a, Polynomial a n)
 clearDenom f =
   let g = foldr (lcm . denominator . fst) one $ getTerms f
   in (g, mapCoeff (numerator . ((g F.% one)*)) f)
 
-factorQBigPrime :: (Functor m, MonadRandom m)
+factorQBigPrime :: (MonadRandom m)
                => Unipol Integer -> m (Integer, [([Unipol Integer], Natural)])
 factorQBigPrime f0 = do
   let (g, c) | leadingCoeff f0 < 0 = (- pp f0, - content f0)
@@ -206,7 +207,7 @@ secondM f (a, b)= (a,) <$> f b
 
 infixl 5 <@>
 
-factorSqFreeQBP :: (Functor m, MonadRandom m)
+factorSqFreeQBP :: (MonadRandom m)
                 => Unipol Integer -> m [Unipol Integer]
 factorSqFreeQBP f
   | n == 1 = return [f]
@@ -279,9 +280,7 @@ henselStep m f g h s t =
 tr :: Show a => String -> a -> a
 tr msg a = trace (msg ++ show a) a
 
-multiHensel :: -- (Euclidean b, Commutative b, Eq b, Show b)
---            => b -> Natural -> OrderedPolynomial b Grevlex One -> [OrderedPolynomial b Grevlex One] -> [OrderedPolynomial b Grevlex One]
-               Integer -> Natural -> Unipol Integer -> [Unipol Integer] -> [Unipol Integer]
+multiHensel :: Integer -> Natural -> Unipol Integer -> [Unipol Integer] -> [Unipol Integer]
 multiHensel p l f [_] =
   let u = fromMaybe (error $ "lc(f) = " ++ (show $ leadingCoeff f) ++ " is zero divisor mod p!") $
           recipMod (tr "p^l = " $ p^l) $ leadingCoeff f

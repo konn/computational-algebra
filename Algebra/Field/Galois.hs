@@ -1,28 +1,29 @@
 {-# LANGUAGE DataKinds, EmptyDataDecls, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, MultiParamTypeClasses, NoMonomorphismRestriction        #-}
 {-# LANGUAGE ParallelListComp, PolyKinds, RankNTypes, ScopedTypeVariables   #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances              #-}
+{-# LANGUAGE StandaloneDeriving, TypeFamilies, TypeOperators                #-}
+{-# LANGUAGE UndecidableInstances                                           #-}
 module Algebra.Field.Galois (GF0(), IsGF0, modPoly, modVec, reifyGF0,
                              withGF0, GF'(), Conway, primitive, conway,
                              conwayFile, addConwayPolynomials)  where
-import           Algebra.Field.Finite
-import           Algebra.Field.Galois.Conway
-import           Algebra.Internal
-import           Algebra.Prelude
+import Algebra.Field.Finite
+import Algebra.Field.Galois.Conway
+import Algebra.Internal
+import Algebra.Prelude
+
 import           Control.Lens                 (imap)
 import           Control.Monad                (replicateM)
 import           Control.Monad.Loops          (iterateUntil)
 import           Control.Monad.Random         (MonadRandom)
 import           Control.Monad.Random         (uniform)
+import qualified Data.Foldable                as F
 import qualified Data.Ratio                   as Rat
 import           Data.Reflection
-import           Data.Singletons.Prelude.Enum (PEnum (..), SEnum (..))
+import           Data.Singletons.Prelude.Enum (SEnum (..))
 import           Data.Singletons.TypeLits     (withKnownNat)
-import           Data.Type.Natural            hiding (one, zero)
-import qualified Data.Type.Natural.Builtin    as TN
+import           Data.Sized.Builtin           as SV
+import qualified Data.Traversable             as T
 import qualified Data.Vector                  as V
-import           Data.Vector.Sized            (Vector ((:-), Nil))
-import qualified Data.Vector.Sized            as SV
 import qualified GHC.TypeLits                 as TL
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
@@ -33,8 +34,9 @@ import qualified Prelude                      as P
 
 -- | Galois field of order @p^n@.
 --   @f@ stands for the irreducible polynomial over @F_p@ of degree @n@.
-data GF0 p (n :: TL.Nat) (f :: *) = GF0 { runGF0 :: SV.Vector (F p) (TN.ToPeano n) } deriving (Eq)
-type Unipol a = OrderedPolynomial a Grevlex One
+data GF0 p (n :: TL.Nat) (f :: *) = GF0 { runGF0 :: Vector (F p) n }
+deriving instance Reifies p Integer => Eq (GF0 p n f)
+type Unipol a = OrderedPolynomial a Grevlex 1
 
 -- | Galois Field of order @p^n@. This uses conway polynomials
 --   as canonical minimal polynomial and it should be known at
@@ -43,31 +45,31 @@ type Unipol a = OrderedPolynomial a Grevlex One
 type GF' (p :: TL.Nat) n = GF0 p n (Conway p n)
 
 modPoly :: forall p n f. (SingI n, Reifies p Integer) => Unipol (F p) -> GF0 p n f
-modPoly = withSingI (TN.sToPeano (sing :: Sing n)) $ GF0 . polyToVec
+modPoly = GF0 . polyToVec
 
-modVec :: Vector (F p) (TN.ToPeano n) -> GF0 p n f
+modVec :: Vector (F p) n -> GF0 p n f
 modVec = GF0
 
-instance (Reifies p Integer, Show (F p), SingI n) => Show (GF0 p n f)  where
-  showsPrec _ (GF0 Nil) = showString "0"
-  showsPrec d (GF0 (v :- vs)) =
-    if SV.all isZero vs
+instance (Reifies p Integer, Show (F p)) => Show (GF0 p n f)  where
+  showsPrec d (GF0 (v :< vs)) =
+    if F.all isZero vs
     then showsPrec d v
-    else showChar '<' . showString (showPolynomialWithVars [(0, "ξ")] $ vecToPoly $ v :- vs) . showChar '>'
+    else showChar '<' . showString (showPolynomialWithVars [(0, "ξ")] $ vecToPoly $ v :< vs) . showChar '>'
+  showsPrec _ _ = showString "0"
 
 vecToPoly :: (CoeffRing r)
-          => SV.Vector r n -> Unipol r
-vecToPoly v = sum $ imap (\i c -> injectCoeff c * varX^fromIntegral i) $ SV.toList v
+          => Vector r n -> Unipol r
+vecToPoly v = sum $ imap (\i c -> injectCoeff c * varX^fromIntegral i) $ F.toList v
 
-polyToVec :: forall n r. (CoeffRing r, SingI n) => Unipol r -> SV.Vector r n
-polyToVec f = SV.unsafeFromList' [ coeff (leadingMonomial $ (varX ^ i) `asTypeOf` f) f
-                                 | i <- [0..sNatToInt (sing :: SNat n)]]
+polyToVec :: forall n r. (CoeffRing r, SingI n) => Unipol r -> Vector r n
+polyToVec f = unsafeFromList' [ coeff (leadingMonomial $ (varX ^ i) `asTypeOf` f) f
+                              | i <- [0..fromIntegral (fromSing (sing :: SNat n))]]
 
 instance Reifies p Integer => Additive (GF0 p n f)  where
   GF0 v + GF0 u = GF0 $ SV.zipWithSame (+) v u
 
 instance (Reifies p Integer, SingI n) => Monoidal (GF0 p n f) where
-  zero = withSingI (TN.sToPeano (sing :: Sing n)) $ GF0 $ SV.replicate' zero
+  zero = GF0 $ SV.replicate' zero
 
 instance Reifies p Integer => LeftModule Natural (GF0 p n f) where
   n .* GF0 v = GF0 $ SV.map (n .*) v
@@ -85,56 +87,56 @@ instance (SingI n, Reifies p Integer) => Group (GF0 p n f) where
   negate (GF0 v) = GF0 $ SV.map negate v
   GF0 u - GF0 v  = GF0 $ SV.zipWithSame (-) u v
 
-instance (SingI n, Reifies p Integer) => Abelian (GF0 p n f)
+instance (Reifies p Integer) => Abelian (GF0 p n f)
 
 instance (SingI n, Reifies f (Unipol (F p)), Reifies p Integer)
       => Multiplicative (GF0 p n f) where
   GF0 u * GF0 v =
     let t = (vecToPoly u * vecToPoly v) `rem` reflect (Proxy :: Proxy f)
-    in withSingI (TN.sToPeano (sing :: Sing n)) $ GF0 $ polyToVec t
+    in GF0 $ polyToVec t
 
-instance (SingI n, Reifies f (Unipol (F p)), Reifies p Integer) => Unital (GF0 p n f) where
+instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Unital (GF0 p n f) where
   one =
-    case TN.sToPeano (sing :: Sing n) of
-      SZ   -> GF0 Nil
-      SS k -> withSingI k $ GF0 $ one :- SV.replicate' zero
+    case zeroOrSucc (sing :: SNat n) of
+      IsZero   -> GF0 NilL
+      IsSucc k -> withSingI k $ GF0 $ one :< SV.replicate' zero
 
-instance (SingI n, Reifies f (Unipol (F p)), Reifies p Integer) => Semiring (GF0 p n f)
+instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Semiring (GF0 p n f)
 
-instance (SingI n, Reifies f (Unipol (F p)), Reifies p Integer) => Rig (GF0 p n f) where
+instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Rig (GF0 p n f) where
   fromNatural n =
-    case TN.sToPeano (sing :: Sing n) of
-      SZ -> GF0 Nil
-      SS k -> withSingI k $ GF0 $ fromNatural n :- SV.replicate' zero
+    case zeroOrSucc (sing :: SNat n) of
+      IsZero -> GF0 SV.empty
+      IsSucc k -> withSingI k $ GF0 $ fromNatural n :< SV.replicate' zero
 
 instance (SingI n, Reifies f (Unipol (F p)), Reifies p Integer) => Commutative (GF0 p n f)
 
-instance (SingI n, Reifies f (Unipol (F p)), Reifies p Integer) => Ring (GF0 p n f) where
+instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Ring (GF0 p n f) where
   fromInteger n =
-    case TN.sToPeano (sing :: Sing n) of
-      SZ -> GF0 Nil
-      SS k -> withSingI k $ GF0 $ fromInteger n :- SV.replicate' zero
+    case zeroOrSucc (sing :: SNat n) of
+      IsZero   -> GF0 NilL
+      IsSucc k -> withSingI k $ GF0 $ fromInteger n :< SV.replicate' zero
 
 instance (SingI n, Reifies p Integer) => DecidableZero (GF0 p n f) where
-  isZero (GF0 sv) = SV.all isZero sv
+  isZero (GF0 sv) = F.all isZero sv
 
-instance (SingI n, Reifies p Integer, Reifies f (Unipol (F p))) => DecidableUnits (GF0 p n f) where
-  isUnit (GF0 sv) = not $ SV.all isZero sv
+instance (KnownNat n, Reifies p Integer, Reifies f (Unipol (F p))) => DecidableUnits (GF0 p n f) where
+  isUnit (GF0 sv) = not $ F.all isZero sv
   recipUnit a | isZero a = Nothing
               | otherwise = Just $ recip a
 
-instance (Reifies p Integer, Reifies f (Unipol (F p)), SingI n)
+instance (Reifies p Integer, Reifies f (Unipol (F p)), KnownNat n)
       => Characteristic (GF0 p n f) where
   char _ = char (Proxy :: Proxy (F p))
 
-instance (Reifies p Integer, Reifies f (Unipol (F p)), SingI n)
+instance (Reifies p Integer, Reifies f (Unipol (F p)), KnownNat n)
       => Division (GF0 p n f) where
   recip f =
     let p = reflect (Proxy :: Proxy f)
-        (_,_,r) = head $ euclid p $ vecToPoly $ runGF0 f
-    in GF0 $ withSingI (TN.sToPeano (sing :: Sing n)) $ polyToVec $ r `rem` p
+        (_,_,r) = P.head $ euclid p $ vecToPoly $ runGF0 f
+    in GF0 $ polyToVec $ r `rem` p
 
-instance (Reifies p Integer, Reifies f (Unipol (F p)), SingI n) => P.Num (GF0 p n f) where
+instance (Reifies p Integer, Reifies f (Unipol (F p)), KnownNat n) => P.Num (GF0 p n f) where
   (+) = (+)
   (-) = (-)
   negate = negate
@@ -143,7 +145,7 @@ instance (Reifies p Integer, Reifies f (Unipol (F p)), SingI n) => P.Num (GF0 p 
   abs = error "not defined"
   signum = error "not defined"
 
-instance (Reifies p Integer, Reifies f (Unipol (F p)), SingI n) => P.Fractional (GF0 p n f) where
+instance (Reifies p Integer, Reifies f (Unipol (F p)), KnownNat n) => P.Fractional (GF0 p n f) where
   fromRational u = fromInteger (Rat.numerator u) / fromInteger (Rat.denominator u)
   (/) = (/)
   recip = recip
@@ -176,30 +178,27 @@ withGF0 :: MonadRandom m
         -> m (V.Vector Integer)
 withGF0 p n f = reifyGF0 p n $ V.fromList . SV.toList . SV.map naturalRepr . runGF0 . asProxyTypeOf f
 
-proxyGF0 :: Proxy (F p) -> Sing n -> Proxy f -> Proxy (GF0 p n f)
+proxyGF0 :: Proxy (F p) -> SNat n -> Proxy f -> Proxy (GF0 p n f)
 proxyGF0 _ _ Proxy = Proxy
 
 -- | Type-constraint synonym to work with Galois field.
-class (SingI n, Reifies p Integer, Reifies f (Unipol (F p))) => IsGF0 p n f
-instance (SingI n, Reifies p Integer, Reifies f (Unipol (F p))) => IsGF0 p n f
+class (KnownNat n, Reifies p Integer, Reifies f (Unipol (F p))) => IsGF0 p n f
+instance (KnownNat n, Reifies p Integer, Reifies f (Unipol (F p))) => IsGF0 p n f
 
 
-instance (IsGF0 p n f) => IntegralSemiring (GF0 p n f)
+instance (KnownNat n, IsGF0 p n f) => IntegralSemiring (GF0 p n f)
 
-instance IsGF0 p n f => FiniteField (GF0 p n f) where
-  power _ = fromIntegral $ fromSing (sing :: Sing n)
+instance (KnownNat n, IsGF0 p n f) => FiniteField (GF0 p n f) where
+  power _ = fromIntegral $ fromSing (sing :: SNat n)
   elements _ =
-    let sn = sing :: Sing n
-    in withSingI (TN.sToPeano sn) $
-       map (GF0 . SV.unsafeFromList') $ sequence $
-       replicate (fromIntegral $ fromSing sn) $ elements Proxy
+    let sn = sing :: SNat n
+    in P.map GF0 $ T.sequence $
+       SV.replicate sn $ elements Proxy
 
-primitive :: forall p n f. (SingI n, IsGF0 p n f) => GF0 p (Succ n) f
-primitive =
-  withSingI (TN.sToPeano (sSucc (sing :: Sing n))) $
-  GF0 $ polyToVec varX
+primitive :: forall p n f. (IsGF0 p n f) => GF0 p (n + 1) f
+primitive = withSingI (sSucc (sing :: SNat n)) $ GF0 $ polyToVec varX
 
 -- | Conway polynomial (if definition is known).
 conway :: forall p n. (Reifies (Conway p n) (Unipol (F p)))
-       => Sing p -> Sing n -> Unipol (F p)
+       => SNat p -> SNat n -> Unipol (F p)
 conway _ _ = reflect (Proxy :: Proxy (Conway p n))

@@ -8,7 +8,6 @@ import           Algebra.Prelude            hiding (lex)
 import           Data.Char                  (isDigit)
 import           Data.Char                  (digitToInt)
 import           Data.Reflection            (Reifies (..))
-import           Data.Type.Natural
 import qualified GHC.TypeLits               as TL
 import           Language.Haskell.TH
 import           Language.Haskell.TH.Syntax (lift)
@@ -39,7 +38,7 @@ buildInstance (p,n,cs) =
   let tp = litT $ numTyLit p
       tn = litT $ numTyLit n
   in [d| instance Reifies (Conway $tp $tn)
-                          (OrderedPolynomial (F $tp) Grevlex ('S 'Z)) where
+                          (OrderedPolynomial (F $tp) Grevlex 1) where
            reflect _ = $(toPoly cs)
            {-# INLINE reflect #-}
        |]

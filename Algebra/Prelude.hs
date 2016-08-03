@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
+{-# LANGUAGE FlexibleContexts, NoImplicitPrelude, NoMonomorphismRestriction #-}
 module Algebra.Prelude
        ((^), (^^),(%),Scalar(..),(.*.),Rational,
         module Prelude,
@@ -7,11 +7,14 @@ module Algebra.Prelude
         module Numeric.Domain.Class,
         module Numeric.Domain.Euclidean,
         module Algebra.Ring.Ideal,
-        module Numeric.Field.Fraction) where
+        module Numeric.Field.Fraction,
+        module Algebra.Internal) where
+
+import Algebra.Internal
+
 import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
-import           Data.Singletons
 import           Numeric.Algebra          hiding (Order (..), (^))
 import qualified Numeric.Algebra          as NA
 import           Numeric.Domain.Class
@@ -29,8 +32,8 @@ import           Prelude                  (fromRational)
 (^^) :: Division r => r -> Integer -> r
 (^^) = (NA.^)
 
-(%) :: (Eq r, Division r, SingI n, DecidableZero r)
-    => r -> r -> OrderedPolynomial r order n
+(%) :: (IsPolynomial poly, Division (Coefficient poly))
+    => Coefficient poly -> Coefficient poly -> poly
 n % m = injectCoeff (n / m)
 infixl 7 %
 infixr 8 ^, ^^

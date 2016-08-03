@@ -39,5 +39,5 @@ v %== f = do
 
 infix 4 .==, %==
 
-image :: (Functor f, MonadReader (FGLMEnv s r ord n) f) => OrderedPolynomial r ord n -> f (V.Vector r)
+image :: (MonadReader (FGLMEnv s r ord n) f) => OrderedPolynomial r ord n -> f (V.Vector r)
 image a = views lMap ($ a)
