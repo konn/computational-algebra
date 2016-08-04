@@ -47,7 +47,6 @@ import           Data.Sized.Builtin           (toList)
 import qualified Data.Sized.Builtin           as V
 import           Data.STRef
 import           Numeric.Algebra              hiding ((<), (>))
-import qualified Numeric.Algebra              as NA
 import           Numeric.Decidable.Zero
 import           Prelude                      hiding (Num (..), recip, subtract,
                                                (^))
@@ -262,9 +261,17 @@ reduceMinimalGroebnerBasis bs = runST $ do
   readSTRef right
 
 -- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
-calcGroebnerBasisWith :: (Field k, CoeffRing k, KnownNat n, IsMonomialOrder n order, IsMonomialOrder n order')
-                      => order -> Ideal (OrderedPolynomial k order' n) -> [OrderedPolynomial k order n]
-calcGroebnerBasisWith ord i = calcGroebnerBasis $  mapIdeal (changeOrder ord) i
+calcGroebnerBasisWith :: (IsOrderedPolynomial poly,
+                          Field (Coefficient poly),
+                          IsMonomialOrder (Arity poly) order)
+                      => order -> Ideal poly
+                      -> [OrderedPolynomial (Coefficient poly) order (Arity poly)]
+calcGroebnerBasisWith _ord = calcGroebnerBasis . mapIdeal injectVars
+{-# INLINE [1] calcGroebnerBasisWith #-}
+{-# RULES
+"calcGroebnerBasisWith/sameOrderPolyn" [~1] forall x.
+  calcGroebnerBasisWith x = calcGroebnerBasis
+  #-}
 
 -- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
 calcGroebnerBasisWithStrategy :: (Field (Coefficient poly), IsOrderedPolynomial poly
@@ -322,126 +329,140 @@ replicateCong :: a :~: b -> Sing x -> Replicate a x :~: Replicate b x
 replicateCong Refl _ = Refl
 
 -- | Calculate n-th elimination ideal using 'WeightedEliminationOrder' ordering.
-thEliminationIdeal :: forall n m ord k.
-                      ( IsMonomialOrder (m - n) ord,
-                        IsMonomialOrder m ord, Field k, CoeffRing k, KnownNat m
-                      , (n :<= m) ~ 'True)
+thEliminationIdeal :: forall poly n.
+                      ( IsMonomialOrder (Arity poly - n) (MOrder poly),
+                        Field (Coefficient poly),
+                        IsOrderedPolynomial poly,
+                        (n :<= Arity poly) ~ 'True)
                    => SNat n
-                   -> Ideal (OrderedPolynomial k ord m)
-                   -> Ideal (OrderedPolynomial k ord (m :-. n))
+                   -> Ideal poly
+                   -> Ideal (OrderedPolynomial (Coefficient poly) (MOrder poly) (Arity poly :-. n))
 thEliminationIdeal n = withSingI (sOnes n) $
   gcastWith (lengthReplicate n sOne) $
   withKnownNat n $
-  withKnownNat ((sing :: SNat m) %:-. n) $
+  withKnownNat ((sing :: SNat (Arity poly)) %:-. n) $
   mapIdeal (changeOrderProxy Proxy) . thEliminationIdealWith (weightedEliminationOrder n) n
 
 -- | Calculate n-th elimination ideal using the specified n-th elimination type order.
-thEliminationIdealWith :: ( Field k, CoeffRing k,
+thEliminationIdealWith :: ( IsOrderedPolynomial poly,
+                            m ~ Arity poly,
+                            k ~ Coefficient poly, Field k,
                             KnownNat (m :-. n), (n :<= m) ~ 'True,
-                            EliminationType m n ord, IsMonomialOrder m ord',
+                            EliminationType m n ord,
                             IsMonomialOrder (m :-. n) ord)
                    => ord
                    -> SNat n
-                   -> Ideal (OrderedPolynomial k ord' m)
+                   -> Ideal poly
                    -> Ideal (OrderedPolynomial k ord (m :-. n))
-thEliminationIdealWith ord n ideal =
+thEliminationIdealWith = unsafeThEliminationIdealWith
+
+-- | Calculate n-th elimination ideal using the specified n-th elimination type order.
+-- This function should be used carefully because it does not check whether the given ordering is
+-- n-th elimintion type or not.
+unsafeThEliminationIdealWith :: ( IsOrderedPolynomial poly,
+                                  m ~ Arity poly,
+                                  k ~ Coefficient poly,
+                                  Field k,
+                                  IsMonomialOrder m ord,
+                                  KnownNat (m :-. n), (n :<= m) ~ 'True,
+                                  IsMonomialOrder (m :-. n) ord)
+                             => ord
+                             -> SNat n
+                             -> Ideal poly
+                             -> Ideal (OrderedPolynomial k ord (m :-. n))
+unsafeThEliminationIdealWith ord n ideal =
   withKnownNat n $ toIdeal $ [ transformMonomial (V.drop n) f
                              | f <- calcGroebnerBasisWith ord ideal
                              , all (all (== 0) . V.takeAtMost n . getMonomial . snd) $ getTerms f
                              ]
 
--- | Calculate n-th elimination ideal using the specified n-th elimination type order.
--- This function should be used carefully because it does not check whether the given ordering is
--- n-th elimintion type or not.
-unsafeThEliminationIdealWith :: ( IsMonomialOrder (m :-. n) ord, Field k,
-                                  IsMonomialOrder m ord,
-                                  CoeffRing k, KnownNat m, KnownNat (m :-. n)
-                                , (n :<= m) ~ 'True, IsMonomialOrder m ord')
-                             => ord
-                             -> SNat n
-                             -> Ideal (OrderedPolynomial k ord' m)
-                             -> Ideal (OrderedPolynomial k ord (m :-. n))
-unsafeThEliminationIdealWith ord n ideal =
-   withKnownNat n $ toIdeal $ [ transformMonomial (V.drop n) f
-                                 | f <- calcGroebnerBasisWith ord ideal
-                                 , all (all (== 0) . V.take n . getMonomial . snd) $ getTerms f
-                                 ]
-
 -- | An intersection ideal of given ideals (using 'WeightedEliminationOrder').
-intersection :: forall r k n ord.
-                ( IsMonomialOrder (k + n) ord, Field r, CoeffRing r, KnownNat n
-                , IsMonomialOrder n ord)
-             => Vector (Ideal (OrderedPolynomial r ord n)) k
-             -> Ideal (OrderedPolynomial r ord n)
+intersection :: forall poly k.
+                ( IsMonomialOrder (k + Arity poly) (MOrder poly),
+                  Field (Coefficient poly), IsOrderedPolynomial poly)
+             => Vector (Ideal poly) k
+             -> Ideal poly
 intersection idsv@(_ :< _) =
     let sk = sizedLength idsv
-        sn = sing :: SNat n
+        sn = sing :: SNat (Arity poly)
     in withSingI (sOnes sk) $ withKnownNat (sk %:+ sn) $
     let ts  = take (fromIntegral $ fromSing sk) $ genVars (sk %:+ sn)
-        tis = zipWith (\ideal t -> mapIdeal ((t *) . shiftR sk) ideal) (toList idsv) ts
+        inj :: poly -> OrderedPolynomial (Coefficient poly) (MOrder poly) (k + Arity poly)
+        inj = transformMonomial (V.append $ V.replicate sk 0) .  injectVars
+        tis = zipWith (\ideal t -> mapIdeal ((t *) . inj) ideal) (toList idsv) ts
         j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
     in gcastWith (plusMinus' sk sn) $ case plusLeqL sk sn of
-      Witness -> coerce (cong Proxy $ minusCongL (plusComm sk sn) sk `trans` plusMinus sn sk) $
-                 thEliminationIdeal sk j
+      Witness ->
+        mapIdeal injectVars $ 
+        coerce (cong Proxy $ minusCongL (plusComm sk sn) sk `trans` plusMinus sn sk) $
+        thEliminationIdeal sk j
 intersection _ = Ideal $ singleton one
 
 -- | Ideal quotient by a principal ideals.
-quotByPrincipalIdeal :: (Field k, CoeffRing k, KnownNat n,
-                         IsMonomialOrder n ord, IsMonomialOrder (2 + n) ord)
-                     => Ideal (OrderedPolynomial k ord n)
-                     -> OrderedPolynomial k ord n
-                     -> Ideal (OrderedPolynomial k ord n)
+quotByPrincipalIdeal :: (IsMonomialOrder (2 + Arity poly) (MOrder poly),
+                         Field (Coefficient poly), IsOrderedPolynomial poly)
+                     => Ideal poly
+                     -> poly
+                     -> Ideal poly
 quotByPrincipalIdeal i g =
     case intersection (i :< (Ideal $ singleton g) :< NilL) of
       Ideal gs -> Ideal $ V.map (snd . head . (`divPolynomial` [g])) gs
 
 -- | Ideal quotient by the given ideal.
-quotIdeal :: forall k ord n l.
-             (CoeffRing k, KnownNat n, Field k,
-              IsMonomialOrder (l + n) ord,
-              IsMonomialOrder (2 + n) ord,
-              IsMonomialOrder n ord)
-          => Ideal (OrderedPolynomial k ord n)
-          -> Vector (OrderedPolynomial k ord n) l
-          -> Ideal (OrderedPolynomial k ord n)
+quotIdeal :: forall poly l.
+             (IsOrderedPolynomial poly, Field (Coefficient poly),
+              IsMonomialOrder (l + Arity poly) (MOrder poly),
+              IsMonomialOrder (2 + Arity poly) (MOrder poly))
+          => Ideal poly
+          -> Vector poly l
+          -> Ideal poly
 quotIdeal i g =
   withKnownNat (sizedLength g) $
-  withKnownNat (sizedLength g %:+ (sing :: SNat n)) $
+  withKnownNat (sizedLength g %:+ sArity g) $
   intersection $ V.map (i `quotByPrincipalIdeal`) g
 
 -- | Saturation by a principal ideal.
-saturationByPrincipalIdeal :: forall k n ord.
-                              (Field k, CoeffRing k, KnownNat n,
-                               IsMonomialOrder n ord, IsMonomialOrder  (n + 1) ord)
-                           => Ideal (OrderedPolynomial k ord n)
-                           -> OrderedPolynomial k ord n -> Ideal (OrderedPolynomial k ord n)
+saturationByPrincipalIdeal :: forall poly.
+                              (IsOrderedPolynomial poly, Field (Coefficient poly),
+                               IsMonomialOrder  (1 + Arity poly) (MOrder poly))
+                           => Ideal poly
+                           -> poly
+                           -> Ideal poly
 saturationByPrincipalIdeal is g =
-  let n = sing :: SNat n
+  let n = sArity' g
+      remap :: poly -> OrderedPolynomial (Coefficient poly) (MOrder poly) (1 + Arity poly)
+      remap = shiftR sOne . injectVars
   in withKnownNat (sOne %:+ n) $
      gcastWith (plusMinus' sOne n) $ gcastWith (plusComm n sOne) $
      case (leqStep sOne (sOne %:+ n) n Refl, lneqZero n) of
         (Witness, Witness) ->
+          mapIdeal injectVars $
           thEliminationIdeal sOne $
-          addToIdeal (one - (castPolynomial g * varX)) (mapIdeal (shiftR sOne) is)
+          addToIdeal (one - (remap g * varX)) $
+          mapIdeal remap is
 
 -- | Saturation ideal
-saturationIdeal :: forall k ord n l. (CoeffRing k, KnownNat n, Field k,
-                                      IsMonomialOrder n ord,
-                                      IsMonomialOrder (l + n) ord,
-                                      IsMonomialOrder (n + 1) ord)
-                => Ideal (OrderedPolynomial k ord n)
-                -> Vector (OrderedPolynomial k ord n) l
-                -> Ideal (OrderedPolynomial k ord n)
+saturationIdeal :: forall poly l.
+                   (Field (Coefficient poly),
+                    IsOrderedPolynomial poly,
+                    IsMonomialOrder (l + Arity poly) (MOrder poly),
+                    IsMonomialOrder (1 + Arity poly) (MOrder poly))
+                => Ideal poly
+                -> Vector poly l
+                -> Ideal poly
 saturationIdeal i g =
   withKnownNat (sizedLength g) $
-  withKnownNat (sizedLength g %:+ (sing :: SNat n)) $
+  withKnownNat (sizedLength g %:+ sArity g) $
   intersection $ V.map (i `saturationByPrincipalIdeal`) g
 
 -- | Calculate resultant for given two unary polynomimals.
-resultant :: forall k ord . (Eq k, Field k, DecidableZero k, IsMonomialOrder 1 ord)
-          => OrderedPolynomial k ord 1
-          -> OrderedPolynomial k ord 1
-          -> k
+resultant :: forall poly.
+             (Field (Coefficient poly),
+              IsOrderedPolynomial poly,
+              Arity poly ~ 1)
+          => poly
+          -> poly
+          -> (Coefficient poly)
 resultant = go one
   where
     go res h s
@@ -454,25 +475,32 @@ resultant = go one
         | totalDegree' h > 0     = (leadingCoeff s ^ totalDegree' h) * res
         | otherwise              = res
 
+    _ = Refl :: Arity poly :~: 1
+        -- to suppress "redundant" warning for univariate constraint.
 
 -- | Determine whether two polynomials have a common factor with positive degree using resultant.
-hasCommonFactor :: forall k ord . (Eq k, Field k, DecidableZero k, IsMonomialOrder 1 ord)
-                => OrderedPolynomial k ord 1
-                -> OrderedPolynomial k ord 1
+hasCommonFactor :: (Field (Coefficient poly),
+                    IsOrderedPolynomial poly,
+                    Arity poly ~ 1)
+                => poly
+                -> poly
                 -> Bool
 hasCommonFactor f g = isZero $ resultant f g
 
-lcmPolynomial :: forall k ord n. (CoeffRing k, KnownNat n, Field k,
-                                  IsMonomialOrder n ord,
-                                  IsMonomialOrder (2 + n) ord)
-              => OrderedPolynomial k ord n
-              -> OrderedPolynomial k ord n
-              -> OrderedPolynomial k ord n
+lcmPolynomial :: forall poly.
+                 (Field (Coefficient poly),
+                  IsOrderedPolynomial poly,
+                  IsMonomialOrder (2 + Arity poly) (MOrder poly))
+              => poly
+              -> poly
+              -> poly
 lcmPolynomial f g = head $ generators $ intersection (principalIdeal f :< principalIdeal g :< NilL)
 
-gcdPolynomial :: (CoeffRing r, KnownNat n, Field r, IsMonomialOrder n order,
-                 IsMonomialOrder (2 + n) order)
-              => OrderedPolynomial r order n -> OrderedPolynomial r order n
-              -> OrderedPolynomial r order n
+gcdPolynomial :: (Field (Coefficient poly),
+                  IsOrderedPolynomial poly,
+                  IsMonomialOrder (2 + Arity poly) (MOrder poly))
+              => poly
+              -> poly
+              -> poly
 gcdPolynomial f g = snd $ head $ f * g `divPolynomial` [lcmPolynomial f g]
 
