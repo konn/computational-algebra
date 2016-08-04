@@ -1,23 +1,23 @@
-{-# LANGUAGE OverloadedStrings, ScopedTypeVariables, ViewPatterns #-}
+{-# LANGUAGE GADTs, MultiParamTypeClasses, OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables, UndecidableInstances       #-}
+{-# LANGUAGE UndecidableSuperClasses, ViewPatterns           #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module SingularBridge (singIdealFun, singPolyFun) where
-import           Algebra.Ring.Ideal
-import           Algebra.Ring.Polynomial hiding (lex)
+import Algebra.Internal
+import Algebra.Ring.Ideal
+import Algebra.Ring.Polynomial hiding (lex)
+
 import           Control.Applicative
 import           Data.Char
 import           Data.List
-import           Data.Maybe              (mapMaybe)
-import           Data.Maybe              (fromMaybe)
-import           Data.Proxy
-import           Data.Singletons
-import qualified Data.Text               as T
-import           Data.Type.Natural
+import           Data.Maybe             (fromMaybe, mapMaybe)
+import qualified Data.Text              as T
 import           Numeric
 import           Numeric.Field.Fraction
 import           System.IO.Unsafe
 import           System.Process
 
-class IsMonomialOrder ord => SingularOrder ord where
+class IsStrongMonomialOrder ord => SingularOrder ord where
   singularOrder :: p ord -> String
 
 instance SingularOrder Lex where
@@ -26,11 +26,12 @@ instance SingularOrder Lex where
 instance SingularOrder Grevlex where
   singularOrder _ = "dp"
 
-idealProgram :: forall ord n. (SingularOrder ord, SingI n)
+idealProgram :: forall ord n. (SingularOrder ord, KnownNat n)
              => String
              -> Ideal (OrderedPolynomial (Fraction Integer) ord n)
              -> String
 idealProgram fun ideal =
+  withStrongMonomialOrder (Proxy :: Proxy ord) (sing :: SNat n) $
   let vars = [(i, "x(" ++ show i ++ ")") | i <- [0.. sNatToInt (sing :: SNat n) - 1]]
       istr = intercalate ", " $ map (showPolynomialWith True vars showRational) $ generators ideal
   in (++";") $ intercalate ";\n"
@@ -47,14 +48,15 @@ idealProgram fun ideal =
 singular :: String -> IO String
 singular code = readProcess "singular" ["-q"] code
 
-readSingularIdeal :: (SingI n, IsMonomialOrder ord)
+readSingularIdeal :: (KnownNat n, IsStrongMonomialOrder ord)
                   => SNat n -> Proxy ord -> String -> [OrderedPolynomial (Fraction Integer) ord n]
 readSingularIdeal n p (T.pack -> code) =
   mapMaybe (readSingularPoly n p  . T.unpack) $ map (\a -> fromMaybe a $ T.stripSuffix "," a) $ T.lines code
 
-readSingularPoly :: (SingI n, IsMonomialOrder ord)
+readSingularPoly :: (KnownNat n, IsStrongMonomialOrder ord)
                  => SNat n -> Proxy ord -> String -> Maybe (OrderedPolynomial (Fraction Integer) ord n)
-readSingularPoly _ _ code =
+readSingularPoly n pxy code =
+  withStrongMonomialOrder pxy n $
   case [p | (p, xs) <- readPoly code, all isSpace xs] of
     (p:_) -> Just p
     _ -> Nothing
@@ -103,13 +105,15 @@ readSingularPoly _ _ code =
                             <|> return (1, mpow)
             return (var (toEnum nth) ^ power, gomi)
 
-singIdealFun :: forall ord n. (SingularOrder ord, SingI n)
+singIdealFun :: forall ord n. (SingularOrder ord, KnownNat n)
              => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Ideal (OrderedPolynomial (Fraction Integer) ord n)
-singIdealFun fun ideal = unsafePerformIO $ do
-  ans <- singular $ idealProgram fun ideal
-  return $ toIdeal $ readSingularIdeal (sing :: SNat n) (Proxy :: Proxy ord) ans
+singIdealFun fun ideal =
+  withStrongMonomialOrder (Proxy :: Proxy ord) (sing :: SNat n) $
+  unsafePerformIO $ do
+    ans <- singular $ idealProgram fun ideal
+    return $ toIdeal $ readSingularIdeal (sing :: SNat n) (Proxy :: Proxy ord) ans
 
-singPolyFun :: forall ord n. (SingularOrder ord, SingI n)
+singPolyFun :: forall ord n. (SingularOrder ord, KnownNat n)
             => String
             -> Ideal (OrderedPolynomial (Fraction Integer) ord n)
             -> OrderedPolynomial (Fraction Integer) ord n
