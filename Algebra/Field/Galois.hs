@@ -44,7 +44,7 @@ type Unipol a = OrderedPolynomial a Grevlex 1
 --   instances should be defined to use field operations).
 type GF' (p :: TL.Nat) n = GF0 p n (Conway p n)
 
-modPoly :: forall p n f. (SingI n, Reifies p Integer) => Unipol (F p) -> GF0 p n f
+modPoly :: forall p n f. (KnownNat n, Reifies p Integer) => Unipol (F p) -> GF0 p n f
 modPoly = GF0 . polyToVec
 
 modVec :: Vector (F p) n -> GF0 p n f
@@ -61,14 +61,14 @@ vecToPoly :: (CoeffRing r)
           => Vector r n -> Unipol r
 vecToPoly v = sum $ imap (\i c -> injectCoeff c * varX^fromIntegral i) $ F.toList v
 
-polyToVec :: forall n r. (CoeffRing r, SingI n) => Unipol r -> Vector r n
+polyToVec :: forall n r. (CoeffRing r, KnownNat n) => Unipol r -> Vector r n
 polyToVec f = unsafeFromList' [ coeff (leadingMonomial $ (varX ^ i) `asTypeOf` f) f
                               | i <- [0..fromIntegral (fromSing (sing :: SNat n))]]
 
 instance Reifies p Integer => Additive (GF0 p n f)  where
   GF0 v + GF0 u = GF0 $ SV.zipWithSame (+) v u
 
-instance (Reifies p Integer, SingI n) => Monoidal (GF0 p n f) where
+instance (Reifies p Integer, KnownNat n) => Monoidal (GF0 p n f) where
   zero = GF0 $ SV.replicate' zero
 
 instance Reifies p Integer => LeftModule Natural (GF0 p n f) where
@@ -83,13 +83,13 @@ instance Reifies p Integer => LeftModule Integer (GF0 p n f) where
 instance Reifies p Integer => RightModule Integer (GF0 p n f) where
   GF0 v *. n = GF0 $ SV.map (*. n) v
 
-instance (SingI n, Reifies p Integer) => Group (GF0 p n f) where
+instance (KnownNat n, Reifies p Integer) => Group (GF0 p n f) where
   negate (GF0 v) = GF0 $ SV.map negate v
   GF0 u - GF0 v  = GF0 $ SV.zipWithSame (-) u v
 
 instance (Reifies p Integer) => Abelian (GF0 p n f)
 
-instance (SingI n, Reifies f (Unipol (F p)), Reifies p Integer)
+instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer)
       => Multiplicative (GF0 p n f) where
   GF0 u * GF0 v =
     let t = (vecToPoly u * vecToPoly v) `rem` reflect (Proxy :: Proxy f)
@@ -99,7 +99,7 @@ instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Unital (GF
   one =
     case zeroOrSucc (sing :: SNat n) of
       IsZero   -> GF0 NilL
-      IsSucc k -> withSingI k $ GF0 $ one :< SV.replicate' zero
+      IsSucc k -> withKnownNat k $ GF0 $ one :< SV.replicate' zero
 
 instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Semiring (GF0 p n f)
 
@@ -107,17 +107,17 @@ instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Rig (GF0 p
   fromNatural n =
     case zeroOrSucc (sing :: SNat n) of
       IsZero -> GF0 SV.empty
-      IsSucc k -> withSingI k $ GF0 $ fromNatural n :< SV.replicate' zero
+      IsSucc k -> withKnownNat k $ GF0 $ fromNatural n :< SV.replicate' zero
 
-instance (SingI n, Reifies f (Unipol (F p)), Reifies p Integer) => Commutative (GF0 p n f)
+instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Commutative (GF0 p n f)
 
 instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Ring (GF0 p n f) where
   fromInteger n =
     case zeroOrSucc (sing :: SNat n) of
       IsZero   -> GF0 NilL
-      IsSucc k -> withSingI k $ GF0 $ fromInteger n :< SV.replicate' zero
+      IsSucc k -> withKnownNat k $ GF0 $ fromInteger n :< SV.replicate' zero
 
-instance (SingI n, Reifies p Integer) => DecidableZero (GF0 p n f) where
+instance (KnownNat n, Reifies p Integer) => DecidableZero (GF0 p n f) where
   isZero (GF0 sv) = F.all isZero sv
 
 instance (KnownNat n, Reifies p Integer, Reifies f (Unipol (F p))) => DecidableUnits (GF0 p n f) where
@@ -161,19 +161,19 @@ generateIrreducible p n =
     return f
 
 reifyGF0 :: MonadRandom m => Natural -> Natural
-         -> (forall (p :: TL.Nat) (f :: *) (n :: TL.Nat) . (Reifies p Integer, Reifies f (Unipol (F p)), SingI n)
+         -> (forall (p :: TL.Nat) (f :: *) (n :: TL.Nat) . (Reifies p Integer, Reifies f (Unipol (F p)), KnownNat n)
                        => Proxy (GF0 p n f) -> a)
          -> m a
 reifyGF0 p n f = reifyPrimeField (toInteger p) $ \pxy -> do
   mpol <- generateIrreducible pxy n
   case toSing (fromIntegral n) of
     SomeSing sn -> do
-      return $ withSingI sn $ withKnownNat sn $
+      return $ withKnownNat sn $ withKnownNat sn $
          reify mpol (f . proxyGF0 pxy sn)
 
 withGF0 :: MonadRandom m
         => Natural -> Natural
-        -> (forall (p :: TL.Nat) f (n :: TL.Nat) . (Reifies p Integer, Reifies f (Unipol (F p)), SingI n)
+        -> (forall (p :: TL.Nat) f (n :: TL.Nat) . (Reifies p Integer, Reifies f (Unipol (F p)), KnownNat n)
             => GF0 p n f)
         -> m (V.Vector Integer)
 withGF0 p n f = reifyGF0 p n $ V.fromList . SV.toList . SV.map naturalRepr . runGF0 . asProxyTypeOf f
@@ -196,7 +196,7 @@ instance (KnownNat n, IsGF0 p n f) => FiniteField (GF0 p n f) where
        SV.replicate sn $ elements Proxy
 
 primitive :: forall p n f. (IsGF0 p n f) => GF0 p (n + 1) f
-primitive = withSingI (sSucc (sing :: SNat n)) $ GF0 $ polyToVec varX
+primitive = withKnownNat (sSucc (sing :: SNat n)) $ GF0 $ polyToVec varX
 
 -- | Conway polynomial (if definition is known).
 conway :: forall p n. (Reifies (Conway p n) (Unipol (F p)))

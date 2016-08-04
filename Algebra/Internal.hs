@@ -38,6 +38,7 @@ import qualified Data.Sized.Builtin           as S
 import qualified Data.Sized.Flipped           as Flipped (Flipped (..))
 import           Data.Type.Equality           ((:~:) (..), gcastWith)
 import           Data.Type.Natural.Class      as Algebra.Internal
+import qualified Data.Type.Ordinal            as O
 import qualified Data.Vector                  as DV
 import           GHC.TypeLits                 as Algebra.Internal
 import           Proof.Equational             (coerce)
@@ -101,6 +102,13 @@ type family Flipped a :: Nat -> * where
 
 pattern Flipped :: Sized n a -> Flipped a n
 pattern Flipped xs = Flipped.Flipped xs
+
+
+pattern OLt :: forall (t :: Nat). ()
+            => forall (n1 :: Nat).
+               ((n1 :< t) ~ 'True)
+            => Sing n1 -> O.Ordinal t
+pattern OLt n = O.OLt n
 
 sNatToInt :: SNat n -> Int
 sNatToInt = fromInteger . fromSing

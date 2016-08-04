@@ -5,7 +5,7 @@
 {-# LANGUAGE NoMonomorphismRestriction, PolyKinds, RankNTypes              #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell      #-}
 {-# LANGUAGE TupleSections, UndecidableInstances, ViewPatterns             #-}
-{-# OPTIONS_GHC -funbox-strict-fields -fno-warn-type-defaults #-}
+{-# OPTIONS_GHC -funbox-strict-fields -Wno-type-defaults -Wno-redundant-constraints #-}
 module Algebra.LinkedMatrix (Matrix, toLists, fromLists, fromList,
                              swapRows, identity,nonZeroRows,nonZeroCols,
                              swapCols, switchCols, switchRows, addRow,
