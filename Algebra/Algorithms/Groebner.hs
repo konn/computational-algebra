@@ -1,8 +1,7 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, EmptyCase, FlexibleContexts    #-}
-{-# LANGUAGE FlexibleInstances, GADTs, MultiParamTypeClasses            #-}
-{-# LANGUAGE NoImplicitPrelude, ParallelListComp, PolyKinds, RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables, TemplateHaskell, TypeFamilies         #-}
-{-# LANGUAGE TypeOperators, ViewPatterns                                #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, EmptyCase, FlexibleContexts        #-}
+{-# LANGUAGE FlexibleInstances, GADTs, MultiParamTypeClasses                #-}
+{-# LANGUAGE NoImplicitPrelude, ParallelListComp, PolyKinds, RankNTypes     #-}
+{-# LANGUAGE ScopedTypeVariables, TypeFamilies, TypeOperators, ViewPatterns #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Algebra.Algorithms.Groebner
        (
@@ -41,13 +40,14 @@ import qualified Data.Heap                    as H
 import           Data.List
 import           Data.Maybe
 import           Data.Singletons.Prelude      (POrd (..), SEq (..), SOrd (..))
-import           Data.Singletons.Prelude      (Sing (SFalse, STrue))
+import           Data.Singletons.Prelude      (Sing (SFalse, STrue), withSingI)
 import           Data.Singletons.Prelude.List (Length, Replicate, Sing (SCons))
 import           Data.Singletons.Prelude.List (sLength, sReplicate)
 import           Data.Sized.Builtin           (toList)
 import qualified Data.Sized.Builtin           as V
 import           Data.STRef
 import           Numeric.Algebra              hiding ((<), (>))
+import qualified Numeric.Algebra              as NA
 import           Numeric.Decidable.Zero
 import           Prelude                      hiding (Num (..), recip, subtract,
                                                (^))
@@ -96,8 +96,8 @@ isGroebnerBasis (nub . generators -> ideal) = all check $ combinations ideal
       in t*u == lcmMonomial t u || sPolynomial f g `modPolynomial` ideal == zero
 
 -- | The Naive buchberger's algorithm to calculate Groebner basis for the given ideal.
-simpleBuchberger :: (Field k, CoeffRing k, KnownNat n, IsMonomialOrder n order)
-                 => Ideal (OrderedPolynomial k order n) -> [OrderedPolynomial k order n]
+simpleBuchberger :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+                 => Ideal poly -> [poly]
 simpleBuchberger ideal =
   let gs = nub $ generators ideal
   in fst $ until (null . snd) (\(ggs, acc) -> let cur = nub $ ggs ++ acc in
@@ -108,8 +108,8 @@ simpleBuchberger ideal =
                ]
 
 -- | Buchberger's algorithm slightly improved by discarding relatively prime pair.
-primeTestBuchberger :: (Field r, CoeffRing r, KnownNat n, IsMonomialOrder n order)
-                    => Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
+primeTestBuchberger :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+                    => Ideal poly -> [poly]
 primeTestBuchberger ideal =
   let gs = nub $ generators ideal
   in fst $ until (null . snd) (\(ggs, acc) -> let cur = nub $ ggs ++ acc in
@@ -133,23 +133,23 @@ combinations xs = concat $ zipWith (map . (,)) xs $ drop 1 $ tails xs
 
 -- | Calculate Groebner basis applying (modified) Buchberger's algorithm.
 -- This function is same as 'syzygyBuchberger'.
-buchberger :: (Field r, CoeffRing r, KnownNat n, IsMonomialOrder n order)
-           => Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
+buchberger :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+           => Ideal poly -> [poly]
 buchberger = syzygyBuchberger
 
 -- | Buchberger's algorithm greately improved using the syzygy theory with the sugar strategy.
 -- Utilizing priority queues, this function reduces division complexity and comparison time.
 -- If you don't have strong reason to avoid this function, this function is recommended to use.
-syzygyBuchberger :: (Field r, CoeffRing r, KnownNat n, IsMonomialOrder n order)
-                    => Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
+syzygyBuchberger :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+                    => Ideal poly -> [poly]
 syzygyBuchberger = syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)
 {-# INLINE syzygyBuchberger #-}
 
 -- | apply buchberger's algorithm using given selection strategy.
-syzygyBuchbergerWithStrategy :: (Field r, CoeffRing r, KnownNat n,
-                                 IsMonomialOrder n order, SelectionStrategy n strategy
-                        , Ord (Weight n strategy order))
-                    => strategy -> Ideal (OrderedPolynomial r order n) -> [OrderedPolynomial r order n]
+syzygyBuchbergerWithStrategy :: (Field (Coefficient poly), IsOrderedPolynomial poly,
+                                 SelectionStrategy (Arity poly) strategy,
+                                 Ord (Weight (Arity poly) strategy (MOrder poly)))
+                    => strategy -> Ideal poly -> [poly]
 syzygyBuchbergerWithStrategy strategy ideal = runST $ do
   let gens = zip [1..] $ filter (/= zero) $ generators ideal
   gs <- newSTRef $ H.fromList [H.Entry (leadingMonomial g) g | (_, g) <- gens]
@@ -181,16 +181,16 @@ syzygyBuchbergerWithStrategy strategy ideal = runST $ do
 -- Buchberger's algorithm proccesses the pair with the most least weight first.
 -- This function requires the @Ord@ instance for the weight; this constraint is not required
 -- in the 'calcWeight' because of the ease of implementation. So use this function.
-calcWeight' :: (SelectionStrategy n s, CoeffRing r, KnownNat n, IsMonomialOrder n ord)
-            => s -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n -> Weight n s ord
+calcWeight' :: (SelectionStrategy (Arity poly) s, IsOrderedPolynomial poly)
+            => s -> poly -> poly -> Weight (Arity poly) s (MOrder poly)
 calcWeight' s = calcWeight (toProxy s)
 {-# INLINE calcWeight' #-}
 
 -- | Type-class for selection strategies in Buchberger's algorithm.
 class SelectionStrategy n s where
   type Weight n s ord :: *
-  calcWeight :: (CoeffRing r, KnownNat n, IsMonomialOrder n ord)
-             => Proxy s -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n -> Weight n s ord
+  calcWeight :: (IsOrderedPolynomial poly, n ~ Arity poly)
+             => Proxy s -> poly -> poly -> Weight n s (MOrder poly)
 
 -- | Buchberger's normal selection strategy. This selects the pair with
 -- the least LCM(LT(f), LT(g)) w.r.t. current monomial ordering.
@@ -227,14 +227,14 @@ instance SelectionStrategy n s => SelectionStrategy n (SugarStrategy s) where
   type Weight n (SugarStrategy s) ord = (Int, Weight n s ord)
   calcWeight (Proxy :: Proxy (SugarStrategy s)) f g = (sugar, calcWeight (Proxy :: Proxy s) f g)
     where
-      deg' = maximum . map (totalDegree . snd) . getTerms
+      deg' = maximum . map totalDegree . H.toList . orderedMonomials
       tsgr h = deg' h - totalDegree (leadingMonomial h)
       sugar = max (tsgr f) (tsgr g) + totalDegree (lcmMonomial (leadingMonomial f) (leadingMonomial g))
   {-# INLINE calcWeight #-}
 
 
-minimizeGroebnerBasis :: (Field k, CoeffRing k, KnownNat n, IsMonomialOrder n order)
-                      => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
+minimizeGroebnerBasis :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+                      => [poly] -> [poly]
 minimizeGroebnerBasis bs = runST $ do
   left  <- newSTRef $ map monoize $ filter (/= zero) bs
   right <- newSTRef []
@@ -248,8 +248,8 @@ minimizeGroebnerBasis bs = runST $ do
   readSTRef right
 
 -- | Reduce minimum Groebner basis into reduced Groebner basis.
-reduceMinimalGroebnerBasis :: (Field k, CoeffRing k, KnownNat n, IsMonomialOrder n order)
-                           => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
+reduceMinimalGroebnerBasis :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+                           => [poly] -> [poly]
 reduceMinimalGroebnerBasis bs = runST $ do
   left  <- newSTRef bs
   right <- newSTRef []
@@ -267,25 +267,26 @@ calcGroebnerBasisWith :: (Field k, CoeffRing k, KnownNat n, IsMonomialOrder n or
 calcGroebnerBasisWith ord i = calcGroebnerBasis $  mapIdeal (changeOrder ord) i
 
 -- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
-calcGroebnerBasisWithStrategy :: (Field k, CoeffRing k, KnownNat n, IsMonomialOrder n order
-                                 , SelectionStrategy n strategy, Ord (Weight n strategy order))
-                      => strategy -> Ideal (OrderedPolynomial k order n) -> [OrderedPolynomial k order n]
+calcGroebnerBasisWithStrategy :: (Field (Coefficient poly), IsOrderedPolynomial poly
+                                 , SelectionStrategy (Arity poly) strategy
+                                 , Ord (Weight (Arity poly) strategy (MOrder poly)))
+                      => strategy -> Ideal poly -> [poly]
 calcGroebnerBasisWithStrategy strategy =
   reduceMinimalGroebnerBasis . minimizeGroebnerBasis . syzygyBuchbergerWithStrategy strategy
 
 -- | Caliculating reduced Groebner basis of the given ideal.
-calcGroebnerBasis :: (Field k, CoeffRing k, KnownNat n, IsMonomialOrder n order)
-                  => Ideal (OrderedPolynomial k order n) -> [OrderedPolynomial k order n]
+calcGroebnerBasis :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+                  => Ideal poly -> [poly]
 calcGroebnerBasis = reduceMinimalGroebnerBasis . minimizeGroebnerBasis . syzygyBuchberger
 
 -- | Test if the given polynomial is the member of the ideal.
-isIdealMember :: (CoeffRing k, KnownNat n, Field k, IsMonomialOrder n o)
-              => OrderedPolynomial k o n -> Ideal (OrderedPolynomial k o n) -> Bool
+isIdealMember :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+              => poly -> Ideal poly -> Bool
 isIdealMember f ideal = groebnerTest f (calcGroebnerBasis ideal)
 
 -- | Test if the given polynomial can be divided by the given polynomials.
-groebnerTest :: (CoeffRing k, KnownNat n, Field k, IsMonomialOrder n order)
-             => OrderedPolynomial k order n -> [OrderedPolynomial k order n] -> Bool
+groebnerTest :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+             => poly -> [poly] -> Bool
 groebnerTest f fs = f `modPolynomial` fs == zero
 
 newtype LengthReplicate n =

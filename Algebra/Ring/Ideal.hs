@@ -52,6 +52,8 @@ principalIdeal = Ideal . singleton
 
 mapIdeal :: (r -> r') -> Ideal r -> Ideal r'
 mapIdeal fun (Ideal xs) = Ideal $ S.map fun xs
+{-# INLINE [1] mapIdeal #-}
+{-# RULES "mapIdeal/id" [~1] forall x. mapIdeal id x = x #-}
 
 instance NFData r => NFData (Ideal r) where
   rnf (Ideal is) = rnf is

@@ -383,10 +383,11 @@ transformMonomial tr (Polynomial d) =
 orderedBy :: OrderedPolynomial k o n -> o -> OrderedPolynomial k o n
 p `orderedBy` _ = p
 
-shiftR :: forall k r n ord. (CoeffRing r, KnownNat n, IsMonomialOrder (k + n) ord)
+shiftR :: forall k r n ord. (CoeffRing r, KnownNat n, IsMonomialOrder n ord,
+                             IsMonomialOrder (k + n) ord)
        => SNat k -> OrderedPolynomial r ord n -> OrderedPolynomial r ord (k :+ n)
 shiftR k = withKnownNat (k %:+ (sing :: SNat n)) $
-  withKnownNat k $  transformMonomial (S.append (fromList k []))
+  withKnownNat k $ transformMonomial (S.append (fromList k []))
 
 genVars :: forall k o n. (CoeffRing k, KnownNat n, IsMonomialOrder n o)
         => SNat n -> [OrderedPolynomial k o n]

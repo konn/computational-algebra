@@ -2,11 +2,13 @@
 {-# LANGUAGE ExplicitNamespaces, FlexibleContexts, FlexibleInstances    #-}
 {-# LANGUAGE GADTs, LiberalTypeSynonyms, MultiParamTypeClasses          #-}
 {-# LANGUAGE NoImplicitPrelude, ParallelListComp, PolyKinds, RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances    #-}
+{-# LANGUAGE ScopedTypeVariables, TypeFamilies, TypeOperators           #-}
+{-# LANGUAGE UndecidableInstances                                       #-}
 -- | This module provides abstract classes for finitary polynomial types.
 module Algebra.Ring.Polynomial.Class ( IsPolynomial(..), IsOrderedPolynomial(..)
                                      , CoeffRing, oneNorm, maxNorm, monoize,
-                                       sPolynomial, pDivModPoly, content, pp
+                                       sPolynomial, pDivModPoly, content, pp,
+                                       injectVars, vars
                                      ) where
 import Algebra.Internal
 import Algebra.Ring.Polynomial.Monomial
@@ -22,7 +24,7 @@ import qualified Data.Map.Strict          as M
 import qualified Data.Set                 as S
 import           Data.Singletons.Prelude  (SingKind (..))
 import qualified Data.Sized.Builtin       as V
-import           Data.Type.Ordinal        (Ordinal, enumOrdinal)
+import           Data.Type.Ordinal        (Ordinal, enumOrdinal, inclusion)
 import           GHC.TypeLits             (KnownNat, Nat)
 import           Numeric.Algebra          (Additive (..), Commutative)
 import           Numeric.Algebra          (Division (..), Field, Group (..))
@@ -172,6 +174,11 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
   (*|<) :: poly -> Monomial (Arity poly) -> poly
   (*|<) = flip (>|*)
 
+{-# RULES
+"liftMap/identity"   liftMap (\ x -> x) = (P.id :: poly -> poly)
+"liftMap/identity-2" liftMap P.id = (P.id :: poly -> poly)
+  #-}
+
 -- | Class to lookup ordering from its (type-level) name.
 class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrderedPolynomial poly where
   type MOrder poly :: *
@@ -293,4 +300,13 @@ pp :: (Euclidean (Coefficient poly), IsPolynomial poly) => poly -> poly
 pp f = mapCoeff' (`quot` content f) f
 {-# INLINE pp #-}
 
+injectVars :: ((Arity r :<= Arity r') ~ 'P.True,
+               IsPolynomial r,
+               IsPolynomial r',
+               Coefficient r ~ Coefficient r') => r -> r'
+injectVars = liftMap (var . inclusion)
+{-# INLINE [1] injectVars #-}
+{-# RULES "injectVars/identity" injectVars = P.id #-}
 
+vars :: forall poly. IsPolynomial poly => [poly]
+vars = map var $ enumOrdinal (sArity (Nothing :: Maybe poly))

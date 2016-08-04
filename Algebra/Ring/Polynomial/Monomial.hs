@@ -20,7 +20,7 @@ module Algebra.Ring.Polynomial.Monomial
          Revlex(..), Grlex(..), Graded(..),
          castMonomial, scastMonomial, varMonom,
          changeMonomialOrder, changeMonomialOrderProxy, sOnes,
-         withStrongMonomialOrder, cmpAnyMonomial
+         withStrongMonomialOrder, cmpAnyMonomial, orderMonomial
        ) where
 import Algebra.Internal
 
@@ -50,7 +50,7 @@ import           Prelude                         hiding (Fractional (..),
                                                   Integral (..), Num (..),
                                                   Real (..), lex, product, sum)
 import qualified Prelude                         as P
-import           Proof.Propositional             (IsTrue (..))  
+import           Proof.Propositional             (IsTrue (..))
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i- type Monomial (n :: Nat) = Sized n Int
 type Monomial n = Sized n Int
@@ -335,3 +335,7 @@ cmpAnyMonomial :: IsStrongMonomialOrder ord
 cmpAnyMonomial pxy t t' =
   let (l, u, u') = padVecs 0 t t'
   in withStrongMonomialOrder pxy l $ cmpMonomial pxy u u'
+
+orderMonomial :: proxy ord -> Monomial n -> OrderedMonomial ord n
+orderMonomial _ = OrderedMonomial
+{-# INLINE orderMonomial #-}
