@@ -24,7 +24,6 @@ import           Unsafe.Coerce
 newtype WrappedField a = WrapField { unwrapField :: a
                                    } deriving (Read, Show, Eq, Ord)
 
-
 makeWrapped ''WrappedField
 
 deriving instance Commutative r => Commutative (WrappedField r)
@@ -101,13 +100,12 @@ instance (Normed r, Eq r, Ring r, Division r, Group r) => Fractional (WrappedFie
   fromRational q = WrapField $ NA.fromInteger (P.numerator q) NA./ NA.fromInteger (P.denominator q)
 
 fmapUnwrap :: Functor f => f (WrappedField r) -> f r
-fmapUnwrap = unsafeCoerce
+fmapUnwrap = fmap unsafeCoerce
 
 fmapWrap :: Functor f => f r -> f (WrappedField r)
-fmapWrap = unsafeCoerce
+fmapWrap = fmap unsafeCoerce
 
 {-# RULES
-"fmap/unwrap" forall (x :: Functor f => f (WrappedField r)) . fmap unwrapField x = fmapUnwrap x
 "fmap/wrap"   forall (x :: Functor f => f r) . fmap WrapField   x = fmapWrap x
   #-}
 

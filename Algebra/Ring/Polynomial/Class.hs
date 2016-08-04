@@ -1,13 +1,14 @@
-{-# LANGUAGE DataKinds, DefaultSignatures, ExplicitNamespaces              #-}
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                    #-}
-{-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, NoImplicitPrelude #-}
-{-# LANGUAGE ParallelListComp, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
-{-# LANGUAGE TypeFamilies, UndecidableInstances                            #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures              #-}
+{-# LANGUAGE ExplicitNamespaces, FlexibleContexts, FlexibleInstances    #-}
+{-# LANGUAGE GADTs, LiberalTypeSynonyms, MultiParamTypeClasses          #-}
+{-# LANGUAGE NoImplicitPrelude, ParallelListComp, PolyKinds, RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances    #-}
 -- | This module provides abstract classes for finitary polynomial types.
 module Algebra.Ring.Polynomial.Class ( IsPolynomial(..), IsOrderedPolynomial(..)
                                      , CoeffRing, oneNorm, maxNorm, monoize,
                                        sPolynomial, pDivModPoly, content, pp
                                      ) where
+import Algebra.Internal
 import Algebra.Ring.Polynomial.Monomial
 import Algebra.Scalar
 import Algebra.Wrapped
@@ -19,11 +20,9 @@ import qualified Data.Foldable            as F
 import qualified Data.HashSet             as HS
 import qualified Data.Map.Strict          as M
 import qualified Data.Set                 as S
-import           Data.Singletons.Prelude  (Sing, SingI (..), SingKind (..))
-import           Data.Sized.Builtin       (Sized, (%!!))
+import           Data.Singletons.Prelude  (SingKind (..))
 import qualified Data.Sized.Builtin       as V
 import           Data.Type.Ordinal        (Ordinal, enumOrdinal)
-import qualified Data.Vector              as DV
 import           GHC.TypeLits             (KnownNat, Nat)
 import           Numeric.Algebra          (Additive (..), Commutative)
 import           Numeric.Algebra          (Division (..), Field, Group (..))
@@ -40,8 +39,6 @@ import           Prelude                  ((<$>), (<*>))
 import qualified Prelude                  as P
 
 infixl 7 *<, >*, *|<, >|*
-
-type SNat (n :: Nat) = Sing n
 
 -- | Constraint synonym for rings that can be used as polynomial coefficient.
 class    (DecidableZero r, Ring r, Commutative r, Eq r) => CoeffRing r
@@ -73,7 +70,7 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
 
   -- | A variant of @'liftMap'@, each value is given by @'Sized'@.
   subst :: (Ring alg, Commutative alg, Module (Scalar (Coefficient poly)) alg)
-        => Sized DV.Vector (Arity poly) alg -> poly -> alg
+        => Sized (Arity poly) alg -> poly -> alg
   subst dic f = liftMap (dic V.%!!) f
   {-# INLINE subst #-}
 
@@ -81,7 +78,7 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
   --   This function relies on @'terms''@; if you have more efficient implementation,
   --   it is encouraged to override this method.
   substWith :: (Unital r, Monoidal m)
-            => (Coefficient poly -> r -> m) -> Sized DV.Vector (Arity poly) r -> poly -> m
+            => (Coefficient poly -> r -> m) -> Sized (Arity poly) r -> poly -> m
   substWith o pt poly = sum $ P.map (uncurry (flip o) . first extractPower) $ M.toList $ terms' poly
     where
       extractPower = F.foldr (*) one . V.zipWithSame pow pt .
@@ -129,7 +126,7 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
 
   -- | @'coeff m f'@ returns the coefficient of monomial @m@ in polynomial @f@.
   coeff' :: Monomial (Arity poly) -> poly -> Coefficient poly
-  coeff' m = runCoeff . liftMap (\i -> WrapCoeff $ fromInteger $ P.fromIntegral $ m %!! i)
+  coeff' m = runCoeff . liftMap (\i -> WrapCoeff $ fromInteger $ P.fromIntegral $ m V.%!! i)
   {-# INLINE coeff' #-}
 
   -- | Calculates constant coefficient.

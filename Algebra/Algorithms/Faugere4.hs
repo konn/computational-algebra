@@ -1,10 +1,10 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts        #-}
-{-# LANGUAGE FlexibleInstances, GADTs, MultiParamTypeClasses     #-}
-{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction        #-}
-{-# LANGUAGE ParallelListComp, QuasiQuotes, RankNTypes           #-}
-{-# LANGUAGE ScopedTypeVariables, TemplateHaskell, TupleSections #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, ViewPatterns           #-}
-{-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, ExplicitNamespaces                #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                    #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude                      #-}
+{-# LANGUAGE NoMonomorphismRestriction, ParallelListComp, PatternSynonyms  #-}
+{-# LANGUAGE QuasiQuotes, RankNTypes, ScopedTypeVariables, TemplateHaskell #-}
+{-# LANGUAGE TupleSections, TypeFamilies, TypeOperators, ViewPatterns      #-}
+{-# OPTIONS_GHC -Wno-type-defaults -Wno-orphans -Wno-unused-top-binds #-}
 module Algebra.Algorithms.Faugere4 (
   -- * F_4 algorithms with various backends
   faugere4LM, faugere4, faugere4G, faugere4Modular,
@@ -14,42 +14,42 @@ module Algebra.Algorithms.Faugere4 (
   faugere4Gen,
   -- * Examples
   cyclic)  where
+import           Algebra.Internal
 import qualified Algebra.LinkedMatrix    as LM
 import           Algebra.Matrix          hiding (trace)
 import qualified Algebra.Repa            as Repa
 import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Wrapped
+
 import           Control.Arrow
 import           Control.Monad.Identity
 import           Control.Parallel
-import qualified Data.Array.Repa         as Repa
-import qualified Data.Array.Repa.Eval    as Repa
+import qualified Data.Array.Repa        as Repa
+import qualified Data.Array.Repa.Eval   as Repa
 import           Data.Function
-import qualified Data.HashMap.Strict     as HM
-import qualified Data.HashSet            as HS
+import qualified Data.HashMap.Strict    as HM
+import qualified Data.HashSet           as HS
 import           Data.List
 import           Data.Maybe
-import           Data.Proxy              (Proxy)
-import           Data.Reflection         (Given (..), give)
-import qualified Data.Set                as S
-import           Data.Type.Natural       hiding (one, zero)
-import qualified Data.Vector             as V
-import           Data.Vector.Sized       (Vector ((:-), Nil))
-import qualified Data.Vector.Sized       as SV
-import           Numeric.Algebra         hiding (sum, (<), (>), (\\))
-import qualified Numeric.Algebra         as NA
-import           Numeric.Decidable.Zero  (isZero)
-import           Numeric.Field.Fraction  (Fraction)
-import           Prelude                 hiding (Num (..), recip, subtract, (/),
-                                          (^))
-import qualified Prelude                 as P
+import           Data.Proxy             (Proxy)
+import           Data.Reflection        (Given (..), give)
+import qualified Data.Set               as S
+import           Data.Traversable       (sequenceA)
+import qualified Data.Vector            as V
+import           Numeric.Algebra        hiding (sum, (<), (>), (\\))
+import qualified Numeric.Algebra        as NA
+import           Numeric.Decidable.Zero (isZero)
+import           Numeric.Field.Fraction (Fraction)
+import           Prelude                hiding (Num (..), recip, subtract, (/),
+                                         (^))
+import qualified Prelude                as P
 
 -- * F_4 algorithm with various backends
 
 -- | F_4 with general matrix.
 faugere4G :: forall r ord mat n.
-       (Normed r, Field r, IsMonomialOrder ord, CoeffRing r, SingI n,
+       (Normed r, Field r, IsMonomialOrder n ord, CoeffRing r, KnownNat n,
         Matrix mat, Elem mat r)
     => Proxy mat -> Strategy r ord n -> Ideal (OrderedPolynomial r ord n)
     -> Ideal (OrderedPolynomial r ord n)
@@ -62,7 +62,7 @@ faugere4G _ =
       in (fromLists $ map (\f -> map (\t -> coeff t f) ts) fs, ts)
 
 -- | F_4 using repa
-faugere4 :: (Normed r, Field r, Fractional r, IsMonomialOrder ord, CoeffRing r, SingI n,
+faugere4 :: (Normed r, Fractional r, IsMonomialOrder n ord, CoeffRing r, KnownNat n,
              Repa.Elt r, Repa.Target (Repa.DefVec r) r, Repa.Source (Repa.DefVec r) r)
          => Strategy r ord n -> Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
 faugere4 = faugere4Gen fromPs (fst . runIdentity . Repa.gaussReductionP) toPs
@@ -74,7 +74,7 @@ faugere4 = faugere4Gen fromPs (fst . runIdentity . Repa.gaussReductionP) toPs
       map (NA.sum . zipWith (flip $ curry toPolynomial) ts . V.toList) $ Repa.toRows mat
 
 -- | F_4 with linked list based matrix with modified matrix construction
-faugere4LM :: (Eq r, DecidableZero r, Field r, SingI n, IsMonomialOrder ord)
+faugere4LM :: (Eq r, DecidableZero r, Field r, KnownNat n, IsMonomialOrder n ord)
            => Strategy r ord n -> Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
 faugere4LM =
   faugere4Gen fromPs (fst . LM.structuredGauss) toPs
@@ -87,7 +87,7 @@ faugere4LM =
       in (LM.fromList $ concat $ zipWith (\i f -> [ ((i, d0  HM.! t), c) | (c, t) <- getTerms f]) [0..] fs,
           V.fromList $ map (toPolynomial . (one,)) ts)
 
-faugere4Modular :: (SingI n, IsMonomialOrder ord)
+faugere4Modular :: (KnownNat n, IsMonomialOrder n ord)
                 => Strategy (Fraction Integer) ord n
                 -> Ideal (OrderedPolynomial (Fraction Integer) ord n)
                 -> Ideal (OrderedPolynomial (Fraction Integer) ord n)
@@ -109,7 +109,7 @@ optimalStrategy ps =
   let d = minimum $ map degPair ps
   in filter ((==d) . degPair) ps
 
-sugarStrategy :: (SingI n, IsMonomialOrder ord, CoeffRing r) => Strategy r ord n
+sugarStrategy :: (KnownNat n, IsMonomialOrder n ord, CoeffRing r) => Strategy r ord n
 sugarStrategy ps =
   let d = minimum $ map calcSug ps
   in filter ((==d) . calcSug) ps
@@ -117,7 +117,7 @@ sugarStrategy ps =
 -- * F_4 Main Algorithm
 
 -- | Generate F_4 algorithm with new backend
-faugere4Gen :: (IsMonomialOrder ord, CoeffRing r, SingI n)
+faugere4Gen :: (IsMonomialOrder n ord, CoeffRing r, KnownNat n)
             => ([OrderedPolynomial r ord n] -> (mat r, dic))
                -- ^ Convert list of polynomials to matrix and intermediate data.
             -> (mat r -> mat r)
@@ -155,7 +155,7 @@ rightP = rightMonom &&& rightPoly
 degPair :: Pair r ord n -> Int
 degPair = totalDegree . lcmPair
 
-mkPair :: (CoeffRing r, SingI n, IsMonomialOrder ord)
+mkPair :: (CoeffRing r, KnownNat n, IsMonomialOrder n ord)
        => OrderedPolynomial r ord n -> OrderedPolynomial r ord n -> Pair r ord n
 mkPair f g =
   let f0  = leadingMonomial f
@@ -165,7 +165,7 @@ mkPair f g =
       tj  = lij / g0
   in Pair lij ti f tj g
 
-calcSug :: (CoeffRing r, SingI n, IsMonomialOrder ord) => Pair r ord n -> Int
+calcSug :: (CoeffRing r, KnownNat n, IsMonomialOrder n ord) => Pair r ord n -> Int
 calcSug p =
   let f = leftPoly p
       g = rightPoly p
@@ -177,7 +177,7 @@ calcSug p =
 notDivs :: OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
 notDivs = (not .) . divs
 
-update :: (CoeffRing r, SingI n, IsMonomialOrder ord)
+update :: (CoeffRing r, KnownNat n, IsMonomialOrder n ord)
        => [OrderedPolynomial r ord n] -> [Pair r ord n] -> OrderedPolynomial r ord n
        -> ([OrderedPolynomial r ord n], [Pair r ord n])
 update gs bs h = {-# SCC "update" #-}
@@ -203,7 +203,7 @@ update gs bs h = {-# SCC "update" #-}
       gs' = [g | g <- gs, leadingMonomial h `notDivs` leadingMonomial g ]
   in (es `par` bs' `par` gs') `pseq` (h : gs', bs' ++ es)
 
-cyclic :: (SingI n)
+cyclic :: (KnownNat n)
        => SNat n -> Ideal (Polynomial (Fraction Integer) n)
 cyclic sn =
   let vars = genVars sn
@@ -211,16 +211,15 @@ cyclic sn =
       ary = sNatToInt sn
   in toIdeal $ NA.product vars - one : [ NA.sum $ map (NA.product . take i) $ take ary cycs | i <- [ary - 1,ary-2..1]]
 
-divisors :: (SingI n, IsMonomialOrder ord) => OrderedMonomial ord n -> [OrderedMonomial ord n]
+divisors :: (KnownNat n) => OrderedMonomial ord n -> [OrderedMonomial ord n]
 divisors t = [om
-             | m <- sequenceSV (SV.map (enumFromTo 0) $ getMonomial t)
+             | m <- sequenceSV (fmap (enumFromTo 0) $ getMonomial t)
              , let om = OrderedMonomial m
              , om /= one
              ]
 
-sequenceSV :: SV.Vector [a] n -> [SV.Vector a n]
-sequenceSV Nil = [Nil]
-sequenceSV (xs :- xss) = concatMap (\x -> map (x :-) $ sequenceSV xss) xs
+sequenceSV :: Sized n [a] -> [Sized n a]
+sequenceSV = sequenceA
 
 data MatrixRepr r ord n where
   MatrixRepr :: ([OrderedPolynomial r ord n] -> (mat r, dic))
@@ -237,8 +236,7 @@ withMatRepr :: Given (MatrixRepr r ord n)
 withMatRepr f = case given of
   MatrixRepr fromPs gauss toPs -> f fromPs gauss toPs
 
-simplify :: (Given (MatrixRepr r ord n),
-             IsMonomialOrder ord, CoeffRing r, SingI n, DecidableZero r)
+simplify :: (Given (MatrixRepr r ord n), IsMonomialOrder n ord, CoeffRing r, KnownNat n)
          => [[OrderedPolynomial r ord n]]
          -> OrderedMonomial ord n -> OrderedPolynomial r ord n
          -> (OrderedMonomial ord n, OrderedPolynomial r ord n)
@@ -255,8 +253,8 @@ simplify fss t f = go $ divisors t
              then simplify fss (t/u) p
              else (one, p)
 
-rowEchelon :: (Given (MatrixRepr r ord n), Eq r,
-               IsMonomialOrder ord, CoeffRing r, SingI n, DecidableZero r)
+rowEchelon :: (Given (MatrixRepr r ord n),
+               IsMonomialOrder n ord, CoeffRing r, KnownNat n)
            => [OrderedPolynomial r ord n]
            -> [OrderedPolynomial r ord n]
 rowEchelon fs = withMatRepr $ \fromPolys gauss toPolys ->
@@ -265,7 +263,8 @@ rowEchelon fs = withMatRepr $ \fromPolys gauss toPolys ->
       mf' = toPolys ts $ {-# SCC "eche/red" #-} gauss mf
   in filter (not . isZero) $ nub mf'
 
-symbolicPP :: (Given (MatrixRepr r ord n), IsMonomialOrder ord, CoeffRing r, SingI n, DecidableZero r)
+symbolicPP :: (Given (MatrixRepr r ord n), IsMonomialOrder n ord,
+               CoeffRing r, KnownNat n)
            => [(OrderedMonomial ord n, OrderedPolynomial r ord n)]
            -> [OrderedPolynomial r ord n]
            -> [[OrderedPolynomial r ord n]]
@@ -288,7 +287,7 @@ symbolicPP ls gs fss = {-# SCC "symbolicPP" #-}
                     in go (f' : fs) (ts' `HS.union` ts'') done'
           Nothing -> go fs ts' done'
 
-redF4 :: (Given (MatrixRepr r ord n), IsMonomialOrder ord, CoeffRing r, SingI n)
+redF4 :: (Given (MatrixRepr r ord n), IsMonomialOrder n ord, CoeffRing r, KnownNat n)
       => [(OrderedMonomial ord n, OrderedPolynomial r ord n)]
       -> [OrderedPolynomial r ord n]
       -> [[OrderedPolynomial r ord n]]
@@ -298,9 +297,9 @@ redF4 ls gs fss = {-# SCC "reduction" #-}
       fs' = rowEchelon fs
   in ([ f | f <- fs', not $ leadingMonomial f `elem` map leadingMonomial fs], fs)
 
-ideal3 :: Ideal (Polynomial (Fraction Integer) Three)
+ideal3 :: Ideal (Polynomial (Fraction Integer) 3)
 ideal3 = toIdeal [x^^^2 + y^^^2 + z^^^2 - 1, x^^^2 + y^^^2 + z^^^2 - 2*x, 2*x -3*y - z]
   where
-    (^^^) :: (Unital r, Multiplicative r) => r -> Natural -> r
+    (^^^) :: (Unital r) => r -> Natural -> r
     (^^^) = pow
-    [x,y,z] = genVars sThree
+    [x,y,z] = genVars sing

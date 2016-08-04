@@ -5,32 +5,24 @@
 module Algebra.Matrix (Matrix(..), delta, companion,
                        gaussReduction, maxNorm, rankWith, det,
                        inverse, inverseWith) where
-import qualified Algebra.LinkedMatrix             as LM
-import           Algebra.Ring.Polynomial          hiding (maxNorm)
-import           Algebra.Wrapped                  (Normed (..))
-import           Control.Arrow
+import           Algebra.Internal
+import qualified Algebra.LinkedMatrix    as LM
+import           Algebra.Ring.Polynomial hiding (maxNorm)
+import           Algebra.Wrapped         (Normed (..))
+
 import           Control.Lens
 import           Control.Monad                    (when)
-import           Data.Complex
-import qualified Data.IntSet                      as IS
 import           Data.List
 import qualified Data.Matrix                      as DM
-import           Data.Maybe
 import           Data.Ord
-import           Data.Singletons                  (SingI)
 import           Data.Type.Ordinal
 import qualified Data.Vector                      as V
-import qualified Data.Vector.Algorithms.Insertion as Sort
-import qualified Data.Vector.Generic              as GV
-import qualified Data.Vector.Hybrid               as H
-import           Data.Vector.Hybrid.Internal
 import           GHC.Exts                         (Constraint)
 import           Numeric.Algebra                  (Additive, DecidableZero)
 import           Numeric.Algebra                  (Monoidal, Multiplicative)
 import           Numeric.Algebra                  (Ring, Unital)
 import qualified Numeric.Algebra                  as NA
 import qualified Numeric.Decidable.Zero           as NA
-import           Numeric.Field.Fraction
 import qualified Numeric.LinearAlgebra            as LA
 import qualified Numeric.LinearAlgebra.Devel      as LA
 -- import           Sparse.Matrix                    (_Mat)
@@ -263,8 +255,8 @@ delta :: (NA.Monoidal r, NA.Unital r) => Int -> Int -> r
 delta i j | i == j = NA.one
           | otherwise = NA.zero
 
-companion :: (SingI n, CoeffRing r, Matrix mat, Eq r,
-              Elem mat r, IsMonomialOrder ord, Ring r)
+companion :: (KnownNat n, CoeffRing r, Matrix mat,
+              Elem mat r, IsMonomialOrder n ord)
           => Ordinal n -> OrderedPolynomial r ord n -> mat r
 companion on poly =
   let deg = fromIntegral $ totalDegree' poly
@@ -280,13 +272,13 @@ companion on poly =
 -- instance SM.Eq0 (Fraction Integer)
 
 -- | @gaussReduction a = (a', p)@ where @a'@ is row echelon form and @p@ is pivoting matrix.
-gaussReduction :: (Matrix mat, Elem mat a, Normed a, Ord (Norm a), Eq a, NA.Field a)
+gaussReduction :: (Matrix mat, Elem mat a, Normed a, Eq a, NA.Field a)
                => mat a -> (mat a, mat a)
 gaussReduction mat =
   let (a, b, _) = gaussReduction' mat in (a, b)
 
 -- | @gaussReduction a = (a', p)@ where @a'@ is row echelon form and @p@ is pivoting matrix.
-gaussReduction' :: (Matrix mat, Elem mat a, Normed a, Ord (Norm a), Eq a, NA.Field a)
+gaussReduction' :: (Matrix mat, Elem mat a, Normed a, Eq a, NA.Field a)
                => mat a -> (mat a, mat a, a)
 gaussReduction' mat = {-# SCC "gaussRed" #-} go 1 1 mat (identity $ nrows mat) NA.one
   where

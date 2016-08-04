@@ -7,8 +7,10 @@ module Algebra.Ring.Polynomial.Monomorphic where
 import           Algebra.Internal
 import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial       (IsMonomialOrder,
+                                                IsStrongMonomialOrder,
                                                 OrderedMonomial (..),
-                                                OrderedPolynomial)
+                                                OrderedPolynomial,
+                                                cmpAnyMonomial)
 import qualified Algebra.Ring.Polynomial       as Poly
 import           Algebra.Ring.Polynomial.Class
 import           Algebra.Scalar
@@ -20,6 +22,7 @@ import           Data.Maybe
 import           Data.Singletons.Prelude       (Sing)
 import qualified Data.Sized.Builtin            as V
 import           Data.Type.Monomorphic
+import qualified Data.Vector                   as DV
 import qualified Numeric.Algebra               as NA
 import           Numeric.Domain.Euclidean      (Euclidean)
 import           Numeric.Field.Fraction        (Fraction)
@@ -91,7 +94,7 @@ instance (Eq r, CoeffRing r) => NA.LeftModule (Scalar r) (Polynomial r) where
 instance (Eq r, CoeffRing r) => NA.RightModule (Scalar r) (Polynomial r) where
   Polynomial dic *. Scalar r = normalize $ Polynomial $ fmap (r NA.*) dic
 
-promoteWithVars :: (IsMonomialOrder (0-1) ord, CoeffRing r, KnownNat n)
+promoteWithVars :: (IsStrongMonomialOrder ord, CoeffRing r, KnownNat n)
                 => Vector Variable n -> Polynomial r -> OrderedPolynomial r ord n
 promoteWithVars vs = Poly.polynomial . M.mapKeys (fromJust . buildMonomial vs) . unPolynomial
 
@@ -108,7 +111,8 @@ buildVarsList = nub . sort . concatMap M.keys . M.keys . unPolynomial
 encodeMonomList :: [Variable] -> Monomial -> [Int]
 encodeMonomList vars mono = map (maybe 0 fromInteger . flip M.lookup mono) vars
 
-encodeMonomial :: [Variable] -> Monomial -> Monomorphic (Vector Int)
+encodeMonomial :: IsStrongMonomialOrder ord
+                => [Variable] -> Monomial -> Monomorphic (OrderedMonomial ord)
 encodeMonomial vars mono = promote $ encodeMonomList vars mono
 
 encodePolynomial :: (Monomorphicable (Poly.Polynomial r))
@@ -118,10 +122,10 @@ encodePolynomial = promote . toPolynomialSetting
 toPolynomialSetting :: Polynomial r -> PolynomialSetting r
 toPolynomialSetting p =
     PolySetting { polyn = p
-                , dimension = promote $ length $ buildVarsList p
+                , dimension = toSing $ toInteger $ length $ buildVarsList p
                 }
 
-data PolynomialSetting r = PolySetting { dimension :: Monomorphic (Sing :: Nat -> *)
+data PolynomialSetting r = PolySetting { dimension :: SomeSing Nat
                                        , polyn     :: Polynomial r
                                        }
 
@@ -131,13 +135,14 @@ instance (Euclidean a, CoeffRing a, Integral a, Show a) => Show (Polynomial (Fra
 instance (Eq r, CoeffRing r, Show r) => Show (Polynomial r) where
   show = showPolynomial
 
-instance (Eq r, CoeffRing r, Poly.IsMonomialOrder (0-1) ord)
+instance (Eq r, CoeffRing r, IsStrongMonomialOrder ord)
     => Monomorphicable (Poly.OrderedPolynomial r ord) where
   type MonomorphicRep (Poly.OrderedPolynomial r ord) = PolynomialSetting r
   promote PolySetting{..} =
     case dimension of
-      Monomorphic dim ->
+      SomeSing dim ->
         withKnownNat dim $
+        Poly.withStrongMonomialOrder (Proxy :: Proxy ord) dim $
         Monomorphic $ Poly.polynomial $
         M.mapKeys (Poly.OrderedMonomial . Poly.fromList dim . encodeMonomList vars) $
         unPolynomial polyn
@@ -145,9 +150,9 @@ instance (Eq r, CoeffRing r, Poly.IsMonomialOrder (0-1) ord)
       vars = buildVarsList polyn
   demote (Monomorphic f) =
         PolySetting { polyn = Polynomial $ M.fromList $
-                                map (toMonom . map toInteger . demote . Monomorphic . Poly.getMonomial . snd &&& fst) $
+                                map (toMonom . map toInteger . demote . Monomorphic . snd &&& fst) $
                                 Poly.getTerms f
-                    , dimension = Monomorphic $ Poly.sArity (Just f)
+                    , dimension = SomeSing $ Poly.sArity (Just f)
                     }
     where
       toMonom = M.fromList . zip (Variable 'X' Nothing : [Variable 'X' (Just i) | i <- [1..]])
@@ -170,11 +175,19 @@ uniformlyPromote ps  = uniformlyPromoteWithDim (length vars) ps
   where
     vars = nub $ sort $ concatMap buildVarsList ps
 
-instance (Eq r, CoeffRing r, Poly.IsMonomialOrder (0-1) ord)
+instance (Eq r, CoeffRing r, IsStrongMonomialOrder ord)
     => Monomorphicable (Ideal :.: Poly.OrderedPolynomial r ord) where
   type MonomorphicRep (Ideal :.: Poly.OrderedPolynomial r ord) = [Polynomial r]
   promote = uniformlyPromote
   demote (Monomorphic (Comp (Ideal v))) = map (polyn . demote . Monomorphic) $ V.toList v
+
+instance (IsStrongMonomialOrder ord)
+      => Monomorphicable (OrderedMonomial ord)where
+  type MonomorphicRep (OrderedMonomial ord) = DV.Vector Int
+  promote xs =
+    case V.toSomeSized xs of
+      V.SomeSized len xs -> Monomorphic $ OrderedMonomial xs
+  demote (Monomorphic (OrderedMonomial m)) = V.unsized m
 
 promoteList :: (Eq r, CoeffRing r, Poly.IsMonomialOrder (0-1) ord)
             => [Polynomial r] -> Monomorphic ([] :.: Poly.OrderedPolynomial r ord)

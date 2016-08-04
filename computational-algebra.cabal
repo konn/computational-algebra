@@ -68,19 +68,21 @@ library
                        Algebra.Algorithms.Faugere5 Algebra.Algorithms.Groebner
                        Algebra.Algorithms.ZeroDim Algebra.Field.Galois
                        Algebra.Ring.Ideal Algebra.Ring.Polynomial
-                       Algebra.Ring.Polynomial.Monomorphic
+                       -- Algebra.Ring.Polynomial.Monomorphic
                        Algebra.Repa Algebra.Ring.Polynomial.Quotient
-                       Algebra.Ring.Polynomial.Parser Algebra.Field.Finite
+                       -- Algebra.Ring.Polynomial.Parser
+                       Algebra.Field.Finite
                        Algebra.Scalar Algebra.Internal Algebra.Instances Algebra.Wrapped
                        Algebra.Matrix Algebra.Prelude Algebra.Algorithms.Signature
                        Algebra.Ring.Polynomial.Factorize
                        Algebra.Algorithms.PrimeTest Algebra.Algorithms.ChineseRemainder
                        Algebra.Ring.Polynomial.Class
                        Algebra.Ring.Polynomial.Labeled
+                       Algebra.Ring.Polynomial.Monomial
     exposed:           True
     buildable:         True
     other-modules:     Algebra.Algorithms.FGLM Algebra.Field.Galois.Internal Algebra.Field.Galois.Conway
-    ghc-options:      -fwarn-name-shadowing -Odph -with-rtsopts="-qa"- -Wall
+    ghc-options:      -Odph -with-rtsopts="-qa"- -Wall -Wno-unused-top-binds
     extensions:       CPP
  
 executable solve
@@ -89,7 +91,6 @@ executable solve
                    base >=4, type-natural >= 0.4.2,
                    computational-algebra -any, random >= 1.0,
                    hmatrix, matrix >= 0.3,
- -- sized-vector >= 1.4,
                    sized,
                    vector >= 0.10, convertible >= 1.1, lens >= 3.9,
                    MonadRandom >= 0.1
@@ -110,7 +111,6 @@ executable ipsolve
                    reflection >=1.4, base >=4, type-natural >= 0.2,
                    computational-algebra -any, random >= 1.0,
                    hmatrix, matrix >= 0.3, sized,
-                   -- sized-vector >= 1.4,
                    vector >= 0.10, convertible >= 1.1, lens >= 3.9,
                    MonadRandom >= 0.1, singletons
      
@@ -130,7 +130,6 @@ executable faugere-prof
                    base >=4, type-natural >= 0.2,
                    computational-algebra -any, random >= 1.0,
                    hmatrix, matrix >= 0.3, sized,
-                   -- sized-vector >= 1.4,
                    vector >= 0.10, convertible >= 1.1, lens >= 3.9,
                    deepseq >= 1.3, MonadRandom >= 0.1
      
@@ -149,8 +148,7 @@ executable hensel-prof
                    constraints >=0.3, algebra,
                    base >=4, type-natural >= 0.2,
                    computational-algebra -any, random >= 1.0,
-                   hmatrix, matrix >= 0.3, 
--- sized-vector >= 1.4,
+                   hmatrix, matrix >= 0.3,  sized,
                    vector >= 0.10, convertible >= 1.1, lens >= 3.9,
                    deepseq >= 1.3, MonadRandom >= 0.1
      
@@ -166,8 +164,8 @@ executable hensel-prof
 executable sandpit-poly
     build-depends: semigroups >= 0.15.2,
                    constraints >=0.3, computational-algebra -any,
-                   base >=4, type-natural >= 0.2, algebra
---                   sized-vector >= 1.4
+                   base >=4, type-natural >= 0.2, algebra,
+                   sized
      
     if flag(examples)
         buildable: True
@@ -183,7 +181,7 @@ test-suite test-multi-table
                    computational-algebra -any, containers >= 0.5,
                    hspec >=1.9.5, lazysmallcheck >= 0.6, lens >= 3.9,
                    quickcheck-instances >=0.3.8, reflection >=1.4,
-                   -- sized-vector >= 1.4,
+                   sized,
                    smallcheck >=1.1.1,
                    tagged >= 0.7, test-framework >=0.8.0.3,
                    test-framework-hunit >=0.3.0.1, transformers >= 0.3,
@@ -210,8 +208,7 @@ test-suite singular-test
                    smallcheck -any, test-framework -any, test-framework-hunit -any,
                    vector >= 0.10, equational-reasoning >= 0.2,
                    quickcheck-instances >= 0.3.8,
-                   -- sized-vector,
-                   type-natural,
+                   type-natural,sized,
                    reflection, tagged, lens, matrix, text, singletons
 
 test-suite monomial-order-test
@@ -220,7 +217,8 @@ test-suite monomial-order-test
                    computational-algebra -any, containers >= 0.5,
                    deepseq >= 1.3, hspec -any, monomorphic >=0.0.3,
                    smallcheck -any, test-framework -any, test-framework-hunit -any,
-                   vector >= 0.10, equational-reasoning >= 0.2
+                   vector >= 0.10, equational-reasoning >= 0.2,
+                   sized
     type: exitcode-stdio-1.0
     main-is: monomials.hs
     buildable: False
@@ -234,7 +232,7 @@ test-suite linear-test
                    deepseq >= 1.3, hspec -any, lens >= 3.9,
                    monomorphic >=0.0.3, quickcheck-instances -any,
                    reflection >=1.4,
-                   -- sized-vector >= 1.4,
+                   sized,
                    smallcheck -any,
                    tagged >= 0.7, test-framework -any, test-framework-hunit -any,
                    type-natural >= 0.2, vector >= 0.10,
@@ -252,7 +250,7 @@ test-suite matrix-test
                    deepseq >= 1.3, hspec -any, lens >= 3.9,
                    monomorphic >=0.0.3, quickcheck-instances -any,
                    reflection >=1.4,
-                   -- sized-vector >= 1.4,
+                   sized,
                    smallcheck -any,
                    tagged >= 0.7, test-framework -any, test-framework-hunit -any,
                    type-natural >= 0.2, vector >= 0.10, matrix >= 0.3,
@@ -270,7 +268,7 @@ test-suite specs
                    deepseq >= 1.3, hspec -any, lens >= 3.9,
                    monomorphic >=0.0.3, quickcheck-instances -any,
                    reflection >=1.4,
-                   -- sized-vector >= 1.4,
+                   sized,
                    smallcheck -any,
                    tagged >= 0.7, test-framework -any, test-framework-hunit -any,
                    type-natural >= 0.2, vector >= 0.10,convertible,

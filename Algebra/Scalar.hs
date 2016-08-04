@@ -9,7 +9,7 @@ newtype Scalar r = Scalar { runScalar :: r }
     deriving (Read, Show, Eq, Ord, Additive, Num, Integral, Real, Enum
              ,Multiplicative, Unital)
 
-(.*.) :: (RightModule (Scalar r) m, LeftModule (Scalar r) m)
+(.*.) :: (Module (Scalar r) m)
       => r -> m -> m
 r .*. f = Scalar r .* f
 

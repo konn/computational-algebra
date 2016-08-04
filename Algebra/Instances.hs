@@ -4,15 +4,12 @@
 -- | This Library provides some *dangerous* instances for @Double@s and @Complex@.
 module Algebra.Instances () where
 import           Control.DeepSeq          (NFData (..))
-import           Control.Lens
 import           Control.Monad.Random     (Random (..), getRandom)
 import           Control.Monad.Random     (getRandomR, runRand)
 import           Data.Complex
 import           Data.Convertible.Base    (Convertible (..))
 import           Data.Hashable
 import qualified Data.Ratio               as P
-import qualified Data.Sized.Builtin       as V
-import           Data.Type.Ordinal
 import qualified Data.Vector              as DV
 import           Numeric.Algebra
 import qualified Numeric.Algebra          as NA
@@ -21,10 +18,6 @@ import           Numeric.Domain.Euclidean (Euclidean, splitUnit)
 import           Numeric.Field.Fraction
 import           Prelude                  hiding (Num (..), lcm)
 import qualified Prelude                  as P
-
-updateNth :: (Ixed (f a), IxValue (f a) ~ a, Integral (Index (f a)))
-          => Ordinal n -> (a -> a) -> V.Sized f n a -> V.Sized f n a
-updateNth o f = ix o %~ f
 
 instance Additive r => Additive (DV.Vector r) where
   (+) = DV.zipWith (+)

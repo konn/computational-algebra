@@ -1,5 +1,6 @@
-{-# LANGUAGE DataKinds, ExplicitNamespaces, FlexibleContexts              #-}
-{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving         #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, ExistentialQuantification        #-}
+{-# LANGUAGE ExplicitNamespaces, FlexibleContexts, FlexibleInstances      #-}
+{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, IncoherentInstances       #-}
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, ParallelListComp #-}
 {-# LANGUAGE PatternSynonyms, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
 {-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies            #-}
@@ -8,6 +9,7 @@
 module Algebra.Ring.Polynomial.Monomial
        ( Monomial, OrderedMonomial(..),
          IsOrder(..), IsMonomialOrder, MonomialOrder,
+         IsStrongMonomialOrder,
          isRelativelyPrime, totalDegree, ProductOrder(..),
          productOrder, productOrder', WeightProxy, WeightOrder(..),
          gcdMonomial, divs, isPowerOf, tryDiv, lcmMonomial,
@@ -17,7 +19,8 @@ module Algebra.Ring.Polynomial.Monomial
          weightOrder, Grevlex(..), fromList,
          Revlex(..), Grlex(..), Graded(..),
          castMonomial, scastMonomial, varMonom,
-         changeMonomialOrder, changeMonomialOrderProxy, sOnes
+         changeMonomialOrder, changeMonomialOrderProxy, sOnes,
+         withStrongMonomialOrder, cmpAnyMonomial
        ) where
 import Algebra.Internal
 
@@ -25,7 +28,11 @@ import           Control.DeepSeq                 (NFData (..))
 import           Control.Lens                    (Ixed (..), alaf, makeLenses,
                                                   makeWrapped, (%~), (&), (.~),
                                                   _Wrapped)
+import           Data.Constraint                 ((:=>) (..), Dict (..))
+import qualified Data.Constraint                 as C
+import           Data.Constraint.Forall
 import           Data.Hashable                   (Hashable (..))
+import           Data.Kind                       (Type)
 import           Data.Maybe                      (catMaybes)
 import           Data.Monoid                     (Dual (..))
 import           Data.Monoid                     ((<>))
@@ -43,10 +50,10 @@ import           Prelude                         hiding (Fractional (..),
                                                   Integral (..), Num (..),
                                                   Real (..), lex, product, sum)
 import qualified Prelude                         as P
-import           Proof.Propositional             (IsTrue (..))
+import           Proof.Propositional             (IsTrue (..))  
 
--- | N-ary Monomial. IntMap contains degrees for each x_i.
-type Monomial (n :: Nat) = Sized n Int
+-- | N-ary Monomial. IntMap contains degrees for each x_i- type Monomial (n :: Nat) = Sized n Int
+type Monomial n = Sized n Int
 
 -- | A wrapper for monomials with a certain (monomial) order.
 newtype OrderedMonomial ordering n =
@@ -302,3 +309,29 @@ changeMonomialOrder _ = OrderedMonomial . getMonomial
 changeMonomialOrderProxy :: Proxy o' -> OrderedMonomial ord n -> OrderedMonomial o' n
 changeMonomialOrderProxy _ = OrderedMonomial . getMonomial
 
+class    (IsMonomialOrder n ord) => IsMonomialOrder' ord n
+instance (IsMonomialOrder n ord) => IsMonomialOrder' ord n
+
+instance IsMonomialOrder' ord n :=> IsMonomialOrder n ord where
+  ins = C.Sub Dict
+
+-- | Monomial ordering which can do with monomials of arbitrary large arity.
+type IsStrongMonomialOrder ord = Forall (IsMonomialOrder' ord)
+
+withStrongMonomialOrder :: forall ord n r proxy (proxy' :: Nat -> Type).
+                           (IsStrongMonomialOrder ord)
+                        => proxy ord -> proxy' n -> (IsMonomialOrder n ord => r) -> r
+withStrongMonomialOrder _ _ r = r C.\\ dict
+  where
+    ismToPrim = (ins :: IsMonomialOrder' ord n C.:- IsMonomialOrder n ord)
+    primeInst = inst :: Forall (IsMonomialOrder' ord) C.:- IsMonomialOrder' ord n
+    dict = ismToPrim `C.trans` primeInst
+
+-- | Comparing monomials with different arity,
+--   padding with @0@ at bottom of the shorter monomial to
+--   make the length equal.
+cmpAnyMonomial :: IsStrongMonomialOrder ord
+               => Proxy ord -> Monomial n -> Monomial m -> Ordering
+cmpAnyMonomial pxy t t' =
+  let (l, u, u') = padVecs 0 t t'
+  in withStrongMonomialOrder pxy l $ cmpMonomial pxy u u'

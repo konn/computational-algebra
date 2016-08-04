@@ -20,54 +20,52 @@ module Algebra.LinkedMatrix (Matrix, toLists, fromLists, fromList,
                              nonZeroEntries, rankLM, splitIndependentDirs,
                              structuredGauss, multWithVector, solveWiedemann,
                              henselLift, solveHensel, structuredGauss') where
-import           Algebra.Algorithms.ChineseRemainder
-import           Algebra.Field.Finite
-import           Algebra.Instances                   ()
-import           Algebra.Prelude                     hiding (fromList, (%))
-import           Algebra.Wrapped                     ()
-import           Control.Applicative                 ((<|>))
-import           Control.Arrow                       ((&&&))
-import           Control.Arrow                       ((>>>))
-import           Control.Lens                        hiding (index, (<.>))
-import           Control.Monad                       (replicateM)
-import           Control.Monad.Loops                 (iterateUntil)
-import           Control.Monad.Random                hiding (fromList)
-import           Control.Monad.ST.Strict             (ST, runST)
-import           Control.Monad.State.Strict          (evalState, runState)
-import           Control.Parallel.Strategies         (parMap)
-import           Control.Parallel.Strategies         (rdeepseq)
-import           Data.IntMap.Strict                  (IntMap, alter, insert,
-                                                      mapMaybeWithKey,
-                                                      minViewWithKey)
-import qualified Data.IntMap.Strict                  as IM
-import           Data.IntSet                         (IntSet)
-import qualified Data.IntSet                         as IS
-import           Data.List                           (intercalate, minimumBy,
-                                                      sort)
-import           Data.List                           (sortBy)
-import           Data.Maybe                          (fromJust, fromMaybe,
-                                                      mapMaybe)
-import           Data.Monoid                         (First (..))
-import           Data.Numbers.Primes                 (primes)
-import           Data.Ord                            (comparing)
-import           Data.Proxy                          (Proxy (..))
-import           Data.Reflection                     (Reifies (..), reify)
-import           Data.Semigroup                      hiding (First (..))
-import           Data.Tuple                          (swap)
-import           Data.Type.Natural                   (One)
-import           Data.Vector                         (Vector, create, generate,
-                                                      thaw, unsafeFreeze)
-import qualified Data.Vector                         as V
-import           Data.Vector.Mutable                 (grow)
-import qualified Data.Vector.Mutable                 as MV
-import           Numeric.Decidable.Zero              (isZero)
+import Algebra.Algorithms.ChineseRemainder
+import Algebra.Field.Finite
+import Algebra.Instances                   ()
+import Algebra.Prelude                     hiding (Vector, fromList, generate,
+                                            (%))
+import Algebra.Wrapped                     ()
+
+import           Control.Applicative         ((<|>))
+import           Control.Arrow               ((&&&))
+import           Control.Arrow               ((>>>))
+import           Control.Lens                hiding (index, (<.>))
+import           Control.Monad               (replicateM)
+import           Control.Monad.Loops         (iterateUntil)
+import           Control.Monad.Random        hiding (fromList)
+import           Control.Monad.ST.Strict     (ST, runST)
+import           Control.Monad.State.Strict  (evalState, runState)
+import           Control.Parallel.Strategies (parMap)
+import           Control.Parallel.Strategies (rdeepseq)
+import           Data.IntMap.Strict          (IntMap, alter, insert,
+                                              mapMaybeWithKey, minViewWithKey)
+import qualified Data.IntMap.Strict          as IM
+import           Data.IntSet                 (IntSet)
+import qualified Data.IntSet                 as IS
+import           Data.List                   (intercalate, minimumBy, sort)
+import           Data.List                   (sortBy)
+import           Data.Maybe                  (fromJust, fromMaybe, mapMaybe)
+import           Data.Monoid                 (First (..))
+import           Data.Numbers.Primes         (primes)
+import           Data.Ord                    (comparing)
+import           Data.Proxy                  (Proxy (..))
+import           Data.Reflection             (Reifies (..), reify)
+import           Data.Semigroup              hiding (First (..))
+import           Data.Tuple                  (swap)
+import           Data.Vector                 (Vector, create, generate, thaw,
+                                              unsafeFreeze)
+import qualified Data.Vector                 as V
+import           Data.Vector.Mutable         (grow)
+import qualified Data.Vector.Mutable         as MV
+import           Numeric.Decidable.Zero      (isZero)
 import           Numeric.Field.Fraction
-import           Numeric.Semiring.Integral           (IntegralSemiring)
-import           Prelude                             (abs)
-import           Prelude                             hiding (Num (..), gcd, lcm,
-                                                      product, quot, recip, sum,
-                                                      (/), (^))
-import qualified Prelude                             as P
+import           Numeric.Semiring.Integral   (IntegralSemiring)
+import           Prelude                     (abs)
+import           Prelude                     hiding (Num (..), gcd, lcm,
+                                              product, quot, recip, sum, (/),
+                                              (^))
+import qualified Prelude                     as P
 
 data Entry a = Entry { _value   :: !a
                      , _idx     :: !(Int, Int)
@@ -225,13 +223,13 @@ clearAt k mat = mat & coefficients %~ go
     go vs = generate (V.length vs - 1) $ \n ->
       vs V.! (if n < k then n else n + 1) & shiftDir Column & shiftDir Row
 
-clearDir :: Monoidal a => Direction -> Int -> Matrix a -> Matrix a
+clearDir :: Direction -> Int -> Matrix a -> Matrix a
 clearDir dir i mat = foldl (flip clearAt) mat $ sort $ mapMaybe (fmap fst) $ V.toList $ igetDir dir i mat
 
-clearRow :: Monoidal a => Int -> Matrix a -> Matrix a
+clearRow :: Int -> Matrix a -> Matrix a
 clearRow = clearDir Row
 
-clearCol :: Monoidal a => Int -> Matrix a -> Matrix a
+clearCol :: Int -> Matrix a -> Matrix a
 clearCol = clearDir Column
 
 scaleRow :: (DecidableZero a, Multiplicative a) => a -> Int -> Matrix a -> Matrix a
@@ -274,8 +272,7 @@ getDir dir i mat =
     trav :: forall s. MV.MVector s a -> () -> Int -> Entry a -> ST s ()
     trav v _ _ ent = MV.write v (ent ^. nthL dir) (ent ^. value)
 
-igetDir :: forall a. Monoidal a
-       => Direction -> Int -> Matrix a -> Vector (Maybe (Int, Entry a))
+igetDir :: forall a. Direction -> Int -> Matrix a -> Vector (Maybe (Int, Entry a))
 igetDir dir i mat =
   create $ do
     v <- MV.replicate (mat ^. lenL dir) Nothing
@@ -314,9 +311,7 @@ nextL :: Direction -> Lens' (Entry a) (Maybe Int)
 nextL Row    = rowNext
 nextL Column = colNext
 
-
-
-addDir :: forall a. (DecidableZero a, Additive a)
+addDir :: forall a. (DecidableZero a)
        => Direction -> Vector a -> Int -> Matrix a -> Matrix a
 addDir dir vec i mat = runST $ do
     mv <- thaw $ mat ^. coefficients
@@ -647,15 +642,15 @@ testCase = fromLists [[0,0,0,0,0,0,2,-3,-1,0]
 newtype Square n r = Square { runSquare :: Matrix r
                             } deriving (Show, Eq, Additive, Multiplicative)
 
-deriving instance (DecidableZero r, Semiring r, Additive r, Multiplicative r)
+deriving instance (DecidableZero r, Semiring r, Multiplicative r)
                => LeftModule (Scalar r) (Square n r)
-deriving instance (DecidableZero r, Semiring r, Additive r, Multiplicative r)
+deriving instance (DecidableZero r, Semiring r, Multiplicative r)
                => RightModule (Scalar r) (Square n r)
 
 instance (Unital r, Multiplicative r, Reifies n Integer, DecidableZero r) => Unital (Square n r) where
   one = Square $ identity $ fromInteger $ reflect (Proxy :: Proxy n)
 
-instance (Additive r, DecidableZero r, Multiplicative r) => Multiplicative (Matrix r) where
+instance (DecidableZero r, Multiplicative r) => Multiplicative (Matrix r) where
   m * n = fromList [ ((i,j),sum $ V.zipWith (*) (getRow i m) (getCol j n))
                    | i <- nonZeroRows m
                    , j <- nonZeroCols n
@@ -675,21 +670,21 @@ instance (DecidableZero r, RightModule Integer r) => RightModule Integer (Matrix
 instance (DecidableZero r, LeftModule Integer r) => LeftModule Integer (Matrix r) where
   n .* m = cmap (n .*) m
 
-instance (RightModule Natural r, LeftModule Natural r, Additive r, DecidableZero r)
+instance (DecidableZero r)
       => Monoidal (Matrix r) where
   zero = zeroMat 0 0
 
-instance (DecidableZero r, Additive r) => Additive (Matrix r) where
+instance (DecidableZero r) => Additive (Matrix r) where
   m + n =
     let dir = minimumBy (comparing $ length . flip nonZeroDirs n)
               [Row, Column]
     in foldr (\i l -> addDir dir (getDir dir i n) i l) m (nonZeroDirs dir n)
 
-instance (DecidableZero r, Semiring r, Additive r, Multiplicative r)
+instance (DecidableZero r, Semiring r, Multiplicative r)
       => LeftModule (Scalar r) (Matrix r) where
   Scalar r .* mat = cmap (r*) mat
 
-instance (DecidableZero r, Semiring r, Additive r, Multiplicative r)
+instance (DecidableZero r, Semiring r, Multiplicative r)
       => RightModule (Scalar r) (Matrix r) where
   mat *. Scalar r = cmap (*r) mat
 
@@ -701,14 +696,14 @@ instance (DecidableZero r, Abelian r) => Abelian (Matrix r)
 instance (DecidableZero r, Semiring r) => Semiring (Matrix r)
 
 substMatrix :: (CoeffRing r)
-            => Matrix r -> Polynomial r One -> Matrix r
+            => Matrix r -> Polynomial r 1 -> Matrix r
 substMatrix m f =
   let n = ncols m
   in if n == nrows m
      then reify (toInteger n) $ \pxy -> runSquare $ substUnivariate (toSquare pxy m) f
      else error "Matrix must be square"
 
-toSquare :: Reifies n Integer => proxy n -> Matrix r -> Square n r
+toSquare :: proxy n -> Matrix r -> Square n r
 toSquare _ = Square
 
 (<.>) :: (Multiplicative m, Monoidal m) => Vector m -> Vector m -> m
@@ -717,7 +712,7 @@ v <.> u = sum $ V.zipWith (*) v u
 krylovMinpol :: (Eq a, Ring a, DecidableZero a, DecidableUnits a,
                  Field a, IntegralSemiring a,
                  Random a, MonadRandom m)
-             => Matrix a -> Vector a -> m (Polynomial a One)
+             => Matrix a -> Vector a -> m (Polynomial a 1)
 krylovMinpol m b
   | V.all isZero b = return one
   | otherwise = reify (toInteger n) $ \pxy -> do
@@ -836,6 +831,7 @@ triangulateModular mat0 =
      in if (spec * permMat) == origDeled
         then (permMat, spec)
         else go ps
+    go _ = error "Cannot happen!"
     build ans i mns vecs
       | i < 0 = fromCols ans
       | otherwise = {-# SCC "building" #-}
