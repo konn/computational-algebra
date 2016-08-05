@@ -176,7 +176,19 @@ syzygyBuchbergerWithStrategy strategy ideal = runST $ do
         gs %= H.insert (H.Entry (leadingMonomial s) s)
         len %= (*2)
   map H.payload . H.toList <$> readSTRef gs
+{-# SPECIALISE
+ syzygyBuchbergerWithStrategy :: (Field k, CoeffRing k,
+                                 SelectionStrategy n strategy, KnownNat n,
+                                 Ord (Weight n strategy Grevlex))
+                    => strategy -> Ideal (OrderedPolynomial k Grevlex n) -> [OrderedPolynomial k Grevlex n]
+ #-}
 
+{-# SPECIALISE
+ syzygyBuchbergerWithStrategy :: (Field k, CoeffRing k, IsMonomialOrder n ord,
+                                 SelectionStrategy n strategy, KnownNat n,
+                                 Ord (Weight n strategy ord))
+                    => strategy -> Ideal (OrderedPolynomial k ord n) -> [OrderedPolynomial k ord n]
+ #-}
 
 -- | Calculate the weight of given polynomials w.r.t. the given strategy.
 -- Buchberger's algorithm proccesses the pair with the most least weight first.
@@ -340,7 +352,7 @@ thEliminationIdeal :: forall poly n.
                    -> Ideal poly
                    -> Ideal (OrderedPolynomial (Coefficient poly) (MOrder poly) (Arity poly :-. n))
 thEliminationIdeal n = withSingI (sOnes n) $
-  gcastWith (lengthReplicate n sOne) $
+  withRefl (lengthReplicate n sOne) $
   withKnownNat n $
   withKnownNat ((sing :: SNat (Arity poly)) %:-. n) $
   mapIdeal (changeOrderProxy Proxy) . thEliminationIdealWith (weightedEliminationOrder n) n
@@ -391,10 +403,10 @@ intersection idsv@(_ :< _) =
         inj = transformMonomial (V.append $ V.replicate sk 0) .  injectVars
         tis = zipWith (\ideal t -> mapIdeal ((t *) . inj) ideal) (toList idsv) ts
         j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
-    in gcastWith (plusMinus' sk sn) $ case plusLeqL sk sn of
-      Witness ->
-        mapIdeal injectVars $ 
-        coerce (cong Proxy $ minusCongL (plusComm sk sn) sk `trans` plusMinus sn sk) $
+    in withRefl (plusMinus' sk sn) $
+       withWitness (plusLeqL sk sn) $
+       mapIdeal injectVars $ 
+       coerce (cong Proxy $ minusCongL (plusComm sk sn) sk `trans` plusMinus sn sk) $
         thEliminationIdeal sk j
 intersection _ = Ideal $ singleton one
 
@@ -433,13 +445,13 @@ saturationByPrincipalIdeal is g =
       remap :: poly -> OrderedPolynomial (Coefficient poly) (MOrder poly) (1 + Arity poly)
       remap = shiftR sOne . injectVars
   in withKnownNat (sOne %:+ n) $
-     gcastWith (plusMinus' sOne n) $ gcastWith (plusComm n sOne) $
-     case (leqStep sOne (sOne %:+ n) n Refl, lneqZero n) of
-        (Witness, Witness) ->
-          mapIdeal injectVars $
-          thEliminationIdeal sOne $
-          addToIdeal (one - (remap g * varX)) $
-          mapIdeal remap is
+     withRefl (plusMinus' sOne n) $ withRefl (plusComm n sOne) $
+     withWitness (leqStep sOne (sOne %:+ n) n Refl) $
+     withWitness (lneqZero n) $
+     mapIdeal injectVars $
+     thEliminationIdeal sOne $
+     addToIdeal (one - (remap g * varX)) $
+     mapIdeal remap is
 
 -- | Saturation ideal
 saturationIdeal :: forall poly l.

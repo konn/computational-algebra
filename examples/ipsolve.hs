@@ -73,8 +73,7 @@ solveIP' c mat b =
       vlen = sSucc m %:+ n
   in withKnownNat (sSucc m) $
      reify (IsOrder_ $ costCmp n c) $ \pxy ->
-     case plusLeqL (sSucc m) n of
-        (Witness) ->
+     withWitness (plusLeqL (sSucc m) n) $
           withKnownNat vlen $
             let ord  = ProductOrder (sSucc m) n Grevlex (toReifiedOrder pxy)
                 !b' = toMonomial n b
@@ -108,9 +107,9 @@ solveCnstrs ipp =
   let sn = sing :: SNat n
       sm = sing :: SNat m
       (obj, mat, vec) = extractProblem $ nfProblem ipp
-  in case plusLeqL sn sm of
-    Witness -> withKnownNat (sn %:+ sm) $
-            V.take (sing :: SNat n) <$> solveIP' obj mat vec
+  in withWitness (plusLeqL sn sm) $
+     withKnownNat (sn %:+ sm) $
+     V.take (sing :: SNat n) <$> solveIP' obj mat vec
 
 extractProblem :: IPProblem n m -> (Vector Int n, Vector (Vector Int n) m, Vector Int m)
 extractProblem (IPProblem obj css) = (obj, V.map (view lhs) css, V.map (view rhs) css)

@@ -35,7 +35,7 @@ library
                      , convertible          >= 1.1
                      , constraints          >= 0.3
                      , deepseq              >= 1.3
-                     , equational-reasoning >= 0.4
+                     , equational-reasoning >= 0.4.1.1
                      , hashable             >= 1.1
                      , heaps                >= 0.3
                      , hmatrix              >= 0.16
@@ -52,7 +52,7 @@ library
                      , tagged               >= 0.7
                      , hybrid-vectors       >= 0.1
                      , text                 >=0.11
-                     , type-natural         == 0.6.*
+                     , type-natural         >= 0.6.1 && < 0.7
                      , unamb                >= 0.2
                      , unordered-containers >= 0.2
                      , vector               >= 0.10
@@ -82,7 +82,7 @@ library
     exposed:           True
     buildable:         True
     other-modules:     Algebra.Algorithms.FGLM Algebra.Field.Galois.Internal Algebra.Field.Galois.Conway
-    ghc-options:      -O2 -Wall -Wno-unused-top-binds
+    ghc-options:      -Odph -Wall -Wno-unused-top-binds
     extensions:       CPP
  
 executable solve

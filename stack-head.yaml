@@ -14,7 +14,12 @@ packages:
 
 - location:
     git: https://github.com/konn/type-natural.git
-    commit: ce013e3a8d0f9e019a55422862bfeed4e9772e71
+    commit: 2320302b0c99567b79d17af689493e68579df1eb
+  extra-dep: true
+
+- location:
+    git: https://github.com/konn/equational-reasoning-in-haskell.git
+    commit: af0457b760efa333da086507381a4af1ea5354e3
   extra-dep: true
 
 flags:
@@ -28,7 +33,7 @@ extra-deps:
 - repa-algorithms-3.4.1.1
 - trifecta-1.6
 - type-natural-0.6.0.0
-- equational-reasoning-0.4.0.0
+- equational-reasoning-0.4.1.0
 - ghc-typelits-presburger-0.1.1.0
 - monomorphic-0.0.3.3
 - singletons-2.2
