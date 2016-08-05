@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 {-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures            #-}
 {-# LANGUAGE ExplicitNamespaces, FlexibleContexts, FlexibleInstances  #-}
 {-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
@@ -14,7 +15,7 @@ module Algebra.Algorithms.ZeroDim (univPoly, radical, isRadical, solveWith,
 import           Algebra.Algorithms.FGLM
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
-import           Algebra.Internal
+import           Algebra.Internal                 hiding (OLt)
 import qualified Algebra.Matrix                   as AM
 import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
@@ -24,35 +25,31 @@ import           Algebra.Wrapped
 
 import           Control.Applicative
 import           Control.Arrow
-import           Control.Lens            hiding ((:<))
+import           Control.Lens          hiding ((:<))
 import           Control.Monad
 import           Control.Monad.Loops
-import           Control.Monad.Random    hiding (next)
+import           Control.Monad.Random  hiding (next)
 import           Control.Monad.Reader
-import           Control.Monad.ST.Strict (runST)
+import           Control.Monad.ST      (runST)
 import           Data.Complex
 import           Data.Convertible
-import           Data.List               hiding (sum)
-import qualified Data.Matrix             as M
+import           Data.List             hiding (sum)
+import qualified Data.Matrix           as M
 import           Data.Maybe
-import           Data.Ord                (comparing)
+import           Data.Ord              (comparing)
 import           Data.Reflection
-import qualified Data.Sized.Builtin      as SV
-import           Data.STRef.Strict       (newSTRef)
+import qualified Data.Sized.Builtin    as SV
+import           Data.STRef.Strict     (newSTRef)
 import           Data.Type.Ordinal
-import qualified Data.Vector             as V
-import qualified Data.Vector.Mutable     as MV
-import           Debug.Trace
-import           Numeric.Algebra         hiding ((/), (<))
-import qualified Numeric.Algebra         as NA
-import qualified Numeric.LinearAlgebra   as LA
-import           Prelude                 hiding (lex, negate, recip, sum, (*),
-                                          (+), (-), (^), (^^))
-import qualified Prelude                 as P
+import qualified Data.Vector           as V
+import qualified Data.Vector.Mutable   as MV
+import           Numeric.Algebra       hiding ((/), (<))
+import qualified Numeric.Algebra       as NA
+import qualified Numeric.LinearAlgebra as LA
+import           Prelude               hiding (lex, negate, recip, sum, (*),
+                                        (+), (-), (^), (^^))
+import qualified Prelude               as P
 -- import qualified Sparse.Matrix                    as Sparse
-
-tr :: Show b => b -> b
-tr = join traceShow
 
 solveM :: forall m r ord n.
           (Normed r, Ord r, MonadRandom m, Field r, CoeffRing r, KnownNat n,
@@ -316,9 +313,8 @@ fglm :: (DecidableZero r, Normed r, Ord r, KnownNat n, Field r,
          IsMonomialOrder n ord, (0 :< n) ~ 'True)
      => Ideal (OrderedPolynomial r ord n)
      -> ([OrderedPolynomial r Lex n], [OrderedPolynomial r Lex n])
-fglm ideal =
-  let (gs, bs) = reifyQuotient ideal $ \pxy -> fglmMap (\f -> vectorRep $ modIdeal' pxy f)
-  in (gs, bs)
+fglm ideal = reifyQuotient ideal $ \pxy ->
+  fglmMap (\f -> vectorRep $ modIdeal' pxy f)
 
 -- | Compute the kernel and image of the given linear map using generalized FGLM algorithm.
 fglmMap :: forall k ord n. (Normed k, Ord k, Field k, (0 :< n) ~ 'True,
@@ -346,7 +342,7 @@ mainLoop = do
   let f = toPolynomial (one, changeMonomialOrderProxy Proxy m)
   lx <- image f
   bs <- mapM image =<< look bLex
-  let mat  = foldr1 (M.<|>) $ map (M.colVector . fmapWrap) bs
+  let mat  = foldr (M.<|>) (M.fromList 0 0 []) $ map (M.colVector . fmapWrap) bs
       cond | null bs   = if V.all (== zero) lx
                          then Just $ V.replicate (length bs) zero
                          else Nothing
@@ -361,9 +357,10 @@ mainLoop = do
       proced .== Just (changeOrder Lex f)
       gLex %== (g :)
 
-toContinue :: ((0 :< n) ~ 'True,
+toContinue :: forall s r o n.
+              ((0 :< n) ~ 'True,
                DecidableZero r, Ord r,
-               KnownNat n, Field r, IsMonomialOrder n o)
+               KnownNat n, Field r)
            => Machine s r o n Bool
 toContinue = do
   mans <- look proced
@@ -373,17 +370,23 @@ toContinue = do
       let xLast = P.maximum allVars `asTypeOf` g
       return $ not $ leadingMonomial g `isPowerOf` leadingMonomial xLast
 
-nextMonomial :: (CoeffRing r, KnownNat n) => Machine s r ord n ()
+nextMonomial :: forall s r ord n.
+                (CoeffRing r, KnownNat n) => Machine s r ord n ()
 nextMonomial = do
   m <- look monomial
   gs <- map leadingMonomial <$> look gLex
-  let next = fst $ maximumBy (comparing snd)
+  let next = fst $ maximumBy (comparing snd) $
              [ (OrderedMonomial monom, ordToInt od)
-             | od <- [0..]
+             | od <- enumOrdinal (sing :: SNat n)
              , let monom = beta (getMonomial m) od
              , all (not . (`divs` OrderedMonomial monom)) gs
              ]
   monomial .== next
 
 beta :: Monomial n -> Ordinal n -> Monomial n
-beta xs n = xs & ix n +~ 1
+beta xs o@(OLt k) =
+  let n = sizedLength xs
+  in withRefl (lneqSuccLeq k n) $
+     withRefl (plusComm (n %:- sSucc k) (sSucc k)) $
+     withRefl (minusPlus n (sSucc k) Witness) $
+     (SV.take (sSucc k) $ xs & ix o +~ 1) SV.++ SV.replicate (n %:- sSucc k) 0
