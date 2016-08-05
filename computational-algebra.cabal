@@ -52,7 +52,7 @@ library
                      , tagged               >= 0.7
                      , hybrid-vectors       >= 0.1
                      , text                 >=0.11
-                     , type-natural         >= 0.6.1 && < 0.7
+                     , type-natural         >= 0.6.1.1 && < 0.7
                      , unamb                >= 0.2
                      , unordered-containers >= 0.2
                      , vector               >= 0.10
@@ -314,7 +314,8 @@ test-suite specs
     buildable: True
     hs-source-dirs: tests share
     other-modules: Utils GroebnerSpec ZeroDimSpec
-                   Faugere5Spec
+                   QuotientSpec PolynomialSpec
+                   -- Faugere5Spec
     ghc-options: -Wall -threaded
 test-suite new-div-test
     build-depends: constraints >=0.3, HUnit -any,
