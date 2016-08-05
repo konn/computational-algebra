@@ -13,6 +13,7 @@ import Algebra.Internal
 import Algebra.Ring.Polynomial.Class
 import Algebra.Scalar
 
+import qualified Prelude as P
 import           Data.Function                (on)
 import           Data.Singletons.Prelude
 import           Data.Singletons.Prelude.Enum (SEnum (..))
@@ -55,6 +56,15 @@ instance (PrettyCoeff (Coefficient poly), IsOrderedPolynomial poly, SingI vars)
         vsVec = generate sing $ \i -> vs !! fromEnum i
     in showsPolynomialWith vsVec d f
 
+instance (UniqueList vars, Arity poly ~ Length vars, P.Num poly)
+      => P.Num (LabPolynomial poly vars) where
+  fromInteger = LabelPolynomial . P.fromInteger
+  LabelPolynomial f + LabelPolynomial g = LabelPolynomial $ f P.+ g
+  LabelPolynomial f * LabelPolynomial g = LabelPolynomial $ f P.* g
+  abs = LabelPolynomial . P.abs . unLabelPolynomial
+  LabelPolynomial f - LabelPolynomial g = LabelPolynomial $ f P.- g
+  negate = LabelPolynomial . P.negate . unLabelPolynomial
+  signum = LabelPolynomial . P.signum . unLabelPolynomial
 
 instance (Wraps vars poly, Additive poly) => Additive (LabPolynomial poly vars) where
   LabelPolynomial f + LabelPolynomial g = LabelPolynomial $ f + g
@@ -224,6 +234,6 @@ canonicalMap' :: (SingI xs, SingI ys, IsSubsetOf xs ys,
                  Wraps xs poly, Wraps ys poly',
                  IsPolynomial poly, IsPolynomial poly',
                  Coefficient poly ~ Coefficient poly')
-              => proxy xs -> proxy ys -> LabPolynomial poly xs -> LabPolynomial poly' ys
+              => proxy poly' -> proxy' ys -> LabPolynomial poly xs -> LabPolynomial poly' ys
 canonicalMap' _ _ = canonicalMap
 {-# INLINE canonicalMap' #-}
