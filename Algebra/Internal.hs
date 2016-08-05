@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeOperators                                                 #-}
 {-# OPTIONS_GHC -fwarn-incomplete-patterns #-}
 module Algebra.Internal
-       (  (:~:)(..), gcastWith,
+       (  (:~:)(..), withRefl,
           module Data.Proxy, WrappedField(..)
        ,  module Algebra.Internal) where
 import           Algebra.Instances            ()
@@ -36,17 +36,18 @@ import           Data.Sized.Builtin           as Algebra.Internal (pattern (:<),
                                                                    zipWithSame)
 import qualified Data.Sized.Builtin           as S
 import qualified Data.Sized.Flipped           as Flipped (Flipped (..))
-import           Data.Type.Equality           ((:~:) (..), gcastWith)
+import           Data.Type.Equality           ((:~:) (..))
 import           Data.Type.Natural.Class      as Algebra.Internal
 import qualified Data.Type.Ordinal            as O
 import qualified Data.Vector                  as DV
 import           GHC.TypeLits                 as Algebra.Internal
-import           Proof.Equational             (coerce)
+import           Proof.Equational             (coerce, withRefl)
 import           Proof.Equational             as Algebra.Internal (because,
                                                                    coerce,
                                                                    start, (===),
                                                                    (=~=))
-import           Proof.Propositional          as Algebra.Internal (IsTrue (..))
+import           Proof.Propositional          as Algebra.Internal (IsTrue (..),
+                                                                   withWitness)
 
 toProxy :: a -> Proxy a
 toProxy _ = Proxy
@@ -84,18 +85,16 @@ padVecs d xs ys
         in (l,
             coerceLength nPLUSk (xs S.++ S.replicate k d),
             coerceLength maxISm ys)
-      SFalse ->
-        case notLeqToLeq n m of
-          Witness ->
-            let maxISn = geqToMax n m Witness
-                mPLUSk :: m :+ (n :- m) :~: Max n m
-                mPLUSk = start (m %:+ (n %:- m))
-                           === n %:- m %:+ m `because` plusComm m (n %:- m)
-                           === n             `because` minusPlus n m Witness
-                           === sMax n m      `because` maxISn
-            in (l,
-                coerceLength maxISn xs,
-                coerceLength mPLUSk $ ys S.++ S.replicate (n %:- m) d)
+      SFalse -> withWitness (notLeqToLeq n m) $
+        let maxISn = geqToMax n m Witness
+            mPLUSk :: m :+ (n :- m) :~: Max n m
+            mPLUSk = start (m %:+ (n %:- m))
+                       === n %:- m %:+ m `because` plusComm m (n %:- m)
+                       === n             `because` minusPlus n m Witness
+                       === sMax n m      `because` maxISn
+        in (l,
+            coerceLength maxISn xs,
+            coerceLength mPLUSk $ ys S.++ S.replicate (n %:- m) d)
 
 type family Flipped a :: Nat -> * where
   Flipped a = Flipped.Flipped DV.Vector a

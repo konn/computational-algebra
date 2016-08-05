@@ -167,8 +167,8 @@ productOrder :: forall ord ord' n m. (IsOrder n ord, IsOrder m ord', KnownNat n,
 productOrder _ mon mon' =
   let n = sing :: SNat n
       m = sing :: SNat m
-  in case plusLeqL n m of
-    Witness -> case (V.splitAt n mon, V.splitAt n mon') of
+  in withWitness (plusLeqL n m) $
+     case (V.splitAt n mon, V.splitAt n mon') of
       ((xs, xs'), (ys, ys')) ->
         cmpMonomial (Proxy :: Proxy ord) xs ys <>
         cmpMonomial (Proxy :: Proxy ord')

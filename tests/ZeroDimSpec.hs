@@ -63,22 +63,23 @@ spec = parallel $ do
         case zeroOrSucc sdim of
           IsZero -> error "impossible"
           IsSucc k ->
-            case (lneqSucc k, lneqZero k) of
-              (Witness, Witness) -> withKnownNat k $
-                forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
-                let base = reifyQuotient (mapIdeal (changeOrder Lex) ideal) $ \ii ->
-                      map quotRepr $ fromJust $ standardMonomials' ii
-                in stdReduced (snd $ fglm ideal) == stdReduced base
+            withWitness (lneqSucc k) $ withWitness (lneqZero k) $
+            withKnownNat k $
+            forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
+            let base =
+                  reifyQuotient (mapIdeal (changeOrder Lex) ideal) $ \ii ->
+                  map quotRepr $ fromJust $ standardMonomials' ii
+            in stdReduced (snd $ fglm ideal) == stdReduced base
     prop "computes lex base" $ do
       checkForArity [2..4] $ \sdim ->
         case zeroOrSucc sdim of
           IsZero -> error "impossible"
           IsSucc k -> withKnownNat k $
-            case (lneqSucc k, lneqZero k) of
-              (Witness, Witness) ->
-                forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
-                stdReduced (fst $ fglm ideal)
-                  == stdReduced (calcGroebnerBasisWith Lex ideal)
+            withWitness (lneqSucc k) $
+            withWitness (lneqZero k) $
+            forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
+            stdReduced (fst $ fglm ideal)
+              == stdReduced (calcGroebnerBasisWith Lex ideal)
     prop "returns lex base in descending order" $
       checkForArity [2..4] $ \sdim ->
       case zeroOrSucc sdim of

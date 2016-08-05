@@ -278,7 +278,9 @@ substUnivariate u f =
 evalUnivariate :: (CoeffRing b, IsMonomialOrder 1 order) => b -> OrderedPolynomial b order 1 -> b
 evalUnivariate u f =
   let n = totalDegree' f
-  in foldr1 (\a b -> a + b * u)  [ coeff (OrderedMonomial $ singleton $ fromIntegral i) f | i <- [0 .. n] ]
+  in if n == 0
+     then coeff one f
+     else foldr1 (\a b -> a + b * u)  [ coeff (OrderedMonomial $ singleton $ fromIntegral i) f | i <- [0 .. n] ]
 
 -- | Evaluate polynomial at some point.
 eval :: (CoeffRing r, IsMonomialOrder n order, KnownNat n)

@@ -75,8 +75,9 @@ matRep0 :: forall r ord ideal n.
         => Proxy ideal -> OrderedMonomial ord n -> M.Matrix r
 matRep0 pxy m =
   let ZeroDimIdeal _ bs table = reflect pxy
-  in foldr1 (M.<|>) [ M.colVector $ vectorRep $ modIdeal' pxy (HM.lookupDefault zero (m, b) table)
-                    | b <- bs  ]
+  in foldr (M.<|>) (M.fromList 0 0 [])
+     [ M.colVector $ vectorRep $ modIdeal' pxy (HM.lookupDefault zero (m, b) table)
+     | b <- bs  ]
 
 multUnamb :: (Reifies ideal (QIdeal r ord n), IsMonomialOrder n ord, CoeffRing r, KnownNat n, Field r)
           => Quotient r ord n ideal -> Quotient r ord n ideal

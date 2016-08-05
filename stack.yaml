@@ -13,7 +13,7 @@ packages:
 
 - location:
     git: https://github.com/konn/type-natural.git
-    commit: 2320302b0c99567b79d17af689493e68579df1eb
+    commit: eec3a2c139245db68c32a22ab2bba4844f694b57
   extra-dep: true
 
 - location:
