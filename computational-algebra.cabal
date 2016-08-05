@@ -103,6 +103,25 @@ executable solve
     buildable: True
     hs-source-dirs: share examples
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
+
+executable strum
+    build-depends: semigroups >= 0.15.2,
+                   constraints >=0.3, algebra >= 4.1,
+                   base >=4, type-natural,
+                   computational-algebra -any, random >= 1.0,
+                   hmatrix, matrix >= 0.3,
+                   sized,
+                   vector >= 0.10, convertible >= 1.1, lens >= 3.9,
+                   MonadRandom >= 0.1
+     
+    if flag(examples)
+        buildable: True
+    else
+        buildable: False
+    main-is: strum.hs
+    buildable: True
+    hs-source-dirs: share examples
+    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
  
 executable ipsolve
     build-depends: semigroups >= 0.15.2,
@@ -172,6 +191,22 @@ executable sandpit-poly
     else
         buildable: False
     main-is: sandpit-poly.hs
+    buildable: True
+    hs-source-dirs: share examples
+
+
+executable quotient
+    build-depends: semigroups >= 0.15.2,
+                   constraints >=0.3, computational-algebra -any,
+                   base >=4, type-natural, algebra,
+                   sized,
+                   reflection
+     
+    if flag(examples)
+        buildable: True
+    else
+        buildable: False
+    main-is: quotient.hs
     buildable: True
     hs-source-dirs: share examples
  

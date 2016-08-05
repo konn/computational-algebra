@@ -1,29 +1,25 @@
-{-# LANGUAGE DataKinds, NoImplicitPrelude, NoMonomorphismRestriction #-}
-{-# LANGUAGE OverlappingInstances, PolyKinds                         #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, NoImplicitPrelude #-}
+{-# LANGUAGE NoMonomorphismRestriction, PolyKinds           #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Main (module Algebra.Algorithms.Groebner, module Algebra.Ring.Polynomial
             , module Numeric.Field.Fraction, module Main, module Algebra.Internal
             ) where
-import           Algebra.Algorithms.Groebner
-import           Algebra.Internal
-import           Algebra.Ring.Ideal
-import           Algebra.Ring.Polynomial
-import           Algebra.Ring.Polynomial.Quotient
-import           Algebra.Scalar
-import           Control.Arrow
-import           Data.Reflection
-import           Data.Type.Natural
-import           Numeric.Additive.Group
-import           Numeric.Algebra                  hiding ((/))
-import           Numeric.Field.Fraction
-import           Prelude                          hiding (Num (..), Real (..),
-                                                   (/), (^), (^^))
-import qualified Prelude                          as P
+import Algebra.Algorithms.Groebner
+import Algebra.Internal
+import Algebra.Ring.Ideal
+import Algebra.Ring.Polynomial
+import Algebra.Ring.Polynomial.Quotient
+import Algebra.Scalar
+import Numeric.Additive.Group
+import Numeric.Algebra                  hiding ((/))
+import Numeric.Field.Fraction
+import Prelude                          hiding (Num (..), Real (..), (/), (^),
+                                         (^^))
 
 default (Integer)
 
-x, y :: Polynomial (Fraction Integer) Two
-[x, y] = genVars sTwo
+x, y :: Polynomial (Fraction Integer) 2
+[x, y] = vars
 
 (^^) :: Unital r => r -> Natural -> r
 (^^) = pow

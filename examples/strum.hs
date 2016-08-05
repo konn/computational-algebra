@@ -1,26 +1,52 @@
-{-# LANGUAGE BangPatterns, FlexibleInstances, MultiParamTypeClasses #-}
-{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction           #-}
+{-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, FlexibleInstances #-}
+{-# LANGUAGE GADTs, MultiParamTypeClasses, NoImplicitPrelude              #-}
+{-# LANGUAGE NoMonomorphismRestriction                                    #-}
 module Main where
 import           Algebra.Algorithms.Groebner
-import           Algebra.Prelude             hiding (normalize)
-import           Control.Arrow               ((***))
-import           Data.Singletons             (SingI)
-import           Data.Type.Natural           (One)
-import           Data.Type.Ordinal           (Ordinal (..))
-import           Data.Vector.Sized           (Vector (..))
-import           GHC.Num                     (Num)
-import           Numeric.Decidable.Zero      (isZero)
-import qualified Numeric.Field.Fraction      as F
-import           Numeric.Semiring.Integral   (IntegralSemiring)
-import           Prelude                     (Show (..), abs, filter)
-import qualified Prelude                     as P
+import           Algebra.Prelude                   hiding (normalize)
+import           Algebra.Ring.Polynomial.Factorize
+import           Control.Arrow                     ((***))
+import           Control.Monad.Random              (StdGen, newStdGen, next)
+import           Control.Monad.Random              (random)
+import           Control.Monad.Random              (Random)
+import           Control.Monad.Random              (split)
+import           Control.Monad.Random              (evalRand)
+import           Control.Monad.Random              (Rand)
+import           Data.IORef                        (IORef, atomicModifyIORef')
+import           Data.IORef                        (newIORef)
+import           Data.Tuple                        (swap)
+import           Data.Type.Ordinal                 (Ordinal (..))
+import           GHC.Num                           (Num)
+import           Numeric.Decidable.Zero            (isZero)
+import qualified Numeric.Field.Fraction            as F
+import           Numeric.Semiring.Integral         (IntegralSemiring)
+import           Prelude                           (abs)
+import qualified Prelude                           as P
+import           System.IO.Unsafe                  (unsafePerformIO)
+
+randSrc :: IORef StdGen
+randSrc = unsafePerformIO $ newIORef =<< newStdGen
+{-# NOINLINE randSrc #-}
+
+getRand :: Random a => IO a
+getRand = atomicModifyIORef' randSrc (swap . random)
+{-# INLINE getRand #-}
+
+splitSrc :: IO StdGen
+splitSrc = atomicModifyIORef' randSrc (swap . split)
+{-# INLINE splitSrc #-}
+
+doRand :: Rand StdGen b -> IO b
+doRand act = do
+  g <- splitSrc
+  return $ evalRand act g
 
 -- Invariants:
 --   (1) eqn is square-free and does not have x as a factor
 --   (2) strumseq is the standard strum sequence of eqn
 --   (3) interval contains exactly one root of eqn
-data Algebraic = Algebraic { eqn      :: Polynomial Rational One
-                           , strumseq :: [Polynomial Rational One]
+data Algebraic = Algebraic { eqn      :: Polynomial Rational 1
+                           , strumseq :: [Polynomial Rational 1]
                            , interval :: Interval Rational
                            }
                | Rational !Rational
@@ -123,16 +149,17 @@ Interval i j `includes` Interval i' j' = i <= i' && j' <= j
 plusInt :: Group r => Interval r -> Interval r -> Interval r
 plusInt (Interval l u) (Interval l' u') = Interval (l + l') (u + u')
 
-rootSumPoly :: Polynomial Rational One -> Polynomial Rational One -> Polynomial Rational One
-rootSumPoly f g = normalize $ presultant (liftP f) (substWith (.*.) (injectCoeff varX - varX :- Nil) $ liftP g)
+rootSumPoly :: Polynomial Rational 1 -> Polynomial Rational 1 -> Polynomial Rational 1
+rootSumPoly f g =
+  normalize $ presultant (liftP f) $
+  substWith (.*.) (singleton $ injectCoeff varX - varX) $ liftP g
   where
-    liftP :: Polynomial Rational One -> Polynomial (Polynomial Rational One) One
+    liftP :: Polynomial Rational 1 -> Polynomial (Polynomial Rational 1) 1
     liftP = mapCoeff injectCoeff
 
-sqFreePart :: (DecidableUnits r, Eq r, Domain r, DecidableZero r, Division r, Commutative r, IsMonomialOrder order)
-           => OrderedPolynomial r order One -> OrderedPolynomial r order One
-sqFreePart f = snd $ head $ f `divPolynomial` [gcd f (diff OZ f)]
-
+sqFreePart :: (DecidableUnits r, Eq r, Domain r, DecidableZero r, Division r, Commutative r, IsMonomialOrder 1 order)
+           => OrderedPolynomial r order 1 -> OrderedPolynomial r order 1
+sqFreePart f = snd $ head $ f `divPolynomial` [gcd f (diff 0 f)]
 
 plusA :: Algebraic -> Algebraic -> Algebraic
 plusA (Rational r) (Rational q) = Rational (r + q)
@@ -151,18 +178,18 @@ plusA a@(Algebraic f sf i0) b@(Algebraic g sg j0)
 normA :: Algebraic -> Algebraic
 normA (Rational a) = Rational a
 normA (Algebraic f sf i)
-  | substWith (*) (zero :- Nil) f == zero && zero `isIn` i = Rational zero
+  | evalUnivariate zero f == zero && zero `isIn` i = Rational zero
   | totalDegree' f == 1 = Rational $ negate $ coeff one f / leadingCoeff f
   | otherwise = Algebraic (shiftP f) sf i
 
 isIn :: Ord a => a -> Interval a -> Bool
 x `isIn` Interval i j = i < x && x <= j
 
-algebraic :: Polynomial Rational One -> Interval Rational -> Algebraic
+algebraic :: Polynomial Rational 1 -> Interval Rational -> Algebraic
 algebraic f i = Algebraic f (strum f) i
 
 catcher :: (Interval Rational -> Interval Rational -> Interval Rational)
-        -> OrderedPolynomial Rational Grevlex One -> Algebraic -> Algebraic -> Interval Rational
+        -> OrderedPolynomial Rational Grevlex 1 -> Algebraic -> Algebraic -> Interval Rational
 catcher app h (Algebraic _ sf i0) (Algebraic _ sg j0) =
   let lens = map size $ isolateRoots h
       (i', j') = until (\(i,j) -> all (size (app i j) <) lens)
@@ -171,12 +198,12 @@ catcher app h (Algebraic _ sf i0) (Algebraic _ sg j0) =
   in i' `app` j'
 catcher _ _ _ _ = error "rational is impossible"
 
-normalize :: (Eq r, Ring r, DecidableZero r, DecidableUnits r, Division r, Commutative r, IntegralSemiring r, IsMonomialOrder order) => OrderedPolynomial r order One -> OrderedPolynomial r order One
+normalize :: (Eq r, Ring r, DecidableZero r, DecidableUnits r, Division r, Commutative r, IntegralSemiring r, IsMonomialOrder 1 order) => OrderedPolynomial r order 1 -> OrderedPolynomial r order 1
 normalize = monoize . sqFreePart
 
 shiftP :: (Domain r, Division r, Eq r, Commutative r, DecidableUnits r,
-           DecidableZero r, IsMonomialOrder order)
-       => OrderedPolynomial r order One -> OrderedPolynomial r order One
+           DecidableZero r, IsMonomialOrder 1 order)
+       => OrderedPolynomial r order 1 -> OrderedPolynomial r order 1
 shiftP f | isZero (coeff one f) = f `quot` varX
          | otherwise = f
 
@@ -189,15 +216,15 @@ stabilize ar@(Algebraic f ss int)
         uh = Interval 0 (upper int)
     in Algebraic f ss $ if countChangeIn lh ss == 0 then uh else lh
 
-rootMultPoly :: Polynomial Rational One -> Polynomial Rational One -> Polynomial Rational One
+rootMultPoly :: Polynomial Rational 1 -> Polynomial Rational 1 -> Polynomial Rational 1
 rootMultPoly f g =
   let ts@((_, lm):_) = getTerms g
       d = totalDegree lm
       g' = sum $  map (\(k, m) -> toPolynomial (injectCoeff k * varX^(P.fromIntegral $ totalDegree m),
-                                                (OrderedMonomial $ d - totalDegree m :- Nil)) ) ts
+                                                (OrderedMonomial $ singleton $ d - totalDegree m)) ) ts
   in normalize $ presultant (liftP f) g'
   where
-    liftP :: Polynomial Rational One -> Polynomial (Polynomial Rational One) One
+    liftP :: Polynomial Rational 1 -> Polynomial (Polynomial Rational 1) 1
     liftP = mapCoeff injectCoeff
 
 multInt :: (Num a, Ord a, Multiplicative a) => Interval a -> Interval a -> Interval a
@@ -233,29 +260,21 @@ recipA a =
   let fi = rootRecipPoly (eqn a)
       sf = strum fi
       i0 = improveNonzero a
-      lens = map size $ isolateRoots fi
-      i'    = until (\i -> any (> size (recipInt i)) lens) (improveWith sf) i0
+      ls = map size $ isolateRoots fi
+      i' = until (\i -> any (> size (recipInt i)) ls) (improveWith sf) i0
   in Algebraic fi (strum fi) $ recipInt i'
 
-rootRecipPoly :: Polynomial Rational One -> Polynomial Rational One
+rootRecipPoly :: Polynomial Rational 1 -> Polynomial Rational 1
 rootRecipPoly f =
   let ts@((_, lm):_) = getTerms f
       d = totalDegree lm
-      f' = sum $  map (\(k, m) -> toPolynomial (k, OrderedMonomial $ d - totalDegree m :- Nil) ) ts
+      f' = sum $  map (\(k, m) -> toPolynomial (k, OrderedMonomial $ singleton $ d - totalDegree m) ) ts
   in normalize f'
 
-monoize :: (Ring r, DecidableZero r, Division r, SingI n, IsOrder order)
-        => OrderedPolynomial r order n -> OrderedPolynomial r order n
-monoize f =
-  let lc = leadingCoeff f
-  in if isZero lc
-     then zero
-     else recip lc .*. f
-
-strum :: Polynomial Rational One -> [Polynomial Rational One]
+strum :: Polynomial Rational 1 -> [Polynomial Rational 1]
 strum f = zipWith (*) (cycle [1,1,-1,-1]) $
           map (\(p,_,_) -> p * injectCoeff (recip $ abs (leadingCoeff p))) $
-          reverse $ prs f (diff OZ f)
+          reverse $ prs f (diff 0 f)
 
 
 data Interval r = Interval { lower :: !r, upper :: !r } deriving (Eq, Ord)
@@ -276,26 +295,26 @@ signChange xs =
   let nzs = filter (not . isZero) xs
   in length $ filter (< zero) $ zipWith (*) nzs (tail nzs)
 
-countRootsIn :: Polynomial Rational One -> Interval Rational -> Int
+countRootsIn :: Polynomial Rational 1 -> Interval Rational -> Int
 countRootsIn f ints = countChangeIn ints (strum f)
 
-countChangeIn :: (Ord a, Ring a, DecidableZero a)
-                 => Interval a -> [OrderedPolynomial a order One] -> Int
+countChangeIn :: (Ord a, CoeffRing a, IsMonomialOrder 1 order)
+                 => Interval a -> [OrderedPolynomial a order 1] -> Int
 countChangeIn ints ss =
   signChangeAt (lower ints) ss - signChangeAt (upper ints) ss
 
-signChangeAt :: (Ord a, Ring a, DecidableZero a) => a -> [OrderedPolynomial a order One] -> Int
-signChangeAt a fs = signChange $ map (substWith (*) (a :- Nil)) fs
+signChangeAt :: (Ord a, CoeffRing a, IsMonomialOrder 1 order) => a -> [OrderedPolynomial a order 1] -> Int
+signChangeAt a fs = signChange $ map (eval $ singleton a) fs
 
-rootBound :: (IsMonomialOrder ord, Num r, Ord r, Ring r, Division r)
-          => OrderedPolynomial r ord One -> r
+rootBound :: (IsMonomialOrder 1 ord, Num r, Ord r, CoeffRing r, Division r)
+          => OrderedPolynomial r ord 1 -> r
 rootBound f
   | totalDegree' f == 0 = 0
   | otherwise =
     let a:as = map fst $ getTerms f
     in 1 + maximum (map (abs . (/ a)) as)
 
-isolateRoots :: Polynomial Rational One -> [Interval Rational]
+isolateRoots :: Polynomial Rational 1 -> [Interval Rational]
 isolateRoots f =
   let bd = rootBound f * 2
   in go (Interval (- bd) bd)
@@ -314,8 +333,9 @@ improve :: Algebraic -> Algebraic
 improve (Algebraic f ss int) = Algebraic f ss $ improveWith ss int
 improve a = a
 
-improveWith :: (Ord a, Ring a, DecidableZero a, Division a)
-            => [OrderedPolynomial a order One] -> Interval a -> Interval a
+improveWith :: (Ord a, IsMonomialOrder 1 order,
+                CoeffRing a, DecidableZero a, Division a)
+            => [OrderedPolynomial a order 1] -> Interval a -> Interval a
 improveWith ss int =
   let (ls, us) = bisect int
   in if countChangeIn ls ss == 0 then us else ls
@@ -323,7 +343,7 @@ improveWith ss int =
 (%%) :: Euclidean d => d -> d -> Fraction d
 (%%) = (F.%)
 
-iterateImprove :: Rational -> Polynomial Rational One -> Interval Rational -> Interval Rational
+iterateImprove :: Rational -> Polynomial Rational 1 -> Interval Rational -> Interval Rational
 iterateImprove eps f int0 =
   let ss = strum f
   in until (\int -> size int < eps) (improveWith ss) int0
@@ -334,7 +354,8 @@ fromFraction q = P.fromInteger (numerator q) P./ P.fromInteger (denominator q)
 sample :: (Num r, Division r, Additive r) => Interval r -> r
 sample (Interval l r) = (l+r)/2
 
-presultant :: (Euclidean k, IsOrder ord) => OrderedPolynomial k ord One -> OrderedPolynomial k ord One -> k
+presultant :: (Euclidean k, CoeffRing k, IsMonomialOrder 1 ord)
+           => OrderedPolynomial k ord 1 -> OrderedPolynomial k ord 1 -> k
 presultant = go one one
   where
     go !res !acc h s
@@ -342,9 +363,12 @@ presultant = go one one
           let (_, r)    = h `pDivModPoly` s
               res' = res * pow (negate one)
                            (P.fromIntegral $ totalDegree' h * totalDegree' s :: Natural)
-                     * pow1p (leadingCoeff s) (P.fromIntegral $ totalDegree' h - totalDegree' r - 1 :: Natural)
-              adj = pow (leadingCoeff s) (P.fromIntegral $ totalDegree' h - totalDegree' s + 1 :: Natural)
+                     * pow1p (leadingCoeff s) (P.fromIntegral $ totalDegree' h P.- totalDegree' r P.- 1 :: Natural)
+              adj = pow (leadingCoeff s) (P.fromIntegral $ totalDegree' h P.- totalDegree' s + 1 :: Natural)
           in go res' (acc * adj) s r
         | isZero h || isZero s = zero
         | totalDegree' h > 0     = pow (leadingCoeff s) (P.fromIntegral $ totalDegree' h :: Natural) * res `quot` acc
         | otherwise              = res `quot` acc
+
+main :: IO ()
+main = return ()
