@@ -8,7 +8,9 @@
 module Algebra.Ring.Polynomial.Class ( IsPolynomial(..), IsOrderedPolynomial(..)
                                      , CoeffRing, oneNorm, maxNorm, monoize,
                                        sPolynomial, pDivModPoly, content, pp,
-                                       injectVars, vars
+                                       injectVars, vars,
+                                       PrettyCoeff(..), ShowSCoeff(..),
+                                       showsCoeffAsTerm, showsCoeffWithOp
                                      ) where
 import Algebra.Internal
 import Algebra.Ring.Polynomial.Monomial
@@ -20,19 +22,23 @@ import           Control.Lens             (folded, maximumOf)
 import           Data.Foldable            (foldr, maximum)
 import qualified Data.Foldable            as F
 import qualified Data.HashSet             as HS
+import           Data.Int
 import qualified Data.Map.Strict          as M
 import qualified Data.Set                 as S
 import           Data.Singletons.Prelude  (SingKind (..))
 import qualified Data.Sized.Builtin       as V
 import           Data.Type.Ordinal        (Ordinal, enumOrdinal, inclusion)
+import           Data.Word
 import           GHC.TypeLits             (KnownNat, Nat)
 import           Numeric.Algebra          (Additive (..), Commutative)
 import           Numeric.Algebra          (Division (..), Field, Group (..))
 import           Numeric.Algebra          (LeftModule (..), Module)
 import           Numeric.Algebra          (Monoidal (..), Multiplicative (..))
 import           Numeric.Algebra          (Ring (fromInteger), Unital (..), sum)
+import qualified Numeric.Algebra.Complex  as NA
 import           Numeric.Decidable.Zero   (DecidableZero (..))
 import           Numeric.Domain.Euclidean (Euclidean, gcd, quot)
+import           Numeric.Field.Fraction   (Fraction)
 import           Numeric.Natural          (Natural)
 import           Prelude                  (Eq (..), Int, Maybe (..), flip, fmap)
 import           Prelude                  (fromIntegral, fst, map, maybe, not)
@@ -310,3 +316,90 @@ injectVars = liftMap (var . inclusion)
 
 vars :: forall poly. IsPolynomial poly => [poly]
 vars = map var $ enumOrdinal (sArity (Nothing :: Maybe poly))
+
+-- | Coefficients which admits pretty-printing
+class (P.Show r) => PrettyCoeff r where
+  showsCoeff :: Int -> r -> ShowSCoeff
+  showsCoeff d a = Positive (P.showsPrec d a)
+
+defaultShowsOrdCoeff :: (P.Show r, Group r, P.Ord r)
+                     => Int -> r -> ShowSCoeff
+defaultShowsOrdCoeff d r
+  | r P.<  zero = Negative (P.showsPrec d (negate r))
+  | r P.== zero = Vanished
+  | otherwise   = Positive (P.showsPrec d r)
+
+instance PrettyCoeff P.Integer where
+  showsCoeff = defaultShowsOrdCoeff
+
+instance PrettyCoeff Natural where
+  showsCoeff d r
+    | r == 0    = Vanished
+    | otherwise = Positive (P.showsPrec d r)
+
+instance PrettyCoeff P.Int where
+  showsCoeff = defaultShowsOrdCoeff
+
+instance PrettyCoeff Int64 where
+  showsCoeff = defaultShowsOrdCoeff
+instance PrettyCoeff Int16 where
+  showsCoeff = defaultShowsOrdCoeff
+instance PrettyCoeff Int32 where
+  showsCoeff = defaultShowsOrdCoeff
+instance PrettyCoeff Int8 where
+  showsCoeff = defaultShowsOrdCoeff
+
+instance PrettyCoeff Word64 where
+  showsCoeff = defaultShowsOrdCoeff
+
+instance PrettyCoeff Word16 where
+  showsCoeff = defaultShowsOrdCoeff
+
+instance PrettyCoeff Word32 where
+  showsCoeff = defaultShowsOrdCoeff
+
+instance PrettyCoeff Word8 where
+  showsCoeff = defaultShowsOrdCoeff
+
+instance (PrettyCoeff r) => PrettyCoeff (NA.Complex r) where
+  showsCoeff d (NA.Complex r i) =
+    case (showsCoeff 10 r, showsCoeff 10 i) of
+      (Vanished, Vanished)     -> Vanished
+      (Vanished, Positive s)   -> Positive (s . P.showString " I")
+      (Vanished, Negative s)   -> Negative (s . P.showString " I")
+      (Positive s, Vanished)   -> Positive s
+      (Negative s, Vanished)   -> Negative s
+      (s, t) ->
+        Positive $ P.showParen (d P.> 10) $
+        showsCoeffAsTerm s . showsCoeffWithOp t
+
+instance {-# OVERLAPPING #-} PrettyCoeff (Fraction P.Integer) where
+  showsCoeff = defaultShowsOrdCoeff
+
+-- | Pretty-printing conditional for coefficients.
+--   Each returning @'P.ShowS'@ must not have any sign.
+data ShowSCoeff = Negative P.ShowS | Vanished | Positive P.ShowS
+
+-- | ShowS coefficients as term.
+--
+-- @
+-- showsCoeffAsTerm 'Vanished' "" = ""
+-- showsCoeffAsTerm ('Negative' (shows "12")) "" = "-12"
+-- showsCoeffAsTerm ('Positive' (shows "12")) "" = "12"
+-- @
+showsCoeffAsTerm :: ShowSCoeff -> P.ShowS
+showsCoeffAsTerm Vanished     = P.id
+showsCoeffAsTerm (Negative s) = P.showChar '-' . s
+showsCoeffAsTerm (Positive s) = s
+
+-- | ShowS coefficients prefixed with infix operator.
+--
+-- @
+-- (shows 12 . showsCoeffWithOp 'Vanished') "" = "12"
+-- (shows 12 . showsCoeffWithOp ('Negative' (shows 34))) "" = "12 - 34"
+-- (shows 12 . showsCoeffWithOp ('Positive' (shows 34))) "" = "12 + 34"
+-- @
+showsCoeffWithOp :: ShowSCoeff -> P.ShowS
+showsCoeffWithOp Vanished = P.id
+showsCoeffWithOp (Negative s) = P.showString " - " . s
+showsCoeffWithOp (Positive s) = P.showString " + " . s
