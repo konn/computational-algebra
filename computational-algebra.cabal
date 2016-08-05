@@ -82,7 +82,7 @@ library
     exposed:           True
     buildable:         True
     other-modules:     Algebra.Algorithms.FGLM Algebra.Field.Galois.Internal Algebra.Field.Galois.Conway
-    ghc-options:      -Odph -with-rtsopts="-qa"- -Wall -Wno-unused-top-binds
+    ghc-options:      -Odph -Wall -Wno-unused-top-binds
     extensions:       CPP
  
 executable solve
