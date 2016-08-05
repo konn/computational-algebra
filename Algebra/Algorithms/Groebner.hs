@@ -29,6 +29,8 @@ module Algebra.Algorithms.Groebner
        ) where
 import           Algebra.Internal
 import           Algebra.Ring.Ideal
+import qualified Data.Map as M
+import Control.Lens (_Wrapped, (&),  (%~))
 import           Algebra.Ring.Polynomial
 import           Control.Applicative
 import           Control.Monad
@@ -348,12 +350,11 @@ thEliminationIdealWith :: ( IsOrderedPolynomial poly,
                             m ~ Arity poly,
                             k ~ Coefficient poly, Field k,
                             KnownNat (m :-. n), (n :<= m) ~ 'True,
-                            EliminationType m n ord,
-                            IsMonomialOrder (m :-. n) ord)
+                            EliminationType m n ord)
                    => ord
                    -> SNat n
                    -> Ideal poly
-                   -> Ideal (OrderedPolynomial k ord (m :-. n))
+                   -> Ideal (OrderedPolynomial k Grevlex (m :-. n))
 thEliminationIdealWith = unsafeThEliminationIdealWith
 
 -- | Calculate n-th elimination ideal using the specified n-th elimination type order.
@@ -364,14 +365,13 @@ unsafeThEliminationIdealWith :: ( IsOrderedPolynomial poly,
                                   k ~ Coefficient poly,
                                   Field k,
                                   IsMonomialOrder m ord,
-                                  KnownNat (m :-. n), (n :<= m) ~ 'True,
-                                  IsMonomialOrder (m :-. n) ord)
+                                  KnownNat (m :-. n), (n :<= m) ~ 'True)
                              => ord
                              -> SNat n
                              -> Ideal poly
-                             -> Ideal (OrderedPolynomial k ord (m :-. n))
+                             -> Ideal (OrderedPolynomial k Grevlex (m :-. n))
 unsafeThEliminationIdealWith ord n ideal =
-  withKnownNat n $ toIdeal $ [ transformMonomial (V.drop n) f
+  withKnownNat n $ toIdeal $ [ f & _Wrapped %~ M.mapKeys (orderMonomial Nothing . V.drop n . getMonomial)
                              | f <- calcGroebnerBasisWith ord ideal
                              , all (all (== 0) . V.takeAtMost n . getMonomial . snd) $ getTerms f
                              ]
