@@ -3,7 +3,7 @@ packages:
 - '.'
 - location:
     git: https://github.com/konn/sized.git
-    commit: c019a9589f90470b2d219dc0bd40c536dfc2afb4
+    commit: 0b17f9fd9c80acb0387100bcf3afd57eed7c519f
   extra-dep: true
 
 - location:
@@ -16,6 +16,9 @@ packages:
     commit: ce013e3a8d0f9e019a55422862bfeed4e9772e71
   extra-dep: true
 
+flags:
+  computational-algebra:
+    examples: true
 
 extra-deps:
 - control-monad-loop-0.1

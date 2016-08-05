@@ -4,7 +4,7 @@ packages:
 - '.'
 - location:
     git: https://github.com/konn/sized.git
-    commit: c019a9589f90470b2d219dc0bd40c536dfc2afb4
+    commit: 0b17f9fd9c80acb0387100bcf3afd57eed7c519f
   extra-dep: true
 
 - location:
