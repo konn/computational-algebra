@@ -13,6 +13,7 @@ import qualified Data.Ratio               as P
 import qualified Data.Vector              as DV
 import           Numeric.Algebra
 import qualified Numeric.Algebra          as NA
+import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
 import           Numeric.Domain.Euclidean (Euclidean, splitUnit)
 import           Numeric.Field.Fraction
@@ -92,6 +93,65 @@ instance Ring Double where
 instance DecidableZero Double where
   isZero 0 = True
   isZero _ = False
+
+instance P.Integral r => Additive (P.Ratio r) where
+  (+) = (P.+)
+
+instance P.Integral r => Abelian (P.Ratio r)
+
+instance P.Integral r => LeftModule Natural (P.Ratio r) where
+  n .* r = fromIntegral n P.* r
+
+instance P.Integral r => RightModule Natural (P.Ratio r) where
+  r *. n = r P.* fromIntegral n
+
+instance P.Integral r => LeftModule Integer (P.Ratio r) where
+  n .* r = P.fromInteger n P.* r
+
+instance P.Integral r => RightModule Integer (P.Ratio r) where
+  r *. n = r P.* P.fromInteger n
+
+instance P.Integral r => Group (P.Ratio r) where
+  (-)    = (P.-)
+  negate = P.negate
+  subtract = P.subtract
+  times n r = P.fromIntegral n P.* r
+
+instance P.Integral r => Multiplicative (P.Ratio r) where
+  (*) = (P.*)
+
+instance P.Integral r => Unital (P.Ratio r) where
+  one = 1
+
+instance P.Integral r => Division (P.Ratio r) where
+  (/) = (P./)
+  recip = P.recip
+
+instance P.Integral r => Monoidal (P.Ratio r) where
+  zero = 0
+
+instance P.Integral r => Semiring (P.Ratio r)
+
+instance P.Integral r => Rig (P.Ratio r) where
+  fromNatural = P.fromIntegral
+
+instance P.Integral r => Ring (P.Ratio r) where
+  fromInteger = P.fromInteger
+
+instance P.Integral r => DecidableZero (P.Ratio r) where
+  isZero 0 = True
+  isZero _ = False
+
+instance P.Integral r => DecidableUnits (P.Ratio r) where
+  isUnit 0 = False
+  isUnit _ = True
+  recipUnit 0 = Nothing
+  recipUnit n = Just (P.recip n)
+  r ^? n
+    | r == 0 = Just 1
+    | r /= 0 = Just (r P.^^ n)
+    | r == 0 && n P.> 0 = Just 0
+    | otherwise = Nothing
 
 instance Euclidean d => Fractional (Fraction d) where
   fromRational r = fromInteger (P.numerator r) % fromInteger (P.denominator r)
