@@ -32,8 +32,8 @@ idealProgram :: forall ord n. (SingularOrder ord, KnownNat n)
              -> String
 idealProgram fun ideal =
   withStrongMonomialOrder (Proxy :: Proxy ord) (sing :: SNat n) $
-  let vars = [(i, "x(" ++ show i ++ ")") | i <- [0.. sNatToInt (sing :: SNat n) - 1]]
-      istr = intercalate ", " $ map (showPolynomialWith True vars showRational) $ generators ideal
+  let vars = generate sing $ \i -> "x(" ++ show (fromEnum i) ++ ")"
+      istr = intercalate ", " $ map (showPolynomialWith vars 5) $ generators ideal
   in (++";") $ intercalate ";\n"
 
      [ "LIB \"primdec.lib\""
