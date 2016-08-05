@@ -29,6 +29,7 @@ import Algebra.Ring.Polynomial.Monomial
 import Algebra.Scalar
 
 import           Control.Arrow
+import           Control.DeepSeq           (NFData)
 import           Control.Lens              hiding (assign)
 import qualified Data.Foldable             as F
 import           Data.Function
@@ -63,6 +64,7 @@ deriving instance (CoeffRing r, IsOrder n ord, Ord r) => Ord (OrderedPolynomial 
 
 -- | n-ary polynomial ring over some noetherian ring R.
 newtype OrderedPolynomial r order n = Polynomial { _terms :: Map (OrderedMonomial order n) r }
+                                    deriving (NFData)
 type Polynomial r = OrderedPolynomial r Grevlex
 
 instance (KnownNat n, IsMonomialOrder n ord, CoeffRing r) => IsPolynomial (OrderedPolynomial r ord n) where
@@ -99,6 +101,8 @@ instance (KnownNat n, IsMonomialOrder n ord, CoeffRing r) => IsPolynomial (Order
       extractPower =
         P.foldr (*) one . zipWithSame (\ o r -> pow  (mor o) (fromIntegral r)) ordVec . getMonomial
   {-# INLINE liftMap #-}
+
+
 
 
 ordVec :: forall n. KnownNat n => Vector (Ordinal n) n
