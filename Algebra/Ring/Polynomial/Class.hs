@@ -43,6 +43,7 @@ import qualified Numeric.Algebra.Complex  as NA
 import           Numeric.Decidable.Zero   (DecidableZero (..))
 import           Numeric.Domain.Euclidean (Euclidean, gcd, quot)
 import           Numeric.Field.Fraction   (Fraction)
+import qualified Numeric.Field.Fraction   as NA
 import           Numeric.Natural          (Natural)
 import           Prelude                  (Eq (..), Int, Maybe (..), flip, fmap)
 import           Prelude                  (fromIntegral, fst, map, maybe, not)
@@ -326,11 +327,12 @@ class (P.Show r) => PrettyCoeff r where
   showsCoeff :: Int -> r -> ShowSCoeff
   showsCoeff d a = Positive (P.showsPrec d a)
 
-defaultShowsOrdCoeff :: (P.Show r, Group r, P.Ord r)
+defaultShowsOrdCoeff :: (P.Show r, Unital r, Group r, P.Ord r)
                      => Int -> r -> ShowSCoeff
 defaultShowsOrdCoeff d r
   | r P.<  zero = Negative (P.showsPrec d (negate r))
   | r P.== zero = Vanished
+  | r P.== one  = OneCoeff
   | otherwise   = Positive (P.showsPrec d r)
 
 instance PrettyCoeff P.Integer where
@@ -365,8 +367,11 @@ instance PrettyCoeff Word32 where
 instance PrettyCoeff Word8 where
   showsCoeff = defaultShowsOrdCoeff
 
-instance (P.Integral a, P.Show a) => PrettyCoeff (R.Ratio a) where
-  showsCoeff = defaultShowsOrdCoeff
+instance (P.Integral a, PrettyCoeff a) => PrettyCoeff (R.Ratio a) where
+  showsCoeff d r =
+    if R.denominator r == 1
+    then showsCoeff 10 (R.numerator r)
+    else defaultShowsOrdCoeff d r
 
 instance (PrettyCoeff r) => PrettyCoeff (NA.Complex r) where
   showsCoeff d (NA.Complex r i) =
@@ -381,16 +386,21 @@ instance (PrettyCoeff r) => PrettyCoeff (NA.Complex r) where
         showsCoeffAsTerm s . showsCoeffWithOp t
 
 instance {-# OVERLAPPING #-} PrettyCoeff (Fraction P.Integer) where
-  showsCoeff = defaultShowsOrdCoeff
-
-instance {-# OVERLAPPING #-} PrettyCoeff (Fraction P.Int)
+  showsCoeff d r =
+      if NA.denominator r == one
+      then showsCoeff d (NA.numerator r)
+      else defaultShowsOrdCoeff d r
 
 instance {-# OVERLAPS #-}
-  (P.Show r, Eq r, Euclidean r) => PrettyCoeff (Fraction r)
+  (PrettyCoeff r, Eq r, Euclidean r) => PrettyCoeff (Fraction r) where
+    showsCoeff d r =
+      if NA.denominator r == one
+      then showsCoeff d (NA.numerator r)
+      else Positive (P.showsPrec d r)
 
 -- | Pretty-printing conditional for coefficients.
 --   Each returning @'P.ShowS'@ must not have any sign.
-data ShowSCoeff = Negative P.ShowS | Vanished | Positive P.ShowS
+data ShowSCoeff = Negative P.ShowS | Vanished | OneCoeff | Positive P.ShowS
 
 -- | ShowS coefficients as term.
 --
@@ -402,6 +412,7 @@ data ShowSCoeff = Negative P.ShowS | Vanished | Positive P.ShowS
 showsCoeffAsTerm :: ShowSCoeff -> P.ShowS
 showsCoeffAsTerm Vanished     = P.id
 showsCoeffAsTerm (Negative s) = P.showChar '-' . s
+showsCoeffAsTerm OneCoeff     = P.showChar '1'
 showsCoeffAsTerm (Positive s) = s
 
 -- | ShowS coefficients prefixed with infix operator.
@@ -414,6 +425,7 @@ showsCoeffAsTerm (Positive s) = s
 showsCoeffWithOp :: ShowSCoeff -> P.ShowS
 showsCoeffWithOp Vanished = P.id
 showsCoeffWithOp (Negative s) = P.showString " - " . s
+showsCoeffWithOp OneCoeff     = P.showString " + 1"
 showsCoeffWithOp (Positive s) = P.showString " + " . s
 
 showsPolynomialWith :: (IsPolynomial poly, PrettyCoeff (Coefficient poly))
@@ -428,11 +440,13 @@ showsPolynomialWith vsVec d f = P.showParen (d P.> 10) $
     (mc : ts) -> P.foldr1 (.) $
                  (showTermOnly mc) : map showRestTerm ts
   where
-    showTermOnly (Nothing, Vanished) = P.showString "1"
+    showTermOnly (Nothing, Vanished) = P.id
     showTermOnly (Nothing, s)        = showsCoeffAsTerm s
+    showTermOnly (Just m, OneCoeff)  = m
     showTermOnly (Just m, t)         = showsCoeffAsTerm t . P.showChar ' ' . m
-    showRestTerm (Nothing, Vanished) = P.showString " + 1"
+    showRestTerm (Nothing, Vanished) = P.id
     showRestTerm (Nothing, s)        = showsCoeffWithOp s
+    showRestTerm (Just m, OneCoeff)  = P.showString " + " . m
     showRestTerm (Just m, t)         = showsCoeffWithOp t . P.showChar ' ' . m
     vs = F.toList vsVec
     showMonom m =
@@ -441,4 +455,5 @@ showsPolynomialWith vsVec d f = P.showParen (d P.> 10) $
          then Nothing
          else Just $ foldr (.) P.id $ L.intersperse (P.showChar ' ') (map P.showString fs)
     showFactor _ 0 = Nothing
+    showFactor v 1 = Just v
     showFactor v n = Just $ v P.++ " ^ " P.++ P.show n
