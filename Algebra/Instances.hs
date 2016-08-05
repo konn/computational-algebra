@@ -3,6 +3,8 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 -- | This Library provides some *dangerous* instances for @Double@s and @Complex@.
 module Algebra.Instances () where
+import Algebra.Scalar
+
 import           Control.DeepSeq          (NFData (..))
 import           Control.Monad.Random     (Random (..), getRandom)
 import           Control.Monad.Random     (getRandomR, runRand)
@@ -117,6 +119,14 @@ instance P.Integral r => Group (P.Ratio r) where
   subtract = P.subtract
   times n r = P.fromIntegral n P.* r
 
+instance P.Integral r => Commutative (P.Ratio r)
+
+instance (Semiring r, P.Integral r) => LeftModule (Scalar r) (P.Ratio r) where
+  Scalar n .* r = (n P.% 1) * r
+
+instance (Semiring r, P.Integral r) => RightModule (Scalar r) (P.Ratio r) where
+  r *. Scalar n = r * (n P.% 1)
+  
 instance P.Integral r => Multiplicative (P.Ratio r) where
   (*) = (P.*)
 
