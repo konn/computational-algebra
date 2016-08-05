@@ -10,20 +10,24 @@ module Algebra.Ring.Polynomial.Class ( IsPolynomial(..), IsOrderedPolynomial(..)
                                        sPolynomial, pDivModPoly, content, pp,
                                        injectVars, vars,
                                        PrettyCoeff(..), ShowSCoeff(..),
-                                       showsCoeffAsTerm, showsCoeffWithOp
+                                       showsCoeffAsTerm, showsCoeffWithOp,
+                                       showsPolynomialWith
                                      ) where
 import Algebra.Internal
 import Algebra.Ring.Polynomial.Monomial
 import Algebra.Scalar
 import Algebra.Wrapped
 
-import           Control.Arrow            (first)
+import           Control.Arrow            (first, (***))
 import           Control.Lens             (folded, maximumOf)
 import           Data.Foldable            (foldr, maximum)
 import qualified Data.Foldable            as F
 import qualified Data.HashSet             as HS
 import           Data.Int
+import qualified Data.List                as L
 import qualified Data.Map.Strict          as M
+import           Data.Maybe               (catMaybes)
+import qualified Data.Ratio               as R
 import qualified Data.Set                 as S
 import           Data.Singletons.Prelude  (SingKind (..))
 import qualified Data.Sized.Builtin       as V
@@ -361,6 +365,9 @@ instance PrettyCoeff Word32 where
 instance PrettyCoeff Word8 where
   showsCoeff = defaultShowsOrdCoeff
 
+instance (P.Integral a, P.Show a) => PrettyCoeff (R.Ratio a) where
+  showsCoeff = defaultShowsOrdCoeff
+
 instance (PrettyCoeff r) => PrettyCoeff (NA.Complex r) where
   showsCoeff d (NA.Complex r i) =
     case (showsCoeff 10 r, showsCoeff 10 i) of
@@ -375,6 +382,11 @@ instance (PrettyCoeff r) => PrettyCoeff (NA.Complex r) where
 
 instance {-# OVERLAPPING #-} PrettyCoeff (Fraction P.Integer) where
   showsCoeff = defaultShowsOrdCoeff
+
+instance {-# OVERLAPPING #-} PrettyCoeff (Fraction P.Int)
+
+instance {-# OVERLAPS #-}
+  (P.Show r, Eq r, Euclidean r) => PrettyCoeff (Fraction r)
 
 -- | Pretty-printing conditional for coefficients.
 --   Each returning @'P.ShowS'@ must not have any sign.
@@ -403,3 +415,30 @@ showsCoeffWithOp :: ShowSCoeff -> P.ShowS
 showsCoeffWithOp Vanished = P.id
 showsCoeffWithOp (Negative s) = P.showString " - " . s
 showsCoeffWithOp (Positive s) = P.showString " + " . s
+
+showsPolynomialWith :: (IsPolynomial poly, PrettyCoeff (Coefficient poly))
+                    => Sized (Arity poly) P.String
+                    -> Int
+                    -> poly
+                    -> P.ShowS
+showsPolynomialWith vsVec d f = P.showParen (d P.> 10) $
+  let tms  = map (showMonom *** showsCoeff 10) $ M.toList $ terms' f
+  in case tms of
+    [] -> P.showString "0"
+    (mc : ts) -> P.foldr1 (.) $
+                 (showTermOnly mc) : map showRestTerm ts
+  where
+    showTermOnly (Nothing, Vanished) = P.showString "1"
+    showTermOnly (Nothing, s)        = showsCoeffAsTerm s
+    showTermOnly (Just m, t)         = showsCoeffAsTerm t . P.showChar ' ' . m
+    showRestTerm (Nothing, Vanished) = P.showString " + 1"
+    showRestTerm (Nothing, s)        = showsCoeffWithOp s
+    showRestTerm (Just m, t)         = showsCoeffWithOp t . P.showChar ' ' . m
+    vs = F.toList vsVec
+    showMonom m =
+      let fs = catMaybes $ P.zipWith showFactor vs $ F.toList m
+      in if P.null fs
+         then Nothing
+         else Just $ foldr (.) P.id $ L.intersperse (P.showChar ' ') (map P.showString fs)
+    showFactor _ 0 = Nothing
+    showFactor v n = Just $ v P.++ " ^ " P.++ P.show n

@@ -14,10 +14,9 @@ module Algebra.Ring.Polynomial
       Polynomial,
       transformMonomial,
       castPolynomial, changeOrder, changeOrderProxy,
-      scastPolynomial, OrderedPolynomial(..), showPolynomialWithVars,
-      showPolynomialWith, showRational, allVars, subst', homogenize, unhomogenize,
+      scastPolynomial, OrderedPolynomial(..),
+      allVars, subst', homogenize, unhomogenize,
       normalize, varX, getTerms, shiftR, orderedBy,
-      CoeffView(..), genVars,
       mapCoeff, reversal, padeApprox,
       eval, evalUnivariate,
       substUnivariate, diff, minpolRecurrent,
@@ -48,7 +47,6 @@ import           Numeric.Algebra           hiding (Order (..))
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
 import           Numeric.Domain.Euclidean  hiding (normalize)
-import           Numeric.Field.Fraction
 import qualified Numeric.Ring.Class        as NA
 import           Numeric.Semiring.Integral (IntegralSemiring)
 import           Prelude                   hiding (Rational, fromInteger, gcd,
@@ -197,13 +195,9 @@ instance (IsMonomialOrder n ord, Characteristic r, KnownNat n, CoeffRing r)
       => Characteristic (OrderedPolynomial r ord n) where
   char _ = char (Proxy :: Proxy r)
 
-instance {-# INCOHERENT #-} (KnownNat n, IsMonomialOrder n order)
-       => Show (OrderedPolynomial (Fraction Integer) order n) where
-  show = showPolynomialWith False [(n, "X_"++ show n) | n <- [0..]] showRational
-
-instance {-# OVERLAPPABLE #-} (CoeffRing r, KnownNat n, IsMonomialOrder n order, Show r)
-         =>  Show (OrderedPolynomial r order n) where
-  show = showPolynomialWithVars [(n, "X_"++ show n) | n <- [0..]]
+instance (KnownNat n, CoeffRing r, IsMonomialOrder n order, PrettyCoeff r)
+       => Show (OrderedPolynomial r order n) where
+  showsPrec = showsPolynomialWith $ generate sing (\i -> "X_" ++ show (fromEnum i))
 
 showPolynomialWithVars :: (CoeffRing a, Show a, KnownNat n, IsMonomialOrder n ordering)
                        => [(Int, String)] -> OrderedPolynomial a ordering n -> String
@@ -225,53 +219,6 @@ showPolynomialWithVars dic p0@(Polynomial d)
                      | p == 1    = Just $ showVar n
                      | otherwise = Just $ showVar n ++ "^" ++ show p
       showVar n = fromMaybe ("X_" ++ show n) $ lookup n dic
-
-data CoeffView = ZeroC | Negative String | Positive String | Eps
-                 deriving (Show, Eq, Ord)
-
-showRational :: (Ord a, Show a, Euclidean a) => Fraction a -> CoeffView
-showRational r | isZero r  = ZeroC
-               | r >  zero = Positive $ formatRat r
-               | otherwise = Negative $ formatRat $ negate  r
-  where
-    formatRat q | denominator q == one = show $ numerator q
-                | otherwise            = show (numerator q) ++ "/" ++ show (denominator q) ++ " "
-
-showPolynomialWith  :: (CoeffRing a, KnownNat n, IsMonomialOrder n ordering)
-                    => Bool -> [(Int, String)] -> (a -> CoeffView) -> OrderedPolynomial a ordering n -> String
-showPolynomialWith useAst vDic showCoeff p0@(Polynomial d)
-    | isZero p0 = "0"
-    | otherwise  = catTerms $ mapMaybe procTerm $ M.toDescList d
-    where
-      ast | useAst    = "*"
-          | otherwise = ""
-      catTerms [] = "0"
-      catTerms (x:xs) = concat $ showTerm True x : map (showTerm False) xs
-      showTerm isLeading (ZeroC, _) = if isLeading then "0" else ""
-      showTerm isLeading (Positive s, deg) = if isLeading then s ++ deg else " + " ++ s ++ deg
-      showTerm isLeading (Negative s, deg) = if isLeading then '-' : s ++ deg else " - " ++ s ++ deg
-      showTerm isLeading (Eps, deg) = if isLeading then deg else " + " ++ deg
-      procTerm (getMonomial -> deg, c)
-          | isZero c = Nothing
-          | otherwise =
-              let cKind = showCoeff c
-                  cff | isConstantMonomial deg && isZero (c - one) = Positive "1"
-                      | isConstantMonomial deg && isZero (c + one) = Negative "1"
-                      | isZero (c - one) = Positive ""
-                      | isZero (c + one) = Negative ""
-                      | not (isConstantMonomial deg)              =
-                        case cKind of
-                          Negative c' -> Negative $ c' ++ ast
-                          Positive c' -> Positive $ c' ++ ast
-                          i          -> i
-                      | otherwise                                 = cKind
-                  catnate | useAst    = intercalate "*"
-                          | otherwise = unwords
-              in Just $ (cff, catnate (mapMaybe showDeg (zip [0..] $ F.toList deg)))
-      showDeg (n, p) | p == 0    = Nothing
-                     | p == 1    = Just $ showVar n
-                     | otherwise = Just $ showVar n ++ "^" ++ show p
-      showVar n = fromMaybe ("X_" ++ show n) $ lookup n vDic
 
 isConstantMonomial :: (Eq a, Num a) => Vector a n -> Bool
 isConstantMonomial v = all (== 0) $ F.toList v

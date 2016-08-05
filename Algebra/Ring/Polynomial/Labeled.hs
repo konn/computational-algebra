@@ -3,9 +3,10 @@
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes                  #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell      #-}
 {-# LANGUAGE TypeFamilies, TypeInType, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE UndecidableSuperClasses                      #-}
 module Algebra.Ring.Polynomial.Labeled
        (IsUniqueList, LabPolynomial(..),
-        UniqueResult(..), canonicalMap,
+        canonicalMap,
         canonicalMap',
         IsSubsetOf) where
 import Algebra.Internal
@@ -19,6 +20,7 @@ import           Data.Singletons.Prelude.List hiding (Group)
 import qualified Data.Sized.Builtin           as S
 import           Data.Type.Natural.Class      (IsPeano (..), sOne)
 import           Data.Type.Ordinal
+import           GHC.Exts                     (Constraint)
 import           Numeric.Algebra              hiding (Order (..))
 import           Numeric.Decidable.Zero
 import           Prelude                      hiding (Integral (..), Num (..),
@@ -26,30 +28,33 @@ import           Prelude                      hiding (Integral (..), Num (..),
 
 data UniqueResult = Expected | VariableOccursTwice Symbol
 
-type family UniqueList' (x :: Symbol) (xs :: [Symbol]) :: UniqueResult where
-  UniqueList' x '[] = 'Expected
-  UniqueList' x (x ': xs) = TypeError ('Text "The variable " ':<>: 'Text x ':<>: 'Text " occurs more than once!")
-  UniqueList' x (y ': xs) = UniqueList' x xs
+type family UniqueList' (x :: Symbol) (xs :: [Symbol]) :: Constraint where
+  UniqueList' x '[] = ()
+  UniqueList' x (x ': xs) = TypeError ('Text "The variable " ':<>: 'ShowType x ':<>: 'Text " occurs more than once!")
+  UniqueList' x (y ': xs) = ()
 
-type family SumResult r r' where
-  SumResult 'Expected 'Expected = 'Expected
-  SumResult ('VariableOccursTwice x) 'Expected = 'VariableOccursTwice x
-  SumResult 'Expected ('VariableOccursTwice x) = 'VariableOccursTwice x
-  SumResult ('VariableOccursTwice x) ('VariableOccursTwice y) = 'VariableOccursTwice x
+type family UniqueList (xs :: [Symbol]) :: Constraint where
+  UniqueList '[] = ()
+  UniqueList (x ': xs) = (UniqueList' x xs, UniqueList xs)
 
-type family UniqueList (xs :: [Symbol]) :: UniqueResult where
-  UniqueList '[] = 'Expected
-  UniqueList (x ': xs) = SumResult (UniqueList' x xs) (UniqueList xs)
+class    (UniqueList xs) => IsUniqueList (xs :: [Symbol])
+instance (UniqueList xs) => IsUniqueList (xs :: [Symbol])
 
-class    ('Expected ~ UniqueList xs) => IsUniqueList (xs :: [Symbol])
-instance ('Expected ~ UniqueList xs) => IsUniqueList (xs :: [Symbol])
-
-newtype LabPolynomial poly (vars :: [Symbol]) where
-  LabelPolynomial :: { unLabelPolynomial :: (IsUniqueList vars, Length vars ~ Arity poly)
-                                       => poly }
-                -> LabPolynomial poly vars
+data LabPolynomial poly (vars :: [Symbol]) where
+  LabelPolynomial :: (IsUniqueList vars, Length vars ~ Arity poly)
+                  => { unLabelPolynomial :: poly }
+                  -> LabPolynomial poly vars
 
 type Wraps vars poly = (IsUniqueList vars, Arity poly ~ Length vars)
+
+instance (PrettyCoeff (Coefficient poly), IsOrderedPolynomial poly, SingI vars)
+      => Show (LabPolynomial poly vars) where
+  showsPrec d (LabelPolynomial f) =
+    let svs   = sing :: Sing vars
+        vs    = fromSing svs
+        vsVec = generate sing $ \i -> vs !! fromEnum i
+    in showsPolynomialWith vsVec d f
+
 
 instance (Wraps vars poly, Additive poly) => Additive (LabPolynomial poly vars) where
   LabelPolynomial f + LabelPolynomial g = LabelPolynomial $ f + g
