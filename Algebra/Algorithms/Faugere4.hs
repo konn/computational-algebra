@@ -206,8 +206,7 @@ update gs bs h = {-# SCC "update" #-}
 cyclic :: (KnownNat n)
        => SNat n -> Ideal (Polynomial (Fraction Integer) n)
 cyclic sn =
-  let vars = genVars sn
-      cycs = tails $ cycle vars
+  let cycs = tails $ cycle vars
       ary = sNatToInt sn
   in toIdeal $ NA.product vars - one : [ NA.sum $ map (NA.product . take i) $ take ary cycs | i <- [ary - 1,ary-2..1]]
 
@@ -302,4 +301,4 @@ ideal3 = toIdeal [x^^^2 + y^^^2 + z^^^2 - 1, x^^^2 + y^^^2 + z^^^2 - 2*x, 2*x -3
   where
     (^^^) :: (Unital r) => r -> Natural -> r
     (^^^) = pow
-    [x,y,z] = genVars sing
+    [x,y,z] = vars

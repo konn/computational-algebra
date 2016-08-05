@@ -4,29 +4,31 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Field.Finite (F(), naturalRepr, reifyPrimeField, withPrimeField,
                              modNat, modNat', modRat, modRat', FiniteField(..), order) where
-import           Algebra.Algorithms.PrimeTest
-import           Algebra.Wrapped
-import           Control.Monad.Random         (uniform)
-import           Control.Monad.Random         (runRand)
-import           Control.Monad.Random         (Random (..))
-import           Data.Maybe                   (fromMaybe)
+import Algebra.Algorithms.PrimeTest
+import Algebra.Ring.Polynomial.Class (PrettyCoeff (..), ShowSCoeff (..))
+import Algebra.Wrapped
+
+import           Control.Monad.Random       (uniform)
+import           Control.Monad.Random       (runRand)
+import           Control.Monad.Random       (Random (..))
+import           Data.Maybe                 (fromMaybe)
 import           Data.Proxy
-import qualified Data.Ratio                   as R
+import qualified Data.Ratio                 as R
 import           Data.Reflection
-import qualified Data.Type.Natural            as TN
-import           GHC.TypeLits                 (KnownNat)
-import           Numeric.Algebra              (Field)
-import           Numeric.Algebra              (char)
-import           Numeric.Algebra              (Natural)
-import qualified Numeric.Algebra              as NA
+import qualified Data.Type.Natural          as TN
+import           GHC.TypeLits               (KnownNat)
+import           Numeric.Algebra            (Field)
+import           Numeric.Algebra            (char)
+import           Numeric.Algebra            (Natural)
+import qualified Numeric.Algebra            as NA
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
-import           Numeric.Domain.Euclidean     (euclid)
-import           Numeric.Field.Fraction       (Fraction)
-import           Numeric.Field.Fraction       (denominator)
-import           Numeric.Field.Fraction       (numerator)
-import           Numeric.Rig.Characteristic   (Characteristic)
-import           Numeric.Semiring.Integral    (IntegralSemiring)
+import           Numeric.Domain.Euclidean   (euclid)
+import           Numeric.Field.Fraction     (Fraction)
+import           Numeric.Field.Fraction     (denominator)
+import           Numeric.Field.Fraction     (numerator)
+import           Numeric.Rig.Characteristic (Characteristic)
+import           Numeric.Semiring.Integral  (IntegralSemiring)
 
 -- | Prime field of characteristic @p@.
 --   @p@ should be prime, and not statically checked.
@@ -37,6 +39,8 @@ naturalRepr = runF
 
 instance Reifies (p :: k) Integer => Show (F p) where
   showsPrec d n@(F p) = showsPrec d (p `mod` reflect n)
+
+instance Reifies (p :: k) Integer => PrettyCoeff (F p)
 
 modNat :: Reifies (p :: k) Integer => Integer -> F p
 modNat = modNat' Proxy

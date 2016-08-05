@@ -302,7 +302,7 @@ subst' p val f
 
 allVars :: forall k ord n . (IsMonomialOrder n ord, CoeffRing k, KnownNat n)
         => Vector (OrderedPolynomial k ord n) n
-allVars = unsafeFromList' $ genVars (sing :: SNat n)
+allVars = unsafeFromList' vars
 
 -- | Partially difference at (m+1)-th variable
 diff :: forall n ord r. (CoeffRing r, KnownNat n, IsMonomialOrder n ord)
@@ -339,10 +339,6 @@ shiftR :: forall k r n ord. (CoeffRing r, KnownNat n, IsMonomialOrder n ord,
        => SNat k -> OrderedPolynomial r ord n -> OrderedPolynomial r ord (k :+ n)
 shiftR k = withKnownNat (k %:+ (sing :: SNat n)) $
   withKnownNat k $ transformMonomial (S.append (fromList k []))
-
-genVars :: forall k o n. (CoeffRing k, KnownNat n, IsMonomialOrder n o)
-        => SNat n -> [OrderedPolynomial k o n]
-genVars sn = map var $ enumOrdinal sn
 
 -- | Calculate the homogenized polynomial of given one, with additional variable is the last variable.
 homogenize :: forall k ord n.

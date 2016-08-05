@@ -10,6 +10,7 @@ import Algebra.Field.Finite
 import Algebra.Field.Galois.Conway
 import Algebra.Internal
 import Algebra.Prelude
+import Algebra.Ring.Polynomial
 
 import           Control.Lens                 (imap)
 import           Control.Monad                (replicateM)
@@ -54,8 +55,10 @@ instance (Reifies p Integer, Show (F p)) => Show (GF0 p n f)  where
   showsPrec d (GF0 (v :< vs)) =
     if F.all isZero vs
     then showsPrec d v
-    else showChar '<' . showString (showPolynomialWithVars [(0, "ξ")] $ vecToPoly $ v :< vs) . showChar '>'
+    else showChar '<' . showString (showPolynomialWith (singleton "ξ") 0 $ vecToPoly $ v :< vs) . showChar '>'
   showsPrec _ _ = showString "0"
+
+instance (Reifies p Integer, Show (F p)) => PrettyCoeff (GF0 p n f)
 
 vecToPoly :: (CoeffRing r)
           => Vector r n -> Unipol r

@@ -386,7 +386,7 @@ intersection idsv@(_ :< _) =
     let sk = sizedLength idsv
         sn = sing :: SNat (Arity poly)
     in withSingI (sOnes sk) $ withKnownNat (sk %:+ sn) $
-    let ts  = take (fromIntegral $ fromSing sk) $ genVars (sk %:+ sn)
+    let ts  = take (fromIntegral $ fromSing sk) vars
         inj :: poly -> OrderedPolynomial (Coefficient poly) (MOrder poly) (k + Arity poly)
         inj = transformMonomial (V.append $ V.replicate sk 0) .  injectVars
         tis = zipWith (\ideal t -> mapIdeal ((t *) . inj) ideal) (toList idsv) ts

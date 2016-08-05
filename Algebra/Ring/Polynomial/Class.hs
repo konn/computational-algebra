@@ -11,7 +11,7 @@ module Algebra.Ring.Polynomial.Class ( IsPolynomial(..), IsOrderedPolynomial(..)
                                        injectVars, vars,
                                        PrettyCoeff(..), ShowSCoeff(..),
                                        showsCoeffAsTerm, showsCoeffWithOp,
-                                       showsPolynomialWith
+                                       showsPolynomialWith, showPolynomialWith
                                      ) where
 import Algebra.Internal
 import Algebra.Ring.Polynomial.Monomial
@@ -427,6 +427,13 @@ showsCoeffWithOp Vanished = P.id
 showsCoeffWithOp (Negative s) = P.showString " - " . s
 showsCoeffWithOp OneCoeff     = P.showString " + 1"
 showsCoeffWithOp (Positive s) = P.showString " + " . s
+
+showPolynomialWith :: (IsPolynomial poly, PrettyCoeff (Coefficient poly))
+                    => Sized (Arity poly) P.String
+                    -> Int
+                    -> poly
+                    -> P.String
+showPolynomialWith vs i p = showsPolynomialWith vs i p ""
 
 showsPolynomialWith :: (IsPolynomial poly, PrettyCoeff (Coefficient poly))
                     => Sized (Arity poly) P.String

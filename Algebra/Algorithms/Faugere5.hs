@@ -53,7 +53,7 @@ showsIf :: Bool -> ShowS -> ShowS
 showsIf True  a = a
 showsIf False _ = id
 
-instance (CoeffRing r, Show r, KnownNat n, IsMonomialOrder n ord)
+instance (CoeffRing r, PrettyCoeff r, KnownNat n, IsMonomialOrder n ord)
          => Show (PolyRepr r ord n) where
   showsPrec _ (PolyRepr (n, m) p) = showParen True $
     showsIf (m /= one) (shows m . showChar ' ') . showString "F_" . shows n . showString ", " . shows p
@@ -89,11 +89,11 @@ preReduction fs = map monoize $ go [] fs
          then go (xs++[y]) ys
          else go [] (xs ++ if isZero r then ys else r : ys)
 
-f5Original :: (Show r, Ord r, DecidableZero r, KnownNat n, Field r, IsMonomialOrder n ord)
+f5Original :: (PrettyCoeff r, Ord r, DecidableZero r, KnownNat n, Field r, IsMonomialOrder n ord)
            => Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
 f5Original = toIdeal . sort . generators . mainLoop
 
-mainLoop :: (Show r, IsMonomialOrder n ord, CoeffRing r, KnownNat n, Field r)
+mainLoop :: (PrettyCoeff r, IsMonomialOrder n ord, CoeffRing r, KnownNat n, Field r)
          => Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
 mainLoop (preReduction . filter (not . isZero) . generators -> ij)
   | null ij = toIdeal [zero]
@@ -157,7 +157,7 @@ setupReducedBasis gs = do
         addRule (k, u) Nothing
 
 f5Core :: ( ?labPolys :: (RefVector s (PolyRepr r ord n)),
-           ?rules :: (RefVector s (Rule ord n)), Show r,
+           ?rules :: (RefVector s (Rule ord n)), PrettyCoeff r,
            Eq r, Field r, KnownNat n, DecidableZero r, IsMonomialOrder n ord)
        => Int
        -> [OrderedPolynomial r ord n]
@@ -196,7 +196,7 @@ mapMaybeM f as = go as id
         Just x' -> go xs (acc . (x' :))
 
 reduction :: (Eq r, ?labPolys :: (RefVector s (PolyRepr r ord n)),
-              ?rules :: (RefVector s (Rule ord n)), Show r,
+              ?rules :: (RefVector s (Rule ord n)), PrettyCoeff r,
               KnownNat n, DecidableZero r, Field r,
               IsMonomialOrder n ord)
           => [Int] -> [OrderedPolynomial r ord n] -> IntSet -> IntSet -> ST s IntSet
@@ -233,7 +233,7 @@ findReductor k g g' = do
   listToMaybe <$> filterM cond (IS.toList g')
 
 topReduction :: (Eq r, ?labPolys :: (RefVector s (PolyRepr r ord n)),
-                 ?rules :: (RefVector s (Rule ord n)), KnownNat n, Show r,
+                 ?rules :: (RefVector s (Rule ord n)), KnownNat n, PrettyCoeff r,
                  DecidableZero r, Field r, IsMonomialOrder n ord)
              => Int -> IntSet -> IntSet -> ST s ([Int], [Int])
 topReduction k g g' = do
@@ -269,7 +269,7 @@ topReduction k g g' = do
 
 spols :: (?labPolys :: (RefVector s (PolyRepr r ord n)),
           ?rules :: (RefVector s (Rule ord n)), Eq r,
-          KnownNat n, Show r,
+          KnownNat n, PrettyCoeff r,
           DecidableZero r, Field r, IsMonomialOrder n ord)
       => [CriticalPair ord n] -> ST s [Int]
 spols bs =
@@ -386,9 +386,11 @@ snoc m x = do
 lengthMV :: STRef s1 (MV.MVector s a) -> ST s1 Int
 lengthMV = liftM MV.length . readSTRef
 
-showSingular :: (KnownNat n, IsMonomialOrder n ord, Show r, CoeffRing r)
+showSingular :: (KnownNat n, IsMonomialOrder n ord, PrettyCoeff r, CoeffRing r)
              => OrderedPolynomial r ord n -> String
-showSingular = replace '%' '/' . showPolynomialWith True [(0, "x(0)"), (1, "x(1)"), (2, "x(2)")] (Positive . show)
+showSingular = replace '%' '/' . showPolynomialWith prettyVars 0
+  where
+    prettyVars = generate sing $ \o -> "x(" ++ show (fromEnum o) ++ ")"
 
 ideal :: Ideal (OrderedPolynomial (Fraction Integer) Grevlex 3)
 ideal = toIdeal
@@ -397,4 +399,4 @@ ideal = toIdeal
         ,3%5 *x^4 - 3%2 *x^2 *y^2 + 3%5 *x^2 *y *z + 3%5 *y *z^3
         ,-5%4 *x^3 - 4%3 *y^3 + 3%7 *y *z^2]
   where
-    [x,y,z] = genVars (sing :: SNat 3)
+    [x,y,z] = vars

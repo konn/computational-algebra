@@ -141,7 +141,7 @@ standardMonomials = standardMonomials' (Proxy :: Proxy ideal)
 genQuotVars' :: forall ord n ideal r. ( KnownNat n, Reifies ideal (QIdeal r ord n),
                                         IsMonomialOrder n ord, CoeffRing r,  Field r)
              => Proxy ideal -> [Quotient r ord n ideal]
-genQuotVars' pxy = map (modIdeal' pxy) $ genVars (sing :: SNat n)
+genQuotVars' pxy = map (modIdeal' pxy) vars
 
 genQuotVars :: forall ord n ideal r. (IsMonomialOrder n ord, Reifies ideal (QIdeal r ord n)
                                      , CoeffRing r, KnownNat n, Field r)
