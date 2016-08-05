@@ -1,15 +1,13 @@
+{-# LANGUAGE DataKinds #-}
 module Main where
 import Algebra.Algorithms.Faugere4
 import Algebra.LinkedMatrix
 import Algebra.Prelude
 import Control.Exception           (evaluate)
-import Control.Monad               (void)
-import Data.Type.Natural           (sFour)
-import Data.Type.Natural           (sFive)
 
 main :: IO ()
 main = do
-  _ <- evaluate $ faugere4Modular optimalStrategy (cyclic sFour)
+  _ <- evaluate $ faugere4Modular optimalStrategy (cyclic (sing :: SNat 4))
   return ()
 
 testCase :: Matrix (Fraction Integer)
