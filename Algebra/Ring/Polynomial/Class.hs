@@ -51,7 +51,7 @@ import           Prelude                  (otherwise, snd, uncurry, ($), (.))
 import           Prelude                  ((<$>), (<*>))
 import qualified Prelude                  as P
 
-infixl 7 *<, >*, *|<, >|*
+infixl 7 *<, >*, *|<, >|*, !*
 
 -- | Constraint synonym for rings that can be used as polynomial coefficient.
 class    (DecidableZero r, Ring r, Commutative r, Eq r) => CoeffRing r
@@ -184,6 +184,10 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
   -- | Flipped version of @('>|*')@
   (*|<) :: poly -> Monomial (Arity poly) -> poly
   (*|<) = flip (>|*)
+
+  (!*) :: Coefficient poly -> poly -> poly
+  (!*) = (.*.)
+
 
 {-# RULES
 "liftMap/identity"   liftMap (\ x -> x) = (P.id :: poly -> poly)

@@ -13,7 +13,7 @@ newtype Scalar r = Scalar { runScalar :: r }
       => r -> m -> m
 r .*. f = Scalar r .* f
 
-infixr 7 .*.
+infixr 8 .*.
 
 deriving instance Monoidal r => Monoidal (Scalar r)
 deriving instance Group r => Group (Scalar r)

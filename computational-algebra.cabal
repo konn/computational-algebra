@@ -82,7 +82,7 @@ library
     exposed:           True
     buildable:         True
     other-modules:     Algebra.Algorithms.FGLM Algebra.Field.Galois.Internal Algebra.Field.Galois.Conway
-    ghc-options:      -Odph -Wall -Wno-unused-top-binds
+    ghc-options:      -O2 -Wall -Wno-unused-top-binds
     extensions:       CPP
  
 executable solve
@@ -337,7 +337,7 @@ benchmark normal-bench
     build-depends: constraints >=0.3, algebra,
                    base >=4, computational-algebra -any, containers >= 0.5,
                    criterion >= 0.8.1.0, deepseq >= 1.3, parallel >= 3.2,
-                   process >=1.1, singletons,
+                   process >=1.1, singletons, sized,
                    type-natural, vector >= 0.10, matrix >= 0.3
     type: exitcode-stdio-1.0
     main-is: bench.hs
@@ -349,7 +349,7 @@ benchmark elimination-bench
     build-depends: constraints >=0.3, algebra,
                    base >=4, computational-algebra -any, containers >= 0.5,
                    criterion >= 0.8.1.0, deepseq >= 1.3, parallel >= 3.2,
-                   process >=1.1, singletons,
+                   process >=1.1, singletons, sized,
                    type-natural, vector >= 0.10, matrix >= 0.3
     type: exitcode-stdio-1.0
     main-is: elimination-bench.hs
@@ -363,7 +363,7 @@ benchmark quotient-bench-randomized
                    containers >= 0.5, criterion >= 0.8.1.0, deepseq >= 1.3,
                    lens >= 3.9, parallel >= 3.2, process >=1.1,
                    quickcheck-instances -any, reflection >=1.4,
-                   singletons, smallcheck -any,
+                   singletons, smallcheck -any, sized,
                    tagged >= 0.7, transformers >= 0.3,
                    type-natural, vector >= 0.10, matrix >= 0.3,
                    equational-reasoning >= 0.2, monomorphic >=0.0.3
@@ -379,7 +379,7 @@ benchmark monomial-order-bench
                    containers >= 0.5, criterion >= 0.8.1.0, deepseq >= 1.3,
                    lens >= 3.9, monomorphic >=0.0.3, parallel >= 3.2,
                    process >=1.1, quickcheck-instances -any, random >= 1.0,
-                   reflection >=1.4, singletons,
+                   reflection >=1.4, singletons, sized,
                    smallcheck -any, tagged >= 0.7, transformers >= 0.3,
                    type-natural, vector >= 0.10, matrix >= 0.3
     type: exitcode-stdio-1.0
@@ -391,7 +391,7 @@ benchmark monomial-order-bench
 
 benchmark linear-bench
     build-depends: constraints >=0.3, HUnit -any,
-                   MonadRandom >= 0.1, QuickCheck >= 2.6, algebra,
+                   MonadRandom >= 0.1, QuickCheck >= 2.6, algebra,  sized,
                    base >=4, computational-algebra -any, containers >= 0.5,
                    criterion >= 0.8.1.0, deepseq >= 1.3, hspec -any, lens >= 3.9,
                    monomorphic >=0.0.3, parallel >= 3.2, process >=1.1,
@@ -409,7 +409,7 @@ benchmark linear-bench
     ghc-options: -Wall -threaded
 benchmark division-bench
     build-depends: constraints >=0.3, HUnit -any,
-                   MonadRandom >= 0.1, QuickCheck >= 2.6, algebra,
+                   MonadRandom >= 0.1, QuickCheck >= 2.6, algebra, sized,
                    base >=4, computational-algebra -any, containers >= 0.5,
                    criterion >= 0.8.1.0, deepseq >= 1.3, hspec -any, lens >= 3.9,
                    monomorphic >=0.0.3, parallel >= 3.2, process >=1.1,
@@ -426,7 +426,7 @@ benchmark division-bench
     other-modules: Utils
     ghc-options: -Wall -threaded
 benchmark sugar-paper-bench
-    build-depends: constraints >=0.3, HUnit -any,
+    build-depends: constraints >=0.3, HUnit -any, sized,
                    MonadRandom >= 0.1, QuickCheck >= 2.6, algebra,
                    base >=4, computational-algebra -any, containers >= 0.5,
                    criterion >= 0.8.1.0, deepseq >= 1.3, hspec -any, lens >= 3.9,
@@ -444,7 +444,7 @@ benchmark sugar-paper-bench
     other-modules: Utils
     ghc-options: -Wall -threaded
 benchmark solve-bench
-    build-depends: constraints >=0.3, HUnit -any,
+    build-depends: constraints >=0.3, HUnit -any, sized,
                    MonadRandom >= 0.1, QuickCheck >= 2.6, algebra,
                    base >=4, computational-algebra -any, containers >= 0.5,
                    criterion >= 0.8.1.0, deepseq >= 1.3, hspec -any, lens >= 3.9,
@@ -462,7 +462,7 @@ benchmark solve-bench
     other-modules: Utils
     ghc-options: -Wall -threaded
 benchmark coercion-bench
-    build-depends: constraints >=0.3, HUnit -any,
+    build-depends: constraints >=0.3, HUnit -any, sized,
                    MonadRandom >= 0.1, QuickCheck >= 2.6, algebra,
                    base >=4, computational-algebra -any, containers >= 0.5,
                    criterion >= 0.8.1.0, deepseq >= 1.3, hspec -any, lens >= 3.9,
@@ -480,7 +480,7 @@ benchmark coercion-bench
     other-modules: Utils
     ghc-options: -Wall -threaded -fcontext-stack=2000
 benchmark faugere4-bench
-    build-depends: constraints >=0.3, HUnit -any,
+    build-depends: constraints >=0.3, HUnit -any, sized,
                    QuickCheck >= 2.6, algebra, base >=4,
                    computational-algebra -any, containers >= 0.5, criterion >= 0.8.1.0,
                    deepseq >= 1.3, hspec -any, lens >= 3.9,
