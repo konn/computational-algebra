@@ -4,66 +4,57 @@
 {-# LANGUAGE UndecidableInstances                                  #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
-import           Algebra.Algorithms.Groebner
-import           Algebra.Ring.Ideal
-import           Algebra.Ring.Polynomial
-import           Algebra.Ring.Polynomial.Monomorphic (promoteWithVars, varChar)
-import qualified Algebra.Ring.Polynomial.Monomorphic as MP
-import           Algebra.Ring.Polynomial.Parser
-import           Control.Parallel.Strategies
-import           Criterion.Main
-import           Data.Type.Natural
-import           Data.Vector.Sized                   (Vector (..))
-import qualified Data.Vector.Sized                   as V
-import           Numeric.Field.Fraction              (Fraction)
+import Algebra.Algorithms.Groebner
+import Algebra.Internal
+import Algebra.Ring.Ideal
+import Algebra.Ring.Polynomial
+import Algebra.Scalar
 
-parse :: String -> MP.Polynomial (Fraction Integer)
-parse x = case parsePolyn x of
-            Right y -> y
-            Left er -> error $ show er
+import Control.Parallel.Strategies
+import Criterion.Main
+import Numeric.Field.Fraction      (Fraction)
 
-i1 :: [OrderedPolynomial (Fraction Integer) Grevlex Seven]
-i1 = map (promoteWithVars (V.map varChar $ 't' :- 'u' :- 'v' :- 'w' :- 'x' :- 'y' :- 'z' :- Nil) . parse)
-     ["yw - 1/2 zw + tw"
-     ,"-2/7 uw^2 + 10/7 vw^2 - 20/7 w^3 + tu - 5tv + 10tw"
-     ,"2/7 yw^2 - 2/7 zw^2 + 6/7 tw^2 - yt + zt - 3t^2"
-     ,"-2v^3 + 4uvw + 5v^2w - 6uw^2 - 7vw^2 + 15w^3 + 42yv"
-     ,"-14zv - 63yw + 21zw - 42tw + 147x"
-     ,"-9/7uw^3 + 45/7vw^3 - 135/7w^4 + 2zv^2 - 2tv^2 - 4zuw+10tuw - 2zvw - 28tvw + 4zw^2 + 86tw^2 - 42yz+14z^2 + 42yt - 14zt - 21xu + 105xv - 315xw"
-     ,"6/7yw^3 - 9/7zw^3 + 36/7tw^3 - 2zv^2 - 4ytw + 6ztw - 24t^2w\
-     \+ 4xuw + 2xvw - 4xw^2 + 56xy - 35xz + 84xt"
-     ,"2uvw - 6v^2w - uw^2 + 13vw^2 - 5w^3 + 14yw - 28tw"
-     ,"u^2w - 3uvw + 5uw^2 + 14yw - 28tw"
-     ,"-2zuw - 2tuw + 4yvw + 6zvw - 2tvw - 16yw^2 - 10 zw^2 + 22tw^2 + 42xw"
-     ,"28/3yuw + 8/3zuw - 20/3tuw - 88/3yvw - 8zvw\
-     \+68/3tvw + 52yw^2 + 40/3zw^2 - 44tw^2 - 84xw"
-     ,"-4yzw + 10ytw + 8ztw - 20t^2w + 12xuw - 30xvw + 15xw^2"
-     ,"-1 y^2w + 1/2 yzw + ytw - ztw + 2 t^2 w - 3xuw + 6xvw - 3xw^2"
-     , "8xyw - 4xzw + 8xtw"
+i1 :: [OrderedPolynomial (Fraction Integer) Grevlex 7]
+i1 = [y * w - (1 / 2) !* z * w + t*w
+     ,(-2/7) !* u * w^2 + (10/7) !* v * w^2 - (20/7) !* w^3 + t* u - 5 * t* v + 10 * t* w
+     ,(2/7) !* y* w^2 - (2/7) !* z* w^2 + (6/7) !* t* w^2 - y* t + z* t - 3 * t^2
+     ,-2 * v^3 + 4 * u* v* w + 5 * v^2 * w - 6 * u* w^2 - 7 * v* w^2 + 15 * w^3 + 42 * y* v
+     ,-14 * z* v - 63 * y* w + 21 * z* w - 42 * t* w + 147 * x
+     ,(-9/7) !* u* w^3 + (45/7) !* v* w^3 - (135/7) !* w^4 + 2 * z* v^2 - 2 * t* v^2 - 4 * z* u* w+10 * t* u* w - 2 * z* v* w - 28 * t* v* w + 4 * z* w^2 + 86 * t* w^2 - 42 * y* z+14 * z^2 + 42 * y* t - 14 * z* t - 21 * x* u + 105 * x* v - 315 * x* w
+     ,(6/7) !* y* w^3 - (9/7) !* z* w^3 + (36/7) !* t* w^3 - 2 * z* v^2 - 4 * y* t* w + 6 * z* t* w - 24 * t^2 * w + 4 * x* u* w + 2 * x* v* w - 4 * x* w^2 + 56 * x* y - 35 * x* z + 84 * x* t
+     ,2 * u* v* w - 6 !* v^2 * w - u* w^2 + 13 * v* w^2 - 5 * w^3 + 14 * y* w - 28 * t* w
+     ,u^2 * w - 3 * u* v* w + 5 * u* w^2 + 14 * y* w - 28 * t* w
+     ,-2 * z* u* w - 2 * t* u* w + 4 * y* v* w + 6 * z* v* w - 2 * t* v* w - 16 * y* w^2 - 10 * z* w^2 + 22 * t* w^2 + 42 * x* w
+     ,(28/3) !* y* u* w + (8/3) !* z* u* w - (20/3) !* t* u* w - (88/3) !* y* v* w - 8 * z* v* w +(68/3) !* t* v* w + 52 * y* w^2 + (40/3) !* z* w^2 - 44 * t* w^2 - 84 * x* w
+     ,-4 * y* z* w + 10 * y* t* w + 8 * z* t* w - 20 * t^2 * w + 12 * x* u* w - 30 * x* v* w + 15 * x* w^2
+     ,-1 * y^2 * w + (1/2) !* y* z* w + y* t* w - z* t* w + 2 * t^2 * w - 3 * x* u* w + 6 * x* v* w - 3 * x* w^2
+     , 8 * x* y* w - 4 * x* z* w + 8 * x* t* w
      ]
+     where
+       [t,u,v,w,x,y,z] = vars
 
-i2 :: [OrderedPolynomial (Fraction Integer) Grevlex Five]
+i2 :: [OrderedPolynomial (Fraction Integer) Grevlex 5]
 i2 =  [35 * y^4 - 30*x*y^2 - 210*y^2*z + 3*x^2 + 30*x*z - 105*z^2 +140*y*t - 21*u
       ,5*x*y^3 - 140*y^3*z - 3*x^2*y + 45*x*y*z - 420*y*z^2 + 210*y^2*t -25*x*t + 70*z*t + 126*y*u
       ]
-     where [t,u,x,y,z] = genVars sFive
+     where [t,u,x,y,z] = vars
 
-i3 :: [OrderedPolynomial (Fraction Integer) Grevlex Four]
+i3 :: [OrderedPolynomial (Fraction Integer) Grevlex 4]
 i3 = [ x^31 - x^6 - x- y, x^8 - z, x^10 -t]
   where
-    [t,x,y,z] = genVars sFour
+    [t,x,y,z] = vars
 
-i4 :: [OrderedPolynomial (Fraction Integer) Grevlex Four]
+i4 :: [OrderedPolynomial (Fraction Integer) Grevlex 4]
 i4 = [ w+x+y+z, w*x+x*y+y*z+z*w, w*x*y + x*y*z + y*z*w + z*w*x, w*x*y*z]
   where
-    [x,y,z,w] = genVars sFour
+    [x,y,z,w] = vars
 
-mkTestCases :: (Show a, SingI n) => a -> Ideal (Polynomial (Fraction Integer) n) -> [Benchmark]
+mkTestCases :: (Show a, KnownNat n) => a -> Ideal (Polynomial (Fraction Integer) n) -> [Benchmark]
 mkTestCases num ideal = [ mkTC ("lex0" ++ show num) (mapIdeal (changeOrder Lex) ideal)
                         , mkTC ("grevlex0" ++ show num) (mapIdeal (changeOrder Grevlex) ideal)
                         ]
 
-mkTC :: (IsMonomialOrder ord, SingI n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
+mkTC :: (IsMonomialOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
 mkTC name ideal =
     bgroup name [ bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy) ideal
                 , bench "syz+sugar" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)) ideal

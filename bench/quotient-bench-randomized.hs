@@ -3,29 +3,33 @@
 {-# LANGUAGE QuasiQuotes, TemplateHaskell, UndecidableInstances    #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
-import Algebra.Ring.Ideal
-import Algebra.Ring.Polynomial
-import Algebra.Ring.Polynomial.Quotient
-import Control.Applicative
-import Control.Concurrent
-import Control.DeepSeq
-import Control.Monad
-import Control.Parallel.Strategies
-import Criterion.Main
-import Data.List                        (foldl')
-import Data.Maybe
-import Data.Type.Natural                hiding (one)
-import Numeric.Algebra                  hiding ((>), (^))
-import Numeric.Field.Fraction           (Fraction)
-import Prelude                          hiding (product)
-import System.Process
-import Test.QuickCheck
-import Utils
+import           Algebra.Prelude
+import           Algebra.Ring.Ideal
+import           Algebra.Ring.Polynomial
+import           Algebra.Ring.Polynomial.Quotient
+import           Control.Applicative
+import           Control.Concurrent
+import           Control.DeepSeq
+import           Control.Monad
+import           Control.Parallel.Strategies
+import           Criterion.Main
+import           Data.List                        (foldl')
+import           Data.Maybe
+import           Numeric.Algebra                  hiding ((>), (^))
+import           Numeric.Field.Fraction           (Fraction)
+import           Prelude                          hiding (product)
+import qualified Prelude                          as P
+import           System.Process
+import           Test.QuickCheck
+import           Utils
 
-makeIdeals :: SingI n => Int -> SNat n -> Int -> IO [Ideal (Polynomial (Fraction Integer) n)]
+sTwo :: SNat 2
+sTwo = sing
+
+makeIdeals :: KnownNat n => Int -> SNat n -> Int -> IO [Ideal (Polynomial (Fraction Integer) n)]
 makeIdeals count _ dpI = take count . map getIdeal <$> sample' (resize dpI arbitrary `suchThat` isNonTrivial)
 
-mkTestCases :: SingI n => Int -> Int -> [Ideal (Polynomial (Fraction Integer) n)] -> IO [Benchmark]
+mkTestCases :: KnownNat n => Int -> Int -> [Ideal (Polynomial (Fraction Integer) n)] -> IO [Benchmark]
 mkTestCases count size is =
   forM (zip [1..] is) $ \(n, ideal) -> do
     reifyQuotient ideal $ \ii -> do
@@ -49,7 +53,7 @@ main = do
   case04 <- mkTestCases 10 8 =<< makeIdeals 3 sTwo 7
   putStrLn "done. purge and sleep 10secs..."
   system "purge"
-  threadDelay $ 10^7
+  threadDelay $ 10 P.^ 7
   defaultMain $
     [ bgroup "binary" case01
     , bgroup "ternary" case02

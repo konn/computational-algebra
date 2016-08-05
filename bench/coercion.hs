@@ -1,7 +1,7 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts                   #-}
-{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, OverlappingInstances #-}
-{-# LANGUAGE PolyKinds, QuasiQuotes, TemplateHaskell                        #-}
-{-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans -fcontext-stack=1000 #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts        #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, PolyKinds #-}
+{-# LANGUAGE QuasiQuotes, TemplateHaskell                        #-}
+{-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans -freduction-depth=1000 #-}
 module Main where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Ring.Ideal
@@ -24,7 +24,7 @@ import qualified Prelude                     as P
 import           Progression.Main
 
 x, y, z :: Polynomial (Fraction Integer) Three
-[x, y, z] = genVars sThree
+[x, y, z] = vars
 
 (.*) :: SingI n => (Fraction Integer) -> Polynomial (Fraction Integer) n -> Polynomial (Fraction Integer) n
 (.*) = (.*.)
@@ -63,7 +63,7 @@ f03 :: Polynomial (Fraction Integer) Four
 f03 = (6/7).* (a^^7*b^^3*c^^4) - (4/3) .* (a^^5*b^^6*c*d^^2) - a^^4*b^^2*c^^4*d^^4
   where
     a, b, c, d :: Polynomial (Fraction Integer) Four
-    [a, b, c, d] = genVars sFour
+    [a, b, c, d] = vars
 
 main :: IO ()
 main = do
@@ -80,14 +80,7 @@ main = do
   poly02 <- return $!! (f02 `using` rdeepseq)
   poly03 <- return $!! (f03 `using` rdeepseq)
   defaultMain $ bgroup "coercion" $
-    [ bgroup "padVec"
-      [ bench "10-100" $ nf (padVec () v10) v100
-      , bench "100-10" $ nf (padVec () v100) v10
-      , bench "100-400" $ nf (padVec () v100) v400
-      , bench "100-200" $ nf (padVec () v100) v200
-      , bench "400-300" $ nf (padVec () v400) v300
-      ]
-    , bgroup "unhomogenize"
+    [ bgroup "unhomogenize"
       [ bench "01" $ nf unhomogenize poly01
       , bench "02" $ nf unhomogenize poly02
       , bench "03" $ nf unhomogenize poly03

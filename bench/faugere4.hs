@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
+{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction, DataKinds, FlexibleContexts #-}
 module Main where
 import           Algebra.Algorithms.Faugere4
 import           Algebra.Algorithms.Groebner
@@ -11,54 +11,59 @@ import           Criterion
 import           Criterion.Main
 import qualified Data.Matrix                 as DM
 import           Data.Proxy                  (Proxy (..))
-import           Data.Type.Natural           (sFour, sThree)
-import           Data.Type.Natural           (sSix)
-import           Data.Type.Natural           (Three)
-import           Data.Type.Natural           (Six)
 import           Test.QuickCheck
 
 import Utils
 
+s3 :: SNat 3
+s3 = sing
+
+s4 :: SNat 4
+s4 = sing
+
+s6 :: SNat 6
+s6 = sing
+
 f4Repa = faugere4 optimalStrategy
 f4DM = faugere4G (Proxy :: Proxy DM.Matrix) optimalStrategy
-f4SM = faugere4G (Proxy :: Proxy Sparse) optimalStrategy
+-- f4SM = faugere4G (Proxy :: Proxy Sparse) optimalStrategy
 f4LM  = faugere4LM optimalStrategy
 f4LMN = faugere4G  (Proxy :: Proxy LM.Matrix) optimalStrategy
 f4Mod  = faugere4Modular optimalStrategy
 
-ideal3 :: [OrderedPolynomial (Fraction Integer) Grevlex Three]
+ideal3 :: [OrderedPolynomial (Fraction Integer) Grevlex 3]
 ideal3 = [x^2 + y^2 + z^2 - 1, x^2 + y^2 + z^2 - 2*x, 2*x -3*y - z]
   where
-    [x,y,z] = genVars sThree
+    [x,y,z] = vars
 
-ideal4 :: [OrderedPolynomial (Fraction Integer) Grevlex Three]
+ideal4 :: [OrderedPolynomial (Fraction Integer) Grevlex 3]
 ideal4 = [x^2 * y - 2*x*y - 4*z - 1, z-y^2, x^3 - 4*z*y]
   where
-    [x,y,z] = genVars sThree
+    [x,y,z] = vars
 
-ideal5 :: [OrderedPolynomial (Fraction Integer) Grevlex Six]
+ideal5 :: [OrderedPolynomial (Fraction Integer) Grevlex 6]
 ideal5 = [ 2 * s - a * y, b^2 - (x^2 + y^2), c^2 - ( (a-x) ^ 2 + y^2)
          ]
   where
-    [s,x,y,a,b,c] = genVars sSix
+    [s,x,y,a,b,c] = vars
 
-ideal6 ::  [OrderedPolynomial (Fraction Integer) Grevlex Three]
+ideal6 ::  [OrderedPolynomial (Fraction Integer) Grevlex 3]
 ideal6 = [ z^5 + y^4 + x^3 - 1, z^3 + y^3 + x^2 - 1]
   where
-    [x,y,z] = genVars sThree
+    [x,y,z] = vars
 
 buildCase :: NFData b => a -> String -> (a -> b) -> Benchmark
 buildCase i name calc = bench name $ nf calc i
 
 main :: IO ()
 main = do
-  i1 <- return $!! (cyclic sThree `using` rdeepseq)
-  i2 <- return $!! (cyclic sFour `using` rdeepseq)
+  i1 <- return $!! (cyclic s3 `using` rdeepseq)
+  i2 <- return $!! (cyclic s4 `using` rdeepseq)
   i3 <- return $!! (toIdeal ideal3 `using` rdeepseq)
   i4 <- return $!! (toIdeal ideal4 `using` rdeepseq)
   i5 <- return $!! (toIdeal ideal5 `using` rdeepseq)
   i6 <- return $!! (toIdeal ideal6 `using` rdeepseq)
-  rand0 <- sample' $ idealOfDim sThree
+  rand0 <- sample' $ idealOfDim s3
   rnd <- return $!! (head (drop 2 rand0) `using` rdeepseq)
   putStrLn $ concat [ "random ideal: ", show rnd ]
   defaultMain $
@@ -67,7 +72,7 @@ main = do
       [("buchberger", toIdeal . calcGroebnerBasis)
       , ("F4-repa", f4Repa)
       , ("F4-dm", f4DM)
-      , ("F4-sparse", f4SM)
+      -- , ("F4-sparse", f4SM)
       , ("F4-link-naive", f4LMN)
       , ("F4-link-str", f4LM)
       , ("F4-modular" , f4Mod)
@@ -77,7 +82,7 @@ main = do
       [("buchberger", toIdeal . calcGroebnerBasis)
       , ("F4-repa", f4Repa)
       , ("F4-dm", f4DM)
-      , ("F4-sparse", f4SM)
+      -- , ("F4-sparse", f4SM)
       , ("F4-link-naive", f4LMN)
       , ("F4-link-str", f4LM)
       , ("F4-modular" , f4Mod)
@@ -87,7 +92,7 @@ main = do
       [("buchberger", toIdeal . calcGroebnerBasis)
       , ("F4-repa", f4Repa)
       , ("F4-dm", f4DM)
-      , ("F4-sparse", f4SM)
+      -- , ("F4-sparse", f4SM)
       , ("F4-link-naive", f4LMN)
       , ("F4-link-str", f4LM)
       , ("F4-modular" , f4Mod)
@@ -97,7 +102,7 @@ main = do
       [("buchberger", toIdeal . calcGroebnerBasis)
       , ("F4-repa", f4Repa)
       , ("F4-dm", f4DM)
-      , ("F4-sparse", f4SM)
+      -- , ("F4-sparse", f4SM)
       , ("F4-link-naive", f4LMN)
       , ("F4-link-str", f4LM)
       , ("F4-modular" , f4Mod)
@@ -107,7 +112,7 @@ main = do
       [("buchberger", toIdeal . calcGroebnerBasis)
       , ("F4-repa", f4Repa)
       , ("F4-dm", f4DM)
-      , ("F4-sparse", f4SM)
+      -- , ("F4-sparse", f4SM)
       , ("F4-link-naive", f4LMN)
       , ("F4-link-str", f4LM)
       , ("F4-modular" , f4Mod)
@@ -117,7 +122,7 @@ main = do
       [("buchberger", toIdeal . calcGroebnerBasis)
       , ("F4-repa", f4Repa)
       , ("F4-dm", f4DM)
-      , ("F4-sparse", f4SM)
+      -- , ("F4-sparse", f4SM)
       , ("F4-link-naive", f4LMN)
       , ("F4-link-str", f4LM)
       , ("F4-modular" , f4Mod)
@@ -127,7 +132,7 @@ main = do
       [("buchberger", toIdeal . calcGroebnerBasis)
       , ("F4-repa", f4Repa)
       , ("F4-dm", f4DM)
-      , ("F4-sparse", f4SM)
+      -- , ("F4-sparse", f4SM)
       , ("F4-link-naive", f4LMN)
       , ("F4-link-str", f4LM)
       , ("F4-modular" , f4Mod)
