@@ -26,7 +26,7 @@ import qualified Data.HashSet             as HS
 import           Data.Int
 import qualified Data.List                as L
 import qualified Data.Map.Strict          as M
-import           Data.Maybe               (catMaybes)
+import           Data.Maybe               (catMaybes, fromMaybe)
 import qualified Data.Ratio               as R
 import qualified Data.Set                 as S
 import           Data.Singletons.Prelude  (SingKind (..))
@@ -334,8 +334,8 @@ class (P.Show r) => PrettyCoeff r where
 defaultShowsOrdCoeff :: (P.Show r, Unital r, Group r, P.Ord r)
                      => Int -> r -> ShowSCoeff
 defaultShowsOrdCoeff d r
-  | r P.== negate one = Negative P.id
-  | r P.<  zero = Negative (P.showsPrec d (negate r))
+  | r P.== negate one = Negative Nothing
+  | r P.<  zero = Negative (Just $ P.showsPrec d (negate r))
   | r P.== zero = Vanished
   | r P.== one  = OneCoeff
   | otherwise   = Positive (P.showsPrec d r)
@@ -383,7 +383,7 @@ instance (PrettyCoeff r) => PrettyCoeff (NA.Complex r) where
     case (showsCoeff 10 r, showsCoeff 10 i) of
       (Vanished, Vanished)     -> Vanished
       (Vanished, Positive s)   -> Positive (s . P.showString " I")
-      (Vanished, Negative s)   -> Negative (s . P.showString " I")
+      (Vanished, Negative s)   -> Negative (Just $ fromMaybe P.id s . P.showString " I")
       (Positive s, Vanished)   -> Positive s
       (Negative s, Vanished)   -> Negative s
       (s, t) ->
@@ -405,7 +405,7 @@ instance {-# OVERLAPS #-}
 
 -- | Pretty-printing conditional for coefficients.
 --   Each returning @'P.ShowS'@ must not have any sign.
-data ShowSCoeff = Negative P.ShowS
+data ShowSCoeff = Negative (Maybe P.ShowS)
                 | Vanished
                 | OneCoeff
                 | Positive P.ShowS
@@ -419,7 +419,7 @@ data ShowSCoeff = Negative P.ShowS
 -- @
 showsCoeffAsTerm :: ShowSCoeff -> P.ShowS
 showsCoeffAsTerm Vanished     = P.id
-showsCoeffAsTerm (Negative s) = P.showChar '-' . s
+showsCoeffAsTerm (Negative s) = P.showChar '-' . fromMaybe (P.showChar '1') s
 showsCoeffAsTerm OneCoeff     = P.showChar '1'
 showsCoeffAsTerm (Positive s) = s
 
@@ -432,7 +432,7 @@ showsCoeffAsTerm (Positive s) = s
 -- @
 showsCoeffWithOp :: ShowSCoeff -> P.ShowS
 showsCoeffWithOp Vanished = P.id
-showsCoeffWithOp (Negative s) = P.showString " - " . s
+showsCoeffWithOp (Negative s) = P.showString " - " . fromMaybe (P.showChar '1') s
 showsCoeffWithOp OneCoeff     = P.showString " + 1"
 showsCoeffWithOp (Positive s) = P.showString " + " . s
 
@@ -458,12 +458,14 @@ showsPolynomialWith vsVec d f = P.showParen (d P.> 10) $
     showTermOnly (Nothing, Vanished) = P.id
     showTermOnly (Nothing, s)        = showsCoeffAsTerm s
     showTermOnly (Just m, OneCoeff)  = m
-    showTermOnly (Just m, Vanished)  = P.id
+    showTermOnly (Just m, Negative Nothing) = P.showChar '-' . m
+    showTermOnly (Just _, Vanished)  = P.id
     showTermOnly (Just m, t)         = showsCoeffAsTerm t . P.showChar ' ' . m
     showRestTerm (Nothing, Vanished) = P.id
     showRestTerm (Nothing, s)        = showsCoeffWithOp s
     showRestTerm (Just m, OneCoeff)  = P.showString " + " . m
-    showRestTerm (Just m, Vanished)  = P.id
+    showRestTerm (Just m, Negative Nothing)  = P.showString " - " . m
+    showRestTerm (Just _, Vanished)  = P.id
     showRestTerm (Just m, t)         = showsCoeffWithOp t . P.showChar ' ' . m
     vs = F.toList vsVec
     showMonom m =
