@@ -25,9 +25,9 @@ module Algebra.Ring.Polynomial.Monomial
 import Algebra.Internal
 
 import           Control.DeepSeq                 (NFData (..))
-import           Control.Lens                    (Ixed (..), alaf, makeLenses,
-                                                  makeWrapped, (%~), (&), (.~),
-                                                  _Wrapped)
+import           Control.Lens                    (Ixed (..), alaf, imap,
+                                                  makeLenses, makeWrapped, (%~),
+                                                  (&), (.~), _Wrapped)
 import           Data.Constraint                 ((:=>) (..), Dict (..))
 import qualified Data.Constraint                 as C
 import           Data.Constraint.Forall
@@ -111,10 +111,10 @@ deriving instance (Eq (Monomial n)) => Eq (OrderedMonomial ordering n)
 instance KnownNat n => Show (OrderedMonomial ord n) where
   show xs =
     let vs = catMaybes $ V.toList $
-            V.zipWithSame (\n i -> if i > 0
-                                   then Just ("X_" ++ show n ++ if i == 1 then "" else "^" ++ show i)
-                                   else Nothing)
-            (V.unsafeFromList' [0 :: Int ..])
+            imap (\n i ->
+                   if i > 0
+                   then Just ("X_" ++ show (ordToInt n) ++ if i == 1 then "" else "^" ++ show i)
+                   else Nothing)
             $ getMonomial xs
     in if null vs then "1" else unwords vs
 
