@@ -66,7 +66,7 @@ deploy cnf = shelly $ handleany_sh (const $ return $ ExitFailure 1)  $do
   isGit <- test_d ".git"
   timeStamp <- formatTime defaultTimeLocale "%c" <$> liftIO getZonedTime
   let msg = "Updated (" ++ timeStamp ++  ")"
-      msgOpt =  ("-m\"" <> T.pack msg <> "\"")
+      msgOpt =  ("-m" <> T.pack msg)
   unless isGit $ withTmpDir $ \tdir -> do
     cd tdir
     run_ "git" ["init"]

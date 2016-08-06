@@ -26,7 +26,7 @@ This package currently provides the following functionalities:
 
 * Groebner basis calculation w.r.t. arbitrary monomial ordering
     * Currently using Buchberger's algorithm with some optimization
-    * Faugere's F_4 algorithms is experimentally implemented,
+    * Faugere's $F_4$ algorithms is experimentally implemented,
 	  but currently not as fast as Buchberger's algorithm 
 * Computation in the (multivariate) polynomial ring over arbitarary field and its quotient ring
     * Ideal membership problem
@@ -139,7 +139,7 @@ The type for the polynomials and operations are defined in `Algebra.Ring.Polynom
 
 `OrderedPolynomial r ord n`{.haskell} represents
 
-* the `n`{.haskell}-variate polynomial ring, 
+* the $n$-variate polynomial ring, 
 * over the coefficient ring `r`{.haskell},
 * with terms sorted w.r.t. [*the monomial ordering*](http://en.wikipedia.org/wiki/Monomial_order) `ord`{.haskell}.
 
