@@ -1,0 +1,8 @@
+hackage:
+  prefix:  http://hackage.haskell.org/package/
+
+asin:
+  prefix:  http://www.amazon.co.jp/dp/
+
+github:
+  prefix:  https://github.com/

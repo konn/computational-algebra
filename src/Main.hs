@@ -1,7 +1,13 @@
 {-# LANGUAGE ExtendedDefaultRules, OverloadedStrings #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Main where
+import Lenses
+import Settings
+
+import           Control.Lens        hiding (setting)
 import           Data.Default
+import           Data.Foldable
+import           Data.Maybe
 import           Data.Monoid
 import           Data.Text           (Text)
 import qualified Data.Text           as T
@@ -10,11 +16,13 @@ import           Data.Time.LocalTime
 import           Hakyll
 import           Shelly
 import           System.Exit         (ExitCode (..))
+import           Text.Pandoc
 
 default (Text)
 
 main :: IO ()
 main = hakyllWith conf $ do
+  setting "schemes" (def :: Schemes)
   match "templates/**" $
     compile templateCompiler
   match "params.json" $ do
@@ -26,8 +34,11 @@ main = hakyllWith conf $ do
   match "index.md" $ do
     route $ setExtension "html"
     compile $ do
-      pandocCompiler
-        >>= return . fmap (demoteHeaders . demoteHeaders)
+      pandocCompilerWithTransformM
+        defaultHakyllReaderOptions
+        defaultHakyllWriterOptions
+        procSchemes
+        <&> fmap (demoteHeaders . demoteHeaders)
         >>= loadAndApplyTemplate "templates/default.html" defaultContext
         >>= relativizeUrls
   return ()
@@ -72,3 +83,20 @@ conf = def { deploySite = deploy
            , ignoreFile = testIgnore
            , previewPort = 8898
            }
+
+procSchemes :: Pandoc -> Compiler Pandoc
+procSchemes = bottomUpM procSchemes0
+
+procSchemes0 :: Inline -> Compiler Inline
+procSchemes0 inl =
+  case inl ^? linkUrl of
+    Nothing -> return inl
+    Just url -> do
+      Schemes dic <- loadBody "config/schemes.yml"
+      let url' = maybe url T.unpack $ asum $
+                 imap (\k v -> fmap (sandwitched (prefix v) (fromMaybe "" $ postfix v)) $
+                               T.stripPrefix (k <> ":") $ T.pack url)
+                 dic
+      return $ inl & linkUrl .~ url'
+  where
+    sandwitched s e t = s <> t <> e

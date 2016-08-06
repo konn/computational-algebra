@@ -2,15 +2,62 @@
 ./Setup.hs,15
 main main1,2
 
-./src/Main.hs,240
+./src/Instances.hs,325
+module Instances Instances2,3
+newtype BibTeX BibTeX13,14
+newtype BibTeX = BibTeX BibTeX13,14
+newtype BibTeX = BibTeX { runBibTeX runBibTeX13,14
+instance instance16,17
+biblioToBibTeX biblioToBibTeX25,26
+biblioToBibTeX biblioToBibTeX26,27
+bibTeXToBiblio bibTeXToBiblio28,29
+bibTeXToBiblio bibTeXToBiblio29,30
+
+./src/Lenses.hs,281
+module Lenses Lenses4,5
+newtype MonoidFun MonoidFun13,14
+newtype MonoidFun a w = MonoidFun MonoidFun13,14
+newtype MonoidFun a w = MonoidFun { runMonoidArr runMonoidArr13,14
+imgOrLink imgOrLink23,24
+imgOrLink imgOrLink24,25
+linkUrl linkUrl26,27
+linkUrl linkUrl27,28
+
+./src/Main.hs,368
 module Main Main2,3
-main main15,16
-main main16,17
-excluded excluded34,35
-excluded excluded35,36
-testIgnore testIgnore37,38
-testIgnore testIgnore38,39
-deploy deploy41,42
-deploy deploy42,43
-conf conf68,69
-conf conf69,70
+main main22,23
+main main23,24
+excluded excluded45,46
+excluded excluded46,47
+testIgnore testIgnore48,49
+testIgnore testIgnore49,50
+deploy deploy52,53
+deploy deploy53,54
+conf conf79,80
+conf conf80,81
+procSchemes procSchemes86,87
+procSchemes procSchemes87,88
+procSchemes0 procSchemes089,90
+procSchemes0 procSchemes090,91
+
+./src/Settings.hs,724
+module Settings Settings3,4
+data SiteTree SiteTree30,31
+data SiteTree = SiteTree SiteTree30,31
+data SiteTree = SiteTree { title title30,31
+                         , children children31,32
+instance instance35,36
+walkTree walkTree47,48
+walkTree walkTree48,49
+data Scheme Scheme54,55
+data Scheme = Scheme Scheme54,55
+data Scheme = Scheme { prefix prefix54,55
+                     , postfix postfix55,56
+newtype Schemes Schemes65,66
+newtype Schemes  = Schemes Schemes65,66
+newtype Schemes  = Schemes { getSchemes getSchemes65,66
+setting setting75,76
+setting setting77,78
+newtype NavBar NavBar80,81
+newtype NavBar  = NavBar NavBar80,81
+newtype NavBar  = NavBar { runNavBar runNavBar80,81
