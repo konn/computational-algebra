@@ -52,7 +52,7 @@ library
                      , tagged               >= 0.7
                      , hybrid-vectors       >= 0.1
                      , text                 >=0.11
-                     , type-natural         >= 0.6.1.1 && < 0.7
+                     , type-natural         >= 0.7 && < 0.8
                      , unamb                >= 0.2
                      , unordered-containers >= 0.2
                      , vector               >= 0.10
@@ -84,7 +84,7 @@ library
     exposed:           True
     buildable:         True
     other-modules:     Algebra.Algorithms.FGLM Algebra.Field.Galois.Internal Algebra.Field.Galois.Conway
-    ghc-options:      -Odph -Wall -Wno-unused-top-binds
+    ghc-options:      -O2 -Wall -Wno-unused-top-binds
     extensions:       CPP
  
 executable solve
@@ -499,7 +499,7 @@ benchmark faugere4-bench
     buildable: True
     hs-source-dirs: bench share
     other-modules: Utils
-    ghc-options: -Wall -threaded -Odph -rtsopts -caf-all -auto-all -with-rtsopts=-qa
+    ghc-options: -Wall -threaded -O2 -rtsopts -caf-all -auto-all -with-rtsopts=-qa
 
 benchmark unipol-mult-bench
     build-depends: constraints >=0.3, HUnit -any, sized,
@@ -517,4 +517,4 @@ benchmark unipol-mult-bench
     buildable: True
     hs-source-dirs: bench share
     other-modules: Utils
-    ghc-options: -Wall -threaded -Odph -rtsopts -caf-all -auto-all -with-rtsopts=-qa
+    ghc-options: -Wall -threaded -O2 -rtsopts -caf-all -auto-all -with-rtsopts=-qa
