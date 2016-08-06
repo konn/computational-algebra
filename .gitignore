@@ -83,3 +83,4 @@ tramp
 
 # Other custom ignores
 _site
+_cache

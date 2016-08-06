@@ -2,11 +2,15 @@
 ./Setup.hs,15
 main main1,2
 
-./src/Main.hs,132
+./src/Main.hs,240
 module Main Main2,3
-deploy deploy16,17
-deploy deploy17,18
-conf conf39,40
-conf conf40,41
-main main44,45
-main main45,46
+main main15,16
+main main16,17
+excluded excluded34,35
+excluded excluded35,36
+testIgnore testIgnore37,38
+testIgnore testIgnore38,39
+deploy deploy41,42
+deploy deploy42,43
+conf conf71,72
+conf conf72,73

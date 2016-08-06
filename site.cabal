@@ -1,4 +1,4 @@
-name:                sites
+name:                site
 version:             0.1.0.0
 synopsis:            Simple project template from stack
 description:         Please see README.md
@@ -12,7 +12,7 @@ category:            Web
 build-type:          Simple
 cabal-version:       >=1.10
 
-executable sites
+executable site
   hs-source-dirs:      src
   main-is:             Main.hs
   default-language:    Haskell2010
