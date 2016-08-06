@@ -7,8 +7,12 @@
     <meta name="description" content="Computational Algebra System in Haskell : Library to calculate Gröbner basis written in Haskell.">
 
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/pygments.css">
+    <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    
 
-    <title>index - Computational Algebra System in Haskell</title>
+    <title>Home - Computational Algebra System in Haskell</title>
   </head>
   <body>
 
@@ -30,25 +34,136 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h3 id="welcome-to-github-pages">Welcome to GitHub Pages.</h3>
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
-<div class="sourceCode"><pre class="sourceCode zsh"><code class="sourceCode zsh">$ <span class="kw">cd</span> your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages</code></pre></div>
-<p>If you’re using the GitHub for Mac, simply sync your repository and you’ll see the new branch.</p>
-<h3 id="designer-templates" class="anchor">Designer Templates</h3>
-<p>We’ve crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
-<h3 id="rather-drive-stick">Rather Drive Stick?</h3>
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-<h3 id="authors-and-contributors">Authors and Contributors</h3>
-<p>You can <span class="citation">@mention</span> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor’s GitHub Profile. For example: In 2007, Chris Wanstrath <span class="citation">@defunkt</span>, PJ Hyett (<span class="citation">@pjhyett</span>), and Tom Preston-Werner (<span class="citation">@mojombo</span>) founded GitHub.</p>
-<h3 id="support-or-contact">Support or Contact</h3>
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages" class="uri">http://help.github.com/pages</a> or contact <script type="text/javascript">
-<!--
-h='&#x67;&#x69;&#116;&#104;&#x75;&#98;&#46;&#x63;&#x6f;&#x6d;';a='&#64;';n='&#x73;&#x75;&#112;&#112;&#x6f;&#114;&#116;';e=n+a+h;
-document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+e+'<\/'+'a'+'>');
-// -->
-</script><noscript>support at github dot com</noscript> and we’ll help you sort it out.</p>
+        <h3 id="overview">Overview</h3>
+<p>The <code>computational-algebra</code> is the computational algebra system, implemented as a Embedded Domain Specific Language (<em>EDSL</em>) in <a href="https://www.haskell.org">Haskell</a>. This library provides many functionality for computational algebra, especially ideal computation such as Groebner basis calculation.</p>
+<p>Thanks to Haskell’s powerful language features, this library achieves the following goals:</p>
+<dl>
+<dt>Type-Safety</dt>
+<dd>Haskell’s static type system enforces <strong>static correctness</strong> and prevents you from violating invariants.
+</dd>
+<dt>Flexibility</dt>
+<dd>With the powerful type-system of Haskell, we can write <strong>highly abstract program</strong> resulted in <strong>easy-to-extend</strong> system.
+</dd>
+<dt>Efficiency</dt>
+<dd>Haskell comes with many <strong>aggressive optimization mechanism</strong> and <strong>parallel computation features</strong>, which enables us to write efficient program.
+</dd>
+</dl>
+<p>This package currently provides the following functionalities:</p>
+<ul>
+<li>Groebner basis calculation w.r.t. arbitrary monomial ordering
+<ul>
+<li>Currently using Buchberger’s algorithm with some optimization</li>
+<li>Faugere’s F_4 algorithms is experimentally implemented, but currently not as fast as Buchberger’s algorithm</li>
+</ul></li>
+<li>Computation in the (multivariate) polynomial ring over arbitarary field and its quotient ring
+<ul>
+<li>Ideal membership problem</li>
+<li>Ideal operations such as intersection, saturation and so on.</li>
+<li>Zero-dimensional ideal operation and conversion via FGLM algorithm</li>
+<li>Variable elimination</li>
+</ul></li>
+<li>Find numeric solutions for polynomial system with real coefficient</li>
+</ul>
+<h3 id="requirements-and-installation">Requirements and Installation</h3>
+<p>Old version of this package is <a href="http://hackage.haskell.org/package/computational-algebra">uploaded on Hackage</a>, but it’s rather outdated. Most recent version of <code>computational-algebra</code> is developed on <a href="https://github.com/konn/computational-algebra">GitHub</a>.</p>
+<p>It uses the most agressive language features recently implemented in <a href="https://www.haskell.org/ghc/">Glasgow Haskell Compiler</a>, so it requires at least GHC 8.0.1 and also it depends on many packages currently not available on Hackage, but you can install it fairly easily with help of <a href="https://docs.haskellstack.org/en/stable/README/">The Haskell Tool Stack</a>.</p>
+<div class="sourceCode"><pre class="sourceCode zsh"><code class="sourceCode zsh">$ curl -sSL https://get.haskellstack.org/ <span class="kw">|</span> <span class="kw">sh</span>
+  <span class="co"># if you haven't install Stack yet</span>
+$ git <span class="kw">clone</span> https://github.com/konn/computational-algebra
+$ <span class="kw">cd</span> computational-algebra
+$ stack build</code></pre></div>
+<p>In addition, you may need to install GSL and LAPACK (for matrix computation) beforehand. You can install them via Homebrew (OS X), <code>apt-get</code>, or other major package management systems.</p>
+<h3 id="example">Example</h3>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE ConstraintKinds, DataKinds, GADTs, KindSignatures     #-}</span>
+<span class="ot">{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude              #-}</span>
+<span class="ot">{-# LANGUAGE NoMonomorphismRestriction, QuasiQuotes, TypeOperators #-}</span>
+<span class="kw">module</span> <span class="dt">Main</span> <span class="kw">where</span>
+<span class="kw">import </span><span class="dt">Algebra.Algorithms.Groebner</span>
+<span class="kw">import </span><span class="dt">Algebra.Field.Finite</span>
+<span class="kw">import </span><span class="dt">Algebra.Prelude</span>
+<span class="kw">import </span><span class="dt">Data.Type.Ordinal.Builtin</span>
+
+<span class="co">-- | 0-th variable of polynomial ring with at least one variable.</span>
+<span class="co">-- Variables are 0-origin.</span>
+<span class="ot">x ::</span> (<span class="dt">KnownNat</span> n, <span class="dt">CoeffRing</span> r, <span class="dt">IsMonomialOrder</span> n order, (<span class="dv">0</span> <span class="fu">:&lt;</span> n) <span class="fu">~</span> <span class="ch">'True)</span>
+  <span class="ot">=&gt;</span> <span class="dt">OrderedPolynomial</span> r order n
+x <span class="fu">=</span> var [od<span class="fu">|</span><span class="dv">0</span><span class="fu">|</span>]
+
+<span class="co">-- | 1-st variable of polynomial ring with at least two variable.</span>
+<span class="ot">y ::</span> (<span class="dt">KnownNat</span> n, <span class="dt">CoeffRing</span> r, <span class="dt">IsMonomialOrder</span> n order, (<span class="dv">1</span> <span class="fu">:&lt;</span> n) <span class="fu">~</span> <span class="ch">'True)</span>
+  <span class="ot">=&gt;</span> <span class="dt">OrderedPolynomial</span> r order n
+y <span class="fu">=</span> var [od<span class="fu">|</span><span class="dv">1</span><span class="fu">|</span>]
+
+<span class="co">-- | The last variable of</span>
+<span class="ot">z ::</span> <span class="dt">Polynomial</span> <span class="dt">Rational</span> <span class="dv">3</span>
+z <span class="fu">=</span> var [od<span class="fu">|</span><span class="dv">2</span><span class="fu">|</span>]
+
+<span class="co">-- | f in QQ[x,y,z]</span>
+<span class="ot">f ::</span> <span class="dt">OrderedPolynomial</span> <span class="dt">Rational</span> <span class="dt">Grevlex</span> <span class="dv">3</span>
+f <span class="fu">=</span> <span class="dv">1</span><span class="fu">%</span><span class="dv">2</span><span class="fu">*</span>x<span class="fu">*</span>y<span class="fu">^</span><span class="dv">2</span> <span class="fu">+</span> y<span class="fu">^</span><span class="dv">2</span>
+
+<span class="co">-- | map f to the F_5[x,y,z], where F_5 = ZZ/5ZZ</span>
+<span class="ot">f' ::</span> <span class="dt">Polynomial</span> (<span class="dt">F</span> <span class="dv">5</span>) <span class="dv">3</span>
+f' <span class="fu">=</span> mapCoeff (\r <span class="ot">-&gt;</span> fromInteger (numerator r) <span class="fu">/</span> fromInteger (denominator r) ) f
+
+<span class="co">-- | ideal of QQ[x,y,a,b,c,s]</span>
+<span class="ot">heron ::</span> <span class="dt">Ideal</span> (<span class="dt">OrderedPolynomial</span> <span class="dt">Rational</span> <span class="dt">Lex</span> <span class="dv">6</span>)
+heron <span class="fu">=</span> toIdeal [ <span class="dv">2</span> <span class="fu">*</span> s <span class="fu">-</span> a <span class="fu">*</span> y
+                , b<span class="fu">^</span><span class="dv">2</span> <span class="fu">-</span> (x<span class="fu">^</span><span class="dv">2</span> <span class="fu">+</span> y<span class="fu">^</span><span class="dv">2</span>)
+                , c<span class="fu">^</span><span class="dv">2</span> <span class="fu">-</span> ((a <span class="fu">-</span> x)<span class="fu">^</span><span class="dv">2</span> <span class="fu">+</span> y<span class="fu">^</span><span class="dv">2</span>)
+                ]
+  <span class="kw">where</span>
+    <span class="co">-- | Get the last four variables of QQ[x,y,a,b,c,s]</span>
+    [_, _, a, b, c, s] <span class="fu">=</span> vars
+
+<span class="ot">main ::</span> <span class="dt">IO</span> ()
+main <span class="fu">=</span> <span class="kw">do</span>
+  print f
+  print f'
+  print <span class="fu">$</span> x <span class="fu">*</span> f'<span class="fu">^</span><span class="dv">2</span>
+  print <span class="fu">$</span> calcGroebnerBasis heron
+  <span class="co">-- print $ f' * 5 + f -- ^ Type error!</span></code></pre></div>
+<h3 id="type-interface">Type Interface</h3>
+<p><code>computational-algebra</code> provides well-typed interface. In this section, we will see how this package represents mathematical objects by type.</p>
+<h4 id="type-level-natural-numbers-and-singletons">Type-level natural numbers and singletons</h4>
+<p>As we will see below, we use type-level natural number to indicate the number of variables. So, let’s see how we express natural numbers as type.</p>
+<p>The <a href="http://hackage.haskell.org/package/type-natural"><code>type-natural</code> package</a> provides the functionality to treat type-level natural numbers seamlesly. That library also provides Peano numerals, but it is enough to use <code>*.Builtin</code> module for our purposes. <!-- It provides quasiquote `snat`{.haskell} to express the natural numbers. For example, we can write `[nat| 40 |]`{.haskell}, `[nat|100|]`{.haskell} and so on. --></p>
+<p>Sometimes we have to specify the type-level natural as function argument explicitly. We use so-called <strong>singleton</strong>s for the type natural in such case. To generate singletons for type-level naturals, we can use <code class="sourceCode haskell">snat</code> quasiquoter from <code class="sourceCode haskell"><span class="dt">Data.Type.Natural.Builtin</span></code> in <code>type-natural</code> package. Furthermore, the <a href="http://hackage.haskell.org/package/singletons"><code>singletons</code> package</a> provides unified way to do with singletons. For more detail, please read the <a href="http://www.cis.upenn.edu/~eir/papers/2012/singletons/paper.pdf">original paper of singletons</a>.</p>
+<h4 id="algebraic-structures-and-operations">Algebraic structures and operations</h4>
+<p>To express algebraic structures, we use the type classes from <a href="http://hackage.haskell.org/package/algebra"><code>algebra</code></a> package. For example, if we say “k is a <em>field</em>”, it means that <code class="sourceCode haskell">k</code> is an instance of <code class="sourceCode haskell"><span class="dt">Field</span></code> class from <code>algebra</code> package. As mentioned above, we can compute the Groebner basis for ideals in polynomial rings over arbitary field. This means we can compute bases for those with coefficient field an instance of <code>Field</code>. In addition, <code>computational-algebra</code> provides <code class="sourceCode haskell"><span class="dt">NoetherianRing</span></code> class for completion.</p>
+<p>The ring and field operations for objects implemented in this package is provided as the instance function of <code class="sourceCode haskell"><span class="dt">Ring</span></code> and <code class="sourceCode haskell"><span class="dt">Field</span></code> classes. Of course, this package also provides instances for the standard type classes such as <code class="sourceCode haskell"><span class="dt">Num</span></code> and <code class="sourceCode haskell"><span class="dt">Fractional</span></code>, but we recommend to use the operation from <code>algebra</code> with <code class="sourceCode haskell"><span class="dt">NoImplicitPrlude</span></code> option. We provide the convenient module <code class="sourceCode haskell"><span class="dt">Algebra.Ring.Prelude</span></code> to use with <code class="sourceCode haskell"><span class="dt">NoImplicitPrlude</span></code> option. Also we will plan to provide drop-in replacement for <code class="sourceCode haskell"><span class="dt">Prelude</span></code> module.</p>
+<h4 id="polynomial">Polynomial</h4>
+<p>The type for the polynomials and operations are defined in <code class="sourceCode haskell"><span class="dt">Algebra.Ring.Polynomial</span></code> module.</p>
+<p><code class="sourceCode haskell"><span class="dt">OrderedPolynomial</span> r ord n</code> represents</p>
+<ul>
+<li>the <code class="sourceCode haskell">n</code>-variate polynomial ring,</li>
+<li>over the coefficient ring <code class="sourceCode haskell">r</code>,</li>
+<li>with terms sorted w.r.t. <a href="http://en.wikipedia.org/wiki/Monomial_order"><em>the monomial ordering</em></a> <code class="sourceCode haskell">ord</code>.</li>
+</ul>
+<p>In the above, <code class="sourceCode haskell">n</code> should have kind <code class="sourceCode haskell"><span class="dt">Nat</span></code> and <code class="sourceCode haskell">r</code> should be at least an instance of <code class="sourceCode haskell"><span class="dt">NoetherianRing</span></code>, but usually the <code class="sourceCode haskell"><span class="dt">Field</span></code> for practical usage. The monomial ordering <code class="sourceCode haskell">ord</code> should be the instance of <code class="sourceCode haskell"><span class="dt">IsMonomialOrder</span></code>. More precisely, <code class="sourceCode haskell">ord</code> must have instance for <code class="sourceCode haskell"><span class="dt">IsMonomial</span> <span class="dt">Order</span> n ord</code> if and only if <code class="sourceCode haskell">ord</code> stands for some monomial ordering on n-ary polynomial.</p>
+<p>Let’s see example. <span class="math inline">\(\mathbb{Q}[x,y,z]\)</span> (the trivariate polynomial ring over the rational number) with Lex ordering is represented by the type <code class="sourceCode haskell"><span class="dt">OrderedPolynomial</span> <span class="dt">Rational</span> <span class="dt">Lex</span> <span class="dv">3</span></code>. <code class="sourceCode haskell"><span class="dt">Polynomial</span> <span class="dt">Rational</span> <span class="dv">3</span></code> is short for <code class="sourceCode haskell"><span class="dt">OrderedPolynomial</span> <span class="dt">Rational</span> <span class="dt">Grevlex</span> <span class="dv">3</span></code>.</p>
+<h4 id="monomial-orderings">Monomial Orderings</h4>
+<p>By default, <code>computational-algebra</code> provides the following monomial orderings:</p>
+<ul>
+<li><code class="sourceCode haskell"><span class="dt">Lex</span></code>, the lexicographical order,</li>
+<li><code class="sourceCode haskell"><span class="dt">Grlex</span></code>, the graded lex order, and</li>
+<li><code class="sourceCode haskell"><span class="dt">Grevlex</span></code>, the graded reversed lex order.</li>
+</ul>
+<p>In addition to the basic monomial orders listed above, we can construct new monomial orderings from existing ones with following:</p>
+<ul>
+<li><code class="sourceCode haskell"><span class="dt">Graded</span> ord</code>, the graded order which first compares the grade (i.e. total degree) and break the tie with <code class="sourceCode haskell">ord</code>,</li>
+<li><code class="sourceCode haskell"><span class="dt">ProductOrder</span> n ord ord'</code>, the product order which compares first n variables with <code class="sourceCode haskell">ord</code>, then compare the rest with <code class="sourceCode haskell">ord'</code>, and</li>
+<li><code class="sourceCode haskell"><span class="dt">WeightOrder</span> ws ord</code>, weighted order which compares the dot-product with ws first and then break the tie with <code class="sourceCode haskell">ord</code>.</li>
+</ul>
+<p>We provide the <code class="sourceCode haskell"><span class="dt">Revlex</span></code>, the reversed lex order. <code class="sourceCode haskell"><span class="dt">Revlex</span></code> is <strong>not</strong> the monomial order, but we can construct monomial orderings from it with above constructors. For example, <code class="sourceCode haskell"><span class="dt">Graded</span> <span class="dt">Revlex</span></code> is equivalent to <code class="sourceCode haskell"><span class="dt">Grevlex</span></code>.</p>
+<h5 id="how-to-write-ismonomialorder-instances">How to write <code class="sourceCode haskell"><span class="dt">IsMonomialOrder</span></code> instances?</h5>
+<p>If you should use the monomial ordering which cannot constructed from the above, and you have proven that ordering is really a monomial ordering, you can just implement an instance for the <code class="sourceCode haskell"><span class="dt">IsMonomialOrder</span></code>.</p>
+<p>In <code class="sourceCode haskell">computational<span class="fu">-</span>algebra</code>, monomials are essentially represented as <code class="sourceCode haskell"><span class="dt">Sized</span> n <span class="dt">Int</span></code>, the <code class="sourceCode haskell"><span class="dt">Int</span></code> vector with size <code class="sourceCode haskell">n</code>.</p>
+<p>(stub)</p>
+<h4 id="quotient-ring">Quotient ring</h4>
+<p>The type <code class="sourceCode haskell"><span class="dt">Quotient</span> k ord n ideal</code> stands for the quotient ring of n-variate polynomial ring over the field <code class="sourceCode haskell">k</code>. In order to distinguish the quotient ring over different ideals, we parametrize ideals in type. But, wait, how to parametrize the ideal information in the type-level?</p>
+<p>To solve this problem, we use the Edward Kmett’s <a href="http://hackage.haskell.org/package/reflection">reflection</a> package.</p>
+<p>(stub)</p>
       </section>
     </div>
 
