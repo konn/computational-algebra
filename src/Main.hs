@@ -41,26 +41,23 @@ testIgnore fp =
 
 deploy :: Configuration -> IO ExitCode
 deploy cnf = shelly $ handleany_sh (const $ return $ ExitFailure 1)  $do
-  let dest = fromText $ T.pack $ destinationDirectory cnf
+  dest <- canonicalize $ fromText $ T.pack $ destinationDirectory cnf
   mkdir_p dest
   cd dest
   isGit <- test_d ".git"
   timeStamp <- formatTime defaultTimeLocale "%c" <$> liftIO getZonedTime
   let msg = "Updated (" ++ timeStamp ++  ")"
       msgOpt =  ("-m\"" <> T.pack msg <> "\"")
-  if isGit
-    then do
-    () <- cmd "git" "add" "."
-    run_ "git" ["commit", "-a", msgOpt, "--edit"]
-    else do
-    () <- cmd "git" "init"
-    () <- cmd "git" "add" "."
-    () <- cmd "git" "commit" "-mtemporary"
-    () <- cmd "git" "branch" "-m" "gh-pages-tmp"
-    () <- cmd "git" "remote" "add" "origin" "git@github.com:konn/computational-algebra.git"
-    () <- cmd "git" "pull" "origin" "gh-pages" "--depth=1"
-    () <- cmd "git" "checkout" "gh-pages"
-    run_ "git" ["merge", msgOpt, "--edit", "gh-pages-tmp"]
+  unless isGit $ withTmpDir $ \tdir -> do
+    cd tdir
+    run_ "git" ["init"]
+    run_ "git" ["remote", "add", "origin", "git@github.com:konn/computational-algebra.git"]
+    run_ "git" ["fetch", "origin", "gh-pages", "--depth=1"]
+    run_ "git" ["checkout", "gh-pages"]
+    mv (tdir </> ".git") dest
+  cd dest
+  run_ "git" ["add", "."]
+  run_ "git" ["commit", "-a", msgOpt, "--edit"]
   msgZ <- cmd "git" "log" "HEAD~1" "--format=%s"
   run_ "git" ["push", "origin", "gh-pages"]
   cd ".."
