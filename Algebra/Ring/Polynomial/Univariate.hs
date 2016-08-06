@@ -1,5 +1,5 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, GADTs        #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses          #-}
+{-# LANGUAGE BangPatterns, ConstraintKinds, DataKinds, FlexibleContexts #-}
+{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, MultiParamTypeClasses   #-}
 {-# LANGUAGE NoImplicitPrelude, ScopedTypeVariables, StandaloneDeriving #-}
 {-# LANGUAGE TypeFamilies, UndecidableSuperClasses                      #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
@@ -112,7 +112,7 @@ karatsuba f0 g0 =
     cCoeff = IM.findWithDefault zero 0
     {-# INLINE cCoeff #-}
 
-    loop m f g
+    loop !m !f !g
       | m <= 1 =
         let (a, b, c) =
               linearProduct (*)
