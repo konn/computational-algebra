@@ -36,12 +36,20 @@ main = hakyllWith conf $ do
     compile $ do
       pandocCompilerWithTransformM
         defaultHakyllReaderOptions
-        defaultHakyllWriterOptions
+        writerOpts
         procSchemes
         <&> fmap (demoteHeaders . demoteHeaders)
         >>= loadAndApplyTemplate "templates/default.html" defaultContext
         >>= relativizeUrls
   return ()
+
+writerOpts =
+  defaultHakyllWriterOptions
+  { writerHTMLMathMethod = MathJax mathJaxCDN
+  -- , writerOpts = S.fromList []
+  }
+  where
+    mathJaxCDN = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"
 
 excluded :: [String]
 excluded = ["src", "sites.cabal", "TAGS", "stack.yaml"]

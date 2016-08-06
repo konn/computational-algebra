@@ -23,22 +23,23 @@ imgOrLink imgOrLink24,25
 linkUrl linkUrl26,27
 linkUrl linkUrl27,28
 
-./src/Main.hs,368
+./src/Main.hs,397
 module Main Main2,3
 main main22,23
 main main23,24
-excluded excluded45,46
-excluded excluded46,47
-testIgnore testIgnore48,49
-testIgnore testIgnore49,50
-deploy deploy52,53
-deploy deploy53,54
-conf conf79,80
-conf conf80,81
-procSchemes procSchemes86,87
-procSchemes procSchemes87,88
-procSchemes0 procSchemes089,90
-procSchemes0 procSchemes090,91
+writerOpts writerOpts45,46
+excluded excluded53,54
+excluded excluded54,55
+testIgnore testIgnore56,57
+testIgnore testIgnore57,58
+deploy deploy60,61
+deploy deploy61,62
+conf conf87,88
+conf conf88,89
+procSchemes procSchemes94,95
+procSchemes procSchemes95,96
+procSchemes0 procSchemes097,98
+procSchemes0 procSchemes098,99
 
 ./src/Settings.hs,724
 module Settings Settings3,4
