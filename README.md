@@ -2,21 +2,26 @@ Computational Algebra Library
 ==============================
 [![Build Status](https://travis-ci.org/konn/computational-algebra.png?branch=master)](https://travis-ci.org/konn/computational-algebra)
 
-Abstract
---------
-A statically typed computational algebra library. This package currently focuses on computations in (multivariate) polynomial ring over arbitrary field and its quotient ring. As an application, this library also provides the functionality to solve the polynomial equation system.
-
-This library utilizes GHC's advanced type system to statically guarantee safety, so please use with GHC >= 7.6.*.
-
-Installation
--------------
-```sh
-$ cabal update
-$ cabal install computational-algebra
-```
+**For more detail, please read [Official Project Site](http://konn.github.io/computational-algebra/)**.
 
 Overview
 --------
+The `computational-algebra` is the computational algebra system, implemented as a Embedded Domain Specific Language (*EDSL*) in [Haskell](https://www.haskell.org).
+This library provides many functionality for computational algebra, especially ideal computation such as Groebner basis calculation.
+
+Thanks to Haskell's powerful language features, this library achieves the following goals:
+
+Type-Safety
+:   Haskell's static type system enforces **static correctness** and prevents you from violating invariants. 
+
+Flexibility
+:   With the powerful type-system of Haskell,
+    we can write **highly abstract program** resulted in **easy-to-extend** system.
+
+Efficiency
+:   Haskell comes with many **aggressive optimization mechanism** and **parallel computation features**,
+    which enables us to write efficient program.
+
 This package currently provides the following functionalities:
 
 * Groebner basis calculation w.r.t. arbitrary monomial ordering
@@ -30,137 +35,21 @@ This package currently provides the following functionalities:
     * Variable elimination
 * Find numeric solutions for polynomial system with real coefficient
 
-Example
--------
+Requirements and Installation
+------------------------------
+Old version of this package is uploaded on [Hackage](http://hackage.haskell.org/package/computational-algebra), but it's rather outdated.
+Most recent version of `computational-algebra` is developed on GitHub.
 
-```haskell
-{-# LANGUAGE ConstraintKinds #-}
-{-# LANGUAGE DataKinds, NoImplicitPrelude, NoMonomorphismRestriction, QuasiQuotes #-}
-module Main where
-import Algebra.Prelude
-import Algebra.Field.Finite
-import Algebra.Ring.Noetherian
-import Algebra.Algorithms.Groebner
-import Data.Type.Natural
-import Data.Type.Ordinal
+It uses the most agressive language features recently implemented in [Glasgow Haskell Compiler](https://www.haskell.org/ghc/), so it requires at least GHC 8.0.1 and
+also it depends on many packages currently not available on Hackage, but you can install it fairly easily with help of [The Haskell Tool Stack](https://docs.haskellstack.org/en/stable/README/).
 
--- | 0-th variable of polynomial ring with at least one variable.
--- Variables are 0-origin.
-x :: (IsPolynomial r n, IsOrder order) => OrderedPolynomial r order (S n)
-x = var [od|0|]
-
--- | 1-st variable of polynomial ring with at least two variable.
-y :: (IsPolynomial r n, IsOrder order) => OrderedPolynomial r order (S (S n))
-y = var [od|1|]
-
--- | The last variable of 
-z :: Polynomial Rational Three
-z = var [od|2|]
-
--- | f in QQ[x,y,z] 
-f :: OrderedPolynomial Rational Grevlex Three
-f = 1%2*x*y^2 + y^2
-
--- | map f to the F_5[x,y,z], where F_5 = ZZ/5ZZ
-f' :: Polynomial (F Five) Three
-f' = mapCoeff fromRational f
-
--- | ideal of QQ[x,y,a,b,c,s]
-heron :: Ideal (OrderedPolynomial Rational Lex Six)
-heron = toIdeal [ 2 * s - a * y
-                , b^2 - (x^2 + y^2)
-                , c^2 - ((a-x)^2 + y^2)
-                ]
-  where
-    -- | Get the last four variables of QQ[x,y,a,b,c,s]
-    [_, _, a, b, c, s] = genVars sSix
-
-main :: IO ()
-main = do
-  print f
-  print f'
-  print $ x * f'^2
-  print $ calcGroebnerBasis heron
-  -- print $ f' * 5 + f -- ^ Type error!
+```zsh
+$ curl -sSL https://get.haskellstack.org/ | sh
+  # if you haven't install Stack yet
+$ git clone https://github.com/konn/computational-algebra
+$ cd computational-algebra
+$ stack build
 ```
 
-Type Interface
---------------
-`computational-algebra` provides well-typed interface. In this section, we will see how this package represents mathematical objects by type.
-
-### Type-level natural numbers and singletons ###
-As we will see below, we use type-level natural number to indicate the number of variables. So, let's see how we express natural numbers as type.
-
-We use `Nat` from [`type-natural`](http://hackage.haskell.org/package/type-natural ) package. This package adopt [peano numerals](http://www.haskell.org/haskellwiki/Peano_numbers) to express the number at type-level, that is:
-
-```haskell
-data Nat = Z | S Z
-```
-
-`Z` stands for 0 and `S n` for n+1. For example, `S Z` stands for 1, `S (S (S Z))` for 3, and so on. With `DataKinds` language extension, we can use `Nat` as kind and `Z` and `S` as type constructors. For more detail, please read my introduction article for the dependently typed programming with Haskell (coming soon).
-
-For the numbers upto 20, `type-natural` provides the type synonym to express these numbers such as:
-
-* `Zero`, `One`, `Two`, `Three`, ..., `Twenty`
-* `N0`, `N1`, ..., `N20`.
-
-In addition, the package provides quasiquote `nat` to express the natural numbers. For example, we can write `[nat| 40 |]`, `[nat|100|]` and so on.
-Peano numerals consume the same space as itself, sometimes we have to specify `-fcontext-stack=` option to compile the code which includes large type-level natural.
-
-Sometimes we have to specify the type-level natural as function argument explicitly. We use singletons for the type natural in such case. A singleton for a type `t` has exactly one inhabitant and the same structure as `t`. For example, singleton type for `Three = S (S (S Z))` is the type `SNat Three` and its only inhabitant is `SS (SS (SS SZ))`. Also, `type-natural` provides synonyms for singleton natural numbers upto 20, such as `sOne`, `sTwo`, .... and `sN0`, `sN1`, .... and so on. In addition, you should use smart constructors such as `sS` and `sZ` to construct the singleton natural numbers, instead of data constructor `SS` and `SZ`. This sometimes make it easy for the compiler to find some instances.
-For more detail, please read the [original paper of singletons](http://www.cis.upenn.edu/~eir/papers/2012/singletons/paper.pdf).
-
-### Algebraic structures and operations ###
-To express algebraic structures, we use the type classes from Edward Kmett's [`algebra`](http://hackage.haskell.org/package/algebra ) package.
-For example, if we say "k is a *field*", it means that `k` is an instance of `Field` class from `algebra` package.
-As mentioned above, we can compute the Groebner basis for ideals in polynomial rings over arbitary field. This means we can compute bases for those with coefficient field an instance of `Field`. In addition, `computational-algebra` provides `NoetherianRing` class for completion.
-
-The ring and field operations for objects implemented in this package is provided as the instance function of `Ring` and `Field` classes. Of course, this package also provides instances for the standard type classes such as `Num` and `Fractional`, but we recommend to use the operation from `algebra` with `NoImplicitPrlude` option. We provide the convenient module `Algebra.Ring.Prelude` to use with `NoImplicitPrlude` option.
-
-### Polynomial ###
-The type for the polynomials and operations are defined in `Algebra.Ring.Polynomial` module.
-
-`OrderedPolynomial r ord n` represents
-
-* the `n`-variate polynomial ring, 
-* over the coefficient ring `r`,
-* with terms sorted w.r.t. [*the monomial ordering*](http://en.wikipedia.org/wiki/Monomial_order) `ord`.
-
-In the above, `n` should have kind `Nat` described [above](#type-level-natural-numbers-and-singletons) and `r` should be at least an instance of `NoetherianRing`, but usually the `Field` for practical usage. The monomial ordering `ord` should be the instance of `IsMonomialOrder`.
-
-Let's see example. QQ[x,y,z] (the trivariate polynomial ring over the rational number) with Lex ordering is represented by the type `OrderedPolynomial Rational Lex Three`. `Polynomial Rational Three` is short for `OrderedPolynomial Rational Grevlex Three`.
-
-### Monomial Orderings ###
-By default, `computational-algebra` provides the following monomial orderings:
-
-* `Lex`, the lexicographical order, 
-* `Grlex`, the graded lex order, and
-* `Grevlex`, the graded reversed lex order.
-
-In addition to the basic monomial orders listed above, we can construct new monomial orderings from existing ones with following: 
-
-* `Graded ord`, the graded order which first compares the grade (i.e. total degree)
-  and break the tie with `ord`,
-* `ProductOrder n ord ord'`, the product order which compares
-  first n variables with `ord`, then compare the rest with `ord'`, and
-* `WeightOrder ws ord`, weighted order which compares the dot-product
-  with ws first and then break the tie with `ord`.
-
-We provide the `Revlex`, the reversed lex order. `Revlex` is **not** the monomial order, but we can construct monomial orderings from it with above constructors. For example, `Graded Revlex` is equivalent to `Grevlex`.
-
-### How to write `IsMonomialOrder` instances? ###
-
-If you should use the monomial ordering which cannot constructed from the above, and you have proven that ordering is really a monomial ordering, you can just implement an instance for the `IsMonomialOrder`.
-
-In `computational-algebra`, monomials are essentially  represented as `Vector Int n`, the `Int` vector with size `n`. 
-
-(stub)
-
-### Quotient ring ###
-The type `Quotient k ord n ideal` stands for the quotient ring of n-variate polynomial ring over the field `k`.
-In order to distinguish the quotient ring over different ideals, we parametrize ideals in type. But, wait, how to parametrize the ideal information in the type-level?
-
-To solve this problem, we use the Edward Kmett's [reflection](http://hackage.haskell.org/package/reflection ) package.
-
-
-(stub)
+In addition, you may need to install GSL and LAPACK (for matrix computation) beforehand.
+You can install them via Homebrew (OS X), `apt-get`, or other major package management systems.
