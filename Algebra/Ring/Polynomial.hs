@@ -1,11 +1,11 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, ExplicitNamespaces           #-}
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs               #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, IncoherentInstances          #-}
-{-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses               #-}
-{-# LANGUAGE NoMonomorphismRestriction, PatternGuards, PolyKinds      #-}
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, StandaloneDeriving      #-}
-{-# LANGUAGE TemplateHaskell, TypeFamilies, TypeOperators             #-}
-{-# LANGUAGE TypeSynonymInstances, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, ExplicitNamespaces            #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, LiberalTypeSynonyms           #-}
+{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction          #-}
+{-# LANGUAGE PatternGuards, PolyKinds, RankNTypes, ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies         #-}
+{-# LANGUAGE TypeOperators, TypeSynonymInstances, UndecidableInstances #-}
+{-# LANGUAGE ViewPatterns                                              #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 module Algebra.Ring.Polynomial
@@ -272,7 +272,8 @@ substUnivariate :: (Module (Scalar r) b, Unital b, CoeffRing r, IsMonomialOrder 
                 => b -> OrderedPolynomial r order 1 -> b
 substUnivariate u f =
   let n = totalDegree' f
-  in foldr (\a b -> Scalar a .* one + b * u) (Scalar (coeff (OrderedMonomial $ singleton $ fromIntegral n) f) .* one)
+  in foldr (\a b -> Scalar a .* one + b * u)
+           (Scalar (coeff (OrderedMonomial $ singleton $ fromIntegral n) f) .* one)
            [ coeff (OrderedMonomial $ singleton $ fromIntegral i) f | i <- [0 .. n P.- 1] ]
 
 evalUnivariate :: (CoeffRing b, IsMonomialOrder 1 order) => b -> OrderedPolynomial b order 1 -> b

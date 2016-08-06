@@ -3,8 +3,8 @@
 {-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, IncoherentInstances       #-}
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, ParallelListComp #-}
 {-# LANGUAGE PatternSynonyms, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
-{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies            #-}
-{-# LANGUAGE TypeOperators, UndecidableInstances                          #-}
+{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeApplications        #-}
+{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances            #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Ring.Polynomial.Monomial
        ( Monomial, OrderedMonomial(..),
@@ -44,13 +44,12 @@ import           Data.Singletons.Prelude.List    (Length, Replicate, sReplicate)
 import           Data.Singletons.TypeLits        (withKnownNat)
 import qualified Data.Sized.Builtin              as V
 import           Data.Type.Natural.Class         (IsPeano (..), PeanoOrder (..))
-import           Data.Type.Ordinal               (Ordinal (..))
+import           Data.Type.Ordinal               (Ordinal (..), ordToInt)
 import           Numeric.Algebra                 hiding (Order (..))
 import           Prelude                         hiding (Fractional (..),
                                                   Integral (..), Num (..),
                                                   Real (..), lex, product, sum)
 import qualified Prelude                         as P
-import           Proof.Propositional             (IsTrue (..))
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i- type Monomial (n :: Nat) = Sized n Int
 type Monomial n = Sized n Int
@@ -132,6 +131,20 @@ instance KnownNat n => Unital (OrderedMonomial ord n) where
 class IsOrder (n :: Nat) (ordering :: *) where
   cmpMonomial :: Proxy ordering -> MonomialOrder n
 
+head' :: (0 :< n) ~ 'True => Sized n a -> a
+head' = V.head
+{-# INLINE head' #-}
+
+-- We know that Monomial ordering coincides on lex ordering
+-- on univariate monomials.
+{-# RULES
+"cmpMonomial/unary" [~1]
+              forall (pxy :: IsMonomialOrder 1 (o :: *) => Proxy o)
+                     (xs :: Sized 1 Int)
+                     (ys :: Sized 1 Int).
+  cmpMonomial pxy xs ys = comparing head' xs ys
+ #-}
+
 -- * Names for orderings.
 --   We didn't choose to define one single type for ordering names for the extensibility.
 -- | Lexicographical order
@@ -156,6 +169,7 @@ data Graded ord = Graded ord
 
 instance IsOrder n ord => IsOrder n (Graded ord) where
   cmpMonomial Proxy = graded (cmpMonomial (Proxy :: Proxy ord))
+  {-# INLINE [1] cmpMonomial #-}
 
 instance IsMonomialOrder n ord => IsMonomialOrder n (Graded ord)
 
@@ -207,23 +221,29 @@ weightOrder Proxy m m' =
 instance (KnownNat n, IsOrder n ord, SingI ws)
        => IsOrder n (WeightOrder ws ord) where
   cmpMonomial p = weightOrder p
+  {-# INLINE [1] cmpMonomial #-}
 
 instance (IsOrder n ord, IsOrder m ord', KnownNat m, KnownNat n, k ~ (n + m))
       => IsOrder k (ProductOrder n m ord ord') where
   cmpMonomial p = productOrder p
+  {-# INLINE [1] cmpMonomial #-}
 
 -- They're all total orderings.
 instance IsOrder n Grevlex where
   cmpMonomial _ = grevlex
+  {-# INLINE [1] cmpMonomial #-}
 
 instance IsOrder n Revlex where
   cmpMonomial _ = revlex
+  {-# INLINE [1] cmpMonomial #-}
 
 instance IsOrder n Lex where
   cmpMonomial _ = lex
+  {-# INLINE [1] cmpMonomial #-}
 
 instance IsOrder n Grlex where
   cmpMonomial _ = grlex
+  {-# INLINE [1] cmpMonomial #-}
 
 -- | Class for Monomial orders.
 class IsOrder n name => IsMonomialOrder n name where
