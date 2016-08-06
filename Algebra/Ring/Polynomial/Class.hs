@@ -334,6 +334,7 @@ class (P.Show r) => PrettyCoeff r where
 defaultShowsOrdCoeff :: (P.Show r, Unital r, Group r, P.Ord r)
                      => Int -> r -> ShowSCoeff
 defaultShowsOrdCoeff d r
+  | r P.== negate one = Negative P.id
   | r P.<  zero = Negative (P.showsPrec d (negate r))
   | r P.== zero = Vanished
   | r P.== one  = OneCoeff
@@ -404,7 +405,10 @@ instance {-# OVERLAPS #-}
 
 -- | Pretty-printing conditional for coefficients.
 --   Each returning @'P.ShowS'@ must not have any sign.
-data ShowSCoeff = Negative P.ShowS | Vanished | OneCoeff | Positive P.ShowS
+data ShowSCoeff = Negative P.ShowS
+                | Vanished
+                | OneCoeff
+                | Positive P.ShowS
 
 -- | ShowS coefficients as term.
 --
@@ -445,7 +449,7 @@ showsPolynomialWith :: (IsPolynomial poly, PrettyCoeff (Coefficient poly))
                     -> poly
                     -> P.ShowS
 showsPolynomialWith vsVec d f = P.showParen (d P.> 10) $
-  let tms  = map (showMonom *** showsCoeff 10) $ M.toList $ terms' f
+  let tms  = map (showMonom *** showsCoeff 10) $ M.toDescList $ terms' f
   in case tms of
     [] -> P.showString "0"
     (mc : ts) -> P.foldr1 (.) $
@@ -454,10 +458,12 @@ showsPolynomialWith vsVec d f = P.showParen (d P.> 10) $
     showTermOnly (Nothing, Vanished) = P.id
     showTermOnly (Nothing, s)        = showsCoeffAsTerm s
     showTermOnly (Just m, OneCoeff)  = m
+    showTermOnly (Just m, Vanished)  = P.id
     showTermOnly (Just m, t)         = showsCoeffAsTerm t . P.showChar ' ' . m
     showRestTerm (Nothing, Vanished) = P.id
     showRestTerm (Nothing, s)        = showsCoeffWithOp s
     showRestTerm (Just m, OneCoeff)  = P.showString " + " . m
+    showRestTerm (Just m, Vanished)  = P.id
     showRestTerm (Just m, t)         = showsCoeffWithOp t . P.showChar ' ' . m
     vs = F.toList vsVec
     showMonom m =
@@ -467,4 +473,4 @@ showsPolynomialWith vsVec d f = P.showParen (d P.> 10) $
          else Just $ foldr (.) P.id $ L.intersperse (P.showChar ' ') (map P.showString fs)
     showFactor _ 0 = Nothing
     showFactor v 1 = Just v
-    showFactor v n = Just $ v P.++ " ^ " P.++ P.show n
+    showFactor v n = Just $ v P.++ "^" P.++ P.show n
