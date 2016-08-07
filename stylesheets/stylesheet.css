@@ -366,6 +366,10 @@ Full-Width Styles
   background: #212121;
 }
 
+.footnoteRef {
+    vertical-align: super;
+    font-size: 75%;
+}
 
 
 /*******************************************************************************
