@@ -80,7 +80,7 @@ instance Eq (F p) where
 instance Reifies p Integer => Normed (F p) where
   type Norm (F p) = Integer
   norm fp@(F p) = p where _ = reflect fp
-  liftNorm = modNat 
+  liftNorm = modNat
 
 instance Reifies p Integer => Num (F p) where
   fromInteger n = modNat $ fromInteger n
