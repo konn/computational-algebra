@@ -1,31 +1,43 @@
 {-# LANGUAGE BangPatterns, ConstraintKinds, DataKinds, FlexibleContexts #-}
 {-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, MultiParamTypeClasses   #-}
 {-# LANGUAGE NoImplicitPrelude, ScopedTypeVariables, StandaloneDeriving #-}
-{-# LANGUAGE TypeFamilies, UndecidableSuperClasses                      #-}
+{-# LANGUAGE TypeApplications, TypeFamilies, UndecidableSuperClasses    #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 -- | Polynomial type optimized to univariate polynomial.
 module Algebra.Ring.Polynomial.Univariate
-       (Unipol, naiveMult, karatsuba,
+       (Unipol(), naiveMult, karatsuba,
+        divModUnipolByMult, divModUnipol,
         module Algebra.Ring.Polynomial.Class,
         module Algebra.Ring.Polynomial.Monomial) where
 import Algebra.Prelude
 import Algebra.Ring.Polynomial.Class
 import Algebra.Ring.Polynomial.Monomial
 
-import           Control.Arrow          (first)
-import           Control.DeepSeq        (NFData)
-import           Data.Bits              (Bits (..), FiniteBits (..))
-import           Data.Function          (on)
-import           Data.Hashable          (Hashable (hashWithSalt))
-import qualified Data.HashSet           as HS
-import qualified Data.IntMap            as IM
-import qualified Data.Map.Strict        as M
-import           Data.MonoTraversable   (oall)
-import           Data.Ord               (comparing)
-import qualified Data.Sized.Builtin     as SV
-import qualified Numeric.Algebra        as NA
-import           Numeric.Decidable.Zero (DecidableZero (..))
-import qualified Prelude                as P
+import           Control.Arrow                         (first)
+import           Control.DeepSeq                       (NFData)
+import           Data.Bits                             (Bits (..),
+                                                        FiniteBits (..))
+import           Data.Function                         (on)
+import           Data.Hashable                         (Hashable (hashWithSalt))
+import qualified Data.HashSet                          as HS
+import           Data.IntMap                           (IntMap)
+import qualified Data.IntMap                           as IM
+import qualified Data.Map.Strict                       as M
+import           Data.Maybe                            (mapMaybe)
+import           Data.Ord                              (comparing)
+import qualified Data.Sized.Builtin                    as SV
+import qualified Numeric.Algebra                       as NA
+import           Numeric.Algebra.Unital.UnitNormalForm hiding (normalize)
+import qualified Numeric.Algebra.Unital.UnitNormalForm as NA
+import           Numeric.Decidable.Associates
+import           Numeric.Decidable.Units
+import           Numeric.Decidable.Zero                (DecidableZero (..))
+import           Numeric.Domain.GCD
+import           Numeric.Domain.Integral
+import           Numeric.Domain.PID
+import           Numeric.Domain.UFD
+import           Numeric.Semiring.ZeroProduct
+import qualified Prelude                               as P
 
 -- | Univariate polynomial.
 --   It uses @'IM.IntMap'@ as its internal representation;
@@ -40,8 +52,92 @@ instance Hashable r => Hashable (Unipol r) where
 normaliseUP :: DecidableZero r => Unipol r -> Unipol r
 normaliseUP (Unipol r) = Unipol $ IM.filter (not . isZero) r
 
+divModUnipol :: (CoeffRing r, Field r) => Unipol r -> Unipol r -> (Unipol r, Unipol r)
+divModUnipol f g =
+  if isZero g then error "Divided by zero!" else loop f zero
+  where
+    (dq, cq) = leadingTermIM g
+    loop p !acc =
+      let (dp, cp) = leadingTermIM p
+          coe = cp/cq
+          deg = dp - dq
+          canceler = Unipol $ IM.map (*coe) $ IM.mapKeysMonotonic (+ deg) (runUnipol g)
+      in if dp < dq
+         then (acc, p)
+         else loop (p - canceler) $
+              Unipol $ IM.insert deg coe $ runUnipol acc
+{-# INLINE divModUnipol #-}
+
+divModUnipolByMult :: (Eq r, Field r) => Unipol r -> Unipol r -> (Unipol r, Unipol r)
+divModUnipolByMult f g =
+  if isZero g then error "Divided by zero!" else
+  let ((n,_), (m,_)) = (leadingTermIM f, leadingTermIM g)
+      i = logBase2 (n - m + 1) + 1
+      g' = reversalIM g
+      t  = recipBinPow i g'
+      q  = reversalIMWith (n - m) $
+           modVarPower (n - m + 1) $
+           t * reversalIM f
+  in if n >= m
+     then (q, f - g * q)
+     else (zero, f)
+{-# INLINE divModUnipolByMult #-}
+
+recipBinPow :: (Eq r, Field r)
+            => Int -> Unipol r -> Unipol r
+recipBinPow i f =
+  let g 0 = Unipol $ IM.singleton 0 $ recip (constantTerm f)
+      g k = let p = g (k - 1)
+            in modVarPower (2^fromIntegral k) (fromInteger 2 * p - p*p * f)
+  in g i
+{-# INLINE recipBinPow #-}
+
+modVarPower :: Int -> Unipol r -> Unipol r
+modVarPower n = Unipol . fst . IM.split n . runUnipol
+{-# INLINE modVarPower #-}
+
+reversalIM :: Monoidal r => Unipol r -> Unipol r
+reversalIM m = reversalIMWith (fst $ leadingTermIM m) m
+{-# INLINE reversalIM  #-}
+
+reversalIMWith :: Monoidal r => Int -> Unipol r -> Unipol r
+reversalIMWith d = Unipol . IM.mapKeys (d -) . runUnipol
+{-# INLINE reversalIMWith  #-}
+
+
+
+instance (Eq r, Field r) => DecidableUnits (Unipol r) where
+  isUnit f =
+    let (lc, lm) = leadingTerm f
+    in lm == one && isUnit lc
+  recipUnit f | isUnit f  = injectCoeff <$> recipUnit (leadingCoeff f)
+              | otherwise = Nothing
+instance (Eq r, Field r) => DecidableAssociates (Unipol r) where
+  isAssociate = (==) `on` NA.normalize
+
+instance (Eq r, Field r) => UnitNormalForm (Unipol r) where
+  splitUnit f
+      | isZero f = (zero, f)
+      | otherwise = let lc = leadingCoeff f
+                    in (injectCoeff lc, injectCoeff (recip lc) * f)
+instance (Eq r, Field r) => GCDDomain (Unipol r)
+instance (Eq r, Field r) => ZeroProductSemiring (Unipol r)
+instance (Eq r, Field r) => IntegralDomain (Unipol r)
+instance (Eq r, Field r) => UFD (Unipol r)
+instance (Eq r, Field r) => PID (Unipol r)
+instance (Eq r, Field r) => Euclidean (Unipol r) where
+  divide f g =
+    if totalDegree' f `min` totalDegree' g < 50
+    then divModUnipol f g
+    else divModUnipolByMult f g
+  degree = Just . totalDegree'
+
+leadingTermIM :: Monoidal r => Unipol r -> (Int, r)
+leadingTermIM = maybe (0, zero) fst . IM.maxViewWithKey . runUnipol
+{-# INLINE leadingTermIM #-}
+
 instance CoeffRing r => P.Num (Unipol r) where
-  fromInteger = fromInteger
+  fromInteger = NA.fromInteger
   (+) = (NA.+)
   (*) = (NA.*)
   negate = NA.negate
@@ -52,17 +148,27 @@ instance CoeffRing r => P.Num (Unipol r) where
     then zero
     else one
 
+(%!!) :: Sized (n :: Nat) a -> SV.Ordinal (n :: Nat) -> a
+(%!!) = (SV.%!!)
+
+{-# RULES
+"injectVars/toUnipol" forall (f :: (IsPolynomial poly, Arity poly ~ 1, CoeffRing (Coefficient poly)) => poly).
+  injectVars @poly f
+     = Unipol (IM.fromAscList (map (first (%!! 0)) (M.toAscList (terms' f))))
+                 :: Unipol (Coefficient poly)
+ #-}
+
 
 instance (Eq r, DecidableZero r) => Eq (Unipol r) where
   (==) = (==) `on` IM.filter (not . isZero) . runUnipol
   (/=) = (/=) `on` IM.filter (not . isZero) . runUnipol
 
 instance (Ord r, DecidableZero r) => Ord (Unipol r) where
-  compare = comparing (runUnipol . normaliseUP)
-  (<)  = (<)  `on` IM.filter (not . isZero) . runUnipol
-  (>)  = (>)  `on` IM.filter (not . isZero) . runUnipol
-  (<=) = (<=) `on` IM.filter (not . isZero) . runUnipol
-  (>=) = (>=) `on` IM.filter (not . isZero) . runUnipol
+  compare = comparing runUnipol
+  (<)  = (<) `on` runUnipol
+  (>)  = (>) `on` runUnipol
+  (<=) = (<=) `on` runUnipol
+  (>=) = (>=) `on` runUnipol
 
 
 logBase2 :: Int -> Int
@@ -82,11 +188,12 @@ naiveMult (Unipol f) (Unipol g) =
 -- | Polynomial multiplication using Karatsuba's method.
 karatsuba :: forall r. CoeffRing r => Unipol r -> Unipol r -> Unipol r
 karatsuba f0 g0 =
-  let n0 = fromIntegral $ totalDegree' f0 `max` totalDegree' g0
+  let n0 = fromIntegral (totalDegree' f0 `max` totalDegree' g0) + 1
       -- The least @m@ such that deg(f), deg(g) <= 2^m - 1.
-      m0  = if popCount n0 == 1
-            then logBase2 n0 + 1
-            else logBase2 (n0 + 1)
+      m0  = toEnum $
+            if popCount n0 == 1
+            then logBase2 n0
+            else logBase2 n0 + 1
   in Unipol $ loop m0 (runUnipol f0) (runUnipol g0)
   where
     linearProduct op (a, b) (c, d) =
@@ -104,7 +211,7 @@ karatsuba f0 g0 =
 
     divideAt m h =
         let (l, mk, u) = IM.splitLookup m h
-        in (maybe id (IM.insert 0) mk $ IM.mapKeys (subtract m) u, l)
+        in (maybe id (IM.insert 0) mk $ IM.mapKeysMonotonic (subtract m) u, l)
     {-# INLINE divideAt #-}
 
     xCoeff = IM.findWithDefault zero 1
@@ -122,20 +229,21 @@ karatsuba f0 g0 =
            filter (not . isZero . snd)
            [(0, c), (1, b), (2, a)]
       | otherwise =
-        let (f1, f2) = divideAt m f -- f = f1 x^m + f2
-            (g1, g2) = divideAt m g -- g = g1 x^m + g2
+        let (f1, f2) = divideAt (2^(m P.- 1)) f -- f = f1 x^m + f2
+            (g1, g2) = divideAt (2^(m P.- 1)) g -- g = g1 x^m + g2
             (Unipol m2, Unipol m1, Unipol c) =
-              linearProduct ((Unipol .) . loop (m - 1) `on` runUnipol)
+              linearProduct ((Unipol .) . loop (m P.- 1) `on` runUnipol)
               (Unipol f1, Unipol f2)
               (Unipol g1, Unipol g2)
-        in IM.unionsWith (+) [IM.mapKeys (2*m+) m2, IM.mapKeys (m+) m1, c]
+        in IM.unionsWith (+) [IM.mapKeysMonotonic (2^m+) m2,
+                              IM.mapKeysMonotonic (2^(m P.- 1)+) m1, c]
 {-# INLINABLE karatsuba #-}
 
 
 decZero :: DecidableZero r => r -> Maybe r
 decZero r = if isZero r then Nothing else Just r
 
-instance (DecidableZero r)=> Additive (Unipol r) where
+instance (DecidableZero r) => Additive (Unipol r) where
   Unipol f + Unipol g =
     Unipol $ IM.mergeWithKey (\_ a b -> decZero (a + b)) id id f g
 
@@ -154,11 +262,21 @@ instance (DecidableZero r, LeftModule Integer r) => LeftModule Integer (Unipol r
   n .* Unipol r = Unipol $ IM.mapMaybe (decZero . (n .*)) r
 
 instance (CoeffRing r, Multiplicative r) => Multiplicative (Unipol r) where
-  (*) = karatsuba
+  f * g =
+    if totalDegree' f `min` totalDegree' g > 50
+    then karatsuba f g
+    else f `naiveMult` g
+
+diffIMap :: (DecidableZero r, Group r) => IntMap r -> IntMap r -> IntMap r
+diffIMap = IM.mergeWithKey (\_ a b -> decZero (a - b)) id (fmap negate)
+{-# INLINE diffIMap #-}
 
 instance (DecidableZero r, Group r) => Group (Unipol r) where
   negate (Unipol r)   = Unipol $ IM.map negate r
-  Unipol f - Unipol g = Unipol $ IM.mergeWithKey (\_ a b -> decZero (a - b)) id (fmap negate) f g
+  {-# INLINE negate #-}
+
+  Unipol f - Unipol g = Unipol $ diffIMap f g
+  {-# INLINE (-) #-}
 
 instance (CoeffRing r, Unital r) => Unital (Unipol r) where
   one = Unipol $ IM.singleton 0 one
@@ -189,7 +307,7 @@ instance DecidableZero r => Monoidal (Unipol r) where
   zero = Unipol IM.empty
 
 instance DecidableZero r => DecidableZero (Unipol r) where
-  isZero = oall isZero . runUnipol
+  isZero = IM.null . runUnipol
 
 instance CoeffRing r => IsPolynomial (Unipol r) where
   type Arity (Unipol r) = 1
@@ -219,14 +337,19 @@ instance CoeffRing r => IsPolynomial (Unipol r) where
   {-# INLINABLE liftMap #-}
   fromMonomial = Unipol . flip IM.singleton one . SV.head
   {-# INLINE fromMonomial #-}
-  toPolynomial' (c, m) = Unipol $ IM.singleton (SV.head m) c
+  toPolynomial' (c, m) =
+    if isZero c
+    then Unipol IM.empty
+    else Unipol $ IM.singleton (SV.head m) c
   {-# INLINE toPolynomial' #-}
-  polynomial' = Unipol . IM.fromList . map (first SV.head) . M.toList
+  polynomial' = Unipol . IM.fromList
+              . mapMaybe (\(s, v) -> if isZero v then Nothing else Just (SV.head s, v))
+              . M.toList
   {-# INLINE polynomial' #-}
   totalDegree' = fromIntegral . maybe 0 (fst . fst) . IM.maxViewWithKey . runUnipol
   {-# INLINE totalDegree' #-}
   var _ = Unipol $ IM.singleton 1 one
-  {-# INLINE var #-}
+  {-# INLINE [1] var #-}
   mapCoeff' f = Unipol . IM.mapMaybe (decZero . f) . runUnipol
   {-# INLINE mapCoeff' #-}
   m >|* Unipol dic =
