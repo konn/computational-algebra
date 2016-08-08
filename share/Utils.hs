@@ -8,33 +8,37 @@ module Utils (ZeroDimIdeal(..), polyOfDim, arbitraryRational,homogPolyOfDim,arbV
               arbitrarySolvable, zeroDimOf, zeroDimG, unaryPoly, stdReduced,
               quotOfDim, isNonTrivial, Equation(..), liftSNat, checkForArity,
               MatrixCase(..), idealOfDim) where
+import           Algebra.Field.Finite
+import qualified Algebra.Field.Finite               as F
 import           Algebra.Internal
 import           Algebra.Ring.Ideal
-import           Algebra.Ring.Polynomial          hiding (Positive)
+import           Algebra.Ring.Polynomial            hiding (Positive)
 import           Algebra.Ring.Polynomial.Quotient
-import           Control.Lens                     hiding ((:<))
+import           Algebra.Ring.Polynomial.Univariate
+import           Control.Lens                       hiding ((:<))
 import           Control.Monad
-import           Data.List                        (sortBy)
-import qualified Data.Map                         as M
-import qualified Data.Matrix                      as M hiding (fromList)
+import           Data.List                          (sortBy)
+import qualified Data.List                          as L
+import qualified Data.Map                           as M
+import qualified Data.Matrix                        as M hiding (fromList)
 import           Data.Ord
 import           Data.Reflection
-import           Data.Sized.Builtin               hiding (head, length, map,
-                                                   sortBy, (++))
-import qualified Data.Sized.Builtin               as SV
+import           Data.Sized.Builtin                 hiding (head, length, map,
+                                                     sortBy, (++))
+import qualified Data.Sized.Builtin                 as SV
 import           Data.Type.Monomorphic
-import qualified Data.Type.Monomorphic            as M
-import qualified Data.Vector                      as V
-import           Numeric.Algebra                  (DecidableZero)
-import           Numeric.Algebra                  (Ring)
-import qualified Numeric.Algebra                  as NA
-import           Numeric.Domain.Euclidean         (Euclidean)
+import qualified Data.Type.Monomorphic              as M
+import qualified Data.Vector                        as V
+import           Numeric.Algebra                    (DecidableZero)
+import           Numeric.Algebra                    (Ring)
+import qualified Numeric.Algebra                    as NA
+import           Numeric.Domain.Euclidean           (Euclidean)
 import           Numeric.Field.Fraction
 import           Test.QuickCheck
-import qualified Test.QuickCheck                  as QC
-import           Test.QuickCheck.Instances        ()
+import qualified Test.QuickCheck                    as QC
+import           Test.QuickCheck.Instances          ()
 import           Test.SmallCheck.Series
-import qualified Test.SmallCheck.Series           as SC
+import qualified Test.SmallCheck.Series             as SC
 
 newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal :: Ideal (Polynomial (Fraction Integer) n)
                                       } deriving (Show, Eq, Ord)
@@ -52,6 +56,9 @@ instance (KnownNat n, Monad m) => Serial m (Monomial n) where
 instance (Ord k, Serial m k, Serial m v) => Serial m (M.Map k v) where
   series = M.fromList <$> series
 
+instance KnownNat n => Arbitrary (F n) where
+  arbitrary = QC.elements (F.elements Proxy)
+
 instance (Monad m, Serial m (Monomial n)) => Serial m (OrderedMonomial ord n) where
   series = newtypeCons OrderedMonomial
 
@@ -62,6 +69,16 @@ instance (Eq r, CoeffRing r, KnownNat n, IsMonomialOrder n ord,
 
 instance (Ord r, Ring r, Serial m r) => Serial m (Ideal r) where
   series = newtypeCons toIdeal
+
+instance (CoeffRing r, Arbitrary r) => Arbitrary (Unipol r) where
+  arbitrary = fromCoeffVec <$> QC.listOf QC.arbitrary
+    where
+      fromCoeffVec = polynomial' . M.fromList . L.zip [singleton n | n <- [0..]]
+
+genUnipol :: (CoeffRing r, Arbitrary r) => Int -> IO (Unipol r)
+genUnipol len = QC.generate $ fromCoeffVec <$> QC.vectorOf len QC.arbitrary
+    where
+      fromCoeffVec = polynomial' . M.fromList . L.zip [singleton n | n <- [0..]]
 
 appendLM :: (Fraction Integer) -> Monomial 2 -> Polynomial (Fraction Integer) 2 -> Polynomial (Fraction Integer) 2
 appendLM coef lm = _Wrapped %~ M.insert (OrderedMonomial lm) coef

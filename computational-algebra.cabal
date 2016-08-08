@@ -315,7 +315,7 @@ test-suite specs
     main-is: Spec.hs
     buildable: True
     hs-source-dirs: tests share
-    other-modules: Utils GroebnerSpec ZeroDimSpec
+    other-modules: Utils UnivariateSpec GroebnerSpec ZeroDimSpec
                    QuotientSpec PolynomialSpec
                    -- Faugere5Spec
     ghc-options: -Wall -threaded
@@ -514,6 +514,24 @@ benchmark unipol-mult-bench
                    equational-reasoning >= 0.2, matrix >= 0.3
     type: exitcode-stdio-1.0
     main-is: unipol-mult.hs
+    buildable: True
+    hs-source-dirs: bench share
+    other-modules: Utils
+    ghc-options: -Wall -threaded -O2 -rtsopts -caf-all -auto-all -with-rtsopts=-qa
+
+benchmark unipol-div-bench
+    build-depends: constraints >=0.3, HUnit -any, sized,
+                   QuickCheck >= 2.6, algebra, base >=4,
+                   computational-algebra -any, containers >= 0.5, criterion >= 0.8.1.0,
+                   deepseq >= 1.3, hspec -any, lens >= 3.9,
+                   monomorphic >=0.0.3, parallel >= 3.2, process >=1.1,
+                   quickcheck-instances -any, reflection >=1.4,
+                   smallcheck -any, tagged >= 0.7,
+                   test-framework -any, test-framework-hunit -any,
+                   type-natural, vector >= 0.10, random >= 1.0,
+                   equational-reasoning >= 0.2, matrix >= 0.3
+    type: exitcode-stdio-1.0
+    main-is: unipol-div.hs
     buildable: True
     hs-source-dirs: bench share
     other-modules: Utils
