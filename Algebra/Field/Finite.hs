@@ -174,12 +174,6 @@ instance Reifies p Integer => NA.Commutative (F p)
 instance Reifies p Integer => NA.Characteristic (F p) where
   char _ = fromIntegral $ reflect (Proxy :: Proxy p)
 
-instance Reifies 'TN.Z Integer  where
-  reflect _ = 0
-
-instance Reifies n Integer => Reifies ('TN.S n) Integer where
-  reflect _ = 1 + reflect (Proxy :: Proxy n)
-
 class (Field k, Characteristic k) => FiniteField k where
   power :: proxy k -> Natural
   elements :: proxy k -> [k]
