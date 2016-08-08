@@ -152,12 +152,13 @@ instance CoeffRing r => P.Num (Unipol r) where
 (%!!) = (SV.%!!)
 
 {-# RULES
-"injectVars/toUnipol" forall (f :: (IsPolynomial poly, Arity poly ~ 1, CoeffRing (Coefficient poly)) => poly).
-  injectVars @poly f
-     = Unipol (IM.fromAscList (map (first (%!! 0)) (M.toAscList (terms' f))))
-                 :: Unipol (Coefficient poly)
- #-}
+"var x^n" forall (x :: SV.Ordinal 1) n.
+  pow (varUnipol x) n = Unipol (IM.singleton (fromEnum n) one)
+  #-}
 
+varUnipol :: Unital r => SV.Ordinal 1 -> Unipol r
+varUnipol _ = Unipol $ IM.singleton 1 one
+{-# NOINLINE CONLIKE [1] varUnipol #-}
 
 instance (Eq r, DecidableZero r) => Eq (Unipol r) where
   (==) = (==) `on` IM.filter (not . isZero) . runUnipol
@@ -348,8 +349,7 @@ instance CoeffRing r => IsPolynomial (Unipol r) where
   {-# INLINE polynomial' #-}
   totalDegree' = fromIntegral . maybe 0 (fst . fst) . IM.maxViewWithKey . runUnipol
   {-# INLINE totalDegree' #-}
-  var _ = Unipol $ IM.singleton 1 one
-  {-# INLINE [1] var #-}
+  var = varUnipol
   mapCoeff' f = Unipol . IM.mapMaybe (decZero . f) . runUnipol
   {-# INLINE mapCoeff' #-}
   m >|* Unipol dic =

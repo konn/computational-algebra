@@ -175,7 +175,6 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
   -- | @'var' n@ returns a polynomial representing n-th variable.
   var :: Ordinal (Arity poly) -> poly
   var nth = fromMonomial $ varMonom (sArity' (zero :: poly)) nth
-  {-# INLINE var #-}
 
   -- | Adjusting coefficients of each term.
   mapCoeff' :: (Coefficient poly -> Coefficient poly) -> poly -> poly
