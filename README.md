@@ -53,3 +53,5 @@ $ stack build
 
 In addition, you may need to install GSL and LAPACK (for matrix computation) beforehand.
 You can install them via Homebrew (OS X), `apt-get`, or other major package management systems.
+
+### [Read More in Official Project Site](http://konn.github.io/computational-algebra/)
