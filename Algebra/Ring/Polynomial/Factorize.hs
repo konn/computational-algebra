@@ -49,7 +49,6 @@ import           Debug.Trace                      (traceShow)
 import           Numeric.Decidable.Zero           (isZero)
 import           Numeric.Domain.GCD               (gcd, lcm)
 import qualified Numeric.Field.Fraction           as F
-import           Numeric.Semiring.ZeroProduct     (ZeroProductSemiring)
 import           Prelude                          (div, mod)
 import qualified Prelude                          as P
 
@@ -57,8 +56,7 @@ type Unipol r = OrderedPolynomial r Grevlex 1
 
 -- | @distinctDegFactor f@ computes the distinct-degree decomposition of the given
 --   square-free polynomial over finite field @f@.
-distinctDegFactor :: forall k. (Eq k, DecidableUnits k, DecidableZero k,
-                                ZeroProductSemiring k, FiniteField k)
+distinctDegFactor :: forall k. (Eq k, FiniteField k)
                   => Unipol k     -- ^ Square-free polynomial over finite field.
                   -> [(Natural, Unipol k)]   -- ^ Distinct-degree decomposition.
 distinctDegFactor f0 = zip [1..] $ go id (var OZ :: Unipol k) f0 []
@@ -80,8 +78,7 @@ modPow a p f = withQuotient (principalIdeal f) $
 traceCharTwo :: (Unital m, Monoidal m) => Natural -> m -> m
 traceCharTwo m a = sum [ a ^ (2 ^ i) | i <- [0..pred m]]
 
-equalDegreeSplitM :: forall k m. (MonadRandom m, DecidableUnits k,
-                                  CoeffRing k, ZeroProductSemiring k, FiniteField k)
+equalDegreeSplitM :: forall k m. (MonadRandom m, CoeffRing k,  FiniteField k)
                  => Unipol k
                  -> Natural
                  -> m (Maybe (Unipol k))
@@ -103,8 +100,7 @@ equalDegreeSplitM f d
                 guard (g2 /= one && g2 /= f)
                 return g2
 
-equalDegreeFactorM :: (Eq k, DecidableUnits k, DecidableZero k,
-                       ZeroProductSemiring k, FiniteField k, MonadRandom m)
+equalDegreeFactorM :: (Eq k, FiniteField k, MonadRandom m)
                    => Unipol k -> Natural -> m [Unipol k]
 equalDegreeFactorM f d = go f >>= \a -> return (a [])
   where
@@ -118,13 +114,12 @@ equalDegreeFactorM f d = go f >>= \a -> return (a [])
              r <- go (h `quot` g)
              return $ l . r
 
-factorSquareFree :: (Eq k, DecidableUnits k, DecidableZero k, ZeroProductSemiring k,
-                     FiniteField k, MonadRandom m)
+factorSquareFree :: (Eq k, FiniteField k, MonadRandom m)
                  => Unipol k -> m [Unipol k]
 factorSquareFree f =
    concat <$> mapM (uncurry $ flip equalDegreeFactorM) (filter ((/= one) . snd) $ distinctDegFactor f)
 
-squareFreePart :: (Eq k, DecidableUnits k, DecidableZero k, ZeroProductSemiring k, FiniteField k)
+squareFreePart :: (Eq k, FiniteField k)
                => Unipol k -> Unipol k
 squareFreePart f =
   let !n = fromIntegral $ totalDegree' f
@@ -135,7 +130,7 @@ squareFreePart f =
      then v
      else v * squareFreePart (pthRoot f')
 
-yun :: (CoeffRing r, Field r, DecidableUnits r, ZeroProductSemiring r)
+yun :: (CoeffRing r, Field r)
     => Unipol r -> IntMap (Unipol r)
 yun f = let f' = diff OZ f
             u  = gcd f f'
@@ -164,8 +159,7 @@ pthRoot f =
      then error "char R should be positive prime"
      else transformMonomial (SV.map (`P.div` fromIntegral p)) f
 
-squareFreeDecomp :: (ZeroProductSemiring k, DecidableUnits k, Eq k,
-                     Characteristic k, Field k, DecidableZero k)
+squareFreeDecomp :: (Eq k, Characteristic k, Field k)
                  => Unipol k -> IntMap (Unipol k)
 squareFreeDecomp f =
   let dcmp = yun f
@@ -179,7 +173,7 @@ squareFreeDecomp f =
           IM.unionWith (*) dcmp $ IM.mapKeys (p*) $ squareFreeDecomp $ pthRoot f'
 
 -- | Factorise a polynomial over finite field using Cantor-Zassenhaus algorithm
-factorise :: (MonadRandom m, DecidableUnits k, CoeffRing k, ZeroProductSemiring k, FiniteField k)
+factorise :: (MonadRandom m, CoeffRing k, FiniteField k)
           => Unipol k -> m [(Unipol k, Natural)]
 factorise f = do
   concat <$> mapM (\(r, h) -> map (,fromIntegral r) <$> factorSquareFree h) (IM.toList $  squareFreeDecomp f)
@@ -256,7 +250,7 @@ factorSqFreeQBP f
 -- | Given that @f = gh (mod m)@ with @sg + th = 1 (mod m)@ and @leadingCoeff f@ isn't zero divisor mod m,
 --   @henselStep m f g h s t@ calculates the unique (g', h', s', t') s.t.
 --   @f = g' h' (mod m), g' = g (mod m), h' = h (mod m), s' = s (mod m), t' = t (mod m)@, @h'@ monic.
-henselStep :: (Eq r, Euclidean r, Commutative r)
+henselStep :: (Eq r, Euclidean r)
            => r        -- ^ modulus
            -> Unipol r
            -> Unipol r

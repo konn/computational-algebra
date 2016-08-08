@@ -3,11 +3,13 @@
 {-# LANGUAGE PolyKinds, RankNTypes, ScopedTypeVariables, TypeOperators  #-}
 {-# LANGUAGE UndecidableInstances                                       #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Algebra.Ring.Polynomial.Quotient ( Quotient(), QIdeal(), reifyQuotient, modIdeal
-                                        , modIdeal', quotRepr, withQuotient, vectorRep
-                                        , genQuotVars, genQuotVars', gBasis', matRep0
-                                        , standardMonomials, standardMonomials', matRepr'
-                                        , reduce, multWithTable, multUnamb, isZeroDimensional) where
+module Algebra.Ring.Polynomial.Quotient
+       ( Quotient(), QIdeal(), reifyQuotient, modIdeal
+       , modIdeal', quotRepr, withQuotient, vectorRep
+       , genQuotVars, genQuotVars', gBasis', matRep0
+       , standardMonomials, standardMonomials', matRepr'
+       , reduce, multWithTable, multUnamb, isZeroDimensional
+       ) where
 import Algebra.Algorithms.Groebner
 import Algebra.Internal
 import Algebra.Ring.Ideal
@@ -182,7 +184,7 @@ buildQIdeal ideal =
          Just ms -> ZeroDimIdeal bs ms (buildMultTable bs ms)
 
 -- | Reifies the ideal at the type-level. The ideal can be recovered with 'reflect'.
-reifyQuotient :: (IsMonomialOrder n ord, KnownNat n, Field r, DecidableZero r, Eq r)
+reifyQuotient :: (IsMonomialOrder n ord, KnownNat n, Field r, Eq r)
               => Ideal (OrderedPolynomial r ord n)
               -> (forall (ideal :: *). Reifies ideal (QIdeal r ord n) => Proxy ideal -> a)
               -> a
@@ -239,10 +241,10 @@ instance (IsMonomialOrder n ord, Num r, Reifies ideal (QIdeal r ord n), CoeffRin
   negate = Quotient . negate . quotRepr_
 
 -- | Reduce polynomial modulo ideal.
-reduce :: (Eq r, DecidableZero r, Field r, KnownNat n, IsMonomialOrder n ord)
+reduce :: (Eq r, Field r, KnownNat n, IsMonomialOrder n ord)
        => OrderedPolynomial r ord n -> Ideal (OrderedPolynomial r ord n) -> OrderedPolynomial r ord n
 reduce f i = withQuotient i $ modIdeal f
 
-isZeroDimensional :: (Eq r, DecidableZero r, Field r, KnownNat n, IsMonomialOrder n ord)
+isZeroDimensional :: (Eq r, Field r, KnownNat n, IsMonomialOrder n ord)
                   => [OrderedPolynomial r ord n] -> Bool
 isZeroDimensional ii = isJust $ stdMonoms $ calcGroebnerBasis $ toIdeal ii

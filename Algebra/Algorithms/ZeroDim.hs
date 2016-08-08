@@ -49,6 +49,7 @@ import qualified Numeric.LinearAlgebra as LA
 import           Prelude               hiding (lex, negate, recip, sum, (*),
                                         (+), (-), (^), (^^))
 import qualified Prelude               as P
+import           Proof.Propositional   (IsTrue (Witness))
 -- import qualified Sparse.Matrix                    as Sparse
 
 solveM :: forall m r ord n.
@@ -111,7 +112,8 @@ solveWith f0 i0 = {-# SCC "solveWith" #-}
                  else Just $ foldr ({-# SCC "rewrite-answer" #-} phi) (SV.replicate (sArity' f0) (error "indec!")) inds
         in sequence $ map calc $ LA.toColumns evecs
 
-solve' :: (Field r, CoeffRing r, KnownNat n, (0 :< n) ~ 'True,
+solve' :: forall r n ord.
+          (Field r, CoeffRing r, KnownNat n, (0 :< n) ~ 'True,
            IsMonomialOrder n ord, Convertible r Double)
        => Double
        -> Ideal (OrderedPolynomial r ord n)
@@ -129,6 +131,8 @@ solve' err ideal =
        , let xs = SV.unsafeFromList' xs0
        , all ((< err) . magnitude . substWith mul xs) $ generators ideal
        ]
+  where
+    _ = Witness :: IsTrue (0 :< n) -- Just to suppress "redundant constraint" warning
 
 subspMatrix :: (Normed r, Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord)
             => Ordinal n -> Ideal (OrderedPolynomial r ord n) -> M.Matrix r
@@ -206,7 +210,7 @@ univPoly nth ideal = {-# SCC "univPoly" #-}
        in step (M.colVector p0) pows
 
 -- | Solves linear system. If the given matrix is degenerate, this returns @Nothing@.
-solveLinear :: (Normed r, Ord r, Eq r, Fractional r)
+solveLinear :: (Ord r, Fractional r)
             => M.Matrix r
             -> V.Vector r
             -> Maybe (V.Vector r)
@@ -261,6 +265,8 @@ isRadical ideal =
   let gens  = map (\on -> reduction on $ univPoly on ideal) $
               enumOrdinal (sing :: SNat n)
   in all (`isIdealMember` ideal) gens
+  where
+    _ = Witness :: IsTrue (0 :< n) -- Just to suppress "redundant constraint" warning
 
 -- solve'' :: forall r ord n.
 --            (Show r, Sparse.Eq0 r, Normed r, Ord r, Field r, CoeffRing r, KnownNat n,
@@ -309,7 +315,7 @@ toDM = AM.fromCols . AM.toCols
 
 -- | Calculate the Groebner basis w.r.t. lex ordering of the zero-dimensional ideal using FGLM algorithm.
 --   If the given ideal is not zero-dimensional this function may diverge.
-fglm :: (DecidableZero r, Normed r, Ord r, KnownNat n, Field r,
+fglm :: (Normed r, Ord r, KnownNat n, Field r,
          IsMonomialOrder n ord, (0 :< n) ~ 'True)
      => Ideal (OrderedPolynomial r ord n)
      -> ([OrderedPolynomial r Lex n], [OrderedPolynomial r Lex n])
@@ -358,8 +364,7 @@ mainLoop = do
       gLex %== (g :)
 
 toContinue :: forall s r o n.
-              ((0 :< n) ~ 'True,
-               DecidableZero r, Ord r,
+              ((0 :< n) ~ 'True, Ord r,
                KnownNat n, Field r)
            => Machine s r o n Bool
 toContinue = do
@@ -369,6 +374,8 @@ toContinue = do
     Just g -> do
       let xLast = P.maximum allVars `asTypeOf` g
       return $ not $ leadingMonomial g `isPowerOf` leadingMonomial xLast
+  where
+    _ = Witness :: IsTrue (0 :< n) -- Just to suppress "redundant constraint" warning
 
 nextMonomial :: forall s r ord n.
                 (CoeffRing r, KnownNat n) => Machine s r ord n ()

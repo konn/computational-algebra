@@ -20,7 +20,7 @@ import qualified Data.Vector                 as V
 import           GHC.Exts                    (Constraint)
 import           Numeric.Algebra             (Additive, DecidableZero)
 import           Numeric.Algebra             (Monoidal, Multiplicative)
-import           Numeric.Algebra             (Ring, Unital)
+import           Numeric.Algebra             (Unital)
 import qualified Numeric.Algebra             as NA
 import qualified Numeric.Decidable.Zero      as NA
 import qualified Numeric.LinearAlgebra       as LA

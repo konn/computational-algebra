@@ -74,7 +74,7 @@ faugere4 = faugere4Gen fromPs (fst . runIdentity . Repa.gaussReductionP) toPs
       map (NA.sum . zipWith (flip $ curry toPolynomial) ts . V.toList) $ Repa.toRows mat
 
 -- | F_4 with linked list based matrix with modified matrix construction
-faugere4LM :: (Eq r, DecidableZero r, Field r, KnownNat n, IsMonomialOrder n ord)
+faugere4LM :: (Eq r, Field r, KnownNat n, IsMonomialOrder n ord)
            => Strategy r ord n -> Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
 faugere4LM =
   faugere4Gen fromPs (fst . LM.structuredGauss) toPs

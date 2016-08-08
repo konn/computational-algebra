@@ -10,7 +10,6 @@ import Algebra.Field.Finite
 import Algebra.Field.Galois.Conway
 import Algebra.Internal
 import Algebra.Prelude
-import Algebra.Ring.Polynomial
 
 import           Control.Lens                          (imap)
 import           Control.Monad                         (replicateM)
@@ -29,11 +28,9 @@ import qualified GHC.TypeLits                          as TL
 import           Numeric.Algebra.Unital.UnitNormalForm
 import           Numeric.Decidable.Associates
 import           Numeric.Decidable.Units
-import           Numeric.Decidable.Units
-import           Numeric.Decidable.Zero
 import           Numeric.Decidable.Zero
 import           Numeric.Domain.Euclidean              (Euclidean)
-import           Numeric.Domain.GCD                    (GCDDomain, gcd, lcm)
+import           Numeric.Domain.GCD                    (GCDDomain, gcd)
 import           Numeric.Domain.Integral
 import           Numeric.Domain.PID
 import           Numeric.Domain.UFD
@@ -181,8 +178,7 @@ instance (Reifies p Integer, Reifies f (Unipol (F p)), KnownNat n) => P.Fraction
   recip = recip
 
 -- | @generateIrreducible p n@ generates irreducible polynomial over F_@p@ of degree @n@.
-generateIrreducible :: (DecidableZero k, MonadRandom m, FiniteField k,
-                        ZeroProductSemiring k, DecidableUnits k, Eq k)
+generateIrreducible :: (MonadRandom m, FiniteField k, Eq k)
                     => proxy k -> Natural -> m (Unipol k)
 generateIrreducible p n =
   iterateUntil (\f -> all (\i -> one == gcd (varX^(order p^i) - varX) f ) [1.. n `div` 2]) $ do
