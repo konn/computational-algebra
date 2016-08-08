@@ -18,8 +18,9 @@ import           Data.Tuple                        (swap)
 import           Data.Type.Ordinal                 (Ordinal (..))
 import           GHC.Num                           (Num)
 import           Numeric.Decidable.Zero            (isZero)
+import           Numeric.Domain.GCD                (gcd)
 import qualified Numeric.Field.Fraction            as F
-import           Numeric.Semiring.Integral         (IntegralSemiring)
+import           Numeric.Semiring.ZeroProduct      (ZeroProductSemiring)
 import           Prelude                           (abs)
 import qualified Prelude                           as P
 import           System.IO.Unsafe                  (unsafePerformIO)
@@ -134,7 +135,7 @@ instance Unital Algebraic where
 instance Semiring Algebraic
 instance Abelian Algebraic
 instance Rig Algebraic
-instance IntegralSemiring Algebraic
+instance ZeroProductSemiring Algebraic
 instance Division Algebraic where
   recip = recipA
 
@@ -157,7 +158,7 @@ rootSumPoly f g =
     liftP :: Polynomial Rational 1 -> Polynomial (Polynomial Rational 1) 1
     liftP = mapCoeff injectCoeff
 
-sqFreePart :: (DecidableUnits r, Eq r, Domain r, DecidableZero r, Division r, Commutative r, IsMonomialOrder 1 order)
+sqFreePart :: (DecidableUnits r, Eq r, Euclidean r, DecidableZero r, Division r, Commutative r, IsMonomialOrder 1 order)
            => OrderedPolynomial r order 1 -> OrderedPolynomial r order 1
 sqFreePart f = snd $ head $ f `divPolynomial` [gcd f (diff 0 f)]
 
@@ -198,11 +199,14 @@ catcher app h (Algebraic _ sf i0) (Algebraic _ sg j0) =
   in i' `app` j'
 catcher _ _ _ _ = error "rational is impossible"
 
-normalize :: (Eq r, Ring r, DecidableZero r, DecidableUnits r, Division r, Commutative r, IntegralSemiring r, IsMonomialOrder 1 order) => OrderedPolynomial r order 1 -> OrderedPolynomial r order 1
+normalize :: (Eq r, Ring r, DecidableZero r, DecidableUnits r,
+              Euclidean r,
+              Division r, Commutative r, ZeroProductSemiring r,
+              IsMonomialOrder 1 order) => OrderedPolynomial r order 1 -> OrderedPolynomial r order 1
 normalize = monoize . sqFreePart
 
 shiftP :: (Domain r, Division r, Eq r, Commutative r, DecidableUnits r,
-           DecidableZero r, IsMonomialOrder 1 order)
+           DecidableZero r, IsMonomialOrder 1 order, Euclidean r)
        => OrderedPolynomial r order 1 -> OrderedPolynomial r order 1
 shiftP f | isZero (coeff one f) = f `quot` varX
          | otherwise = f

@@ -47,8 +47,9 @@ import qualified Data.Vector                      as V
 import           Debug.Trace                      (trace)
 import           Debug.Trace                      (traceShow)
 import           Numeric.Decidable.Zero           (isZero)
+import           Numeric.Domain.GCD               (gcd, lcm)
 import qualified Numeric.Field.Fraction           as F
-import           Numeric.Semiring.Integral        (IntegralSemiring)
+import           Numeric.Semiring.ZeroProduct     (ZeroProductSemiring)
 import           Prelude                          (div, mod)
 import qualified Prelude                          as P
 
@@ -57,7 +58,7 @@ type Unipol r = OrderedPolynomial r Grevlex 1
 -- | @distinctDegFactor f@ computes the distinct-degree decomposition of the given
 --   square-free polynomial over finite field @f@.
 distinctDegFactor :: forall k. (Eq k, DecidableUnits k, DecidableZero k,
-                                IntegralSemiring k, FiniteField k)
+                                ZeroProductSemiring k, FiniteField k)
                   => Unipol k     -- ^ Square-free polynomial over finite field.
                   -> [(Natural, Unipol k)]   -- ^ Distinct-degree decomposition.
 distinctDegFactor f0 = zip [1..] $ go id (var OZ :: Unipol k) f0 []
@@ -71,7 +72,7 @@ distinctDegFactor f0 = zip [1..] $ go id (var OZ :: Unipol k) f0 []
          then gs'
          else go gs' h' f'
 
-modPow :: (CoeffRing r, Division r, KnownNat n, IsMonomialOrder n ord)
+modPow :: (CoeffRing r, Division r, Euclidean r, KnownNat n, IsMonomialOrder n ord)
        => OrderedPolynomial r ord n -> Natural -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n
 modPow a p f = withQuotient (principalIdeal f) $
                repeatedSquare (modIdeal a) p
@@ -80,7 +81,7 @@ traceCharTwo :: (Unital m, Monoidal m) => Natural -> m -> m
 traceCharTwo m a = sum [ a ^ (2 ^ i) | i <- [0..pred m]]
 
 equalDegreeSplitM :: forall k m. (MonadRandom m, DecidableUnits k,
-                                  CoeffRing k, IntegralSemiring k, FiniteField k)
+                                  CoeffRing k, ZeroProductSemiring k, FiniteField k)
                  => Unipol k
                  -> Natural
                  -> m (Maybe (Unipol k))
@@ -103,7 +104,7 @@ equalDegreeSplitM f d
                 return g2
 
 equalDegreeFactorM :: (Eq k, DecidableUnits k, DecidableZero k,
-                       IntegralSemiring k, FiniteField k, MonadRandom m)
+                       ZeroProductSemiring k, FiniteField k, MonadRandom m)
                    => Unipol k -> Natural -> m [Unipol k]
 equalDegreeFactorM f d = go f >>= \a -> return (a [])
   where
@@ -117,13 +118,13 @@ equalDegreeFactorM f d = go f >>= \a -> return (a [])
              r <- go (h `quot` g)
              return $ l . r
 
-factorSquareFree :: (Eq k, DecidableUnits k, DecidableZero k, IntegralSemiring k,
+factorSquareFree :: (Eq k, DecidableUnits k, DecidableZero k, ZeroProductSemiring k,
                      FiniteField k, MonadRandom m)
                  => Unipol k -> m [Unipol k]
 factorSquareFree f =
    concat <$> mapM (uncurry $ flip equalDegreeFactorM) (filter ((/= one) . snd) $ distinctDegFactor f)
 
-squareFreePart :: (Eq k, DecidableUnits k, DecidableZero k, IntegralSemiring k, FiniteField k)
+squareFreePart :: (Eq k, DecidableUnits k, DecidableZero k, ZeroProductSemiring k, FiniteField k)
                => Unipol k -> Unipol k
 squareFreePart f =
   let !n = fromIntegral $ totalDegree' f
@@ -134,7 +135,7 @@ squareFreePart f =
      then v
      else v * squareFreePart (pthRoot f')
 
-yun :: (CoeffRing r, Field r, DecidableUnits r, IntegralSemiring r)
+yun :: (CoeffRing r, Field r, DecidableUnits r, ZeroProductSemiring r)
     => Unipol r -> IntMap (Unipol r)
 yun f = let f' = diff OZ f
             u  = gcd f f'
@@ -163,7 +164,7 @@ pthRoot f =
      then error "char R should be positive prime"
      else transformMonomial (SV.map (`P.div` fromIntegral p)) f
 
-squareFreeDecomp :: (IntegralSemiring k, DecidableUnits k, Eq k,
+squareFreeDecomp :: (ZeroProductSemiring k, DecidableUnits k, Eq k,
                      Characteristic k, Field k, DecidableZero k)
                  => Unipol k -> IntMap (Unipol k)
 squareFreeDecomp f =
@@ -178,7 +179,7 @@ squareFreeDecomp f =
           IM.unionWith (*) dcmp $ IM.mapKeys (p*) $ squareFreeDecomp $ pthRoot f'
 
 -- | Factorise a polynomial over finite field using Cantor-Zassenhaus algorithm
-factorise :: (MonadRandom m, DecidableUnits k, CoeffRing k, IntegralSemiring k, FiniteField k)
+factorise :: (MonadRandom m, DecidableUnits k, CoeffRing k, ZeroProductSemiring k, FiniteField k)
           => Unipol k -> m [(Unipol k, Natural)]
 factorise f = do
   concat <$> mapM (\(r, h) -> map (,fromIntegral r) <$> factorSquareFree h) (IM.toList $  squareFreeDecomp f)

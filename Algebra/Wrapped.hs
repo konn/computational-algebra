@@ -72,8 +72,8 @@ instance Normed Integer where
   norm = abs
   liftNorm = id
 
-instance (Ord (Norm d), Euclidean d, Euclidean (Norm d),
-          Normed d, Multiplicative (Norm d)) =>  Normed (Fraction d) where
+instance (Ord (Norm d), Euclidean d, Euclidean (Norm d), Normed d)
+     =>  Normed (Fraction d) where
   type Norm (Fraction d) = Fraction (Norm d)
   norm f = norm (numerator f) % norm (denominator f)
   liftNorm f = liftNorm (numerator f) % liftNorm (denominator f)

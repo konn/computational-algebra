@@ -14,7 +14,6 @@ import           Language.Haskell.TH.Syntax (lift)
 import           Numeric                    (readInt)
 import           Prelude                    (lex)
 
--- | Phantom type for conway polynomials
 data Conway (p :: TL.Nat) (n :: TL.Nat)
 
 parseLine :: String -> [(Integer, Integer, [Integer])]

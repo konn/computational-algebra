@@ -5,30 +5,36 @@
 module Algebra.Field.Finite (F(), naturalRepr, reifyPrimeField, withPrimeField,
                              modNat, modNat', modRat, modRat', FiniteField(..), order) where
 import Algebra.Algorithms.PrimeTest
-import Algebra.Ring.Polynomial.Class (PrettyCoeff (..), ShowSCoeff (..))
+import Algebra.Ring.Polynomial.Class (PrettyCoeff (..))
 import Algebra.Wrapped
 
-import           Control.Monad.Random       (uniform)
-import           Control.Monad.Random       (runRand)
-import           Control.Monad.Random       (Random (..))
-import           Data.Maybe                 (fromMaybe)
+import           Control.Monad.Random                  (uniform)
+import           Control.Monad.Random                  (runRand)
+import           Control.Monad.Random                  (Random (..))
+import           Data.Maybe                            (fromMaybe)
 import           Data.Proxy
-import qualified Data.Ratio                 as R
+import qualified Data.Ratio                            as R
 import           Data.Reflection
-import qualified Data.Type.Natural          as TN
-import           GHC.TypeLits               (KnownNat)
-import           Numeric.Algebra            (Field)
-import           Numeric.Algebra            (char)
-import           Numeric.Algebra            (Natural)
-import qualified Numeric.Algebra            as NA
+import qualified Data.Type.Natural                     as TN
+import           GHC.TypeLits                          (KnownNat)
+import           Numeric.Algebra                       (Field)
+import           Numeric.Algebra                       (char)
+import           Numeric.Algebra                       (Natural)
+import qualified Numeric.Algebra                       as NA
+import           Numeric.Algebra.Unital.UnitNormalForm
+import           Numeric.Decidable.Associates
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
-import           Numeric.Domain.Euclidean   (euclid)
-import           Numeric.Field.Fraction     (Fraction)
-import           Numeric.Field.Fraction     (denominator)
-import           Numeric.Field.Fraction     (numerator)
-import           Numeric.Rig.Characteristic (Characteristic)
-import           Numeric.Semiring.Integral  (IntegralSemiring)
+import           Numeric.Domain.Euclidean              (Euclidean, euclid)
+import           Numeric.Domain.GCD                    (GCDDomain)
+import           Numeric.Domain.Integral
+import           Numeric.Domain.PID
+import           Numeric.Domain.UFD
+import           Numeric.Field.Fraction                (Fraction)
+import           Numeric.Field.Fraction                (denominator)
+import           Numeric.Field.Fraction                (numerator)
+import           Numeric.Rig.Characteristic            (Characteristic)
+import           Numeric.Semiring.ZeroProduct          (ZeroProductSemiring)
 
 -- | Prime field of characteristic @p@.
 --   @p@ should be prime, and not statically checked.
@@ -128,8 +134,6 @@ instance Reifies p Integer => NA.Unital (F p) where
   one = 1
   pow = pow
 
-instance Reifies p Integer => IntegralSemiring (F p)
-
 instance Reifies p Integer => DecidableUnits (F p) where
   isUnit n = gcd (runF n) (reflect n) == 1
   recipUnit n =
@@ -137,6 +141,16 @@ instance Reifies p Integer => DecidableUnits (F p) where
         (u,_,r) = head $ euclid p (fromIntegral $ runF n)
     in if u == 1 then Just $ modNat $ fromInteger $ r `mod` p else Nothing
 
+instance (Reifies p Integer) => DecidableAssociates (F p) where
+  isAssociate p n =
+    (isZero p && isZero n) || (not (isZero p) && not (isZero n))
+instance (Reifies p Integer) => UnitNormalForm (F p)
+instance (Reifies p Integer) => IntegralDomain (F p)
+instance (Reifies p Integer) => GCDDomain (F p)
+instance (Reifies p Integer) => UFD (F p)
+instance (Reifies p Integer) => PID (F p)
+instance (Reifies p Integer) => ZeroProductSemiring (F p)
+instance (Reifies p Integer) => Euclidean (F p)
 
 instance Reifies p Integer => NA.Division (F p) where
   recip = recip

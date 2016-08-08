@@ -28,32 +28,41 @@ import Algebra.Ring.Polynomial.Monomial
 import Algebra.Scalar
 
 import           Control.Arrow
-import           Control.DeepSeq           (NFData)
-import           Control.Lens              hiding (assign)
-import qualified Data.Foldable             as F
+import           Control.DeepSeq                       (NFData)
+import           Control.Lens                          hiding (assign)
+import qualified Data.Foldable                         as F
 import           Data.Function
 import           Data.Hashable
-import qualified Data.HashSet              as HS
-import           Data.List                 (intercalate)
-import           Data.Map                  (Map)
-import qualified Data.Map.Strict           as M
+import qualified Data.HashSet                          as HS
+import           Data.List                             (intercalate)
+import           Data.Map                              (Map)
+import qualified Data.Map.Strict                       as M
 import           Data.Maybe
 import           Data.Ord
-import qualified Data.Set                  as Set
-import           Data.Singletons.Prelude   (POrd (..))
-import qualified Data.Sized.Builtin        as S
+import qualified Data.Set                              as Set
+import           Data.Singletons.Prelude               (POrd (..))
+import qualified Data.Sized.Builtin                    as S
 import           Data.Type.Ordinal
-import           Numeric.Algebra           hiding (Order (..))
+import           Numeric.Algebra                       hiding (Order (..))
+import           Numeric.Algebra.Unital.UnitNormalForm (UnitNormalForm (..))
+import qualified Numeric.Algebra.Unital.UnitNormalForm as NA
+import           Numeric.Decidable.Associates
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
-import           Numeric.Domain.Euclidean  hiding (normalize)
-import qualified Numeric.Ring.Class        as NA
-import           Numeric.Semiring.Integral (IntegralSemiring)
-import           Prelude                   hiding (Rational, fromInteger, gcd,
-                                            lex, negate, quot, recip, rem, sum,
-                                            (*), (+), (-), (/), (^), (^^))
-import qualified Prelude                   as P
-import           Proof.Equational          (symmetry)
+import           Numeric.Domain.Euclidean
+import           Numeric.Domain.GCD
+import           Numeric.Domain.Integral               (IntegralDomain (..))
+import           Numeric.Domain.PID
+import           Numeric.Domain.UFD
+import qualified Numeric.Ring.Class                    as NA
+import           Numeric.Semiring.ZeroProduct          (ZeroProductSemiring)
+import           Prelude                               hiding (Rational,
+                                                        fromInteger, gcd, lex,
+                                                        negate, quot, recip,
+                                                        rem, sum, (*), (+), (-),
+                                                        (/), (^), (^^))
+import qualified Prelude                               as P
+import           Proof.Equational                      (symmetry)
 
 instance Hashable r => Hashable (OrderedPolynomial r ord n) where
   hashWithSalt salt poly = hashWithSalt salt $ getTerms poly
@@ -237,9 +246,31 @@ instance (IsMonomialOrder n order, CoeffRing r, KnownNat n, Num r)
 instance (CoeffRing r, KnownNat n, IsMonomialOrder n ord) => DecidableZero (OrderedPolynomial r ord n) where
   isZero (Polynomial d) = M.null d
 
-instance (CoeffRing r, IsMonomialOrder 1 ord, IntegralSemiring r)
-      => IntegralSemiring (OrderedPolynomial r ord 1)
-instance (Eq r, DecidableUnits r, DecidableZero r, Field r, IsMonomialOrder 1 ord, IntegralSemiring r) => Euclidean (OrderedPolynomial r ord 1) where
+instance (CoeffRing r, IsMonomialOrder 1 ord, ZeroProductSemiring r)
+      => ZeroProductSemiring (OrderedPolynomial r ord 1)
+
+instance (Eq r, DecidableUnits r, DecidableZero r, Field r,
+          IsMonomialOrder 1 ord, ZeroProductSemiring r)
+      => DecidableAssociates (OrderedPolynomial r ord 1) where
+  isAssociate = (==) `on` NA.normalize
+instance (Eq r, DecidableUnits r, DecidableZero r, Field r,
+          IsMonomialOrder 1 ord, ZeroProductSemiring r)
+      => UnitNormalForm (OrderedPolynomial r ord 1) where
+  splitUnit f
+    | isZero f = (zero, f)
+    | otherwise = let lc = leadingCoeff f
+                  in (injectCoeff lc, injectCoeff (recip lc) * f)
+
+instance (Eq r, DecidableUnits r, DecidableZero r, Field r,
+          IsMonomialOrder 1 ord, ZeroProductSemiring r)
+      => GCDDomain (OrderedPolynomial r ord 1)
+instance (Eq r, DecidableUnits r, DecidableZero r, Field r,
+          IsMonomialOrder 1 ord, ZeroProductSemiring r)
+      => UFD (OrderedPolynomial r ord 1)
+instance (Eq r, DecidableUnits r, DecidableZero r, Field r,
+          IsMonomialOrder 1 ord, ZeroProductSemiring r)
+      => PID (OrderedPolynomial r ord 1)
+instance (Eq r, DecidableUnits r, DecidableZero r, Field r, IsMonomialOrder 1 ord, ZeroProductSemiring r) => Euclidean (OrderedPolynomial r ord 1) where
   f0 `divide` g = step f0 zero
     where
       lm = leadingMonomial g
@@ -251,10 +282,21 @@ instance (Eq r, DecidableUnits r, DecidableZero r, Field r, IsMonomialOrder 1 or
           | otherwise = (quo, p)
   degree f | isZero f  = Nothing
            | otherwise = Just $ P.fromIntegral $ totalDegree' f
-  splitUnit f
-    | isZero f = (zero, f)
-    | otherwise = let lc = leadingCoeff f
-                  in (injectCoeff lc, injectCoeff (recip lc) * f)
+instance (Eq r, DecidableUnits r, DecidableZero r, KnownNat n,
+          Field r, IsMonomialOrder n ord, ZeroProductSemiring r)
+       => ZeroProductSemiring (OrderedPolynomial r ord n)
+
+instance (Eq r, DecidableUnits r, DecidableZero r, KnownNat n,
+          Field r, IsMonomialOrder n ord, ZeroProductSemiring r)
+       => IntegralDomain (OrderedPolynomial r ord n) where
+  p `divides` q = isZero $ p `modPolynomial` [q]
+  p `maybeQuot` q =
+    if isZero q
+    then Nothing
+    else let (r, s) = p `divModPolynomial` [q]
+         in if isZero s
+            then Just $ snd $ head r
+            else Nothing
 
 instance (CoeffRing r, IsMonomialOrder n ord, DecidableUnits r, KnownNat n) => DecidableUnits (OrderedPolynomial r ord n) where
   isUnit f =
@@ -368,7 +410,7 @@ reversal :: (CoeffRing k, IsMonomialOrder 1 o)
          => Int -> OrderedPolynomial k o 1 -> OrderedPolynomial k o 1
 reversal k = transformMonomial (S.map (k - ))
 
-padeApprox :: (Field r, DecidableUnits r, CoeffRing r, IntegralSemiring r,
+padeApprox :: (Field r, DecidableUnits r, CoeffRing r, ZeroProductSemiring r,
               IsMonomialOrder 1 order)
            => Natural -> Natural -> OrderedPolynomial r order 1
            -> (OrderedPolynomial r order 1, OrderedPolynomial r order 1)
@@ -377,7 +419,7 @@ padeApprox k nmk g =
   in (r, t)
 
 
-minpolRecurrent :: forall k. (Eq k, IntegralSemiring k, DecidableUnits k, DecidableZero k, Field k)
+minpolRecurrent :: forall k. (Eq k, ZeroProductSemiring k, DecidableUnits k, DecidableZero k, Field k)
                 => Natural -> [k] -> Polynomial k 1
 minpolRecurrent n xs =
   let h = sum $ zipWith (\a b -> injectCoeff a * b) xs [pow varX i | i <- [0.. pred (2 * n)]]

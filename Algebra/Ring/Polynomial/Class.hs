@@ -5,14 +5,17 @@
 {-# LANGUAGE ScopedTypeVariables, TypeFamilies, TypeOperators           #-}
 {-# LANGUAGE UndecidableInstances                                       #-}
 -- | This module provides abstract classes for finitary polynomial types.
-module Algebra.Ring.Polynomial.Class ( IsPolynomial(..), IsOrderedPolynomial(..)
-                                     , CoeffRing, oneNorm, maxNorm, monoize,
-                                       sPolynomial, pDivModPoly, content, pp,
-                                       injectVars, vars,
-                                       PrettyCoeff(..), ShowSCoeff(..),
-                                       showsCoeffAsTerm, showsCoeffWithOp,
-                                       showsPolynomialWith, showPolynomialWith
-                                     ) where
+module Algebra.Ring.Polynomial.Class
+       ( IsPolynomial(..), IsOrderedPolynomial(..)
+       , CoeffRing, oneNorm, maxNorm, monoize,
+         sPolynomial, pDivModPoly, content, pp,
+         injectVars, vars,
+         PrettyCoeff(..), ShowSCoeff(..),
+         showsCoeffAsTerm, showsCoeffWithOp,
+         showsPolynomialWith, showPolynomialWith,
+         -- * Polynomial division
+         divModPolynomial, divPolynomial, modPolynomial
+       ) where
 import Algebra.Internal
 import Algebra.Ring.Polynomial.Monomial
 import Algebra.Scalar
@@ -41,7 +44,8 @@ import           Numeric.Algebra          (Monoidal (..), Multiplicative (..))
 import           Numeric.Algebra          (Ring (fromInteger), Unital (..), sum)
 import qualified Numeric.Algebra.Complex  as NA
 import           Numeric.Decidable.Zero   (DecidableZero (..))
-import           Numeric.Domain.Euclidean (Euclidean, gcd, quot)
+import           Numeric.Domain.Euclidean (Euclidean, quot)
+import           Numeric.Domain.GCD       (gcd)
 import           Numeric.Field.Fraction   (Fraction)
 import qualified Numeric.Field.Fraction   as NA
 import           Numeric.Natural          (Natural)
@@ -476,3 +480,35 @@ showsPolynomialWith vsVec d f = P.showParen (d P.> 10) $
     showFactor _ 0 = Nothing
     showFactor v 1 = Just v
     showFactor v n = Just $ v P.++ "^" P.++ P.show n
+
+-- | Calculate a polynomial quotient and remainder w.r.t. second argument.
+divModPolynomial :: (IsOrderedPolynomial poly, Field (Coefficient poly))
+                 => poly -> [poly]
+                 -> ([(poly, poly)], poly)
+divModPolynomial f0 fs = loop f0 zero (P.zip (L.nub fs) (P.repeat zero))
+  where
+    loop p r dic
+        | isZero p = (dic, r)
+        | otherwise =
+            let ltP = toPolynomial $ leadingTerm p
+            in case L.break ((`divs` leadingMonomial p) . leadingMonomial . fst) dic of
+                 (_, []) -> loop (p - ltP) (r + ltP) dic
+                 (xs, (g, old):ys) ->
+                     let q = toPolynomial $ leadingTerm p `tryDiv` leadingTerm g
+                         dic' = xs P.++ (g, old + q) : ys
+                     in loop (p - (q * g)) r dic'
+{-# INLINABLE divModPolynomial #-}
+
+-- | Remainder of given polynomial w.r.t. the second argument.
+modPolynomial :: (IsOrderedPolynomial poly, Field (Coefficient poly))
+              => poly -> [poly] -> poly
+modPolynomial = (snd .) . divModPolynomial
+
+-- | A Quotient of given polynomial w.r.t. the second argument.
+divPolynomial :: (IsOrderedPolynomial poly, Field (Coefficient poly))
+              => poly -> [poly] -> [(poly, poly)]
+divPolynomial = (fst .) . divModPolynomial
+
+infixl 7 `divPolynomial`
+infixl 7 `modPolynomial`
+infixl 7 `divModPolynomial`

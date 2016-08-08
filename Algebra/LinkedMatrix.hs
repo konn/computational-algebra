@@ -27,45 +27,46 @@ import Algebra.Prelude                     hiding (Vector, fromList, generate,
                                             (%))
 import Algebra.Wrapped                     ()
 
-import           Control.Applicative         ((<|>))
-import           Control.Arrow               ((&&&))
-import           Control.Arrow               ((>>>))
-import           Control.Lens                hiding (index, (<.>))
-import           Control.Monad               (replicateM)
-import           Control.Monad.Loops         (iterateUntil)
-import           Control.Monad.Random        hiding (fromList)
-import           Control.Monad.ST.Strict     (ST, runST)
-import           Control.Monad.State.Strict  (evalState, runState)
-import           Control.Parallel.Strategies (parMap)
-import           Control.Parallel.Strategies (rdeepseq)
-import           Data.IntMap.Strict          (IntMap, alter, insert,
-                                              mapMaybeWithKey, minViewWithKey)
-import qualified Data.IntMap.Strict          as IM
-import           Data.IntSet                 (IntSet)
-import qualified Data.IntSet                 as IS
-import           Data.List                   (intercalate, minimumBy, sort)
-import           Data.List                   (sortBy)
-import           Data.Maybe                  (fromJust, fromMaybe, mapMaybe)
-import           Data.Monoid                 (First (..))
-import           Data.Numbers.Primes         (primes)
-import           Data.Ord                    (comparing)
-import           Data.Proxy                  (Proxy (..))
-import           Data.Reflection             (Reifies (..), reify)
-import           Data.Semigroup              hiding (First (..))
-import           Data.Tuple                  (swap)
-import           Data.Vector                 (Vector, create, generate, thaw,
-                                              unsafeFreeze)
-import qualified Data.Vector                 as V
-import           Data.Vector.Mutable         (grow)
-import qualified Data.Vector.Mutable         as MV
-import           Numeric.Decidable.Zero      (isZero)
+import           Control.Applicative          ((<|>))
+import           Control.Arrow                ((&&&))
+import           Control.Arrow                ((>>>))
+import           Control.Lens                 hiding (index, (<.>))
+import           Control.Monad                (replicateM)
+import           Control.Monad.Loops          (iterateUntil)
+import           Control.Monad.Random         hiding (fromList)
+import           Control.Monad.ST.Strict      (ST, runST)
+import           Control.Monad.State.Strict   (evalState, runState)
+import           Control.Parallel.Strategies  (parMap)
+import           Control.Parallel.Strategies  (rdeepseq)
+import           Data.IntMap.Strict           (IntMap, alter, insert,
+                                               mapMaybeWithKey, minViewWithKey)
+import qualified Data.IntMap.Strict           as IM
+import           Data.IntSet                  (IntSet)
+import qualified Data.IntSet                  as IS
+import           Data.List                    (intercalate, minimumBy, sort)
+import           Data.List                    (sortBy)
+import           Data.Maybe                   (fromJust, fromMaybe, mapMaybe)
+import           Data.Monoid                  (First (..))
+import           Data.Numbers.Primes          (primes)
+import           Data.Ord                     (comparing)
+import           Data.Proxy                   (Proxy (..))
+import           Data.Reflection              (Reifies (..), reify)
+import           Data.Semigroup               hiding (First (..))
+import           Data.Tuple                   (swap)
+import           Data.Vector                  (Vector, create, generate, thaw,
+                                               unsafeFreeze)
+import qualified Data.Vector                  as V
+import           Data.Vector.Mutable          (grow)
+import qualified Data.Vector.Mutable          as MV
+import           Numeric.Decidable.Zero       (isZero)
+import           Numeric.Domain.GCD           (gcd, lcm)
 import           Numeric.Field.Fraction
-import           Numeric.Semiring.Integral   (IntegralSemiring)
-import           Prelude                     (abs)
-import           Prelude                     hiding (Num (..), gcd, lcm,
-                                              product, quot, recip, sum, (/),
-                                              (^))
-import qualified Prelude                     as P
+import           Numeric.Semiring.ZeroProduct (ZeroProductSemiring)
+import           Prelude                      (abs)
+import           Prelude                      hiding (Num (..), gcd, lcm,
+                                               product, quot, recip, sum, (/),
+                                               (^))
+import qualified Prelude                      as P
 
 data Entry a = Entry { _value   :: !a
                      , _idx     :: !(Int, Int)
@@ -710,7 +711,7 @@ toSquare _ = Square
 v <.> u = sum $ V.zipWith (*) v u
 
 krylovMinpol :: (Eq a, Ring a, DecidableZero a, DecidableUnits a,
-                 Field a, IntegralSemiring a,
+                 Field a, ZeroProductSemiring a,
                  Random a, MonadRandom m)
              => Matrix a -> Vector a -> m (Polynomial a 1)
 krylovMinpol m b
@@ -726,7 +727,7 @@ krylovMinpol m b
 
 -- | Solving linear equation using linearly recurrent sequence (Wiedemann algorithm).
 solveWiedemann :: (Eq a, Field a, DecidableZero a, DecidableUnits a,
-                IntegralSemiring a, Random a, MonadRandom m)
+                ZeroProductSemiring a, Random a, MonadRandom m)
             => Matrix a -> Vector a -> m (Either (Vector a) (Vector a))
 solveWiedemann a b = do
   m <- krylovMinpol a b

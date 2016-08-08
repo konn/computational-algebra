@@ -12,26 +12,36 @@ import Algebra.Internal
 import Algebra.Prelude
 import Algebra.Ring.Polynomial
 
-import           Control.Lens                 (imap)
-import           Control.Monad                (replicateM)
-import           Control.Monad.Loops          (iterateUntil)
-import           Control.Monad.Random         (MonadRandom)
-import           Control.Monad.Random         (uniform)
-import qualified Data.Foldable                as F
-import qualified Data.Ratio                   as Rat
+import           Control.Lens                          (imap)
+import           Control.Monad                         (replicateM)
+import           Control.Monad.Loops                   (iterateUntil)
+import           Control.Monad.Random                  (MonadRandom)
+import           Control.Monad.Random                  (uniform)
+import qualified Data.Foldable                         as F
+import qualified Data.Ratio                            as Rat
 import           Data.Reflection
-import           Data.Singletons.Prelude.Enum (SEnum (..))
-import           Data.Singletons.TypeLits     (withKnownNat)
-import           Data.Sized.Builtin           as SV
-import qualified Data.Traversable             as T
-import qualified Data.Vector                  as V
-import qualified GHC.TypeLits                 as TL
+import           Data.Singletons.Prelude.Enum          (SEnum (..))
+import           Data.Singletons.TypeLits              (withKnownNat)
+import           Data.Sized.Builtin                    as SV
+import qualified Data.Traversable                      as T
+import qualified Data.Vector                           as V
+import qualified GHC.TypeLits                          as TL
+import           Numeric.Algebra.Unital.UnitNormalForm
+import           Numeric.Decidable.Associates
+import           Numeric.Decidable.Units
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
-import           Numeric.Semiring.Integral    (IntegralSemiring)
-import           Prelude                      hiding (Fractional (..), Num (..),
-                                               gcd, quot, rem, sum, (^))
-import qualified Prelude                      as P
+import           Numeric.Decidable.Zero
+import           Numeric.Domain.Euclidean              (Euclidean)
+import           Numeric.Domain.GCD                    (GCDDomain, gcd, lcm)
+import           Numeric.Domain.Integral
+import           Numeric.Domain.PID
+import           Numeric.Domain.UFD
+import           Numeric.Semiring.ZeroProduct          (ZeroProductSemiring)
+import           Prelude                               hiding (Fractional (..),
+                                                        Num (..), gcd, quot,
+                                                        rem, sum, (^))
+import qualified Prelude                               as P
 
 -- | Galois field of order @p^n@.
 --   @f@ stands for the irreducible polynomial over @F_p@ of degree @n@.
@@ -139,6 +149,23 @@ instance (Reifies p Integer, Reifies f (Unipol (F p)), KnownNat n)
         (_,_,r) = P.head $ euclid p $ vecToPoly $ runGF0 f
     in GF0 $ polyToVec $ r `rem` p
 
+instance (KnownNat n, Reifies p Integer, Reifies f (Unipol (F p)))
+      => DecidableAssociates (GF0 p n f) where
+  isAssociate p n =
+    (isZero p && isZero n) || (not (isZero p) && not (isZero n))
+instance (KnownNat n, Reifies p Integer, Reifies f (Unipol (F p)))
+      => UnitNormalForm (GF0 p n f)
+instance (KnownNat n, Reifies p Integer, Reifies f (Unipol (F p)))
+      => IntegralDomain (GF0 p n f)
+instance (KnownNat n, Reifies p Integer, Reifies f (Unipol (F p)))
+      => GCDDomain (GF0 p n f)
+instance (KnownNat n, Reifies p Integer, Reifies f (Unipol (F p)))
+      => UFD (GF0 p n f)
+instance (KnownNat n, Reifies p Integer, Reifies f (Unipol (F p)))
+      => PID (GF0 p n f)
+instance (KnownNat n, Reifies p Integer, Reifies f (Unipol (F p)))
+      => Euclidean (GF0 p n f)
+
 instance (Reifies p Integer, Reifies f (Unipol (F p)), KnownNat n) => P.Num (GF0 p n f) where
   (+) = (+)
   (-) = (-)
@@ -155,7 +182,7 @@ instance (Reifies p Integer, Reifies f (Unipol (F p)), KnownNat n) => P.Fraction
 
 -- | @generateIrreducible p n@ generates irreducible polynomial over F_@p@ of degree @n@.
 generateIrreducible :: (DecidableZero k, MonadRandom m, FiniteField k,
-                        IntegralSemiring k, DecidableUnits k, Eq k)
+                        ZeroProductSemiring k, DecidableUnits k, Eq k)
                     => proxy k -> Natural -> m (Unipol k)
 generateIrreducible p n =
   iterateUntil (\f -> all (\i -> one == gcd (varX^(order p^i) - varX) f ) [1.. n `div` 2]) $ do
@@ -189,7 +216,7 @@ class (KnownNat n, Reifies p Integer, Reifies f (Unipol (F p))) => IsGF0 p n f
 instance (KnownNat n, Reifies p Integer, Reifies f (Unipol (F p))) => IsGF0 p n f
 
 
-instance (KnownNat n, IsGF0 p n f) => IntegralSemiring (GF0 p n f)
+instance (KnownNat n, IsGF0 p n f) => ZeroProductSemiring (GF0 p n f)
 
 instance (KnownNat n, IsGF0 p n f) => FiniteField (GF0 p n f) where
   power _ = fromIntegral $ fromSing (sing :: SNat n)

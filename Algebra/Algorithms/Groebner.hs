@@ -5,11 +5,8 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Algebra.Algorithms.Groebner
        (
-       -- * Polynomial division
-         divModPolynomial, divPolynomial, modPolynomial
-       , lcmPolynomial, gcdPolynomial
        -- * Groebner basis
-       , isGroebnerBasis
+         isGroebnerBasis
        , calcGroebnerBasis, calcGroebnerBasisWith
        , calcGroebnerBasisWithStrategy
        , buchberger, syzygyBuchberger
@@ -26,6 +23,7 @@ module Algebra.Algorithms.Groebner
        , saturationIdeal, saturationByPrincipalIdeal
        -- * Resultant
        , resultant, hasCommonFactor
+       , lcmPolynomial, gcdPolynomial
        ) where
 import           Algebra.Internal
 import           Algebra.Ring.Ideal
@@ -54,38 +52,6 @@ import           Prelude                      hiding (Num (..), recip, subtract,
                                                (^))
 import qualified Prelude                      as P
 import           Proof.Equational
-
--- | Calculate a polynomial quotient and remainder w.r.t. second argument.
-divModPolynomial :: (IsOrderedPolynomial poly, Field (Coefficient poly))
-                 => poly -> [poly]
-                 -> ([(poly, poly)], poly)
-divModPolynomial f0 fs = loop f0 zero (zip (nub fs) (repeat zero))
-  where
-    loop p r dic
-        | isZero p = (dic, r)
-        | otherwise =
-            let ltP = toPolynomial $ leadingTerm p
-            in case break ((`divs` leadingMonomial p) . leadingMonomial . fst) dic of
-                 (_, []) -> loop (p - ltP) (r + ltP) dic
-                 (xs, (g, old):ys) ->
-                     let q = toPolynomial $ leadingTerm p `tryDiv` leadingTerm g
-                         dic' = xs ++ (g, old + q) : ys
-                     in loop (p - (q * g)) r dic'
-{-# INLINABLE divModPolynomial #-}
-
--- | Remainder of given polynomial w.r.t. the second argument.
-modPolynomial :: (IsOrderedPolynomial poly, Field (Coefficient poly))
-              => poly -> [poly] -> poly
-modPolynomial = (snd .) . divModPolynomial
-
--- | A Quotient of given polynomial w.r.t. the second argument.
-divPolynomial :: (IsOrderedPolynomial poly, Field (Coefficient poly))
-              => poly -> [poly] -> [(poly, poly)]
-divPolynomial = (fst .) . divModPolynomial
-
-infixl 7 `divPolynomial`
-infixl 7 `modPolynomial`
-infixl 7 `divModPolynomial`
 
 -- | Test if the given ideal is Groebner basis, using Buchberger criteria and relatively primeness.
 isGroebnerBasis :: (IsOrderedPolynomial poly, Field (Coefficient poly))

@@ -11,20 +11,20 @@ import           Algebra.Ring.Polynomial hiding (maxNorm)
 import           Algebra.Wrapped         (Normed (..))
 
 import           Control.Lens
-import           Control.Monad                    (when)
+import           Control.Monad               (when)
 import           Data.List
-import qualified Data.Matrix                      as DM
+import qualified Data.Matrix                 as DM
 import           Data.Ord
 import           Data.Type.Ordinal
-import qualified Data.Vector                      as V
-import           GHC.Exts                         (Constraint)
-import           Numeric.Algebra                  (Additive, DecidableZero)
-import           Numeric.Algebra                  (Monoidal, Multiplicative)
-import           Numeric.Algebra                  (Ring, Unital)
-import qualified Numeric.Algebra                  as NA
-import qualified Numeric.Decidable.Zero           as NA
-import qualified Numeric.LinearAlgebra            as LA
-import qualified Numeric.LinearAlgebra.Devel      as LA
+import qualified Data.Vector                 as V
+import           GHC.Exts                    (Constraint)
+import           Numeric.Algebra             (Additive, DecidableZero)
+import           Numeric.Algebra             (Monoidal, Multiplicative)
+import           Numeric.Algebra             (Ring, Unital)
+import qualified Numeric.Algebra             as NA
+import qualified Numeric.Decidable.Zero      as NA
+import qualified Numeric.LinearAlgebra       as LA
+import qualified Numeric.LinearAlgebra.Devel as LA
 -- import           Sparse.Matrix                    (_Mat)
 -- import qualified Sparse.Matrix                    as SM
 
@@ -301,7 +301,7 @@ gaussReduction' mat = {-# SCC "gaussRed" #-} go 1 1 mat (identity $ nrows mat) N
                     offset = if i == k then id else NA.negate
                 in go (i+1) (j+1) a' p' (offset $ acc NA.* new)
 
-det :: (Elem mat a, Eq a, Ring a, NA.Division a, NA.Commutative a, Normed a, Matrix mat)
+det :: (Elem mat a, Eq a, NA.Field a, Normed a, Matrix mat)
     => mat a -> a
 det = view _3 . gaussReduction'
 
@@ -312,7 +312,7 @@ rankWith :: (Elem mat r, CoeffRing r, Matrix mat)
          => (mat r -> mat r) -> mat r -> Int
 rankWith gauss = length . nonZeroRows . gauss
 
-inverse :: (Elem mat a, Eq a, Ring a, NA.Division a, NA.Commutative a, Normed a, Matrix mat)
+inverse :: (Elem mat a, Eq a, NA.Field a, Normed a, Matrix mat)
         => mat a -> mat a
 inverse = snd . gaussReduction
 

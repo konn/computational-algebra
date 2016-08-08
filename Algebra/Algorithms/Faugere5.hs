@@ -72,13 +72,13 @@ instance (IsMonomialOrder n ord) => Ord (PolyRepr r ord n) where
      => OrderedMonomial ord n -> PolyRepr r ord n -> PolyRepr r ord n
 (*@) v = (signature._2 %~ (v*)) >>> (poly %~ (toPolynomial (one, v) *))
 
-nf :: (DecidableZero r, Eq r, KnownNat n, Field r, IsMonomialOrder n ord)
+nf :: (Eq r, KnownNat n, Field r, IsMonomialOrder n ord)
    => PolyRepr r ord n -> [OrderedPolynomial r ord n] -> PolyRepr r ord n
 nf r g = r & poly %~ (`modPolynomial` g)
 
 infixl 7 *@
 
-preReduction :: (Eq r, DecidableZero r, KnownNat n, Field r, IsMonomialOrder n order)
+preReduction :: (Eq r, KnownNat n, Field r, IsMonomialOrder n order)
              => [OrderedPolynomial r order n] -> [OrderedPolynomial r order n]
 preReduction fs = map monoize $ go [] fs
   where
@@ -89,7 +89,7 @@ preReduction fs = map monoize $ go [] fs
          then go (xs++[y]) ys
          else go [] (xs ++ if isZero r then ys else r : ys)
 
-f5Original :: (PrettyCoeff r, Ord r, DecidableZero r, KnownNat n, Field r, IsMonomialOrder n ord)
+f5Original :: (PrettyCoeff r, Ord r, KnownNat n, Field r, IsMonomialOrder n ord)
            => Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
 f5Original = toIdeal . sort . generators . mainLoop
 
@@ -122,8 +122,7 @@ mainLoop (preReduction . filter (not . isZero) . generators -> ij)
         --  ["reduced(", show i, "th): ", show (isGroebnerBasis $ toIdeal bs'), ", ", show bs']
         loop bs' g'' xs
 
-interred :: (Eq k, KnownNat n, DecidableZero k,
-             Field k, IsMonomialOrder n order)
+interred :: (Eq k, KnownNat n, Field k, IsMonomialOrder n order)
          => [OrderedPolynomial k order n] -> [OrderedPolynomial k order n]
 interred = reduceMinimalGroebnerBasis . minimizeGroebnerBasis
 
@@ -131,10 +130,9 @@ toPolys :: (?labPolys::STRef s (MV.MVector s (PolyRepr r ord n)))
         => IntSet -> ST s [OrderedPolynomial r ord n]
 toPolys = mapM (liftM (view poly) . readAt ?labPolys) . IS.toList
 
-setupReducedBasis :: (Eq r, ?labPolys::STRef s (MV.MVector s (PolyRepr r ord n)),
-                     ?rules::STRef s (MV.MVector s (Rule ord n)),
-                     DecidableZero r, KnownNat n, Field r,
-                     IsMonomialOrder n ord)
+setupReducedBasis :: (Eq r, ?labPolys :: STRef s (MV.MVector s (PolyRepr r ord n)),
+                     ?rules :: STRef s (MV.MVector s (Rule ord n)),
+                     KnownNat n, Field r, IsMonomialOrder n ord)
                  => IntSet -> ST s IntSet
 setupReducedBasis gs = do
   bs <- interred <$> toPolys gs
@@ -158,7 +156,7 @@ setupReducedBasis gs = do
 
 f5Core :: ( ?labPolys :: (RefVector s (PolyRepr r ord n)),
            ?rules :: (RefVector s (Rule ord n)), PrettyCoeff r,
-           Eq r, Field r, KnownNat n, DecidableZero r, IsMonomialOrder n ord)
+           Eq r, Field r, KnownNat n, IsMonomialOrder n ord)
        => Int
        -> [OrderedPolynomial r ord n]
        -> IntSet
@@ -197,7 +195,7 @@ mapMaybeM f as = go as id
 
 reduction :: (Eq r, ?labPolys :: (RefVector s (PolyRepr r ord n)),
               ?rules :: (RefVector s (Rule ord n)), PrettyCoeff r,
-              KnownNat n, DecidableZero r, Field r,
+              KnownNat n, Field r,
               IsMonomialOrder n ord)
           => [Int] -> [OrderedPolynomial r ord n] -> IntSet -> IntSet -> ST s IntSet
 reduction t0 bs g g' =
@@ -234,7 +232,7 @@ findReductor k g g' = do
 
 topReduction :: (Eq r, ?labPolys :: (RefVector s (PolyRepr r ord n)),
                  ?rules :: (RefVector s (Rule ord n)), KnownNat n, PrettyCoeff r,
-                 DecidableZero r, Field r, IsMonomialOrder n ord)
+                 Field r, IsMonomialOrder n ord)
              => Int -> IntSet -> IntSet -> ST s ([Int], [Int])
 topReduction k g g' = do
   rk <- readAt ?labPolys k
@@ -270,7 +268,7 @@ topReduction k g g' = do
 spols :: (?labPolys :: (RefVector s (PolyRepr r ord n)),
           ?rules :: (RefVector s (Rule ord n)), Eq r,
           KnownNat n, PrettyCoeff r,
-          DecidableZero r, Field r, IsMonomialOrder n ord)
+          Field r, IsMonomialOrder n ord)
       => [CriticalPair ord n] -> ST s [Int]
 spols bs =
   map payload . T.toList <$> foldrM step H.empty (sortBy (comparing $ view _1) bs)

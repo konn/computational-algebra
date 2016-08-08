@@ -5,22 +5,23 @@
 module Algebra.Instances () where
 import Algebra.Scalar
 
-import           Control.DeepSeq          (NFData (..))
-import           Control.Monad.Random     (Random (..), getRandom)
-import           Control.Monad.Random     (getRandomR, runRand)
+import           Control.DeepSeq                       (NFData (..))
+import           Control.Monad.Random                  (Random (..), getRandom)
+import           Control.Monad.Random                  (getRandomR, runRand)
 import           Data.Complex
-import           Data.Convertible.Base    (Convertible (..))
+import           Data.Convertible.Base                 (Convertible (..))
 import           Data.Hashable
-import qualified Data.Ratio               as P
-import qualified Data.Vector              as DV
+import qualified Data.Ratio                            as P
+import qualified Data.Vector                           as DV
 import           Numeric.Algebra
-import qualified Numeric.Algebra          as NA
+import qualified Numeric.Algebra                       as NA
+import           Numeric.Algebra.Unital.UnitNormalForm
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
-import           Numeric.Domain.Euclidean (Euclidean, splitUnit)
+import           Numeric.Domain.Euclidean              (Euclidean)
 import           Numeric.Field.Fraction
-import           Prelude                  hiding (Num (..), lcm)
-import qualified Prelude                  as P
+import           Prelude                               hiding (Num (..), lcm)
+import qualified Prelude                               as P
 
 instance Additive r => Additive (DV.Vector r) where
   (+) = DV.zipWith (+)
@@ -126,7 +127,7 @@ instance (Semiring r, P.Integral r) => LeftModule (Scalar r) (P.Ratio r) where
 
 instance (Semiring r, P.Integral r) => RightModule (Scalar r) (P.Ratio r) where
   r *. Scalar n = r * (n P.% 1)
-  
+
 instance P.Integral r => Multiplicative (P.Ratio r) where
   (*) = (P.*)
 
@@ -181,7 +182,7 @@ instance (Random (Fraction Integer)) where
     return $ i % (P.abs j + 1)
   randomR (a, b) = runRand $ do
     j <- succ . P.abs <$> getRandom
-    let g = foldl1 lcm  [denominator a, denominator b, j]
+    let g = foldl1 P.lcm  [denominator a, denominator b, j]
         lb = g * numerator a `quot` denominator a
         ub = g * numerator b `quot` denominator b
     i <- getRandomR (lb, ub)

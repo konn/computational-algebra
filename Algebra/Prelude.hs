@@ -18,7 +18,7 @@ import           Algebra.Scalar
 import           Numeric.Algebra          hiding (Order (..), (^))
 import qualified Numeric.Algebra          as NA
 import           Numeric.Domain.Class
-import           Numeric.Domain.Euclidean hiding (normalize)
+import           Numeric.Domain.Euclidean
 import           Numeric.Field.Fraction   hiding ((%))
 import           Prelude                  hiding (Fractional (..),
                                            Integral (..), Num (..), Rational,

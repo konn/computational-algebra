@@ -57,7 +57,7 @@ isPseudoPrime 2 = return $ Right True
 isPseudoPrime 3 = return $ Right True
 isPseudoPrime n = do
   a <- uniform [2..n P.- 2]
-  let d = gcd a n
+  let d = P.gcd a n
   return $ if d > 1
     then Left d
     else
@@ -69,6 +69,6 @@ isPseudoPrime n = do
        else case findIndex (== 1) bs of
          Nothing -> Right False
          Just j ->
-           let g = gcd (bs !! j - 1) n
+           let g = P.gcd (bs !! j - 1) n
            in if g == 1 || g == n then Right True else Left g
 
