@@ -5,7 +5,7 @@
 module Algebra.Field.Finite (F(), naturalRepr, reifyPrimeField, withPrimeField,
                              modNat, modNat', modRat, modRat', FiniteField(..), order) where
 import Algebra.Algorithms.PrimeTest
-import Algebra.Ring.Polynomial.Class (PrettyCoeff (..))
+import Algebra.Ring.Polynomial.Class (PrettyCoeff (..), ShowSCoeff (..))
 import Algebra.Wrapped
 
 import           Control.Monad.Random                  (uniform)
@@ -46,7 +46,13 @@ naturalRepr = runF
 instance Reifies (p :: k) Integer => Show (F p) where
   showsPrec d n@(F p) = showsPrec d (p `mod` reflect n)
 
-instance Reifies (p :: k) Integer => PrettyCoeff (F p)
+instance Reifies (p :: k) Integer => PrettyCoeff (F p) where
+  showsCoeff d (F p) =
+    if p == 0
+    then Vanished
+    else if p == 1
+         then OneCoeff
+         else Positive $ showsPrec d p
 
 modNat :: Reifies (p :: k) Integer => Integer -> F p
 modNat = modNat' Proxy
