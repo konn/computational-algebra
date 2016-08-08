@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts, NoImplicitPrelude, NoMonomorphismRestriction #-}
 module Algebra.Prelude
-       ((^), (^^),(%),Scalar(..),(.*.),Rational,
+       ((^), (^^),(%),Scalar(..),(.*.),Rational, od,
         module Prelude,
         module Numeric.Algebra,
         module Algebra.Ring.Polynomial,
@@ -15,16 +15,17 @@ import Algebra.Internal
 import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import           Algebra.Scalar
-import           Numeric.Algebra          hiding (Order (..), (^))
-import qualified Numeric.Algebra          as NA
+import           Data.Type.Ordinal.Builtin (od)
+import           Numeric.Algebra           hiding (Order (..), (^))
+import qualified Numeric.Algebra           as NA
 import           Numeric.Domain.Class
 import           Numeric.Domain.Euclidean
-import           Numeric.Field.Fraction   hiding ((%))
-import           Prelude                  hiding (Fractional (..),
-                                           Integral (..), Num (..), Rational,
-                                           Real (..), gcd, lcm, lex, product,
-                                           subtract, sum, (^), (^^))
-import           Prelude                  (fromRational)
+import           Numeric.Field.Fraction    hiding ((%))
+import           Prelude                   hiding (Fractional (..),
+                                            Integral (..), Num (..), Rational,
+                                            Real (..), gcd, lcm, lex, product,
+                                            subtract, sum, (^), (^^))
+import           Prelude                   (fromRational)
 
 (^) :: Unital r => r -> Natural -> r
 (^) = pow
