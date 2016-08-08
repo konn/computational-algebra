@@ -15,7 +15,6 @@ import           Data.Maybe                            (fromMaybe)
 import           Data.Proxy
 import qualified Data.Ratio                            as R
 import           Data.Reflection
-import qualified Data.Type.Natural                     as TN
 import           GHC.TypeLits                          (KnownNat)
 import           Numeric.Algebra                       (Field)
 import           Numeric.Algebra                       (char)
@@ -75,23 +74,31 @@ proxyF Proxy = Proxy
 
 -- instance Reifies p Int => Noetherian (F p)
 
-instance Reifies p Integer => Eq (F p) where
-  n == m = runF n `mod` reflect n == runF m `mod` reflect n
+instance Eq (F p) where
+  F n == F m = n == m
 
 instance Reifies p Integer => Normed (F p) where
   type Norm (F p) = Integer
-  norm n@(F p) = p `mod` reflect n
-  liftNorm = F . (`mod` reflect (Proxy :: Proxy p))
+  norm fp@(F p) = p where _ = reflect fp
+  liftNorm = modNat 
 
 instance Reifies p Integer => Num (F p) where
   fromInteger n = modNat $ fromInteger n
+  {-# INLINE fromInteger #-}
+
   F a + F b = modNat $ a + b
-  F a - F b =
-    let p = reflect (Proxy :: Proxy p)
-    in modNat $ a + (p - (b `mod` p))
+  {-# INLINE (+) #-}
+
+  F a - F b = modNat $ a - b
+  {-# INLINE (-) #-}
+
   negate c = modNat $ reflect c - runF c
+  {-# INLINE negate #-}
+
   a * b = modNat $ runF a * runF b
-  abs (F n) = modNat $ abs n
+  {-# INLINE (*) #-}
+
+  abs = id
   signum (F n) = modNat $ signum n
 
 pow :: (Integral a1, Reifies p Integer) => F p -> a1 -> F p
@@ -134,7 +141,7 @@ instance Reifies p Integer => NA.Ring (F p) where
   fromInteger = fromInteger
 
 instance Reifies p Integer => NA.DecidableZero (F p) where
-  isZero n@(F p) = p `mod` reflect n == 0
+  isZero (F p) = p == 0
 
 instance Reifies p Integer => NA.Unital (F p) where
   one = 1
@@ -167,7 +174,7 @@ instance Reifies p Integer => Fractional (F p) where
   a / b = a * recip b
   fromRational r =
     modNat (fromInteger $ R.numerator r) * recip (modNat (fromInteger $ R.denominator r))
-  recip = fromMaybe (error "not unit") . recipUnit
+  recip = fromMaybe (error "recip: not unit") . recipUnit
 
 instance Reifies p Integer => NA.Commutative (F p)
 
