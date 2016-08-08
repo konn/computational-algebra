@@ -41,9 +41,11 @@ import           Data.Maybe
 import           Data.Ord
 import qualified Data.Set                              as Set
 import           Data.Singletons.Prelude               (POrd (..))
+import           Data.Sized.Builtin                    ((%!!))
 import qualified Data.Sized.Builtin                    as S
 import           Data.Type.Ordinal
 import           Numeric.Algebra                       hiding (Order (..))
+import qualified Numeric.Algebra                       as NA
 import           Numeric.Algebra.Unital.UnitNormalForm (UnitNormalForm (..))
 import qualified Numeric.Algebra.Unital.UnitNormalForm as NA
 import           Numeric.Decidable.Associates
@@ -105,8 +107,8 @@ instance (KnownNat n, IsMonomialOrder n ord, CoeffRing r) => IsPolynomial (Order
 
   liftMap mor poly = sum $ map (uncurry (.*) . (Scalar *** extractPower)) $ getTerms poly
     where
-      extractPower =
-        P.foldr (*) one . zipWithSame (\ o r -> pow  (mor o) (fromIntegral r)) ordVec . getMonomial
+      extractPower m =
+       NA.product $ generate (sing :: SNat n) (\ o -> pow  (mor o) (fromIntegral $ getMonomial m %!! o))
   {-# INLINE liftMap #-}
 
 
