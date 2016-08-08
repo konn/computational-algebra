@@ -1,7 +1,11 @@
 {-# LANGUAGE DataKinds, FlexibleInstances, LiberalTypeSynonyms            #-}
 {-# LANGUAGE MultiParamTypeClasses, TemplateHaskell, TypeSynonymInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Algebra.Field.Galois.Conway (Conway, addConwayPolynomials, conwayFile) where
+module Algebra.Field.Galois.Conway
+       (Conway,
+        ConwayPolynomial(..),
+        addConwayPolynomials,
+        conwayFile) where
 import Algebra.Field.Galois.Internal
 import Control.Monad                 (liftM)
 import Language.Haskell.TH           (runIO)

@@ -1,20 +1,36 @@
-{-# LANGUAGE DataKinds, EmptyDataDecls, FlexibleInstances          #-}
-{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude              #-}
-{-# LANGUAGE NoMonomorphismRestriction, PolyKinds, TemplateHaskell #-}
-{-# LANGUAGE UndecidableInstances                                  #-}
-module Algebra.Field.Galois.Internal (Conway(), buildInstance, parseLine) where
+{-# LANGUAGE DataKinds, EmptyDataDecls, FlexibleInstances              #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude                  #-}
+{-# LANGUAGE NoMonomorphismRestriction, PolyKinds, ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell, UndecidableInstances                     #-}
+module Algebra.Field.Galois.Internal
+       (ConwayPolynomial(..),
+        Conway,
+        buildInstance,
+        parseLine) where
 import           Algebra.Field.Finite
-import           Algebra.Prelude            hiding (lex)
-import           Data.Char                  (isDigit)
-import           Data.Char                  (digitToInt)
-import           Data.Reflection            (Reifies (..))
-import qualified GHC.TypeLits               as TL
+import           Algebra.Prelude                    hiding (lex)
+import           Algebra.Ring.Polynomial.Univariate (Unipol)
+import           Data.Char                          (isDigit)
+import           Data.Char                          (digitToInt)
+import           Data.Reflection
+import qualified GHC.TypeLits                       as TL
 import           Language.Haskell.TH
-import           Language.Haskell.TH.Syntax (lift)
-import           Numeric                    (readInt)
-import           Prelude                    (lex)
+import           Language.Haskell.TH.Syntax         (lift)
+import           Numeric                            (readInt)
+import           Prelude                            (lex)
 
-data Conway (p :: TL.Nat) (n :: TL.Nat)
+-- | Type-class to provide the dictionary for Conway polynomials
+class ConwayPolynomial (p :: TL.Nat) (n :: TL.Nat) where
+  conwayPolynomial :: proxy p -> proxy n -> Unipol (F p)
+
+-- | Empty tag to reify Conway polynomial to type-level
+data Conway p n
+
+-- instance  {-# OVERLAPPABLE #-} (KnownNat p, KnownNat n) => ConwayPolynomial p n where
+--   conwayPolynomial _ _ = undefined
+
+instance (KnownNat p, KnownNat n) => Reifies (Conway p n) (Unipol (F p)) where
+  reflect _ = conwayPolynomial (Proxy :: Proxy p) (Proxy :: Proxy n)
 
 parseLine :: String -> [(Integer, Integer, [Integer])]
 parseLine ('[':xs) =
@@ -30,14 +46,15 @@ plusOp e f = infixApp e [| (+) |] f
 
 toPoly :: [Integer] -> ExpQ
 toPoly as =
-  foldl1 plusOp $ zipWith (\i c -> [| injectCoeff (modNat $(litE $ integerL c)) * varX ^ $(lift i) |]) [0 :: Integer ..] as
+  foldl1 plusOp $
+  zipWith (\i c -> [| injectCoeff (modNat $(litE $ integerL c)) * var 0 ^ $(lift i) |])
+  [0 :: Integer ..] as
 
 buildInstance :: (Integer, Integer, [Integer]) -> DecsQ
 buildInstance (p,n,cs) =
   let tp = litT $ numTyLit p
       tn = litT $ numTyLit n
-  in [d| instance Reifies (Conway $tp $tn)
-                          (OrderedPolynomial (F $tp) Grevlex 1) where
-           reflect _ = $(toPoly cs)
-           {-# INLINE reflect #-}
+  in [d| instance {-# OVERLAPPING #-} ConwayPolynomial $tp $tn where
+           conwayPolynomial _ _ = $(toPoly cs)
+           {-# INLINE conwayPolynomial #-}
        |]
