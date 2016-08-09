@@ -15,10 +15,10 @@ module Algebra.Algorithms.Faugere4 (
   faugere4Gen,
   -- * Examples
   cyclic)  where
-import qualified Algebra.LinkedMatrix    as LM
-import           Algebra.Matrix          hiding (trace)
-import           Algebra.Prelude         hiding ((\\))
-import qualified Algebra.Repa            as Repa
+import qualified Algebra.LinkedMatrix as LM
+import           Algebra.Matrix       hiding (trace)
+import           Algebra.Prelude      hiding ((\\))
+import qualified Algebra.Repa         as Repa
 
 import           Control.Monad.Identity
 import           Control.Parallel

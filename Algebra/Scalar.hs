@@ -3,12 +3,13 @@
 {-# LANGUAGE StandaloneDeriving                                #-}
 module Algebra.Scalar (Scalar(..), (.*.)) where
 import           AlgebraicPrelude
+
+import Algebra.Normed
 import qualified Prelude          as P
-import Numeric.Algebra.Unital.UnitNormalForm hiding (normalize)
 
 newtype Scalar r = Scalar { runScalar :: r }
     deriving (Read, Show, Eq, Ord, Additive,
-              P.Integral, P.Real, Enum
+              Integral, Real, Enum
              ,Multiplicative, Unital)
 
 (.*.) :: (Module (Scalar r) m)

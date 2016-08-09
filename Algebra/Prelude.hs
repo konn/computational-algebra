@@ -5,9 +5,11 @@ module Algebra.Prelude
         module AlgebraicPrelude,
         module Algebra.Ring.Polynomial,
         module Algebra.Ring.Ideal,
+        module Algebra.Normed,
         module Algebra.Internal) where
 
 import Algebra.Internal
+import Algebra.Normed
 import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
 import Algebra.Scalar

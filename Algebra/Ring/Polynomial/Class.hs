@@ -17,6 +17,7 @@ module Algebra.Ring.Polynomial.Class
          divModPolynomial, divPolynomial, modPolynomial
        ) where
 import Algebra.Internal
+import Algebra.Normed
 import Algebra.Ring.Polynomial.Monomial
 import Algebra.Scalar
 

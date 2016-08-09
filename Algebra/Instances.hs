@@ -6,20 +6,15 @@ module Algebra.Instances () where
 import Algebra.Scalar
 
 import           AlgebraicPrelude
-import           Control.DeepSeq                       (NFData (..))
-import           Control.Monad.Random                  (Random (..), getRandom)
-import           Control.Monad.Random                  (getRandomR, runRand)
+import           Control.DeepSeq       (NFData (..))
+import           Control.Monad.Random  (Random (..), getRandom)
+import           Control.Monad.Random  (getRandomR, runRand)
 import           Data.Complex
-import           Data.Convertible.Base                 (Convertible (..))
-import qualified Data.Ratio                            as P
-import qualified Data.Vector                           as DV
-import qualified Numeric.Algebra                       as NA
-import           Numeric.Algebra.Unital.UnitNormalForm
-import           Numeric.Decidable.Units
-import           Numeric.Decidable.Zero
-import           Numeric.Domain.Euclidean              (Euclidean)
--- import           Prelude                               hiding (Num (..), lcm)
-import qualified Prelude as P
+import           Data.Convertible.Base (Convertible (..))
+import qualified Data.Ratio            as P
+import qualified Data.Vector           as DV
+import qualified Numeric.Algebra       as NA
+import qualified Prelude               as P
 
 instance Additive r => Additive (DV.Vector r) where
   (+) = DV.zipWith (+)
@@ -30,15 +25,6 @@ instance DecidableZero r => DecidableZero (Complex r) where
 
 instance (NFData a) => NFData (Fraction a) where
   rnf a = rnf (numerator a) `seq` rnf (denominator a) `seq` ()
-
-instance Euclidean a => P.Num (Fraction a) where
-  (+) = (NA.+)
-  (-) = (NA.-)
-  negate = NA.negate
-  (*) = (NA.*)
-  fromInteger = NA.fromInteger
-  abs p = snd (splitUnit (numerator p)) % snd (splitUnit (denominator p))
-  signum p = fst (splitUnit (numerator p)) % fst (splitUnit (denominator p))
 
 instance Additive r => Additive (Complex r) where
   (a :+ b) + (c :+ d) = (a + c) :+ (b + d)
@@ -165,11 +151,6 @@ instance P.Integral r => DecidableUnits (P.Ratio r) where
     | r /= 0 = Just (r P.^^ n)
     | r == 0 && n P.> 0 = Just 0
     | otherwise = Nothing
-
-instance Euclidean d => P.Fractional (Fraction d) where
-  fromRational r = fromInteger' (P.numerator r) % fromInteger' (P.denominator r)
-  recip = NA.recip
-  (/) = (NA./)
 
 instance Convertible (Fraction Integer) Double where
   safeConvert a = Right $ P.fromInteger (numerator a) P./ P.fromInteger (denominator a)

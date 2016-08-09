@@ -34,7 +34,6 @@ import qualified Data.Constraint                 as C
 import           Data.Constraint.Forall
 import           Data.Hashable                   (Hashable (..))
 import           Data.Kind                       (Type)
-import           Data.Kind                       (Type)
 import           Data.Maybe                      (catMaybes)
 import           Data.Monoid                     (Dual (..))
 import           Data.Monoid                     ((<>))

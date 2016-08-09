@@ -70,7 +70,7 @@ library
     exposed-modules:   Algebra.Algorithms.Faugere4 Algebra.LinkedMatrix
                        Algebra.Algorithms.Faugere5 Algebra.Algorithms.Groebner
                        Algebra.Algorithms.ZeroDim Algebra.Field.Galois
-                       Algebra.Ring.Ideal
+                       Algebra.Ring.Ideal Algebra.Normed
                        Algebra.Ring.Polynomial
                        Algebra.Ring.Polynomial.Univariate
                        -- Algebra.Ring.Polynomial.Monomorphic
