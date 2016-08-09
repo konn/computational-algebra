@@ -20,26 +20,26 @@ imgOrLink imgOrLink24,25
 linkUrl linkUrl26,27
 linkUrl linkUrl27,28
 
-./app/Main.hs,500
+./app/Main.hs,501
 module Main Main3,4
-main main26,27
-main main27,28
-writerOpts writerOpts53,54
-writerOpts writerOpts54,55
-excluded excluded62,63
-excluded excluded63,64
-testIgnore testIgnore65,66
-testIgnore testIgnore66,67
-deploy deploy69,70
-deploy deploy70,71
-conf conf96,97
-conf conf97,98
-procSchemes procSchemes103,104
-procSchemes procSchemes104,105
-procSchemes0 procSchemes0106,107
-procSchemes0 procSchemes0107,108
-procHaddock procHaddock120,121
-procHaddock procHaddock121,122
+main main28,29
+main main29,30
+writerOpts writerOpts55,56
+writerOpts writerOpts56,57
+excluded excluded64,65
+excluded excluded65,66
+testIgnore testIgnore67,68
+testIgnore testIgnore68,69
+deploy deploy71,72
+deploy deploy72,73
+conf conf98,99
+conf conf99,100
+procSchemes procSchemes105,106
+procSchemes procSchemes106,107
+procSchemes0 procSchemes0108,109
+procSchemes0 procSchemes0109,110
+procHaddock procHaddock122,123
+procHaddock procHaddock123,124
 
 ./app/Settings.hs,724
 module Settings Settings3,4

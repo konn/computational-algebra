@@ -7,12 +7,14 @@ import Settings hiding (children)
 
 import           Control.Lens        hiding (children, element, elements,
                                       setting)
+import           Control.Monad       ((>=>))
 import           Data.Default
 import           Data.Foldable
 import           Data.Maybe
 import           Data.Monoid
 import           Data.Text           (Text)
 import qualified Data.Text           as T
+import qualified Data.Text.Lazy      as LT
 import           Data.Text.Lazy.Lens
 import           Data.Time.Format
 import           Data.Time.LocalTime
@@ -119,7 +121,8 @@ procSchemes0 inl =
     sandwitched s e t = s <> t <> e
 
 procHaddock :: String -> Compiler String
-procHaddock  = packed . html . element . transformM . attr "href" $ traverse rewriteUrl
+procHaddock  = packed (( html . element . transformM . attr "href" $ traverse rewriteUrl)
+                       >=> return . LT.replace "</span><" "</span> <")
   where
     rewriteUrl :: Text -> Compiler Text
     rewriteUrl ref = do
