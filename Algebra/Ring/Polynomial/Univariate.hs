@@ -156,6 +156,16 @@ instance CoeffRing r => P.Num (Unipol r) where
   pow (varUnipol x) n = Unipol (IM.singleton (fromEnum n) one)
   #-}
 
+{-# RULES
+"pow1p x n" forall (x :: SV.Ordinal 1) n.
+  NA.pow1p (varUnipol x) n = Unipol (IM.singleton (fromEnum n + 1) one)
+  #-}
+
+{-# RULES
+"x ^ n" forall (x :: SV.Ordinal 1) n.
+  (varUnipol x) ^ n = Unipol (IM.singleton (fromEnum n) one)
+  #-}
+
 varUnipol :: Unital r => SV.Ordinal 1 -> Unipol r
 varUnipol _ = Unipol $ IM.singleton 1 one
 {-# NOINLINE CONLIKE [1] varUnipol #-}
