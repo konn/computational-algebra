@@ -8,6 +8,9 @@
 
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/pygments.css">
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({ TeX: { extensions: ["https://konn.github.io/xyjax/extensions/TeX/xypic.js"] }});
+    </script>
     <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
     </script>
     
@@ -165,10 +168,13 @@ caller sn <span class="fu">=</span> withKnownNat n <span class="fu">$</span> fun
           <span class="ot">=&gt;</span> (<span class="dt">Ordinal</span> (<span class="dt">Arity</span> poly) <span class="ot">-&gt;</span> alg) <span class="ot">-&gt;</span> poly <span class="ot">-&gt;</span> alg</code></pre></div>
 <p><code class="sourceCode haskell">var n</code> stands for the <span class="math inline">\(n\)</span>-th variable of poly. The type <code class="sourceCode haskell"><span class="dt">Ordinal</span> n</code> is provided in <code class="sourceCode haskell"><span class="dt">Data.Type.Ordinals.Builtin</span></code> of <code>type-natural</code> package, and it stands for the natural numbers less than n. So, in the context of polynomial, you can think <code class="sourceCode haskell"><span class="dt">Ordinal</span> n</code> as “variable of <span class="math inline">\(n\)</span>-variate polynomial”. One can construct ordinals safely by the quasiquoter <code class="sourceCode haskell">od</code> provided in <code class="sourceCode haskell"><span class="dt">Data.Type.Ordinal.Builtin</span></code>, when we use <code class="sourceCode haskell"><span class="dt">QuasiQutoes</span></code> language extension. For example, <code class="sourceCode haskell">[od<span class="fu">|</span><span class="dv">3</span><span class="fu">|</span>]</code> stands for the third ordinal. <code class="sourceCode haskell">[od<span class="fu">|</span><span class="dv">3</span><span class="fu">|</span>]<span class="ot"> ::</span> <span class="dt">Ordinal</span> <span class="dv">4</span></code> typechecks, but <code class="sourceCode haskell">[od<span class="fu">|</span><span class="dv">3</span><span class="fu">|</span>]<span class="ot"> ::</span> <span class="dt">Ordinal</span> <span class="dv">2</span></code> is rejected in compile-time<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>.</p>
 <p>The latter function <code class="sourceCode haskell">liftMap</code> seems to have odd type, but it is just an <em>algebraic substitution mapping</em>. First, <code class="sourceCode haskell"><span class="ot">f ::</span> <span class="dt">Ordinal</span> n <span class="ot">-&gt;</span> <span class="dt">A</span></code> can be seen as “<span class="math inline">\(A\)</span>-valued assignment for each variable”. Then <code class="sourceCode haskell">liftMap f p</code> extends f onto entire polynomial ring <span class="math inline">\(R[X_1,\ldots,X_n]\)</span>, just substituting each variables in <code class="sourceCode haskell">p</code> using <code class="sourceCode haskell">f</code> and taking products in <span class="math inline">\(A\)</span>. These are what we have calld “the universality of free algebra over commutative rings”, as pictured the following diagram:</p>
-<div class="figure">
-<img src="images/free-alg-univ.svg" alt="Universality of free algebra" />
-<p class="caption">Universality of free algebra</p>
-</div>
+<!-- ![Universality of free algebra](images/free-alg-univ.svg )  -->
+\begin{xy}
+\xymatrix {
+R[X_1, \ldots, X_n] \ar[r]^{\mathtt{liftMap} f} &amp; A\\
+\{X_1, \ldots, X_n\} \ar[u]^{\mathtt{var}} \ar[ur]_{f}
+}
+\end{xy}
 <p>Although, we can derive other algebraic operations from these two functions in theory, but for the practical purpose, <code class="sourceCode haskell"><span class="dt">IsPolynomial</span></code> class have other algebraic operations as its member functions, which can be overridden by instance-specific optimized implementation.</p>
 <h5 id="polynomials-and-monomial-orderings">Polynomials and Monomial Orderings</h5>
 <p><code class="sourceCode haskell"><span class="dt">IsPolynomial</span></code> class doesn’t incorporate any information on monomial orderings. Polynomial rings with operations related monomial orderings is abstracted in <code class="sourceCode haskell"><span class="dt">IsOrderedPolynomial</span></code>. This class comes with associated type <code class="sourceCode haskell"><span class="dt">MOrder</span></code>, which stands for the monomial ordering of given polynomial type:</p>
@@ -228,6 +234,9 @@ caller sn <span class="fu">=</span> withKnownNat n <span class="fu">$</span> fun
 <h4 id="quotient-ring">Quotient ring</h4>
 <p>The type <code class="sourceCode haskell"><span class="dt">Quotient</span> k ord n ideal</code> stands for the quotient ring of n-variate polynomial ring over the field <code class="sourceCode haskell">k</code>. In order to distinguish the quotient ring over different ideals, we parametrize ideals in type. But, wait, how to parametrize the ideal information in the type-level?</p>
 <p>To solve this problem, we use the Edward Kmett’s <a href="http://hackage.haskell.org/package/reflection">reflection</a> package.</p>
+<p>(stub)</p>
+<h4 id="finite-fields">Finite Fields</h4>
+<p><code class="sourceCode haskell"><span class="dt">Algebra.Field.Finite</span></code> provides the prime field type <code class="sourceCode haskell"><span class="dt">F</span> p</code> which corresponds to <span class="math inline">\(\mathbb{F}_p = \mathbb{Z}/p\mathbb{Z}\)</span>. Note that, this type doesn’t check primarity of type parameter <span class="math inline">\(p\)</span> (too expensive!). For other general finite fields other than prime fields (Galois Field), you can use <code class="sourceCode haskell"><span class="dt">Algebra.Field.Galois</span></code> module provides types <code>GF p n</code>, which corresponds to <span class="math inline">\(\mathbb{F}_{p^n}\)</span>. We use <a href="https://en.wikipedia.org/wiki/Conway_polynomial_(finite_fields)">Conway polynomial</a> for internal representation of Galois Fields. As a default, <code>computational-algebra</code> comes with the information of Conway polynomials for 10th power of 2,3,5,7,11. Users can easily add the information by …</p>
 <p>(stub)</p>
 <div class="footnotes">
 <hr />
