@@ -200,7 +200,14 @@ First, `f :: Ordinal n -> A`{.haskell} can be seen as "$A$-valued assignment for
 Then `liftMap f p`{.haskell} extends f onto entire polynomial ring $R[X_1,\ldots,X_n]$, just substituting each variables in `p`{.haskell} using `f`{.haskell} and taking products in $A$.
 These are what we have calld "the universality of free algebra over commutative rings", as pictured the following diagram:
 
-![Universality of free algebra](images/free-alg-univ.svg ) 
+<!-- ![Universality of free algebra](images/free-alg-univ.svg )  -->
+
+\begin{xy}
+\xymatrix {
+R[X_1, \ldots, X_n] \ar[r]^{\mathtt{liftMap} f} & A\\
+\{X_1, \ldots, X_n\} \ar[u]^{\mathtt{var}} \ar[ur]_{f}
+}
+\end{xy}
 
 Although, we can derive other algebraic operations from these two functions in theory, but for the practical purpose, `IsPolynomial`{.haskell} class have other algebraic operations as its member functions, which can be overridden by instance-specific optimized implementation.
 
@@ -331,6 +338,16 @@ The type `Quotient k ord n ideal`{.haskell} stands for the quotient ring of n-va
 In order to distinguish the quotient ring over different ideals, we parametrize ideals in type. But, wait, how to parametrize the ideal information in the type-level?
 
 To solve this problem, we use the Edward Kmett's [reflection](http://hackage.haskell.org/package/reflection ) package.
+
+(stub)
+
+## Finite Fields
+`Algebra.Field.Finite`{.haskell} provides the prime field type `F p`{.haskell} which corresponds to $\mathbb{F}_p = \mathbb{Z}/p\mathbb{Z}$.
+Note that, this type doesn't check primarity of type parameter $p$ (too expensive!).
+For other general finite fields other than prime fields (Galois Field), you can use `Algebra.Field.Galois`{.haskell} module provides types `GF p n`, which corresponds to $\mathbb{F}_{p^n}$.
+We use [Conway polynomial](https://en.wikipedia.org/wiki/Conway_polynomial_(finite_fields)) for internal representation of Galois Fields.
+As a default, `computational-algebra` comes with the information of Conway polynomials for 10th power of 2,3,5,7,11.
+Users can easily add the information by ...
 
 (stub)
 
