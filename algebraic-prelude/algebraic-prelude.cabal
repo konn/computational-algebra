@@ -1,0 +1,38 @@
+name:                algebraic-prelude
+version:             0.1.0.0
+synopsis:            Initial project template from stack
+description:         Please see README.md
+homepage:            https://github.com/konn/algebraic-prelude#readme
+license:             BSD3
+license-file:        LICENSE
+author:              Hiromi ISHII
+maintainer:          konn.jinro _at_ gmail.com
+copyright:           2015 (c) Hiromi ISHII
+category:            Web
+build-type:          Simple
+-- extra-source-files:
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     AlgebraicPrelude
+  build-depends:       base    >= 4.7 && < 5
+                     , algebra >= 4.3
+                     , basic-prelude
+  default-language:    Haskell2010
+  extensions:          NoImplicitPrelude
+  ghc-options:         -Wall
+  
+
+executable sandpit
+  hs-source-dirs:      examples
+  Main-is:             sandpit.hs
+  build-depends:       base
+                     , algebraic-prelude
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  extensions:          RebindableSyntax
+
+source-repository head
+  type:     git
+  location: https://github.com/konn/algebraic-prelude

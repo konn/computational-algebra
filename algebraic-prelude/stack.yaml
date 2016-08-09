@@ -1,0 +1,6 @@
+resolver: lts-6.10
+packages:
+extra-deps:
+- algebra-4.3
+flags: {}
+extra-package-dbs: []

@@ -1,0 +1,37 @@
+
+./examples/sandpit.hs,85
+module Main Main1,2
+arg, main main6,7
+arg,arg6,7
+arg arg7,8
+main main12,13
+
+./Setup.hs,15
+main main1,2
+
+./src/AlgebraicPrelude.hs,595
+module AlgebraicPreludeAlgebraicPrelude3,4
+type Rational Rational51,52
+class (Ord (Norm a)) => Normed Normed55,56
+class (Ord (Norm a)) => Normed Normed55,56
+  type Norm Norm56,57
+  norm norm57,58
+  liftNorm liftNorm58,59
+instance instance60,61
+abs abs82,83
+abs abs83,84
+(^)^86,87
+(^(87,88
+(^^)^^90,91
+ifThenElse ifThenElse102,103
+ifThenElse ifThenElse103,104
+fromInteger fromInteger106,107
+fromInteger fromInteger107,108
+fromInteger' fromInteger'115,116
+fromInteger' fromInteger'116,117
+fromRational fromRational118,119
+fromRational fromRational119,120
+
+./test/Spec.hs,30
+main main0,1
+main main1,2
