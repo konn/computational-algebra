@@ -1,0 +1,17 @@
+<DOCTYPE html
+     PUBLIC &quot;-//W3C//DTD XHTML 1.0 Frameset//EN&quot;
+     &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd&quot;=""><html xmlns="http://www.w3.org/1999/xhtml"><head><title></title><script src="haddock-util.js" type="text/javascript"></script><script type="text/javascript">&lt;!--
+/*
+
+  The synopsis frame needs to be updated using javascript, so we hide
+  it by default and only show it if javascript is enabled.
+
+  TODO: provide some means to disable it.
+*/
+function load() {
+  var d = document.getElementById(&quot;inner-fs&quot;);
+  d.rows = &quot;50%,50%&quot;;
+  postReframe();
+}
+--&gt;</script></head><frameset onload="load()" cols="25%,75%" id="outer-fs"><frameset rows="100%,0%" id="inner-fs"><frame name="modules" src="index-frames.html"></frame><frame name="synopsis" src=""></frame></frameset><frame name="main" src="index.html"></frame></frameset></html>
+</DOCTYPE>
