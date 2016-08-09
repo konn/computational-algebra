@@ -202,12 +202,12 @@ These are what we have calld "the universality of free algebra over commutative 
 
 <!-- ![Universality of free algebra](images/free-alg-univ.svg )  -->
 
-\begin{xy}
-\xymatrix {
-R[X_1, \ldots, X_n] \ar[r]^{\mathtt{liftMap} f} & A\\
+$$\begin{xy}
+\xymatrix @C=10ex @R=15ex {
+R[X_1, \ldots, X_n] \ar @{.>}[r]^-{\mathop{\mathtt{liftMap}} f} & A\\
 \{X_1, \ldots, X_n\} \ar[u]^{\mathtt{var}} \ar[ur]_{f}
 }
-\end{xy}
+\end{xy}$$
 
 Although, we can derive other algebraic operations from these two functions in theory, but for the practical purpose, `IsPolynomial`{.haskell} class have other algebraic operations as its member functions, which can be overridden by instance-specific optimized implementation.
 
