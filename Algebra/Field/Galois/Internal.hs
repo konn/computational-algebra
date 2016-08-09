@@ -29,7 +29,7 @@ data Conway p n
 -- instance  {-# OVERLAPPABLE #-} (KnownNat p, KnownNat n) => ConwayPolynomial p n where
 --   conwayPolynomial _ _ = undefined
 
-instance (KnownNat p, KnownNat n) => Reifies (Conway p n) (Unipol (F p)) where
+instance (ConwayPolynomial p n) => Reifies (Conway p n) (Unipol (F p)) where
   reflect _ = conwayPolynomial (Proxy :: Proxy p) (Proxy :: Proxy n)
 
 parseLine :: String -> [(Integer, Integer, [Integer])]

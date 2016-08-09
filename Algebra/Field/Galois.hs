@@ -3,8 +3,11 @@
 {-# LANGUAGE ParallelListComp, PolyKinds, QuasiQuotes, RankNTypes           #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeFamilies          #-}
 {-# LANGUAGE TypeOperators, UndecidableInstances                            #-}
-module Algebra.Field.Galois (GF'(), IsGF', modPoly, modVec, reifyGF',
-                             withGF', GF, Conway, primitive, conway,
+module Algebra.Field.Galois (GF'(), IsGF', modPoly, modVec,
+                             withIrreducible, linearRepGF, linearRepGF',
+                             reifyGF', generateIrreducible,
+                             withGF', GF, ConwayPolynomial(..),
+                             Conway, primitive, conway,
                              conwayFile, addConwayPolynomials)  where
 import Algebra.Field.Finite
 import Algebra.Field.Galois.Conway
@@ -188,26 +191,40 @@ generateIrreducible :: (MonadRandom m, FiniteField k, Eq k)
 generateIrreducible p n =
   iterateUntil (\f -> all (\i -> one == gcd (varX^(order p^i) - varX) f ) [1.. n `div` 2]) $ do
     cs <- replicateM (fromIntegral n) $ uniform (elements p)
-    let f = varX^n + sum [ injectCoeff c * (varX^i) | c <- cs | i <- [0..]]
+    let f = varX^n + sum [ injectCoeff c * (varX^i) | c <- cs | i <- [0..n P.- 1]]
     return f
 
+withIrreducible :: forall p a. KnownNat p
+                => Unipol (F p)
+                -> (forall f (n :: Nat). (Reifies f (Unipol (F p))) => Proxy (GF' p n f) -> a)
+                -> a
+withIrreducible r f =
+  case toSing (fromIntegral $ totalDegree' r) of
+    SomeSing sn ->
+      withKnownNat sn $
+      reify r (f. proxyGF' (Proxy :: Proxy (F n)) sn)
+
 reifyGF' :: MonadRandom m => Natural -> Natural
-         -> (forall (p :: TL.Nat) (f :: *) (n :: TL.Nat) . (Reifies p Integer, Reifies f (Unipol (F p)), KnownNat n)
+         -> (forall (p :: TL.Nat) (f :: *) (n :: TL.Nat) . (Reifies p Integer, Reifies f (Unipol (F p)))
                        => Proxy (GF' p n f) -> a)
          -> m a
 reifyGF' p n f = reifyPrimeField (toInteger p) $ \pxy -> do
   mpol <- generateIrreducible pxy n
-  case toSing (fromIntegral n) of
-    SomeSing sn -> do
-      return $ withKnownNat sn $ withKnownNat sn $
-         reify mpol (f . proxyGF' pxy sn)
+  case toSing (fromIntegral p) of
+    SomeSing sp -> return $ withKnownNat sp $ withIrreducible mpol f
+
+linearRepGF :: GF' p n f -> V.Vector (F p)
+linearRepGF = SV.unsized . runGF'
+
+linearRepGF' :: GF' p n f -> V.Vector Integer
+linearRepGF' = V.map naturalRepr . linearRepGF
 
 withGF' :: MonadRandom m
         => Natural -> Natural
-        -> (forall (p :: TL.Nat) f (n :: TL.Nat) . (Reifies p Integer, Reifies f (Unipol (F p)), KnownNat n)
+        -> (forall (p :: TL.Nat) f (n :: TL.Nat) . (Reifies p Integer, Reifies f (Unipol (F p)))
             => GF' p n f)
         -> m (V.Vector Integer)
-withGF' p n f = reifyGF' p n $ V.fromList . SV.toList . SV.map naturalRepr . runGF' . asProxyTypeOf f
+withGF' p n f = reifyGF' p n $ V.map naturalRepr . linearRepGF . asProxyTypeOf f
 
 proxyGF' :: Proxy (F p) -> SNat n -> Proxy f -> Proxy (GF' p n f)
 proxyGF' _ _ Proxy = Proxy
