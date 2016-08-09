@@ -13,7 +13,7 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 executable site
-  hs-source-dirs:      src
+  hs-source-dirs:      app
   main-is:             Main.hs
   other-modules:       Settings
                      , Instances
@@ -37,4 +37,6 @@ executable site
                      , pandoc-citeproc
                      , hashable
                      , derive
+                     , taggy
+                     , taggy-lens
   ghc-options:         -Wall -threaded -O2

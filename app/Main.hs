@@ -1,28 +1,36 @@
-{-# LANGUAGE ExtendedDefaultRules, OverloadedStrings #-}
+{-# LANGUAGE ExtendedDefaultRules, FlexibleContexts, OverloadedStrings #-}
+{-# LANGUAGE ViewPatterns                                              #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Main where
 import Lenses
-import Settings
+import Settings hiding (children)
 
-import           Control.Lens        hiding (setting)
+import           Control.Lens        hiding (children, element, elements,
+                                      setting)
 import           Data.Default
 import           Data.Foldable
 import           Data.Maybe
 import           Data.Monoid
 import           Data.Text           (Text)
 import qualified Data.Text           as T
+import           Data.Text.Lazy.Lens
 import           Data.Time.Format
 import           Data.Time.LocalTime
 import           Hakyll
 import           Shelly
 import           System.Exit         (ExitCode (..))
 import           Text.Pandoc
+import           Text.Taggy.Lens
 
 default (Text)
 
 main :: IO ()
 main = hakyllWith conf $ do
   setting "schemes" (def :: Schemes)
+  match "docs/**.html" $ do
+    route idRoute
+    compile $
+      getResourceString >>= withItemBody procHaddock
   match "templates/**" $
     compile templateCompiler
   match "params.json" $ do
@@ -43,6 +51,7 @@ main = hakyllWith conf $ do
         >>= relativizeUrls
   return ()
 
+writerOpts :: WriterOptions
 writerOpts =
   defaultHakyllWriterOptions
   { writerHTMLMathMethod = MathJax mathJaxCDN
@@ -52,7 +61,7 @@ writerOpts =
     mathJaxCDN = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"
 
 excluded :: [String]
-excluded = ["src", "sites.cabal", "TAGS", "stack.yaml"]
+excluded = ["app", "sites.cabal", "TAGS", "stack.yaml"]
 
 testIgnore :: String -> Bool
 testIgnore fp =
@@ -108,3 +117,19 @@ procSchemes0 inl =
       return $ inl & linkUrl .~ url'
   where
     sandwitched s e t = s <> t <> e
+
+procHaddock :: String -> Compiler String
+procHaddock  = packed . html . element . transformM . attr "href" $ traverse rewriteUrl
+  where
+    rewriteUrl :: Text -> Compiler Text
+    rewriteUrl ref = do
+      case T.stripPrefix "../" ref of
+        Just (T.breakOn "/" -> (pkg, rest)) -> do
+          known <- unsafeCompiler $ shelly $ test_e $ "docs" </> pkg
+          return $
+            if known
+            then ref
+            else T.concat
+                 ["http://hackage.haskell.org/package/", pkg,
+                  "/docs", rest]
+        _ -> return $ ref

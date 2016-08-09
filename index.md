@@ -333,23 +333,84 @@ The module `Algebra.Ring.Polynomial.Class`{.haskell} provides the function `inje
 Sometimes (e.g. variable elimination) one might want to permute variables.
 In such a case, you can just use `liftMap`{.haskell}, `subst`{.haskell} or their variants.
     
-## Quotient ring ##
-The type `Quotient k ord n ideal`{.haskell} stands for the quotient ring of n-variate polynomial ring over the field `k`{.haskell}.
-In order to distinguish the quotient ring over different ideals, we parametrize ideals in type. But, wait, how to parametrize the ideal information in the type-level?
-
-To solve this problem, we use the Edward Kmett's [reflection](http://hackage.haskell.org/package/reflection ) package.
-
-(stub)
-
 ## Finite Fields
 `Algebra.Field.Finite`{.haskell} provides the prime field type `F p`{.haskell} which corresponds to $\mathbb{F}_p = \mathbb{Z}/p\mathbb{Z}$.
 Note that, this type doesn't check primarity of type parameter $p$ (too expensive!).
+
 For other general finite fields other than prime fields (Galois Field), you can use `Algebra.Field.Galois`{.haskell} module provides types `GF p n`, which corresponds to $\mathbb{F}_{p^n}$.
 We use [Conway polynomial](https://en.wikipedia.org/wiki/Conway_polynomial_(finite_fields)) for internal representation of Galois Fields.
 As a default, `computational-algebra` comes with the information of Conway polynomials for 10th power of 2,3,5,7,11.
-Users can easily add the information by ...
+Users can easily add the information by just defining `ConwayPolynomial p n`{.haskell} instace for specific $p$ an $n$ as follows:
 
-(stub)
+```haskell
+instance ConwayPolynomial 19 1 where
+  conwayPolynomial _ _ = x ^2 + 18 * x + 2
+    where x = var 0 :: Unipol (F 19)
+```
+
+Although we are planning to implement the functionality to automatically calculate Conway Polynomial,
+it is recomended to provide concrete value for each specific $p$ and $n$ to gain the efficiency.
+The `primitive`{.haskell} constant(s) exported from `Algebra.Field.Finite`{.haskell} stands for a primitive element of $\mathbb{F}_{p^n}$, i.e. a generator of the multiplicative group $\mathbb{F}_{p^n}^\times$ of units.
+
+### Galois Field computation with arbitrary irreducible polynomials
+Although Conway polynomials provides systematic way to treat field extensions,
+it takes some computational overhead to compute Conway polynomial.
+So if one doesn't need to treat field extension, it is enough to chose arbitrary
+irreducible polynomial of degree $n$ with coeffcients in $\mathbb{F}_p$ to do computation.
+
+Internally, the type `GF p n`{.haskell} is synonym for `GF' p n (Conway p n)`{.haskell};
+here, `Conway p n`{.haskell} is a placeholder to retrieve the information of conway polynomial for $\mathbb{F}_{p^n}$.
+Actual computation algorithm for Galios fields is defined for `GF' p n f`{.haskell} for `f`{.haskell} carrying information of such an irreducible polynomial.
+So if we have some irreducible $p \in \mathbb{F}_p[x]$ with $\deg(p) = n$, one can compute in $\mathbb{F}_{p^n}$ by *reflecting* the information of $p$ to parameter `f`{.haskell}.
+The [`reflection` package](hackage:reflection) provides general way to do such a type-level reflection.
+Based on that, `Algebra.Field.Galois`{.haskell} provides utility function to reflect given irreducible polynomial to type-level: `withIrreducible`{.haskell}.
+Suppose $p \in \mathbb{F}_5$ is irreducible and $\deg(p) = 7$.
+Then we can do computation in $\mathbb{F}_{5^7}$ as follows:
+
+```haskell
+withIrreducible p $ \pxy ->
+  show (sqrt (3 `asProxyTypeOf` pxy))
+```
+
+In above, `pxy`{.haskell} is Proxy type to carry the information of *reflected* field and `asProxyOf`{.haskell} forces literals to be interpreted as an element of the reflected field.
+One thing to note is that the type variable `f`{.haskell} *dynamically* reflecting polynomial cannot *leak* outside of given functions.
+For example, the value `GF' p n f`{.haskell} itself cannot be taken out from `withIrreducible`{.haskell} :
+
+```haskell
+withIrreducible p $ \pxy ->
+  primitive * (2 * primivite - 1) `asProxyTypeOf` pxy -- type error!
+```
+
+In such a situation, one cannot "take out" the reulst directly, but one can still extract the *linear representation* of it:
+
+```haskell
+withIrreducible p $ \pxy ->
+  linearRepGF (primitive * (2 * primivite - 1) `asProxyTypeOf` pxy) -- OK!
+```
+
+On the other hand, if we adopt Conway polynomials as a representation, one can do any computation without any scope restriction as this.
+This is because `Conway p n`{.haskell} carries information of an irreducible polynomial *statically*.
+So you can define `Reifies`{.haskell} instance for your custom placeholder type and store the information of some specific irreducible polynomial, then you can do such a calculation without any scoping problem:
+
+```haskell
+data MyPoly = MyPoly -- ^ Just for placeholder
+
+instance Reifies MyPoly (Unipol (F 5)) where
+  reflect _ = x^2 + 2 x + 4
+
+type MyGF5'2 = GF' 5 2 MyPoly
+...
+```
+
+Also, `Algebra.Field.Galois`{.haskell} comes with monadic function `generateIrreducible`{.haskell} to find irreducible polynomials and `reifyGF'`{.haskell} combining these two functions.
+There is another function `withGF'`{.haskell} to retrieve linear representation of elements of Galois Field.
+See [documents](docs/computational-algebra-0.4.0.0) for more information.
+
+## Quotient ring ##
+The type `Quotient k ord n ideal`{.haskell} stands for the quotient ring of n-variate polynomial ring over the field `k`{.haskell}.
+In order to distinguish the quotient ring over different ideals, we parametrize ideals in type.
+We use the functionalities provided by `reflection`{.haskell} package here, again.
+
 
 [^1]: One can also construct ordinals using integer literals of Haskell, like `3 :: Ordinal 4`{.haskell}, but it is unsafe and so highly unrecommended.
 For example, although `[od|3|] :: Ordinal 2`{.haskell} is rejected by compiler as expected, but `3 :: Ordinal 2`{.haskell} passes the compile-time typecheck and throws run-time error.
