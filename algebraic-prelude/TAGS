@@ -9,28 +9,35 @@ main main12,13
 ./Setup.hs,15
 main main1,2
 
-./src/AlgebraicPrelude.hs,595
-module AlgebraicPreludeAlgebraicPrelude3,4
-type Rational Rational55,56
-class (Ord (Norm a)) => Normed Normed59,60
-class (Ord (Norm a)) => Normed Normed59,60
-  type Norm Norm60,61
-  norm norm61,62
-  liftNorm liftNorm62,63
-instance instance64,65
-abs abs86,87
-abs abs87,88
-(^)^90,91
-(^(91,92
-(^^)^^94,95
-ifThenElse ifThenElse106,107
-ifThenElse ifThenElse107,108
-fromInteger fromInteger110,111
-fromInteger fromInteger111,112
-fromInteger' fromInteger'119,120
-fromInteger' fromInteger'120,121
-fromRational fromRational122,123
-fromRational fromRational123,124
+./src/AlgebraicPrelude.hs,1183
+module AlgebraicPreludeAlgebraicPrelude47,48
+type Rational Rational131,132
+fromInteger fromInteger136,137
+fromInteger fromInteger137,138
+fromInteger' fromInteger'145,146
+fromInteger' fromInteger'146,147
+fromRational fromRational148,149
+fromRational fromRational149,150
+normaliseUnit normaliseUnit156,157
+normaliseUnit normaliseUnit157,158
+(^)^160,161
+(^(161,162
+(^^)^^164,165
+ifThenElse ifThenElse177,178
+ifThenElse ifThenElse178,179
+newtype WrapNum WrapNum196,197
+newtype WrapNum a = WrapNum WrapNum196,197
+newtype WrapNum a = WrapNum { unwrapNum unwrapNum196,197
+instance instance199,200
+newtype WrapFractional WrapFractional268,269
+newtype WrapFractional a = WrapFractional WrapFractional268,269
+newtype WrapFractional a = WrapFractional { unwrapFractional unwrapFractional268,269
+newtype WrapIntegral WrapIntegral372,373
+newtype WrapIntegral a = WrapIntegral WrapIntegral372,373
+newtype WrapIntegral a = WrapIntegral { unwrapIntegral unwrapIntegral372,373
+newtype WrapAlgebra WrapAlgebra489,490
+newtype WrapAlgebra a = WrapAlgebra WrapAlgebra489,490
+newtype WrapAlgebra a = WrapAlgebra { unwrapAlgebra unwrapAlgebra489,490
 
 ./test/Spec.hs,30
 main main0,1
