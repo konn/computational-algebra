@@ -92,8 +92,8 @@ deploy cnf = shelly $ handleany_sh (const $ return $ ExitFailure 1)  $do
   run_ "git" ["push", "origin", "gh-pages"]
   cd ".."
   run_ "git" ["add", "."]
-  run_ "git" ["commit", "-m", msgZ]
-  run_ "git" ["push", "origin", "gh-pages-devel"]
+  run_ "git" $ ["commit", "-m"] ++ (take 1 $ T.lines msgZ)
+  run_ "git"   ["push", "origin", "gh-pages-devel"]
   return ExitSuccess
 
 conf :: Configuration
