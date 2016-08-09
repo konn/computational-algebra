@@ -62,7 +62,7 @@ divModUnipol f g =
           coe = cp/cq
           deg = dp - dq
           canceler = Unipol $ IM.map (*coe) $ IM.mapKeysMonotonic (+ deg) (runUnipol g)
-      in if dp < dq
+      in if dp < dq || isZero p
          then (acc, p)
          else loop (p - canceler) $
               Unipol $ IM.insert deg coe $ runUnipol acc
@@ -130,7 +130,7 @@ instance (Eq r, Field r) => Euclidean (Unipol r) where
     if totalDegree' f `min` totalDegree' g < 50
     then divModUnipol f g
     else divModUnipolByMult f g
-  degree = Just . totalDegree'
+  degree f = if isZero f then Nothing else Just (totalDegree' f)
 
 leadingTermIM :: Monoidal r => Unipol r -> (Int, r)
 leadingTermIM = maybe (0, zero) fst . IM.maxViewWithKey . runUnipol
