@@ -1,5 +1,5 @@
 name: computational-algebra
-version: 0.3.0.0
+version: 0.4.0.0
 cabal-version: >=1.8
 build-type: Simple
 license: BSD3
@@ -28,6 +28,8 @@ library
                      , repa-algorithms      >= 3.3
                      , template-haskell     -any
                      , MonadRandom          >= 0.1
+                     , mwc-random
+                     , mwc-random-monad
                      , algebra              >= 4.1
                      , base                 >= 4
                      , semigroups           >= 0.15
