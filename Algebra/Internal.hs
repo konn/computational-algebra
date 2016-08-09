@@ -6,10 +6,11 @@
 {-# OPTIONS_GHC -fwarn-incomplete-patterns #-}
 module Algebra.Internal
        (  (:~:)(..), withRefl,
-          module Data.Proxy, WrappedField(..)
-       ,  module Algebra.Internal) where
+          module Data.Proxy,
+          module Algebra.Internal) where
 import           Algebra.Instances            ()
-import           Algebra.Wrapped
+
+import AlgebraicPrelude
 import           Control.Lens                 ((%~), _Unwrapping)
 import           Data.Proxy
 import           Data.Singletons.Prelude      as Algebra.Internal (PNum (..),
@@ -48,11 +49,11 @@ import           Proof.Equational             as Algebra.Internal (because,
                                                                    (=~=))
 import           Proof.Propositional          as Algebra.Internal (IsTrue (..),
                                                                    withWitness)
+import Data.Kind (Type)
 
 toProxy :: a -> Proxy a
 toProxy _ = Proxy
 
-type Vector a n = S.Sized DV.Vector n a
 type Sized n a = S.Sized DV.Vector n a
 
 coerceLength :: n :~: m -> Sized n a -> Sized m a
@@ -96,7 +97,7 @@ padVecs d xs ys
             coerceLength maxISn xs,
             coerceLength mPLUSk $ ys S.++ S.replicate (n %:- m) d)
 
-type family Flipped a :: Nat -> * where
+type family Flipped a :: Nat -> Type where
   Flipped a = Flipped.Flipped DV.Vector a
 
 pattern Flipped :: Sized n a -> Flipped a n

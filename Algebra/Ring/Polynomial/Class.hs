@@ -19,8 +19,8 @@ module Algebra.Ring.Polynomial.Class
 import Algebra.Internal
 import Algebra.Ring.Polynomial.Monomial
 import Algebra.Scalar
-import Algebra.Wrapped
 
+import           AlgebraicPrelude
 import           Control.Arrow            (first, (***))
 import           Control.Lens             (folded, maximumOf)
 import           Data.Foldable            (foldr, maximum)
@@ -37,11 +37,6 @@ import qualified Data.Sized.Builtin       as V
 import           Data.Type.Ordinal        (Ordinal, enumOrdinal, inclusion)
 import           Data.Word
 import           GHC.TypeLits             (KnownNat, Nat)
-import           Numeric.Algebra          (Additive (..), Commutative)
-import           Numeric.Algebra          (Division (..), Field, Group (..))
-import           Numeric.Algebra          (LeftModule (..), Module)
-import           Numeric.Algebra          (Monoidal (..), Multiplicative (..))
-import           Numeric.Algebra          (Ring (fromInteger), Unital (..), sum)
 import qualified Numeric.Algebra.Complex  as NA
 import           Numeric.Decidable.Zero   (DecidableZero (..))
 import           Numeric.Domain.Euclidean (Euclidean, quot)
@@ -49,10 +44,6 @@ import           Numeric.Domain.GCD       (gcd)
 import           Numeric.Field.Fraction   (Fraction)
 import qualified Numeric.Field.Fraction   as NA
 import           Numeric.Natural          (Natural)
-import           Prelude                  (Eq (..), Int, Maybe (..), flip, fmap)
-import           Prelude                  (fromIntegral, fst, map, maybe, not)
-import           Prelude                  (otherwise, snd, uncurry, ($), (.))
-import           Prelude                  ((<$>), (<*>))
 import qualified Prelude                  as P
 
 infixl 7 *<, >*, *|<, >|*, !*
@@ -79,7 +70,7 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
   liftMap :: (Module (Scalar (Coefficient poly)) alg, Ring alg, Commutative alg)
            => (Ordinal (Arity poly) -> alg) -> poly -> alg
   liftMap mor f =
-    sum [ Scalar r .* sum [ Scalar (fromInteger (P.fromIntegral i) :: Coefficient poly) .* mor o
+    sum [ Scalar r .* sum [ Scalar (fromInteger' (P.fromIntegral i) :: Coefficient poly) .* mor o
                           | i <- V.toList (m :: Monomial (Arity poly)) :: [Int]
                           | o <- enumOrdinal (sArity (Nothing :: Maybe poly)) ]
         | (m, r) <- M.toList (terms' f) ]
@@ -143,12 +134,12 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
 
   -- | @'coeff m f'@ returns the coefficient of monomial @m@ in polynomial @f@.
   coeff' :: Monomial (Arity poly) -> poly -> Coefficient poly
-  coeff' m = runCoeff . liftMap (\i -> WrapCoeff $ fromInteger $ P.fromIntegral $ m V.%!! i)
+  coeff' m = runScalar . liftMap (\i -> Scalar $ fromInteger' $ P.fromIntegral $ m V.%!! i)
   {-# INLINE coeff' #-}
 
   -- | Calculates constant coefficient.
   constantTerm :: poly -> Coefficient poly
-  constantTerm = runCoeff . liftMap (\ _ -> WrapCoeff zero)
+  constantTerm = runScalar . liftMap (\ _ -> Scalar zero)
   {-# INLINE constantTerm #-}
 
   -- | Inject monic monomial.

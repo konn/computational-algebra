@@ -15,8 +15,6 @@ import Algebra.Ring.Polynomial.Monomial
 
 import           Control.Arrow                         (first)
 import           Control.DeepSeq                       (NFData)
-import           Data.Bits                             (Bits (..),
-                                                        FiniteBits (..))
 import           Data.Function                         (on)
 import           Data.Hashable                         (Hashable (hashWithSalt))
 import qualified Data.HashSet                          as HS
@@ -30,15 +28,11 @@ import qualified Numeric.Algebra                       as NA
 import           Numeric.Algebra.Unital.UnitNormalForm hiding (normalize)
 import qualified Numeric.Algebra.Unital.UnitNormalForm as NA
 import           Numeric.Decidable.Associates
+import           Numeric.Domain.Integral
+import           Numeric.Semiring.ZeroProduct
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero                (DecidableZero (..))
-import           Numeric.Domain.GCD
-import           Numeric.Domain.Integral
-import           Numeric.Domain.PID
-import           Numeric.Domain.UFD
-import           Numeric.Semiring.ZeroProduct
-import qualified Prelude                               as P
-
+import qualified Prelude as P
 -- | Univariate polynomial.
 --   It uses @'IM.IntMap'@ as its internal representation;
 --   so if you want to treat the power greater than @maxBound :: Int@,
@@ -88,7 +82,7 @@ recipBinPow :: (Eq r, Field r)
 recipBinPow i f =
   let g 0 = Unipol $ IM.singleton 0 $ recip (constantTerm f)
       g k = let p = g (k - 1)
-            in modVarPower (2^fromIntegral k) (fromInteger 2 * p - p*p * f)
+            in modVarPower (2^fromIntegral k) (P.fromInteger 2 * p - p*p * f)
   in g i
 {-# INLINE recipBinPow #-}
 
@@ -181,11 +175,6 @@ instance (Ord r, DecidableZero r) => Ord (Unipol r) where
   (<=) = (<=) `on` runUnipol
   (>=) = (>=) `on` runUnipol
 
-
-logBase2 :: Int -> Int
-logBase2 x = finiteBitSize x - 1 - countLeadingZeros x
-{-# INLINE logBase2 #-}
-
 -- | Polynomial multiplication, naive version.
 naiveMult :: (DecidableZero r, Multiplicative r) => Unipol r -> Unipol r -> Unipol r
 naiveMult (Unipol f) (Unipol g) =
@@ -201,10 +190,7 @@ karatsuba :: forall r. CoeffRing r => Unipol r -> Unipol r -> Unipol r
 karatsuba f0 g0 =
   let n0 = fromIntegral (totalDegree' f0 `max` totalDegree' g0) + 1
       -- The least @m@ such that deg(f), deg(g) <= 2^m - 1.
-      m0  = toEnum $
-            if popCount n0 == 1
-            then logBase2 n0
-            else logBase2 n0 + 1
+      m0  = toEnum $ ceilingLogBase2 n0
   in Unipol $ loop m0 (runUnipol f0) (runUnipol g0)
   where
     linearProduct op (a, b) (c, d) =
@@ -307,7 +293,7 @@ instance (CoeffRing r, DecidableZero r) => Rig (Unipol r) where
 
 instance (CoeffRing r, DecidableZero r) => Ring (Unipol r) where
   fromInteger 0 = Unipol IM.empty
-  fromInteger n = Unipol $ IM.singleton 0 (fromInteger n)
+  fromInteger n = Unipol $ IM.singleton 0 (fromInteger' n)
 
 instance (DecidableZero r, Semiring r) => RightModule (Scalar r) (Unipol r) where
   Unipol f *. Scalar q

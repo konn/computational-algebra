@@ -24,6 +24,7 @@ module Algebra.Ring.Polynomial.Monomial
        ) where
 import Algebra.Internal
 
+import           AlgebraicPrelude                hiding (lex)
 import           Control.DeepSeq                 (NFData (..))
 import           Control.Lens                    (Ixed (..), alaf, imap,
                                                   makeLenses, makeWrapped, (%~),
@@ -32,6 +33,7 @@ import           Data.Constraint                 ((:=>) (..), Dict (..))
 import qualified Data.Constraint                 as C
 import           Data.Constraint.Forall
 import           Data.Hashable                   (Hashable (..))
+import           Data.Kind                       (Type)
 import           Data.Kind                       (Type)
 import           Data.Maybe                      (catMaybes)
 import           Data.Monoid                     (Dual (..))
@@ -45,11 +47,10 @@ import           Data.Singletons.TypeLits        (withKnownNat)
 import qualified Data.Sized.Builtin              as V
 import           Data.Type.Natural.Class         (IsPeano (..), PeanoOrder (..))
 import           Data.Type.Ordinal               (Ordinal (..), ordToInt)
-import           Numeric.Algebra                 hiding (Order (..))
-import           Prelude                         hiding (Fractional (..),
-                                                  Integral (..), Num (..),
-                                                  Real (..), lex, product, sum)
-import qualified Prelude                         as P
+-- import           Prelude                         hiding (Fractional (..),
+--                                                   Integral (..), Num (..),
+--                                                   Real (..), lex, product, sum)
+import qualified Prelude as P
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i- type Monomial (n :: Nat) = Sized n Int
 type Monomial n = Sized n Int
@@ -197,7 +198,7 @@ productOrder' n m _ _ =
 
 type WeightProxy (v :: [Nat]) = SList v
 
-data WeightOrder (v :: [Nat]) (ord :: *) where
+data WeightOrder (v :: [Nat]) (ord :: Type) where
   WeightOrder :: SList (v :: [Nat]) -> Proxy ord -> WeightOrder v ord
 
 calcOrderWeight :: forall vs n. (SingI vs, KnownNat n)
@@ -306,7 +307,7 @@ weightedEliminationOrder :: SNat n -> WeightedEliminationOrder n Grevlex
 weightedEliminationOrder n =
   WeightOrder (sOnes n) (Proxy :: Proxy Grevlex)
 
-type WeightedEliminationOrder (n :: Nat) (ord :: *) =
+type WeightedEliminationOrder (n :: Nat) (ord :: Type) =
   WeightOrder (Replicate n 1) ord
 
 -- | Special ordering for ordered-monomials.

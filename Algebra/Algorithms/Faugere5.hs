@@ -6,7 +6,7 @@
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 module Algebra.Algorithms.Faugere5 (f5Original, showSingular) where
 import           Algebra.Algorithms.Groebner
-import           Algebra.Prelude
+import           Algebra.Prelude hiding (insert)
 
 import           Control.Arrow               ((>>>))
 import           Control.Lens                (makeLenses, view, (%~), (&), (.~))

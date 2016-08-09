@@ -5,14 +5,13 @@
 module Algebra.Field.Finite (F(), naturalRepr, reifyPrimeField, withPrimeField,
                              modNat, modNat', modRat, modRat', FiniteField(..), order) where
 import Algebra.Algorithms.PrimeTest
+import Algebra.Prelude               hiding (pow)
 import Algebra.Ring.Polynomial.Class (PrettyCoeff (..), ShowSCoeff (..))
-import Algebra.Wrapped
 
 import           Control.Monad.Random                  (uniform)
 import           Control.Monad.Random                  (runRand)
 import           Control.Monad.Random                  (Random (..))
 import           Data.Maybe                            (fromMaybe)
-import           Data.Proxy
 import qualified Data.Ratio                            as R
 import           Data.Reflection
 import           GHC.TypeLits                          (KnownNat)
@@ -24,16 +23,10 @@ import           Numeric.Algebra.Unital.UnitNormalForm
 import           Numeric.Decidable.Associates
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
-import           Numeric.Domain.Euclidean              (Euclidean, euclid)
-import           Numeric.Domain.GCD                    (GCDDomain)
 import           Numeric.Domain.Integral
-import           Numeric.Domain.PID
-import           Numeric.Domain.UFD
-import           Numeric.Field.Fraction                (Fraction)
-import           Numeric.Field.Fraction                (denominator)
-import           Numeric.Field.Fraction                (numerator)
 import           Numeric.Rig.Characteristic            (Characteristic)
 import           Numeric.Semiring.ZeroProduct          (ZeroProductSemiring)
+import qualified Prelude                               as P
 
 -- | Prime field of characteristic @p@.
 --   @p@ should be prime, and not statically checked.
@@ -43,7 +36,7 @@ naturalRepr :: F p -> Integer
 naturalRepr = runF
 
 instance Reifies (p :: k) Integer => Show (F p) where
-  showsPrec d n@(F p) = showsPrec d (p `mod` reflect n)
+  showsPrec d n@(F p) = showsPrec d (p `rem` reflect n)
 
 instance Reifies (p :: k) Integer => PrettyCoeff (F p) where
   showsCoeff d (F p) =
@@ -60,7 +53,7 @@ modNat = modNat' Proxy
 modNat' :: forall proxy (p :: k). Reifies p Integer =>  proxy (F p) -> Integer -> F p
 modNat' _ i =
   let p = reflect (Proxy :: Proxy p)
-  in F (i `mod` p)
+  in F (i `rem` p)
 {-# INLINE modNat' #-}
 
 reifyPrimeField :: Integer -> (forall p. KnownNat p => Proxy (F p) -> a) -> a
@@ -82,7 +75,7 @@ instance Reifies p Integer => Normed (F p) where
   norm fp@(F p) = p where _ = reflect fp
   liftNorm = modNat
 
-instance Reifies p Integer => Num (F p) where
+instance Reifies p Integer => P.Num (F p) where
   fromInteger n = modNat $ fromInteger n
   {-# INLINE fromInteger #-}
 
@@ -99,9 +92,9 @@ instance Reifies p Integer => Num (F p) where
   {-# INLINE (*) #-}
 
   abs = id
-  signum (F n) = modNat $ signum n
+  signum (F n) = modNat $ P.signum n
 
-pow :: (Integral a1, Reifies p Integer) => F p -> a1 -> F p
+pow :: (P.Integral a1, Reifies p Integer) => F p -> a1 -> F p
 pow a n = modNat $ modPow (runF a) (reflect a) n
 
 instance Reifies p Integer => NA.Additive (F p) where
@@ -135,7 +128,7 @@ instance Reifies p Integer => NA.Abelian (F p)
 instance Reifies p Integer => NA.Semiring (F p)
 
 instance Reifies p Integer => NA.Rig (F p) where
-  fromNatural = fromInteger . toInteger
+  fromNatural = fromInteger . P.toInteger
 
 instance Reifies p Integer => NA.Ring (F p) where
   fromInteger = fromInteger
@@ -152,7 +145,7 @@ instance Reifies p Integer => DecidableUnits (F p) where
   recipUnit n =
     let p = fromIntegral $ reflect n
         (u,_,r) = head $ euclid p (fromIntegral $ runF n)
-    in if u == 1 then Just $ modNat $ fromInteger $ r `mod` p else Nothing
+    in if u == 1 then Just $ modNat $ fromInteger $ r `rem` p else Nothing
 
 instance (Reifies p Integer) => DecidableAssociates (F p) where
   isAssociate p n =
@@ -165,12 +158,12 @@ instance (Reifies p Integer) => PID (F p)
 instance (Reifies p Integer) => ZeroProductSemiring (F p)
 instance (Reifies p Integer) => Euclidean (F p)
 
-instance Reifies p Integer => NA.Division (F p) where
+instance Reifies p Integer => Division (F p) where
   recip = recip
   (/)   = (/)
   (^)   = pow
 
-instance Reifies p Integer => Fractional (F p) where
+instance Reifies p Integer => P.Fractional (F p) where
   a / b = a * recip b
   fromRational r =
     modNat (fromInteger $ R.numerator r) * recip (modNat (fromInteger $ R.denominator r))
@@ -187,7 +180,7 @@ class (Field k, Characteristic k) => FiniteField k where
 
 instance Reifies p Integer => FiniteField (F p) where
   power _ = 1
-  elements p = map modNat [0.. fromIntegral (char p - 1)]
+  elements p = map modNat [0.. fromIntegral (char p) - 1]
 
 order :: FiniteField k => proxy k -> Natural
 order p = char p ^ power p

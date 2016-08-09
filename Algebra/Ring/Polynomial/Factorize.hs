@@ -49,7 +49,6 @@ import           Debug.Trace                      (traceShow)
 import           Numeric.Decidable.Zero           (isZero)
 import           Numeric.Domain.GCD               (gcd, lcm)
 import qualified Numeric.Field.Fraction           as F
-import           Prelude                          (div, mod)
 import qualified Prelude                          as P
 
 type Unipol r = OrderedPolynomial r Grevlex 1
@@ -239,7 +238,7 @@ factorSqFreeQBP f
     ps = takeWhile (< floor (4*b')) $ dropWhile (<= ceiling (2*b')) $ tail primes
     b = leadingCoeff f
     a = maxNorm f
-    b' = P.product [ sqrt (fromIntegral n P.+ 1), 2 P.^^ n, fromIntegral a,  fromIntegral b]
+    b' = P.product [ P.sqrt (fromIntegral n P.+ 1), 2 P.^^ n, fromIntegral a,  fromIntegral b]
          :: Double
     n = totalDegree' f
     isSqFreeMod :: Integer -> Bool
@@ -285,13 +284,13 @@ multiHensel p l f fs =
       g0 = mapCoeff (`rem` p) $ leadingCoeff f .*. product as
       r = length fs
       k = r `div` 2
-      d = floor $ logBase 2 (fromIntegral l)
+      d = logBase2 (fromIntegral l)
       h0 = mapCoeff (`rem` p) $ product bs
       (a, s0, t0) : _ = reifyPrimeField p $ \fp ->
         map (each %~ mapCoeff naturalRepr) $ euclid (skim $ mapCoeff (modNat' fp) g0) (skim $ mapCoeff (modNat' fp) h0)
       (gd, hd, _, _) = foldl (\(s, t, g, h) j -> henselStep (p^2^j) f g h s t)
                          (s0, t0, mapCoeff (`rem` p) $ product as, h0)
-                         [0..d P.- 1]
+                         [0..P.fromIntegral (d - 1)]
   in if a /= one
      then error $ concat ["(f, as, bs, g0, h0) = ", show (f, as, bs, g0, h0), " is not bezout coprime!"]
      else multiHensel p l (tr "gd = " gd) as ++ multiHensel p l (tr "hd = " hd) bs

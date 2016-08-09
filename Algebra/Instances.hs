@@ -5,23 +5,21 @@
 module Algebra.Instances () where
 import Algebra.Scalar
 
+import           AlgebraicPrelude
 import           Control.DeepSeq                       (NFData (..))
 import           Control.Monad.Random                  (Random (..), getRandom)
 import           Control.Monad.Random                  (getRandomR, runRand)
 import           Data.Complex
 import           Data.Convertible.Base                 (Convertible (..))
-import           Data.Hashable
 import qualified Data.Ratio                            as P
 import qualified Data.Vector                           as DV
-import           Numeric.Algebra
 import qualified Numeric.Algebra                       as NA
 import           Numeric.Algebra.Unital.UnitNormalForm
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
 import           Numeric.Domain.Euclidean              (Euclidean)
-import           Numeric.Field.Fraction
-import           Prelude                               hiding (Num (..), lcm)
-import qualified Prelude                               as P
+-- import           Prelude                               hiding (Num (..), lcm)
+import qualified Prelude as P
 
 instance Additive r => Additive (DV.Vector r) where
   (+) = DV.zipWith (+)
@@ -50,7 +48,7 @@ instance (Group r, Rig r) => Rig (Complex r) where
   fromNatural = (:+ zero) . fromNatural
 instance (Group r, Commutative r) => Commutative (Complex r) where
 instance Ring r => Ring (Complex r) where
-  fromInteger = (:+ zero) . fromInteger
+  fromInteger = (:+ zero) . fromInteger'
 instance Group r => Group (Complex r) where
   (a :+ b) - (c :+ d) = (a - c) :+ (b - d)
   negate (a :+ b) = negate a :+ negate b
@@ -96,6 +94,10 @@ instance Ring Double where
 instance DecidableZero Double where
   isZero 0 = True
   isZero _ = False
+
+instance Division Double where
+  recip = P.recip
+  (/)   = (P./)
 
 instance P.Integral r => Additive (P.Ratio r) where
   (+) = (P.+)
@@ -164,8 +166,8 @@ instance P.Integral r => DecidableUnits (P.Ratio r) where
     | r == 0 && n P.> 0 = Just 0
     | otherwise = Nothing
 
-instance Euclidean d => Fractional (Fraction d) where
-  fromRational r = fromInteger (P.numerator r) % fromInteger (P.denominator r)
+instance Euclidean d => P.Fractional (Fraction d) where
+  fromRational r = fromInteger' (P.numerator r) % fromInteger' (P.denominator r)
   recip = NA.recip
   (/) = (NA./)
 

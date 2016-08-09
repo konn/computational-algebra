@@ -9,7 +9,7 @@
 {-# LANGUAGE UndecidableInstances                                     #-}
 -- | Algorithms for zero-dimensional ideals.
 module Algebra.Algorithms.ZeroDim (univPoly, radical, isRadical, solveWith,
-                                   WrappedField(..), reduction, solveViaCompanion,
+                                   reduction, solveViaCompanion,
                                    solveM, solve',  matrixRep, subspMatrix,
                                    vectorRep, solveLinear, fglm, fglmMap) where
 import           Algebra.Algorithms.FGLM
@@ -17,37 +17,27 @@ import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
 import           Algebra.Internal                 hiding (OLt)
 import qualified Algebra.Matrix                   as AM
-import           Algebra.Ring.Ideal
-import           Algebra.Ring.Polynomial
+import           Algebra.Prelude
 import           Algebra.Ring.Polynomial.Quotient
-import           Algebra.Scalar
-import           Algebra.Wrapped
 
-import           Control.Applicative
-import           Control.Arrow
-import           Control.Lens          hiding ((:<))
-import           Control.Monad
+import           Control.Lens         hiding ((:<))
 import           Control.Monad.Loops
-import           Control.Monad.Random  hiding (next)
+import           Control.Monad.Random hiding (next)
 import           Control.Monad.Reader
-import           Control.Monad.ST      (runST)
+import           Control.Monad.ST     (runST)
 import           Data.Complex
 import           Data.Convertible
-import           Data.List             hiding (sum)
-import qualified Data.Matrix           as M
+import qualified Data.Matrix          as M
 import           Data.Maybe
-import           Data.Ord              (comparing)
+import           Data.Ord             (comparing)
 import           Data.Reflection
-import qualified Data.Sized.Builtin    as SV
-import           Data.STRef.Strict     (newSTRef)
-import           Data.Type.Ordinal
+import qualified Data.Sized.Builtin   as SV
+import           Data.STRef.Strict    (newSTRef)
+-- import           Data.Type.Ordinal
 import qualified Data.Vector           as V
 import qualified Data.Vector.Mutable   as MV
-import           Numeric.Algebra       hiding ((/), (<))
 import qualified Numeric.Algebra       as NA
 import qualified Numeric.LinearAlgebra as LA
-import           Prelude               hiding (lex, negate, recip, sum, (*),
-                                        (+), (-), (^), (^^))
 import qualified Prelude               as P
 import           Proof.Propositional   (IsTrue (Witness))
 -- import qualified Sparse.Matrix                    as Sparse
@@ -80,7 +70,7 @@ solveWith :: forall r n ord. (DecidableZero r, Normed r, Ord r, Field r, CoeffRi
                               KnownNat n, Convertible r Double)
           => OrderedPolynomial r ord n
           -> Ideal (OrderedPolynomial r ord n)
-          -> Maybe [Vector (Complex Double) n]
+          -> Maybe [Sized n (Complex Double)]
 solveWith f0 i0 = {-# SCC "solveWith" #-}
   withKnownNat (sSucc (sing :: SNat n)) $
   reifyQuotient (radical i0) $ \pxy ->
@@ -105,7 +95,7 @@ solveWith f0 i0 = {-# SCC "solveWith" #-}
             (_, evecs) = LA.eig $ LA.tr mf
             calc vec ={-# SCC "calc" #-}
               let c = vec LA.! cind
-                  phi (idx, Right nth) acc = acc & ix idx .~ (vec LA.! nth) / c
+                  phi (idx, Right nth) acc = acc & ix idx .~ (vec LA.! nth) P./ c
                   phi (idx, Left g)    acc = acc & ix idx .~ substWith (*) acc g
               in if c == 0
                  then Nothing
@@ -117,7 +107,7 @@ solve' :: forall r n ord.
            IsMonomialOrder n ord, Convertible r Double)
        => Double
        -> Ideal (OrderedPolynomial r ord n)
-       -> [Vector (Complex Double) n]
+       -> [Sized n (Complex Double)]
 solve' err ideal =
   reifyQuotient ideal $ \ii ->
   if gBasis' ii == [one]
@@ -143,13 +133,13 @@ subspMatrix on ideal =
       cfs  = [negate $ coeff (leadingMonomial $ pow v (j :: Natural)) poly | j <- [0..fromIntegral (dim - 1)]]
   in (M.fromLists [replicate (dim - 1) zero]
           M.<->
-      fmapUnwrap (M.identity (dim - 1))) M.<|> M.colVector (V.fromList cfs)
+      fmap runScalar (M.identity (dim - 1))) M.<|> M.colVector (V.fromList cfs)
 
 solveViaCompanion :: forall r ord n.
                      (Normed r, Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord, Convertible r Double)
                   => Double
                   -> Ideal (OrderedPolynomial r ord n)
-                  -> [Vector (Complex Double) n]
+                  -> [Sized n (Complex Double)]
 solveViaCompanion err ideal =
   if calcGroebnerBasis ideal == [one]
   then []
@@ -196,7 +186,7 @@ univPoly nth ideal = {-# SCC "univPoly" #-}
   if gBasis' pxy == [one]
   then one
   else let x = var nth
-           p0 : pows = [fmapWrap $ vectorRep $ modIdeal' pxy (pow x i)
+           p0 : pows = [fmap Scalar $ vectorRep $ modIdeal' pxy (pow x i)
                        | i <- [0:: Natural ..]
                        | _ <- zero : fromJust (standardMonomials' pxy) ]
            step m (p : ps) = {-# SCC "univPoly/step" #-}
@@ -205,12 +195,12 @@ univPoly nth ideal = {-# SCC "univPoly" #-}
                Just ans ->
                  let cur = fromIntegral $ V.length ans :: Natural
                  in {-# SCC "buildRelation" #-}
-                    pow x cur - sum (zipWith (.*.) (fmapUnwrap $ V.toList ans)
+                    pow x cur - sum (zipWith (.*.) (fmap runScalar $ V.toList ans)
                                      [pow x i | i <- [0 :: Natural .. cur P.- 1]])
        in step (M.colVector p0) pows
 
 -- | Solves linear system. If the given matrix is degenerate, this returns @Nothing@.
-solveLinear :: (Ord r, Fractional r)
+solveLinear :: (Ord r, P.Fractional r)
             => M.Matrix r
             -> V.Vector r
             -> Maybe (V.Vector r)
@@ -270,10 +260,10 @@ isRadical ideal =
 
 -- solve'' :: forall r ord n.
 --            (Show r, Sparse.Eq0 r, Normed r, Ord r, Field r, CoeffRing r, KnownNat n,
---             IsMonomialOrder ord, Convertible r Double)
+--             IsMonomialOrder ord, Convertible r Double, (0 :< n) ~ 'True)
 --        => Double
---        -> Ideal (OrderedPolynomial r ord (Succ n))
---        -> [Vector (Complex Double) (Succ n)]
+--        -> Ideal (OrderedPolynomial r ord n)
+--        -> [Sized n  (Complex Double)]
 -- solve'' err ideal =
 --   reifyQuotient (radical ideal) $ \ii ->
 --   let gbs = gBasis' ii
@@ -306,7 +296,7 @@ isRadical ideal =
 --             ]
 
 solveLinearNA :: (Ord b, Field b, Normed b) => M.Matrix b -> V.Vector b -> Maybe (V.Vector b)
-solveLinearNA m v = fmapUnwrap <$> solveLinear (fmapWrap m) (fmapWrap v)
+solveLinearNA m v = fmap runScalar <$> solveLinear (fmap Scalar m) (fmap Scalar v)
 
 toDM :: (AM.Matrix mat, AM.Elem mat a, AM.Elem M.Matrix a) => mat a -> M.Matrix a
 toDM = AM.fromCols . AM.toCols
@@ -348,18 +338,18 @@ mainLoop = do
   let f = toPolynomial (one, changeMonomialOrderProxy Proxy m)
   lx <- image f
   bs <- mapM image =<< look bLex
-  let mat  = foldr (M.<|>) (M.fromList 0 0 []) $ map (M.colVector . fmapWrap) bs
+  let mat  = foldr (M.<|>) (M.fromList 0 0 []) $ map (M.colVector . fmap Scalar) bs
       cond | null bs   = if V.all (== zero) lx
                          then Just $ V.replicate (length bs) zero
                          else Nothing
-           | otherwise = solveLinear mat (fmapWrap lx)
+           | otherwise = solveLinear mat (fmap Scalar lx)
   case cond of
     Nothing -> do
       proced .== Nothing
       bLex %== (f : )
     Just cs -> do
       bps <- look bLex
-      let g = changeOrder Lex $ f - sum (zipWith (.*.) (V.toList $ fmapUnwrap cs) bps)
+      let g = changeOrder Lex $ f - sum (zipWith (.*.) (V.toList $ fmap runScalar cs) bps)
       proced .== Just (changeOrder Lex f)
       gLex %== (g :)
 
@@ -383,7 +373,7 @@ nextMonomial = do
   m <- look monomial
   gs <- map leadingMonomial <$> look gLex
   let next = fst $ maximumBy (comparing snd) $
-             [ (OrderedMonomial monom, ordToInt od)
+             [ (OrderedMonomial monom, fromEnum od)
              | od <- enumOrdinal (sing :: SNat n)
              , let monom = beta (getMonomial m) od
              , all (not . (`divs` OrderedMonomial monom)) gs

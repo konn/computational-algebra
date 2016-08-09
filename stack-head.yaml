@@ -2,9 +2,10 @@ resolver: nightly-2016-08-02
 skip-ghc-check: true
 packages:
 - '.'
+- 'algebraic-prelude'
 - location:
-    git: https://github.com/ekmett/algebra.git
-    commit: 0e04c01f11960a842c66f86f6cbdb27f7a2d12b5
+    git: https://github.com/konn/type-natural.git
+    commit: 843498255722471249a36fb821eabb4409e75bc2
   extra-dep: true
 
 flags:
@@ -17,7 +18,7 @@ extra-deps:
 - repa-3.4.1.1
 - repa-algorithms-3.4.1.1
 - trifecta-1.6
-- type-natural-0.7.0.0
+- type-natural-0.7.1.0
 - equational-reasoning-0.4.1.1
 - ghc-typelits-presburger-0.1.1.0
 - monomorphic-0.0.3.3

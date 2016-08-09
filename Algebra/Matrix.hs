@@ -6,16 +6,12 @@ module Algebra.Matrix (Matrix(..), delta, companion,
                        gaussReduction, maxNorm, rankWith, det,
                        inverse, inverseWith) where
 import           Algebra.Internal
-import qualified Algebra.LinkedMatrix    as LM
-import           Algebra.Ring.Polynomial hiding (maxNorm)
-import           Algebra.Wrapped         (Normed (..))
+import qualified Algebra.LinkedMatrix as LM
+import           Algebra.Prelude      hiding (maxNorm, zero)
 
 import           Control.Lens
 import           Control.Monad               (when)
-import           Data.List
 import qualified Data.Matrix                 as DM
-import           Data.Ord
-import           Data.Type.Ordinal
 import qualified Data.Vector                 as V
 import           GHC.Exts                    (Constraint)
 import           Numeric.Algebra             (Additive, DecidableZero)
@@ -25,6 +21,7 @@ import qualified Numeric.Algebra             as NA
 import qualified Numeric.Decidable.Zero      as NA
 import qualified Numeric.LinearAlgebra       as LA
 import qualified Numeric.LinearAlgebra.Devel as LA
+import qualified Prelude                     as P
 -- import           Sparse.Matrix                    (_Mat)
 -- import qualified Sparse.Matrix                    as SM
 
@@ -73,7 +70,7 @@ class Matrix mat where
   nonZeroCols = map fst . filter (V.any (not . NA.isZero) . snd) . zip [1..] . toCols
 
 instance Matrix DM.Matrix where
-  type Elem DM.Matrix a = Num a
+  type Elem DM.Matrix a = P.Num a
   empty = DM.zero 0 0
   cmap  = fmap
   fromLists = DM.fromLists
@@ -103,7 +100,7 @@ swapIJ :: Eq a => a -> a -> a -> a
 swapIJ i j k = if k == i then j else if k == j then i else k
 
 instance Matrix LA.Matrix where
-  type Elem LA.Matrix a = (Num a, LA.Numeric  a, LA.Element a, LA.Container LA.Vector a)
+  type Elem LA.Matrix a = (P.Num a, LA.Numeric  a, LA.Element a, LA.Container LA.Vector a)
   empty = LA.fromLists [[]]
   fromLists = LA.fromLists
   cmap = LA.cmap
@@ -124,12 +121,12 @@ instance Matrix LA.Matrix where
   getCol i = V.fromList . LA.toList . (!! (i - 1)) . LA.toColumns
   getRow i = V.fromList . LA.toList . (!! (i - 1)) . LA.toRows
   switchRows i j m = m LA.? map (swapIJ (i-1) (j-1)) [0.. nrows m - 1]
-  combineRows j s i m = LA.mapMatrixWithIndex (\(k,l) v -> if k == j - 1 then s * (m ! (i,l+1)) + v else v) m
+  combineRows j s i m = LA.mapMatrixWithIndex (\(k,l) v -> if k == j - 1 then s P.* (m ! (i,l+1)) P.+ v else v) m
   buildMatrix w h f = LA.build (w, h) (\i j -> f (toIntLA i+1, toIntLA j+1))
   scaleRow a i = (fst .) $ LA.mutable $ \(k, l) m -> do
     v <- LA.readMatrix m k l
     when (k == i - 1) $
-      LA.writeMatrix m k l (a * v)
+      LA.writeMatrix m k l (a P.* v)
   m ! (i, j) = m `LA.atIndex` (i - 1, j - 1)
   m <||> n = LA.fromColumns $ LA.toColumns m ++ LA.toColumns n
   m <--> n = LA.fromRows $ LA.toRows m ++ LA.toRows n

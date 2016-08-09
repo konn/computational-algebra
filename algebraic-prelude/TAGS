@@ -11,26 +11,26 @@ main main1,2
 
 ./src/AlgebraicPrelude.hs,595
 module AlgebraicPreludeAlgebraicPrelude3,4
-type Rational Rational51,52
-class (Ord (Norm a)) => Normed Normed55,56
-class (Ord (Norm a)) => Normed Normed55,56
-  type Norm Norm56,57
-  norm norm57,58
-  liftNorm liftNorm58,59
-instance instance60,61
-abs abs82,83
-abs abs83,84
-(^)^86,87
-(^(87,88
-(^^)^^90,91
-ifThenElse ifThenElse102,103
-ifThenElse ifThenElse103,104
-fromInteger fromInteger106,107
-fromInteger fromInteger107,108
-fromInteger' fromInteger'115,116
-fromInteger' fromInteger'116,117
-fromRational fromRational118,119
-fromRational fromRational119,120
+type Rational Rational55,56
+class (Ord (Norm a)) => Normed Normed59,60
+class (Ord (Norm a)) => Normed Normed59,60
+  type Norm Norm60,61
+  norm norm61,62
+  liftNorm liftNorm62,63
+instance instance64,65
+abs abs86,87
+abs abs87,88
+(^)^90,91
+(^(91,92
+(^^)^^94,95
+ifThenElse ifThenElse106,107
+ifThenElse ifThenElse107,108
+fromInteger fromInteger110,111
+fromInteger fromInteger111,112
+fromInteger' fromInteger'119,120
+fromInteger' fromInteger'120,121
+fromRational fromRational122,123
+fromRational fromRational123,124
 
 ./test/Spec.hs,30
 main main0,1

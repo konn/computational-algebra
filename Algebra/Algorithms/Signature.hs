@@ -7,7 +7,8 @@
 -- | Provides general framework for signature-based algorithms
 module Algebra.Algorithms.Signature where
 import           Algebra.Algorithms.Groebner
-import           Algebra.Prelude             hiding (singleton)
+import           Algebra.Prelude             hiding (mapMaybe, singleton,
+                                              uncons)
 import           Control.Applicative         ((<|>))
 import           Control.Arrow               (second, (&&&), (>>>))
 import qualified Data.Foldable               as F

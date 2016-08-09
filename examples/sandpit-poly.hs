@@ -1,19 +1,16 @@
 {-# LANGUAGE DataKinds, MultiWayIf, NoImplicitPrelude, PolyKinds #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
-module Main (module Algebra.Algorithms.Groebner, module Algebra.Ring.Polynomial
-            , module Numeric.Field.Fraction, module Main, module Algebra.Internal
+module Main ( module Algebra.Algorithms.Groebner
+            , module Main
             ) where
 import           Algebra.Algorithms.Groebner
-import           Algebra.Internal
 import           Algebra.Prelude
-import           Algebra.Ring.Ideal
-import           Algebra.Ring.Polynomial
-import           Data.Maybe                  (isJust)
-import           Data.Maybe                  (fromJust)
-import           Data.Maybe                  (fromMaybe)
-import qualified Data.Sized.Builtin          as SV
-import           Numeric.Decidable.Zero      (isZero)
-import           Numeric.Field.Fraction
+import           Algebra.Ring.Polynomial.Univariate (Unipol)
+import           Data.Maybe                         (isJust)
+import           Data.Maybe                         (fromJust)
+import           Data.Maybe                         (fromMaybe)
+import qualified Data.Sized.Builtin                 as SV
+import           Numeric.Decidable.Zero             (isZero)
 
 u, v, x, y, z :: Polynomial (Fraction Integer) 5
 [u, v, x, y, z] = vars
@@ -26,12 +23,13 @@ fromRight _ = error "fromRight"
 main, act :: IO ()
 main = act
 act = do
+  print (var 0 ^ 51245 :: Unipol Integer)
   let n = thEliminationIdeal sTwo $
           toIdeal [x - (3*u + 3*u*v^2 - u^3), y - (3*v + 3*u^2*v -  v^3), z - (3*u^2 - 3*v^2)]
   return ()
   where sTwo = sing :: Sing 2 ; sThree = sing :: Sing 3
 
-findDifference :: (Eq r, DecidableZero r, Field r)
+findDifference :: (Eq r,  Field r)
                => [Polynomial r 1] -> (r, r, [r], Int)
 findDifference = go 0
   where

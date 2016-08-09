@@ -1,9 +1,10 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, ExplicitNamespaces                #-}
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                    #-}
-{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude                      #-}
-{-# LANGUAGE NoMonomorphismRestriction, ParallelListComp, PatternSynonyms  #-}
-{-# LANGUAGE QuasiQuotes, RankNTypes, ScopedTypeVariables, TemplateHaskell #-}
-{-# LANGUAGE TupleSections, TypeFamilies, TypeOperators, ViewPatterns      #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, ExplicitNamespaces               #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                   #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude                     #-}
+{-# LANGUAGE NoMonomorphismRestriction, ParallelListComp, PatternSynonyms #-}
+{-# LANGUAGE QuasiQuotes, RankNTypes, ScopedTypeVariables                 #-}
+{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TupleSections           #-}
+{-# LANGUAGE TypeFamilies, TypeOperators, ViewPatterns                    #-}
 {-# OPTIONS_GHC -Wno-type-defaults -Wno-orphans -Wno-unused-top-binds #-}
 module Algebra.Algorithms.Faugere4 (
   -- * F_4 algorithms with various backends
@@ -14,35 +15,26 @@ module Algebra.Algorithms.Faugere4 (
   faugere4Gen,
   -- * Examples
   cyclic)  where
-import           Algebra.Internal
 import qualified Algebra.LinkedMatrix    as LM
 import           Algebra.Matrix          hiding (trace)
+import           Algebra.Prelude         hiding ((\\))
 import qualified Algebra.Repa            as Repa
-import           Algebra.Ring.Ideal
-import           Algebra.Ring.Polynomial
-import           Algebra.Wrapped
 
-import           Control.Arrow
 import           Control.Monad.Identity
 import           Control.Parallel
 import qualified Data.Array.Repa        as Repa
 import qualified Data.Array.Repa.Eval   as Repa
-import           Data.Function
 import qualified Data.HashMap.Strict    as HM
 import qualified Data.HashSet           as HS
-import           Data.List
-import           Data.Maybe
+import           Data.List              ((\\))
 import           Data.Proxy             (Proxy)
 import           Data.Reflection        (Given (..), give)
 import qualified Data.Set               as S
 import           Data.Traversable       (sequenceA)
 import qualified Data.Vector            as V
-import           Numeric.Algebra        hiding (sum, (<), (>), (\\))
 import qualified Numeric.Algebra        as NA
 import           Numeric.Decidable.Zero (isZero)
 import           Numeric.Field.Fraction (Fraction)
-import           Prelude                hiding (Num (..), recip, subtract, (/),
-                                         (^))
 import qualified Prelude                as P
 
 -- * F_4 algorithm with various backends
@@ -145,7 +137,9 @@ data Pair r ord n = Pair { lcmPair    :: OrderedMonomial ord n
                          , leftPoly   :: OrderedPolynomial r ord n
                          , rightMonom :: OrderedMonomial ord n
                          , rightPoly  :: OrderedPolynomial r ord n
-                         } deriving (Eq, Ord)
+                         } deriving (Eq)
+deriving instance (CoeffRing r, IsOrder n ord, Ord r) => Ord (Pair r ord n)
+
 type Strategy r ord n = [Pair r ord n] -> [Pair r ord n]
 
 leftP, rightP :: Pair r ord n -> (OrderedMonomial ord n, OrderedPolynomial r ord n)
@@ -297,8 +291,6 @@ redF4 ls gs fss = {-# SCC "reduction" #-}
   in ([ f | f <- fs', not $ leadingMonomial f `elem` map leadingMonomial fs], fs)
 
 ideal3 :: Ideal (Polynomial (Fraction Integer) 3)
-ideal3 = toIdeal [x^^^2 + y^^^2 + z^^^2 - 1, x^^^2 + y^^^2 + z^^^2 - 2*x, 2*x -3*y - z]
+ideal3 = toIdeal [x^2 + y^2 + z^2 - 1, x^2 + y^2 + z^2 - 2*x, 2*x -3*y - z]
   where
-    (^^^) :: (Unital r) => r -> Natural -> r
-    (^^^) = pow
     [x,y,z] = vars

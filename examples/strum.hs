@@ -3,7 +3,7 @@
 {-# LANGUAGE NoMonomorphismRestriction                                    #-}
 module Main where
 import           Algebra.Algorithms.Groebner
-import           Algebra.Prelude                   hiding (normalize)
+import           Algebra.Prelude                   hiding (intersect, normalize)
 import           Algebra.Ring.Polynomial.Factorize
 import           Control.Arrow                     ((***))
 import           Control.Monad.Random              (StdGen, newStdGen, next)
@@ -21,7 +21,6 @@ import           Numeric.Decidable.Zero            (isZero)
 import           Numeric.Domain.GCD                (gcd)
 import qualified Numeric.Field.Fraction            as F
 import           Numeric.Semiring.ZeroProduct      (ZeroProductSemiring)
-import           Prelude                           (abs)
 import qualified Prelude                           as P
 import           System.IO.Unsafe                  (unsafePerformIO)
 
@@ -291,7 +290,7 @@ instance Show r => Show (Interval r) where
 
 bisect :: (Ring r, Division r) => Interval r -> (Interval r, Interval r)
 bisect (Interval l u) =
-  let mid = (l+u) / fromInteger 2
+  let mid = (l+u) / fromInteger' 2
   in (Interval l mid, Interval mid u)
 
 signChange :: (Ord a, Ring a, DecidableZero a) => [a] -> Int
@@ -316,7 +315,7 @@ rootBound f
   | totalDegree' f == 0 = 0
   | otherwise =
     let a:as = map fst $ getTerms f
-    in 1 + maximum (map (abs . (/ a)) as)
+    in 1 + maximum (map (P.abs . (/ a)) as)
 
 isolateRoots :: Polynomial Rational 1 -> [Interval Rational]
 isolateRoots f =
@@ -337,8 +336,7 @@ improve :: Algebraic -> Algebraic
 improve (Algebraic f ss int) = Algebraic f ss $ improveWith ss int
 improve a = a
 
-improveWith :: (Ord a, IsMonomialOrder 1 order,
-                CoeffRing a, DecidableZero a, Division a)
+improveWith :: (Ord a, IsMonomialOrder 1 order, CoeffRing a, Division a)
             => [OrderedPolynomial a order 1] -> Interval a -> Interval a
 improveWith ss int =
   let (ls, us) = bisect int

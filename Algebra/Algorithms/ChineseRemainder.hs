@@ -1,10 +1,11 @@
 {-# LANGUAGE ViewPatterns #-}
 module Algebra.Algorithms.ChineseRemainder where
-import Algebra.Instances        ()
-import Data.List                (findIndices)
-import Numeric.Domain.Euclidean (euclid)
-import Numeric.Domain.Euclidean (chineseRemainder)
-import Numeric.Field.Fraction
+import           Algebra.Instances        ()
+import           AlgebraicPrelude
+import           Data.List                (findIndices)
+import           Numeric.Domain.Euclidean (euclid)
+import           Numeric.Domain.Euclidean (chineseRemainder)
+import qualified Prelude                  as P
 
 recoverRat :: Integer                    -- ^ Bound for numerator
            -> Integer                    -- ^ modulus
@@ -14,7 +15,7 @@ recoverRat (abs -> k) m g
   | g == 0 = Just 0
   | otherwise =
   let ps = euclid m g
-      ixs = findIndices (\(rj, _, _) -> abs rj < k) ps
+      ixs = findIndices (\(rj, _, _) -> P.abs rj < k) ps
   in if null ixs
      then Nothing
      else

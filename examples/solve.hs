@@ -2,33 +2,23 @@
 {-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, PolyKinds #-}
 {-# LANGUAGE QuasiQuotes, TemplateHaskell                        #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
-module Main (module Algebra.Algorithms.Groebner, module Algebra.Ring.Polynomial
-            , module Numeric.Field.Fraction, module Main, module Algebra.Internal
+module Main (module Algebra.Algorithms.Groebner, module Algebra.Prelude
+            , module Main
             ) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.ZeroDim
-import           Algebra.Internal
 import           Algebra.Ring.Ideal
-import           Algebra.Ring.Polynomial
 import           Algebra.Ring.Polynomial.Quotient
-import           Algebra.Scalar
+import           Algebra.Prelude
 import           Control.Monad.Random             hiding (fromList)
 import           Data.Complex
 import           Data.Convertible
 import           Data.List                        (find, nub, partition, sortBy)
 import qualified Data.Matrix                      as M
-import           Data.Ord
 import qualified Data.Sized.Builtin               as SV
-import           Data.Type.Ordinal
 import qualified Data.Vector                      as V
 import           Debug.Trace
-import           Numeric.Algebra                  hiding ((.*), (<))
-import qualified Numeric.Algebra                  as NA
-import           Numeric.Field.Fraction
 import qualified Numeric.LinearAlgebra            as LA
-import           Prelude                          hiding (Fractional (..),
-                                                   Integral (..), Num (..),
-                                                   Real (..), sum, (^^))
 import qualified Prelude                          as P
 
 tr :: Show a => a -> a
@@ -37,21 +27,13 @@ tr a = trace (show a) a
 x, y, z :: Polynomial (Fraction Integer) 3
 [x, y, z] = vars
 
-(.*) :: KnownNat n => (Fraction Integer) -> Polynomial (Fraction Integer) n -> Polynomial (Fraction Integer) n
-(.*) = (.*.)
-
-infixl 7 .*
-
-(^^) :: Unital r => r -> NA.Natural -> r
-(^^) = NA.pow
-
 seed :: Polynomial (Fraction Integer) 3
 seed = -412742019532366985 * x -7641395389638504101 * y + 4362835172800530323 * z
 
 seedMat :: LA.Matrix Double
 seedMat = LA.fromLists $ map (map toDouble) $ reifyQuotient eqn02 $ \pxy -> matrixRep (modIdeal' pxy seed)
 
-toDouble :: P.Fractional a => Fraction Integer -> a
+toDouble :: Fractional a => Fraction Integer -> a
 toDouble rat = fromIntegral (numerator rat) P./ fromIntegral (denominator rat)
 
 fromRight :: Either t t1 -> t1
@@ -62,27 +44,27 @@ printLvl :: Show a => Int -> a -> IO ()
 printLvl lvl = putStrLn . unlines . map (replicate lvl '\t' ++) . lines . show
 
 eqn01 :: Ideal (Polynomial (Fraction Integer) 3)
-eqn01 = toIdeal [x^^2 - 2*x*z + 5, x*y^^2+y*z+1, 3*y^^2 - 8*x*z]
+eqn01 = toIdeal [x^2 - 2*x*z + 5, x*y^2+y*z+1, 3*y^2 - 8*x*z]
 
 eqn02 :: Ideal (Polynomial (Fraction Integer) 3)
 eqn02 =
-  toIdeal [x^^2 + 2*y^^2 - y - 2*z
-          ,x^^2 - 8*y^^2 + 10*z - 1
-          ,x^^2 - 7*y*z
+  toIdeal [x^2 + 2*y^2 - y - 2*z
+          ,x^2 - 8*y^2 + 10*z - 1
+          ,x^2 - 7*y*z
           ]
 
 eqn03 :: Ideal (Polynomial (Fraction Integer) 3)
-eqn03 = toIdeal [x^^2 + y^^2 + z^^2 - 2*x
-                ,x^^3 - y*z - x
+eqn03 = toIdeal [x^2 + y^2 + z^2 - 2*x
+                ,x^3 - y*z - x
                 ,x - y + 2*z
                 ]
 
 jdeal :: Ideal (Polynomial (Fraction Integer) 3)
-jdeal = toIdeal [x*y + z - x*z, x^^2 - z, 2*x^^3 - x^^2 * y * z - 1]
+jdeal = toIdeal [x*y + z - x*z, x^2 - z, 2*x^3 - x^2 * y * z - 1]
 
 
 vs :: [V.Vector (Fraction Integer)]
-vs = reifyQuotient eqn03 $ \pxy -> map (vectorRep . modIdeal' pxy) [var 0 ^^ i | i <- [0..6::Natural]]
+vs = reifyQuotient eqn03 $ \pxy -> map (vectorRep . modIdeal' pxy) [var 0 ^ i | i <- [0..6::Natural]]
 
 mat :: M.Matrix (Fraction Integer)
 mat = fromCols $ take 4 vs
@@ -100,10 +82,10 @@ findUnivar poly =
 toCoeffList :: (CoeffRing r,  KnownNat n, IsMonomialOrder n ord) => Ordinal n -> OrderedPolynomial r ord n -> [r]
 toCoeffList on f =
   let v = var on  `asTypeOf` f
-  in [ coeff (leadingMonomial $ v ^^ i) f | i <- [0.. fromIntegral (totalDegree' f)]]
+  in [ coeff (leadingMonomial $ v ^ i) f | i <- [0.. fromIntegral (totalDegree' f)]]
 
 showSols :: (KnownNat n, IsMonomialOrder n order, Convertible a Double)
-         => Double -> Ideal (OrderedPolynomial a order n) -> [Vector (Complex Double) n1] -> IO ()
+         => Double -> Ideal (OrderedPolynomial a order n) -> [Sized n1 (Complex Double)] -> IO ()
 showSols err eqn sols = do
   let (rs, is) = partition (all ((<err).P.abs.imagPart)) $ map SV.toList sols
       subs a b c = generators $

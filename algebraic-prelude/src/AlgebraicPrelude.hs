@@ -2,7 +2,10 @@
 {-# LANGUAGE NoImplicitPrelude, TypeFamilies, UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module AlgebraicPrelude
-       (module AlgebraicPrelude
+       (module AlgebraicPrelude,
+        -- * Old Prelude's Numeric type classes and functions, without confliction
+        P.Num(),P.Integral(),P.toInteger, P.Fractional (),
+        P.Floating(..), P.RealFrac(..), P.RealFloat(..), realToFrac
        ) where
 import           BasicPrelude             as AlgebraicPrelude hiding
                                                                (Floating (..),
@@ -14,7 +17,7 @@ import           BasicPrelude             as AlgebraicPrelude hiding
                                                                RealFloat (..),
                                                                RealFrac (..),
                                                                fromShow, gcd,
-                                                               getArts,
+                                                               getArgs,
                                                                getContents,
                                                                getLine, id,
                                                                interact, lcm,

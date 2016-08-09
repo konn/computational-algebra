@@ -23,9 +23,9 @@ module Algebra.LinkedMatrix (Matrix, toLists, fromLists, fromList,
 import Algebra.Algorithms.ChineseRemainder
 import Algebra.Field.Finite
 import Algebra.Instances                   ()
-import Algebra.Prelude                     hiding (Vector, fromList, generate,
-                                            (%))
-import Algebra.Wrapped                     ()
+import Algebra.Prelude                     hiding (Vector, empty, fromList,
+                                            generate, insert, transpose, (%),
+                                            (<.>), (<>))
 
 import           Control.Applicative          ((<|>))
 import           Control.Arrow                ((&&&))
@@ -43,7 +43,7 @@ import           Data.IntMap.Strict           (IntMap, alter, insert,
 import qualified Data.IntMap.Strict           as IM
 import           Data.IntSet                  (IntSet)
 import qualified Data.IntSet                  as IS
-import           Data.List                    (intercalate, minimumBy, sort)
+import           Data.List                    (minimumBy, sort)
 import           Data.List                    (sortBy)
 import           Data.Maybe                   (fromJust, fromMaybe, mapMaybe)
 import           Data.Monoid                  (First (..))
@@ -62,10 +62,6 @@ import           Numeric.Decidable.Zero       (isZero)
 import           Numeric.Domain.GCD           (gcd, lcm)
 import           Numeric.Field.Fraction
 import           Numeric.Semiring.ZeroProduct (ZeroProductSemiring)
-import           Prelude                      (abs)
-import           Prelude                      hiding (Num (..), gcd, lcm,
-                                               product, quot, recip, sum, (/),
-                                               (^))
 import qualified Prelude                      as P
 
 data Entry a = Entry { _value   :: !a
@@ -514,7 +510,7 @@ newGaussianState inp =
 
 getHeaviest :: IntSet -> Matrix a -> IntSet
 getHeaviest old inp =
-  if IS.size old >= inp^.width*5`div`100
+  if IS.size old >= inp^.width*5`P.div`100
   then old
   else  let news = entry $ mconcat $ map (\k -> MaxEntry (colCount k inp) (IS.singleton k)) $
                    IS.toList $ IM.keysSet (inp^.colStart) IS.\\ old
@@ -701,7 +697,7 @@ substMatrix :: (CoeffRing r)
 substMatrix m f =
   let n = ncols m
   in if n == nrows m
-     then reify (toInteger n) $ \pxy -> runSquare $ substUnivariate (toSquare pxy m) f
+     then reify (P.toInteger n) $ \pxy -> runSquare $ substUnivariate (toSquare pxy m) f
      else error "Matrix must be square"
 
 toSquare :: proxy n -> Matrix r -> Square n r
@@ -716,7 +712,7 @@ krylovMinpol :: (Eq a, Ring a, DecidableZero a, DecidableUnits a,
              => Matrix a -> Vector a -> m (Polynomial a 1)
 krylovMinpol m b
   | V.all isZero b = return one
-  | otherwise = reify (toInteger n) $ \pxy -> do
+  | otherwise = reify (P.toInteger n) $ \pxy -> do
     iterateUntil (\h -> V.all isZero $ multWithVector (substMatrix m h) b) $ do
       u <- replicateM n getRandom
       return $ minpolRecurrent (fromIntegral n)
@@ -769,9 +765,9 @@ intDet :: Matrix Integer -> Integer
 intDet mat =
   let b = V.maximum $ V.map (P.fromInteger . abs . snd) $ nonZeroEntries mat
       n = fromIntegral $ ncols mat
-      c = n^(n `div` 2) * b^n
-      r = ceiling $ logBase (2 :: Double) (2*fromIntegral c + 1)
-      ps = take (fromInteger r) primes
+      c = n^(n `P.div` 2) * b^n
+      r = ceilingLogBase2 (2*fromIntegral c + 1)
+      ps = take r primes
       m  = product ps
       d  = chineseRemainder [ (p,
                                reifyPrimeField p $ \pxy ->
@@ -783,16 +779,16 @@ intDet mat =
      then 0
      else minimumBy (comparing abs) [d - m * off, d - m * (off + 1)]
 
-shiftHalf :: Integral a => a -> a -> a
+shiftHalf :: P.Integral a => a -> a -> a
 shiftHalf p n =
-  let s = p `div` 2
-  in (n P.+ s) `mod` p P.- s
+  let s = p `P.div` 2
+  in (n P.+ s) `P.mod` p P.- s
 
 triangulateModular :: Matrix (Fraction Integer)
                    -> (Matrix (Fraction Integer),
                        Matrix (Fraction Integer))
 triangulateModular mat0 =
-  let ps = filter ((/= 0) . (mod l)) primes
+  let ps = filter ((/= 0) . (P.mod l)) primes
   in go ps
   where
     ds = V.foldr (lcm' . abs . denominator.snd) 1 $ nonZeroEntries mat0
@@ -891,7 +887,7 @@ solveHensel cyc p mat b = {-# SCC "solveHensel" #-}
   where
     go _ [] = Nothing
     go prev ((q,x):xs) =
-      let mans = V.mapM (recoverRat (floor $ sqrt (fromIntegral q P./ 2 :: Double)) q) x
+      let mans = V.mapM (recoverRat (P.floor $ P.sqrt (fromIntegral q P./ 2 :: Double)) q) x
       in case mans of
         Just x' | mat `multWithVector` x' == b -> Just x'
                 | mans == prev -> Nothing

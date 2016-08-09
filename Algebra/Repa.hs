@@ -1,8 +1,9 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, MultiParamTypeClasses #-}
-{-# LANGUAGE NoMonomorphismRestriction, TypeFamilies                    #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, ImplicitPrelude #-}
+{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction     #-}
+{-# LANGUAGE NoRebindableSyntax, TypeFamilies                     #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Repa where
-import           Algebra.Wrapped
+import           AlgebraicPrelude                  (Normed (..))
 import           Data.Array.Repa                   hiding (map)
 import           Data.Array.Repa.Algorithms.Matrix
 import           Data.Array.Repa.Eval

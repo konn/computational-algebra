@@ -27,42 +27,27 @@ import Algebra.Ring.Polynomial.Class
 import Algebra.Ring.Polynomial.Monomial
 import Algebra.Scalar
 
-import           Control.Arrow
+import           AlgebraicPrelude
 import           Control.DeepSeq                       (NFData)
 import           Control.Lens                          hiding (assign)
 import qualified Data.Foldable                         as F
-import           Data.Function
-import           Data.Hashable
 import qualified Data.HashSet                          as HS
-import           Data.List                             (intercalate)
 import           Data.Map                              (Map)
 import qualified Data.Map.Strict                       as M
-import           Data.Maybe
-import           Data.Ord
 import qualified Data.Set                              as Set
 import           Data.Singletons.Prelude               (POrd (..))
 import           Data.Sized.Builtin                    ((%!!))
 import qualified Data.Sized.Builtin                    as S
 import           Data.Type.Ordinal
-import           Numeric.Algebra                       hiding (Order (..))
 import qualified Numeric.Algebra                       as NA
 import           Numeric.Algebra.Unital.UnitNormalForm (UnitNormalForm (..))
 import qualified Numeric.Algebra.Unital.UnitNormalForm as NA
 import           Numeric.Decidable.Associates
 import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero
-import           Numeric.Domain.Euclidean
-import           Numeric.Domain.GCD
 import           Numeric.Domain.Integral               (IntegralDomain (..))
-import           Numeric.Domain.PID
-import           Numeric.Domain.UFD
 import qualified Numeric.Ring.Class                    as NA
 import           Numeric.Semiring.ZeroProduct          (ZeroProductSemiring)
-import           Prelude                               hiding (Rational,
-                                                        fromInteger, gcd, lex,
-                                                        negate, quot, recip,
-                                                        rem, sum, (*), (+), (-),
-                                                        (/), (^), (^^))
 import qualified Prelude                               as P
 import           Proof.Equational                      (symmetry)
 
@@ -114,7 +99,7 @@ instance (KnownNat n, IsMonomialOrder n ord, CoeffRing r) => IsPolynomial (Order
 
 
 
-ordVec :: forall n. KnownNat n => Vector (Ordinal n) n
+ordVec :: forall n. KnownNat n => Sized n (Ordinal n)
 ordVec = unsafeFromList' $ enumOrdinal (sing :: SNat n)
 
 instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
@@ -231,17 +216,17 @@ showPolynomialWithVars dic p0@(Polynomial d)
                      | otherwise = Just $ showVar n ++ "^" ++ show p
       showVar n = fromMaybe ("X_" ++ show n) $ lookup n dic
 
-isConstantMonomial :: (Eq a, Num a) => Vector a n -> Bool
+isConstantMonomial :: (Eq a, P.Num a) => Sized n a -> Bool
 isConstantMonomial v = all (== 0) $ F.toList v
 
 -- | We provide Num instance to use trivial injection R into R[X].
 --   Do not use signum or abs.
-instance (IsMonomialOrder n order, CoeffRing r, KnownNat n, Num r)
-      => Num (OrderedPolynomial r order n) where
-  (+) = (Numeric.Algebra.+)
-  (*) = (Numeric.Algebra.*)
-  fromInteger = normalize . injectCoeff . P.fromInteger
-  signum f = if isZero f then zero else injectCoeff 1
+instance (IsMonomialOrder n order, CoeffRing r, KnownNat n)
+      => P.Num (OrderedPolynomial r order n) where
+  (+) = (+)
+  (*) = (*)
+  fromInteger = normalize . injectCoeff . fromInteger'
+  signum f = if isZero f then zero else injectCoeff one
   abs = id
   negate = ((P.negate 1 :: Integer) .*)
 
@@ -329,7 +314,7 @@ evalUnivariate u f =
 
 -- | Evaluate polynomial at some point.
 eval :: (CoeffRing r, IsMonomialOrder n order, KnownNat n)
-     => Vector r n -> OrderedPolynomial r order n -> r
+     => Sized n r -> OrderedPolynomial r order n -> r
 eval = substWith (*)
 
 -- evalOn :: forall k a order . (SingI k, CoeffRing a, IsMonomialOrder order)
@@ -348,7 +333,7 @@ subst' p val f
   | otherwise = error "Not an "
 
 allVars :: forall k ord n . (IsMonomialOrder n ord, CoeffRing k, KnownNat n)
-        => Vector (OrderedPolynomial k ord n) n
+        => Sized n (OrderedPolynomial k ord n)
 allVars = unsafeFromList' vars
 
 -- | Partially difference at (m+1)-th variable

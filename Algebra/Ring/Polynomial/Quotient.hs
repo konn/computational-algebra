@@ -12,26 +12,18 @@ module Algebra.Ring.Polynomial.Quotient
        ) where
 import Algebra.Algorithms.Groebner
 import Algebra.Internal
-import Algebra.Ring.Ideal
-import Algebra.Ring.Polynomial
-import Algebra.Scalar
-import Algebra.Wrapped
+import Algebra.Prelude
 
 import           Control.DeepSeq
 import qualified Data.Foldable      as F
 import qualified Data.HashMap.Lazy  as HM
 import           Data.List          (sort, sortBy)
 import qualified Data.Matrix        as M
-import           Data.Maybe
-import           Data.Ord
 import           Data.Reflection
 import qualified Data.Sized.Builtin as S
 import           Data.Unamb
 import qualified Data.Vector        as V
-import           Numeric.Algebra
 import qualified Numeric.Algebra    as NA
-import           Prelude            hiding (lex, negate, recip, sum, (*), (+),
-                                     (-), (^), (^^))
 import qualified Prelude            as P
 
 -- | The polynomial modulo the ideal indexed at the last type-parameter.
@@ -60,16 +52,17 @@ vectorRep f =
   in V.fromList $ map (flip coeff mf) base
 
 matRepr' :: forall r ord n ideal.
-          (Ord r, Normed r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord, Reifies ideal (QIdeal r ord n))
+          (Ord r, Normed r, Field r, CoeffRing r, KnownNat n,
+           IsMonomialOrder n ord, Reifies ideal (QIdeal r ord n))
        => Quotient r ord n ideal -> M.Matrix r
 matRepr' f =
   let ZeroDimIdeal _bs vs _ = reflect f
       dim = length vs
-  in fmapUnwrap $
+  in fmap runScalar $
      if null vs
-     then M.zero 0 0
-     else foldl (P.+) (M.zero dim dim) $
-          [ fmap (WrapField . (c *)) $ matRep0 (Proxy :: Proxy ideal) t
+     then M.fromList 0 0 []
+     else foldl (P.+) (M.fromList 0 0 []) $
+          [ fmap (Scalar . (c *)) $ matRep0 (Proxy :: Proxy ideal) t
           | (c, t) <- getTerms $ quotRepr_ f ]
 
 matRep0 :: forall r ord ideal n.
@@ -155,7 +148,7 @@ minimum' :: Ord a => [a] -> Maybe a
 minimum' [] = Nothing
 minimum' xs = Just $ minimum xs
 
-diag :: a -> a -> SNat n -> [Vector a n]
+diag :: a -> a -> SNat n -> [Sized n a]
 diag d z n = F.toList $ generate n $ \i ->
   generate n $ \j ->
     if i == j then d else z
@@ -232,13 +225,13 @@ instance (IsMonomialOrder n ord, CoeffRing r, KnownNat n) => LeftModule (Scalar 
 instance (IsMonomialOrder n ord, CoeffRing r, KnownNat n) => RightModule (Scalar r) (Quotient r ord n ideal) where
   f *. r = Quotient $ quotRepr_ f *. r
 
-instance (IsMonomialOrder n ord, Num r, Reifies ideal (QIdeal r ord n), CoeffRing r, KnownNat n, Field r) => Num (Quotient r ord n ideal) where
+instance (IsMonomialOrder n ord, Reifies ideal (QIdeal r ord n), CoeffRing r, KnownNat n, Field r) =>  P.Num (Quotient r ord n ideal) where
   (+) = (NA.+)
   (*) = (NA.*)
   fromInteger = Quotient . P.fromInteger
-  signum = Quotient . signum . quotRepr_
+  signum = Quotient . P.signum . quotRepr_
   abs    = id
-  negate = Quotient . negate . quotRepr_
+  negate = Quotient . P.negate . quotRepr_
 
 -- | Reduce polynomial modulo ideal.
 reduce :: (Eq r, Field r, KnownNat n, IsMonomialOrder n ord)

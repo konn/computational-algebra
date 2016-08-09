@@ -1,42 +1,34 @@
 {-# LANGUAGE FlexibleContexts, NoImplicitPrelude, NoMonomorphismRestriction #-}
 module Algebra.Prelude
-       ((^), (^^),(%),Scalar(..),(.*.),Rational, od,
-        module Prelude,
-        module Numeric.Algebra,
+       ((%),Scalar(..),(.*.), od,Ordinal, enumOrdinal,
+        logBase2,ceilingLogBase2,
+        module AlgebraicPrelude,
         module Algebra.Ring.Polynomial,
-        module Numeric.Domain.Class,
-        module Numeric.Domain.Euclidean,
         module Algebra.Ring.Ideal,
-        module Numeric.Field.Fraction,
         module Algebra.Internal) where
 
 import Algebra.Internal
+import Algebra.Ring.Ideal
+import Algebra.Ring.Polynomial
+import Algebra.Scalar
 
-import           Algebra.Ring.Ideal
-import           Algebra.Ring.Polynomial
-import           Algebra.Scalar
-import           Data.Type.Ordinal.Builtin (od)
-import           Numeric.Algebra           hiding (Order (..), (^))
-import qualified Numeric.Algebra           as NA
-import           Numeric.Domain.Class
-import           Numeric.Domain.Euclidean
-import           Numeric.Field.Fraction    hiding ((%))
-import           Prelude                   hiding (Fractional (..),
-                                            Integral (..), Num (..), Rational,
-                                            Real (..), gcd, lcm, lex, product,
-                                            subtract, sum, (^), (^^))
-import           Prelude                   (fromRational)
-
-(^) :: Unital r => r -> Natural -> r
-(^) = pow
-
-(^^) :: Division r => r -> Integer -> r
-(^^) = (NA.^)
+import AlgebraicPrelude          hiding (lex, (%))
+import Data.Bits                 (Bits (..), FiniteBits (..))
+import Data.Type.Ordinal.Builtin (Ordinal, enumOrdinal, od)
 
 (%) :: (IsPolynomial poly, Division (Coefficient poly))
     => Coefficient poly -> Coefficient poly -> poly
 n % m = injectCoeff (n / m)
 infixl 7 %
-infixr 8 ^, ^^
 
-type Rational = Ratio Integer
+type Rational = Fraction Integer
+
+logBase2 :: Int -> Int
+logBase2 x = finiteBitSize x - 1 - countLeadingZeros x
+{-# INLINE logBase2 #-}
+
+ceilingLogBase2 :: Int -> Int
+ceilingLogBase2 n =
+  if popCount n == 1
+  then logBase2 n
+  else logBase2 n + 1

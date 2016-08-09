@@ -25,10 +25,11 @@ import qualified Data.Ratio                            as Rat
 import           Data.Reflection
 import           Data.Singletons.Prelude.Enum          (SEnum (..))
 import           Data.Singletons.TypeLits              (withKnownNat)
-import           Data.Sized.Builtin                    as SV
+import qualified Data.Sized.Builtin                    as SV
 import qualified Data.Traversable                      as T
 import qualified Data.Vector                           as V
 import qualified GHC.TypeLits                          as TL
+import qualified Numeric.Algebra                       as NA
 import           Numeric.Algebra.Unital.UnitNormalForm
 import           Numeric.Decidable.Associates
 import           Numeric.Decidable.Units
@@ -39,14 +40,11 @@ import           Numeric.Domain.Integral
 import           Numeric.Domain.PID
 import           Numeric.Domain.UFD
 import           Numeric.Semiring.ZeroProduct          (ZeroProductSemiring)
-import           Prelude                               hiding (Fractional (..),
-                                                        Num (..), gcd, quot,
-                                                        rem, sum, (^))
 import qualified Prelude                               as P
 
 -- | Galois field of order @p^n@.
 --   @f@ stands for the irreducible polynomial over @F_p@ of degree @n@.
-data GF' p (n :: TL.Nat) (f :: *) = GF' { runGF' :: Vector (F p) n }
+data GF' p (n :: TL.Nat) (f :: *) = GF' { runGF' :: Sized n (F p) }
 deriving instance Reifies p Integer => Eq (GF' p n f)
 
 -- | Galois Field of order @p^n@. This uses conway polynomials
@@ -58,7 +56,7 @@ type GF (p :: TL.Nat) n = GF' p n (Conway p n)
 modPoly :: forall p n f. (KnownNat n, Reifies p Integer) => Unipol (F p) -> GF' p n f
 modPoly = GF' . polyToVec
 
-modVec :: Vector (F p) n -> GF' p n f
+modVec :: Sized n (F p) -> GF' p n f
 modVec = GF'
 
 instance (Reifies p Integer, Show (F p)) => Show (GF' p n f)  where
@@ -74,10 +72,10 @@ varX :: CoeffRing r => Unipol r
 varX = var [od|0|]
 
 vecToPoly :: (CoeffRing r)
-          => Vector r n -> Unipol r
+          => Sized n r -> Unipol r
 vecToPoly v = sum $ imap (\i c -> injectCoeff c * varX^fromIntegral i) $ F.toList v
 
-polyToVec :: forall n r. (CoeffRing r, KnownNat n) => Unipol r -> Vector r n
+polyToVec :: forall n r. (CoeffRing r, KnownNat n) => Unipol r -> Sized n r
 polyToVec f = unsafeFromList' [ coeff (leadingMonomial $ (varX ^ i) `asTypeOf` f) f
                               | i <- [0..fromIntegral (fromSing (sing :: SNat n))]]
 
@@ -208,7 +206,7 @@ reifyGF' :: MonadRandom m => Natural -> Natural
          -> (forall (p :: TL.Nat) (f :: *) (n :: TL.Nat) . (Reifies p Integer, Reifies f (Unipol (F p)))
                        => Proxy (GF' p n f) -> a)
          -> m a
-reifyGF' p n f = reifyPrimeField (toInteger p) $ \pxy -> do
+reifyGF' p n f = reifyPrimeField (P.toInteger p) $ \pxy -> do
   mpol <- generateIrreducible pxy n
   case toSing (fromIntegral p) of
     SomeSing sp -> return $ withKnownNat sp $ withIrreducible mpol f

@@ -27,18 +27,14 @@ module Algebra.Algorithms.Groebner
        ) where
 import           Algebra.Internal
 import           Algebra.Ring.Ideal
+import           Algebra.Prelude
+
 import qualified Data.Map as M
 import Control.Lens (_Wrapped, (&),  (%~))
-import           Algebra.Ring.Polynomial
-import           Control.Applicative
-import           Control.Monad
 import           Control.Monad.Loops
 import           Control.Monad.ST
 import qualified Data.Foldable                as H
-import           Data.Function
 import qualified Data.Heap                    as H
-import           Data.List
-import           Data.Maybe
 import           Data.Singletons.Prelude      (POrd (..), SEq (..), SOrd (..))
 import           Data.Singletons.Prelude      (Sing (SFalse, STrue), withSingI)
 import           Data.Singletons.Prelude.List (Length, Replicate, Sing (SCons))
@@ -46,12 +42,9 @@ import           Data.Singletons.Prelude.List (sLength, sReplicate)
 import           Data.Sized.Builtin           (toList)
 import qualified Data.Sized.Builtin           as V
 import           Data.STRef
-import           Numeric.Algebra              hiding ((<), (>))
 import           Numeric.Decidable.Zero
-import           Prelude                      hiding (Num (..), recip, subtract,
-                                               (^))
-import qualified Prelude                      as P
 import           Proof.Equational
+import qualified Prelude as P
 
 -- | Test if the given ideal is Groebner basis, using Buchberger criteria and relatively primeness.
 isGroebnerBasis :: (IsOrderedPolynomial poly, Field (Coefficient poly))
@@ -358,7 +351,7 @@ unsafeThEliminationIdealWith ord n ideal =
 intersection :: forall poly k.
                 ( IsMonomialOrder (k + Arity poly) (MOrder poly),
                   Field (Coefficient poly), IsOrderedPolynomial poly)
-             => Vector (Ideal poly) k
+             => Sized k (Ideal poly)
              -> Ideal poly
 intersection idsv@(_ :< _) =
     let sk = sizedLength idsv
@@ -392,7 +385,7 @@ quotIdeal :: forall poly l.
               IsMonomialOrder (l + Arity poly) (MOrder poly),
               IsMonomialOrder (2 + Arity poly) (MOrder poly))
           => Ideal poly
-          -> Vector poly l
+          -> Sized l poly
           -> Ideal poly
 quotIdeal i g =
   withKnownNat (sizedLength g) $
@@ -426,7 +419,7 @@ saturationIdeal :: forall poly l.
                     IsMonomialOrder (l + Arity poly) (MOrder poly),
                     IsMonomialOrder (1 + Arity poly) (MOrder poly))
                 => Ideal poly
-                -> Vector poly l
+                -> Sized l poly
                 -> Ideal poly
 saturationIdeal i g =
   withKnownNat (sizedLength g) $

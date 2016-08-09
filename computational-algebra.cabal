@@ -30,6 +30,7 @@ library
                      , MonadRandom          >= 0.1
                      , mwc-random
                      , mwc-random-monad
+                     , algebraic-prelude    >= 0.1
                      , algebra              >= 4.1
                      , base                 >= 4
                      , semigroups           >= 0.15
@@ -54,7 +55,7 @@ library
                      , tagged               >= 0.7
                      , hybrid-vectors       >= 0.1
                      , text                 >=0.11
-                     , type-natural         >= 0.7 && < 0.8
+                     , type-natural         >= 0.7.1 && < 0.8
                      , unamb                >= 0.2
                      , unordered-containers >= 0.2
                      , vector               >= 0.10
@@ -76,7 +77,7 @@ library
                        Algebra.Repa Algebra.Ring.Polynomial.Quotient
                        -- Algebra.Ring.Polynomial.Parser
                        Algebra.Field.Finite
-                       Algebra.Scalar Algebra.Internal Algebra.Instances Algebra.Wrapped
+                       Algebra.Scalar Algebra.Internal Algebra.Instances
                        Algebra.Matrix Algebra.Prelude Algebra.Algorithms.Signature
                        Algebra.Ring.Polynomial.Factorize
                        Algebra.Algorithms.PrimeTest Algebra.Algorithms.ChineseRemainder
@@ -88,6 +89,16 @@ library
     other-modules:     Algebra.Algorithms.FGLM Algebra.Field.Galois.Internal Algebra.Field.Galois.Conway
     ghc-options:      -O2 -Wall -Wno-unused-top-binds
     extensions:       CPP
+                    , DataKinds
+                    , PolyKinds
+                    , GADTs
+                    , MultiParamTypeClasses
+                    , TypeFamilies
+                    , FlexibleContexts
+                    , FlexibleInstances
+                    , UndecidableInstances
+                    , NoImplicitPrelude
+                    , RebindableSyntax
  
 executable solve
     build-depends: semigroups >= 0.15.2,
