@@ -144,7 +144,6 @@ As mentioned above, we can compute the Groebner basis for ideals in polynomial r
 
 The ring and field operations for objects implemented in this package is provided as the instance function of `Ring`{.haskell} and `Field`{.haskell} classes.
 Of course, this package also provides instances for the standard type classes such as `Num`{.haskell} and `Fractional`{.haskell}, but we recommend to use the operation from `algebra` with `NoImplicitPrlude`{.haskell} option. We provide the convenient module [`Algebra.Prelude`{.haskell}](doc:Algebra-Prelude.html) to use with `NoImplicitPrlude`{.haskell} option.
-Also we will plan to provide drop-in replacement for `Prelude`{.haskell} module.
 
 ## Polynomial ##
 
