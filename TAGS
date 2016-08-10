@@ -1857,8 +1857,8 @@ ideal3 ideal310,11
 module Main Main1,2
 i i6,7
 i i7,8
-main main10,11
-main main11,12
+main main26,27
+main main27,28
 
 ./examples/hensel-prof.hs,102
 module Main Main1,2
