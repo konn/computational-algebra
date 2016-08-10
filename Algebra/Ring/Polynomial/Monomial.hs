@@ -32,6 +32,7 @@ import           Control.Lens                    (Ixed (..), alaf, imap,
 import           Data.Constraint                 ((:=>) (..), Dict (..))
 import qualified Data.Constraint                 as C
 import           Data.Constraint.Forall
+import qualified Data.Foldable                   as F
 import           Data.Hashable                   (Hashable (..))
 import           Data.Kind                       (Type)
 import           Data.Maybe                      (catMaybes)
@@ -46,6 +47,7 @@ import           Data.Singletons.TypeLits        (withKnownNat)
 import qualified Data.Sized.Builtin              as V
 import           Data.Type.Natural.Class         (IsPeano (..), PeanoOrder (..))
 import           Data.Type.Ordinal               (Ordinal (..), ordToInt)
+import qualified Data.Vector                     as DV
 -- import           Prelude                         hiding (Fractional (..),
 --                                                   Integral (..), Num (..),
 --                                                   Real (..), lex, product, sum)
@@ -82,15 +84,17 @@ totalDegree = P.sum . getMonomial
 -- | Lexicographical order. This *is* a monomial order.
 lex :: MonomialOrder n
 lex m n = P.foldMap (uncurry compare) $ V.zipSame m n
+{-# INLINE [2] lex #-}
 
 -- | Reversed lexicographical order. This is *not* a monomial order.
 revlex :: MonomialOrder n
 revlex xs ys = alaf Dual foldMap (uncurry (flip compare)) $ V.zipSame xs ys
+{-# INLINE [2] revlex #-}
 
 -- | Convert ordering into graded one.
 graded :: MonomialOrder n -> MonomialOrder n
-graded cmp xs ys = comparing MT.sum xs ys <> cmp xs ys
-{-# INLINE[1] graded #-}
+graded cmp xs ys = comparing F.sum xs ys <> cmp xs ys
+{-# INLINE[2] graded #-}
 {-# RULES
 "graded/graded"  [~1] forall x. graded (graded x) = graded x
   #-}
@@ -209,7 +213,7 @@ calcOrderWeight' :: forall vs n. KnownNat n => SList (vs :: [Nat]) -> Monomial n
 calcOrderWeight' slst m =
   let cfs = V.fromListWithDefault' (0 :: Int) $ map P.fromIntegral $ fromSing slst
   in P.sum $ V.zipWithSame (*) cfs m
-{-# INLINE calcOrderWeight' #-}
+{-# INLINE [2] calcOrderWeight' #-}
 
 weightOrder :: forall n ns ord. (KnownNat n, IsOrder n ord, SingI ns)
             => Proxy (WeightOrder ns ord) -> MonomialOrder n
@@ -271,7 +275,7 @@ divs :: OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
 isPowerOf :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
 OrderedMonomial n `isPowerOf` OrderedMonomial m =
   case V.sFindIndices (> 0) m of
-    [ind] -> MT.sum n == V.sIndex ind n
+    [ind] -> F.sum n == V.sIndex ind n
     _     -> False
 
 tryDiv :: Field r => (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n)

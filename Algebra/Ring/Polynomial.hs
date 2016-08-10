@@ -42,9 +42,6 @@ import           Data.Type.Ordinal
 import qualified Numeric.Algebra                       as NA
 import           Numeric.Algebra.Unital.UnitNormalForm (UnitNormalForm (..))
 import qualified Numeric.Algebra.Unital.UnitNormalForm as NA
-import           Numeric.Decidable.Associates
-import           Numeric.Decidable.Units
-import           Numeric.Decidable.Zero
 import           Numeric.Domain.Integral               (IntegralDomain (..))
 import qualified Numeric.Ring.Class                    as NA
 import           Numeric.Semiring.ZeroProduct          (ZeroProductSemiring)
@@ -107,21 +104,31 @@ instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
   -- | coefficient for a degree.
   type MOrder (OrderedPolynomial r ord n) = ord
   coeff d = M.findWithDefault zero d . terms
+  {-# INLINE coeff #-}
+
   terms = _terms
+  {-# INLINE terms #-}
 
   orderedMonomials = M.keysSet . terms
+  {-# INLINE orderedMonomials #-}
 
   toPolynomial (c, deg) = polynomial $ M.singleton deg c
+  {-# INLINE toPolynomial #-}
+
   polynomial dic = normalize $ Polynomial dic
+  {-# INLINE polynomial #-}
 
   leadingTerm (Polynomial d) =
     case M.maxViewWithKey d of
       Just ((deg, c), _) -> (c, deg)
       Nothing -> (zero, one)
+  {-# INLINE leadingTerm #-}
 
   leadingMonomial = snd . leadingTerm
+  {-# INLINE leadingMonomial #-}
 
   leadingCoeff = fst . leadingTerm
+  {-# INLINE leadingCoeff #-}
 
 instance (KnownNat n, CoeffRing r, IsMonomialOrder n order)
          => Wrapped (OrderedPolynomial r order n) where
@@ -136,60 +143,98 @@ castPolynomial :: (CoeffRing r, KnownNat n, KnownNat m,
                => OrderedPolynomial r o n
                -> OrderedPolynomial r o' m
 castPolynomial = _Wrapped %~ M.mapKeys castMonomial
+{-# INLINE castPolynomial #-}
 
 scastPolynomial :: (IsMonomialOrder n o, IsMonomialOrder m o', KnownNat m,
                     CoeffRing r, KnownNat n)
                 => SNat m -> OrderedPolynomial r o n -> OrderedPolynomial r o' m
 scastPolynomial _ = castPolynomial
+{-# INLINE scastPolynomial #-}
 
 mapCoeff :: (KnownNat n, CoeffRing b, IsMonomialOrder n ord)
          => (a -> b) -> OrderedPolynomial a ord n -> OrderedPolynomial b ord n
 mapCoeff f (Polynomial dic) = polynomial $ M.map f dic
+{-# INLINE mapCoeff #-}
 
 normalize :: (DecidableZero r)
           => OrderedPolynomial r order n -> OrderedPolynomial r order n
 normalize (Polynomial dic) =
   Polynomial $ M.filter (not . isZero) dic
+{-# INLINE normalize #-}
+
 
 instance (Eq r) => Eq (OrderedPolynomial r order n) where
   Polynomial f == Polynomial g = f == g
+  {-# INLINE (==) #-}
 
 -- -- | By Hilbert's finite basis theorem, a polynomial ring over a noetherian ring is also a noetherian ring.
 -- instance (IsMonomialOrder order, CoeffRing r, KnownNat n) => Ring (OrderedPolynomial r order n) where
-instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Ring (OrderedPolynomial r order n)
+instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Ring (OrderedPolynomial r order n) where
+  fromInteger 0 = Polynomial M.empty
+  fromInteger n = Polynomial $ M.singleton one (fromInteger' n)
+  {-# INLINE fromInteger #-}
+
+decZero :: DecidableZero r => r -> Maybe r
+decZero n | isZero n = Nothing
+          | otherwise = Just n
+{-# INLINE decZero #-}
+
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Rig (OrderedPolynomial r order n)
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Group (OrderedPolynomial r order n) where
   negate (Polynomial dic) = Polynomial $ fmap negate dic
+  {-# INLINE negate #-}
+
+  Polynomial f - Polynomial g = Polynomial $ M.mergeWithKey (\_ i j -> decZero (i - j)) id (fmap negate) f g
+  {-# INLINE (-) #-}
+
+
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => LeftModule Integer (OrderedPolynomial r order n) where
   n .* Polynomial dic = polynomial $ fmap (n .*) dic
+  {-# INLINE (.*) #-}
+
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => RightModule Integer (OrderedPolynomial r order n) where
   (*.) = flip (.*)
+  {-# INLINE (*.) #-}
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Additive (OrderedPolynomial r order n) where
   (Polynomial f) + (Polynomial g) = polynomial $ M.unionWith (+) f g
+  {-# INLINE (+) #-}
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Monoidal (OrderedPolynomial r order n) where
-  zero = injectCoeff zero
+  zero = Polynomial M.empty
+  {-# INLINE zero #-}
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => LeftModule Natural (OrderedPolynomial r order n) where
   n .* Polynomial dic = polynomial $ fmap (n .*) dic
+  {-# INLINE (.*) #-}
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => RightModule Natural (OrderedPolynomial r order n) where
   (*.) = flip (.*)
+  {-# INLINE (*.) #-}
+
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Unital (OrderedPolynomial r order n) where
-  one = injectCoeff one
+  one = Polynomial $ M.singleton one one
+  {-# INLINE one #-}
+
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Multiplicative (OrderedPolynomial r order n) where
   Polynomial (M.toList -> d1) *  Polynomial (M.toList -> d2) =
     let dic = (one, zero) : [ (a * b, r * r') | (a, r) <- d1, (b, r') <- d2, not $ isZero (r * r')
               ]
     in polynomial $ M.fromListWith (+) dic
+  {-# INLINE (*) #-}
+
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Semiring (OrderedPolynomial r order n) where
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Commutative (OrderedPolynomial r order n) where
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Abelian (OrderedPolynomial r order n) where
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => LeftModule (Scalar r) (OrderedPolynomial r order n) where
   Scalar r .* Polynomial dic = polynomial $ fmap (r*) dic
+  {-# INLINE (.*) #-}
+
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => RightModule (Scalar r) (OrderedPolynomial r order n) where
   Polynomial dic *. Scalar r = polynomial $ fmap (r*) dic
+  {-# INLINE (*.) #-}
+
 
 instance (IsMonomialOrder n ord, Characteristic r, KnownNat n, CoeffRing r)
       => Characteristic (OrderedPolynomial r ord n) where
   char _ = char (Proxy :: Proxy r)
+  {-# INLINE char #-}
 
 instance (KnownNat n, CoeffRing r, IsMonomialOrder n order, PrettyCoeff r)
        => Show (OrderedPolynomial r order n) where
@@ -224,14 +269,27 @@ isConstantMonomial v = all (== 0) $ F.toList v
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n)
       => P.Num (OrderedPolynomial r order n) where
   (+) = (+)
+  {-# INLINE (+) #-}
+
   (*) = (*)
+  {-# INLINE (*) #-}
+
   fromInteger = normalize . injectCoeff . fromInteger'
+  {-# INLINE fromInteger #-}
+
   signum f = if isZero f then zero else injectCoeff one
+  {-# INLINE signum #-}
+
   abs = id
+  {-# INLINE abs #-}
+
   negate = ((P.negate 1 :: Integer) .*)
+  {-# INLINE negate #-}
+
 
 instance (CoeffRing r, KnownNat n, IsMonomialOrder n ord) => DecidableZero (OrderedPolynomial r ord n) where
   isZero (Polynomial d) = M.null d
+  {-# INLINE isZero #-}
 
 instance (CoeffRing r, IsMonomialOrder 1 ord, ZeroProductSemiring r)
       => ZeroProductSemiring (OrderedPolynomial r ord 1)
@@ -240,6 +298,8 @@ instance (Eq r, DecidableUnits r, DecidableZero r, Field r,
           IsMonomialOrder 1 ord, ZeroProductSemiring r)
       => DecidableAssociates (OrderedPolynomial r ord 1) where
   isAssociate = (==) `on` NA.normalize
+  {-# INLINE isAssociate #-}
+
 instance (Eq r, DecidableUnits r, DecidableZero r, Field r,
           IsMonomialOrder 1 ord, ZeroProductSemiring r)
       => UnitNormalForm (OrderedPolynomial r ord 1) where
@@ -247,6 +307,7 @@ instance (Eq r, DecidableUnits r, DecidableZero r, Field r,
     | isZero f = (zero, f)
     | otherwise = let lc = leadingCoeff f
                   in (injectCoeff lc, injectCoeff (recip lc) * f)
+  {-# INLINE splitUnit #-}
 
 instance (Eq r, DecidableUnits r, DecidableZero r, Field r,
           IsMonomialOrder 1 ord, ZeroProductSemiring r)
@@ -269,6 +330,8 @@ instance (Eq r, DecidableUnits r, DecidableZero r, Field r, IsMonomialOrder 1 or
           | otherwise = (quo, p)
   degree f | isZero f  = Nothing
            | otherwise = Just $ P.fromIntegral $ totalDegree' f
+
+
 instance (Eq r, DecidableUnits r, DecidableZero r, KnownNat n,
           Field r, IsMonomialOrder n ord, ZeroProductSemiring r)
        => ZeroProductSemiring (OrderedPolynomial r ord n)
