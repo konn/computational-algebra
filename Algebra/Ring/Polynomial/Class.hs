@@ -135,7 +135,7 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
 
   -- | @'coeff m f'@ returns the coefficient of monomial @m@ in polynomial @f@.
   coeff' :: Monomial (Arity poly) -> poly -> Coefficient poly
-  coeff' m = runScalar . liftMap (\i -> Scalar $ fromInteger' $ P.fromIntegral $ m V.%!! i)
+  coeff' m = M.findWithDefault zero m . terms'
   {-# INLINE coeff' #-}
 
   -- | Calculates constant coefficient.
