@@ -83,7 +83,16 @@ library
     extensions: CPP
     if impl(ghc >= 7.8)
        extensions: AllowAmbiguousTypes
- 
+
+executable groebner-prof
+  hs-source-dirs: share examples
+  Main-is:             groebner-prof.hs
+  build-depends:       base
+                     , computational-algebra
+                     , deepseq
+  default-language:    Haskell2010
+  ghc-options:         -Wall -prof -fprof-auto -threaded -O2 
+
 executable solve
     build-depends: semigroups >= 0.15.2,
                    constraints >=0.3 && < 0.5, algebra >= 4.1,
