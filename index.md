@@ -252,7 +252,7 @@ In `computational-algebra`{.haskell}, monomials are essentially  represented as 
 
 More precisely, there are two types representing monomials: `Monomial`{.haskell} and `OrderedMonomial`{.haskell}.
 The type `Monomial n`{.haskell} is just a synonym of `Sized n Int`{.haskell}, which is mathematically equal to $\mathbb{N}^n$.
-You can manipulate the value of `Monomial n`{.haskell} with functions provided by [`Data.Sized.Builtin`{.haskell}](docs/sized-0.2.0.0/Data-Sized-Builtin.html) from [`sized` package](hackage:sized).
+You can manipulate the value of `Monomial n`{.haskell} with functions provided by [`Data.Sized.Builtin`{.haskell}](docs/sized-0.2.0.1/Data-Sized-Builtin.html) from [`sized` package](hackage:sized).
 
 [`OrderedMonomial`{.haskell}](doc:Algebra-Ring-Polynomial-Monomial.html#t:OrderedMonomial) is just a newtype wrapping [`Monomial`{.haskell}](doc:Algebra-Ring-Polynomial-Monomial.html#t:Monomial) tagged with additional monomial ordering information:
 ```haskell
@@ -287,7 +287,7 @@ For example, we can rewrite above definition as follows:
 ```haskell
 cmpMonomial _ ns ms = mconcat (zipWithSame compare ns ms)
 ```
-where [`zipWithSame`{.haskell}](docs/sized-0.2.0.0/Data-Sized.html#v:zipWithSame) is imported from `Data.Sized.Builtin`{.haskell} from `sized` package.
+where [`zipWithSame`{.haskell}](docs/sized-0.2.0.1/Data-Sized.html#v:zipWithSame) is imported from `Data.Sized.Builtin`{.haskell} from `sized` package.
 Monoid opertions for `Ordering`{.haskell} can be considered as left-biased "breaking tie" operator.
 
 The `Ord`{.haskell} instance for `Monomial ord n`{.haskell} is defined if `IsOrder n ord`{.haskell} is defined.
