@@ -10,10 +10,10 @@ packages:
 
 flags:
   computational-algebra:
-    examples: true
+    examples: false
 
-build:
-  haddock: true
+# build:
+#   haddock: true
 
 extra-deps:
 - control-monad-loop-0.1

@@ -100,6 +100,16 @@ library
                     , NoImplicitPrelude
                     , RebindableSyntax
  
+executable groebner-prof
+  hs-source-dirs: share examples
+  Main-is:             groebner-prof.hs
+  build-depends:       base
+                     , computational-algebra
+                     , deepseq
+  default-language:    Haskell2010
+  ghc-options:         -Wall -prof -fprof-auto
+
+
 executable solve
     build-depends: semigroups >= 0.15.2,
                    constraints >=0.3, algebra >= 4.1,
@@ -360,7 +370,7 @@ benchmark normal-bench
     buildable: False
     hs-source-dirs: bench share
     other-modules: SingularBench
-    ghc-options: -O2 -threaded
+    ghc-options: -O2 -threaded -rtsopts
 benchmark elimination-bench
     build-depends: constraints >=0.3, algebra,
                    base >=4, computational-algebra -any, containers >= 0.5,
@@ -372,7 +382,7 @@ benchmark elimination-bench
     buildable: False
     hs-source-dirs: bench share
     other-modules: SingularBench
-    ghc-options: -O2 -threaded
+    ghc-options: -O2 -threaded -rtsopts
 benchmark quotient-bench-randomized
     build-depends: constraints >=0.3, QuickCheck >= 2.6,
                    algebra, base >=4, computational-algebra -any,
@@ -422,7 +432,7 @@ benchmark linear-bench
     buildable: False
     hs-source-dirs: bench share
     other-modules: Utils
-    ghc-options: -Wall -threaded
+    ghc-options: -O2 -threaded -rtsopts
 benchmark division-bench
     build-depends: constraints >=0.3, HUnit -any,
                    MonadRandom >= 0.1, QuickCheck >= 2.6, algebra, sized,
@@ -440,7 +450,7 @@ benchmark division-bench
     buildable: False
     hs-source-dirs: bench share
     other-modules: Utils
-    ghc-options: -Wall -threaded
+    ghc-options: -O2 -threaded -rtsopts
 benchmark sugar-paper-bench
     build-depends: constraints >=0.3, HUnit -any, sized,
                    MonadRandom >= 0.1, QuickCheck >= 2.6, algebra,
@@ -458,7 +468,7 @@ benchmark sugar-paper-bench
     buildable: True
     hs-source-dirs: bench share
     other-modules: Utils
-    ghc-options: -Wall -threaded
+    ghc-options: -O2 -threaded -rtsopts
 benchmark solve-bench
     build-depends: constraints >=0.3, HUnit -any, sized,
                    MonadRandom >= 0.1, QuickCheck >= 2.6, algebra,
@@ -476,7 +486,7 @@ benchmark solve-bench
     buildable: True
     hs-source-dirs: bench share
     other-modules: Utils
-    ghc-options: -Wall -threaded
+    ghc-options: -O2 -threaded -rtsopts
 benchmark coercion-bench
     build-depends: constraints >=0.3, HUnit -any, sized,
                    MonadRandom >= 0.1, QuickCheck >= 2.6, algebra,
@@ -494,7 +504,7 @@ benchmark coercion-bench
     buildable: False
     hs-source-dirs: bench share
     other-modules: Utils
-    ghc-options: -Wall -threaded -fcontext-stack=2000
+    ghc-options: -Wall -O2 -threaded -rtsopts
 
 benchmark faugere4-bench
     build-depends: constraints >=0.3, HUnit -any, sized,
@@ -512,7 +522,7 @@ benchmark faugere4-bench
     buildable: True
     hs-source-dirs: bench share
     other-modules: Utils
-    ghc-options: -Wall -threaded -O2 -rtsopts -caf-all -auto-all -with-rtsopts=-qa
+    ghc-options: -Wall -O2 -threaded -rtsopts
 
 benchmark unipol-mult-bench
     build-depends: constraints >=0.3, HUnit -any, sized,
@@ -530,7 +540,7 @@ benchmark unipol-mult-bench
     buildable: True
     hs-source-dirs: bench share
     other-modules: Utils
-    ghc-options: -Wall -threaded -O2 -rtsopts -caf-all -auto-all -with-rtsopts=-qa
+    ghc-options: -Wall -O2 -threaded -rtsopts
 
 benchmark unipol-div-bench
     build-depends: constraints >=0.3, HUnit -any, sized,
@@ -548,4 +558,4 @@ benchmark unipol-div-bench
     buildable: True
     hs-source-dirs: bench share
     other-modules: Utils
-    ghc-options: -Wall -threaded -O2 -rtsopts -caf-all -auto-all -with-rtsopts=-qa
+    ghc-options: -Wall -O2 -threaded -rtsopts
