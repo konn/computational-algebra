@@ -9,7 +9,7 @@
 -- | Algorithms for zero-dimensional ideals.
 module Algebra.Algorithms.ZeroDim (univPoly, radical, isRadical, solveWith,
                                    WrappedField(..), reduction, solveViaCompanion,
-                                   solveM, solve', solve'', matrixRep, subspMatrix,
+                                   solveM, solve', matrixRep, subspMatrix,
                                    vectorRep, solveLinear, fglm, fglmMap) where
 import           Algebra.Algorithms.FGLM
 import           Algebra.Algorithms.Groebner
@@ -48,13 +48,12 @@ import qualified Data.Vector.Sized                as SV
 import           Debug.Trace
 import           Numeric.Algebra                  hiding ((/), (<))
 import qualified Numeric.Algebra                  as NA
-import           Numeric.LinearAlgebra            ((@>))
 import qualified Numeric.LinearAlgebra            as LA
 import           Prelude                          hiding (lex, negate, recip,
                                                    sum, (*), (+), (-), (^),
                                                    (^^))
 import qualified Prelude                          as P
-import qualified Sparse.Matrix                    as Sparse
+-- import qualified Sparse.Matrix                    as Sparse
 
 tr :: Show b => b -> b
 tr = join traceShow
@@ -102,10 +101,10 @@ solveWith f0 i0 = {-# SCC "solveWith" #-}
                       answer = mapCoeff toComplex $ injectCoeff (recip r) * (toPolynomial (leadingTerm g) - g)
                   in Left answer
             mf = AM.fromLists $ map (map toComplex) $ matrixRep f
-            (_, evecs) = LA.eig $ LA.ctrans mf
+            (_, evecs) = LA.eig $ LA.tr mf
             calc vec ={-# SCC "calc" #-}
-              let c = vec @> cind
-                  phi (idx, Right nth) acc = acc & ix idx .~ (vec @> nth) / c
+              let c = vec LA.! cind
+                  phi (idx, Right nth) acc = acc & ix idx .~ (vec LA.! nth) / c
                   phi (idx, Left g)    acc = acc & ix idx .~ substWith (*) acc g
               in if c == 0
                  then Nothing
@@ -258,42 +257,42 @@ isRadical ideal =
   let gens  = map (\on -> reduction on $ univPoly on ideal) $ enumOrdinal (sing :: SNat (S n))
   in all (`isIdealMember` ideal) gens
 
-solve'' :: forall r ord n.
-           (Show r, Sparse.Eq0 r, Normed r, Ord r, Field r, IsPolynomial r n,
-            IsMonomialOrder ord, Convertible r Double)
-       => Double
-       -> Ideal (OrderedPolynomial r ord (S n))
-       -> [SV.Vector (Complex Double) (S n)]
-solve'' err ideal =
-  reifyQuotient (radical ideal) $ \ii ->
-  let gbs = gBasis' ii
-      lexBase = fst $ fglm $ toIdeal gbs
-      upoly = last lexBase
-      restVars = init $ SV.toList allVars
-      calcEigs = nub . LA.toList . LA.eigenvalues . AM.fromLists
-      lastEigs = calcEigs $ matToLists $ fmap toComplex $ fmapUnwrap
-                 (AM.companion maxBound $ mapCoeff WrapField upoly)
-  in if gbs == [one]
-     then []
-     else if length (lastEigs) == length (fromJust $ standardMonomials' ii)
-          then solveSpan (init lexBase) lastEigs
-          else chooseAnswer $
-               lastEigs : map (calcEigs . map (map toComplex) . matrixRep . modIdeal' ii)
-                              restVars
-  where
-    mul p q = toComplex p * q
-    solveSpan rest lastEigs =
-      let answers = map (\f -> toPolynomial (leadingTerm f) - f) rest
-          substEig eig = substWith (\d b -> toComplex d * b) $ SV.unsafeFromList' $ map (const zero) rest ++ [eig]
-      in [ SV.unsafeFromList' $ map (substEig eig) answers ++ [eig]
-         | eig <- lastEigs
-         ]
-    chooseAnswer vs =
-          [ xs
-            | xs0 <- sequence vs
-            , let xs = SV.unsafeFromList' xs0
-            , all ((<err) . magnitude . substWith mul xs) $ generators ideal
-            ]
+-- solve'' :: forall r ord n.
+--            (Show r, Sparse.Eq0 r, Normed r, Ord r, Field r, IsPolynomial r n,
+--             IsMonomialOrder ord, Convertible r Double)
+--        => Double
+--        -> Ideal (OrderedPolynomial r ord (S n))
+--        -> [SV.Vector (Complex Double) (S n)]
+-- solve'' err ideal =
+--   reifyQuotient (radical ideal) $ \ii ->
+--   let gbs = gBasis' ii
+--       lexBase = fst $ fglm $ toIdeal gbs
+--       upoly = last lexBase
+--       restVars = init $ SV.toList allVars
+--       calcEigs = nub . LA.toList . LA.eigenvalues . AM.fromLists
+--       lastEigs = calcEigs $ matToLists $ fmap toComplex $ fmapUnwrap
+--                  (AM.companion maxBound $ mapCoeff WrapField upoly)
+--   in if gbs == [one]
+--      then []
+--      else if length (lastEigs) == length (fromJust $ standardMonomials' ii)
+--           then solveSpan (init lexBase) lastEigs
+--           else chooseAnswer $
+--                lastEigs : map (calcEigs . map (map toComplex) . matrixRep . modIdeal' ii)
+--                               restVars
+--   where
+--     mul p q = toComplex p * q
+--     solveSpan rest lastEigs =
+--       let answers = map (\f -> toPolynomial (leadingTerm f) - f) rest
+--           substEig eig = substWith (\d b -> toComplex d * b) $ SV.unsafeFromList' $ map (const zero) rest ++ [eig]
+--       in [ SV.unsafeFromList' $ map (substEig eig) answers ++ [eig]
+--          | eig <- lastEigs
+--          ]
+--     chooseAnswer vs =
+--           [ xs
+--             | xs0 <- sequence vs
+--             , let xs = SV.unsafeFromList' xs0
+--             , all ((<err) . magnitude . substWith mul xs) $ generators ideal
+--             ]
 
 solveLinearNA :: (Ord b, Field b, Normed b) => M.Matrix b -> V.Vector b -> Maybe (V.Vector b)
 solveLinearNA m v = fmapUnwrap <$> solveLinear (fmapWrap m) (fmapWrap v)
@@ -383,4 +382,4 @@ beta (a :- as) (OS n) =
   case sing :: SNat n of
     SS k -> case singInstance k of SingInstance -> a :- beta as n
     _ -> error "bugInGHC"
-beta Nil      _       = bugInGHC
+beta Nil      _       = error "bugInGHC!"

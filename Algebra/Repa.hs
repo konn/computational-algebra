@@ -15,6 +15,7 @@ import qualified Data.Vector                       as V
 import qualified Numeric.Algebra                   as NA
 import           Numeric.Field.Fraction
 import           Numeric.Field.Fraction            (Fraction)
+import Prelude hiding (traverse)
 
 type Matrix a = Array (DefVec a) DIM2 a
 

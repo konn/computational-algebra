@@ -14,7 +14,7 @@ import           Control.Monad.Random     (getRandomR)
 import           Data.Complex
 import           Data.Convertible.Base    (Convertible (..))
 import qualified Data.Ratio               as P
-import           Data.Type.Natural        (bugInGHC)
+import           Data.Type.Natural hiding (zero,one)
 import qualified Data.Vector              as DV
 import qualified Data.Vector.Sized        as V
 import           Numeric.Algebra
@@ -37,7 +37,7 @@ instance  Ixed (V.Vector a  n) where
 updateNth :: V.Index n -> (a -> a) -> V.Vector a n -> V.Vector a n
 updateNth V.OZ     f (a V.:- as) = f a V.:- as
 updateNth (V.OS n) f (a V.:- b V.:- bs) = a V.:- updateNth n f (b V.:- bs)
-updateNth _      _ _              = bugInGHC
+updateNth _      _ _              = error "bugin ghc"
 
 instance Additive r => Additive (DV.Vector r) where
   (+) = DV.zipWith (+)

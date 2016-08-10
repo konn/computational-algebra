@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP, ConstraintKinds, DataKinds  #-}
+{-# LANGUAGE CPP, ConstraintKinds, DataKinds, StandaloneDeriving  #-}
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs, MagicHash #-}
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes          #-}
 {-# LANGUAGE ScopedTypeVariables, UndecidableInstances             #-}
@@ -33,7 +33,9 @@ import           Prelude                     hiding (lex, negate, recip, sum,
 import qualified Prelude                     as P
 
 -- | The polynomial modulo the ideal indexed at the last type-parameter.
-data Quotient r ord n ideal = Quotient { quotRepr_ :: OrderedPolynomial r ord n } deriving (Eq)
+data Quotient r ord n ideal = Quotient { quotRepr_ :: OrderedPolynomial r ord n }
+deriving instance (Ring r, DecidableZero r, IsOrder ord, Eq r, SingI n)
+            => Eq (Quotient r ord n ideal)
 
 data QIdeal r ord n = ZeroDimIdeal { _gBasis   :: ![OrderedPolynomial r ord n]
                                    , _vBasis   :: [OrderedMonomial ord n]

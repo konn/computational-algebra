@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds, EmptyDataDecls, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, MultiParamTypeClasses, NoMonomorphismRestriction        #-}
 {-# LANGUAGE ParallelListComp, PolyKinds, RankNTypes, ScopedTypeVariables   #-}
-{-# LANGUAGE TypeFamilies, UndecidableInstances                             #-}
+{-# LANGUAGE TypeFamilies, UndecidableInstances, StandaloneDeriving         #-}
 module Algebra.Field.Galois (GF0(), IsGF0, modPoly, modVec, reifyGF0,
                              withGF0, GF'(), Conway, primitive, conway,
                              conwayFile, addConwayPolynomials)  where
@@ -32,7 +32,8 @@ import qualified Prelude                     as P
 
 -- | Galois field of order @p^n@.
 --   @f@ stands for the irreducible polynomial over @F_p@ of degree @n@.
-data GF0 p n f = GF0 { runGF0 :: SV.Vector (F p) n } deriving (Eq)
+data GF0 p n f = GF0 { runGF0 :: SV.Vector (F p) n }
+deriving instance  Reifies p Integer => Eq (GF0 p n f)
 type Unipol a = OrderedPolynomial a Grevlex One
 
 -- | Galois Field of order @p^n@. This uses conway polynomials

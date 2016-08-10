@@ -2,6 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude, OverloadedStrings, ParallelListComp      #-}
 {-# LANGUAGE PolyKinds, ScopedTypeVariables, TupleSections, ViewPatterns #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
+{-# OPTIONS_GHC -fsimpl-tick-factor=20000 #-}
 module Algebra.Ring.Polynomial.Factorize (factorise, Unipol, distinctDegFactor,
                                           equalDegreeSplitM, equalDegreeFactorM,
                                           squareFreePart, squareFreeDecomp,factorQBigPrime

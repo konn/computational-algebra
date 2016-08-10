@@ -31,7 +31,7 @@ import           Control.Lens                        hiding (index, (<.>))
 import           Control.Monad                       (replicateM)
 import           Control.Monad.Loops                 (iterateUntil)
 import           Control.Monad.Random                hiding (fromList)
-import           Control.Monad.ST.Strict             (runST)
+import           Control.Monad.ST.Strict      (ST, runST)
 import           Control.Monad.State.Strict          (evalState, runState)
 import           Control.Parallel.Strategies         (parMap)
 import           Control.Parallel.Strategies         (rdeepseq)
@@ -265,7 +265,7 @@ traverseDirM ini f dir i mat = go (IM.lookup i (mat^.startL dir)) ini
       let !cur = vec V.! k
       go (cur ^. nextL dir) =<< f b k cur
 
-getDir :: Monoidal a
+getDir :: forall a. Monoidal a
        => Direction -> Int -> Matrix a -> Vector a
 getDir dir i mat =
   create $ do
@@ -273,9 +273,10 @@ getDir dir i mat =
     traverseDirM () (trav v) dir i mat
     return v
   where
+    trav :: forall s. MV.MVector s a -> () -> Int -> Entry a -> ST s ()
     trav v _ _ ent = MV.write v (ent ^. nthL dir) (ent ^. value)
 
-igetDir :: Monoidal a
+igetDir :: forall a. Monoidal a
        => Direction -> Int -> Matrix a -> Vector (Maybe (Int, Entry a))
 igetDir dir i mat =
   create $ do
@@ -283,6 +284,7 @@ igetDir dir i mat =
     traverseDirM () (trav v) dir i mat
     return v
   where
+    trav :: forall s. MV.MVector s (Maybe (Int, Entry a)) -> () -> Int -> Entry a -> ST s ()
     trav v _ k ent = MV.write v (ent ^. nthL dir) (Just (k, ent))
 
 getRow :: Monoidal a => Int -> Matrix a -> Vector a
@@ -773,7 +775,7 @@ intDet :: Matrix Integer -> Integer
 intDet mat =
   let b = V.maximum $ V.map (abs . snd) $ nonZeroEntries mat
       n = fromIntegral $ ncols mat
-      c = n^(n `div` 2) * b^n
+      c = n^(P.fromIntegral n `P.div` 2) * b ^ P.fromIntegral n
       r = ceiling $ logBase (2 :: Double) (2*fromIntegral c + 1)
       ps = take (fromInteger r) primes
       m  = product ps

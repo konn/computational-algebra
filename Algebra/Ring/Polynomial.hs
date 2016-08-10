@@ -135,13 +135,13 @@ totalDegree' = maximum . (0:) . map (totalDegree . snd) . getTerms
 lex :: MonomialOrder
 lex Nil Nil = EQ
 lex (x :- xs) (y :- ys) = x `compare` y <> xs `lex` ys
-lex _ _ = bugInGHC
+lex _ _ = error "bugInGHC"
 
 -- | Reversed lexicographical order. This is *not* a monomial order.
 revlex :: Monomial n -> Monomial n -> Ordering
 revlex (x :- xs) (y :- ys) = xs `revlex` ys <> y `compare` x
 revlex Nil       Nil       = EQ
-revlex _ _ = bugInGHC
+revlex _ _ = error "bugInGHC"
 
 -- | Convert ordering into graded one.
 graded :: (Monomial n -> Monomial n -> Ordering) -> (Monomial n -> Monomial n -> Ordering)
@@ -698,7 +698,7 @@ diff mthVar = _Wrapped %~ M.mapKeysWith (+) (_Wrapped %~ dropDegree)
 updateNth :: Ordinal n -> (a -> a) -> V.Vector a n -> V.Vector a n
 updateNth OZ     f (a :- as) = f a :- as
 updateNth (OS n) f (a :- b :- bs) = a :- updateNth n f (b :- bs)
-updateNth _      _ _              = bugInGHC
+updateNth _      _ _              = error "bugInGHC"
 
 sPolynomial :: (Ring k, DecidableZero k, SingI n, Field k, IsOrder order)
             => OrderedPolynomial k order n

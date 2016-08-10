@@ -51,7 +51,7 @@ import qualified Data.Vector.Sized       as V
 import           Numeric.Algebra         hiding ((<), (>))
 import           Numeric.Decidable.Zero
 import           Prelude                 hiding (Num (..), recip, subtract, (^))
-import           Proof.Equational
+import           Proof.Equational hiding ((:-))
 
 -- | Calculate a polynomial quotient and remainder w.r.t. second argument.
 divModPolynomial :: (IsMonomialOrder order, IsPolynomial r n, Field r)

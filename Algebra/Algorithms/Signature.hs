@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, NoImplicitPrelude  #-}
 {-# LANGUAGE NoMonomorphismRestriction, PolyKinds, ScopedTypeVariables    #-}
 {-# LANGUAGE TupleSections, TypeSynonymInstances, UndecidableInstances    #-}
-{-# LANGUAGE ViewPatterns                                                 #-}
+{-# LANGUAGE ViewPatterns, StandaloneDeriving                             #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 -- | Provides general framework for signature-based algorithms
 module Algebra.Algorithms.Signature where
@@ -86,11 +86,15 @@ mlt m | IM.null m = error "zero module element"
 
 data Signature ord n = Signature { generator :: Int
                                  , monomial  :: OrderedMonomial ord n
-                                 } deriving (Show, Eq)
+                                 }
+deriving instance SingI n => Show (Signature ord n)
+deriving instance SingI n => Eq   (Signature ord n)
 
 data LabeledPoly r ord n = LabPoly { signature :: Signature ord n
                                    , poly      :: OrderedPolynomial r ord n
-                                   } deriving (Show, Eq)
+                                   }
+deriving instance (DecidableZero r,  Ring r, IsOrder ord, Show r, SingI n) => Show (LabeledPoly r ord n)
+deriving instance (DecidableZero r, IsOrder ord, Ring r, Eq  r, SingI n) => Eq   (LabeledPoly r ord n)
 
 class ModuleOrdering sord where
   compareSignature :: (SingI n, IsMonomialOrder ord)
