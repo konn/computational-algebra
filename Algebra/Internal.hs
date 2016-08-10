@@ -30,7 +30,7 @@ import           Data.Sized.Builtin           as Algebra.Internal (pattern (:<),
                                                                    pattern (:>),
                                                                    pattern NilL,
                                                                    pattern NilR,
-                                                                   sIndex,
+                                                                   sIndex,generate,
                                                                    singleton,
                                                                    unsafeFromList,
                                                                    unsafeFromList',
@@ -49,29 +49,25 @@ import           Proof.Equational             as Algebra.Internal (because,
                                                                    (=~=))
 import           Proof.Propositional          as Algebra.Internal (IsTrue (..),
                                                                    withWitness)
+import qualified Data.Foldable as F
+import qualified Data.Sequence as Seq
 import Data.Kind (Type)
 
 toProxy :: a -> Proxy a
 toProxy _ = Proxy
 
 type Sized n a = S.Sized DV.Vector n a
+type Sized' n a = S.Sized Seq.Seq n a
 
-coerceLength :: n :~: m -> Sized n a -> Sized m a
+coerceLength :: n :~: m -> S.Sized f n a -> S.Sized f m a
 coerceLength eql = _Unwrapping Flipped.Flipped %~ coerce eql
 
 type SNat (n :: Nat) = Sing n
 
-sizedLength :: Sized n a -> SNat n
-sizedLength = S.sLength
+sizedLength f = (S.sLength f)
 
-generate :: SNat n -> (S.Ordinal n -> a) -> Sized n a
-generate n f =
-  withKnownNat n $
-  S.unsafeToSized' $
-  DV.generate (fromInteger $ fromSing n) (f . toEnum)
-
-padVecs :: forall a n m. a -> Sized n a -> Sized m a
-        -> (SNat (Max n m), Sized (Max n m) a, Sized (Max n m) a)
+padVecs :: forall a n m. a -> Sized' n a -> Sized' m a
+        -> (SNat (Max n m), Sized' (Max n m) a, Sized' (Max n m) a)
 padVecs d xs ys
   = let (n, m) = (S.sLength xs, S.sLength ys)
         l = sMax n m
@@ -97,10 +93,10 @@ padVecs d xs ys
             coerceLength maxISn xs,
             coerceLength mPLUSk $ ys S.++ S.replicate (n %:- m) d)
 
-type family Flipped a :: Nat -> Type where
-  Flipped a = Flipped.Flipped DV.Vector a
+type family Flipped f a :: Nat -> Type where
+  Flipped f a = Flipped.Flipped f a
 
-pattern Flipped :: Sized n a -> Flipped a n
+pattern Flipped :: S.Sized f n a -> Flipped f a n
 pattern Flipped xs = Flipped.Flipped xs
 
 
@@ -112,3 +108,6 @@ pattern OLt n = O.OLt n
 
 sNatToInt :: SNat n -> Int
 sNatToInt = fromInteger . fromSing
+
+instance Hashable a => Hashable (Seq.Seq a) where
+  hashWithSalt d = hashWithSalt d . F.toList

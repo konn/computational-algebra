@@ -148,10 +148,10 @@ minimum' :: Ord a => [a] -> Maybe a
 minimum' [] = Nothing
 minimum' xs = Just $ minimum xs
 
-diag :: a -> a -> SNat n -> [Sized n a]
-diag d z n = F.toList $ generate n $ \i ->
-  generate n $ \j ->
-    if i == j then d else z
+diag :: a -> a -> SNat n -> [Sized' n a]
+diag d z n = [ generate n (\j -> if i == j then d else z)
+             | i <- enumOrdinal n
+             ]
 
 -- | Polynomial modulo ideal.
 modIdeal :: forall ord r n ideal. ( IsMonomialOrder n ord, Reifies ideal (QIdeal r ord n)

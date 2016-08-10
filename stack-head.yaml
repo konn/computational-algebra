@@ -5,7 +5,12 @@ packages:
 - 'algebraic-prelude'
 - location:
     git: https://github.com/konn/type-natural.git
-    commit: 843498255722471249a36fb821eabb4409e75bc2
+    commit: 4a814b8c74aeaab0d47b9cdfb289ab4781bbc0e3
+  extra-dep: true
+
+- location:
+    git: https://github.com/konn/sized.git
+    commit: ab17bf3b0c9de15a9e626243b47b5d0b0518f2df
   extra-dep: true
 
 flags:

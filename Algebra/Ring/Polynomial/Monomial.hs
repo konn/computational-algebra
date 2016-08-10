@@ -47,14 +47,13 @@ import           Data.Singletons.TypeLits        (withKnownNat)
 import qualified Data.Sized.Builtin              as V
 import           Data.Type.Natural.Class         (IsPeano (..), PeanoOrder (..))
 import           Data.Type.Ordinal               (Ordinal (..), ordToInt)
-import qualified Data.Vector                     as DV
 -- import           Prelude                         hiding (Fractional (..),
 --                                                   Integral (..), Num (..),
 --                                                   Real (..), lex, product, sum)
 import qualified Prelude as P
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i- type Monomial (n :: Nat) = Sized n Int
-type Monomial n = Sized n Int
+type Monomial n = Sized' n Int
 
 -- | A wrapper for monomials with a certain (monomial) order.
 newtype OrderedMonomial ordering n =
@@ -88,7 +87,7 @@ lex m n = P.foldMap (uncurry compare) $ V.zipSame m n
 
 -- | Reversed lexicographical order. This is *not* a monomial order.
 revlex :: MonomialOrder n
-revlex xs ys = alaf Dual foldMap (uncurry (flip compare)) $ V.zipSame xs ys
+revlex xs ys = foldl (flip (<>)) EQ $ V.zipWithSame (flip compare) xs ys
 {-# INLINE [2] revlex #-}
 
 -- | Convert ordering into graded one.
@@ -135,7 +134,7 @@ instance KnownNat n => Unital (OrderedMonomial ord n) where
 class IsOrder (n :: Nat) (ordering :: *) where
   cmpMonomial :: Proxy ordering -> MonomialOrder n
 
-head' :: (0 :< n) ~ 'True => Sized n a -> a
+head' :: (0 :< n) ~ 'True => Sized' n a -> a
 head' = V.head
 {-# INLINE head' #-}
 
@@ -144,8 +143,8 @@ head' = V.head
 {-# RULES
 "cmpMonomial/unary" [~1]
               forall (pxy :: IsMonomialOrder 1 (o :: *) => Proxy o)
-                     (xs :: Sized 1 Int)
-                     (ys :: Sized 1 Int).
+                     (xs :: Sized' 1 Int)
+                     (ys :: Sized' 1 Int).
   cmpMonomial pxy xs ys = comparing head' xs ys
  #-}
 

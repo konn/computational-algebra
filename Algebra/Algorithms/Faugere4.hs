@@ -206,13 +206,11 @@ cyclic sn =
 
 divisors :: (KnownNat n) => OrderedMonomial ord n -> [OrderedMonomial ord n]
 divisors t = [om
-             | m <- sequenceSV (fmap (enumFromTo 0) $ getMonomial t)
+             | m <- sequenceA (fmap (enumFromTo 0) $ getMonomial t)
              , let om = OrderedMonomial m
              , om /= one
              ]
 
-sequenceSV :: Sized n [a] -> [Sized n a]
-sequenceSV = sequenceA
 
 data MatrixRepr r ord n where
   MatrixRepr :: ([OrderedPolynomial r ord n] -> (mat r, dic))

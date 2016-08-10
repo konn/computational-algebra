@@ -71,14 +71,14 @@ instance LeftModule Integer Algebraic where
   n .* Rational r = Rational (n .* r)
   n .* Algebraic f _ int
    | n == 0 = zero
-   | otherwise = let f' = (subst' varX (injectCoeff (1 %% n) * varX) f)
+   | otherwise = let f' = (substVar 0 (injectCoeff (1 %% n) * varX) f)
                  in Algebraic f' (strum f') (scale (n %% 1) int)
 
 instance LeftModule (Fraction Integer) Algebraic where
   q .* Rational r = Rational (q * r)
   q .* Algebraic f _ int
    | isZero q  = zero
-   | otherwise = let f' = subst' varX (injectCoeff (recip q) * varX) f
+   | otherwise = let f' = substVar 0 (injectCoeff (recip q) * varX) f
                  in Algebraic f' (strum f') (scale q int)
 
 instance RightModule Integer Algebraic where
@@ -165,7 +165,7 @@ plusA :: Algebraic -> Algebraic -> Algebraic
 plusA (Rational r) (Rational q) = Rational (r + q)
 plusA a@(Algebraic _ _ _) b@(Rational _) = plusA b a
 plusA (Rational r) (Algebraic f _ i)  =
-  let f' = subst' varX (varX - injectCoeff r) f
+  let f' = substVar 0 (varX - injectCoeff r) f
   in Algebraic f' (strum f') (Interval (lower i + r) (upper i + r))
 plusA a@(Algebraic f sf i0) b@(Algebraic g sg j0)
   | totalDegree' f == 1 && isZero (coeff one f) = Algebraic g sg j0

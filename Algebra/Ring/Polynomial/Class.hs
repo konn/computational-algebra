@@ -23,7 +23,7 @@ import Algebra.Scalar
 
 import           AlgebraicPrelude
 import           Control.Arrow            (first, (***))
-import           Control.Lens             (folded, maximumOf)
+import           Control.Lens             (folded, imap, maximumOf)
 import           Data.Foldable            (foldr, maximum)
 import qualified Data.Foldable            as F
 import qualified Data.HashSet             as HS
@@ -90,8 +90,8 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
             => (Coefficient poly -> r -> m) -> Sized (Arity poly) r -> poly -> m
   substWith o pt poly = sum $ P.map (uncurry (flip o) . first extractPower) $ M.toList $ terms' poly
     where
-      extractPower = F.foldr (*) one . V.zipWithSame pow pt .
-                     V.map (P.fromIntegral :: Int -> Natural)
+      extractPower = F.foldr (*) one .
+                     imap (\k -> pow (pt V.%!! k) . P.fromIntegral)
   {-# INLINE substWith #-}
 
   -- | Arity of given polynomial.

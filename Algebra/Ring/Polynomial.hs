@@ -15,7 +15,7 @@ module Algebra.Ring.Polynomial
       transformMonomial,
       castPolynomial, changeOrder, changeOrderProxy,
       scastPolynomial, OrderedPolynomial(..),
-      allVars, subst', homogenize, unhomogenize,
+      allVars, substVar, homogenize, unhomogenize,
       normalize, varX, getTerms, shiftR, orderedBy,
       mapCoeff, reversal, padeApprox,
       eval, evalUnivariate,
@@ -36,7 +36,6 @@ import           Data.Map                              (Map)
 import qualified Data.Map.Strict                       as M
 import qualified Data.Set                              as Set
 import           Data.Singletons.Prelude               (POrd (..))
-import           Data.Sized.Builtin                    ((%!!))
 import qualified Data.Sized.Builtin                    as S
 import           Data.Type.Ordinal
 import qualified Numeric.Algebra                       as NA
@@ -89,12 +88,8 @@ instance (KnownNat n, IsMonomialOrder n ord, CoeffRing r) => IsPolynomial (Order
 
   liftMap mor poly = sum $ map (uncurry (.*) . (Scalar *** extractPower)) $ getTerms poly
     where
-      extractPower m =
-       NA.product $ generate (sing :: SNat n) (\ o -> pow  (mor o) (fromIntegral $ getMonomial m %!! o))
+      extractPower = runMult . ifoldMap (\ o -> Mult . pow (mor o) . fromIntegral) . getMonomial
   {-# INLINE liftMap #-}
-
-
-
 
 ordVec :: forall n. KnownNat n => Sized n (Ordinal n)
 ordVec = unsafeFromList' $ enumOrdinal (sing :: SNat n)
@@ -261,7 +256,7 @@ showPolynomialWithVars dic p0@(Polynomial d)
                      | otherwise = Just $ showVar n ++ "^" ++ show p
       showVar n = fromMaybe ("X_" ++ show n) $ lookup n dic
 
-isConstantMonomial :: (Eq a, P.Num a) => Sized n a -> Bool
+isConstantMonomial :: Monomial n -> Bool
 isConstantMonomial v = all (== 0) $ F.toList v
 
 -- | We provide Num instance to use trivial injection R into R[X].
@@ -384,16 +379,15 @@ eval = substWith (*)
 --       => OrderedPolynomial a order k -> RepArgs k a a
 -- evalOn p = fromNAry $ (fromVecFun (flip eval p) :: NAry k a a)
 
-subst' :: (CoeffRing r, KnownNat n, IsMonomialOrder n ord, (1 :<= n) ~  'True)
-       => OrderedPolynomial r ord n
-       -> OrderedPolynomial r ord n
-       -> OrderedPolynomial r ord n
-       -> OrderedPolynomial r ord n
-subst' p val f
-  | v <- leadingMonomial p
-  , totalDegree v == 1 =
-    substWith (.*.) (zipWithSame (\i mn -> if i == 0 then mn else val) (getMonomial v) allVars) f
-  | otherwise = error "Not an "
+-- | @substVar n f@ substitutes @n@-th variable with polynomial @f@,
+--   without changing arity.
+substVar :: (CoeffRing r, KnownNat n, IsMonomialOrder n ord, (1 :<= n) ~  'True)
+         => Ordinal n
+         -> OrderedPolynomial r ord n
+         -> OrderedPolynomial r ord n
+         -> OrderedPolynomial r ord n
+substVar p val =
+  liftMap  (\o -> if o == p then val else var o)
 
 allVars :: forall k ord n . (IsMonomialOrder n ord, CoeffRing k, KnownNat n)
         => Sized n (OrderedPolynomial k ord n)
