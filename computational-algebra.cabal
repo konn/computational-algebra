@@ -108,6 +108,7 @@ executable groebner-prof
                      , deepseq
   default-language:    Haskell2010
   ghc-options:         -Wall -prof -fprof-auto -threaded -O2
+  extensions: NoImplicitPrelude
 
 
 executable solve
