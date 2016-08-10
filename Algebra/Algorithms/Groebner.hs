@@ -27,6 +27,7 @@ module Algebra.Algorithms.Groebner
        ) where
 import           Algebra.Internal
 import           Algebra.Ring.Ideal
+import           Algebra.Ring.Polynomial.Univariate (Unipol)
 import           Algebra.Prelude
 
 import qualified Data.Map as M
@@ -103,7 +104,15 @@ buchberger = syzygyBuchberger
 syzygyBuchberger :: (Field (Coefficient poly), IsOrderedPolynomial poly)
                     => Ideal poly -> [poly]
 syzygyBuchberger = syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)
-{-# INLINE syzygyBuchberger #-}
+{-# SPECIALISE INLINE [0]
+    syzygyBuchberger :: (CoeffRing r, Field r, IsMonomialOrder n ord, KnownNat n)
+                     => Ideal (OrderedPolynomial r ord n) -> [OrderedPolynomial r ord n]
+ #-}
+{-# SPECIALISE INLINE [0]
+    syzygyBuchberger :: (CoeffRing r, Field r)
+                     => Ideal (Unipol r) -> [Unipol r]
+ #-}
+{-# INLINE [1] syzygyBuchberger #-}
 
 -- | apply buchberger's algorithm using given selection strategy.
 syzygyBuchbergerWithStrategy :: (Field (Coefficient poly), IsOrderedPolynomial poly,
@@ -135,19 +144,27 @@ syzygyBuchbergerWithStrategy strategy ideal = runST $ do
         gs %= H.insert (H.Entry (leadingMonomial s) s)
         len %= (*2)
   map H.payload . H.toList <$> readSTRef gs
-{-# SPECIALISE
- syzygyBuchbergerWithStrategy :: (Field k, CoeffRing k,
-                                 SelectionStrategy n strategy, KnownNat n,
-                                 Ord (Weight n strategy Grevlex))
-                    => strategy -> Ideal (OrderedPolynomial k Grevlex n) -> [OrderedPolynomial k Grevlex n]
+{-# SPECIALISE INLINE [0]
+ syzygyBuchbergerWithStrategy :: (Field k, CoeffRing k, KnownNat n)
+                    => SugarStrategy NormalStrategy -> Ideal (OrderedPolynomial k Grevlex n) -> [OrderedPolynomial k Grevlex n]
+ #-}
+{-# SPECIALISE INLINE [0]
+ syzygyBuchbergerWithStrategy :: (Field k, CoeffRing k)
+                    => SugarStrategy NormalStrategy -> Ideal (Unipol k) -> [Unipol k]
  #-}
 
-{-# SPECIALISE
+{-# SPECIALISE INLINE [1]
+ syzygyBuchbergerWithStrategy :: (Field k, CoeffRing k, KnownNat n, IsMonomialOrder n ord)
+                    => SugarStrategy NormalStrategy -> Ideal (OrderedPolynomial k ord n) -> [OrderedPolynomial k ord n]
+ #-}
+{-# SPECIALISE INLINE [1]
  syzygyBuchbergerWithStrategy :: (Field k, CoeffRing k, IsMonomialOrder n ord,
                                  SelectionStrategy n strategy, KnownNat n,
                                  Ord (Weight n strategy ord))
                     => strategy -> Ideal (OrderedPolynomial k ord n) -> [OrderedPolynomial k ord n]
  #-}
+{-# INLINABLE [2] syzygyBuchbergerWithStrategy #-}
+
 
 -- | Calculate the weight of given polynomials w.r.t. the given strategy.
 -- Buchberger's algorithm proccesses the pair with the most least weight first.
@@ -258,6 +275,16 @@ calcGroebnerBasisWithStrategy strategy =
 calcGroebnerBasis :: (Field (Coefficient poly), IsOrderedPolynomial poly)
                   => Ideal poly -> [poly]
 calcGroebnerBasis = reduceMinimalGroebnerBasis . minimizeGroebnerBasis . syzygyBuchberger
+{-# SPECIALISE INLINE [0]
+    calcGroebnerBasis :: (CoeffRing r, Field r, IsMonomialOrder n ord, KnownNat n)
+                      => Ideal (OrderedPolynomial r ord n) -> [OrderedPolynomial r ord n]
+ #-}
+{-# SPECIALISE INLINE [0]
+    calcGroebnerBasis :: (CoeffRing r, Field r)
+                      => Ideal (Unipol r) -> [Unipol r]
+ #-}
+{-# INLINE [0] calcGroebnerBasis #-}
+
 
 -- | Test if the given polynomial is the member of the ideal.
 isIdealMember :: (Field (Coefficient poly), IsOrderedPolynomial poly)
@@ -474,4 +501,3 @@ gcdPolynomial :: (Field (Coefficient poly),
               -> poly
               -> poly
 gcdPolynomial f g = snd $ head $ f * g `divPolynomial` [lcmPolynomial f g]
-
