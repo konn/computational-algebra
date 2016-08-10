@@ -1,6 +1,6 @@
-{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances   #-}
-{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, TypeFamilies #-}
-{-# LANGUAGE UndecidableInstances                                   #-}
+{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances  #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses     #-}
+{-# LANGUAGE NoImplicitPrelude, TypeFamilies, UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 -- | This module provides drop-in replacement for @'Prelude'@ module in base package,
 --   based on algebraic hierarchy provided by
@@ -86,6 +86,7 @@ import           BasicPrelude                          as AlgebraicPrelude hidin
                                                                             (^),
                                                                             (^^))
 import qualified Data.Ratio                            as P
+import qualified Data.Semigroup                        as Semi
 import           Numeric.Algebra                       as AlgebraicPrelude hiding
                                                                             (Order (..),
                                                                             fromInteger,
@@ -530,3 +531,50 @@ instance Euclidean d => P.Fractional (Fraction d) where
   recip = NA.recip
   (/) = (NA./)
 
+-- | @'Monoid'@ instances for @'Additive'@s.
+--   N.B. Unlike @'WrapNum'@, @'P.Num'@ instance is
+--   just inhereted from the unwrapped data.
+newtype Add a = Add { runAdd :: a }
+              deriving (Read, Show, Eq, Ord, P.Num)
+
+instance Additive a => Semi.Semigroup (Add a) where
+  Add a <> Add b = Add (a NA.+ b)
+  {-# INLINE (<>) #-}
+
+  sconcat = Add . sum1 . map runAdd
+  {-# INLINE sconcat #-}
+
+  stimes n  = Add . sinnum1p (P.fromIntegral n P.- 1) . runAdd
+  {-# INLINE stimes #-}
+
+instance Monoidal a => Monoid (Add a) where
+  mappend = (Semi.<>)
+  {-# INLINE mappend #-}
+  mempty = Add zero
+  {-# INLINE mempty #-}
+  mconcat = Add . sum . map runAdd
+  {-# INLINE mconcat #-}
+
+-- | @'Monoid'@ instances for @'Additive'@s.
+--   N.B. Unlike @'WrapNum'@, @'P.Num'@ instance is
+--   just inhereted from the unwrapped data.
+newtype Mult a = Mult { runMult :: a }
+              deriving (Read, Show, Eq, Ord, P.Num)
+
+instance Multiplicative a => Semi.Semigroup (Mult a) where
+  Mult a <> Mult b = Mult (a NA.* b)
+  {-# INLINE (<>) #-}
+
+  sconcat = Mult . product1 . map runMult
+  {-# INLINE sconcat #-}
+
+  stimes n = Mult . flip pow1p (P.fromIntegral n P.- 1) . runMult
+  {-# INLINE stimes #-}
+
+instance Unital a => Monoid (Mult a) where
+  mappend = (Semi.<>)
+  {-# INLINE mappend #-}
+  mempty = Mult one
+  {-# INLINE mempty #-}
+  mconcat = Mult . product . map runMult
+  {-# INLINE mconcat #-}

@@ -9,35 +9,41 @@ main main12,13
 ./Setup.hs,15
 main main1,2
 
-./src/AlgebraicPrelude.hs,1183
+./src/AlgebraicPrelude.hs,1398
 module AlgebraicPreludeAlgebraicPrelude47,48
-type Rational Rational131,132
-fromInteger fromInteger136,137
+type Rational Rational132,133
 fromInteger fromInteger137,138
-fromInteger' fromInteger'145,146
+fromInteger fromInteger138,139
 fromInteger' fromInteger'146,147
-fromRational fromRational148,149
+fromInteger' fromInteger'147,148
 fromRational fromRational149,150
-normaliseUnit normaliseUnit156,157
+fromRational fromRational150,151
 normaliseUnit normaliseUnit157,158
-(^)^160,161
-(^(161,162
-(^^)^^164,165
-ifThenElse ifThenElse177,178
+normaliseUnit normaliseUnit158,159
+(^)^161,162
+(^(162,163
+(^^)^^165,166
 ifThenElse ifThenElse178,179
-newtype WrapNum WrapNum196,197
-newtype WrapNum a = WrapNum WrapNum196,197
-newtype WrapNum a = WrapNum { unwrapNum unwrapNum196,197
-instance instance199,200
-newtype WrapFractional WrapFractional268,269
-newtype WrapFractional a = WrapFractional WrapFractional268,269
-newtype WrapFractional a = WrapFractional { unwrapFractional unwrapFractional268,269
-newtype WrapIntegral WrapIntegral372,373
-newtype WrapIntegral a = WrapIntegral WrapIntegral372,373
-newtype WrapIntegral a = WrapIntegral { unwrapIntegral unwrapIntegral372,373
-newtype WrapAlgebra WrapAlgebra489,490
-newtype WrapAlgebra a = WrapAlgebra WrapAlgebra489,490
-newtype WrapAlgebra a = WrapAlgebra { unwrapAlgebra unwrapAlgebra489,490
+ifThenElse ifThenElse179,180
+newtype WrapNum WrapNum197,198
+newtype WrapNum a = WrapNum WrapNum197,198
+newtype WrapNum a = WrapNum { unwrapNum unwrapNum197,198
+instance instance200,201
+newtype WrapFractional WrapFractional269,270
+newtype WrapFractional a = WrapFractional WrapFractional269,270
+newtype WrapFractional a = WrapFractional { unwrapFractional unwrapFractional269,270
+newtype WrapIntegral WrapIntegral373,374
+newtype WrapIntegral a = WrapIntegral WrapIntegral373,374
+newtype WrapIntegral a = WrapIntegral { unwrapIntegral unwrapIntegral373,374
+newtype WrapAlgebra WrapAlgebra490,491
+newtype WrapAlgebra a = WrapAlgebra WrapAlgebra490,491
+newtype WrapAlgebra a = WrapAlgebra { unwrapAlgebra unwrapAlgebra490,491
+newtype Add Add536,537
+newtype Add a = Add Add536,537
+newtype Add a = Add { runAdd runAdd536,537
+newtype Mult Mult560,561
+newtype Mult a = Mult Mult560,561
+newtype Mult a = Mult { runMult runMult560,561
 
 ./test/Spec.hs,30
 main main0,1
