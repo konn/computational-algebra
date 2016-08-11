@@ -1,6 +1,7 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances          #-}
-{-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes            #-}
-{-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances               #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses, PolyKinds #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeFamilies                #-}
+{-# LANGUAGE UndecidableInstances                                         #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Field.Finite (F(), naturalRepr, reifyPrimeField, withPrimeField,
                              modNat, modNat', modRat, modRat', FiniteField(..), order) where
@@ -8,6 +9,7 @@ import Algebra.Algorithms.PrimeTest
 import Algebra.Prelude               hiding (pow)
 import Algebra.Ring.Polynomial.Class (PrettyCoeff (..), ShowSCoeff (..))
 
+import           Control.DeepSeq                       (NFData (..))
 import           Control.Monad.Random                  (uniform)
 import           Control.Monad.Random                  (runRand)
 import           Control.Monad.Random                  (Random (..))
@@ -31,6 +33,7 @@ import qualified Prelude                               as P
 -- | Prime field of characteristic @p@.
 --   @p@ should be prime, and not statically checked.
 newtype F (p :: k) = F { runF :: Integer }
+                   deriving (NFData)
 
 naturalRepr :: F p -> Integer
 naturalRepr = runF
@@ -98,11 +101,11 @@ pow :: (P.Integral a1, Reifies p Integer) => F p -> a1 -> F p
 pow a n = modNat $ modPow (runF a) (reflect a) n
 
 instance Reifies p Integer => NA.Additive (F p) where
-  (+) = (+)
+  (+) = (P.+)
 
 instance Reifies p Integer => NA.Multiplicative (F p) where
-  (*) = (*)
-  pow1p n p = pow n (p + 1)
+  (*) = (P.*)
+  pow1p n p = pow n (p P.+ 1)
 
 instance Reifies p Integer => NA.Monoidal (F p) where
   zero = 0
