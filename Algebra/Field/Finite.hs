@@ -162,12 +162,12 @@ instance (Reifies p Integer) => ZeroProductSemiring (F p)
 instance (Reifies p Integer) => Euclidean (F p)
 
 instance Reifies p Integer => Division (F p) where
-  recip = recip
-  (/)   = (/)
+  recip = P.recip
+  (/)   = (P./)
   (^)   = pow
 
 instance Reifies p Integer => P.Fractional (F p) where
-  a / b = a * recip b
+  a / b = a * P.recip b
   fromRational r =
     modNat (fromInteger $ R.numerator r) * recip (modNat (fromInteger $ R.denominator r))
   recip = fromMaybe (error "recip: not unit") . recipUnit
