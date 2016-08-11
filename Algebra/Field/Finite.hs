@@ -13,6 +13,7 @@ import           Control.DeepSeq              (NFData (..))
 import           Control.Monad.Random         (uniform)
 import           Control.Monad.Random         (runRand)
 import           Control.Monad.Random         (Random (..))
+import qualified Data.Coerce                  as C
 import           Data.Maybe                   (fromMaybe)
 import qualified Data.Ratio                   as R
 import           Data.Reflection
@@ -74,80 +75,106 @@ instance Reifies p Integer => Normed (F p) where
   liftNorm = modNat
 
 instance Reifies p Integer => P.Num (F p) where
-  fromInteger n = modNat $ fromInteger n
+  fromInteger = fromInteger'
   {-# INLINE fromInteger #-}
 
-  F a + F b = modNat $ a + b
+  (+) = C.coerce ((P.+) :: WrapAlgebra (F p) -> WrapAlgebra (F p) -> WrapAlgebra (F p))
   {-# INLINE (+) #-}
 
-  F a - F b = modNat $ a - b
+  (-) = C.coerce ((P.-) :: WrapAlgebra (F p) -> WrapAlgebra (F p) -> WrapAlgebra (F p))
   {-# INLINE (-) #-}
 
-  negate c = modNat $ reflect c - runF c
+  negate = C.coerce (P.negate :: WrapAlgebra (F p) -> WrapAlgebra (F p))
   {-# INLINE negate #-}
 
-  a * b = modNat $ runF a * runF b
+  (*) = C.coerce ((P.*) :: WrapAlgebra (F p) -> WrapAlgebra (F p) -> WrapAlgebra (F p))
   {-# INLINE (*) #-}
 
   abs = id
-  signum (F n) = modNat $ P.signum n
+  signum (F 0) = F 0
+  signum (F _) = F 1
 
-pow :: (P.Integral a1, Reifies p Integer) => F p -> a1 -> F p
-pow a n = modNat $ modPow (runF a) (reflect a) n
+pows :: (P.Integral a1, Reifies p Integer) => F p -> a1 -> F p
+pows a n = modNat $ modPow (runF a) (reflect a) n
 
 instance Reifies p Integer => NA.Additive (F p) where
-  (+) = (P.+)
+  F a + F b = modNat $ a + b
+  {-# INLINE (+) #-}
+  sinnum1p n (F k) = modNat $ (1 P.+ P.fromIntegral n) * k
+  {-# INLINE sinnum1p #-}
 
 instance Reifies p Integer => NA.Multiplicative (F p) where
-  (*) = (P.*)
-  pow1p n p = pow n (p P.+ 1)
+  F a * F b = modNat $ a * b
+  {-# INLINE (*) #-}
+
+  pow1p n p = pows n (p P.+ 1)
+  {-# INLINE pow1p #-}
 
 instance Reifies p Integer => NA.Monoidal (F p) where
-  zero = 0
+  zero = F 0
+  {-# INLINE zero #-}
+  sinnum n (F k) = modNat $ P.fromIntegral n * k
+  {-# INLINE sinnum #-}
 
 instance Reifies p Integer => NA.LeftModule Natural (F p) where
-  n .* p = fromIntegral n * p
+  n .* F p = modNat (n .* p)
+  {-# INLINE (.*) #-}
 
 instance Reifies p Integer => NA.RightModule Natural (F p) where
-  p *. n = fromIntegral n * p
+  F p *. n = modNat (p *. n)
+  {-# INLINE (*.) #-}
 
 instance Reifies p Integer => NA.LeftModule Integer (F p) where
-  n .* p = fromIntegral n * p
+  n .* F p = modNat (n * p)
+  {-# INLINE (.*) #-}
 
 instance Reifies p Integer => NA.RightModule Integer (F p) where
-  p *. n = fromIntegral n * p
+  F p *. n = modNat (p * n)
+  {-# INLINE (*.) #-}
 
 instance Reifies p Integer => NA.Group (F p) where
-  (-) = (-)
-  negate = negate
+  F a - F b    = modNat $ a - b
+  {-# INLINE (-) #-}
+
+  negate (F a) = F (reflect (Proxy :: Proxy p) - a)
+  {-# INLINE negate #-}
 
 instance Reifies p Integer => NA.Abelian (F p)
 
 instance Reifies p Integer => NA.Semiring (F p)
 
 instance Reifies p Integer => NA.Rig (F p) where
-  fromNatural = fromInteger . P.toInteger
+  fromNatural = modNat . P.fromIntegral
+  {-# INLINE fromNatural #-}
 
 instance Reifies p Integer => NA.Ring (F p) where
-  fromInteger = fromInteger
+  fromInteger = modNat
+  {-# INLINE fromInteger #-}
 
 instance Reifies p Integer => NA.DecidableZero (F p) where
   isZero (F p) = p == 0
 
 instance Reifies p Integer => NA.Unital (F p) where
-  one = 1
-  pow = pow
+  one = F 1
+  {-# INLINE one #-}
+  pow = pows
+  {-# INLINE pow #-}
 
 instance Reifies p Integer => DecidableUnits (F p) where
-  isUnit n = gcd (runF n) (reflect n) == 1
-  recipUnit n =
+  isUnit (F n) = n /= 0
+  {-# INLINE isUnit #-}
+
+  recipUnit n@(F k) =
     let p = fromIntegral $ reflect n
-        (u,_,r) = head $ euclid p (fromIntegral $ runF n)
+        (u,_,r) = head $ euclid p k
     in if u == 1 then Just $ modNat $ fromInteger $ r `rem` p else Nothing
+  {-# INLINE recipUnit #-}
 
 instance (Reifies p Integer) => DecidableAssociates (F p) where
   isAssociate p n =
     (isZero p && isZero n) || (not (isZero p) && not (isZero n))
+  {-# INLINE isAssociate #-}
+
 instance (Reifies p Integer) => UnitNormalForm (F p)
 instance (Reifies p Integer) => IntegralDomain (F p)
 instance (Reifies p Integer) => GCDDomain (F p)
@@ -157,20 +184,29 @@ instance (Reifies p Integer) => ZeroProductSemiring (F p)
 instance (Reifies p Integer) => Euclidean (F p)
 
 instance Reifies p Integer => Division (F p) where
-  recip = P.recip
-  (/)   = (P./)
-  (^)   = pow
+  recip = fromMaybe (error "recip: not unit") . recipUnit
+  {-# INLINE recip #-}
+  a / b =  a * recip b
+  {-# INLINE (/) #-}
+  (^)   = pows
+  {-# INLINE (^) #-}
 
 instance Reifies p Integer => P.Fractional (F p) where
-  a / b = a * P.recip b
+  (/) = C.coerce ((P./) :: WrapAlgebra (F p) -> WrapAlgebra (F p) -> WrapAlgebra (F p))
+  {-# INLINE (/) #-}
+
   fromRational r =
-    modNat (fromInteger $ R.numerator r) * recip (modNat (fromInteger $ R.denominator r))
-  recip = fromMaybe (error "recip: not unit") . recipUnit
+    modNat (R.numerator r) * recip (modNat $ R.denominator r)
+  {-# INLINE fromRational #-}
+
+  recip = C.coerce (P.recip :: WrapAlgebra (F p) -> WrapAlgebra (F p))
+  {-# INLINE recip #-}
 
 instance Reifies p Integer => NA.Commutative (F p)
 
 instance Reifies p Integer => NA.Characteristic (F p) where
   char _ = fromIntegral $ reflect (Proxy :: Proxy p)
+  {-# INLINE char #-}
 
 class (Field k, Characteristic k) => FiniteField k where
   power :: proxy k -> Natural
@@ -178,17 +214,25 @@ class (Field k, Characteristic k) => FiniteField k where
 
 instance Reifies p Integer => FiniteField (F p) where
   power _ = 1
+  {-# INLINE power #-}
+
   elements p = map modNat [0.. fromIntegral (char p) - 1]
+  {-# INLINE elements #-}
 
 order :: FiniteField k => proxy k -> Natural
 order p = char p ^ power p
+{-# INLINE order #-}
 
 instance Reifies p Integer => Random (F p) where
   random = runRand $ uniform (elements Proxy)
+  {-# INLINE random #-}
   randomR (a, b) = runRand $ uniform $ map modNat [naturalRepr a..naturalRepr b]
+  {-# INLINE randomR #-}
 
 modRat :: FiniteField k => Proxy k -> Fraction Integer -> k
 modRat _ q = NA.fromInteger (numerator q) NA./ NA.fromInteger (denominator q)
+{-# INLINE modRat #-}
 
 modRat' :: FiniteField k => Fraction Integer -> k
 modRat' = modRat Proxy
+{-# INLINE modRat' #-}
