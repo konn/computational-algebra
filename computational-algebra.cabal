@@ -101,6 +101,7 @@ library
                     , RebindableSyntax
  
 executable groebner-prof
+  buildable: False
   hs-source-dirs: share examples
   Main-is:             groebner-prof.hs
   build-depends:       base
@@ -360,6 +361,17 @@ test-suite new-div-test
     other-modules: Utils
     ghc-options: -Wall -threaded
  
+benchmark unipol-bench
+    build-depends: constraints >=0.3, algebra,
+                   base >=4, computational-algebra -any, containers >= 0.5,
+                   criterion >= 0.8.1.0, deepseq >= 1.3, parallel >= 3.2,
+                   process >=1.1, singletons, sized,
+                   type-natural, vector >= 0.10, matrix >= 0.3
+    type: exitcode-stdio-1.0
+    main-is: unipol-bench.hs
+    hs-source-dirs: bench share
+    ghc-options: -O2 -threaded -rtsopts
+
 benchmark normal-bench
     build-depends: constraints >=0.3, algebra,
                    base >=4, computational-algebra -any, containers >= 0.5,
@@ -368,7 +380,7 @@ benchmark normal-bench
                    type-natural, vector >= 0.10, matrix >= 0.3
     type: exitcode-stdio-1.0
     main-is: bench.hs
-    buildable: False
+    -- buildable: False
     hs-source-dirs: bench share
     other-modules: SingularBench
     ghc-options: -O2 -threaded -rtsopts
