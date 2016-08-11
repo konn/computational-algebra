@@ -1,6 +1,7 @@
-{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances  #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses     #-}
-{-# LANGUAGE NoImplicitPrelude, TypeFamilies, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses    #-}
+{-# LANGUAGE NoImplicitPrelude, TemplateHaskell, TypeFamilies     #-}
+{-# LANGUAGE UndecidableInstances                                 #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 -- | This module provides drop-in replacement for @'Prelude'@ module in base package,
 --   based on algebraic hierarchy provided by
@@ -85,6 +86,7 @@ import           BasicPrelude                          as AlgebraicPrelude hidin
                                                                             (\\),
                                                                             (^),
                                                                             (^^))
+import qualified Control.Lens.TH                       as L
 import qualified Data.Ratio                            as P
 import qualified Data.Semigroup                        as Semi
 import           Numeric.Algebra                       as AlgebraicPrelude hiding
@@ -126,7 +128,6 @@ import           Prelude                               as AlgebraicPrelude (Show
                                                                             writeFile,
                                                                             (.))
 import qualified Prelude                               as P
-
 
 -- * Basic types and renamed operations
 -- | We use @'Fraction'@ instead of @'Ratio'@ for consistency.
@@ -578,3 +579,10 @@ instance Unital a => Monoid (Mult a) where
   {-# INLINE mempty #-}
   mconcat = Mult . product . map runMult
   {-# INLINE mconcat #-}
+
+L.makeWrapped ''WrapNum
+L.makeWrapped ''WrapIntegral
+L.makeWrapped ''WrapFractional
+L.makeWrapped ''WrapAlgebra
+L.makeWrapped ''Add
+L.makeWrapped ''Mult
