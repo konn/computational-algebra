@@ -67,52 +67,58 @@ main =
     ]
   , bgroup "div"
     [ bgroup "Rational"
-      [ env ((,)<$>generateFrom rat_5_simple_a<*>generateFrom rat_5_simple_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
-         bgroup "5-simple"
+      [ env ((,)<$>generateFrom rat_100_simple_a<*>generateFrom rat_5_simple_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
+         bgroup "100-simple % 5-simple"
          [bench "Unipol" $ nf (uncurry divide) (fu, gu)
          ,bench "Ordered/Grevlex" $ nf (uncurry divide) (fg, gg)
          ,bench "Ordered/Lex" $ nf (uncurry divide) (fl, gl)
          ]
-      , env ((,)<$>generateFrom rat_5_complex_a<*>generateFrom rat_5_complex_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
-         bgroup "5-complex"
+      , env ((,)<$>generateFrom rat_100_complex_a<*>generateFrom rat_5_complex_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
+         bgroup "100-complex % 5-complex"
          [bench "Unipol" $ nf (uncurry divide) (fu, gu)
          ,bench "Ordered/Grevlex" $ nf (uncurry divide) (fg, gg)
          ,bench "Ordered/Lex" $ nf (uncurry divide) (fl, gl)
          ]
       ]
-    , env ((,)<$>generateFrom rat_100_simple_a<*>generateFrom rat_100_simple_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
-         bgroup "100-simple"
+    , env ((,)<$>generateFrom rat_1000_simple_a<*>generateFrom rat_5_simple_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
+         bgroup "1000 % 5-simple"
          [bench "Unipol" $ nf (uncurry divide) (fu, gu)
          ,bench "Ordered/Grevlex" $ nf (uncurry divide) (fg, gg)
          ,bench "Ordered/Lex" $ nf (uncurry divide) (fl, gl)
          ]
-      , env ((,)<$>generateFrom rat_100_complex_a<*>generateFrom rat_100_complex_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
-         bgroup "100-complex"
+      , env ((,)<$>generateFrom rat_1000_simple_a<*>generateFrom rat_5_complex_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
+         bgroup "1000 % 5-complex"
          [bench "Unipol" $ nf (uncurry divide) (fu, gu)
          ,bench "Ordered/Grevlex" $ nf (uncurry divide) (fg, gg)
          ,bench "Ordered/Lex" $ nf (uncurry divide) (fl, gl)
          ]
-      , env ((,)<$>generateFrom rat_1000_simple_a<*>generateFrom rat_1000_simple_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
-         bgroup "1000-simple"
+      , env ((,)<$>generateFrom rat_1000_simple_a<*>generateFrom rat_100_simple_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
+         bgroup "1000 % 100-simple"
+         [bench "Unipol" $ nf (uncurry divide) (fu, gu)
+         ,bench "Ordered/Grevlex" $ nf (uncurry divide) (fg, gg)
+         ,bench "Ordered/Lex" $ nf (uncurry divide) (fl, gl)
+         ]
+      , env ((,)<$>generateFrom rat_1000_simple_a<*>generateFrom rat_100_complex_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
+         bgroup "1000 % 100-complex"
          [bench "Unipol" $ nf (uncurry divide) (fu, gu)
          ,bench "Ordered/Grevlex" $ nf (uncurry divide) (fg, gg)
          ,bench "Ordered/Lex" $ nf (uncurry divide) (fl, gl)
          ]
     , bgroup "F_103"
-      [ env ((,)<$>generateFrom f103_5_a <*>generateFrom f103_5_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
-         bgroup "5"
+      [ env ((,)<$>generateFrom f103_100_a <*>generateFrom f103_5_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
+         bgroup "100 % 5"
          [bench "Unipol" $ nf (uncurry divide) (fu, gu)
          ,bench "Ordered/Grevlex" $ nf (uncurry divide) (fg, gg)
          ,bench "Ordered/Lex" $ nf (uncurry divide) (fl, gl)
          ]
-      , env ((,)<$>generateFrom f103_100_a <*>generateFrom f103_100_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
-         bgroup "100"
+      , env ((,)<$>generateFrom f103_1000_a <*>generateFrom f103_5_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
+         bgroup "1000 % 5"
          [bench "Unipol" $ nf (uncurry divide) (fu, gu)
          ,bench "Ordered/Grevlex" $ nf (uncurry divide) (fg, gg)
          ,bench "Ordered/Lex" $ nf (uncurry divide) (fl, gl)
          ]
-      , env ((,)<$>generateFrom f103_1000_a <*>generateFrom f103_1000_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
-         bgroup "1000"
+      , env ((,)<$>generateFrom f103_1000_a <*>generateFrom f103_100_b) $ \ ~((fu,fg,fl), (gu,gg,gl)) ->
+         bgroup "1000 % 100"
          [bench "Unipol" $ nf (uncurry divide) (fu, gu)
          ,bench "Ordered/Grevlex" $ nf (uncurry divide) (fg, gg)
          ,bench "Ordered/Lex" $ nf (uncurry divide) (fl, gl)
