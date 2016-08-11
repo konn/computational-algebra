@@ -9,26 +9,21 @@ import Algebra.Algorithms.PrimeTest
 import Algebra.Prelude               hiding (pow)
 import Algebra.Ring.Polynomial.Class (PrettyCoeff (..), ShowSCoeff (..))
 
-import           Control.DeepSeq                       (NFData (..))
-import           Control.Monad.Random                  (uniform)
-import           Control.Monad.Random                  (runRand)
-import           Control.Monad.Random                  (Random (..))
-import           Data.Maybe                            (fromMaybe)
-import qualified Data.Ratio                            as R
+import           Control.DeepSeq              (NFData (..))
+import           Control.Monad.Random         (uniform)
+import           Control.Monad.Random         (runRand)
+import           Control.Monad.Random         (Random (..))
+import           Data.Maybe                   (fromMaybe)
+import qualified Data.Ratio                   as R
 import           Data.Reflection
-import           GHC.TypeLits                          (KnownNat)
-import           Numeric.Algebra                       (Field)
-import           Numeric.Algebra                       (char)
-import           Numeric.Algebra                       (Natural)
-import qualified Numeric.Algebra                       as NA
-import           Numeric.Algebra.Unital.UnitNormalForm
-import           Numeric.Decidable.Associates
-import           Numeric.Decidable.Units
-import           Numeric.Decidable.Zero
-import           Numeric.Domain.Integral
-import           Numeric.Rig.Characteristic            (Characteristic)
-import           Numeric.Semiring.ZeroProduct          (ZeroProductSemiring)
-import qualified Prelude                               as P
+import           GHC.TypeLits                 (KnownNat)
+import           Numeric.Algebra              (Field)
+import           Numeric.Algebra              (char)
+import           Numeric.Algebra              (Natural)
+import qualified Numeric.Algebra              as NA
+import           Numeric.Rig.Characteristic   (Characteristic)
+import           Numeric.Semiring.ZeroProduct (ZeroProductSemiring)
+import qualified Prelude                      as P
 
 -- | Prime field of characteristic @p@.
 --   @p@ should be prime, and not statically checked.
@@ -53,7 +48,7 @@ modNat :: Reifies (p :: k) Integer => Integer -> F p
 modNat = modNat' Proxy
 {-# INLINE modNat #-}
 
-modNat' :: forall proxy (p :: k). Reifies p Integer =>  proxy (F p) -> Integer -> F p
+modNat' :: forall proxy (p :: k). Reifies p Integer => proxy (F p) -> Integer -> F p
 modNat' _ i =
   let p = reflect (Proxy :: Proxy p)
   in F (i `rem` p)
