@@ -36,19 +36,19 @@ ipOrder n vs =
 
 toMonomial :: forall k n ord .
               (KnownNat n, IsMonomialOrder (n + 1 + k) ord)
-           => Sing k -> Sized n Int -> OrderedPolynomial (Fraction Integer) ord (S n :+ k)
+           => Sing k -> Monomial n -> OrderedPolynomial (Fraction Integer) ord (S n :+ k)
 toMonomial k ds =
   withKnownNat k $
   withKnownNat (sSucc (sing :: SNat n) %:+ k) $
   let !c = foldl' (\a b -> if b < 0 then a + abs b else a) 0 ds
-  in toPolynomial (1, OrderedMonomial $
+  in toPolynomial' (1,
      -- coerce (symmetry $ sAndPlusOne (V.sLength ds)) $
      V.map (+c) ds `V.append` V.singleton c `V.append` V.replicate' 0)
 
-calcCost :: Sized n Int -> Sized m Int -> Int
+calcCost :: Sized' n Int -> Sized' m Int -> Int
 calcCost ns ms = sum $ V.zipWith (*) ns ms
 
-costCmp :: Sing m -> Sized n Int -> Monomial m -> Monomial m -> Ordering
+costCmp :: Sing m -> Sized' n Int -> Monomial m -> Monomial m -> Ordering
 costCmp _ cost ns ms =
   comparing (calcCost cost) ns ms <> grevlex ns ms
 
@@ -57,10 +57,10 @@ toReifiedOrder Proxy = ReifiedOrder
 
 -- | Solve integer programming problem with general signature.
 solveIP' :: forall n m . (KnownNat n, KnownNat m)
-         => Sized n Int            -- ^ cost vector
-         -> Sized m (Sized n Int) -- ^ constraint matrix
-         -> Sized m Int            -- ^ constraint
-         -> Maybe (Sized n Int)    -- ^ answer
+         => Sized' n Int            -- ^ cost vector
+         -> Sized' m (Sized' n Int) -- ^ constraint matrix
+         -> Sized' m Int            -- ^ constraint
+         -> Maybe (Sized' n Int)    -- ^ answer
 solveIP' c mat b =
   let n    = sing :: SNat n
       m    = sing :: SNat m
@@ -84,19 +84,19 @@ solveIP' c mat b =
 vars' :: IsPolynomial poly => (MOrder poly) -> SNat (Arity poly) -> [poly]
 vars' _ _ = vars
 
-data Cnstr n = (:<=) { _lhs :: Sized n Int, _rhs :: Int }
-             | (:>=) { _lhs :: Sized n Int, _rhs :: Int }
-             | (:==) { _lhs :: Sized n Int, _rhs :: Int }
+data Cnstr n = (:<=) { _lhs :: Sized' n Int, _rhs :: Int }
+             | (:>=) { _lhs :: Sized' n Int, _rhs :: Int }
+             | (:==) { _lhs :: Sized' n Int, _rhs :: Int }
              deriving (Show, Eq, Ord)
 
 infix 4 :<=, :>=, :==
 
-data IPProblem n m = IPProblem { objectCnstr :: Sized n Int
-                               , cnstrs      :: Sized m (Cnstr n)
+data IPProblem n m = IPProblem { objectCnstr :: Sized' n Int
+                               , cnstrs      :: Sized' m (Cnstr n)
                                } deriving (Show, Eq)
 makeLenses ''Cnstr
 
-solveCnstrs :: forall n m. (KnownNat m, KnownNat n) => IPProblem n m -> Maybe (Sized n Int)
+solveCnstrs :: forall n m. (KnownNat m, KnownNat n) => IPProblem n m -> Maybe (Sized' n Int)
 solveCnstrs ipp =
   let sn = sing :: SNat n
       sm = sing :: SNat m
@@ -105,7 +105,7 @@ solveCnstrs ipp =
      withKnownNat (sn %:+ sm) $
      V.take (sing :: SNat n) <$> solveIP' obj mat vec
 
-extractProblem :: IPProblem n m -> (Sized n Int, Sized m (Sized n Int), Sized m Int)
+extractProblem :: IPProblem n m -> (Sized' n Int, Sized' m (Sized' n Int), Sized' m Int)
 extractProblem (IPProblem obj css) = (obj, V.map (view lhs) css, V.map (view rhs) css)
 
 nfProblem :: forall n m . KnownNat m => IPProblem n m -> IPProblem (n :+ m) m
@@ -113,20 +113,20 @@ nfProblem (IPProblem obj css) =
   IPProblem (obj `V.append` V.replicate (sing :: SNat m) 0)
             (nfCnstrs css)
 
-ordVec :: SNat n -> Sized n (V.Ordinal n)
+ordVec :: SNat n -> Sized' n (V.Ordinal n)
 ordVec n = generate n id
 
 nfCnstrs :: forall n m. (KnownNat m)
-         => Sized m (Cnstr n) -> Sized m (Cnstr (n :+ m))
+         => Sized' m (Cnstr n) -> Sized' m (Cnstr (n :+ m))
 nfCnstrs css = V.zipWithSame conv css (ordVec (sing :: SNat m))
   where
     conv (lh :<= r) nth = (lh `V.append` (V.replicate (sing :: SNat m) 0 & ix nth .~  1)) :== r
     conv (lh :>= r) nth = (lh `V.append` (V.replicate (sing :: SNat m) 0 & ix nth .~ -1)) :== r
     conv (lh :== r) _   = (lh `V.append`  V.replicate (sing :: SNat m) 0) :== r
 
-testC :: Sized 4 Int
-testM :: Sized 2 (Sized 4 Int)
-testB :: Sized 2 Int
+testC :: Sized' 4 Int
+testM :: Sized' 2 (Sized' 4 Int)
+testB :: Sized' 2 Int
 (testC, testM, testB) =
   (1000 :< 1 :< 1 :< 100 :< NilL,
    (3 :< -2 :< 1 :< -1 :< NilL) :< (4 :< 1 :< -1 :< 0 :< NilL) :< NilL,

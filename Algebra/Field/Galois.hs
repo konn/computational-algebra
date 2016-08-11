@@ -30,15 +30,8 @@ import qualified Data.Traversable                      as T
 import qualified Data.Vector                           as V
 import qualified GHC.TypeLits                          as TL
 import qualified Numeric.Algebra                       as NA
-import           Numeric.Algebra.Unital.UnitNormalForm
-import           Numeric.Decidable.Associates
-import           Numeric.Decidable.Units
-import           Numeric.Decidable.Zero
 import           Numeric.Domain.Euclidean              (Euclidean)
 import           Numeric.Domain.GCD                    (GCDDomain, gcd)
-import           Numeric.Domain.Integral
-import           Numeric.Domain.PID
-import           Numeric.Domain.UFD
 import           Numeric.Semiring.ZeroProduct          (ZeroProductSemiring)
 import qualified Prelude                               as P
 

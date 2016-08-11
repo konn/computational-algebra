@@ -45,7 +45,7 @@ import           Proof.Propositional   (IsTrue (Witness))
 solveM :: forall m r ord n.
           (Normed r, Ord r, MonadRandom m, Field r, CoeffRing r, KnownNat n,
            IsMonomialOrder n ord, Convertible r Double,
-           (0 :< n) ~ 'True, IsMonomialOrder (n+1) ord)
+           (0 :< n) ~ 'True)
        => Ideal (OrderedPolynomial r ord n)
        -> m [Sized n (Complex Double)]
 solveM ideal = {-# SCC "solveM" #-}
@@ -66,7 +66,6 @@ solveM ideal = {-# SCC "solveM" #-}
 
 solveWith :: forall r n ord. (DecidableZero r, Normed r, Ord r, Field r, CoeffRing r,
                               (0 :< n) ~ 'True, IsMonomialOrder n ord,
-                              IsMonomialOrder (n + 1) ord,
                               KnownNat n, Convertible r Double)
           => OrderedPolynomial r ord n
           -> Ideal (OrderedPolynomial r ord n)
@@ -157,8 +156,8 @@ matToLists :: M.Matrix a -> [[a]]
 matToLists mat = [ V.toList $ M.getRow i mat | i <- [1.. M.nrows mat] ]
 
 matrixRep :: (DecidableZero t, Eq t, Field t, KnownNat n, IsMonomialOrder n order,
-              Reifies ideal (QIdeal t order n))
-           => Quotient t order n ideal -> [[t]]
+              Reifies ideal (QIdeal (OrderedPolynomial t order n)))
+           => Quotient (OrderedPolynomial t order n) ideal -> [[t]]
 matrixRep f = {-# SCC "matrixRep" #-}
   case standardMonomials of
     Just []    -> []

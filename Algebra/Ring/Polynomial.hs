@@ -19,7 +19,7 @@ module Algebra.Ring.Polynomial
       normalize, varX, getTerms, shiftR, orderedBy,
       mapCoeff, reversal, padeApprox,
       eval, evalUnivariate,
-      substUnivariate, diff, minpolRecurrent,
+      substUnivariate, minpolRecurrent,
       IsOrder(..)
     )  where
 import Algebra.Internal
@@ -30,6 +30,7 @@ import Algebra.Scalar
 import           AlgebraicPrelude
 import           Control.DeepSeq                       (NFData)
 import           Control.Lens                          hiding (assign)
+import qualified Data.Coerce                           as C
 import qualified Data.Foldable                         as F
 import qualified Data.HashSet                          as HS
 import           Data.Map                              (Map)
@@ -101,16 +102,19 @@ instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
   coeff d = M.findWithDefault zero d . terms
   {-# INLINE coeff #-}
 
-  terms = _terms
+  terms = C.coerce
   {-# INLINE terms #-}
 
   orderedMonomials = M.keysSet . terms
   {-# INLINE orderedMonomials #-}
 
-  toPolynomial (c, deg) = polynomial $ M.singleton deg c
+  toPolynomial (c, deg) =
+    if isZero c
+    then Polynomial M.empty
+    else Polynomial $ M.singleton deg c
   {-# INLINE toPolynomial #-}
 
-  polynomial dic = normalize $ Polynomial dic
+  polynomial = normalize . C.coerce
   {-# INLINE polynomial #-}
 
   leadingTerm (Polynomial d) =
@@ -393,16 +397,6 @@ allVars :: forall k ord n . (IsMonomialOrder n ord, CoeffRing k, KnownNat n)
         => Sized n (OrderedPolynomial k ord n)
 allVars = unsafeFromList' vars
 
--- | Partially difference at (m+1)-th variable
-diff :: forall n ord r. (CoeffRing r, KnownNat n, IsMonomialOrder n ord)
-     => Ordinal n -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n
-diff mthVar = _Wrapped %~ M.mapKeysWith (+) (_Wrapped %~ dropDegree)
-                         . M.mapMaybeWithKey (\k c -> if (sIndex mthVar (getMonomial k) > 0)
-                                                      then Just $ c * NA.fromIntegral (sIndex mthVar (getMonomial k))
-                                                      else Nothing)
-  where
-    dropDegree = ix mthVar %~ (max 0 . pred)
-
 changeOrder :: (CoeffRing k, Eq (Monomial n), IsMonomialOrder n o, IsMonomialOrder n o',  KnownNat n)
             => o' -> OrderedPolynomial k o n -> OrderedPolynomial k o' n
 changeOrder _ = _Wrapped %~ M.mapKeys (OrderedMonomial . getMonomial)
@@ -437,7 +431,7 @@ homogenize f =
   withKnownNat (sSucc (sing :: SNat n)) $
   let g = substWith (.*.) (S.init allVars) f
       d = fromIntegral (totalDegree' g)
-  in transformMonomial (\m -> m & ix maxBound .~ d - P.sum m) g
+  in mapMonomialMonotonic (\m -> m & _Wrapped.ix maxBound .~ d - P.sum (m^._Wrapped)) g
 
 unhomogenize :: forall k ord n.
                 (CoeffRing k, KnownNat n, IsMonomialOrder n ord,

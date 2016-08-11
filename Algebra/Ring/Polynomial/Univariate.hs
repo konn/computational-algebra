@@ -25,12 +25,6 @@ import           Data.Maybe                            (mapMaybe)
 import           Data.Ord                              (comparing)
 import qualified Data.Sized.Builtin                    as SV
 import qualified Numeric.Algebra                       as NA
-import           Numeric.Algebra.Unital.UnitNormalForm hiding (normalize)
-import qualified Numeric.Algebra.Unital.UnitNormalForm as NA
-import           Numeric.Decidable.Associates
-import           Numeric.Domain.Integral
-import           Numeric.Semiring.ZeroProduct
-import           Numeric.Decidable.Units
 import           Numeric.Decidable.Zero                (DecidableZero (..))
 import qualified Prelude as P
 -- | Univariate polynomial.
@@ -38,7 +32,7 @@ import qualified Prelude as P
 --   so if you want to treat the power greater than @maxBound :: Int@,
 --   please consider using other represntation.
 newtype Unipol r = Unipol { runUnipol :: IM.IntMap r }
-                 deriving (NFData)
+                 deriving (NFData, Functor)
 
 instance Hashable r => Hashable (Unipol r) where
   hashWithSalt p = hashWithSalt p . IM.toList . runUnipol
@@ -107,7 +101,7 @@ instance (Eq r, Field r) => DecidableUnits (Unipol r) where
   recipUnit f | isUnit f  = injectCoeff <$> recipUnit (leadingCoeff f)
               | otherwise = Nothing
 instance (Eq r, Field r) => DecidableAssociates (Unipol r) where
-  isAssociate = (==) `on` NA.normalize
+  isAssociate = (==) `on` normaliseUnit
 
 instance (Eq r, Field r) => UnitNormalForm (Unipol r) where
   splitUnit f

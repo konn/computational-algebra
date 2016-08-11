@@ -22,8 +22,9 @@ import Algebra.Ring.Polynomial.Monomial
 import Algebra.Scalar
 
 import           AlgebraicPrelude
-import           Control.Arrow            (first, (***))
-import           Control.Lens             (folded, imap, maximumOf)
+import           Control.Arrow            ((***))
+import           Control.Lens             (Iso', folded, ifoldMap, iso, ix,
+                                           maximumOf, (%~), _Wrapped)
 import           Data.Foldable            (foldr, maximum)
 import qualified Data.Foldable            as F
 import qualified Data.HashSet             as HS
@@ -45,6 +46,7 @@ import           Numeric.Domain.GCD       (gcd)
 import           Numeric.Field.Fraction   (Fraction)
 import qualified Numeric.Field.Fraction   as NA
 import           Numeric.Natural          (Natural)
+import qualified Numeric.Ring.Class       as NA
 import qualified Prelude                  as P
 
 infixl 7 *<, >*, *|<, >|*, !*
@@ -88,10 +90,10 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
   --   it is encouraged to override this method.
   substWith :: (Unital r, Monoidal m)
             => (Coefficient poly -> r -> m) -> Sized (Arity poly) r -> poly -> m
-  substWith o pt poly = sum $ P.map (uncurry (flip o) . first extractPower) $ M.toList $ terms' poly
+  substWith o pt poly =
+    runAdd $ ifoldMap ((Add .) . flip o . extractPower) $ terms' poly
     where
-      extractPower = F.foldr (*) one .
-                     imap (\k -> pow (pt V.%!! k) . P.fromIntegral)
+      extractPower = runMult . ifoldMap (\k -> Mult . pow (pt V.%!! k) . P.fromIntegral)
   {-# INLINE substWith #-}
 
   -- | Arity of given polynomial.
@@ -184,6 +186,15 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
   (!*) = (.*.)
 
 
+  _Terms' :: Iso' poly (Map (Monomial (Arity poly)) (Coefficient poly))
+  _Terms' = iso terms' polynomial'
+  {-# INLINE _Terms' #-}
+
+  mapMonomial :: (Monomial (Arity poly) -> Monomial (Arity poly)) -> poly -> poly
+  mapMonomial tr  =
+    _Terms' %~ M.mapKeysWith (+) tr
+  {-# INLINE mapMonomial #-}
+
 {-# RULES
 "liftMap/identity"   liftMap (\ x -> x) = (P.id :: poly -> poly)
 "liftMap/identity-2" liftMap P.id = (P.id :: poly -> poly)
@@ -256,6 +267,33 @@ class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrder
   (*<) = flip (>*)
   {-# INLINE (*<) #-}
 
+  _Terms :: Iso' poly (Map (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly))
+  _Terms = iso terms polynomial
+  {-# INLINE _Terms #-}
+
+  -- | @diff n f@ partially diffrenciates @n@-th variable in the given polynomial @f@.
+  --   The default implementation uses @'terms'@ and @'polynomial'@
+  --   and is really naive; please consider overrideing for efficiency.
+  diff :: Ordinal (Arity poly) -> poly -> poly
+  diff n = _Terms %~ M.mapKeysWith (+) (_Wrapped.ix n %~ max 0 . pred)
+                   . M.mapMaybeWithKey df
+    where
+      df m v =
+        let p  = getMonomial m V.%!! n
+            v' = NA.fromIntegral p * v
+        in if p == 0 || isZero v'
+           then Nothing
+           else Just v'
+  {-# INLINE diff #-}
+
+  -- | Same as @'mapMonomial'@, but maping function is
+  --   assumed to be strictly monotonic (i.e. @a < b@ implies @f a < f b@).
+  mapMonomialMonotonic
+    :: (OrderedMonomial (MOrder poly) (Arity poly) -> OrderedMonomial (MOrder poly) (Arity poly))
+    -> poly -> poly
+  mapMonomialMonotonic tr  =
+    _Terms %~ M.mapKeysMonotonic tr
+  {-# INLINE mapMonomialMonotonic #-}
 
 -- | 1-norm of given polynomial, taking sum of @'norm'@s of each coefficients.
 oneNorm :: (IsPolynomial poly, Normed (Coefficient poly),
