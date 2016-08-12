@@ -3,7 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes                  #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell      #-}
 {-# LANGUAGE TypeFamilies, TypeInType, TypeOperators, UndecidableInstances #-}
-{-# LANGUAGE UndecidableSuperClasses                      #-}
+{-# LANGUAGE UndecidableSuperClasses, OverloadedLabels                     #-}
 module Algebra.Ring.Polynomial.Labeled
        (IsUniqueList, LabPolynomial(..),
         canonicalMap,
@@ -22,10 +22,12 @@ import qualified Data.Sized.Builtin           as S
 import           Data.Type.Natural.Class      (IsPeano (..), sOne)
 import           Data.Type.Ordinal
 import           GHC.Exts                     (Constraint)
+import qualified Data.List as L
 import           Numeric.Algebra              hiding (Order (..))
 import           Numeric.Decidable.Zero
 import           Prelude                      hiding (Integral (..), Num (..),
                                                product, sum)
+import GHC.OverloadedLabels (IsLabel(..))
 
 data UniqueResult = Expected | VariableOccursTwice Symbol
 
@@ -40,6 +42,18 @@ type family UniqueList (xs :: [Symbol]) :: Constraint where
 
 class    (UniqueList xs) => IsUniqueList (xs :: [Symbol])
 instance (UniqueList xs) => IsUniqueList (xs :: [Symbol])
+
+-- | This instance allows something like @#x :: LabPolynomial (OrderedPolynomial Integer Grevlex 3) '["x", "y", "z"]@.
+instance (KnownSymbol symb,
+          SingI vars,
+          UniqueList vars,
+          IsPolynomial poly,
+          Wraps vars poly,
+          Elem symb vars ~ 'True) => IsLabel symb (LabPolynomial poly vars) where
+  fromLabel k =
+    let vs = fromSing (sing :: Sing vars)
+        v    = symbolVal' k
+    in maybe (error "impossible!") (var . toEnum) $ L.elemIndex v vs
 
 data LabPolynomial poly (vars :: [Symbol]) where
   LabelPolynomial :: (IsUniqueList vars, Length vars ~ Arity poly)
