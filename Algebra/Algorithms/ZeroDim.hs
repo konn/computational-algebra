@@ -25,6 +25,7 @@ import           Control.Monad.Loops
 import           Control.Monad.Random hiding (next)
 import           Control.Monad.Reader
 import           Control.Monad.ST     (runST)
+import qualified Data.Coerce          as C
 import           Data.Complex
 import           Data.Convertible
 import qualified Data.Matrix          as M
@@ -123,7 +124,7 @@ solve' err ideal =
   where
     _ = Witness :: IsTrue (0 :< n) -- Just to suppress "redundant constraint" warning
 
-subspMatrix :: (Normed r, Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord)
+subspMatrix :: (Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord)
             => Ordinal n -> Ideal (OrderedPolynomial r ord n) -> M.Matrix r
 subspMatrix on ideal =
   let poly = univPoly on ideal
@@ -132,10 +133,10 @@ subspMatrix on ideal =
       cfs  = [negate $ coeff (leadingMonomial $ pow v (j :: Natural)) poly | j <- [0..fromIntegral (dim - 1)]]
   in (M.fromLists [replicate (dim - 1) zero]
           M.<->
-      fmap runScalar (M.identity (dim - 1))) M.<|> M.colVector (V.fromList cfs)
+      fmap unwrapAlgebra (M.identity (dim - 1))) M.<|> M.colVector (V.fromList cfs)
 
 solveViaCompanion :: forall r ord n.
-                     (Normed r, Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord, Convertible r Double)
+                     (Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord, Convertible r Double)
                   => Double
                   -> Ideal (OrderedPolynomial r ord n)
                   -> [Sized n (Complex Double)]
@@ -176,7 +177,7 @@ reduction on f = {-# SCC "reduction" #-}
   in snd $ head $ f `divPolynomial` calcGroebnerBasis (toIdeal [f, df])
 
 -- | Calculate the monic generator of k[X_0, ..., X_n] `intersect` k[X_i].
-univPoly :: forall r ord n. (Ord r, Normed r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord)
+univPoly :: forall r ord n. (Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord)
          => Ordinal n
          -> Ideal (OrderedPolynomial r ord n)
          -> OrderedPolynomial r ord n
@@ -185,7 +186,7 @@ univPoly nth ideal = {-# SCC "univPoly" #-}
   if gBasis' pxy == [one]
   then one
   else let x = var nth
-           p0 : pows = [fmap Scalar $ vectorRep $ modIdeal' pxy (pow x i)
+           p0 : pows = [fmap WrapAlgebra $ vectorRep $ modIdeal' pxy (pow x i)
                        | i <- [0:: Natural ..]
                        | _ <- zero : fromJust (standardMonomials' pxy) ]
            step m (p : ps) = {-# SCC "univPoly/step" #-}
@@ -194,7 +195,7 @@ univPoly nth ideal = {-# SCC "univPoly" #-}
                Just ans ->
                  let cur = fromIntegral $ V.length ans :: Natural
                  in {-# SCC "buildRelation" #-}
-                    pow x cur - sum (zipWith (.*.) (fmap runScalar $ V.toList ans)
+                    pow x cur - sum (zipWith (.*.) (fmap unwrapAlgebra $ V.toList ans)
                                      [pow x i | i <- [0 :: Natural .. cur P.- 1]])
        in step (M.colVector p0) pows
 
@@ -238,7 +239,7 @@ solveLinear mat vec = {-# SCC "solveLinear" #-}
       return mv
 
 -- | Calculate the radical of the given zero-dimensional ideal.
-radical :: forall r ord n . (Normed r, Ord r, CoeffRing r,
+radical :: forall r ord n . (Ord r, CoeffRing r,
                              KnownNat n, Field r, IsMonomialOrder  n ord)
         => Ideal (OrderedPolynomial r ord n) -> Ideal (OrderedPolynomial r ord n)
 radical ideal = {-# SCC "radical" #-}
@@ -246,7 +247,7 @@ radical ideal = {-# SCC "radical" #-}
   in toIdeal $ calcGroebnerBasis $ toIdeal $ generators ideal ++ gens
 
 -- | Test if the given zero-dimensional ideal is radical or not.
-isRadical :: forall r ord n. (Normed r, Ord r, CoeffRing r, KnownNat n,
+isRadical :: forall r ord n. (Ord r, CoeffRing r, KnownNat n,
                               (0 :< n) ~ 'True,
                               Field r, IsMonomialOrder n ord)
           => Ideal (OrderedPolynomial r ord n) -> Bool
@@ -294,8 +295,8 @@ isRadical ideal =
 --             , all ((<err) . magnitude . substWith mul xs) $ generators ideal
 --             ]
 
-solveLinearNA :: (Ord b, Field b, Normed b) => M.Matrix b -> V.Vector b -> Maybe (V.Vector b)
-solveLinearNA m v = fmap runScalar <$> solveLinear (fmap Scalar m) (fmap Scalar v)
+solveLinearNA :: (Ord b, Field b) => M.Matrix b -> V.Vector b -> Maybe (V.Vector b)
+solveLinearNA m v = C.coerce $ solveLinear (fmap WrapAlgebra m) (fmap WrapAlgebra v)
 
 toDM :: (AM.Matrix mat, AM.Elem mat a, AM.Elem M.Matrix a) => mat a -> M.Matrix a
 toDM = AM.fromCols . AM.toCols
@@ -304,7 +305,7 @@ toDM = AM.fromCols . AM.toCols
 
 -- | Calculate the Groebner basis w.r.t. lex ordering of the zero-dimensional ideal using FGLM algorithm.
 --   If the given ideal is not zero-dimensional this function may diverge.
-fglm :: (Normed r, Ord r, KnownNat n, Field r,
+fglm :: (Ord r, KnownNat n, Field r,
          IsMonomialOrder n ord, (0 :< n) ~ 'True)
      => Ideal (OrderedPolynomial r ord n)
      -> ([OrderedPolynomial r Lex n], [OrderedPolynomial r Lex n])
@@ -312,7 +313,7 @@ fglm ideal = reifyQuotient ideal $ \pxy ->
   fglmMap (\f -> vectorRep $ modIdeal' pxy f)
 
 -- | Compute the kernel and image of the given linear map using generalized FGLM algorithm.
-fglmMap :: forall k ord n. (Normed k, Ord k, Field k, (0 :< n) ~ 'True,
+fglmMap :: forall k ord n. (Ord k, Field k, (0 :< n) ~ 'True,
                             IsMonomialOrder n ord, CoeffRing k, KnownNat n)
         => (OrderedPolynomial k ord n -> V.Vector k)
         -- ^ Linear map from polynomial ring.
@@ -330,25 +331,25 @@ fglmMap l = runST $ do
     whileM_ toContinue $ nextMonomial >> mainLoop
     (,) <$> look gLex <*> (map (changeOrder Lex) <$> look bLex)
 
-mainLoop :: (DecidableZero r, Ord r, Normed r, KnownNat n, Field r, IsMonomialOrder n o)
+mainLoop :: (DecidableZero r, Ord r,  KnownNat n, Field r, IsMonomialOrder n o)
          => Machine s r o n ()
 mainLoop = do
   m <- look monomial
   let f = toPolynomial (one, changeMonomialOrderProxy Proxy m)
   lx <- image f
   bs <- mapM image =<< look bLex
-  let mat  = foldr (M.<|>) (M.fromList 0 0 []) $ map (M.colVector . fmap Scalar) bs
+  let mat  = foldr (M.<|>) (M.fromList 0 0 []) $ map (M.colVector . fmap WrapAlgebra) bs
       cond | null bs   = if V.all (== zero) lx
-                         then Just $ V.replicate (length bs) zero
+                         then Just $ V.replicate (length bs) 0
                          else Nothing
-           | otherwise = solveLinear mat (fmap Scalar lx)
+           | otherwise = solveLinear mat (fmap WrapAlgebra lx)
   case cond of
     Nothing -> do
       proced .== Nothing
       bLex %== (f : )
     Just cs -> do
       bps <- look bLex
-      let g = changeOrder Lex $ f - sum (zipWith (.*.) (V.toList $ fmap runScalar cs) bps)
+      let g = changeOrder Lex $ f - sum (zipWith (.*.) (V.toList $ fmap unwrapAlgebra cs) bps)
       proced .== Just (changeOrder Lex f)
       gLex %== (g :)
 
