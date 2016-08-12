@@ -66,7 +66,8 @@ library
                      , mono-traversable     >= 0.10
                      , control-monad-loop   >=0.1
                      , primes               >= 0.2.1
-                     , singletons == 2.2.*         
+                     , singletons == 2.2.*
+                     , arithmoi
     exposed-modules:   Algebra.Algorithms.Faugere4 Algebra.LinkedMatrix
                        Algebra.Algorithms.Faugere5 Algebra.Algorithms.Groebner
                        Algebra.Algorithms.ZeroDim Algebra.Field.Galois
@@ -138,6 +139,7 @@ executable strum
                    computational-algebra -any, random >= 1.0,
                    hmatrix, matrix >= 0.3,
                    sized,
+                   arithmoi,
                    vector >= 0.10, convertible >= 1.1, lens >= 3.9,
                    MonadRandom >= 0.1
      
@@ -341,7 +343,7 @@ test-suite specs
     buildable: True
     hs-source-dirs: tests share
     other-modules: Utils UnivariateSpec GroebnerSpec ZeroDimSpec
-                   QuotientSpec PolynomialSpec
+                   QuotientSpec PolynomialSpec SingularBridge
                    -- Faugere5Spec
     ghc-options: -Wall -threaded
 test-suite new-div-test

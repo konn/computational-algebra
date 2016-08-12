@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
-{-# LANGUAGE DataKinds, ConstraintKinds, NoImplicitPrelude, TypeOperators #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedLabels, TypeOperators               #-}
 module Example where
 import Algebra.Algorithms.Groebner
 import Algebra.Prelude
@@ -19,17 +20,20 @@ f2 = y^2 - 1
 type LexPolynomial r n = OrderedPolynomial r Lex n
 type XYABCS = (LabPolynomial (Polynomial (Ratio Integer) 6) '["x", "y", "a", "b", "c", "S"])
 type ABCS = (LabPolynomial (Polynomial (Ratio Integer) 4) '["a", "b", "c", "S"])
-               
+
 s :: ABCS
 s = var 3
-               
+
 heronIdeal :: Ideal XYABCS
-heronIdeal = toIdeal [ 2 * s - a * y
-                     , b^2 - (x^2 + y^2)
-                     , c^2 - ( (a-x) ^ 2 + y^2)
+heronIdeal = toIdeal [ 2 * s - #a * #y
+                     , #b^2 - (#x^2 + #y^2)
+                     , #c^2 - ( (#a -  #x) ^ 2 + #y^2)
                      ]
   where
-    [x, y, a, b, c, s] = vars
+    s = last vars
+    -- Due to the current limitation of @OverloadedLabels@ extension,
+    -- we cannot use label starting with a CAPITAL LETTER.
+    -- so we have to do this.
 
 
 main :: IO ()
