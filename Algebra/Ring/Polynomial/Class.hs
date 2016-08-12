@@ -327,7 +327,9 @@ pDivModPoly :: (k ~ Coefficient poly, Euclidean k, IsOrderedPolynomial poly)
             => poly -> poly
             -> (poly, poly)
 f0 `pDivModPoly` g =
-  step (injectCoeff (pow (leadingCoeff g) (P.fromIntegral $ totalDegree' f0 P.- totalDegree' g + 1 :: Natural)) * f0) zero
+  let k = fromIntegral $ totalDegree' f0 :: Integer
+      l = fromIntegral $ totalDegree' g  :: Integer
+  in step (injectCoeff (pow (leadingCoeff g) (P.fromInteger (max 0 $ 1 + k - l) :: Natural)) * f0) zero
   where
     lm = leadingMonomial g
     step p quo
