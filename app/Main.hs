@@ -89,7 +89,7 @@ deploy cnf = shelly $ handleany_sh (const $ return $ ExitFailure 1)  $do
   run_ "git" ["add", "."]
   run_ "git" ["commit", "-a", msgOpt, "--edit"]
   run_ "git" ["push", "origin", "gh-pages"]
-  msgZ <- cmd "git" "log" "HEAD" "--format=%s"
+  msgZ <- cmd "git" "log" "HEAD" "--format=%s" "-n1"
   cd ".."
   run_ "git" ["add", "."]
   run_ "git" $ ["commit", "-m"] ++ (take 1 $ T.lines msgZ)
