@@ -44,6 +44,7 @@ library
                      , hmatrix              >= 0.16
                      , trifecta             >= 1.5
                      , matrix               >= 0.3
+                     , entropy
                      , lens                 >= 4.13
                      , monad-loops          >= 0.4
                      , dlist
@@ -85,6 +86,7 @@ library
                        Algebra.Ring.Polynomial.Class
                        Algebra.Ring.Polynomial.Labeled
                        Algebra.Ring.Polynomial.Monomial
+                       Algebra.Field.AlgebraicReal
     exposed:           True
     buildable:         True
     other-modules:     Algebra.Algorithms.FGLM Algebra.Field.Galois.Internal Algebra.Field.Galois.Conway
@@ -128,26 +130,6 @@ executable solve
     else
         buildable: False
     main-is: solve.hs
-    buildable: True
-    hs-source-dirs: share examples
-    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
-
-executable strum
-    build-depends: semigroups >= 0.15.2,
-                   constraints >=0.3, algebra >= 4.1,
-                   base >=4, type-natural,
-                   computational-algebra -any, random >= 1.0,
-                   hmatrix, matrix >= 0.3,
-                   sized,
-                   arithmoi,
-                   vector >= 0.10, convertible >= 1.1, lens >= 3.9,
-                   MonadRandom >= 0.1
-     
-    if flag(examples)
-        buildable: True
-    else
-        buildable: False
-    main-is: strum.hs
     buildable: True
     hs-source-dirs: share examples
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
