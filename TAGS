@@ -310,48 +310,48 @@ sigSafeRed sigSafeRed192,193
 
 ./Algebra/Algorithms/ZeroDim.hs,1254
 module Algebra.Algorithms.ZeroDim Algebra.Algorithms.ZeroDim10,11
-solveM solveM44,45
-solveM solveM50,51
-solveWith solveWith66,67
-solveWith solveWith72,73
-solve' solve'103,104
-solve' solve'109,110
-subspMatrix subspMatrix125,126
-subspMatrix subspMatrix127,128
-solveViaCompanion solveViaCompanion136,137
-solveViaCompanion solveViaCompanion141,142
-matToLists matToLists154,155
+solveM solveM45,46
+solveM solveM51,52
+solveWith solveWith67,68
+solveWith solveWith73,74
+solve' solve'104,105
+solve' solve'110,111
+subspMatrix subspMatrix126,127
+subspMatrix subspMatrix128,129
+solveViaCompanion solveViaCompanion137,138
+solveViaCompanion solveViaCompanion142,143
 matToLists matToLists155,156
-matrixRep matrixRep157,158
-matrixRep matrixRep160,161
-toComplex toComplex168,169
+matToLists matToLists156,157
+matrixRep matrixRep158,159
+matrixRep matrixRep161,162
 toComplex toComplex169,170
-reduction reduction171,172
-reduction reduction173,174
-univPoly univPoly178,179
-univPoly univPoly182,183
-solveLinear solveLinear201,202
-solveLinear solveLinear205,206
-radical radical240,241
-radical radical243,244
-isRadical isRadical248,249
-isRadical isRadical252,253
-solveLinearNA solveLinearNA296,297
+toComplex toComplex170,171
+reduction reduction172,173
+reduction reduction174,175
+univPoly univPoly179,180
+univPoly univPoly183,184
+solveLinear solveLinear202,203
+solveLinear solveLinear206,207
+radical radical241,242
+radical radical244,245
+isRadical isRadical249,250
+isRadical isRadical253,254
 solveLinearNA solveLinearNA297,298
-toDM toDM299,300
+solveLinearNA solveLinearNA298,299
 toDM toDM300,301
-fglm fglm306,307
-fglm fglm310,311
-fglmMap fglmMap314,315
-fglmMap fglmMap325,326
-mainLoop mainLoop332,333
-mainLoop mainLoop334,335
-toContinue toContinue354,355
-toContinue toContinue358,359
-nextMonomial nextMonomial368,369
-nextMonomial nextMonomial370,371
-beta beta381,382
+toDM toDM301,302
+fglm fglm307,308
+fglm fglm311,312
+fglmMap fglmMap315,316
+fglmMap fglmMap326,327
+mainLoop mainLoop333,334
+mainLoop mainLoop335,336
+toContinue toContinue355,356
+toContinue toContinue359,360
+nextMonomial nextMonomial369,370
+nextMonomial nextMonomial371,372
 beta beta382,383
+beta beta383,384
 
 ./Algebra/Field/Finite.hs,880
 module Algebra.Field.Finite Algebra.Field.Finite5,6
@@ -1465,14 +1465,14 @@ padeApprox padeApprox454,455
 minpolRecurrent minpolRecurrent459,460
 minpolRecurrent minpolRecurrent461,462
 
-./Algebra/Scalar.hs,215
+./Algebra/Scalar.hs,218
 module Algebra.Scalar Algebra.Scalar3,4
-newtype Scalar Scalar9,10
-newtype Scalar r = Scalar Scalar9,10
-newtype Scalar r = Scalar { runScalar runScalar9,10
-(.*.).*.14,15
-r r16,17
-instance instance19,20
+newtype Scalar Scalar12,13
+newtype Scalar r = Scalar Scalar12,13
+newtype Scalar r = Scalar { runScalar runScalar12,13
+(.*.).*.17,18
+r r19,20
+instance instance22,23
 
 ./algebraic-prelude/.stack-work/dist/x86_64-osx/Cabal-1.22.5.0/build/autogen/Paths_algebraic_prelude.hs,984
 module Paths_algebraic_prelude Paths_algebraic_prelude0,1
@@ -2440,44 +2440,44 @@ arbVecOfSum arbVecOfSum113,114
 arbVecOfSum arbVecOfSum114,115
 arbVec arbVec126,127
 arbVec arbVec127,128
-polyOfDim polyOfDim157,158
 polyOfDim polyOfDim158,159
-newtype HomogPoly HomogPoly160,161
-newtype HomogPoly r ord n = HomogPoly HomogPoly160,161
-newtype HomogPoly r ord n = HomogPoly { getHomogPoly getHomogPoly160,161
-homogPolyOfDim homogPolyOfDim162,163
+polyOfDim polyOfDim159,160
+newtype HomogPoly HomogPoly161,162
+newtype HomogPoly r ord n = HomogPoly HomogPoly161,162
+newtype HomogPoly r ord n = HomogPoly { getHomogPoly getHomogPoly161,162
 homogPolyOfDim homogPolyOfDim163,164
-idealOfDim idealOfDim165,166
+homogPolyOfDim homogPolyOfDim164,165
 idealOfDim idealOfDim166,167
-quotOfDim quotOfDim168,169
-quotOfDim quotOfDim170,171
-genLM genLM172,173
+idealOfDim idealOfDim167,168
+quotOfDim quotOfDim169,170
+quotOfDim quotOfDim171,172
 genLM genLM173,174
-zeroDimOf zeroDimOf184,185
+genLM genLM174,175
 zeroDimOf zeroDimOf185,186
-zeroDimG zeroDimG190,191
+zeroDimOf zeroDimOf186,187
 zeroDimG zeroDimG191,192
-arbitraryRational arbitraryRational196,197
+zeroDimG zeroDimG192,193
 arbitraryRational arbitraryRational197,198
-isNonTrivial isNonTrivial203,204
+arbitraryRational arbitraryRational198,199
 isNonTrivial isNonTrivial204,205
-data Equation Equation206,207
-data Equation = Equation Equation206,207
-data Equation = Equation { coefficients coefficients206,207
-                         , answers answers207,208
-newtype MatrixCase MatrixCase210,211
-newtype MatrixCase a = MatrixCase MatrixCase210,211
-newtype MatrixCase a = MatrixCase { getMatrix getMatrix210,211
-arbitrarySolvable arbitrarySolvable228,229
+isNonTrivial isNonTrivial205,206
+data Equation Equation207,208
+data Equation = Equation Equation207,208
+data Equation = Equation { coefficients coefficients207,208
+                         , answers answers208,209
+newtype MatrixCase MatrixCase211,212
+newtype MatrixCase a = MatrixCase MatrixCase211,212
+newtype MatrixCase a = MatrixCase { getMatrix getMatrix211,212
 arbitrarySolvable arbitrarySolvable229,230
-liftSNat liftSNat234,235
+arbitrarySolvable arbitrarySolvable230,231
 liftSNat liftSNat235,236
-unaryPoly unaryPoly239,240
+liftSNat liftSNat236,237
 unaryPoly unaryPoly240,241
-checkForArity checkForArity245,246
+unaryPoly unaryPoly241,242
 checkForArity checkForArity246,247
-stdReduced stdReduced248,249
-stdReduced stdReduced250,251
+checkForArity checkForArity247,248
+stdReduced stdReduced249,250
+stdReduced stdReduced251,252
 
 ./tests/division.hs,286
 module Main Main2,3
