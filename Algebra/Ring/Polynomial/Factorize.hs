@@ -6,7 +6,7 @@
 module Algebra.Ring.Polynomial.Factorize
        (factorise, distinctDegFactor,
         equalDegreeSplitM, equalDegreeFactorM,
-        henselStep, multiHensel,
+        henselStep, multiHensel,clearDenom,
         squareFreePart, squareFreeDecomp,factorQBigPrime
        ) where
 import           Algebra.Algorithms.PrimeTest       hiding (modPow)
