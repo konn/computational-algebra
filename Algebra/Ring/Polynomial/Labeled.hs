@@ -6,11 +6,14 @@
 {-# LANGUAGE UndecidableSuperClasses, OverloadedLabels                     #-}
 module Algebra.Ring.Polynomial.Labeled
        (IsUniqueList, LabPolynomial(..),
+        LabPolynomial', LabUnipol,
         canonicalMap,
         canonicalMap',
         IsSubsetOf) where
 import Algebra.Internal
 import Algebra.Ring.Polynomial.Class
+import Algebra.Ring.Polynomial
+import Algebra.Ring.Polynomial.Univariate
 import Algebra.Scalar
 
 import qualified Prelude as P
@@ -59,6 +62,15 @@ data LabPolynomial poly (vars :: [Symbol]) where
   LabelPolynomial :: (IsUniqueList vars, Length vars ~ Arity poly)
                   => { unLabelPolynomial :: poly }
                   -> LabPolynomial poly vars
+
+-- | Convenient type-synonym for @'LabPlynomial'@ wrapping @'OrderedPolynomial'@
+--   and @'Unipol'@.
+type family LabPolynomial' r ord vars where
+  LabPolynomial' r ord '[x] = LabPolynomial (Unipol r) '[x]
+  LabPolynomial' r ord vars = LabPolynomial (OrderedPolynomial r ord (Length vars)) vars
+
+-- | Convenient type-synonym for @'LabPlynomial'@ wrapping univariate polynomial @'Unipol'@.
+type LabUnipol r sym = LabPolynomial (Unipol r) '[sym]
 
 type Wraps vars poly = (IsUniqueList vars, Arity poly ~ Length vars)
 

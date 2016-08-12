@@ -181,14 +181,14 @@ clearDenom :: (CoeffRing a, Euclidean a)
            => Unipol (Fraction a) -> (a, Unipol a)
 clearDenom f =
   let g = foldr (lcm . denominator) one $ terms' f
-  in (g, fmap (numerator . ((g F.% one)*)) f)
+  in (g, mapCoeffUnipol (numerator . ((g F.% one)*)) f)
 
 factorQBigPrime :: (MonadRandom m)
                => Unipol Integer -> m (Integer, [([Unipol Integer], Natural)])
 factorQBigPrime f0 = do
   let (g, c) | leadingCoeff f0 < 0 = (- pp f0, - content f0)
              | otherwise = (pp f0, content f0)
-  ts0 <- F.mapM (secondM factorSqFreeQBP . clearDenom) (squareFreeDecomp $ monoize $ fmap (F.% 1) g)
+  ts0 <- F.mapM (secondM factorSqFreeQBP . clearDenom) (squareFreeDecomp $ monoize $ mapCoeffUnipol (F.% 1) g)
   let anss = IM.toList ts0
       k = c * leadingCoeff g `div` product (map (fst.snd) anss)
   return $ (k, map (snd *** toEnum <<< swap) anss)
@@ -208,8 +208,8 @@ factorSqFreeQBP f
   | otherwise = do
     p <- iterateUntil isSqFreeMod (uniform ps)
     reifyPrimeField p $ \fp -> do
-      let fbar = fmap (modNat' fp) f
-      gvec <- V.fromList . concatMap (uncurry (flip replicate) <<< (normalizeMod p . fmap naturalRepr) *** fromEnum)
+      let fbar = mapCoeffUnipol (modNat' fp) f
+      gvec <- V.fromList . concatMap (uncurry (flip replicate) <<< (normalizeMod p . mapCoeffUnipol naturalRepr) *** fromEnum)
               <$> factorise (monoize fbar)
       return $ runST $ do
         bb <- newSTRef b
@@ -243,7 +243,7 @@ factorSqFreeQBP f
     n = totalDegree' f
     isSqFreeMod :: Integer -> Bool
     isSqFreeMod p = reifyPrimeField p $ \fp ->
-      let fbar = fmap (modNat' fp) f
+      let fbar = mapCoeffUnipol (modNat' fp) f
       in gcd fbar (diff OZ fbar) == one
 
 -- | Given that @f = gh (mod m)@ with @sg + th = 1 (mod m)@ and @leadingCoeff f@ isn't zero divisor mod m,
@@ -258,9 +258,9 @@ henselStep :: (Eq r, Euclidean r)
            -> Unipol r
            -> (Unipol r, Unipol r, Unipol r, Unipol r)
 henselStep m f g h s t =
-  let modCoeff = fmap (`rem` m^2)
-      divModSq u v = fmap (F.% one) u `divide` fmap (F.% one) v
-                     & both %~ fmap (fromJust . modFraction (m^2))
+  let modCoeff = mapCoeffUnipol (`rem` m^2)
+      divModSq u v = mapCoeffUnipol (F.% one) u `divide` mapCoeffUnipol (F.% one) v
+                     & both %~ mapCoeffUnipol (fromJust . modFraction (m^2))
       e = modCoeff $ f - g * h
       (q, r) = divModSq (s*e) h
       g' = modCoeff $ g + t * e + q * g
@@ -278,18 +278,18 @@ multiHensel :: Integer -> Natural -> Unipol Integer -> [Unipol Integer] -> [Unip
 multiHensel p l f [_] =
   let u = fromMaybe (error $ "lc(f) = " ++ (show $ leadingCoeff f) ++ " is zero divisor mod p!") $
           recipMod (tr "p^l = " $ p^l) $ leadingCoeff f
-  in [fmap ((`rem` p^l).(*u)) $ f]
+  in [mapCoeffUnipol ((`rem` p^l).(*u)) $ f]
 multiHensel p l f fs =
   let (as, bs) = splitAt k fs
-      g0 = fmap (`rem` p) $ leadingCoeff f .*. product as
+      g0 = mapCoeffUnipol (`rem` p) $ leadingCoeff f .*. product as
       r = length fs
       k = r `div` 2
       d = logBase2 (fromIntegral l)
-      h0 = fmap (`rem` p) $ product bs
+      h0 = mapCoeffUnipol (`rem` p) $ product bs
       (a, s0, t0) : _ = reifyPrimeField p $ \fp ->
-        map (each %~ fmap naturalRepr) $ euclid (skim $ fmap (modNat' fp) g0) (skim $ fmap (modNat' fp) h0)
+        map (each %~ mapCoeffUnipol naturalRepr) $ euclid (skim $ mapCoeffUnipol (modNat' fp) g0) (skim $ mapCoeffUnipol (modNat' fp) h0)
       (gd, hd, _, _) = foldl (\(s, t, g, h) j -> henselStep (p^2^j) f g h s t)
-                         (s0, t0, fmap (`rem` p) $ product as, h0)
+                         (s0, t0, mapCoeffUnipol (`rem` p) $ product as, h0)
                          [0..P.fromIntegral (d - 1)]
   in if a /= one
      then error $ concat ["(f, as, bs, g0, h0) = ", show (f, as, bs, g0, h0), " is not bezout coprime!"]
@@ -316,7 +316,7 @@ comb = (DL.toList .) . go
     go k (x:xs) = DL.map (x :) (go (k - 1) xs) <> go k xs
 
 normalizeMod :: Integer -> Unipol Integer -> Unipol Integer
-normalizeMod p f = fmap chooseHalf f
+normalizeMod p f = mapCoeffUnipol chooseHalf f
   where
     chooseHalf ((`rem` p) -> c) = minimumBy (comparing P.abs) [c, c - p]
 

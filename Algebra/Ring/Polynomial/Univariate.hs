@@ -7,6 +7,7 @@
 module Algebra.Ring.Polynomial.Univariate
        (Unipol(), naiveMult, karatsuba,
         divModUnipolByMult, divModUnipol,
+        mapCoeffUnipol,
         module Algebra.Ring.Polynomial.Class,
         module Algebra.Ring.Polynomial.Monomial) where
 import Algebra.Prelude
@@ -32,7 +33,7 @@ import qualified Prelude as P
 --   so if you want to treat the power greater than @maxBound :: Int@,
 --   please consider using other represntation.
 newtype Unipol r = Unipol { runUnipol :: IM.IntMap r }
-                 deriving (NFData, Functor)
+                 deriving (NFData)
 
 instance Hashable r => Hashable (Unipol r) where
   hashWithSalt p = hashWithSalt p . IM.toList . runUnipol
@@ -360,3 +361,7 @@ instance CoeffRing r => IsOrderedPolynomial (Unipol r) where
 
 instance (CoeffRing r, PrettyCoeff r) => Show (Unipol r) where
   showsPrec = showsPolynomialWith (SV.singleton "x")
+
+mapCoeffUnipol :: DecidableZero b => (a -> b) -> Unipol a -> Unipol b
+mapCoeffUnipol f (Unipol a) =
+  Unipol $ IM.mapMaybe (decZero . f) a
