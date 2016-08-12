@@ -313,7 +313,7 @@ benchmark normal-bench
                    type-natural, vector, matrix
     type: exitcode-stdio-1.0
     main-is: bench.hs
-    buildable: False
+    buildable: True
     hs-source-dirs: bench share
     other-modules: SingularBench
     ghc-options: -O2 -threaded
