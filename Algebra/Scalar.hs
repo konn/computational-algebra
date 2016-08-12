@@ -3,10 +3,13 @@
 {-# LANGUAGE StandaloneDeriving                                #-}
 module Algebra.Scalar (Scalar(..), (.*.)) where
 import           AlgebraicPrelude
-
+import qualified Data.Coerce as C
 import Algebra.Normed
+import Control.Lens
 import qualified Prelude          as P
 
+-- | @'Scalar' r@ provides almost the same type-instances as @r@,
+--   but it can also behave as a @'Module'@ over @r@ itself.
 newtype Scalar r = Scalar { runScalar :: r }
     deriving (Read, Show, Eq, Ord, Additive,
               Integral, Real, Enum
@@ -21,22 +24,13 @@ instance Normed r => Normed (Scalar r) where
   type Norm (Scalar r) = Norm r
   norm = norm . runScalar
   liftNorm = runScalar . liftNorm
+deriving instance DecidableAssociates r => DecidableAssociates (Scalar r)
+deriving instance DecidableUnits r => DecidableUnits (Scalar r)
+deriving instance UnitNormalForm r => UnitNormalForm (Scalar r)
 
-instance (Ring r, Normed r, UnitNormalForm r) => P.Num (Scalar r) where
-  abs = abs
-  (+) = (+)
-  (-) = (-)
-  (*) = (*)
-  negate = negate
-  fromInteger = Scalar . fromInteger'
-  signum = Scalar . fst . splitUnit . runScalar
+deriving instance P.Num r => P.Num (Scalar r)
 
-instance (Ring r, Normed r, Division r, UnitNormalForm r) => P.Fractional (Scalar r) where
-  (/) = (/)
-  recip = recip
-  fromRational = fromRational
-
-
+deriving instance P.Fractional r => P.Fractional (Scalar r)
 deriving instance Monoidal r => Monoidal (Scalar r)
 deriving instance Group r => Group (Scalar r)
 deriving instance Semiring r => Semiring (Scalar r)
@@ -45,19 +39,16 @@ deriving instance Abelian r => Abelian (Scalar r)
 deriving instance Rig r => Rig (Scalar r)
 deriving instance Commutative r => Commutative (Scalar r)
 deriving instance Division r => Division (Scalar r)
-
-instance LeftModule Integer r => LeftModule Integer (Scalar r) where
-  n .* Scalar r = Scalar $ n .* r
-instance RightModule Integer r => RightModule Integer (Scalar r) where
-  Scalar r *. n = Scalar $ r *. n
-instance LeftModule Natural r => LeftModule Natural (Scalar r) where
-  n .* Scalar r = Scalar $ n .* r
-instance RightModule Natural r => RightModule Natural (Scalar r) where
-  Scalar r *. n = Scalar $ r *. n
-instance Ring r => RightModule r (Scalar r) where
+deriving instance LeftModule Integer r => LeftModule Integer (Scalar r)
+deriving instance RightModule Integer r => RightModule Integer (Scalar r)
+deriving instance LeftModule Natural r => LeftModule Natural (Scalar r)
+deriving instance RightModule Natural r => RightModule Natural (Scalar r)
+instance Semiring r => RightModule r (Scalar r) where
   Scalar r *. q = Scalar $ r * q
-instance Ring r => LeftModule r (Scalar r) where
+  {-# INLINE (*.) #-}
+instance Semiring r => LeftModule r (Scalar r) where
   r .* Scalar q = Scalar $ r * q
+  {-# INLINE (.*) #-}
 
 instance (Semiring r) => LeftModule (Scalar r) (Scalar r) where
   Scalar r .* Scalar q = Scalar $ r * q

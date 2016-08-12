@@ -91,8 +91,7 @@ vectorRep f =
 {-# INLINE vectorRep #-}
 
 matRepr' :: forall poly ideal.
-          (Normed (Coefficient poly),
-           Field (Coefficient poly),
+          (Field (Coefficient poly),
            Reifies ideal (QIdeal poly), IsOrderedPolynomial poly)
        => Quotient poly ideal -> M.Matrix (Coefficient poly)
 matRepr' f =
@@ -100,17 +99,15 @@ matRepr' f =
   in C.coerce $ getSum $
      ifoldMap
           (\t c ->
-            Sum $ fmap (Scalar . (c *)) $ matRep0 (Proxy :: Proxy poly) (Proxy :: Proxy ideal) t)
+            Sum $ fmap (WrapAlgebra . (c *)) $ matRep0 (Proxy :: Proxy poly) (Proxy :: Proxy ideal) t)
           (terms (quotRepr_ f))
 {-# SPECIALISE INLINE
-   matRepr' :: (IsMonomialOrder n ord, CoeffRing r, KnownNat n,
-                 Normed r, Field r,
+   matRepr' :: (IsMonomialOrder n ord, CoeffRing r, KnownNat n, Field r,
                  Reifies ideal (QIdeal (OrderedPolynomial r ord n)))
              => Quotient (OrderedPolynomial r ord n) ideal -> M.Matrix r
  #-}
 {-# SPECIALISE INLINE
-   matRepr' :: (Field r, Normed r,
-                CoeffRing r, Reifies ideal (QIdeal (Unipol r)))
+   matRepr' :: (Field r, CoeffRing r, Reifies ideal (QIdeal (Unipol r)))
              => Quotient (Unipol r) ideal -> M.Matrix r
  #-}
 {-# SPECIALISE INLINE
