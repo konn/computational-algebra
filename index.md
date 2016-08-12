@@ -317,16 +317,33 @@ There are several polynomial types shipped with this library other than `Ordered
   and fast multplication using [Karatsuba algorithm](https://en.wikipedia.org/wiki/Karatsuba_algorithm).
 * [`LabPolynomial poly vars`{.haskell}](doc:Algebra-Ring-Polynomial-Labeled.html#t:LabPolynomial) defined in [`Algebra.Ring.Polynomial.Labeled`{.haskell}](doc:Algebra-Ring-Polynomial-Labeled.html).
   It wraps existing polynomial type `poly`{.haskell} and have the same operation with it, but it *labels* each variables in `poly`{.haskell} by `vars`{.haskell}.
-  Parameter `vars`{.haskell} is the type-level list of unique symbols which have the length equal to the arity of `poly`{.haskell} and.
-  For example:
+    Parameter `vars`{.haskell} is the type-level list of unique symbols which have the length equal to the arity of `poly`{.haskell} and.
+    For example:
     ```haskell
     LabPolynomial (OrderedPolynomial Rational Grevlex 3) '["x", "y", "z"]
     ```
   is essentially the same as `OrderedPolynomial Rational Grevlex 3`{.haskell} ,
   but each variable is "labeled" with names $x$, $y$ and $z$ when we prrety-print values.
-  It also provides strongly-typed inclusion mapping. For exmap,e. compiler can statically
+  By default, the following type-synonym is provided for convenience:
+
+    ```haskell
+    type LabPolynomial' r ord '[x] = LabPolynomial (Unipol r) '[x]
+    type LabPolynomial' r ord vs   = LabPolynomial (OrderedPolynomial r ord (Length vs)) vs
+    type LabUnipol r x             = LabPolynomial (Unipol r) '[x]
+    ```
+
+    It also provides strongly-typed inclusion mapping. For exmaple, compiler can statically
   generate inclusion mapping from `LabPolynomial poly '["x", "y", "z"]`{.haskell} to
-  `LabPolynomial poly '["z", "a", "x", "b", "c"]`{.haskell} .
+  `LabPolynomial poly '["z", "a", "x", "b", "c"]`{.haskell}.
+  Furthermore, with GHC's `OverloadedLabels`{.haskell} extension,
+  one can use `#<var>`{.haskell} syntax to represent variables safely.
+  For example the following type-checks and we can get what we wanted:
+
+    <pre class="sourceCode haskell"><code class="sourceCode haskell">#x <span class="fu">*</span> #y <span class="fu">-</span> <span class="dv">5</span> <span class="fu">*</span> #a<span class="fu">^</span><span class="dv">2</span><span class="ot"> ::</span> <span class="dt">LabPolynomial'</span> <span class="dt">Rational</span> <span class="dt">Grevlex</span> <span class="ch">'[&quot;a&quot;, &quot;x&quot;, &quot;y&quot;]</span></code></pre>
+  
+    And <code class="sourceCode haskell"><span class="ot">#z ::</span> <span class="dt">LabUnipol</span>  <span class="dt">Rational</span> <span class="ch">&quot;x&quot;</span></code>
+  is statically rejected by compiler at compile-time.
+  One limitation is that we can only use `#<var>` syntax only for variables starting with small alphabet and whithout any white-spaces.
 
 Of course, users can define their custom polynomial types and made them instance of `IsOrdredPolynomial`{.haskell}.
 The module `Algebra.Ring.Polynomial.Class`{.haskell} provides the function [`injectVars`{.haskell}](doc:Algebra-Ring-Polynomial-Class.html#v:injectVars), which converts between different polynomial type with the same coefficient, just mapping each variable to corresponding one with the same index in the target.
