@@ -149,10 +149,11 @@ instance (Num r, Ord r, Ring r, Arbitrary r) => Arbitrary (Ideal r) where
 instance (KnownNat n) => Arbitrary (ZeroDimIdeal n) where
   arbitrary = zeroDimG
 
-instance (DecidableZero r, NA.Field r, Ring r, Reifies ideal (QIdeal r ord n)
-         , Arbitrary (OrderedPolynomial r ord n)
-         , IsMonomialOrder n ord, KnownNat n, Eq r)
-    => Arbitrary (Quotient r ord n ideal) where
+instance (NA.Field (Coefficient poly),
+          IsOrderedPolynomial poly,
+          Reifies ideal (QIdeal poly),
+          Arbitrary poly)
+    => Arbitrary (Quotient poly ideal) where
   arbitrary = modIdeal <$> arbitrary
 
 polyOfDim :: SNat n -> QC.Gen (Polynomial (Fraction Integer) n)
@@ -166,8 +167,8 @@ homogPolyOfDim sn = withKnownNat sn $ getHomogPoly <$> arbitrary
 idealOfDim :: SNat n -> QC.Gen (Ideal (Polynomial (Fraction Integer) n))
 idealOfDim sn = withKnownNat sn arbitrary
 
-quotOfDim :: (KnownNat n, Reifies ideal (QIdeal (Fraction Integer) Grevlex n))
-          => Proxy ideal -> QC.Gen (Quotient (Fraction Integer) Grevlex n ideal)
+quotOfDim :: (KnownNat n, Reifies ideal (QIdeal (OrderedPolynomial (Fraction Integer) Grevlex n)))
+          => Proxy ideal -> QC.Gen (Quotient (OrderedPolynomial (Fraction Integer) Grevlex n) ideal)
 quotOfDim _ = arbitrary
 
 genLM :: forall n. SNat n -> QC.Gen [Polynomial (Fraction Integer) n]
