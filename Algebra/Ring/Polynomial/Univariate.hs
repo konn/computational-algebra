@@ -28,6 +28,7 @@ import qualified Data.Sized.Builtin                    as SV
 import qualified Numeric.Algebra                       as NA
 import           Numeric.Decidable.Zero                (DecidableZero (..))
 import qualified Prelude as P
+import GHC.OverloadedLabels
 -- | Univariate polynomial.
 --   It uses @'IM.IntMap'@ as its internal representation;
 --   so if you want to treat the power greater than @maxBound :: Int@,
@@ -37,6 +38,11 @@ newtype Unipol r = Unipol { runUnipol :: IM.IntMap r }
 
 instance Hashable r => Hashable (Unipol r) where
   hashWithSalt p = hashWithSalt p . IM.toList . runUnipol
+
+-- | By this instance, you can use @#x@ for
+--   the unique variable of @'Unipol' r@.
+instance Unital r => IsLabel "x" (Unipol r) where
+  fromLabel _ = Unipol $ IM.singleton 1 one
 
 normaliseUP :: DecidableZero r => Unipol r -> Unipol r
 normaliseUP (Unipol r) = Unipol $ IM.filter (not . isZero) r
