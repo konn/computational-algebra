@@ -1,6 +1,6 @@
 {-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, MultiParamTypeClasses, NoImplicitPrelude              #-}
-{-# LANGUAGE NoMonomorphismRestriction                                    #-}
+{-# LANGUAGE NoMonomorphismRestriction, OverloadedLabels                  #-}
 -- | Algebraic Real Numbers.
 module Algebra.Field.AlgebraicReal
        ( Algebraic, algebraic,
@@ -9,12 +9,13 @@ module Algebra.Field.AlgebraicReal
          improve,
          approximate, approxFractional,
          -- * Equation solver
-         realRoots,
+         realRoots, complexRoots,
          -- * Internal arithmetic
          Interval(..), representative,
-         includes,
+         includes, intersect,
          -- * Internal utility functions
-         strum, presultant
+         strum, presultant, factors,
+         realPartPoly,imagPartPoly, sqFreePart
        )
        where
 import           Algebra.Prelude                    hiding (intersect,
@@ -33,6 +34,7 @@ import           Data.MonoTraversable
 import qualified Data.Ratio                         as R
 import           GHC.Num                            (Num)
 import           Math.NumberTheory.Powers
+import           Numeric.Algebra.Complex            hiding (i)
 import           Numeric.Decidable.Zero             (isZero)
 import           Numeric.Domain.GCD                 (gcd)
 import qualified Numeric.Field.Fraction             as F
@@ -56,8 +58,8 @@ factors f =
 -- | Algebraic real numbers, which can be expressed as a root
 --   of a rational polynomial.
 data Algebraic = Algebraic { eqn      :: Unipol Rational
-                           , strumseq :: [Unipol Rational]
-                           , interval :: Interval Rational
+                           , _strumseq :: [Unipol Rational]
+                           , _interval :: Interval Rational
                            }
                | Rational !Rational
                  deriving (Show)
@@ -118,6 +120,13 @@ instance Multiplicative Algebraic where
   (*) = multA
   {-# INLINE (*) #-}
 
+instance LeftModule (Scalar (Fraction Integer)) Algebraic where
+  (.*) = multA . Rational . runScalar
+  {-# INLINE (.*) #-}
+
+instance RightModule (Scalar (Fraction Integer)) Algebraic where
+  (*.) = flip (.*)
+  {-# INLINE (*.) #-}
 
 instance Eq Algebraic where
   Rational p      == Algebraic g _ j =
@@ -128,8 +137,9 @@ instance Eq Algebraic where
   Algebraic f ss i == Algebraic g _ j
     = monoize f ==  monoize g && countChangeIn (i `intersect` j) ss == 1
 
-intersect :: (Num a, Ord a) => Interval a -> Interval a -> Interval a
-intersect i j | disjoint i j = Interval 0 0
+-- | Takes intersection of two intervals.
+intersect :: (Monoidal a, Ord a) => Interval a -> Interval a -> Interval a
+intersect i j | disjoint i j = Interval zero zero
               | lower i <= lower j = Interval (lower j) (upper i)
               | lower j >  lower i = Interval (lower i) (upper j)
 intersect _ _ = error "intersect"
@@ -296,7 +306,7 @@ x `isIn` Interval i j = i < x && x <= j
 algebraic :: Unipol Rational -> Interval Rational -> Maybe Algebraic
 algebraic f i =
   let pss = [ (n, p, ss)
-            | p <- factors f
+            | p <- factors $ sqFreePart f
             , let (n, ss) = countRootsIn p i
             , n > 0
             ]
@@ -601,10 +611,6 @@ iterateImproveStrum eps ss int0 =
 fromFraction :: P.Fractional a => Fraction Integer -> a
 fromFraction q = P.fromInteger (numerator q) P./ P.fromInteger (denominator q)
 
-sample :: (Num r, Division r, Additive r) => Interval r -> r
-sample (Interval l r) = (l+r)/2
-
-
 -- | Pseudo resultant. should we expose this?
 presultant :: (Euclidean k, CoeffRing k)
            => Unipol k -> Unipol k -> k
@@ -625,9 +631,29 @@ presultant = go one one
 -- | @'realRoots' f@ finds all real roots of the rational polynomial @f@.
 realRoots :: Unipol Rational -> [Algebraic]
 realRoots f = catMaybes
-  [ algebraic (monoize f) i
+  [ algebraic (monoize $ sqFreePart f) i
   | i <- isolateRoots f
   ]
+
+instance InvolutiveMultiplication Algebraic where
+  adjoint = id
+
+instance TriviallyInvolutive Algebraic
+
+-- | @'realRoots' f@ finds all complex roots of the rational polynomial @f@.
+--
+-- CAUTION: This function currently comes with really naive implementation.
+-- Easy to explode.
+complexRoots :: Unipol Rational -> [Complex Algebraic]
+complexRoots f =
+  let rp = sqFreePart $ realPartPoly f
+      ip = sqFreePart $ imagPartPoly f
+  in [ c
+     | r <- realRoots rp
+     , i <- realRoots ip
+     , let c = Complex r i
+     , liftMap (const $ c) f == Complex 0 0
+     ]
 
 realPartPoly :: Unipol Rational -> Unipol Rational
 realPartPoly f =
@@ -635,7 +661,11 @@ realPartPoly f =
 
 imagPartPoly :: Unipol Rational -> Unipol Rational
 imagPartPoly f =
-  normalize $ liftMap (const $ 2 * var 0) $ rootSumPoly f (liftMap (const $ negate $ var 0) f)
+  let bi = liftMap (const $ 2 * #x) $
+           rootSumPoly f (liftMap (const $ negate $ var 0) f)
+  in mapMonomialMonotonic (_Wrapped.ix 0 *~ 2) $
+     liftMap (const $ negate #x) $
+     rootMultPoly bi bi
 
 -- | Choose representative element of the given interval.
 representative :: (Additive r, Division r, Num r) => Interval r -> r
