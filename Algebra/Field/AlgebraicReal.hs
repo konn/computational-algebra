@@ -32,6 +32,7 @@ import qualified Data.Coerce                        as C
 import           Data.Maybe                         (fromJust)
 import           Data.MonoTraversable
 import qualified Data.Ratio                         as R
+import qualified Data.Sized.Builtin                 as SV
 import           GHC.Num                            (Num)
 import           Math.NumberTheory.Powers
 import           Numeric.Algebra.Complex            hiding (i)
@@ -62,11 +63,38 @@ data Algebraic = Algebraic { eqn      :: Unipol Rational
                            , _interval :: Interval Rational
                            }
                | Rational !Rational
-                 deriving (Show)
+                 -- deriving (Show)
 -- Invariants for constructor Algebraic:
 --   (1) eqn must be monic and irreducible polynomial with degree > 1.
 --   (2) strumseq is the standard strum sequence of eqn
 --   (3) interval contains exactly one root of eqn
+
+viewNthRoot :: Algebraic -> Maybe (Int, Rational)
+viewNthRoot (Algebraic eq _ _) =
+  let (lc, lm) = leadingTerm eq
+  in if totalDegree' (eq - toPolynomial (lc, lm)) == 0
+     then Just (getMonomial lm SV.%!! 0, negate $ constantTerm eq)
+     else Nothing
+viewNthRoot _ = Nothing
+
+showsNthRoot ::  Int -> Rational -> ShowS
+showsNthRoot  1 q = showsPrec 6 q
+showsNthRoot  2 q = showChar '√' . showsPrec 6 q
+showsNthRoot  n q = showsPrec 6 q . showString "^(1/" . shows n . showChar ')'
+
+
+instance Show Algebraic where
+  showsPrec d (Rational q) = showsPrec d q
+  showsPrec d a@(Algebraic eq str int) = showParen (d > 11) $
+    case viewNthRoot a of
+      Nothing ->
+        showString "Algebraic " . showsPrec 7 eq . showChar ' '
+        . showsPrec 7 str . showChar ' '
+        . showsPrec 7 int
+      Just (nth, q)
+        | a < 0     -> showParen (5 < d && d <= 11) $
+                       showString "-" . showsNthRoot nth q
+        | otherwise -> showsNthRoot nth q
 
 
 negateA :: Algebraic -> Algebraic
