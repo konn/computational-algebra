@@ -32,6 +32,7 @@ import qualified Data.Coerce                        as C
 import           Data.Maybe                         (fromJust)
 import           Data.MonoTraversable
 import qualified Data.Ratio                         as R
+import qualified Data.Set                           as S
 import qualified Data.Sized.Builtin                 as SV
 import           GHC.Num                            (Num)
 import           Math.NumberTheory.Powers
@@ -51,7 +52,7 @@ stdGenFromEntropy = mkStdGen . ofoldr (\a -> (+) (fromEnum a) . (`shiftL` 8)) 0 
 factors :: Unipol Rational -> [Unipol Rational]
 factors f =
   let (a, p) = clearDenom f
-  in concatMap (map (monoize . mapCoeffUnipol (F.%a)) . fst) $
+  in S.toList $ S.fromList $ concatMap (map (monoize . mapCoeffUnipol (F.%a)) . fst) $
        snd
          $ flip evalRand (unsafePerformIO stdGenFromEntropy)
          $ factorQBigPrime p
@@ -345,6 +346,12 @@ algebraic f i =
       then Rational $ negate $ constantTerm p
       else Algebraic p ss i
     _ -> Nothing
+
+algebraic' :: Unipol Rational -> Interval Rational -> Algebraic
+algebraic' p i =
+  if totalDegree' p == 1
+  then Rational $ negate $ constantTerm p
+  else Algebraic p (strum p) i
 
 catcher :: (Interval Rational -> Interval Rational -> Interval Rational)
         -> Unipol Rational -> Algebraic -> Algebraic -> Interval Rational
@@ -658,8 +665,13 @@ presultant = go one one
 
 -- | @'realRoots' f@ finds all real roots of the rational polynomial @f@.
 realRoots :: Unipol Rational -> [Algebraic]
-realRoots f = catMaybes
-  [ algebraic (monoize $ sqFreePart f) i
+realRoots = realRootsIrreducible . monoize <=< factors . sqFreePart
+
+-- | Same as @'realRoots'@, but assumes that the given polynomial
+--   is monic and irreducible.
+realRootsIrreducible :: Unipol Rational -> [Algebraic]
+realRootsIrreducible f =
+  [ algebraic' f i
   | i <- isolateRoots f
   ]
 
@@ -673,9 +685,12 @@ instance TriviallyInvolutive Algebraic
 -- CAUTION: This function currently comes with really naive implementation.
 -- Easy to explode.
 complexRoots :: Unipol Rational -> [Complex Algebraic]
-complexRoots f =
-  let rp = sqFreePart $ realPartPoly f
-      ip = sqFreePart $ imagPartPoly f
+complexRoots = complexRoots' <=< factors . sqFreePart
+
+complexRoots' :: Unipol Rational -> [Complex Algebraic]
+complexRoots' f =
+  let rp = realPartPoly f
+      ip = imagPartPoly f
   in [ c
      | r <- realRoots rp
      , i <- realRoots ip
