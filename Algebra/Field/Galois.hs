@@ -15,25 +15,25 @@ import Algebra.Internal
 import Algebra.Prelude                    hiding (varX)
 import Algebra.Ring.Polynomial.Univariate
 
-import           Control.Lens                          (imap)
-import           Control.Monad                         (replicateM)
-import           Control.Monad.Loops                   (iterateUntil)
-import           Control.Monad.Random                  (MonadRandom)
-import           Control.Monad.Random                  (uniform)
-import qualified Data.Foldable                         as F
-import qualified Data.Ratio                            as Rat
+import           Control.Lens                 (imap)
+import           Control.Monad                (replicateM)
+import           Control.Monad.Loops          (iterateUntil)
+import           Control.Monad.Random         (MonadRandom)
+import           Control.Monad.Random         (uniform)
+import qualified Data.Foldable                as F
+import qualified Data.Ratio                   as Rat
 import           Data.Reflection
-import           Data.Singletons.Prelude.Enum          (SEnum (..))
-import           Data.Singletons.TypeLits              (withKnownNat)
-import qualified Data.Sized.Builtin                    as SV
-import qualified Data.Traversable                      as T
-import qualified Data.Vector                           as V
-import qualified GHC.TypeLits                          as TL
-import qualified Numeric.Algebra                       as NA
-import           Numeric.Domain.Euclidean              (Euclidean)
-import           Numeric.Domain.GCD                    (GCDDomain, gcd)
-import           Numeric.Semiring.ZeroProduct          (ZeroProductSemiring)
-import qualified Prelude                               as P
+import           Data.Singletons.Prelude.Enum (SEnum (..))
+import           Data.Singletons.TypeLits     (withKnownNat)
+import qualified Data.Sized.Builtin           as SV
+import qualified Data.Traversable             as T
+import qualified Data.Vector                  as V
+import qualified GHC.TypeLits                 as TL
+import qualified Numeric.Algebra              as NA
+import           Numeric.Domain.Euclidean     (Euclidean)
+import           Numeric.Domain.GCD           (GCDDomain, gcd)
+import           Numeric.Semiring.ZeroProduct (ZeroProductSemiring)
+import qualified Prelude                      as P
 
 -- | Galois field of order @p^n@.
 --   @f@ stands for the irreducible polynomial over @F_p@ of degree @n@.
@@ -163,11 +163,11 @@ instance (KnownNat n, Reifies p Integer, Reifies f (Unipol (F p)))
       => Euclidean (GF' p n f)
 
 instance (Reifies p Integer, Reifies f (Unipol (F p)), KnownNat n) => P.Num (GF' p n f) where
-  (+) = (+)
-  (-) = (-)
-  negate = negate
-  (*) = (*)
-  fromInteger = fromInteger
+  (+) = (NA.+)
+  (-) = (NA.-)
+  negate = NA.negate
+  (*) = (NA.*)
+  fromInteger = NA.fromInteger
   abs = error "not defined"
   signum = error "not defined"
 
