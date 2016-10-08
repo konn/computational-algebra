@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
 module Algebra.Algorithms.PrimeTest (repeatedSquare, modPow,
                                        fermatTest, isPseudoPrime) where
-import           Algebra.Prelude          hiding (div, mod)
+import           Algebra.Prelude.Core     hiding (div, mod)
 import           Control.Lens             ((&), (+~), _1)
 import           Control.Monad.Random     (MonadRandom, uniform)
 import           Data.List                (findIndex)

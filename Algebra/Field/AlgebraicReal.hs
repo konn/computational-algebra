@@ -18,7 +18,7 @@ module Algebra.Field.AlgebraicReal
          realPartPoly,imagPartPoly, sqFreePart
        )
        where
-import           Algebra.Prelude                    hiding (intersect,
+import           Algebra.Prelude.Core               hiding (intersect,
                                                      normalize)
 import           Algebra.Ring.Polynomial.Factorize  (clearDenom,
                                                      factorQBigPrime)

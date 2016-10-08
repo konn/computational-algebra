@@ -6,7 +6,7 @@
 module Algebra.Field.Finite (F(), naturalRepr, reifyPrimeField, withPrimeField,
                              modNat, modNat', modRat, modRat', FiniteField(..), order) where
 import Algebra.Algorithms.PrimeTest
-import Algebra.Prelude               hiding (pow)
+import Algebra.Prelude.Core          hiding (pow)
 import Algebra.Ring.Polynomial.Class (PrettyCoeff (..), ShowSCoeff (..))
 
 import           Control.DeepSeq              (NFData (..))

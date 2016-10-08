@@ -11,7 +11,7 @@ module Algebra.Ring.Polynomial.Factorize
        ) where
 import           Algebra.Algorithms.PrimeTest       hiding (modPow)
 import           Algebra.Field.Finite
-import           Algebra.Prelude
+import           Algebra.Prelude.Core
 import           Algebra.Ring.Polynomial.Quotient
 import           Algebra.Ring.Polynomial.Univariate
 import           Control.Applicative                ((<|>))

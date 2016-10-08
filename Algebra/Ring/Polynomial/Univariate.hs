@@ -10,7 +10,7 @@ module Algebra.Ring.Polynomial.Univariate
         mapCoeffUnipol,
         module Algebra.Ring.Polynomial.Class,
         module Algebra.Ring.Polynomial.Monomial) where
-import Algebra.Prelude
+import Algebra.Prelude.Core
 import Algebra.Ring.Polynomial.Class
 import Algebra.Ring.Polynomial.Monomial
 

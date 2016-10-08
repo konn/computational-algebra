@@ -28,7 +28,7 @@ module Algebra.Algorithms.Groebner
 import           Algebra.Internal
 import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial.Univariate (Unipol)
-import           Algebra.Prelude
+import           Algebra.Prelude.Core
 
 import qualified Data.Map as M
 import Control.Lens (_Wrapped, (&),  (%~))

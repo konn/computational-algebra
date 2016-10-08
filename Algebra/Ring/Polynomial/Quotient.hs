@@ -15,7 +15,7 @@ module Algebra.Ring.Polynomial.Quotient
 import Algebra.Algorithms.Groebner        (calcGroebnerBasis)
 import Algebra.Field.Finite               (F)
 import Algebra.Internal
-import Algebra.Prelude
+import Algebra.Prelude.Core
 import Algebra.Ring.Polynomial.Univariate (Unipol)
 
 import           Control.DeepSeq

@@ -6,8 +6,8 @@ module Algebra.Field.Galois.Conway
         ConwayPolynomial(..),
         addConwayPolynomials,
         conwayFile) where
-import Algebra.Prelude
 import Algebra.Field.Galois.Internal
+import Algebra.Prelude.Core
 import Control.Monad                 (liftM)
 import Language.Haskell.TH           (runIO)
 import Language.Haskell.TH           (DecsQ)

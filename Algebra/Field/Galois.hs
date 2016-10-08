@@ -12,7 +12,7 @@ module Algebra.Field.Galois (GF'(), IsGF', modPoly, modVec,
 import Algebra.Field.Finite
 import Algebra.Field.Galois.Conway
 import Algebra.Internal
-import Algebra.Prelude                    hiding (varX)
+import Algebra.Prelude.Core               hiding (varX)
 import Algebra.Ring.Polynomial.Univariate
 
 import           Control.Lens                 (imap)

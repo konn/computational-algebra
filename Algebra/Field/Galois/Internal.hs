@@ -8,7 +8,7 @@ module Algebra.Field.Galois.Internal
         buildInstance,
         parseLine) where
 import           Algebra.Field.Finite
-import           Algebra.Prelude                    hiding (lex, lift)
+import           Algebra.Prelude.Core               hiding (lex, lift)
 import           Algebra.Ring.Polynomial.Univariate (Unipol)
 import           Data.Char                          (isDigit)
 import           Data.Char                          (digitToInt)

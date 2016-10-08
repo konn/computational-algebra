@@ -17,7 +17,7 @@ import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
 import           Algebra.Internal                 hiding (OLt)
 import qualified Algebra.Matrix                   as AM
-import           Algebra.Prelude
+import           Algebra.Prelude.Core
 import           Algebra.Ring.Polynomial.Quotient
 
 import           Control.Lens         hiding ((:<))

@@ -7,7 +7,7 @@ module Algebra.Matrix (Matrix(..), delta, companion,
                        inverse, inverseWith) where
 import           Algebra.Internal
 import qualified Algebra.LinkedMatrix as LM
-import           Algebra.Prelude      hiding (maxNorm, zero)
+import           Algebra.Prelude.Core hiding (maxNorm, zero)
 
 import           Control.Lens
 import           Control.Monad               (when)

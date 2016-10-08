@@ -32,12 +32,10 @@ import           Prelude                      hiding (Integral (..), Num (..),
                                                product, sum)
 import GHC.OverloadedLabels (IsLabel(..))
 
-data UniqueResult = Expected | VariableOccursTwice Symbol
-
 type family UniqueList' (x :: Symbol) (xs :: [Symbol]) :: Constraint where
   UniqueList' x '[] = ()
   UniqueList' x (x ': xs) = TypeError ('Text "The variable " ':<>: 'ShowType x ':<>: 'Text " occurs more than once!")
-  UniqueList' x (y ': xs) = ()
+  UniqueList' x (y ': xs) = UniqueList' x xs
 
 type family UniqueList (xs :: [Symbol]) :: Constraint where
   UniqueList '[] = ()
