@@ -3,8 +3,7 @@
 {-# LANGUAGE NoRebindableSyntax, TypeFamilies                     #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Repa where
-import Algebra.Normed
-
+import           Algebra.Normed
 import           Data.Array.Repa                   hiding (map)
 import           Data.Array.Repa.Algorithms.Matrix
 import           Data.Array.Repa.Eval

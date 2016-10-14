@@ -2,6 +2,7 @@ resolver: nightly-2016-08-02
 packages:
 - '.'
 - 'algebraic-prelude'
+- 'factor-hensel'
 
 - location:
     git: https://github.com/konn/type-natural.git

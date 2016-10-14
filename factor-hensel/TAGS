@@ -1,12 +1,17 @@
 
-./Algebra/Algorithms/ChineseRemainder.hs,255
+./app/Main.hs,52
+module Main Main0,1
+main main4,5
+main main5,6
+
+./computational-algebra/Algebra/Algorithms/ChineseRemainder.hs,255
 module Algebra.Algorithms.ChineseRemainder Algebra.Algorithms.ChineseRemainder1,2
 recoverRat recoverRat9,10
 recoverRat recoverRat13,14
 rationalChineseRemainder rationalChineseRemainder33,34
 rationalChineseRemainder rationalChineseRemainder36,37
 
-./Algebra/Algorithms/Faugere4.hs,1763
+./computational-algebra/Algebra/Algorithms/Faugere4.hs,1763
 module Algebra.Algorithms.Faugere4 Algebra.Algorithms.Faugere48,9
 faugere4G faugere4G42,43
 faugere4G faugere4G47,48
@@ -64,7 +69,7 @@ redF4 redF4285,286
 ideal3 ideal3290,291
 ideal3 ideal3291,292
 
-./Algebra/Algorithms/Faugere5.hs,1914
+./computational-algebra/Algebra/Algorithms/Faugere5.hs,1914
 module Algebra.Algorithms.Faugere5 Algebra.Algorithms.Faugere56,7
 type CriticalPair CriticalPair43,44
 type CriticalPair ord ord43,44
@@ -133,7 +138,7 @@ showSingular showSingular388,389
 ideal ideal392,393
 ideal ideal393,394
 
-./Algebra/Algorithms/FGLM.hs,611
+./computational-algebra/Algebra/Algorithms/FGLM.hs,611
 module Algebra.Algorithms.FGLM Algebra.Algorithms.FGLM2,3
 data FGLMEnv FGLMEnv15,16
 data FGLMEnv s r ord n = FGLMEnv FGLMEnv15,16
@@ -154,7 +159,7 @@ infix infix39,40
 image image41,42
 image image42,43
 
-./Algebra/Algorithms/Groebner.hs,3601
+./computational-algebra/Algebra/Algorithms/Groebner.hs,3601
 module Algebra.Algorithms.GroebnerAlgebra.Algorithms.Groebner5,6
 isGroebnerBasis isGroebnerBasis50,51
 isGroebnerBasis isGroebnerBasis52,53
@@ -238,7 +243,7 @@ lcmPolynomial lcmPolynomial494,495
 gcdPolynomial gcdPolynomial496,497
 gcdPolynomial gcdPolynomial502,503
 
-./Algebra/Algorithms/PrimeTest.hs,631
+./computational-algebra/Algebra/Algorithms/PrimeTest.hs,631
 module Algebra.Algorithms.PrimeTest Algebra.Algorithms.PrimeTest1,2
 data PrimeResult PrimeResult12,13
 data PrimeResult = Composite Composite12,13
@@ -257,7 +262,7 @@ splitFactor splitFactor47,48
 isPseudoPrime isPseudoPrime53,54
 isPseudoPrime isPseudoPrime55,56
 
-./Algebra/Algorithms/Signature.hs,1594
+./computational-algebra/Algebra/Algorithms/Signature.hs,1594
 module Algebra.Algorithms.Signature Algebra.Algorithms.Signature7,8
 tr tr29,30
 tr tr30,31
@@ -308,7 +313,7 @@ sigSafeRed sigSafeRed192,193
 (*?)*?209,210
 (c(211,212
 
-./Algebra/Algorithms/ZeroDim.hs,1254
+./computational-algebra/Algebra/Algorithms/ZeroDim.hs,1254
 module Algebra.Algorithms.ZeroDim Algebra.Algorithms.ZeroDim10,11
 solveM solveM45,46
 solveM solveM51,52
@@ -353,7 +358,7 @@ nextMonomial nextMonomial371,372
 beta beta382,383
 beta beta383,384
 
-./Algebra/Field/AlgebraicReal.hs,4261
+./computational-algebra/Algebra/Field/AlgebraicReal.hs,4261
 module Algebra.Field.AlgebraicRealAlgebra.Field.AlgebraicReal4,5
 stdGenFromEntropy stdGenFromEntropy47,48
 stdGenFromEntropy stdGenFromEntropy48,49
@@ -487,7 +492,7 @@ approximate approximate719,720
 approxFractional approxFractional724,725
 approxFractional approxFractional725,726
 
-./Algebra/Field/Finite.hs,880
+./computational-algebra/Algebra/Field/Finite.hs,880
 module Algebra.Field.Finite Algebra.Field.Finite5,6
 newtype F F30,31
 newtype F (p :: k) = F F30,31
@@ -518,14 +523,14 @@ modRat modRat232,233
 modRat' modRat'235,236
 modRat' modRat'236,237
 
-./Algebra/Field/Galois/Conway.hs,223
+./computational-algebra/Algebra/Field/Galois/Conway.hs,223
 module Algebra.Field.Galois.ConwayAlgebra.Field.Galois.Conway3,4
 addConwayPolynomials addConwayPolynomials18,19
 addConwayPolynomials addConwayPolynomials19,20
 conwayFile conwayFile24,25
 conwayFile conwayFile25,26
 
-./Algebra/Field/Galois/Internal.hs,467
+./computational-algebra/Algebra/Field/Galois/Internal.hs,467
 module Algebra.Field.Galois.InternalAlgebra.Field.Galois.Internal4,5
 class ConwayPolynomial ConwayPolynomial23,24
 class ConwayPolynomial ConwayPolynomial23,24
@@ -541,7 +546,7 @@ toPoly toPoly48,49
 buildInstance buildInstance53,54
 buildInstance buildInstance54,55
 
-./Algebra/Field/Galois.hs,1139
+./computational-algebra/Algebra/Field/Galois.hs,1139
 module Algebra.Field.Galois Algebra.Field.Galois5,6
 data GF' GF'39,40
 data GF' p (n :: TL.Nat) (f :: *) = GF' GF'39,40
@@ -579,11 +584,11 @@ primitive primitive237,238
 conway conway240,241
 conway conway242,243
 
-./Algebra/Instances.hs,73
+./computational-algebra/Algebra/Instances.hs,73
 module Algebra.Instances Algebra.Instances4,5
 instance instance18,19
 
-./Algebra/Internal.hs,540
+./computational-algebra/Algebra/Internal.hs,540
 module Algebra.InternalAlgebra.Internal6,7
 import import45,46
 toProxy toProxy55,56
@@ -605,7 +610,7 @@ sNatToInt sNatToInt108,109
 sNatToInt sNatToInt109,110
 instance instance111,112
 
-./Algebra/LinkedMatrix.hs,7125
+./computational-algebra/Algebra/LinkedMatrix.hs,7125
 module Algebra.LinkedMatrix Algebra.LinkedMatrix8,9
 data Entry Entry66,67
 data Entry a = Entry Entry66,67
@@ -838,7 +843,7 @@ solveHensel solveHensel876,877
 killerMat killerMat895,896
 killerMat killerMat896,897
 
-./Algebra/Matrix.hs,1818
+./computational-algebra/Algebra/Matrix.hs,1818
 module Algebra.Matrix Algebra.Matrix4,5
 class Matrix Matrix27,28
   nonZeroCols :: (DecidableZero a, Elem mat a) => mat mat68,69
@@ -906,7 +911,7 @@ inverse inverse313,314
 inverseWith inverseWith315,316
 inverseWith inverseWith316,317
 
-./Algebra/Normed.hs,216
+./computational-algebra/Algebra/Normed.hs,216
 module Algebra.Normed Algebra.Normed0,1
 class (Ord (Norm a)) => Normed Normed4,5
 class (Ord (Norm a)) => Normed Normed4,5
@@ -915,7 +920,7 @@ class (Ord (Norm a)) => Normed Normed4,5
   liftNorm liftNorm7,8
 instance instance9,10
 
-./Algebra/Prelude/Core.hs,234
+./computational-algebra/Algebra/Prelude/Core.hs,234
 module Algebra.Prelude.CoreAlgebra.Prelude.Core1,2
 (%)%20,21
 n n22,23
@@ -925,47 +930,47 @@ logBase2 logBase228,29
 ceilingLogBase2 ceilingLogBase231,32
 ceilingLogBase2 ceilingLogBase232,33
 
-./Algebra/Prelude.hs,43
+./computational-algebra/Algebra/Prelude.hs,43
 module Algebra.PreludeAlgebra.Prelude1,2
 
-./Algebra/Repa.hs,900
+./computational-algebra/Algebra/Repa.hs,900
 module Algebra.Repa Algebra.Repa4,5
-type Matrix Matrix17,18
-type Matrix a a17,18
-type family family19,20
-type instance instance20,21
-type instance DefVec DefVec20,21
+type Matrix Matrix18,19
+type Matrix a a18,19
+type family family20,21
 type instance instance21,22
+type instance DefVec DefVec21,22
 type instance instance22,23
-instance instance24,25
-switchRows switchRows29,30
+type instance instance23,24
+instance instance25,26
 switchRows switchRows30,31
-(><)><37,38
-i i38,39
-toRows toRows40,41
+switchRows switchRows31,32
+(><)><38,39
+i i39,40
 toRows toRows41,42
-switchCols switchCols43,44
+toRows toRows42,43
 switchCols switchCols44,45
-getCol getCol51,52
+switchCols switchCols45,46
 getCol getCol52,53
-getRow getRow54,55
+getCol getCol53,54
 getRow getRow55,56
-scaleRow scaleRow57,58
+getRow getRow56,57
 scaleRow scaleRow58,59
-combineRows combineRows64,65
+scaleRow scaleRow59,60
 combineRows combineRows65,66
-identity identity71,72
+combineRows combineRows66,67
 identity identity72,73
-fromLists fromLists74,75
+identity identity73,74
 fromLists fromLists75,76
-ncols ncols78,79
+fromLists fromLists76,77
 ncols ncols79,80
-nrows nrows81,82
+ncols ncols80,81
 nrows nrows82,83
-gaussReductionP gaussReductionP84,85
-gaussReductionP gaussReductionP86,87
+nrows nrows83,84
+gaussReductionP gaussReductionP85,86
+gaussReductionP gaussReductionP87,88
 
-./Algebra/Ring/Ideal.hs,611
+./computational-algebra/Algebra/Ring/Ideal.hs,611
 module Algebra.Ring.Ideal Algebra.Ring.Ideal4,5
 data Ideal Ideal13,14
 data Ideal r = forall forall13,14
@@ -987,7 +992,7 @@ principalIdeal principalIdeal47,48
 mapIdeal mapIdeal49,50
 mapIdeal mapIdeal50,51
 
-./Algebra/Ring/Polynomial/Class.hs,4381
+./computational-algebra/Algebra/Ring/Polynomial/Class.hs,4381
 module Algebra.Ring.Polynomial.ClassAlgebra.Ring.Polynomial.Class7,8
 class    (DecidableZero r, Ring r, Commutative r, Eq r) => CoeffRing CoeffRing54,55
    => IsPolynomial IsPolynomial63,64
@@ -1115,7 +1120,7 @@ modPolynomial modPolynomial535,536
 divPolynomial divPolynomial538,539
 divPolynomial divPolynomial540,541
 
-./Algebra/Ring/Polynomial/Factorize.hs,1711
+./computational-algebra/Algebra/Ring/Polynomial/Factorize.hs,1711
 module Algebra.Ring.Polynomial.FactorizeAlgebra.Ring.Polynomial.Factorize5,6
 distinctDegFactor distinctDegFactor57,58
 distinctDegFactor distinctDegFactor60,61
@@ -1170,7 +1175,7 @@ comb comb311,312
 normalizeMod normalizeMod317,318
 normalizeMod normalizeMod318,319
 
-./Algebra/Ring/Polynomial/HighLevel.hs,1373
+./computational-algebra/Algebra/Ring/Polynomial/HighLevel.hs,1373
 module Algebra.Ring.Polynomial.HighLevel Algebra.Ring.Polynomial.HighLevel6,7
 rational rational29,30
 rational rational30,31
@@ -1221,7 +1226,7 @@ grlex grlex147,148
 grevlex grevlex149,150
 grevlex grevlex150,151
 
-./Algebra/Ring/Polynomial/Labeled.hs,1159
+./computational-algebra/Algebra/Ring/Polynomial/Labeled.hs,1159
 module Algebra.Ring.Polynomial.LabeledAlgebra.Ring.Polynomial.Labeled6,7
 type family family34,35
 type family UniqueList' UniqueList'34,35
@@ -1252,7 +1257,7 @@ canonicalMap canonicalMap246,247
 canonicalMap' canonicalMap'256,257
 canonicalMap' canonicalMap'261,262
 
-./Algebra/Ring/Polynomial/Monomial.hs,3931
+./computational-algebra/Algebra/Ring/Polynomial/Monomial.hs,3931
 module Algebra.Ring.Polynomial.MonomialAlgebra.Ring.Polynomial.Monomial8,9
 type Monomial Monomial55,56
 type Monomial n n55,56
@@ -1358,7 +1363,7 @@ cmpAnyMonomial cmpAnyMonomial357,358
 orderMonomial orderMonomial361,362
 orderMonomial orderMonomial362,363
 
-./Algebra/Ring/Polynomial/Monomorphic.hs,2364
+./computational-algebra/Algebra/Ring/Polynomial/Monomorphic.hs,2364
 module Algebra.Ring.Polynomial.Monomorphic Algebra.Ring.Polynomial.Monomorphic5,6
 data Variable Variable30,31
 data Variable = Variable Variable30,31
@@ -1418,7 +1423,7 @@ subst subst250,251
 diff diff254,255
 diff diff255,256
 
-./Algebra/Ring/Polynomial/Parser.hs,703
+./computational-algebra/Algebra/Ring/Polynomial/Parser.hs,703
 module Algebra.Ring.Polynomial.ParserAlgebra.Ring.Polynomial.Parser1,2
 expression expression13,14
 expression expression14,15
@@ -1447,7 +1452,7 @@ parsePolyn parsePolyn62,63
 eithResult eithResult64,65
 eithResult eithResult65,66
 
-./Algebra/Ring/Polynomial/Quotient.hs,2050
+./computational-algebra/Algebra/Ring/Polynomial/Quotient.hs,2050
 module Algebra.Ring.Polynomial.QuotientAlgebra.Ring.Polynomial.Quotient6,7
 newtype Quotient Quotient34,35
 newtype Quotient poly ideal = Quotient Quotient34,35
@@ -1507,7 +1512,7 @@ reduce reduce501,502
 isZeroDimensional isZeroDimensional516,517
 isZeroDimensional isZeroDimensional518,519
 
-./Algebra/Ring/Polynomial/Univariate.hs,1165
+./computational-algebra/Algebra/Ring/Polynomial/Univariate.hs,1165
 module Algebra.Ring.Polynomial.UnivariateAlgebra.Ring.Polynomial.Univariate6,7
 newtype Unipol Unipol35,36
 newtype Unipol r = Unipol Unipol35,36
@@ -1544,7 +1549,7 @@ diffIMap diffIMap268,269
 mapCoeffUnipol mapCoeffUnipol370,371
 mapCoeffUnipol mapCoeffUnipol371,372
 
-./Algebra/Ring/Polynomial.hs,2037
+./computational-algebra/Algebra/Ring/Polynomial.hs,2037
 module Algebra.Ring.PolynomialAlgebra.Ring.Polynomial10,11
 instance instance50,51
 newtype OrderedPolynomial OrderedPolynomial56,57
@@ -1605,7 +1610,7 @@ padeApprox padeApprox454,455
 minpolRecurrent minpolRecurrent459,460
 minpolRecurrent minpolRecurrent461,462
 
-./Algebra/Scalar.hs,218
+./computational-algebra/Algebra/Scalar.hs,218
 module Algebra.Scalar Algebra.Scalar3,4
 newtype Scalar Scalar12,13
 newtype Scalar r = Scalar Scalar12,13
@@ -1614,77 +1619,17 @@ newtype Scalar r = Scalar { runScalar runScalar12,13
 r r19,20
 instance instance22,23
 
-./algebraic-prelude/.stack-work/dist/x86_64-osx/Cabal-1.22.5.0/build/autogen/Paths_algebraic_prelude.hs,984
-module Paths_algebraic_prelude Paths_algebraic_prelude0,1
-catchIO catchIO11,12
-catchIO catchIO12,13
-version version14,15
-version version15,16
-bindir, libdir, datadir, libexecdir, sysconfdir sysconfdir16,17
-bindir, libdir, datadir, libexecdir,libexecdir16,17
-bindir, libdir, datadir,datadir16,17
-bindir, libdir,libdir16,17
-bindir,bindir16,17
-bindir bindir18,19
-libdir libdir19,20
-datadir datadir20,21
-libexecdir libexecdir21,22
-sysconfdir sysconfdir22,23
-getBinDir, getLibDir, getDataDir, getLibexecDir, getSysconfDir getSysconfDir24,25
-getBinDir, getLibDir, getDataDir, getLibexecDir,getLibexecDir24,25
-getBinDir, getLibDir, getDataDir,getDataDir24,25
-getBinDir, getLibDir,getLibDir24,25
-getBinDir,getBinDir24,25
-getBinDir getBinDir25,26
-getLibDir getLibDir26,27
-getDataDir getDataDir27,28
-getLibexecDir getLibexecDir28,29
-getSysconfDir getSysconfDir29,30
-getDataFileName getDataFileName31,32
-getDataFileName getDataFileName32,33
-
-./algebraic-prelude/.stack-work/dist/x86_64-osx/Cabal-1.24.0.0/build/autogen/Paths_algebraic_prelude.hs,1030
-module Paths_algebraic_prelude Paths_algebraic_prelude3,4
-catchIO catchIO17,18
-catchIO catchIO19,20
-catchIO catchIO23,24
-catchIO catchIO25,26
-version version27,28
-version version28,29
-bindir, libdir, datadir, libexecdir, sysconfdir sysconfdir29,30
-bindir, libdir, datadir, libexecdir,libexecdir29,30
-bindir, libdir, datadir,datadir29,30
-bindir, libdir,libdir29,30
-bindir,bindir29,30
-bindir bindir31,32
-libdir libdir32,33
-datadir datadir33,34
-libexecdir libexecdir34,35
-sysconfdir sysconfdir35,36
-getBinDir, getLibDir, getDataDir, getLibexecDir, getSysconfDir getSysconfDir37,38
-getBinDir, getLibDir, getDataDir, getLibexecDir,getLibexecDir37,38
-getBinDir, getLibDir, getDataDir,getDataDir37,38
-getBinDir, getLibDir,getLibDir37,38
-getBinDir,getBinDir37,38
-getBinDir getBinDir38,39
-getLibDir getLibDir39,40
-getDataDir getDataDir40,41
-getLibexecDir getLibexecDir41,42
-getSysconfDir getSysconfDir42,43
-getDataFileName getDataFileName44,45
-getDataFileName getDataFileName45,46
-
-./algebraic-prelude/examples/sandpit.hs,85
+./computational-algebra/algebraic-prelude/examples/sandpit.hs,85
 module Main Main1,2
 arg, main main6,7
 arg,arg6,7
 arg arg7,8
 main main12,13
 
-./algebraic-prelude/Setup.hs,15
+./computational-algebra/algebraic-prelude/Setup.hs,15
 main main1,2
 
-./algebraic-prelude/src/AlgebraicPrelude.hs,1398
+./computational-algebra/algebraic-prelude/src/AlgebraicPrelude.hs,1398
 module AlgebraicPreludeAlgebraicPrelude48,49
 type Rational Rational133,134
 fromInteger fromInteger138,139
@@ -1720,11 +1665,11 @@ newtype Mult Mult561,562
 newtype Mult a = Mult Mult561,562
 newtype Mult a = Mult { runMult runMult561,562
 
-./algebraic-prelude/test/Spec.hs,30
+./computational-algebra/algebraic-prelude/test/Spec.hs,30
 main main0,1
 main main1,2
 
-./bench/bench.hs,122
+./computational-algebra/bench/bench.hs,122
 i1, i2, i4 i410,11
 i1, i2,i210,11
 i1,i110,11
@@ -1734,7 +1679,7 @@ i3 i319,20
 main main23,24
 main main24,25
 
-./bench/coercion.hs,392
+./computational-algebra/bench/coercion.hs,392
 module Main Main4,5
 x, y, z z25,26
 x, y,y25,26
@@ -1760,7 +1705,7 @@ f03 f0362,63
 main main67,68
 main main68,69
 
-./bench/division.hs,176
+./computational-algebra/bench/division.hs,176
 module Main Main4,5
 makeIdeals makeIdeals20,21
 makeIdeals makeIdeals21,22
@@ -1769,7 +1714,7 @@ mkTestCases mkTestCases27,28
 main main37,38
 main main38,39
 
-./bench/elimination-bench.hs,544
+./computational-algebra/bench/elimination-bench.hs,544
 x, y, z, w, s, a, b, c, t, u, v v15,16
 x, y, z, w, s, a, b, c, t, u,u15,16
 x, y, z, w, s, a, b, c, t,t15,16
@@ -1796,7 +1741,7 @@ mkTestCase mkTestCase32,33
 main main38,39
 main main39,40
 
-./bench/faugere4.hs,449
+./computational-algebra/bench/faugere4.hs,449
 module Main Main1,2
 s3 s317,18
 s3 s318,19
@@ -1822,7 +1767,7 @@ buildCase buildCase55,56
 main main57,58
 main main58,59
 
-./bench/linear.hs,176
+./computational-algebra/bench/linear.hs,176
 module Main Main4,5
 makeLinear makeLinear18,19
 makeLinear makeLinear19,20
@@ -1831,7 +1776,7 @@ mkTestCases mkTestCases25,26
 main main33,34
 main main34,35
 
-./bench/monomials.hs,480
+./computational-algebra/bench/monomials.hs,480
 module Main Main1,2
 data MonomPair MonomPair14,15
 data MonomPair = forall forall14,15
@@ -1847,7 +1792,7 @@ genMonomial genMonomial30,31
 mkTestCase mkTestCase44,45
 mkTestCase mkTestCase45,46
 
-./bench/quotient-bench-randomized.hs,210
+./computational-algebra/bench/quotient-bench-randomized.hs,210
 module Main Main4,5
 sTwo sTwo25,26
 sTwo sTwo26,27
@@ -1858,7 +1803,7 @@ mkTestCases mkTestCases32,33
 main main45,46
 main main46,47
 
-./bench/SingularBench.hs,652
+./computational-algebra/bench/SingularBench.hs,652
 module SingularBench SingularBench2,3
 formatPoly formatPoly20,21
 formatPoly formatPoly21,22
@@ -1880,7 +1825,7 @@ skeleton skeleton70,71
 singularWith singularWith80,81
 singularWith singularWith81,82
 
-./bench/solve.hs,444
+./computational-algebra/bench/solve.hs,444
 module Main Main4,5
 sFour sFour28,29
 sFour sFour29,30
@@ -1906,7 +1851,7 @@ randomCase randomCase72,73
 main main76,77
 main main77,78
 
-./bench/sugar-bench.hs,468
+./computational-algebra/bench/sugar-bench.hs,468
 x, y, z, w, s, a, b, c c10,11
 x, y, z, w, s, a, b,b10,11
 x, y, z, w, s, a,a10,11
@@ -1932,7 +1877,7 @@ mkTC mkTC33,34
 main main41,42
 main main42,43
 
-./bench/sugar-paper.hs,256
+./computational-algebra/bench/sugar-paper.hs,256
 module Main Main5,6
 i1 i116,17
 i1 i117,18
@@ -1949,7 +1894,7 @@ mkTC mkTC57,58
 main main62,63
 main main63,64
 
-./bench/sugar.hs,372
+./computational-algebra/bench/sugar.hs,372
 x, y, z, w, s, a, b, c c11,12
 x, y, z, w, s, a, b,b11,12
 x, y, z, w, s, a,a11,12
@@ -1971,7 +1916,7 @@ i4 i425,26
 main main27,28
 main main28,29
 
-./bench/unipol-bench.hs,1849
+./computational-algebra/bench/unipol-bench.hs,1849
 module Main Main1,2
 main main10,11
 main main11,12
@@ -2021,7 +1966,7 @@ rat_500_simple rat_500_simple249,250
 rat_400_simple rat_400_simple251,252
 rat_400_simple rat_400_simple252,253
 
-./bench/unipol-div.hs,317
+./computational-algebra/bench/unipol-div.hs,317
 module Main Main1,2
 x x15,16
 x x16,17
@@ -2037,7 +1982,7 @@ genPair genPair31,32
 main main38,39
 main main39,40
 
-./bench/unipol-mult.hs,509
+./computational-algebra/bench/unipol-mult.hs,509
 module Main Main1,2
 x x15,16
 x x16,17
@@ -2061,35 +2006,35 @@ rat rat53,54
 main main55,56
 main main56,57
 
-./examples/algebraic.hs,73
+./computational-algebra/examples/algebraic.hs,73
 module Main Main1,2
 f f6,7
 f f7,8
 main main9,10
 main main10,11
 
-./examples/faugere-prof.hs,93
+./computational-algebra/examples/faugere-prof.hs,93
 module Main Main1,2
 main main6,7
 main main7,8
 ideal3 ideal39,10
 ideal3 ideal310,11
 
-./examples/groebner-prof.hs,74
+./computational-algebra/examples/groebner-prof.hs,74
 module Main Main1,2
 i i6,7
 i i7,8
 main main14,15
 main main15,16
 
-./examples/hensel-prof.hs,102
+./computational-algebra/examples/hensel-prof.hs,102
 module Main Main1,2
 main main7,8
 main main8,9
 testCase testCase12,13
 testCase testCase13,14
 
-./examples/ipsolve.hs,2264
+./computational-algebra/examples/ipsolve.hs,2264
 module Main Main5,6
 newtype IsOrder_ IsOrder_16,17
 newtype IsOrder_ n = IsOrder_ IsOrder_16,17
@@ -2159,7 +2104,7 @@ main main155,156
 act act157,158
 act act158,159
 
-./examples/monomorphic.hs,368
+./computational-algebra/examples/monomorphic.hs,368
 module Example Example3,4
 (^^)^^20,21
 (^(21,22
@@ -2180,7 +2125,7 @@ main main40,41
 idealMembershipDemo idealMembershipDemo66,67
 idealMembershipDemo idealMembershipDemo67,68
 
-./examples/polymorphic.hs,543
+./computational-algebra/examples/polymorphic.hs,543
 module Example Example4,5
 x, y, f, f1, f2 f212,13
 x, y, f, f1,f112,13
@@ -2209,7 +2154,7 @@ sFour sFour72,73
 sTwo sTwo74,75
 sTwo sTwo75,76
 
-./examples/quotient.hs,171
+./computational-algebra/examples/quotient.hs,171
 module Main Main3,4
 x, y y13,14
 x,x13,14
@@ -2221,12 +2166,26 @@ fromRight fromRight21,22
 main main24,25
 main main25,26
 
-./examples/sandpit-poly.hs,56
+./computational-algebra/examples/sandpit-poly.hs,368
 module Main Main2,3
-main main13,14
-main main14,15
+u, v, x, y, z z14,15
+u, v, x, y,y14,15
+u, v, x,x14,15
+u, v,v14,15
+u,u14,15
+[u,[u15,16
+fromRight fromRight17,18
+fromRight fromRight18,19
+main, act act22,23
+main,main22,23
+main main23,24
+act act24,25
+findDifference findDifference31,32
+findDifference findDifference33,34
+findRoot findRoot49,50
+findRoot findRoot50,51
 
-./examples/site-example.hs,223
+./computational-algebra/examples/site-example.hs,223
 module Main Main3,4
 x x11,12
 x x13,14
@@ -2244,7 +2203,7 @@ main main42,43
 main main43,44
 act act45,46
 
-./examples/solve.hs,923
+./computational-algebra/examples/solve.hs,923
 module Main Main4,5
 tr tr23,24
 tr tr24,25
@@ -2289,986 +2248,23 @@ substIdeal substIdeal140,141
 toComplex toComplex142,143
 toComplex toComplex143,144
 
-./factor-hensel/.stack-work/dist/x86_64-osx/Cabal-1.24.0.0/build/autogen/Paths_factor_hensel.hs,1022
-module Paths_factor_hensel Paths_factor_hensel3,4
-catchIO catchIO17,18
-catchIO catchIO19,20
-catchIO catchIO23,24
-catchIO catchIO25,26
-version version27,28
-version version28,29
-bindir, libdir, datadir, libexecdir, sysconfdir sysconfdir29,30
-bindir, libdir, datadir, libexecdir,libexecdir29,30
-bindir, libdir, datadir,datadir29,30
-bindir, libdir,libdir29,30
-bindir,bindir29,30
-bindir bindir31,32
-libdir libdir32,33
-datadir datadir33,34
-libexecdir libexecdir34,35
-sysconfdir sysconfdir35,36
-getBinDir, getLibDir, getDataDir, getLibexecDir, getSysconfDir getSysconfDir37,38
-getBinDir, getLibDir, getDataDir, getLibexecDir,getLibexecDir37,38
-getBinDir, getLibDir, getDataDir,getDataDir37,38
-getBinDir, getLibDir,getLibDir37,38
-getBinDir,getBinDir37,38
-getBinDir getBinDir38,39
-getLibDir getLibDir39,40
-getDataDir getDataDir40,41
-getLibexecDir getLibexecDir41,42
-getSysconfDir getSysconfDir42,43
-getDataFileName getDataFileName44,45
-getDataFileName getDataFileName45,46
-
-./factor-hensel/.stack-work/downloaded/GE67uIrr9h97/Data/Type/Natural/Builtin.hs,2837
-module Data.Type.Natural.BuiltinData.Type.Natural.Builtin7,8
-import import48,49
-type Peano Peano58,59
-type family family60,61
-type family FromPeano FromPeano60,61
-type family family64,65
-type family ToPeano ToPeano64,65
-viewNat viewNat68,69
-viewNat viewNat69,70
-sFromPeano sFromPeano74,75
-sFromPeano sFromPeano75,76
-toPeanoInjective toPeanoInjective78,79
-toPeanoInjective toPeanoInjective79,80
-toPeanoSuccCong toPeanoSuccCong86,87
-toPeanoSuccCong toPeanoSuccCong87,88
-sToPeano sToPeano90,91
-sToPeano sToPeano91,92
-toFromPeano toFromPeano100,101
-toFromPeano toFromPeano101,102
-congFromPeano congFromPeano108,109
-congFromPeano congFromPeano109,110
-congToPeano congToPeano111,112
-congToPeano congToPeano112,113
-congSucc congSucc114,115
-congSucc congSucc115,116
-fromToPeano fromToPeano117,118
-fromToPeano fromToPeano118,119
-fromPeanoInjective fromPeanoInjective129,130
-fromPeanoInjective fromPeanoInjective131,132
-fromPeanoSuccCong fromPeanoSuccCong139,140
-fromPeanoSuccCong fromPeanoSuccCong140,141
-fromPeanoPlusCong fromPeanoPlusCong142,143
-fromPeanoPlusCong fromPeanoPlusCong143,144
-toPeanoPlusCong toPeanoPlusCong152,153
-toPeanoPlusCong toPeanoPlusCong153,154
-fromPeanoZeroCong fromPeanoZeroCong168,169
-fromPeanoZeroCong fromPeanoZeroCong169,170
-toPeanoZeroCong toPeanoZeroCong171,172
-toPeanoZeroCong toPeanoZeroCong172,173
-fromPeanoOneCong fromPeanoOneCong174,175
-fromPeanoOneCong fromPeanoOneCong175,176
-toPeanoOneCong toPeanoOneCong177,178
-toPeanoOneCong toPeanoOneCong178,179
-natPlusCongR natPlusCongR180,181
-natPlusCongR natPlusCongR181,182
-fromPeanoMultCong fromPeanoMultCong183,184
-fromPeanoMultCong fromPeanoMultCong184,185
-toPeanoMultCong toPeanoMultCong196,197
-toPeanoMultCong toPeanoMultCong197,198
-infix infix211,212
-(%(212,213
-(%:<=%:<=?212,213
-n n213,214
-natLeqSuccEq natLeqSuccEq218,219
-natLeqSuccEq natLeqSuccEq218,219
-leqqCong leqqCong221,222
-leqqCong leqqCong221,222
-leqCong leqCong224,225
-leqCong leqCong224,225
-fromPeanoMonotone fromPeanoMonotone227,228
-fromPeanoMonotone fromPeanoMonotone227,228
-natLeqZero natLeqZero241,242
-natLeqZero natLeqZero241,242
-natSuccPred natSuccPred248,249
-natSuccPred natSuccPred249,250
-myLeqPred myLeqPred251,252
-myLeqPred myLeqPred251,252
-toPeanoCong toPeanoCong256,257
-toPeanoCong toPeanoCong257,258
-toPeanoMonotone toPeanoMonotone259,260
-toPeanoMonotone toPeanoMonotone259,260
-inductionNat inductionNat280,281
-inductionNat inductionNat281,282
-instance instance287,288
-maxCompareFlip maxCompareFlip314,315
-maxCompareFlip maxCompareFlip315,316
-minCompareFlip minCompareFlip327,328
-minCompareFlip minCompareFlip328,329
-type family family340,341
-type family MyLeqHelper MyLeqHelper340,341
-snat snat422,423
-snat snat423,424
-
-./factor-hensel/.stack-work/downloaded/GE67uIrr9h97/Data/Type/Natural/Class/Arithmetic.hs,5864
-module Data.Type.Natural.Class.ArithmeticData.Type.Natural.Class.Arithmetic5,6
-type family family19,20
-type family Zero Zero19,20
-sZero sZero22,23
-sZero sZero23,24
-type family family25,26
-type family One One25,26
-sOne sOne28,29
-sOne sOne29,30
-type S S31,32
-type S n n31,32
-sS sS33,34
-sS sS34,35
-predCong predCong36,37
-predCong predCong37,38
-plusCong plusCong39,40
-plusCong plusCong40,41
-plusCongL plusCongL42,43
-plusCongL plusCongL43,44
-plusCongR plusCongR45,46
-plusCongR plusCongR46,47
-succCong succCong48,49
-succCong succCong49,50
-multCong multCong51,52
-multCong multCong52,53
-multCongL multCongL54,55
-multCongL multCongL55,56
-multCongR multCongR57,58
-multCongR multCongR58,59
-minusCong minusCong60,61
-minusCong minusCong61,62
-minusCongL minusCongL63,64
-minusCongL minusCongL64,65
-minusCongR minusCongR66,67
-minusCongR minusCongR67,68
-data ZeroOrSucc ZeroOrSucc69,70
-data ZeroOrSucc (n n69,70
-  IsZero IsZero70,71
-  IsSucc IsSucc71,72
-data ZeroOrSucc (n n69,70
-newtype Assoc Assoc73,74
-newtype Assoc op n = Assoc Assoc73,74
-newtype Assoc op n = Assoc { assocProof assocProof73,74
-newtype IdentityR IdentityR79,80
-newtype IdentityR op e (n :: nat) = IdentityR IdentityR79,80
-newtype IdentityR op e (n :: nat) = IdentityR { idRProof idRProof79,80
-newtype IdentityL IdentityL80,81
-newtype IdentityL op e (n :: nat) = IdentityL IdentityL80,81
-newtype IdentityL op e (n :: nat) = IdentityL { idLProof idLProof80,81
-type PlusZeroR PlusZeroR82,83
-type PlusZeroR (n(82,83
-newtype PlusSuccR PlusSuccR83,84
-  PlusSuccR PlusSuccR84,85
-  PlusSuccR { plusSuccRProof plusSuccRProof84,85
-type PlusZeroL PlusZeroL86,87
-newtype PlusSuccL PlusSuccL87,88
-  PlusSuccL PlusSuccL88,89
-  PlusSuccL { plusSuccLProof plusSuccLProof88,89
-newtype Comm Comm90,91
-newtype Comm op n = Comm Comm90,91
-newtype Comm op n = Comm { commProof commProof90,91
-type PlusComm PlusComm92,93
-newtype MultZeroL MultZeroL94,95
-newtype MultZeroL (n :: nat) =  MultZeroL MultZeroL94,95
-newtype MultZeroL (n :: nat) =  MultZeroL { multZeroLProof multZeroLProof94,95
-newtype MultZeroR MultZeroR95,96
-  MultZeroR MultZeroR96,97
-  MultZeroR { multZeroRProof multZeroRProof96,97
-newtype MultSuccL MultSuccL98,99
-newtype MultSuccL (m :: nat) = MultSuccL MultSuccL98,99
-newtype MultSuccL (m :: nat) = MultSuccL { multSuccLProof multSuccLProof98,99
-newtype MultSuccR MultSuccR99,100
-newtype MultSuccR (n :: nat) = MultSuccR MultSuccR99,100
-newtype MultSuccR (n :: nat) = MultSuccR { multSuccRProof multSuccRProof99,100
-newtype PlusMultDistrib PlusMultDistrib101,102
-  PlusMultDistrib PlusMultDistrib102,103
-  PlusMultDistrib { plusMultDistribProof plusMultDistribProof102,103
-newtype PlusEqCancelL PlusEqCancelL106,107
-  PlusEqCancelL PlusEqCancelL107,108
-  PlusEqCancelL { plusEqCancelLProof plusEqCancelLProof107,108
-newtype SuccPlusL SuccPlusL110,111
-newtype SuccPlusL (n :: nat) = SuccPlusL SuccPlusL110,111
-newtype SuccPlusL (n :: nat) = SuccPlusL { proofSuccPlusL proofSuccPlusL110,111
-newtype MultEqCancelR MultEqCancelR111,112
-  MultEqCancelR MultEqCancelR112,113
-  MultEqCancelR { proofMultEqCancelR proofMultEqCancelR112,113
-    => IsPeano IsPeano118,119
-    => IsPeano IsPeano118,119
-  succOneCong succOneCong124,125
-  succInj succInj125,126
-  succInj' succInj'126,127
-  succInj' succInj'127,128
-  succNonCyclic succNonCyclic128,129
-  induction induction129,130
-  plusMinus plusMinus130,131
-  plusMinus' plusMinus'132,133
-  plusMinus' plusMinus'133,134
-  plusZeroL plusZeroL138,139
-  plusZeroL plusZeroL139,140
-  plusSuccL plusSuccL150,151
-  plusSuccL plusSuccL151,152
-  plusZeroR plusZeroR166,167
-  plusZeroR plusZeroR167,168
-  plusSuccR plusSuccR178,179
-  plusSuccR plusSuccR179,180
-  plusComm plusComm194,195
-  plusComm plusComm195,196
-  plusAssoc plusAssoc210,211
-  plusAssoc plusAssoc212,213
-  multZeroL multZeroL231,232
-  multZeroL multZeroL232,233
-  multSuccL multSuccL244,245
-  multSuccL multSuccL245,246
-  multZeroR multZeroR273,274
-  multZeroR multZeroR274,275
-  multSuccR multSuccR286,287
-  multSuccR multSuccR287,288
-  multComm multComm321,322
-  multComm multComm322,323
-  multOneR multOneR337,338
-  multOneR multOneR338,339
-  multOneL multOneL345,346
-  multOneL multOneL346,347
-  plusMultDistrib plusMultDistrib351,352
-  plusMultDistrib plusMultDistrib353,354
-  multPlusDistrib multPlusDistrib376,377
-  multPlusDistrib multPlusDistrib378,379
-  minusNilpotent minusNilpotent384,385
-  minusNilpotent minusNilpotent385,386
-  multAssoc multAssoc390,391
-  multAssoc multAssoc392,393
-  plusEqCancelL plusEqCancelL409,410
-  plusEqCancelL plusEqCancelL410,411
-  plusEqCancelR plusEqCancelR428,429
-  plusEqCancelR plusEqCancelR429,430
-  succAndPlusOneL succAndPlusOneL435,436
-  succAndPlusOneL succAndPlusOneL436,437
-  succAndPlusOneR succAndPlusOneR450,451
-  succAndPlusOneR succAndPlusOneR451,452
-  predSucc predSucc456,457
-  zeroOrSucc zeroOrSucc458,459
-  zeroOrSucc zeroOrSucc459,460
-  plusEqZeroL plusEqZeroL464,465
-  plusEqZeroL plusEqZeroL465,466
-  plusEqZeroR plusEqZeroR470,471
-  plusEqZeroR plusEqZeroR471,472
-  predUnique predUnique473,474
-  predUnique predUnique474,475
-  multEqSuccElimL multEqSuccElimL478,479
-  multEqSuccElimL multEqSuccElimL479,480
-  multEqSuccElimR multEqSuccElimR486,487
-  multEqSuccElimR multEqSuccElimR487,488
-  minusZero minusZero490,491
-  minusZero minusZero491,492
-  multEqCancelR multEqCancelR497,498
-  multEqCancelR multEqCancelR498,499
-  succPred succPred525,526
-  succPred succPred526,527
-  multEqCancelL multEqCancelL531,532
-  multEqCancelL multEqCancelL532,533
-  sPred' sPred'536,537
-  sPred' sPred'537,538
-pattern pattern540,541
-
-./factor-hensel/.stack-work/downloaded/GE67uIrr9h97/Data/Type/Natural/Class/Order.hs,7067
-module Data.Type.Natural.Class.OrderData.Type.Natural.Class.Order4,5
-data LeqView LeqView21,22
-data LeqView (n n21,22
-data LeqView (n :: nat) (m m21,22
-  LeqZero LeqZero22,23
-  LeqSucc LeqSucc23,24
-data LeqView (n n21,22
-data LeqView (n n21,22
-data DiffNat DiffNat25,26
-  DiffNat DiffNat26,27
-newtype LeqWitPf LeqWitPf28,29
-newtype LeqWitPf n = LeqWitPf LeqWitPf28,29
-newtype LeqWitPf n = LeqWitPf { leqWitPf leqWitPf28,29
-newtype LeqStepPf LeqStepPf29,30
-newtype LeqStepPf n = LeqStepPf LeqStepPf29,30
-newtype LeqStepPf n = LeqStepPf { leqStepPf leqStepPf29,30
-succDiffNat succDiffNat31,32
-succDiffNat succDiffNat33,34
-coerceLeqL coerceLeqL35,36
-coerceLeqL coerceLeqL35,36
-coerceLeqR coerceLeqR39,40
-coerceLeqR coerceLeqR39,40
-singletonsOnly singletonsOnly43,44
-congFlipOrdering congFlipOrdering50,51
-congFlipOrdering congFlipOrdering51,52
-compareCongR compareCongR53,54
-compareCongR compareCongR54,55
-sLeqCong sLeqCong56,57
-sLeqCong sLeqCong56,57
-sLeqCongL sLeqCongL59,60
-sLeqCongL sLeqCongL59,60
-sLeqCongR sLeqCongR62,63
-sLeqCongR sLeqCongR62,63
-newtype LTSucc LTSucc65,66
-newtype LTSucc n = LTSucc LTSucc65,66
-newtype LTSucc n = LTSucc { proofLTSucc proofLTSucc65,66
-newtype CmpSuccStepR CmpSuccStepR66,67
-  CmpSuccStepR CmpSuccStepR67,68
-  CmpSuccStepR { proofCmpSuccStepR proofCmpSuccStepR67,68
-  CmpSuccStepR { proofCmpSuccStepR :: forall (m m67,68
-newtype LeqViewRefl LeqViewRefl72,73
-newtype LeqViewRefl n = LeqViewRefl LeqViewRefl72,73
-newtype LeqViewRefl n = LeqViewRefl { proofLeqViewRefl proofLeqViewRefl72,73
-class (SOrd nat, IsPeano nat) => PeanoOrder PeanoOrder74,75
-  minusPlus :: forall (n :: nat) m .PeanoOrder nat => Sing Sing659,660
-  leqToCmp leqToCmp85,86
-  leqToCmp leqToCmp85,86
-  eqlCmpEQ eqlCmpEQ87,88
-  eqToRefl eqToRefl88,89
-  flipCompare flipCompare90,91
-  ltToNeq ltToNeq93,94
-  ltToNeq ltToNeq95,96
-  leqNeqToLT leqNeqToLT100,101
-  leqNeqToLT leqNeqToLT100,101
-  succLeqToLT succLeqToLT104,105
-  succLeqToLT succLeqToLT104,105
-  ltToLeq ltToLeq121,122
-  ltToLeq ltToLeq121,122
-  gtToLeq gtToLeq124,125
-  gtToLeq gtToLeq124,125
-  ltToSuccLeq ltToSuccLeq131,132
-  ltToSuccLeq ltToSuccLeq131,132
-  cmpZero cmpZero136,137
-  cmpZero cmpZero137,138
-  leqToGT leqToGT142,143
-  leqToGT leqToGT142,143
-  cmpZero' cmpZero'150,151
-  cmpZero' cmpZero'151,152
-  zeroNoLT zeroNoLT156,157
-  zeroNoLT zeroNoLT157,158
-  ltRightPredSucc ltRightPredSucc172,173
-  ltRightPredSucc ltRightPredSucc173,174
-  cmpSucc cmpSucc182,183
-  cmpSucc cmpSucc183,184
-  ltSucc ltSucc207,208
-  ltSucc ltSucc208,209
-  cmpSuccStepR cmpSuccStepR219,220
-  cmpSuccStepR cmpSuccStepR221,222
-  ltSuccLToLT ltSuccLToLT237,238
-  ltSuccLToLT ltSuccLToLT239,240
-  leqToLT leqToLT247,248
-  leqToLT leqToLT247,248
-  leqZero leqZero257,258
-  leqZero leqZero257,258
-  leqSucc leqSucc263,264
-  leqSucc leqSucc263,264
-  fromLeqView fromLeqView269,270
-  fromLeqView fromLeqView269,270
-  leqViewRefl leqViewRefl273,274
-  leqViewRefl leqViewRefl274,275
-  viewLeq viewLeq282,283
-  viewLeq viewLeq282,283
-  leqWitness leqWitness293,294
-  leqWitness leqWitness293,294
-  leqStep leqStep306,307
-  leqStep leqStep306,307
-  leqNeqToSuccLeq leqNeqToSuccLeq321,322
-  leqNeqToSuccLeq leqNeqToSuccLeq321,322
-  leqRefl leqRefl333,334
-  leqRefl leqRefl333,334
-  leqSuccStepR leqSuccStepR336,337
-  leqSuccStepR leqSuccStepR336,337
-  leqSuccStepL leqSuccStepL342,343
-  leqSuccStepL leqSuccStepL342,343
-  leqReflexive leqReflexive346,347
-  leqReflexive leqReflexive346,347
-  leqTrans leqTrans349,350
-  leqTrans leqTrans349,350
-  leqAntisymm leqAntisymm355,356
-  leqAntisymm leqAntisymm355,356
-  plusMonotone plusMonotone374,375
-  plusMonotone plusMonotone374,375
-  leqZeroElim leqZeroElim397,398
-  leqZeroElim leqZeroElim397,398
-  plusMonotoneL plusMonotoneL403,404
-  plusMonotoneL plusMonotoneL403,404
-  plusMonotoneR plusMonotoneR407,408
-  plusMonotoneR plusMonotoneR407,408
-  plusLeqL plusLeqL411,412
-  plusLeqL plusLeqL411,412
-  plusLeqR plusLeqR414,415
-  plusLeqR plusLeqR414,415
-  plusCancelLeqR plusCancelLeqR417,418
-  plusCancelLeqR plusCancelLeqR417,418
-  plusCancelLeqL plusCancelLeqL431,432
-  plusCancelLeqL plusCancelLeqL431,432
-  succLeqZeroAbsurd succLeqZeroAbsurd439,440
-  succLeqZeroAbsurd succLeqZeroAbsurd439,440
-  succLeqZeroAbsurd' succLeqZeroAbsurd'443,444
-  succLeqZeroAbsurd' succLeqZeroAbsurd'443,444
-  succLeqAbsurd succLeqAbsurd449,450
-  succLeqAbsurd succLeqAbsurd449,450
-  succLeqAbsurd' succLeqAbsurd'456,457
-  succLeqAbsurd' succLeqAbsurd'456,457
-  notLeqToLeq notLeqToLeq462,463
-  notLeqToLeq notLeqToLeq462,463
-  leqSucc' leqSucc'469,470
-  leqSucc' leqSucc'469,470
-  leqToMin leqToMin486,487
-  leqToMin leqToMin486,487
-  geqToMin geqToMin491,492
-  geqToMin geqToMin491,492
-  minComm minComm496,497
-  minComm minComm497,498
-  minLeqL minLeqL504,505
-  minLeqL minLeqL504,505
-  minLeqR minLeqR513,514
-  minLeqR minLeqR513,514
-  minLargest minLargest518,519
-  minLargest minLargest518,519
-  leqToMax leqToMax531,532
-  leqToMax leqToMax531,532
-  geqToMax geqToMax535,536
-  geqToMax geqToMax535,536
-  maxComm maxComm539,540
-  maxComm maxComm540,541
-  maxLeqR maxLeqR547,548
-  maxLeqR maxLeqR547,548
-  maxLeqL maxLeqL555,556
-  maxLeqL maxLeqL555,556
-  maxLeast maxLeast560,561
-  maxLeast maxLeast560,561
-  leqReversed leqReversed575,576
-  leqReversed leqReversed575,576
-  lneqSuccLeq lneqSuccLeq576,577
-  lneqSuccLeq lneqSuccLeq576,577
-  lneqReversed lneqReversed577,578
-  lneqToLT lneqToLT579,580
-  lneqToLT lneqToLT581,582
-  ltToLneq ltToLneq584,585
-  ltToLneq ltToLneq586,587
-  lneqZero lneqZero589,590
-  lneqZero lneqZero590,591
-  lneqSucc lneqSucc592,593
-  lneqSucc lneqSucc593,594
-  succLneqSucc succLneqSucc595,596
-  succLneqSucc succLneqSucc597,598
-  lneqRightPredSucc lneqRightPredSucc603,604
-  lneqRightPredSucc lneqRightPredSucc605,606
-  lneqSuccStepL lneqSuccStepL607,608
-  lneqSuccStepL lneqSuccStepL608,609
-  lneqSuccStepR lneqSuccStepR613,614
-  lneqSuccStepR lneqSuccStepR614,615
-  plusStrictMonotone plusStrictMonotone619,620
-  plusStrictMonotone plusStrictMonotone622,623
-  maxZeroL maxZeroL630,631
-  maxZeroL maxZeroL631,632
-  maxZeroR maxZeroR633,634
-  maxZeroR maxZeroR634,635
-  minZeroL minZeroL636,637
-  minZeroL minZeroL637,638
-  minZeroR minZeroR639,640
-  minZeroR minZeroR640,641
-  minusSucc minusSucc642,643
-  minusSucc minusSucc642,643
-  lneqZeroAbsurd lneqZeroAbsurd655,656
-  lneqZeroAbsurd lneqZeroAbsurd656,657
-  minusPlus minusPlus659,660
-  minusPlus minusPlus659,660
-type n n672,673
-type n :-. :-.672,673
-type family family673,674
-type family Subt Subt673,674
-(%:-.)%:-.678,679
-minPlusTruncMinus minPlusTruncMinus684,685
-minPlusTruncMinus minPlusTruncMinus686,687
-truncMinusLeq truncMinusLeq700,701
-truncMinusLeq truncMinusLeq700,701
-
-./factor-hensel/.stack-work/downloaded/GE67uIrr9h97/Data/Type/Natural/Class.hs,109
-module Data.Type.Natural.ClassData.Type.Natural.Class2,3
-mkSNatQQ mkSNatQQ17,18
-mkSNatQQ mkSNatQQ18,19
-
-./factor-hensel/.stack-work/downloaded/GE67uIrr9h97/Data/Type/Natural/Compat.hs,108
-module Data.Type.Natural.Compat Data.Type.Natural.Compat1,2
-bugInGHC bugInGHC5,6
-bugInGHC bugInGHC6,7
-
-./factor-hensel/.stack-work/downloaded/GE67uIrr9h97/Data/Type/Natural/Core.hs,902
-module Data.Type.Natural.Core Data.Type.Natural.Core5,6
-import import11,12
-data Leq Leq21,22
-data Leq (n n21,22
-data Leq (n :: Nat) (m m21,22
-  ZeroLeq ZeroLeq22,23
-  SuccLeqSucc SuccLeqSucc23,24
-data Leq (n n21,22
-type LeqTrueInstance LeqTrueInstance25,26
-type LeqTrueInstance a a25,26
-(%(27,28
-(%-)%-27,28
-n n28,29
-SS SS29,30
-_ _31,32
-data (a(38,39
-data (a a38,39
-data (a :: Nat) :<: (b b38,39
-  ZeroLtSucc ZeroLtSucc39,40
-  SuccLtSucc SuccLtSucc40,41
-propToBoolLeq propToBoolLeq47,48
-propToBoolLeq propToBoolLeq48,49
-boolToClassLeq boolToClassLeq51,52
-boolToClassLeq boolToClassLeq51,52
-propToClassLeq propToClassLeq55,56
-propToClassLeq propToClassLeq56,57
-type LeqInstance LeqInstance75,76
-boolToPropLeq boolToPropLeq77,78
-boolToPropLeq boolToPropLeq77,78
-leqRhs leqRhs84,85
-leqRhs leqRhs85,86
-leqLhs leqLhs88,89
-leqLhs leqLhs89,90
-
-./factor-hensel/.stack-work/downloaded/GE67uIrr9h97/Data/Type/Natural/Definitions.hs,317
-module Data.Type.Natural.DefinitionsData.Type.Natural.Definitions5,6
-singletons singletons18,19
-type n n80,81
-type n :-: :-:80,81
-type n n81,82
-type n :+: :+:81,82
-(%+)%+93,94
-(%(94,95
-type n n98,99
-type n :*: :*:98,99
-(%*)%*102,103
-type n n107,108
-type n :**: :**:107,108
-(%**)%**110,111
-
-./factor-hensel/.stack-work/downloaded/GE67uIrr9h97/Data/Type/Natural.hs,1192
-module Data.Type.Natural Data.Type.Natural6,7
-import import65,66
-intToNat intToNat81,82
-intToNat intToNat82,83
-natToInt natToInt88,89
-natToInt natToInt89,90
-sNatToInt sNatToInt93,94
-sNatToInt sNatToInt94,95
-instance instance97,98
-snEqZAbsurd snEqZAbsurd137,138
-snEqZAbsurd snEqZAbsurd138,139
-plusInjectiveL plusInjectiveL140,141
-plusInjectiveL plusInjectiveL141,142
-plusInjectiveR plusInjectiveR144,145
-plusInjectiveR plusInjectiveR145,146
-reflToSEqual reflToSEqual151,152
-reflToSEqual reflToSEqual151,152
-sequalToRefl sequalToRefl156,157
-sequalToRefl sequalToRefl156,157
-snequalToNoRefl snequalToNoRefl162,163
-snequalToNoRefl snequalToNoRefl162,163
-sequalSym sequalSym166,167
-sequalSym sequalSym166,167
-sleqFlip sleqFlip172,173
-sleqFlip sleqFlip172,173
-sLeqReflexive sLeqReflexive178,179
-sLeqReflexive sLeqReflexive178,179
-nonSLeqToLT nonSLeqToLT183,184
-nonSLeqToLT nonSLeqToLT183,184
-plusMinusEqL plusMinusEqL268,269
-plusMinusEqL plusMinusEqL269,270
-plusNeutralR plusNeutralR271,272
-plusNeutralR plusNeutralR272,273
-plusNeutralL plusNeutralL274,275
-plusNeutralL plusNeutralL275,276
-snat snat284,285
-snat snat285,286
-
-./factor-hensel/.stack-work/downloaded/GE67uIrr9h97/Data/Type/Ordinal/Builtin.hs,725
-module Data.Type.Ordinal.BuiltinData.Type.Ordinal.Builtin6,7
-type Ordinal Ordinal37,38
-type Ordinal (n(37,38
-pattern pattern46,47
-od od78,79
-od od79,80
-sNatToOrd' sNatToOrd'85,86
-sNatToOrd' sNatToOrd'86,87
-sNatToOrd sNatToOrd92,93
-sNatToOrd sNatToOrd93,94
-ordToInt ordToInt99,100
-ordToInt ordToInt100,101
-unsafeFromInt unsafeFromInt103,104
-unsafeFromInt unsafeFromInt105,106
-inclusion inclusion111,112
-inclusion inclusion111,112
-inclusion' inclusion'118,119
-inclusion' inclusion'118,119
-(@+)@+125,126
-enumOrdinal enumOrdinal132,133
-enumOrdinal enumOrdinal133,134
-absurdOrd absurdOrd139,140
-absurdOrd absurdOrd140,141
-vacuousOrd vacuousOrd146,147
-vacuousOrd vacuousOrd147,148
-
-./factor-hensel/.stack-work/downloaded/GE67uIrr9h97/Data/Type/Ordinal/Peano.hs,721
-module Data.Type.Ordinal.PeanoData.Type.Ordinal.Peano6,7
-type Ordinal Ordinal37,38
-type Ordinal (n(37,38
-pattern pattern46,47
-od od78,79
-od od79,80
-sNatToOrd' sNatToOrd'85,86
-sNatToOrd' sNatToOrd'86,87
-sNatToOrd sNatToOrd92,93
-sNatToOrd sNatToOrd93,94
-ordToInt ordToInt99,100
-ordToInt ordToInt100,101
-unsafeFromInt unsafeFromInt103,104
-unsafeFromInt unsafeFromInt105,106
-inclusion inclusion111,112
-inclusion inclusion111,112
-inclusion' inclusion'118,119
-inclusion' inclusion'118,119
-(@+)@+125,126
-enumOrdinal enumOrdinal132,133
-enumOrdinal enumOrdinal133,134
-absurdOrd absurdOrd139,140
-absurdOrd absurdOrd140,141
-vacuousOrd vacuousOrd146,147
-vacuousOrd vacuousOrd147,148
-
-./factor-hensel/.stack-work/downloaded/GE67uIrr9h97/Data/Type/Ordinal.hs,1443
-module Data.Type.OrdinalData.Type.Ordinal7,8
-data Ordinal Ordinal49,50
-data Ordinal (n n49,50
-  OLt OLt50,51
-  OLt :: (IsPeano nat, (n :< m) ~ 'True) => Sing (n n50,51
-data Ordinal (n n49,50
-fromOLt fromOLt52,53
-fromOLt fromOLt54,55
-pattern pattern63,64
-       Show (MonomorphicRep (Sing :: nat -> *))) => HasOrdinal HasOrdinal83,84
-instance instance88,89
-enumFromToOrd enumFromToOrd126,127
-enumFromToOrd enumFromToOrd129,130
-enumFromOrd enumFromOrd134,135
-enumFromOrd enumFromOrd137,138
-enumOrdinal enumOrdinal140,141
-enumOrdinal enumOrdinal141,142
-succOrd succOrd146,147
-succOrd succOrd147,148
-unsafeFromInt unsafeFromInt169,170
-unsafeFromInt unsafeFromInt171,172
-unsafeFromInt' unsafeFromInt'178,179
-unsafeFromInt' unsafeFromInt'180,181
-sNatToOrd' sNatToOrd'190,191
-sNatToOrd' sNatToOrd'191,192
-sNatToOrd sNatToOrd195,196
-sNatToOrd sNatToOrd196,197
-ordToSing ordToSing201,202
-ordToSing ordToSing202,203
-ordToInt ordToInt206,207
-ordToInt ordToInt209,210
-inclusion' inclusion'216,217
-inclusion' inclusion'216,217
-inclusion inclusion223,224
-inclusion inclusion223,224
-(@+)@+229,230
-OLt OLt231,232
-absurdOrd absurdOrd238,239
-absurdOrd absurdOrd239,240
-vacuousOrd vacuousOrd244,245
-vacuousOrd vacuousOrd245,246
-mkOrdinalQQ mkOrdinalQQ261,262
-mkOrdinalQQ mkOrdinalQQ262,263
-odPN, odLit odLit269,270
-odPN,odPN269,270
-odPN odPN271,272
-odLit odLit273,274
-
-./factor-hensel/.stack-work/downloaded/GE67uIrr9h97/Setup.hs,15
-main main1,2
-
-./factor-hensel/.stack-work/downloaded/Swevq11h6LY2/Data/Sized/Builtin.hs,170
-module Data.Sized.BuiltinData.Sized.Builtin5,6
-type Ordinal Ordinal17,18
-type Ordinal (n(17,18
-type Sized Sized18,19
-type Sized f f18,19
-pattern pattern25,26
-
-./factor-hensel/.stack-work/downloaded/Swevq11h6LY2/Data/Sized/Flipped.hs,436
-module Data.Sized.Flipped Data.Sized.Flipped8,9
-newtype Flipped Flipped38,39
-newtype Flipped f a n = Flipped Flipped38,39
-newtype Flipped f a n = Flipped { runFlipped runFlipped38,39
-type instance instance43,44
-type instance Index Index43,44
-type instance instance44,45
-type instance IxValue IxValue44,45
-type instance instance45,46
-type instance Element Element45,46
-instance instance48,49
-pattern pattern74,75
-
-./factor-hensel/.stack-work/downloaded/Swevq11h6LY2/Data/Sized/Internal.hs,828
-module Data.Sized.InternalData.Sized.Internal9,10
-newtype Sized Sized50,51
-  Sized Sized51,52
-  Sized { runSized runSized51,52
-type instance instance55,56
-type instance Element Element55,56
-instance instance66,67
-type instance instance93,94
-type instance Index Index93,94
-type instance instance96,97
-type instance IxValue IxValue96,97
-class (ListLike (f a) a) => LLF LLF180,181
-type ListLikeF ListLikeF191,192
-type ListLikeF f f191,192
-instLLF instLLF193,194
-instLLF instLLF194,195
-instLL instLL205,206
-instLL instLL206,207
-instFunctor instFunctor218,219
-instFunctor instFunctor219,220
-withListLikeF withListLikeF230,231
-withListLikeF withListLikeF232,233
-withListLikeF' withListLikeF'245,246
-withListLikeF' withListLikeF'246,247
-toProxy toProxy257,258
-toProxy toProxy258,259
-
-./factor-hensel/.stack-work/downloaded/Swevq11h6LY2/Data/Sized/Peano.hs,166
-module Data.Sized.PeanoData.Sized.Peano5,6
-type Ordinal Ordinal17,18
-type Ordinal (n(17,18
-type Sized Sized18,19
-type Sized f f18,19
-pattern pattern25,26
-
-./factor-hensel/.stack-work/downloaded/Swevq11h6LY2/Data/Sized.hs,5218
-module Data.SizedData.Sized20,21
-data SomeSized SomeSized122,123
-  SomeSized SomeSized123,124
-            -> Sized f (n n125,126
-instance instance130,131
-demote' demote'136,137
-demote' demote'137,138
-length length154,155
-length length155,156
-sLength sLength167,168
-sLength sLength169,170
-null null183,184
-null null184,185
-(!!)!!202,203
-Sized Sized203,204
-(%!!)%!!209,210
-index index226,227
-index index227,228
-sIndex sIndex233,234
-sIndex sIndex234,235
-head head242,243
-head head243,244
-last last251,252
-last last252,253
-uncons uncons260,261
-uncons uncons261,262
-uncons' uncons'273,274
-uncons' uncons'274,275
-unsnoc unsnoc282,283
-unsnoc unsnoc283,284
-unsnoc' unsnoc'293,294
-unsnoc' unsnoc'294,295
-tail tail307,308
-tail tail308,309
-init init316,317
-init init317,318
-take take326,327
-take take326,327
-takeAtMost takeAtMost336,337
-takeAtMost takeAtMost338,339
-drop drop347,348
-drop drop347,348
-splitAt splitAt358,359
-splitAt splitAt358,359
-splitAtMost splitAtMost371,372
-splitAtMost splitAtMost373,374
-empty empty390,391
-empty empty391,392
-singleton singleton397,398
-singleton singleton398,399
-toSomeSized toSomeSized406,407
-toSomeSized toSomeSized408,409
-replicate replicate415,416
-replicate replicate417,418
-replicate' replicate'423,424
-replicate' replicate'424,425
-generate generate427,428
-generate generate430,431
-fromSing' fromSing'446,447
-fromSing' fromSing'447,448
-cons cons456,457
-cons cons457,458
-(<|)<|463,464
-(<(464,465
-snoc snoc471,472
-snoc snoc472,473
-(|>)|>478,479
-append append486,487
-append append487,488
-(++)++493,494
-concat concat500,501
-concat concat502,503
-zip zip520,521
-zip zip522,523
-zipSame zipSame539,540
-zipSame zipSame541,542
-zipWith zipWith558,559
-zipWith zipWith560,561
-zipWithSame zipWithSame583,584
-zipWithSame zipWithSame585,586
-unzip unzip608,609
-unzip unzip610,611
-map map623,624
-map map624,625
-fmap fmap627,628
-fmap fmap628,629
-reverse reverse634,635
-reverse reverse635,636
-intersperse intersperse641,642
-intersperse intersperse642,643
-nub nub648,649
-nub nub649,650
-sort sort654,655
-sort sort656,657
-sortBy sortBy661,662
-sortBy sortBy662,663
-insert insert667,668
-insert insert668,669
-insertBy insertBy673,674
-insertBy insertBy674,675
-toList toList688,689
-toList toList689,690
-fromList fromList702,703
-fromList fromList704,705
-fromList' fromList'715,716
-fromList' fromList'716,717
-unsafeFromList unsafeFromList723,724
-unsafeFromList unsafeFromList724,725
-unsafeFromList' unsafeFromList'742,743
-unsafeFromList' unsafeFromList'743,744
-fromListWithDefault fromListWithDefault762,763
-fromListWithDefault fromListWithDefault764,765
-fromListWithDefault' fromListWithDefault'772,773
-fromListWithDefault' fromListWithDefault'773,774
-unsized unsized783,784
-unsized unsized784,785
-toSized toSized792,793
-toSized toSized794,795
-toSized' toSized'804,805
-toSized' toSized'805,806
-unsafeToSized unsafeToSized812,813
-unsafeToSized unsafeToSized813,814
-unsafeToSized' unsafeToSized'819,820
-unsafeToSized' unsafeToSized'820,821
-toSizedWithDefault toSizedWithDefault826,827
-toSizedWithDefault toSizedWithDefault828,829
-toSizedWithDefault' toSizedWithDefault'836,837
-toSizedWithDefault' toSizedWithDefault'837,838
-data Partitioned Partitioned858,859
-  Partitioned Partitioned859,860
-              -> Sized f (n n861,862
-              -> Sized f (m m863,864
-takeWhile takeWhile869,870
-takeWhile takeWhile871,872
-dropWhile dropWhile877,878
-dropWhile dropWhile879,880
-span span888,889
-span span890,891
-break break903,904
-break break905,906
-partition partition918,919
-partition partition920,921
-elem elem933,934
-elem elem934,935
-notElem notElem940,941
-notElem notElem941,942
-find find947,948
-find find948,949
-findF findF962,963
-findF findF963,964
-findIndex findIndex974,975
-findIndex findIndex975,976
-sFindIndex sFindIndex981,982
-sFindIndex sFindIndex983,984
-findIndexIF findIndexIF987,988
-findIndexIF findIndexIF988,989
-sFindIndexIF sFindIndexIF998,999
-sFindIndexIF sFindIndexIF1000,1001
-findIndices findIndices1012,1013
-findIndices findIndices1013,1014
-findIndicesIF findIndicesIF1018,1019
-findIndicesIF findIndicesIF1019,1020
-sFindIndices sFindIndices1032,1033
-sFindIndices sFindIndices1034,1035
-sFindIndicesIF sFindIndicesIF1037,1038
-sFindIndicesIF sFindIndicesIF1039,1040
-elemIndex elemIndex1060,1061
-elemIndex elemIndex1061,1062
-sElemIndex sElemIndex1071,1072
-sElemIndex sElemIndex1074,1075
-sUnsafeElemIndex sUnsafeElemIndex1083,1084
-sUnsafeElemIndex sUnsafeElemIndex1086,1087
-elemIndices elemIndices1092,1093
-elemIndices elemIndices1093,1094
-sElemIndices sElemIndices1099,1100
-sElemIndices sElemIndices1101,1102
-data ConsView ConsView1146,1147
-  NilCV NilCV1147,1148
-  (:(1148,1149
-  (::-) )1148,1149
-viewCons viewCons1155,1156
-viewCons viewCons1158,1159
-data SnocView SnocView1165,1166
-  NilSV NilSV1166,1167
-  (:-::-1167,1168
-  (:-::) )1167,1168
-viewSnoc viewSnoc1173,1174
-viewSnoc viewSnoc1176,1177
-pattern pattern1224,1225
-
-./factor-hensel/.stack-work/downloaded/Swevq11h6LY2/Setup.hs,15
-main main1,2
-
-./factor-hensel/app/Main.hs,52
-module Main Main0,1
-main main4,5
-main main5,6
-
-./factor-hensel/Setup.hs,15
-main main1,2
-
-./factor-hensel/src/Algebra/Ring/Polynomial/Factorise/Hensel.hs,94
-module Algebra.Ring.Polynomial.Factorise.Hensel Algebra.Ring.Polynomial.Factorise.Hensel0,1
-
-./factor-hensel/test/Spec.hs,30
-main main0,1
-main main1,2
-
-./HLint.hs,198
+./computational-algebra/HLint.hs,198
 infix infix9,10
 infixl 7 `divPolynomial`divPolynomial11,12
 infixl 7 `modPolynomial`modPolynomial13,14
 infixl 7 `divModPolynomial`divModPolynomial15,16
 infixr 9 `addToIdeal`addToIdeal16,17
 
-./Setup.hs,15
+./computational-algebra/Setup.hs,15
 main main1,2
 
-./share/HspecSmallCheck.hs,118
+./computational-algebra/share/HspecSmallCheck.hs,118
 module HspecSmallCheck HspecSmallCheck2,3
 property property9,10
 property property10,11
 instance instance12,13
 
-./share/SequenceMonomial.hs,854
+./computational-algebra/share/SequenceMonomial.hs,854
 module SequenceMonomial SequenceMonomial1,2
 length length11,12
 length length12,13
@@ -3301,7 +2297,7 @@ grlex grlex60,61
 grevlex grevlex64,65
 grevlex grevlex65,66
 
-./share/SingularBridge.hs,664
+./computational-algebra/share/SingularBridge.hs,664
 module SingularBridge SingularBridge4,5
 class IsStrongMonomialOrder ord => SingularOrder SingularOrder19,20
 class IsStrongMonomialOrder ord => SingularOrder SingularOrder19,20
@@ -3320,7 +2316,7 @@ singIdealFun singIdealFun109,110
 singPolyFun singPolyFun115,116
 singPolyFun singPolyFun119,120
 
-./share/Utils.hs,1954
+./computational-algebra/share/Utils.hs,1954
 module Utils Utils6,7
 newtype ZeroDimIdeal ZeroDimIdeal42,43
 newtype ZeroDimIdeal n = ZeroDimIdeal ZeroDimIdeal42,43
@@ -3379,7 +2375,7 @@ checkForArity checkForArity247,248
 stdReduced stdReduced249,250
 stdReduced stdReduced251,252
 
-./tests/division.hs,286
+./computational-algebra/tests/division.hs,286
 module Main Main2,3
 main main13,14
 main main14,15
@@ -3390,7 +2386,7 @@ prop_indivisible prop_indivisible32,33
 prop_degdecay prop_degdecay39,40
 prop_degdecay prop_degdecay40,41
 
-./tests/Faugere5Spec-disabled.hs,228
+./computational-algebra/tests/Faugere5Spec-disabled.hs,228
 module Faugere5Spec Faugere5Spec2,3
 spec spec15,16
 spec spec16,17
@@ -3399,7 +2395,7 @@ prop_computesGroebner prop_computesGroebner24,25
 testCases testCases30,31
 testCases testCases31,32
 
-./tests/GroebnerSpec.hs,938
+./computational-algebra/tests/GroebnerSpec.hs,938
 module GroebnerSpec GroebnerSpec2,3
 asGenListOf asGenListOf19,20
 asGenListOf asGenListOf20,21
@@ -3426,7 +2422,7 @@ data IntersectCase r ord n = IC IC117,118
 ics_binary ics_binary119,120
 ics_binary ics_binary120,121
 
-./tests/linear.hs,315
+./computational-algebra/tests/linear.hs,315
 module Main Main0,1
 main main9,10
 main main10,11
@@ -3439,7 +2435,7 @@ isUpperTriangle isUpperTriangle26,27
 rank rank28,29
 rank rank29,30
 
-./tests/matrix.hs,188
+./computational-algebra/tests/matrix.hs,188
 module Main Main0,1
 main main12,13
 main main13,14
@@ -3448,7 +2444,7 @@ prop_matrixRep prop_matrixRep19,20
 matToLists matToLists26,27
 matToLists matToLists27,28
 
-./tests/monomials.hs,174
+./computational-algebra/tests/monomials.hs,174
 module Main Main1,2
 main main12,13
 main main13,14
@@ -3459,7 +2455,7 @@ compQC compQC28,29
 compSC compSC38,39
 compSC compSC39,40
 
-./tests/multi-table.hs,158
+./computational-algebra/tests/multi-table.hs,158
 module Main Main1,2
 main main12,13
 main main13,14
@@ -3470,7 +2466,7 @@ spec spec19,20
 prop01 prop0123,24
 prop01 prop0124,25
 
-./tests/PolynomialSpec.hs,586
+./computational-algebra/tests/PolynomialSpec.hs,586
 module PolynomialSpec PolynomialSpec2,3
 asGenListOf asGenListOf16,17
 asGenListOf asGenListOf17,18
@@ -3489,7 +2485,7 @@ prop_degdecay prop_degdecay57,58
 rank rank65,66
 rank rank66,67
 
-./tests/QuotientSpec.hs,582
+./computational-algebra/tests/QuotientSpec.hs,582
 module QuotientSpec QuotientSpec2,3
 asGenListOf asGenListOf17,18
 asGenListOf asGenListOf18,19
@@ -3508,14 +2504,14 @@ prop_degdecay prop_degdecay59,60
 rank rank67,68
 rank rank68,69
 
-./tests/SingularTest.hs,55
+./computational-algebra/tests/SingularTest.hs,55
 module Main Main1,2
 main main9,10
 main main10,11
 
-./tests/Spec.hs,0
+./computational-algebra/tests/Spec.hs,0
 
-./tests/UnivariateSpec.hs,308
+./computational-algebra/tests/UnivariateSpec.hs,308
 module UnivariateSpec UnivariateSpec2,3
 asGenListOf asGenListOf21,22
 asGenListOf asGenListOf22,23
@@ -3528,7 +2524,7 @@ spec spec33,34
 divModUnipolCases divModUnipolCases62,63
 divModUnipolCases divModUnipolCases63,64
 
-./tests/ZeroDimSpec.hs,692
+./computational-algebra/tests/ZeroDimSpec.hs,692
 module ZeroDimSpec ZeroDimSpec2,3
 asGenListOf asGenListOf28,29
 asGenListOf asGenListOf29,30
@@ -3549,3 +2545,13 @@ data TestSet = TestSet { inputMat inputMat136,137
                        , answer answer138,139
 linSet linSet141,142
 linSet linSet142,143
+
+./Setup.hs,15
+main main1,2
+
+./src/Algebra/Ring/Polynomial/Factorise/Hensel.hs,94
+module Algebra.Ring.Polynomial.Factorise.Hensel Algebra.Ring.Polynomial.Factorise.Hensel0,1
+
+./test/Spec.hs,30
+main main0,1
+main main1,2

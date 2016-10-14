@@ -92,17 +92,16 @@ library
     buildable:         True
     other-modules:     Algebra.Algorithms.FGLM Algebra.Field.Galois.Internal Algebra.Field.Galois.Conway
     ghc-options:      -O2 -Wall -Wno-unused-top-binds
-    extensions:       CPP
-                    , DataKinds
-                    , PolyKinds
-                    , GADTs
-                    , MultiParamTypeClasses
-                    , TypeFamilies
-                    , FlexibleContexts
-                    , FlexibleInstances
-                    , UndecidableInstances
-                    , NoImplicitPrelude
-                    , RebindableSyntax
+    default-extensions: CPP
+                      , DataKinds
+                      , PolyKinds
+                      , GADTs
+                      , MultiParamTypeClasses
+                      , TypeFamilies
+                      , FlexibleContexts
+                      , FlexibleInstances
+                      , UndecidableInstances
+                      , NoImplicitPrelude
  
 executable groebner-prof
   buildable: False

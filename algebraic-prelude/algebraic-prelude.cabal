@@ -34,7 +34,7 @@ executable sandpit
                      , algebraic-prelude
   default-language:    Haskell2010
   ghc-options:         -Wall
-  extensions:          RebindableSyntax
+  extensions:          NoImplicitPrelude
 
 source-repository head
   type:     git
