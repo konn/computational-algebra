@@ -74,6 +74,7 @@ library
                        Algebra.Algorithms.ZeroDim Algebra.Field.Galois
                        Algebra.Ring.Ideal Algebra.Normed
                        Algebra.Ring.Polynomial
+                       Algebra.Prelude.Core
                        Algebra.Ring.Polynomial.Univariate
                        -- Algebra.Ring.Polynomial.Monomorphic
                        Algebra.Repa Algebra.Ring.Polynomial.Quotient
