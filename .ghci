@@ -1,3 +1,10 @@
+:set -package computational-algebra
+:set -XDataKinds -XPolyKinds -XGADTs
+:set -XMultiParamTypeClasses -XTypeFamilies
+:set -XFlexibleContexts -XFlexibleInstances
+:set -XUndecidableInstances -XRebindableSyntax
+:set -XOverloadedLabels -XNoImplicitPrelude
+:set -XQuasiQuotes -XScopedTypeVariables
+:l Algebra.Prelude
 :set -ishare -itests -ibench
 :set prompt "ghci> "
-
