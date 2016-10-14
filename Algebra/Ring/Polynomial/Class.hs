@@ -7,6 +7,7 @@
 -- | This module provides abstract classes for finitary polynomial types.
 module Algebra.Ring.Polynomial.Class
        ( IsPolynomial(..), IsOrderedPolynomial(..)
+       , substCoeff, liftMapCoeff
        , CoeffRing, oneNorm, maxNorm, monoize,
          sPolynomial, pDivModPoly, content, pp,
          injectVars, vars,
@@ -294,6 +295,14 @@ class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrder
   mapMonomialMonotonic tr  =
     _Terms %~ M.mapKeysMonotonic tr
   {-# INLINE mapMonomialMonotonic #-}
+
+liftMapCoeff :: IsPolynomial poly => (Ordinal (Arity poly) -> (Coefficient poly)) -> poly -> Coefficient poly
+liftMapCoeff l = runScalar . liftMap (Scalar . l)
+{-# INLINE liftMapCoeff #-}
+
+substCoeff :: IsPolynomial poly => Sized (Arity poly) (Coefficient poly) -> poly -> Coefficient poly
+substCoeff l = runScalar . subst (fmap Scalar l)
+{-# INLINE substCoeff #-}
 
 -- | 1-norm of given polynomial, taking sum of @'norm'@s of each coefficients.
 oneNorm :: (IsPolynomial poly, Normed (Coefficient poly),
