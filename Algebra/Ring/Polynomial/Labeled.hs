@@ -1,5 +1,5 @@
 {-# LANGUAGE CPP, ConstraintKinds, DataKinds, EmptyCase, FlexibleContexts  #-}
-{-# LANGUAGE FlexibleInstances, GADTs, KindSignatures                      #-}
+{-# LANGUAGE FlexibleInstances, GADTs, KindSignatures, IncoherentInstances #-}
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes                  #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell      #-}
 {-# LANGUAGE TypeFamilies, TypeInType, TypeOperators, UndecidableInstances #-}

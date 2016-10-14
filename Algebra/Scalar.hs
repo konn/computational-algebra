@@ -55,3 +55,9 @@ instance (Semiring r) => LeftModule (Scalar r) (Scalar r) where
 
 instance (Semiring r) => RightModule (Scalar r) (Scalar r) where
   Scalar r *. Scalar q = Scalar $ r * q
+
+instance (Semiring r) => LeftModule (Scalar r) r where
+  Scalar r .* q =  r * q
+
+instance (Semiring r) => RightModule (Scalar r) r where
+  r *. Scalar q =  r * q
