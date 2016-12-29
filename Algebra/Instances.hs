@@ -9,7 +9,7 @@ import           AlgebraicPrelude
 import           Control.DeepSeq       (NFData (..))
 import           Control.Monad.Random  (Random (..), getRandom)
 import           Control.Monad.Random  (getRandomR, runRand)
-import           Data.Complex
+import           Data.Complex          (Complex (..))
 import           Data.Convertible.Base (Convertible (..))
 import qualified Data.Ratio            as P
 import qualified Data.Vector           as DV

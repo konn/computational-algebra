@@ -1,6 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
-module Algebra.Algorithms.PrimeTest (repeatedSquare, modPow,
-                                       fermatTest, isPseudoPrime) where
+module Algebra.Algorithms.PrimeTest
+       (repeatedSquare, modPow, fermatTest, isPseudoPrime
+       ) where
 import           Algebra.Prelude.Core     hiding (div, mod)
 import           Control.Lens             ((&), (+~), _1)
 import           Control.Monad.Random     (MonadRandom, uniform)
@@ -13,6 +14,7 @@ import qualified Prelude                  as P
 data PrimeResult = Composite | ProbablyPrime | Prime
                  deriving (Read, Show, Eq, Ord)
 
+-- | Calculates @n@-th power efficiently, using repeated square method.
 repeatedSquare :: Multiplicative r => r -> Natural -> r
 repeatedSquare a n =
   let bits = tail $ binRep n
@@ -29,6 +31,7 @@ binRep = flip go []
     go 0 = id
     go k = go (k `div` 2) . ((k `mod` 2) :)
 
+-- | Fermat-test for pseudo-primeness.
 fermatTest :: MonadRandom m => Integer -> m PrimeResult
 fermatTest 2 = return Prime
 fermatTest n = do
@@ -38,6 +41,7 @@ fermatTest n = do
     then return Composite
     else return ProbablyPrime
 
+-- | @'modPow' x m p@ efficiently calculates @x ^ p `'mod'` m@.
 modPow :: (P.Integral a, Euclidean r) => r -> r -> a -> r
 modPow i p = go i one
   where
@@ -51,6 +55,10 @@ splitFactor d n =
      then (0, n)
      else splitFactor d r & _1 +~ 1
 
+-- | @'isPseudoPrime' n@ tests if the given integer @n@ is pseudo prime.
+--   It returns @'Left' p@ if @p < n@ divides @n@,
+--   @'Right' 'True'@ if @n@ is pseudo-prime,
+--   @'Right' 'False'@ if it is not pseudo-prime but no clue can be found.
 isPseudoPrime :: MonadRandom m
               => Integer -> m (Either Integer Bool)
 isPseudoPrime 2 = return $ Right True

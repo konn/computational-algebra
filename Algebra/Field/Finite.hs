@@ -16,7 +16,7 @@ import           Control.Monad.Random         (Random (..))
 import qualified Data.Coerce                  as C
 import           Data.Maybe                   (fromMaybe)
 import qualified Data.Ratio                   as R
-import           Data.Reflection
+import           Data.Reflection              (Reifies (reflect), reifyNat)
 import           GHC.TypeLits                 (KnownNat)
 import           Numeric.Algebra              (Field)
 import           Numeric.Algebra              (char)

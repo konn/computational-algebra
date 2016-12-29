@@ -22,7 +22,7 @@ import           Control.Monad.Random         (MonadRandom)
 import           Control.Monad.Random         (uniform)
 import qualified Data.Foldable                as F
 import qualified Data.Ratio                   as Rat
-import           Data.Reflection
+import           Data.Reflection              (Reifies (..), reify)
 import           Data.Singletons.Prelude.Enum (SEnum (..))
 import           Data.Singletons.TypeLits     (withKnownNat)
 import qualified Data.Sized.Builtin           as SV

@@ -69,28 +69,33 @@ library
                      , primes               >= 0.2.1
                      , singletons == 2.2.*
                      , arithmoi
-    exposed-modules:   Algebra.LinkedMatrix
+    exposed-modules:   Algebra.Algorithms.ChineseRemainder
+                       Algebra.Algorithms.Faugere4
+                       Algebra.Algorithms.Faugere5
                        Algebra.Algorithms.Groebner
-                       Algebra.Algorithms.ZeroDim Algebra.Field.Galois
-                       Algebra.Ring.Ideal Algebra.Normed
-                       Algebra.Ring.Polynomial
-                       Algebra.Prelude.Core
-                       Algebra.Ring.Polynomial.Univariate
-                       -- Algebra.Ring.Polynomial.Monomorphic
-                       Algebra.Repa Algebra.Ring.Polynomial.Quotient
-                       -- Algebra.Ring.Polynomial.Parser
+                       Algebra.Algorithms.PrimeTest
+                       Algebra.Algorithms.ZeroDim
+                       Algebra.Field.AlgebraicReal
                        Algebra.Field.Finite
-                       Algebra.Scalar Algebra.Internal Algebra.Instances
-                       Algebra.Matrix Algebra.Prelude Algebra.Algorithms.Signature
-                       Algebra.Ring.Polynomial.Factorize
-                       Algebra.Algorithms.PrimeTest Algebra.Algorithms.ChineseRemainder
+                       Algebra.Field.Galois
+                       Algebra.Instances
+                       Algebra.Internal
+                       Algebra.LinkedMatrix
+                       Algebra.Matrix
+                       Algebra.Normed
+                       Algebra.Prelude
+                       Algebra.Prelude.Core
+                       Algebra.Ring.Ideal
+                       Algebra.Ring.Polynomial
                        Algebra.Ring.Polynomial.Class
+                       Algebra.Ring.Polynomial.Factorise
                        Algebra.Ring.Polynomial.Labeled
                        Algebra.Ring.Polynomial.Monomial
                        Algebra.Field.AlgebraicReal
     exposed:           True
-    buildable:         True
-    other-modules:     Algebra.Algorithms.FGLM Algebra.Field.Galois.Internal Algebra.Field.Galois.Conway
+    other-modules:     Algebra.Algorithms.FGLM
+                       Algebra.Field.Galois.Conway
+                       Algebra.Field.Galois.Internal
     ghc-options:      -O2 -Wall -Wno-unused-top-binds
     default-language:   Haskell2010
     default-extensions: CPP

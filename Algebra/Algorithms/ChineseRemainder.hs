@@ -1,5 +1,11 @@
 {-# LANGUAGE ViewPatterns #-}
-module Algebra.Algorithms.ChineseRemainder where
+-- | Chinese Remainder for Rational numbers.
+--
+--   Since 0.4.0.0
+module Algebra.Algorithms.ChineseRemainder
+       ( recoverRat
+       , rationalChineseRemainder
+       ) where
 import           Algebra.Instances        ()
 import           AlgebraicPrelude
 import           Data.List                (findIndices)
@@ -7,6 +13,7 @@ import           Numeric.Domain.Euclidean (euclid)
 import           Numeric.Domain.Euclidean (chineseRemainder)
 import qualified Prelude                  as P
 
+-- | Recovers rational number from Z/pZ.
 recoverRat :: Integer                    -- ^ Bound for numerator
            -> Integer                    -- ^ modulus
            -> Integer                    -- ^ integer corresponds to the rational number.
@@ -31,6 +38,7 @@ recoverRat (abs -> k) m g
                then Just (r' % t')
                else Nothing
 
+-- | Chinese Remainder for raional numbers.
 rationalChineseRemainder :: Integer
                          -> [(Integer, Integer)]
                          -> Maybe (Fraction Integer)

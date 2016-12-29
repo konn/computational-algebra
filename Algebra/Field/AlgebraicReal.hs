@@ -1,7 +1,9 @@
 {-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GADTs, MultiParamTypeClasses, NoImplicitPrelude              #-}
 {-# LANGUAGE NoMonomorphismRestriction, OverloadedLabels                  #-}
--- | Algebraic Real Numbers.
+-- | Algebraic Real Numbers for exact computation
+--
+--   Since 0.4.0.0
 module Algebra.Field.AlgebraicReal
        ( Algebraic, algebraic,
          -- * Operations
@@ -10,7 +12,7 @@ module Algebra.Field.AlgebraicReal
          approximate, approxFractional,
          -- * Equation solver
          realRoots, complexRoots,
-         -- * Internal arithmetic
+         -- * Interval arithmetic
          Interval(..), representative,
          includes, intersect,
          -- * Internal utility functions
@@ -20,8 +22,7 @@ module Algebra.Field.AlgebraicReal
        where
 import           Algebra.Prelude.Core               hiding (intersect,
                                                      normalize)
-import           Algebra.Ring.Polynomial.Factorize  (clearDenom,
-                                                     factorQBigPrime)
+import           Algebra.Ring.Polynomial.Factorise  (clearDenom, factorHensel)
 import           Algebra.Ring.Polynomial.Univariate
 import           Control.Arrow                      ((***))
 import           Control.Lens                       (each, ifoldMap, ix, (%~),
@@ -29,6 +30,7 @@ import           Control.Lens                       (each, ifoldMap, ix, (%~),
 import           Control.Monad.Random
 import           Data.Bits
 import qualified Data.Coerce                        as C
+import qualified Data.IntMap                        as IM
 import           Data.Maybe                         (fromJust)
 import           Data.MonoTraversable
 import qualified Data.Ratio                         as R
@@ -52,10 +54,10 @@ stdGenFromEntropy = mkStdGen . ofoldr (\a -> (+) (fromEnum a) . (`shiftL` 8)) 0 
 factors :: Unipol Rational -> [Unipol Rational]
 factors f =
   let (a, p) = clearDenom f
-  in S.toList $ S.fromList $ concatMap (map (monoize . mapCoeffUnipol (F.%a)) . fst) $
-       snd
+  in concatMap (map (monoize . mapCoeffUnipol (F.%a)) . S.toList . snd) $
+     IM.toList $ snd
          $ flip evalRand (unsafePerformIO stdGenFromEntropy)
-         $ factorQBigPrime p
+         $ factorHensel p
 
 -- | Algebraic real numbers, which can be expressed as a root
 --   of a rational polynomial.

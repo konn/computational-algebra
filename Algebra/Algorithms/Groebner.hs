@@ -25,27 +25,26 @@ module Algebra.Algorithms.Groebner
        , resultant, hasCommonFactor
        , lcmPolynomial, gcdPolynomial
        ) where
-import           Algebra.Internal
-import           Algebra.Ring.Ideal
-import           Algebra.Ring.Polynomial.Univariate (Unipol)
-import           Algebra.Prelude.Core
+import Algebra.Internal
+import Algebra.Prelude.Core
+import Algebra.Ring.Polynomial.Univariate (Unipol)
 
-import qualified Data.Map as M
-import Control.Lens (_Wrapped, (&),  (%~))
-import           Control.Monad.Loops
-import           Control.Monad.ST
+import           Control.Lens                 ((%~), (&), _Wrapped)
+import           Control.Monad.Loops          (whileM_)
+import           Control.Monad.ST             (ST, runST)
 import qualified Data.Foldable                as H
 import qualified Data.Heap                    as H
-import           Data.Singletons.Prelude      (POrd (..), SEq (..), SOrd (..))
+import qualified Data.Map                     as M
+import           Data.Singletons.Prelude      (POrd (..), SEq (..))
 import           Data.Singletons.Prelude      (Sing (SFalse, STrue), withSingI)
 import           Data.Singletons.Prelude.List (Length, Replicate, Sing (SCons))
 import           Data.Singletons.Prelude.List (sLength, sReplicate)
 import           Data.Sized.Builtin           (toList)
 import qualified Data.Sized.Builtin           as V
-import           Data.STRef
-import           Numeric.Decidable.Zero
+import           Data.STRef                   (STRef, modifySTRef, newSTRef)
+import           Data.STRef                   (readSTRef, writeSTRef)
+import qualified Prelude                      as P
 import           Proof.Equational
-import qualified Prelude as P
 
 -- | Test if the given ideal is Groebner basis, using Buchberger criteria and relatively primeness.
 isGroebnerBasis :: (IsOrderedPolynomial poly, Field (Coefficient poly))
@@ -167,9 +166,9 @@ syzygyBuchbergerWithStrategy strategy ideal = runST $ do
 
 
 -- | Calculate the weight of given polynomials w.r.t. the given strategy.
--- Buchberger's algorithm proccesses the pair with the most least weight first.
--- This function requires the @Ord@ instance for the weight; this constraint is not required
--- in the 'calcWeight' because of the ease of implementation. So use this function.
+--   Buchberger's algorithm proccesses the pair with the most least weight first.
+--   This function requires the @Ord@ instance for the weight; this constraint is not required
+--   in the 'calcWeight' because of the ease of implementation. So use this function.
 calcWeight' :: (SelectionStrategy (Arity poly) s, IsOrderedPolynomial poly)
             => s -> poly -> poly -> Weight (Arity poly) s (MOrder poly)
 calcWeight' s = calcWeight (toProxy s)
@@ -178,11 +177,12 @@ calcWeight' s = calcWeight (toProxy s)
 -- | Type-class for selection strategies in Buchberger's algorithm.
 class SelectionStrategy n s where
   type Weight n s ord :: *
+  -- | Calculates the weight for the given pair of polynomial used for selection strategy.
   calcWeight :: (IsOrderedPolynomial poly, n ~ Arity poly)
              => Proxy s -> poly -> poly -> Weight n s (MOrder poly)
 
 -- | Buchberger's normal selection strategy. This selects the pair with
--- the least LCM(LT(f), LT(g)) w.r.t. current monomial ordering.
+--   the least LCM(LT(f), LT(g)) w.r.t. current monomial ordering.
 data NormalStrategy = NormalStrategy deriving (Read, Show, Eq, Ord)
 
 instance SelectionStrategy n NormalStrategy where
@@ -391,7 +391,7 @@ intersection idsv@(_ :< _) =
         j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
     in withRefl (plusMinus' sk sn) $
        withWitness (plusLeqL sk sn) $
-       mapIdeal injectVars $ 
+       mapIdeal injectVars $
        coerce (cong Proxy $ minusCongL (plusComm sk sn) sk `trans` plusMinus sn sk) $
         thEliminationIdeal sk j
 intersection _ = Ideal $ singleton one
@@ -485,6 +485,7 @@ hasCommonFactor :: (Field (Coefficient poly),
                 -> Bool
 hasCommonFactor f g = isZero $ resultant f g
 
+-- | Calculates the Least Common Multiply of the given pair of polynomials.
 lcmPolynomial :: forall poly.
                  (Field (Coefficient poly),
                   IsOrderedPolynomial poly,
@@ -494,6 +495,7 @@ lcmPolynomial :: forall poly.
               -> poly
 lcmPolynomial f g = head $ generators $ intersection (principalIdeal f :< principalIdeal g :< NilL)
 
+-- | Calculates the Greatest Common Divisor of the given pair of polynomials.
 gcdPolynomial :: (Field (Coefficient poly),
                   IsOrderedPolynomial poly,
                   IsMonomialOrder (2 + Arity poly) (MOrder poly))

@@ -6,7 +6,7 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Algebra.Ring.Polynomial.Factorise
        ( -- * Factorisation
-         factorise, factorQBigPrime,
+         factorise, factorQBigPrime, factorHensel,
          -- * Internal helper functions
          distinctDegFactor,
          equalDegreeSplitM, equalDegreeFactorM,
