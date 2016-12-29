@@ -1,4 +1,3 @@
-{-# LANGUAGE DataKinds, EmptyCase, ExplicitNamespaces                    #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving, PartialTypeSignatures           #-}
 {-# LANGUAGE PatternSynonyms, RankNTypes, ScopedTypeVariables            #-}
 {-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilyDependencies #-}
@@ -13,6 +12,7 @@ import qualified Data.Map                  as M
 import qualified Data.Type.Natural         as PN
 import           Data.Type.Natural.Builtin
 import           Data.Type.Ordinal.Builtin
+import qualified Data.Sized as SV
 import qualified Numeric.Algebra           as A
 import qualified Prelude                   as P
 
@@ -312,18 +312,22 @@ instance (CoeffRing k, KnownNat n) => IsPolynomial (RecPoly k n) where
   type Coefficient (RecPoly k n) = k
   type Arity (RecPoly k n) = n
   sArity _ = sing
-  polynomial' d =
+  var o =
     case zeroOrSucc (sing :: Sing n) of
-      IsZero -> M.findWithDefault zero NilL $ C.coerce d
-      IsSucc m -> withSingI (sToPeano m) $
-                  withKnownNat m $
-                  withRefl (toPeanoSuccCong m) $
-                  runAdd $
-                  ifoldMap
-                  (\ (n :< tl) k -> withRefl (succInj' (Flipped tl) m Refl) $
-                                    Add $ RecPoly_ $ RecPolyS $
-                                    toPolynomial' (runRecPoly_ $ toPolynomial' (k, tl), singleton n))
-                  d
+      IsZero   -> absurdOrd o
+      IsSucc m -> withKnownNat m $ withSingI (sToPeano m) $ 
+                  case o of
+                    OS n -> RecPoly $ injectCoeff (var n)
+                    _    -> RecPoly #x
+  fromMonomial mon =
+    case mon of
+      n :< ls -> withKnownNat (SV.sLength ls) $ RecPoly $ #x ^ fromIntegral n * injectCoeff (fromMonomial ls)
+      _ -> one
+  injectCoeff k =
+    case zeroOrSucc (sing :: Sing n) of
+      IsZero -> RecPoly_ $ RecPolyZ k
+      IsSucc (m :: SNat m) ->
+        withKnownNat m $ RecPoly $ injectCoeff (injectCoeff k :: RecPoly k m)
   terms' f =
     case zeroOrSucc (sing :: Sing n) of
       IsZero   -> M.fromList [(fromList sZero [], C.coerce $ runRecPoly_ f)]
@@ -360,3 +364,7 @@ instance (CoeffRing k, UnitNormalForm k, KnownNat n) => DecidableAssociates (Rec
 
 instance (CoeffRing k, UnitNormalForm k, KnownNat n) => UnitNormalForm (RecPoly k n) where
   splitUnit = splitUnitDefault
+
+instance (KnownNat n, CoeffRing r, PrettyCoeff r)
+       => Show (RecPoly r n) where
+  showsPrec = showsPolynomialWith $ generate sing (\i -> "X_" ++ show (fromEnum i))
