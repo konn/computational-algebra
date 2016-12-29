@@ -88,6 +88,7 @@ library
                        Algebra.Field.Galois.Conway
                        Algebra.Field.Galois.Internal
     ghc-options:      -O2 -Wall -Wno-unused-top-binds
+    default-language:   Haskell2010
     default-extensions: CPP
                       , DataKinds
                       , PolyKinds
@@ -127,13 +128,11 @@ executable solve
                  , lens >= 3.9
                  , MonadRandom >= 0.1
      
-    if flag(examples)
-        buildable: True
-    else
-        buildable: False
     main-is: solve.hs
     hs-source-dirs: share examples
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
+
+    buildable: False
 
 executable algebraic
   Main-is:             algebraic.hs
@@ -144,10 +143,7 @@ executable algebraic
   default-language:    Haskell2010
   ghc-options:         -Wall -O2 -threaded
 
-  if flag(examples)
-      buildable: True
-  else
-      buildable: False
+  buildable: False
 
 
 executable ipsolve
@@ -170,13 +166,11 @@ executable ipsolve
                  , MonadRandom >= 0.1
                  , singletons
      
-    if flag(examples)
-        buildable: True
-    else
-        buildable: False
     main-is: ipsolve.hs
     hs-source-dirs: share examples
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
+
+    buildable: False
  
 executable faugere-prof
     build-depends: criterion >= 0.8.1.0
@@ -196,10 +190,7 @@ executable faugere-prof
                  , deepseq >= 1.3
                  , MonadRandom >= 0.1
      
-    if flag(examples)
-        buildable: True
-    else
-        buildable: False
+    buildable: False
     main-is: faugere-prof.hs
     hs-source-dirs: share examples
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
@@ -222,10 +213,7 @@ executable hensel-prof
                  , deepseq >= 1.3
                  , MonadRandom >= 0.1
      
-    if flag(examples)
-        buildable: True
-    else
-        buildable: False
+    buildable: False
     main-is: hensel-prof.hs
     hs-source-dirs: share examples
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded -eventlog
@@ -239,10 +227,7 @@ executable sandpit-poly
                  , algebra
                  , sized
      
-    if flag(examples)
-        buildable: True
-    else
-        buildable: False
+    buildable: False
     main-is: sandpit-poly.hs
     hs-source-dirs: share examples
 
@@ -257,10 +242,7 @@ executable quotient
                  , sized
                  , reflection
      
-    if flag(examples)
-        buildable: True
-    else
-        buildable: False
+    buildable: False
     main-is: quotient.hs
     hs-source-dirs: share examples
  
