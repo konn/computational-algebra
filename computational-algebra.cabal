@@ -80,13 +80,17 @@ library
                        Algebra.Normed
                        Algebra.Prelude
                        Algebra.Prelude.Core
+                       Algebra.Repa
                        Algebra.Ring.Ideal
                        Algebra.Ring.Polynomial
                        Algebra.Ring.Polynomial.Class
                        Algebra.Ring.Polynomial.Factorise
                        Algebra.Ring.Polynomial.Labeled
                        Algebra.Ring.Polynomial.Monomial
+                       Algebra.Ring.Polynomial.Quotient
                        Algebra.Ring.Polynomial.Recursive
+                       Algebra.Ring.Polynomial.Univariate
+                       Algebra.Scalar
     exposed:           True
     other-modules:     Algebra.Algorithms.FGLM
                        Algebra.Field.Galois.Conway
@@ -103,6 +107,7 @@ library
                       , FlexibleInstances
                       , UndecidableInstances
                       , NoImplicitPrelude
+                      , OverloadedLabels
  
 executable groebner-prof
   hs-source-dirs:     share examples

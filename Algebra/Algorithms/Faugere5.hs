@@ -1,39 +1,40 @@
-{-# LANGUAGE BangPatterns, ConstraintKinds, DataKinds, DeriveDataTypeable    #-}
-{-# LANGUAGE FlexibleContexts, GADTs, ImplicitParams, MultiParamTypeClasses  #-}
-{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction, ParallelListComp  #-}
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, TemplateHaskell, TupleSections #-}
-{-# LANGUAGE TypeOperators, ViewPatterns                                     #-}
+{-# LANGUAGE BangPatterns, ConstraintKinds, DataKinds, DeriveDataTypeable #-}
+{-# LANGUAGE FlexibleContexts, GADTs, ImplicitParams                      #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude                     #-}
+{-# LANGUAGE NoMonomorphismRestriction, ParallelListComp, RankNTypes      #-}
+{-# LANGUAGE ScopedTypeVariables, TemplateHaskell, TupleSections          #-}
+{-# LANGUAGE TypeOperators, ViewPatterns                                  #-}
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 module Algebra.Algorithms.Faugere5 (f5Original, showSingular) where
-import           Algebra.Algorithms.Groebner
-import           Algebra.Prelude.Core hiding (insert)
+import Algebra.Algorithms.Groebner
+import Algebra.Prelude.Core        hiding (insert)
 
-import           Control.Arrow               ((>>>))
-import           Control.Lens                (makeLenses, view, (%~), (&), (.~))
-import           Control.Lens                ((^.), _1, _2)
-import           Control.Monad               (filterM, forM_, liftM, when)
-import           Control.Monad               (zipWithM_)
-import           Control.Monad.Loops         (anyM, whileM_)
-import           Control.Monad.ST            (ST, runST)
-import           Control.Monad.ST.Unsafe     (unsafeIOToST)
-import           Data.Foldable               (foldrM)
-import qualified Data.Foldable               as T
-import           Data.Function               (on)
-import           Data.Heap                   (Entry (..), insert)
-import qualified Data.Heap                   as H
-import           Data.IntSet                 (IntSet)
-import qualified Data.IntSet                 as IS
-import           Data.List                   (find, partition, sort, sortBy)
-import           Data.List                   (tails)
-import           Data.Maybe                  (listToMaybe)
-import           Data.Monoid                 ((<>))
-import           Data.Ord                    (comparing)
-import           Data.STRef                  (STRef, modifySTRef', newSTRef)
-import           Data.STRef                  (readSTRef, writeSTRef)
-import qualified Data.Vector                 as V
-import qualified Data.Vector.Mutable         as MV
-import           Numeric.Decidable.Zero      (isZero)
-import           Text.Printf                 (printf)
+import           Control.Arrow           ((>>>))
+import           Control.Lens            (makeLenses, view, (%~), (&), (.~))
+import           Control.Lens            ((^.), _1, _2)
+import           Control.Monad           (filterM, forM_, liftM, when)
+import           Control.Monad           (zipWithM_)
+import           Control.Monad.Loops     (anyM, whileM_)
+import           Control.Monad.ST        (ST, runST)
+import           Control.Monad.ST.Unsafe (unsafeIOToST)
+import           Data.Foldable           (foldrM)
+import qualified Data.Foldable           as T
+import           Data.Function           (on)
+import           Data.Heap               (Entry (..), insert)
+import qualified Data.Heap               as H
+import           Data.IntSet             (IntSet)
+import qualified Data.IntSet             as IS
+import           Data.List               (find, partition, sort, sortBy)
+import           Data.List               (tails)
+import           Data.Maybe              (listToMaybe)
+import           Data.Monoid             ((<>))
+import           Data.Ord                (comparing)
+import           Data.STRef              (STRef, modifySTRef', newSTRef)
+import           Data.STRef              (readSTRef, writeSTRef)
+import qualified Data.Vector             as V
+import qualified Data.Vector.Mutable     as MV
+import           Numeric.Decidable.Zero  (isZero)
+import           Text.Printf             (printf)
 
 
 {-
@@ -238,32 +239,32 @@ topReduction k g g' = do
   rk <- readAt ?labPolys k
   let !p = rk ^. poly
   if isZero p
-     then do
-       unsafeIOToST $ printf "Polynomial %d reduced to zero!\n" (k+1)
-       return ([], [])
-     else do
-  mj <- findReductor k g g'
-  case mj of
-    Nothing -> do
-      writeAt ?labPolys k $ rk & poly %~ monoize
-      return ([k], [])
-    Just j ->  do
-      rj <- readAt ?labPolys j
-      let q = rj ^. poly
-          u = leadingMonomial p / leadingMonomial q
-          c = leadingCoeff p % leadingCoeff q
-          p' = monoize $ p - c * toPolynomial (one, u) * q
-      if u *@ rj < rk
-        then do
-          writeAt ?labPolys k $ rk & poly .~ p'
-          return ([], [k])
-        else do
-          n <- lengthMV ?labPolys
-          addLabPoly $ (u *@ rj) & poly .~ p'
-          unsafeIOToST $
-            printf "In topreduction pair (%d,%d) generated polynomial %d:%s\n" (k+1) (j+1) n (showSingular p)
-          addRule ((u*@rj) ^. signature) $ Just n
-          return ([], [k, n])
+    then do
+      unsafeIOToST $ printf "Polynomial %d reduced to zero!\n" (k+1)
+      return ([], [])
+    else do
+      mj <- findReductor k g g'
+      case mj of
+        Nothing -> do
+          writeAt ?labPolys k $ rk & poly %~ monoize
+          return ([k], [])
+        Just j ->  do
+          rj <- readAt ?labPolys j
+          let q = rj ^. poly
+              u = leadingMonomial p / leadingMonomial q
+              c = leadingCoeff p % leadingCoeff q
+              p' = monoize $ p - c * toPolynomial (one, u) * q
+          if u *@ rj < rk
+            then do
+              writeAt ?labPolys k $ rk & poly .~ p'
+              return ([], [k])
+            else do
+              n <- lengthMV ?labPolys
+              addLabPoly $ (u *@ rj) & poly .~ p'
+              unsafeIOToST $
+                printf "In topreduction pair (%d,%d) generated polynomial %d:%s\n" (k+1) (j+1) n (showSingular p)
+              addRule ((u*@rj) ^. signature) $ Just n
+              return ([], [k, n])
 
 spols :: (?labPolys :: (RefVector s (PolyRepr r ord n)),
           ?rules :: (RefVector s (Rule ord n)), Eq r,
