@@ -7,7 +7,7 @@
 module Algebra.Ring.Polynomial.Univariate
        (Unipol(), naiveMult, karatsuba,
         divModUnipolByMult, divModUnipol,
-        mapCoeffUnipol,
+        mapCoeffUnipol, liftMapUnipol,
         module Algebra.Ring.Polynomial.Class,
         module Algebra.Ring.Polynomial.Monomial) where
 import Algebra.Prelude.Core
@@ -326,12 +326,7 @@ instance CoeffRing r => IsPolynomial (Unipol r) where
   arity _ = 1
   constantTerm = IM.findWithDefault zero 0 . runUnipol
   {-# INLINE constantTerm #-}
-  liftMap g f@(Unipol dic) =
-    let u = g 0
-        n = maybe 0 (fst . fst) $ IM.maxViewWithKey $ runUnipol f
-    in foldr (\a b -> a .*. one + b * u)
-             (IM.findWithDefault zero n dic .*. one)
-             [IM.findWithDefault zero k dic | k <- [0..n-1]]
+  liftMap = liftMapUnipol
   {-# INLINABLE liftMap #-}
   fromMonomial = Unipol . flip IM.singleton one . SV.head
   {-# INLINE fromMonomial #-}
@@ -371,3 +366,14 @@ instance (CoeffRing r, PrettyCoeff r) => Show (Unipol r) where
 mapCoeffUnipol :: DecidableZero b => (a -> b) -> Unipol a -> Unipol b
 mapCoeffUnipol f (Unipol a) =
   Unipol $ IM.mapMaybe (decZero . f) a
+{-# INLINE mapCoeffUnipol #-}
+
+liftMapUnipol :: (Module (Scalar k) r, Monoidal k, Unital r)
+              => (Ordinal 1 -> r) -> Unipol k -> r
+liftMapUnipol g f@(Unipol dic) = 
+    let u = g 0
+        n = maybe 0 (fst . fst) $ IM.maxViewWithKey $ runUnipol f
+    in foldr (\a b -> a .*. one + b * u)
+             (IM.findWithDefault zero n dic .*. one)
+             [IM.findWithDefault zero k dic | k <- [0..n-1]]
+{-# INLINE liftMapUnipol #-}

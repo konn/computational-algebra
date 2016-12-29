@@ -41,9 +41,7 @@ import qualified Data.Sized.Builtin                    as S
 import           Data.Type.Ordinal
 import qualified Numeric.Algebra                       as NA
 import           Numeric.Algebra.Unital.UnitNormalForm (UnitNormalForm (..))
-import qualified Numeric.Algebra.Unital.UnitNormalForm as NA
 import           Numeric.Domain.Integral               (IntegralDomain (..))
-import qualified Numeric.Ring.Class                    as NA
 import           Numeric.Semiring.ZeroProduct          (ZeroProductSemiring)
 import qualified Prelude                               as P
 import           Proof.Equational                      (symmetry)
@@ -293,19 +291,15 @@ instance (CoeffRing r, KnownNat n, IsMonomialOrder n ord) => DecidableZero (Orde
 instance (CoeffRing r, IsMonomialOrder 1 ord, ZeroProductSemiring r)
       => ZeroProductSemiring (OrderedPolynomial r ord 1)
 
-instance (Eq r, DecidableUnits r, DecidableZero r, Field r,
-          IsMonomialOrder 1 ord, ZeroProductSemiring r)
-      => DecidableAssociates (OrderedPolynomial r ord 1) where
-  isAssociate = (==) `on` NA.normalize
+instance (Eq r, KnownNat n, Euclidean r, IsMonomialOrder n ord)
+      => DecidableAssociates (OrderedPolynomial r ord n) where
+  isAssociate = isAssociateDefault
   {-# INLINE isAssociate #-}
 
-instance (Eq r, DecidableUnits r, DecidableZero r, Field r,
-          IsMonomialOrder 1 ord, ZeroProductSemiring r)
-      => UnitNormalForm (OrderedPolynomial r ord 1) where
-  splitUnit f
-    | isZero f = (zero, f)
-    | otherwise = let lc = leadingCoeff f
-                  in (injectCoeff lc, injectCoeff (recip lc) * f)
+instance (Eq r, Euclidean r, KnownNat n,
+          IsMonomialOrder n ord)
+      => UnitNormalForm (OrderedPolynomial r ord n) where
+  splitUnit = splitUnitDefault
   {-# INLINE splitUnit #-}
 
 instance (Eq r, DecidableUnits r, DecidableZero r, Field r,
@@ -347,12 +341,10 @@ instance (Eq r, DecidableUnits r, DecidableZero r, KnownNat n,
             then Just $ snd $ head r
             else Nothing
 
-instance (CoeffRing r, IsMonomialOrder n ord, DecidableUnits r, KnownNat n) => DecidableUnits (OrderedPolynomial r ord n) where
-  isUnit f =
-    let (lc, lm) = leadingTerm f
-    in lm == one && isUnit lc
-  recipUnit f | isUnit f  = injectCoeff <$> recipUnit (leadingCoeff f)
-              | otherwise = Nothing
+instance (CoeffRing r, IsMonomialOrder n ord, DecidableUnits r, KnownNat n)
+       => DecidableUnits (OrderedPolynomial r ord n) where
+  isUnit = isUnitDefault
+  recipUnit = recipUnitDefault
 
 varX :: forall r n order. (CoeffRing r, KnownNat n, IsMonomialOrder n order, (0 :< n) ~ 'True)
      => OrderedPolynomial r order n
