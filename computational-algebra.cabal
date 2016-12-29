@@ -86,6 +86,7 @@ library
                        Algebra.Ring.Polynomial.Factorise
                        Algebra.Ring.Polynomial.Labeled
                        Algebra.Ring.Polynomial.Monomial
+                       Algebra.Ring.Polynomial.Recursive
     exposed:           True
     other-modules:     Algebra.Algorithms.FGLM
                        Algebra.Field.Galois.Conway
