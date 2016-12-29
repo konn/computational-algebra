@@ -24,29 +24,27 @@ module Algebra.Ring.Polynomial.Monomial
        ) where
 import Algebra.Internal
 
-import           AlgebraicPrelude                hiding (lex)
-import           Control.DeepSeq                 (NFData (..))
-import           Control.Lens                    (Ixed (..), alaf, imap,
-                                                  makeLenses, makeWrapped, (%~),
-                                                  (&), (.~), _Wrapped)
-import           Data.Constraint                 ((:=>) (..), Dict (..))
-import qualified Data.Constraint                 as C
+import           AlgebraicPrelude             hiding (lex)
+import           Control.DeepSeq              (NFData (..))
+import           Control.Lens                 (Ixed (..), imap, makeLenses,
+                                               makeWrapped, (%~), (&), (.~),
+                                               _Wrapped)
+import           Data.Constraint              ((:=>) (..), Dict (..))
+import qualified Data.Constraint              as C
 import           Data.Constraint.Forall
-import qualified Data.Foldable                   as F
-import           Data.Hashable                   (Hashable (..))
-import           Data.Kind                       (Type)
-import           Data.Maybe                      (catMaybes)
-import           Data.Monoid                     (Dual (..))
-import           Data.Monoid                     ((<>))
-import qualified Data.MonoTraversable.Unprefixed as MT
-import           Data.Ord                        (comparing)
-import           Data.Singletons.Prelude         (POrd (..), SList, Sing ())
-import           Data.Singletons.Prelude         (SingKind (..))
-import           Data.Singletons.Prelude.List    (Length, Replicate, sReplicate)
-import           Data.Singletons.TypeLits        (withKnownNat)
-import qualified Data.Sized.Builtin              as V
-import           Data.Type.Natural.Class         (IsPeano (..), PeanoOrder (..))
-import           Data.Type.Ordinal               (Ordinal (..), ordToInt)
+import qualified Data.Foldable                as F
+import           Data.Hashable                (Hashable (..))
+import           Data.Kind                    (Type)
+import           Data.Maybe                   (catMaybes)
+import           Data.Monoid                  ((<>))
+import           Data.Ord                     (comparing)
+import           Data.Singletons.Prelude      (POrd (..), SList, Sing ())
+import           Data.Singletons.Prelude      (SingKind (..))
+import           Data.Singletons.Prelude.List (Length, Replicate, sReplicate)
+import           Data.Singletons.TypeLits     (withKnownNat)
+import qualified Data.Sized.Builtin           as V
+import           Data.Type.Natural.Class      (IsPeano (..), PeanoOrder (..))
+import           Data.Type.Ordinal            (Ordinal (..), ordToInt)
 -- import           Prelude                         hiding (Fractional (..),
 --                                                   Integral (..), Num (..),
 --                                                   Real (..), lex, product, sum)
