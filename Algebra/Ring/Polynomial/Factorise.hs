@@ -1,57 +1,56 @@
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 {-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, GADTs            #-}
 {-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, OverloadedStrings #-}
 {-# LANGUAGE ParallelListComp, PatternSynonyms, PolyKinds                #-}
-{-# LANGUAGE ScopedTypeVariables, TupleSections, ViewPatterns            #-}
+{-# LANGUAGE ScopedTypeVariables, TupleSections                          #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
-module Algebra.Ring.Polynomial.Factorize
-       (factorise, distinctDegFactor,
-        equalDegreeSplitM, equalDegreeFactorM,
-        henselStep, multiHensel,clearDenom,
-        squareFreePart, squareFreeDecomp,factorQBigPrime
+module Algebra.Ring.Polynomial.Factorise
+       ( -- * Factorisation
+         factorise, factorQBigPrime,
+         -- * Internal helper functions
+         distinctDegFactor,
+         equalDegreeSplitM, equalDegreeFactorM,
+         henselStep, clearDenom,
+         squareFreePart, squareFreeDecomp
        ) where
-import           Algebra.Algorithms.PrimeTest       hiding (modPow)
-import           Algebra.Field.Finite
-import           Algebra.Prelude.Core
-import           Algebra.Ring.Polynomial.Quotient
-import           Algebra.Ring.Polynomial.Univariate
-import           Control.Applicative                ((<|>))
-import           Control.Arrow                      ((***), (<<<))
-import           Control.Lens                       (ifoldl)
-import           Control.Lens                       ((%~), (&))
-import           Control.Lens                       (both)
-import           Control.Lens                       (each)
-import           Control.Monad                      (guard, replicateM)
-import           Control.Monad                      (when)
-import           Control.Monad.Loops                (iterateUntil, untilJust)
-import           Control.Monad.Random               (MonadRandom, uniform)
-import           Control.Monad.ST.Strict            (ST, runST)
-import           Control.Monad.Trans                (lift)
-import           Control.Monad.Trans.Loop           (continue, foreach, while)
-import qualified Data.DList                         as DL
-import           Data.IntMap                        (IntMap)
-import qualified Data.IntMap.Strict                 as IM
-import           Data.List                          (minimumBy)
-import qualified Data.List                          as L
-import           Data.Maybe                         (fromJust)
-import           Data.Maybe                         (fromMaybe)
-import           Data.Monoid                        ((<>))
-import           Data.Numbers.Primes                (primes)
-import           Data.Ord                           (comparing)
-import           Data.Proxy                         (Proxy (..))
-import qualified Data.Sized.Builtin                 as SV
-import           Data.STRef.Strict                  (STRef, modifySTRef,
-                                                     newSTRef)
-import           Data.STRef.Strict                  (readSTRef, writeSTRef)
-import qualified Data.Traversable                   as F
-import           Data.Tuple                         (swap)
-import           Data.Type.Ordinal                  (pattern OZ)
-import qualified Data.Vector                        as V
-import           Debug.Trace                        (trace)
-import           Debug.Trace                        (traceShow)
-import           Numeric.Decidable.Zero             (isZero)
-import           Numeric.Domain.GCD                 (gcd, lcm)
-import qualified Numeric.Field.Fraction             as F
-import qualified Prelude                            as P
+import Algebra.Algorithms.PrimeTest       hiding (modPow)
+import Algebra.Field.Finite
+import Algebra.Prelude.Core
+import Algebra.Ring.Polynomial.Quotient
+import Algebra.Ring.Polynomial.Univariate
+
+import           Control.Applicative              ((<|>))
+import           Control.Arrow                    ((***), (<<<))
+import           Control.Lens                     (both, ifoldl, (%~), (&))
+import           Control.Monad                    (guard, replicateM)
+import           Control.Monad                    (when)
+import           Control.Monad.Loops              (iterateUntil, untilJust)
+import           Control.Monad.Random             (MonadRandom, uniform)
+import           Control.Monad.ST.Strict          (ST, runST)
+import           Control.Monad.Trans              (lift)
+import           Control.Monad.Trans.Loop         (continue, foreach, while)
+import qualified Data.DList                       as DL
+import           Data.IntMap                      (IntMap)
+import qualified Data.IntMap.Strict               as IM
+import qualified Data.List                        as L
+import           Data.Maybe                       (fromJust)
+import           Data.Monoid                      (Sum (..))
+import           Data.Monoid                      ((<>))
+import           Data.Numbers.Primes              (primes)
+import           Data.Proxy                       (Proxy (..))
+import qualified Data.Set                         as S
+import qualified Data.Sized.Builtin               as SV
+import           Data.STRef.Strict                (STRef, modifySTRef, newSTRef)
+import           Data.STRef.Strict                (readSTRef, writeSTRef)
+import qualified Data.Traversable                 as F
+import           Data.Type.Ordinal                (pattern OZ)
+import qualified Data.Vector                      as V
+import           Math.NumberTheory.Logarithms     (intLog2', integerLogBase')
+import           Math.NumberTheory.Powers.Squares (integerSquareRoot)
+import           Numeric.Decidable.Zero           (isZero)
+import           Numeric.Domain.GCD               (gcd, lcm)
+import qualified Numeric.Field.Fraction           as F
+import qualified Prelude                          as P
 
 -- | @distinctDegFactor f@ computes the distinct-degree decomposition of the given
 --   square-free polynomial over finite field @f@.
@@ -183,15 +182,28 @@ clearDenom f =
   let g = foldr (lcm . denominator) one $ terms' f
   in (g, mapCoeffUnipol (numerator . ((g F.% one)*)) f)
 
+-- | Factorise the given integer-coefficient polynomial,
+--   choosing a large enough prime.
 factorQBigPrime :: (MonadRandom m)
-               => Unipol Integer -> m (Integer, [([Unipol Integer], Natural)])
-factorQBigPrime f0 = do
+               => Unipol Integer -> m (Integer, IntMap (Set (Unipol Integer)))
+factorQBigPrime = wrapSQFFactor factorSqFreeQBP
+
+-- | Factorise the given interger-coefficient polynomial by Hensel lifting.
+factorHensel :: (MonadRandom m)
+             => Unipol Integer -> m (Integer, IntMap (Set (Unipol Integer)))
+factorHensel = wrapSQFFactor factorHenselSqFree
+
+wrapSQFFactor :: (MonadRandom m)
+              => (Unipol Integer -> m [Unipol Integer])
+              -> Unipol Integer -> m (Integer, IntMap (Set (Unipol Integer)))
+wrapSQFFactor fac f0 = do
   let (g, c) | leadingCoeff f0 < 0 = (- pp f0, - content f0)
              | otherwise = (pp f0, content f0)
-  ts0 <- F.mapM (secondM factorSqFreeQBP . clearDenom) (squareFreeDecomp $ monoize $ mapCoeffUnipol (F.% 1) g)
+  ts0 <- F.mapM (secondM fac . clearDenom) (squareFreeDecomp $ monoize $ mapCoeffUnipol (F.% 1) g)
   let anss = IM.toList ts0
       k = c * leadingCoeff g `div` product (map (fst.snd) anss)
-  return $ (k, map (snd *** toEnum <<< swap) anss)
+  return $ (k, IM.fromList $ map (second $ S.fromList . snd) anss)
+
 
 secondM :: Functor f => (t -> f a) -> (t1, t) -> f (t1, a)
 secondM f (a, b)= (a,) <$> f b
@@ -246,9 +258,43 @@ factorSqFreeQBP f
       let fbar = mapCoeffUnipol (modNat' fp) f
       in gcd fbar (diff OZ fbar) == one
 
+factorHenselSqFree :: MonadRandom m
+                   => Unipol Integer -> m [Unipol Integer]
+factorHenselSqFree f =
+  let lc = leadingCoeff f
+      Just p = find isGoodPrime primes
+      normF  = integerSquareRoot (getSum $ foldMap (Sum . (^2)) $ terms f) + 1
+      power  = succ $ intLog2' $ integerLogBase' p $ normF * 2 ^ (totalDegree' f + 1)
+  in reifyPrimeField p $ \fp -> do
+  let lc' = modNat' fp lc
+      f0 = mapCoeffUnipol ((/lc') . modNat' fp) f
+  fps <- factorise f0
+  let gs = multiHensel (fromIntegral p) power f $
+           map (mapCoeffUnipol naturalRepr . fst) fps
+  return $ loop (p^2^fromIntegral power) 1 (length gs) f gs []
+  where
+    lc = leadingCoeff f
+    isGoodPrime p = reifyPrimeField p $ \fp ->
+      lc `mod` p /= 0 && isSquareFree (mapCoeffUnipol (modNat' fp) f)
+    loop pk !l m !h gs acc
+      | fromIntegral (2 * l) > m =  if h == one then acc else h : acc
+      | otherwise =
+        let cands = [ (ss, g, q)
+                    | ss <- comb l gs
+                    , let g = normalizeMod pk $ lc .* product ss
+                    , let (q, r) = pDivModPoly (lc .* h) g
+                    , isZero r
+                    , leadingCoeff q * leadingCoeff g == lc * leadingCoeff h
+                    ]
+        in case cands of
+            [] -> loop pk (l + 1) m h gs acc
+            ((ss, g, q) : _) ->
+             let u = leadingCoeff g `div` content g
+             in loop pk l m (mapCoeff' (`div` u) q) (gs L.\\ ss) (pp g : acc)
+
 -- | Given that @f = gh (mod m)@ with @sg + th = 1 (mod m)@ and @leadingCoeff f@ isn't zero divisor mod m,
 --   @henselStep m f g h s t@ calculates the unique (g', h', s', t') s.t.
---   @f = g' h' (mod m), g' = g (mod m), h' = h (mod m), s' = s (mod m), t' = t (mod m)@, @h'@ monic.
+--   @f = g' h' (mod m^2), g' = g (mod m), h' = h (mod m), s' = s (mod m), t' = t (mod m)@, @h'@ monic.
 henselStep :: (Eq r, Euclidean r)
            => r        -- ^ modulus
            -> Unipol r
@@ -271,39 +317,48 @@ henselStep m f g h s t =
       t' = modCoeff $ t - t*b - c*g'
   in (g', h', s', t')
 
-tr :: Show a => String -> a -> a
-tr msg a = trace (msg ++ show a) a
+-- | Repeatedly applies hensel lifting for monics.
+repeatHensel :: Integer -> Int
+             -> Unipol Integer
+             -> Unipol Integer -> Unipol Integer
+             -> Unipol Integer -> Unipol Integer
+             -> (Unipol Integer, Unipol Integer, Unipol Integer, Unipol Integer)
+repeatHensel !m 0 _ g h s t = (normalizeMod m g, normalizeMod m h, s, t)
+repeatHensel !m n f g h s t =
+  let (g', h', s', t') = henselStep m f g h s t
+  in repeatHensel (m ^ 2) (n - 1) f g' h' s' t'
 
-multiHensel :: Integer -> Natural -> Unipol Integer -> [Unipol Integer] -> [Unipol Integer]
-multiHensel p l f [_] =
-  let u = fromMaybe (error $ "lc(f) = " ++ (show $ leadingCoeff f) ++ " is zero divisor mod p!") $
-          recipMod (tr "p^l = " $ p^l) $ leadingCoeff f
-  in [mapCoeffUnipol ((`rem` p^l).(*u)) $ f]
-multiHensel p l f fs =
-  let (as, bs) = splitAt k fs
-      g0 = mapCoeffUnipol (`rem` p) $ leadingCoeff f .*. product as
-      r = length fs
-      k = r `div` 2
-      d = logBase2 (fromIntegral l)
-      h0 = mapCoeffUnipol (`rem` p) $ product bs
-      (a, s0, t0) : _ = reifyPrimeField p $ \fp ->
-        map (each %~ mapCoeffUnipol naturalRepr) $ euclid (skim $ mapCoeffUnipol (modNat' fp) g0) (skim $ mapCoeffUnipol (modNat' fp) h0)
-      (gd, hd, _, _) = foldl (\(s, t, g, h) j -> henselStep (p^2^j) f g h s t)
-                         (s0, t0, mapCoeffUnipol (`rem` p) $ product as, h0)
-                         [0..P.fromIntegral (d - 1)]
-  in if a /= one
-     then error $ concat ["(f, as, bs, g0, h0) = ", show (f, as, bs, g0, h0), " is not bezout coprime!"]
-     else multiHensel p l (tr "gd = " gd) as ++ multiHensel p l (tr "hd = " hd) bs
-
-skim :: Show b => b -> b
-skim a = traceShow a a
+-- | Monic hensel lifting for many factors.
+multiHensel :: Natural          -- ^ prime @p@
+            -> Int              -- ^ iteration count @k@.
+            -> Unipol Integer   -- ^ original polynomial
+            -> [Unipol Integer] -- ^ coprime factorisation mod @p@
+            -> [Unipol Integer] -- ^ coprime factorisation mod @p^(2^k)@.
+multiHensel p n f [_]    = [normalizeMod (fromNatural p^fromIntegral n) f]
+multiHensel p n f [g, h] = reifyPrimeField (fromNatural p) $ \fp ->
+  let (_, s0, t0) = head $
+                    euclid
+                      (mapCoeffUnipol (modNat' fp) g)
+                      (mapCoeffUnipol (modNat' fp) h)
+      (s, t) = (s0, t0) & both %~ mapCoeffUnipol naturalRepr
+      (g', h', _, _) = repeatHensel (fromNatural p) n f g h s t
+  in [g', h']
+multiHensel p n f gs = reifyPrimeField (fromNatural p) $ \fp ->
+  let (ls, rs) = splitAt (length gs `div` 2) gs
+      (l, r) = (product ls, product rs)
+      (_, s0, t0) = head $
+                    euclid
+                      (mapCoeffUnipol (modNat' fp) l)
+                      (mapCoeffUnipol (modNat' fp) r)
+      (s, t) = (s0, t0) & both %~ mapCoeffUnipol naturalRepr
+      (fl, fr, _, _) = repeatHensel (fromNatural p) n f l r s t
+  in multiHensel p n fl ls ++ multiHensel p n fr rs
 
 recipMod :: (Euclidean a, Eq a) => a -> a -> Maybe a
 recipMod m u =
   let (a, r, _) : _ = euclid u m
   in if a == one
      then Just r else Nothing
-
 
 modFraction :: (Euclidean s, Eq s) => s -> Fraction s -> Maybe s
 modFraction m d = ((numerator d `rem` m) *) <$> recipMod m (denominator d)
@@ -316,7 +371,8 @@ comb = (DL.toList .) . go
     go k (x:xs) = DL.map (x :) (go (k - 1) xs) <> go k xs
 
 normalizeMod :: Integer -> Unipol Integer -> Unipol Integer
-normalizeMod p f = mapCoeffUnipol chooseHalf f
-  where
-    chooseHalf ((`rem` p) -> c) = minimumBy (comparing P.abs) [c, c - p]
+normalizeMod p = mapCoeffUnipol (subtract half . (`mod` p) . (+ half))
+  where half = p `div` 2
 
+isSquareFree :: forall poly. (IsOrderedPolynomial poly, GCDDomain poly) => poly -> Bool
+isSquareFree f = (f `gcd` diff 0 f) == one
