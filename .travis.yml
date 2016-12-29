@@ -44,7 +44,7 @@ install:
 # Here starts the actual work to be performed for the package under test;
 # any command which exits with a non-zero exit code causes the build to fail.
 script:
- -  echo "No test -- just for caching" # stack --jobs=3 --no-terminal --skip-ghc-check test
+ - stack --jobs=3 --no-terminal --skip-ghc-check test
 
 # Check that the resulting source distribution can be built & installed.
 # If there are no other `.tar.gz` files in `dist`, this can be even simpler:
