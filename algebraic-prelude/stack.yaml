@@ -1,6 +1,7 @@
-resolver: lts-6.10
+resolver: lts-7.14
 packages:
 extra-deps:
 - algebra-4.3
 flags: {}
 extra-package-dbs: []
+pvp-bounds: both

@@ -1,5 +1,5 @@
 name:                algebraic-prelude
-version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            Algebraically structured Prelude
 description:         This package provides a drop-in replacement for Prelude module,
                      based on algebraic hierarchy provided by <https://hackage.haskell.org/package/algebra algebra> package.
@@ -23,7 +23,7 @@ library
                      , lens    == 4.*
                      , semigroups
   default-language:    Haskell2010
-  extensions:          NoImplicitPrelude
+  default-extensions:  NoImplicitPrelude
   ghc-options:         -Wall
   
 
@@ -34,8 +34,9 @@ executable sandpit
                      , algebraic-prelude
   default-language:    Haskell2010
   ghc-options:         -Wall
-  extensions:          NoImplicitPrelude
+  default-extensions:  NoImplicitPrelude
+  buildable:           False
 
 source-repository head
   type:     git
-  location: https://github.com/konn/algebraic-prelude
+  location: https://github.com/konn/computational-algebra

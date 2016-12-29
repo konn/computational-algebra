@@ -9,28 +9,24 @@ cache:
 
 matrix:
   include:
-    - env: GHCVER=8.0.1 STACK_YAML=stack.yaml
+    - env: STACK_YAML=stack.yaml
       compiler: ": #GHC 8.0.1"
       addons:
         apt:
           packages:
-            - ghc-8.0.1
+            - libgmp3-dev
             - libgsl0-dev
             - liblapack-dev
-          sources:
-            - hvr-ghc
-    - env: GHCVER=head STACK_YAML=stack-head.yaml
+    - env: STACK_YAML=stack-head.yaml
       compiler: ": #GHC HEAD"
       addons:
         apt:
           packages:
-            - ghc-head
+            - libgmp3-dev
             - libgsl0-dev
             - liblapack-dev
-          sources:
-            - hvr-ghc
   allow_failures:
-    - env: GHCVER=head STACK_YAML=stack-head.yaml
+    - env: STACK_YAML=stack-head.yaml
 
 before_install:
  # install Stack
@@ -39,15 +35,16 @@ before_install:
  - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
  - unset CC
  - export PATH=$HOME/.local/bin:/opt/ghc/$GHCVER/bin:$PATH
+ - stack setup
 
 install:
  - stack --version
- - stack build --only-dependencies
+ - stack build --jobs=3 --only-dependencies
 
 # Here starts the actual work to be performed for the package under test;
 # any command which exits with a non-zero exit code causes the build to fail.
 script:
- -  stack --no-terminal --skip-ghc-check test
+ -  stack --jobs=3 --no-terminal --skip-ghc-check test
 
 # Check that the resulting source distribution can be built & installed.
 # If there are no other `.tar.gz` files in `dist`, this can be even simpler:
