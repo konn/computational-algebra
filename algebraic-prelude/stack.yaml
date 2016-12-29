@@ -4,3 +4,4 @@ extra-deps:
 - algebra-4.3
 flags: {}
 extra-package-dbs: []
+pvp-bounds: both
