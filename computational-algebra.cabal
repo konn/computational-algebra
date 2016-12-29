@@ -69,8 +69,8 @@ library
                      , primes               >= 0.2.1
                      , singletons == 2.2.*
                      , arithmoi
-    exposed-modules:   Algebra.Algorithms.Faugere4 Algebra.LinkedMatrix
-                       Algebra.Algorithms.Faugere5 Algebra.Algorithms.Groebner
+    exposed-modules:   Algebra.LinkedMatrix
+                       Algebra.Algorithms.Groebner
                        Algebra.Algorithms.ZeroDim Algebra.Field.Galois
                        Algebra.Ring.Ideal Algebra.Normed
                        Algebra.Ring.Polynomial

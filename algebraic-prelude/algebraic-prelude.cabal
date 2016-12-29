@@ -38,4 +38,4 @@ executable sandpit
 
 source-repository head
   type:     git
-  location: https://github.com/konn/algebraic-prelude
+  location: https://github.com/konn/computational-algebra
