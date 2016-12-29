@@ -2,6 +2,14 @@ resolver: lts-7.14
 packages:
 - '.'
 - 'algebraic-prelude'
+- location:
+    git: https://github.com/konn/type-natural.git
+    commit: c2173428337e59c46a83f7e989161d01f4b0a8eb
+  extra-dep: true
+- location:
+    git: https://github.com/konn/sized.git
+    commit: 25cbc74e0e92dfe9e2f9e6ed0f83a6aab808dd82
+  extra-dep: true
 
 flags:
   computational-algebra:
@@ -12,11 +20,11 @@ flags:
 
 extra-deps:
 - control-monad-loop-0.1
-- ghc-typelits-natnormalise-0.4.6
+- ghc-typelits-natnormalise-0.5.1
 - repa-3.4.1.1
 - repa-algorithms-3.4.1.1
 - trifecta-1.6
-- type-natural-0.7.1.1
+- type-natural-0.7.1.2
 - equational-reasoning-0.4.1.1
 - ghc-typelits-presburger-0.1.1.0
 - monomorphic-0.0.3.3
@@ -25,4 +33,6 @@ extra-deps:
 - unamb-0.2.5
 - lazysmallcheck-0.6
 - algebra-4.3
-- sized-0.2.0.0
+- sized-0.2.1.0
+
+pvp-bounds: both

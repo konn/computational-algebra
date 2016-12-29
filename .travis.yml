@@ -9,28 +9,24 @@ cache:
 
 matrix:
   include:
-    - env: GHCVER=8.0.1 STACK_YAML=stack.yaml
+    - env: STACK_YAML=stack.yaml
       compiler: ": #GHC 8.0.1"
       addons:
         apt:
           packages:
-            - ghc-8.0.1
+            - libgmp3-dev
             - libgsl0-dev
             - liblapack-dev
-          sources:
-            - hvr-ghc
-    - env: GHCVER=head STACK_YAML=stack-head.yaml
+    - env: STACK_YAML=stack-head.yaml
       compiler: ": #GHC HEAD"
       addons:
         apt:
           packages:
-            - ghc-head
+            - libgmp3-dev
             - libgsl0-dev
             - liblapack-dev
-          sources:
-            - hvr-ghc
   allow_failures:
-    - env: GHCVER=head STACK_YAML=stack-head.yaml
+    - env: STACK_YAML=stack-head.yaml
 
 before_install:
  # install Stack
@@ -39,6 +35,7 @@ before_install:
  - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
  - unset CC
  - export PATH=$HOME/.local/bin:/opt/ghc/$GHCVER/bin:$PATH
+ - stack setup
 
 install:
  - stack --version
