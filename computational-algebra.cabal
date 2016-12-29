@@ -132,7 +132,6 @@ executable solve
     else
         buildable: False
     main-is: solve.hs
-    buildable: True
     hs-source-dirs: share examples
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
 
