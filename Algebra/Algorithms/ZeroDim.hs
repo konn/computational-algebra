@@ -8,10 +8,21 @@
 {-# LANGUAGE TypeFamilies, TypeOperators, TypeSynonymInstances        #-}
 {-# LANGUAGE UndecidableInstances                                     #-}
 -- | Algorithms for zero-dimensional ideals.
-module Algebra.Algorithms.ZeroDim (univPoly, radical, isRadical, solveWith,
-                                   reduction, solveViaCompanion,
-                                   solveM, solve',  matrixRep, subspMatrix,
-                                   vectorRep, solveLinear, fglm, fglmMap) where
+--
+--   Since 0.4.0.0
+module Algebra.Algorithms.ZeroDim
+       ( -- * Root finding for zero-dimensional ideal
+         solveM, solve', solveViaCompanion, solveLinear,
+         -- * Radical computation
+         radical, isRadical,
+         -- * Converting monomial ordering to Lex using FGLM algorithm
+         fglm, fglmMap,
+         -- ** Internal helper function
+         solveWith,  univPoly,
+         reduction,
+         matrixRep, subspMatrix,
+         vectorRep
+       ) where
 import           Algebra.Algorithms.FGLM
 import           Algebra.Algorithms.Groebner
 import           Algebra.Instances                ()
@@ -20,29 +31,30 @@ import qualified Algebra.Matrix                   as AM
 import           Algebra.Prelude.Core
 import           Algebra.Ring.Polynomial.Quotient
 
-import           Control.Lens         hiding ((:<))
-import           Control.Monad.Loops
-import           Control.Monad.Random hiding (next)
-import           Control.Monad.Reader
-import           Control.Monad.ST     (runST)
-import qualified Data.Coerce          as C
-import           Data.Complex
-import           Data.Convertible
-import qualified Data.Matrix          as M
-import           Data.Maybe
-import           Data.Ord             (comparing)
-import           Data.Reflection
-import qualified Data.Sized.Builtin   as SV
-import           Data.STRef.Strict    (newSTRef)
--- import           Data.Type.Ordinal
+import           Control.Lens          hiding ((:<))
+import           Control.Monad.Loops   (whileM_)
+import           Control.Monad.Random  hiding (next)
+import           Control.Monad.Reader  (runReaderT)
+import           Control.Monad.ST      (runST)
+import           Data.Complex          (Complex (..), magnitude)
+import           Data.Convertible      (Convertible, convert)
+import qualified Data.Matrix           as M
+import           Data.Maybe            (fromJust)
+import           Data.Ord              (comparing)
+import           Data.Reflection       (Reifies)
+import qualified Data.Sized.Builtin    as SV
+import           Data.STRef.Strict     (newSTRef)
 import qualified Data.Vector           as V
 import qualified Data.Vector.Mutable   as MV
 import qualified Numeric.Algebra       as NA
 import qualified Numeric.LinearAlgebra as LA
 import qualified Prelude               as P
 import           Proof.Propositional   (IsTrue (Witness))
--- import qualified Sparse.Matrix                    as Sparse
 
+-- | Finds complex approximate  roots of given zero-dimensional ideal,
+--   using randomized altorithm.
+--
+--   See also @'solve''@ and @'solveViaCompanion'@.
 solveM :: forall m r ord n.
           (Normed r, Ord r, MonadRandom m, Field r, CoeffRing r, KnownNat n,
            IsMonomialOrder n ord, Convertible r Double,
@@ -65,6 +77,8 @@ solveM ideal = {-# SCC "solveM" #-}
         Nothing -> step (bd*2) len
         Just sols -> return sols
 
+-- | @solveWith f is@ finds complex approximate roots of the given zero-dimensional @n@-variate polynomial system @is@,
+--   using the given relatively prime polynomial @f@.
 solveWith :: forall r n ord. (DecidableZero r, Normed r, Ord r, Field r, CoeffRing r,
                               (0 :< n) ~ 'True, IsMonomialOrder n ord,
                               KnownNat n, Convertible r Double)
@@ -102,6 +116,11 @@ solveWith f0 i0 = {-# SCC "solveWith" #-}
                  else Just $ foldr ({-# SCC "rewrite-answer" #-} phi) (SV.replicate (sArity' f0) (error "indec!")) inds
         in sequence $ map calc $ LA.toColumns evecs
 
+-- | @'solve'' err is@ finds numeric approximate root of the
+--   given zero-dimensional polynomial system @is@,
+--   with error <@err@.
+--
+--   See also @'solveViaCompanion'@ and @'solveM'@.
 solve' :: forall r n ord.
           (Field r, CoeffRing r, KnownNat n, (0 :< n) ~ 'True,
            IsMonomialOrder n ord, Convertible r Double)
@@ -135,6 +154,11 @@ subspMatrix on ideal =
           M.<->
       fmap unwrapAlgebra (M.identity (dim - 1))) M.<|> M.colVector (V.fromList cfs)
 
+-- | @'solveViaCompanion' err is@ finds numeric approximate root of the
+--   given zero-dimensional polynomial system @is@,
+--   with error <@err@.
+--
+--   See also @'solve''@ and @'solveM'@.
 solveViaCompanion :: forall r ord n.
                      (Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord, Convertible r Double)
                   => Double
@@ -170,6 +194,7 @@ matrixRep f = {-# SCC "matrixRep" #-}
 toComplex :: Convertible a Double => a -> Complex Double
 toComplex a = convert a :+ 0
 
+-- | Calculates n-th reduction of f: @f `div` < f, ∂_{x_n} f >@.
 reduction :: (CoeffRing r, KnownNat n, IsMonomialOrder n ord, Field r)
              => Ordinal n -> OrderedPolynomial r ord n -> OrderedPolynomial r ord n
 reduction on f = {-# SCC "reduction" #-}
@@ -189,7 +214,7 @@ univPoly nth ideal = {-# SCC "univPoly" #-}
            p0 : pows = [fmap WrapAlgebra $ vectorRep $ modIdeal' pxy (pow x i)
                        | i <- [0:: Natural ..]
                        | _ <- zero : fromJust (standardMonomials' pxy) ]
-           step m (p : ps) = {-# SCC "univPoly/step" #-}
+           step m ~(p : ps) = {-# SCC "univPoly/step" #-}
              case solveLinear m p of
                Nothing  -> {-# SCC "recur" #-} step ({-# SCC "consCol" #-}m M.<|> M.colVector p) ps
                Just ans ->
@@ -295,12 +320,6 @@ isRadical ideal =
 --             , all ((<err) . magnitude . substWith mul xs) $ generators ideal
 --             ]
 
-solveLinearNA :: (Ord b, Field b) => M.Matrix b -> V.Vector b -> Maybe (V.Vector b)
-solveLinearNA m v = C.coerce $ solveLinear (fmap WrapAlgebra m) (fmap WrapAlgebra v)
-
-toDM :: (AM.Matrix mat, AM.Elem mat a, AM.Elem M.Matrix a) => mat a -> M.Matrix a
-toDM = AM.fromCols . AM.toCols
-
 -- * FGLM
 
 -- | Calculate the Groebner basis w.r.t. lex ordering of the zero-dimensional ideal using FGLM algorithm.
@@ -387,3 +406,4 @@ beta xs o@(OLt k) =
      withRefl (plusComm (n %:- sSucc k) (sSucc k)) $
      withRefl (minusPlus n (sSucc k) Witness) $
      (SV.take (sSucc k) $ xs & ix o +~ 1) SV.++ SV.replicate (n %:- sSucc k) 0
+beta _ _ = error "beta: Bug in ghc!"

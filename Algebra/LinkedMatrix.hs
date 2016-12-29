@@ -60,7 +60,7 @@ import           Data.Vector.Mutable          (grow)
 import qualified Data.Vector.Mutable          as MV
 import           Numeric.Decidable.Zero       (isZero)
 import           Numeric.Domain.GCD           (gcd, lcm)
-import           Numeric.Field.Fraction
+import           Numeric.Field.Fraction       ((%))
 import           Numeric.Semiring.ZeroProduct (ZeroProductSemiring)
 import qualified Prelude                      as P
 
@@ -844,8 +844,6 @@ triangulateModular mat0 =
 
 infixr 9 .!
 
--- trMat lab mat = DT.trace (lab <> ": " <> show (toLists mat)) mat
-
 clearDenom :: Euclidean a => Matrix (Fraction a) -> (a, Matrix a)
 clearDenom mat =
   let g = V.foldr' (lcm' . denominator . snd) one $ nonZeroEntries mat
@@ -892,8 +890,3 @@ solveHensel cyc p mat b = {-# SCC "solveHensel" #-}
         Just x' | mat `multWithVector` x' == b -> Just x'
                 | mans == prev -> Nothing
         _ -> go mans (drop cyc xs)
-
-killerMat :: Matrix (Fraction Integer)
-killerMat = fromLists [[1,9 / 5,-9 / 10],[1,0,0]]
-
--- tr str a = DT.trace (str <> ": " <>show a) a

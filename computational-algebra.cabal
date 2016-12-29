@@ -60,14 +60,15 @@ library
                      , primes               >= 0.2.1
                      , singletons           == 2.2.*
                      , arithmoi
-    exposed-modules:   Algebra.Algorithms.Groebner
-                       Algebra.Algorithms.ZeroDim
+    exposed-modules:   Algebra.Algorithms.ChineseRemainder
+                       Algebra.Algorithms.Groebner
                        Algebra.Algorithms.PrimeTest
-                       Algebra.Algorithms.ChineseRemainder
-                       Algebra.Field.Galois
-                       Algebra.Field.Finite
+                       Algebra.Algorithms.ZeroDim
                        Algebra.Field.AlgebraicReal
+                       Algebra.Field.Finite
+                       Algebra.Field.Galois
                        Algebra.Instances
+                       Algebra.Internal
                        Algebra.LinkedMatrix
                        Algebra.Matrix
                        Algebra.Normed
@@ -76,7 +77,7 @@ library
                        Algebra.Ring.Ideal
                        Algebra.Ring.Polynomial
                        Algebra.Ring.Polynomial.Class
-                       Algebra.Ring.Polynomial.Factorize
+                       Algebra.Ring.Polynomial.Factorise
                        Algebra.Ring.Polynomial.Labeled
                        Algebra.Ring.Polynomial.Monomial
                        Algebra.Ring.Polynomial.Quotient
@@ -84,9 +85,8 @@ library
                        Algebra.Scalar
     exposed:           True
     other-modules:     Algebra.Algorithms.FGLM
-                       Algebra.Field.Galois.Internal
                        Algebra.Field.Galois.Conway
-                       Algebra.Internal
+                       Algebra.Field.Galois.Internal
     ghc-options:      -O2 -Wall -Wno-unused-top-binds
     default-extensions: CPP
                       , DataKinds

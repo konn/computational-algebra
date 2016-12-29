@@ -9,7 +9,7 @@ import           Algebra.Internal
 import qualified Algebra.LinkedMatrix as LM
 import           Algebra.Prelude.Core hiding (maxNorm, zero)
 
-import           Control.Lens
+import           Control.Lens                (both, view, (%~), (&), _3)
 import           Control.Monad               (when)
 import qualified Data.Matrix                 as DM
 import qualified Data.Vector                 as V
@@ -22,8 +22,6 @@ import qualified Numeric.Decidable.Zero      as NA
 import qualified Numeric.LinearAlgebra       as LA
 import qualified Numeric.LinearAlgebra.Devel as LA
 import qualified Prelude                     as P
--- import           Sparse.Matrix                    (_Mat)
--- import qualified Sparse.Matrix                    as SM
 
 class Matrix mat where
   type Elem mat a :: Constraint
@@ -131,44 +129,8 @@ instance Matrix LA.Matrix where
   m <||> n = LA.fromColumns $ LA.toColumns m ++ LA.toColumns n
   m <--> n = LA.fromRows $ LA.toRows m ++ LA.toRows n
 
-mapMatrixWithIndexLA :: LA.Element  a => ((Int, Int) -> a) -> LA.Matrix a -> LA.Matrix a
-mapMatrixWithIndexLA f = (fst .) $ LA.mutable $ \(l, k) m -> do
-  LA.writeMatrix m l k (f (l+1, k+1))
-
 toIntLA :: LA.Container LA.Matrix e => e -> Int
 toIntLA e = fromIntegral $ LA.toZ ((1 LA.>< 1) [e]) `LA.atIndex` (0, 0)
-
--- mapSM :: (SM.Arrayed a, SM.Arrayed b) => (a -> b) -> SM.Mat a -> SM.Mat b
--- mapSM f m =
---   case m ^._Mat of
---     V ks as  -> V ks (GV.fromList $ map f $ GV.toList as) ^.from _Mat
-
--- data Sparse r = Sparse { rawSM :: !(SM.Mat r)
---                        , cols  :: !Int
---                        , rows  :: !Int
---                        }
-
--- instance (SM.Arrayed a, SM.Eq0 a) => Num (Sparse a) where
---   {-# SPECIALIZE instance Num (Sparse Int) #-}
---   {-# SPECIALIZE instance Num (Sparse Double) #-}
---   {-# SPECIALIZE instance Num (Sparse (Complex Double)) #-}
---   Sparse m r _ * Sparse n _ c = Sparse (m * n) r c
---   {-# INLINE (*) #-}
---   abs (Sparse m r c) = Sparse (m & over each abs) r c
---   {-# INLINE abs #-}
---   signum (Sparse m r c) = Sparse (m & over each signum) r c
---   {-# INLINE signum #-}
---   negate (Sparse m r c) = Sparse (m & over each negate) r c
---   {-# INLINE negate #-}
---   fromInteger _ = error "Sparse: fromInteger"
---   {-# INLINE fromInteger #-}
---   Sparse m r c + Sparse n r' c' = Sparse (m + n) (max r r') (max c c')
---   {-# INLINE (+) #-}
---   Sparse m r c - Sparse n r' c' = Sparse (m - n) (max r r') (max c c')
---   {-# INLINE (-) #-}
-
--- instance (SM.Arrayed a, Show a) => Show (Sparse a) where
---   showsPrec d = showsPrec d . rawSM
 
 instance Matrix LM.Matrix where
   type Elem LM.Matrix a = (CoeffRing a, Unital a, Monoidal a, Multiplicative a, Additive a)
@@ -199,55 +161,6 @@ instance Matrix LM.Matrix where
   nonZeroRows = LM.nonZeroRows
   nonZeroCols = LM.nonZeroCols
 
--- instance Matrix Sparse where
---   type Elem Sparse a = (Num a, SM.Arrayed a, SM.Eq0 a)
---   cmap f (Sparse raw nc nr) = Sparse (mapSM f raw) nc nr
---   empty = Sparse (SM.fromList []) 0 0
---   fromLists ls =
---     Sparse (SM.fromList . concat. zipWith (\i -> zipWith (\j v -> (SM.Key i j, v)) [0..]) [0..] $ ls)
---     (length ls) (maximum $ map length ls)
---   nrows (Sparse _ _ r) = r
---   ncols (Sparse _ c _) = c
---   identity n = Sparse (SM.ident n) n n
---   diag v = Sparse (SM.fromList [ (SM.Key (fromIntegral i) (fromIntegral i), v V.! i) | i <- [0.. V.length v - 1]])
---              (V.length v) (V.length v)
---   getDiag (Sparse m r c) =
---     let s = fromIntegral $ min r c
---     in V.fromList [ fromMaybe 0 $ m ^? ix (SM.Key i i) | i <- [1..s] ]
---   trace = V.sum . getDiag
---   diagProd = V.product . getDiag
---   zero n m = Sparse (SM.fromList []) n m
---   colVector v = Sparse (SM.fromList [(SM.Key (fromIntegral i) 0, v V.! i) | i <- [0..V.length v - 1]]) (V.length v) 1
---   rowVector v = Sparse (SM.fromList [(SM.Key 0 (fromIntegral i), v V.! i) | i <- [0..V.length v - 1]]) 1 (V.length v)
---   switchRows i j = wrapSM $ modifyKey $ _1 %~ swapIJ (fromIntegral i - 1) (fromIntegral j - 1)
---   combineRows j s i spm = flip wrapSM spm $ \m ->
---     m & _Mat %~ H.map (\(SM.Key k l, v) -> (SM.Key k l,
---                                             if k == fromIntegral j - 1
---                                             then s * (spm ! (i, fromIntegral l+1)) + v
---                                             else v))
---   scaleRow a i = wrapSM $ _Mat %~ H.map (\(key@(SM.Key l _), v) -> (key, if l == fromIntegral i - 1 then a * v else v))
---   getCol j (Sparse m rs _) = V.fromList $ [ fromMaybe 0 $ m ^? ix (SM.Key (fromIntegral i) (fromIntegral (j-1)))
---                                           | i <- [0..rs - 1]]
---   getRow i (Sparse m _ cs) = V.fromList $ [ fromMaybe 0 $ m ^? ix (SM.Key (fromIntegral (i-1)) (fromIntegral j))
---                                           | j <- [0..cs - 1]]
---   trans (Sparse m r c) = Sparse (SM.transpose m) c r
---   buildMatrix h w f = Sparse (SM.fromList [(SM.Key (fromIntegral $ i-1) (fromIntegral $ j-1), f (i,j))
---                                           | i <- [1..h], j <- [1..w]]) h w
---   Sparse m _ _ ! (i, j) = fromMaybe 0 $ m ^? ix (SM.Key (fromIntegral i - 1) (fromIntegral j - 1))
---   Sparse m r c1 <||> Sparse n r' c2 =
---     Sparse (m + modifyKey (_2 %~ (+ fromIntegral c1)) n) (max r r') (c1 + c2)
---   Sparse m r1 c <--> Sparse n r2 c' =
---     Sparse (m + modifyKey (_1 %~ (+ fromIntegral r1)) n) (r1 + r2) (max c c')
---   nonZeroRows (Sparse mat _ _) = IS.toList $ IS.fromList $ map (succ . fromIntegral) (mat ^.. SM.keys.each._1)
---   nonZeroCols (Sparse mat _ _) = IS.toList $ IS.fromList $ map (succ . fromIntegral) (mat ^.. SM.keys.each._2)
-
--- modifyKey :: (SM.Arrayed a) => (SM.Key -> SM.Key) -> SM.Mat a -> SM.Mat a
--- modifyKey f m =
---   m & _Mat %~ H.modify (Sort.sortBy (comparing fst)). H.map (first f)
-
--- wrapSM :: (SM.Mat a -> SM.Mat b) -> Sparse a -> Sparse b
--- wrapSM f (Sparse m r c) = Sparse (f m) r c
-
 delta :: (NA.Monoidal r, NA.Unital r) => Int -> Int -> r
 delta i j | i == j = NA.one
           | otherwise = NA.zero
@@ -255,9 +168,9 @@ delta i j | i == j = NA.one
 companion :: (KnownNat n, CoeffRing r, Matrix mat,
               Elem mat r, IsMonomialOrder n ord)
           => Ordinal n -> OrderedPolynomial r ord n -> mat r
-companion on poly =
+companion odn poly =
   let deg = fromIntegral $ totalDegree' poly
-      vx  = leadingMonomial (var on `asTypeOf` poly)
+      vx  = leadingMonomial (var odn `asTypeOf` poly)
   in buildMatrix deg deg $ \(j, k) ->
   if 1 <= k && k <= deg - 1
   then delta j (k+1)
