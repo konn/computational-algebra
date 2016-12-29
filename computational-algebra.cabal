@@ -28,8 +28,6 @@ library
                      , repa-algorithms      >= 3.3
                      , template-haskell     -any
                      , MonadRandom          >= 0.1
-                     , mwc-random
-                     , mwc-random-monad
                      , algebraic-prelude    >= 0.1
                      , algebra              >= 4.1
                      , base                 >= 4
@@ -42,7 +40,6 @@ library
                      , hashable             >= 1.1
                      , heaps                >= 0.3
                      , hmatrix              >= 0.16
-                     , trifecta             >= 1.5
                      , matrix               >= 0.3
                      , entropy
                      , lens                 >= 4.13
@@ -51,7 +48,6 @@ library
                      , monomorphic          >= 0.0.3
                      , mtl                  >= 2.1
                      , reflection           >= 2
-                     -- , sized-vector         >= 1.4
                      , sized                == 0.2.*
                      , tagged               >= 0.7
                      , hybrid-vectors       >= 0.1
@@ -60,7 +56,6 @@ library
                      , unamb                >= 0.2
                      , unordered-containers >= 0.2
                      , vector               >= 0.10
-                     -- , sparse               >= 0.9
                      , parallel             >= 3.2
                      , hybrid-vectors       >=0.1
                      , vector-algorithms
@@ -91,7 +86,6 @@ library
                        Algebra.Ring.Polynomial.Factorise
                        Algebra.Ring.Polynomial.Labeled
                        Algebra.Ring.Polynomial.Monomial
-                       Algebra.Field.AlgebraicReal
     exposed:           True
     other-modules:     Algebra.Algorithms.FGLM
                        Algebra.Field.Galois.Conway
@@ -110,16 +104,17 @@ library
                       , NoImplicitPrelude
  
 executable groebner-prof
-  buildable: False
-  hs-source-dirs: share examples
+  hs-source-dirs:     share examples
   Main-is:             groebner-prof.hs
   build-depends:       base
                      , computational-algebra
                      , deepseq
   default-language:    Haskell2010
   ghc-options:         -Wall -prof -fprof-auto -threaded -O2
-  extensions: NoImplicitPrelude
+  default-extensions:  NoImplicitPrelude
 
+  if !flag(examples)
+      Buildable: False
 
 executable solve
     build-depends: semigroups >= 0.15.2,
@@ -132,11 +127,11 @@ executable solve
                    MonadRandom >= 0.1
      
     main-is: solve.hs
-    buildable: True
     hs-source-dirs: share examples
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
 
-    buildable: False
+    if !flag(examples)
+        buildable: False
 
 executable algebraic
   Main-is:             algebraic.hs
@@ -147,7 +142,8 @@ executable algebraic
   default-language:    Haskell2010
   ghc-options:         -Wall -O2 -threaded
 
-  buildable: False
+  if !flag(examples)
+      buildable: False
 
 
 executable ipsolve
@@ -161,11 +157,11 @@ executable ipsolve
                    MonadRandom >= 0.1, singletons
      
     main-is: ipsolve.hs
-    buildable: True
     hs-source-dirs: share examples
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
 
-    buildable: False
+    if !flag(examples)
+        buildable: False
  
 executable faugere-prof
     build-depends: criterion >= 0.8.1.0,
@@ -177,9 +173,9 @@ executable faugere-prof
                    vector >= 0.10, convertible >= 1.1, lens >= 3.9,
                    deepseq >= 1.3, MonadRandom >= 0.1
      
-    buildable: False
+    if !flag(examples)
+        buildable: False
     main-is: faugere-prof.hs
-    buildable: True
     hs-source-dirs: share examples
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
 
@@ -193,9 +189,9 @@ executable hensel-prof
                    vector >= 0.10, convertible >= 1.1, lens >= 3.9,
                    deepseq >= 1.3, MonadRandom >= 0.1
      
-    buildable: False
+    if !flag(examples)
+        buildable: False
     main-is: hensel-prof.hs
-    buildable: True
     hs-source-dirs: share examples
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded -eventlog
 
@@ -205,9 +201,9 @@ executable sandpit-poly
                    base >=4, type-natural, algebra,
                    sized
      
-    buildable: False
+    if !flag(examples)
+        buildable: False
     main-is: sandpit-poly.hs
-    buildable: True
     hs-source-dirs: share examples
 
 
@@ -218,9 +214,9 @@ executable quotient
                    sized,
                    reflection
      
-    buildable: False
+    if !flag(examples)
+        buildable: False
     main-is: quotient.hs
-    buildable: True
     hs-source-dirs: share examples
  
 test-suite test-multi-table
