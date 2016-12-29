@@ -16,6 +16,9 @@ module Algebra.Ring.Polynomial.Class
          showsPolynomialWith, showPolynomialWith,
          -- * Polynomial division
          divModPolynomial, divPolynomial, modPolynomial
+         -- * Default instances
+       , isUnitDefault, recipUnitDefault, isAssociateDefault
+       , splitUnitDefault
        ) where
 import Algebra.Internal
 import Algebra.Normed
@@ -32,7 +35,7 @@ import qualified Data.HashSet             as HS
 import           Data.Int
 import qualified Data.List                as L
 import qualified Data.Map.Strict          as M
-import           Data.Maybe               (catMaybes, fromMaybe)
+import           Data.Maybe               (catMaybes, fromJust, fromMaybe)
 import qualified Data.Ratio               as R
 import qualified Data.Set                 as S
 import           Data.Singletons.Prelude  (SingKind (..))
@@ -552,3 +555,27 @@ divPolynomial = (fst .) . divModPolynomial
 infixl 7 `divPolynomial`
 infixl 7 `modPolynomial`
 infixl 7 `divModPolynomial`
+
+isUnitDefault :: (DecidableUnits r, Coefficient poly ~ r, IsPolynomial poly)
+              => poly -> Bool
+isUnitDefault p = totalDegree' p == 0 && isUnit (constantTerm p)
+
+recipUnitDefault :: (DecidableUnits r, Coefficient poly ~ r, IsPolynomial poly)
+                 => poly -> Maybe poly
+recipUnitDefault p
+  | isUnitDefault p = fmap injectCoeff $ recipUnit $ constantTerm p
+  | otherwise = Nothing
+
+isAssociateDefault :: (UnitNormalForm r, Coefficient poly ~ r, IsOrderedPolynomial poly)
+                 => poly -> poly -> Bool
+isAssociateDefault p q =
+  let up = fromJust $ recipUnit $ leadingUnit $ fst $ leadingTerm p
+      uq = fromJust $ recipUnit $ leadingUnit $ fst $ leadingTerm q
+  in (up !* q) == (uq !* p)
+
+splitUnitDefault :: (UnitNormalForm r, Coefficient poly ~ r, IsOrderedPolynomial poly)
+                 => poly -> (poly, poly)
+splitUnitDefault f =
+  let u = leadingUnit $ leadingCoeff f
+      u' = fromJust $ recipUnit u
+  in (injectCoeff u, u' !* f)
