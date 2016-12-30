@@ -65,6 +65,7 @@ library
                      , singletons == 2.2.*
                      , arithmoi
                      , ghc-typelits-knownnat
+                     , ghc-typelits-presburger
     exposed-modules:   Algebra.Algorithms.ChineseRemainder
                        Algebra.Algorithms.Faugere4
                        Algebra.Algorithms.Faugere5

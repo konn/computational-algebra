@@ -18,7 +18,7 @@ module Algebra.Algorithms.Groebner
        , NormalStrategy(..), SugarStrategy(..), GradedStrategy(..)
        -- * Ideal operations
        , isIdealMember, intersection, thEliminationIdeal, thEliminationIdealWith
-       , unsafeThEliminationIdealWith
+       , unsafeThEliminationIdealWith, eliminatePadding
        , quotIdeal, quotByPrincipalIdeal
        , saturationIdeal, saturationByPrincipalIdeal
        -- * Resultant
