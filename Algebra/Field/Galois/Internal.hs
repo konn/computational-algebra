@@ -6,13 +6,13 @@ module Algebra.Field.Galois.Internal
        (ConwayPolynomial(..),
         Conway,
         buildInstance,
-        parseLine) where
+        parseLine
+       ) where
 import           Algebra.Field.Finite
 import           Algebra.Prelude.Core               hiding (lex, lift)
 import           Algebra.Ring.Polynomial.Univariate (Unipol)
 import           Data.Char                          (isDigit)
 import           Data.Char                          (digitToInt)
-import qualified Data.Map                           as M
 import           Data.Reflection
 import qualified GHC.TypeLits                       as TL
 import           Language.Haskell.TH

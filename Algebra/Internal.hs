@@ -3,7 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses, PatternSynonyms, PolyKinds, RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeFamilies         #-}
 {-# LANGUAGE TypeOperators                                                 #-}
-{-# OPTIONS_GHC -fwarn-incomplete-patterns #-}
+{-# OPTIONS_GHC -Wincomplete-patterns -Wno-orphans #-}
 module Algebra.Internal
        (  (:~:)(..), withRefl,
           module Data.Proxy,

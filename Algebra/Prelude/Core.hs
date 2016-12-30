@@ -3,7 +3,7 @@ module Algebra.Prelude.Core
        ((%),Scalar(..),(.*.), od,Ordinal, enumOrdinal,
         logBase2,ceilingLogBase2,
         module AlgebraicPrelude,
-        module Algebra.Ring.Polynomial,
+        module Algebra.Ring.Polynomial.Internal,
         module Algebra.Ring.Ideal,
         module Algebra.Normed,
         module Algebra.Internal) where
@@ -11,7 +11,7 @@ module Algebra.Prelude.Core
 import Algebra.Internal
 import Algebra.Normed
 import Algebra.Ring.Ideal
-import Algebra.Ring.Polynomial
+import Algebra.Ring.Polynomial.Internal
 import Algebra.Scalar
 
 import AlgebraicPrelude          hiding (lex, (%))
