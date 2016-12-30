@@ -4,9 +4,10 @@
 {-# LANGUAGE TypeOperators, ViewPatterns                                 #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Ring.Polynomial.Recursive
-       (type RecPoly, pattern RecPoly, toRecPoly, runRecPoly) where
+       (RecPoly, pattern RecPoly, toRecPoly, runRecPoly) where
 import           Algebra.Prelude
-import           Control.Lens              (ifoldMap, (%~), _Unwrapping')
+import           Algebra.Algorithms.Groebner 
+import           Control.Lens              ((&),both,ifoldMap, (%~), _Unwrapping')
 import qualified Data.Coerce               as C
 import qualified Data.Map                  as M
 import qualified Data.Type.Natural         as PN
@@ -292,12 +293,21 @@ instance (CoeffRing k, Field k) => Division (RecPoly k 0)  where
   recip = C.coerce (recip :: RecPoly' k 'PN.Z -> RecPoly' k 'PN.Z)
 
 instance (CoeffRing k, Field k) => PID (RecPoly k 0)
-instance (CoeffRing k, Field k) => UFD (RecPoly k 0)
-instance (CoeffRing k, Field k) => GCDDomain (RecPoly k 0)
-instance (CoeffRing k, Field k) => DecidableAssociates (RecPoly k 0) where
-  isAssociate = C.coerce (isAssociate :: k -> k -> Bool)
-instance (CoeffRing k, Field k) => IntegralDomain (RecPoly k 0)
+instance (CoeffRing k, Field k) => PID (RecPoly k 1)
+instance (CoeffRing k, Field k, KnownNat n) => UFD (RecPoly k n)
+instance (CoeffRing k, Field k, KnownNat n) => GCDDomain (RecPoly k n) where
+  gcd f g = gcdPolynomial f g
+  lcm f g = lcmPolynomial f g
+instance (CoeffRing k, Field k, KnownNat n) => IntegralDomain (RecPoly k n) where
+  f `divides` g = isZero $ f `modPolynomial` [g]
+  maybeQuot f g =
+    let ([q], r) = f `divModPolynomial` [g]
+    in if isZero r then Just (snd q) else Nothing
 instance (CoeffRing k, Field k) => Euclidean (RecPoly k 0)
+instance (CoeffRing k, Field k) => Euclidean (RecPoly k 1) where
+  degree f | isZero f = Nothing
+           | otherwise = Just $ totalDegree' f
+  divide f g = divide (runRecPoly f) (runRecPoly g) & both %~ RecPoly
 
 instance (CoeffRing k, UnitNormalForm k, KnownNat n) => Num (RecPoly k n) where
   fromInteger = unwrapAlgebra . P.fromInteger
