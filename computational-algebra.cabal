@@ -60,6 +60,7 @@ library
                      , primes               >= 0.2.1
                      , singletons           == 2.2.*
                      , arithmoi
+                     , ghc-typelits-knownnat
     exposed-modules:   Algebra.Algorithms.ChineseRemainder
                        Algebra.Algorithms.Groebner
                        Algebra.Algorithms.PrimeTest
@@ -87,7 +88,9 @@ library
     other-modules:     Algebra.Algorithms.FGLM
                        Algebra.Field.Galois.Conway
                        Algebra.Field.Galois.Internal
+                       Algebra.Ring.Polynomial.Internal
     ghc-options:      -O2 -Wall -Wno-unused-top-binds
+                      -fplugin GHC.TypeLits.KnownNat.Solver
     default-language:   Haskell2010
     default-extensions: CPP
                       , DataKinds

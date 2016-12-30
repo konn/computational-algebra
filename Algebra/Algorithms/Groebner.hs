@@ -374,31 +374,42 @@ unsafeThEliminationIdealWith ord n ideal =
                              , all (all (== 0) . V.takeAtMost n . getMonomial . snd) $ getTerms f
                              ]
 
+eliminatePadding :: (IsOrderedPolynomial poly,
+                     IsMonomialOrder n ord,
+                     Field (Coefficient poly),
+                     SingI (Replicate n 1),
+                     KnownNat n
+                    )
+                 => Ideal (PadPolyL n ord poly) -> Ideal poly
+eliminatePadding ideal =
+  toIdeal $ [ c
+            | f0 <- calcGroebnerBasis ideal
+            , let (c, m) = leadingTerm $ runPadPolyL f0
+            , m == one
+            ]
+
 -- | An intersection ideal of given ideals (using 'WeightedEliminationOrder').
 intersection :: forall poly k.
-                ( IsMonomialOrder (k + Arity poly) (MOrder poly),
-                  Field (Coefficient poly), IsOrderedPolynomial poly)
+                ( Field (Coefficient poly), IsOrderedPolynomial poly)
              => Sized k (Ideal poly)
              -> Ideal poly
 intersection idsv@(_ :< _) =
     let sk = sizedLength idsv
-        sn = sing :: SNat (Arity poly)
-    in withSingI (sOnes sk) $ withKnownNat (sk %:+ sn) $
+    in withSingI (sOnes sk) $ withKnownNat sk $
     let ts  = take (fromIntegral $ fromSing sk) vars
-        inj :: poly -> OrderedPolynomial (Coefficient poly) (MOrder poly) (k + Arity poly)
-        inj = transformMonomial (V.append $ V.replicate sk 0) .  injectVars
+        inj = padLeftPoly sk Grevlex
         tis = zipWith (\ideal t -> mapIdeal ((t *) . inj) ideal) (toList idsv) ts
         j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
-    in withRefl (plusMinus' sk sn) $
-       withWitness (plusLeqL sk sn) $
-       mapIdeal injectVars $
-       coerce (cong Proxy $ minusCongL (plusComm sk sn) sk `trans` plusMinus sn sk) $
-        thEliminationIdeal sk j
+    -- in withRefl (plusMinus' sk sn) $
+    --    withWitness (plusLeqL sk sn) $
+    --    mapIdeal injectVars $
+    --    coerce (cong Proxy $ minusCongL (plusComm sk sn) sk `trans` plusMinus sn sk) $
+    --    thEliminationIdeal sk j
+    in eliminatePadding j
 intersection _ = Ideal $ singleton one
 
 -- | Ideal quotient by a principal ideals.
-quotByPrincipalIdeal :: (IsMonomialOrder (2 + Arity poly) (MOrder poly),
-                         Field (Coefficient poly), IsOrderedPolynomial poly)
+quotByPrincipalIdeal :: (Field (Coefficient poly), IsOrderedPolynomial poly)
                      => Ideal poly
                      -> poly
                      -> Ideal poly
@@ -408,49 +419,38 @@ quotByPrincipalIdeal i g =
 
 -- | Ideal quotient by the given ideal.
 quotIdeal :: forall poly l.
-             (IsOrderedPolynomial poly, Field (Coefficient poly),
-              IsMonomialOrder (l + Arity poly) (MOrder poly),
-              IsMonomialOrder (2 + Arity poly) (MOrder poly))
+             (IsOrderedPolynomial poly, Field (Coefficient poly))
           => Ideal poly
           -> Sized l poly
           -> Ideal poly
 quotIdeal i g =
   withKnownNat (sizedLength g) $
-  withKnownNat (sizedLength g %:+ sArity g) $
   intersection $ V.map (i `quotByPrincipalIdeal`) g
 
 -- | Saturation by a principal ideal.
 saturationByPrincipalIdeal :: forall poly.
-                              (IsOrderedPolynomial poly, Field (Coefficient poly),
-                               IsMonomialOrder  (1 + Arity poly) (MOrder poly))
+                              (IsOrderedPolynomial poly, Field (Coefficient poly))
                            => Ideal poly
                            -> poly
                            -> Ideal poly
 saturationByPrincipalIdeal is g =
   let n = sArity' g
-      remap :: poly -> OrderedPolynomial (Coefficient poly) (MOrder poly) (1 + Arity poly)
-      remap = shiftR sOne . injectVars
-  in withKnownNat (sOne %:+ n) $
-     withRefl (plusMinus' sOne n) $ withRefl (plusComm n sOne) $
+  in withRefl (plusMinus' sOne n) $ withRefl (plusComm n sOne) $
      withWitness (leqStep sOne (sOne %:+ n) n Refl) $
      withWitness (lneqZero n) $
-     mapIdeal injectVars $
-     thEliminationIdeal sOne $
-     addToIdeal (one - (remap g * varX)) $
-     mapIdeal remap is
+     eliminatePadding $
+     addToIdeal (one - (padLeftPoly sOne Grevlex g * var 0)) $
+     mapIdeal (padLeftPoly sOne Grevlex) is
 
 -- | Saturation ideal
 saturationIdeal :: forall poly l.
                    (Field (Coefficient poly),
-                    IsOrderedPolynomial poly,
-                    IsMonomialOrder (l + Arity poly) (MOrder poly),
-                    IsMonomialOrder (1 + Arity poly) (MOrder poly))
+                    IsOrderedPolynomial poly)
                 => Ideal poly
                 -> Sized l poly
                 -> Ideal poly
 saturationIdeal i g =
   withKnownNat (sizedLength g) $
-  withKnownNat (sizedLength g %:+ sArity g) $
   intersection $ V.map (i `saturationByPrincipalIdeal`) g
 
 -- | Calculate resultant for given two unary polynomimals.
@@ -488,8 +488,7 @@ hasCommonFactor f g = isZero $ resultant f g
 -- | Calculates the Least Common Multiply of the given pair of polynomials.
 lcmPolynomial :: forall poly.
                  (Field (Coefficient poly),
-                  IsOrderedPolynomial poly,
-                  IsMonomialOrder (2 + Arity poly) (MOrder poly))
+                  IsOrderedPolynomial poly)
               => poly
               -> poly
               -> poly
@@ -497,8 +496,7 @@ lcmPolynomial f g = head $ generators $ intersection (principalIdeal f :< princi
 
 -- | Calculates the Greatest Common Divisor of the given pair of polynomials.
 gcdPolynomial :: (Field (Coefficient poly),
-                  IsOrderedPolynomial poly,
-                  IsMonomialOrder (2 + Arity poly) (MOrder poly))
+                  IsOrderedPolynomial poly)
               => poly
               -> poly
               -> poly
