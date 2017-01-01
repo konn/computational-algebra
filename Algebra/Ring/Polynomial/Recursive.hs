@@ -1,190 +1,228 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving, PartialTypeSignatures           #-}
-{-# LANGUAGE PatternSynonyms, RankNTypes, ScopedTypeVariables            #-}
-{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilyDependencies #-}
-{-# LANGUAGE TypeOperators, ViewPatterns                                 #-}
-{-# OPTIONS_GHC -funbox-strict-fields -fplugin GHC.TypeLits.Presburger   #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts, GADTs        #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses          #-}
+{-# LANGUAGE NoImplicitPrelude, ScopedTypeVariables, StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications, TypeFamilies, TypeOperators              #-}
+{-# LANGUAGE UndecidableSuperClasses                                    #-}
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Presburger #-}
 module Algebra.Ring.Polynomial.Recursive
-       {-(RecPoly, pattern RecPoly, toRecPoly, runRecPoly)-} where
-import           Algebra.Prelude
-import           Algebra.Algorithms.Groebner 
-import           Control.Lens              ((&),both,ifoldMap, (%~), _Unwrapping')
+       (RecPoly, runRecPoly) where
+import Algebra.Prelude
+
+import           Control.Lens              (ifoldMap, (%~), _Unwrapping')
 import qualified Data.Map                  as M
-import           Data.Type.Natural.Builtin
-import qualified Numeric.Algebra as NA
+import           Data.Singletons.Prelude   (If, PEq (..), SEq (..))
 import           Data.Type.Ordinal.Builtin
-import qualified Data.Sized as SV
-import qualified Numeric.Algebra           as A
+import qualified Numeric.Algebra           as NA
 import qualified Prelude                   as P
 
-data RecPoly k n where
-  RecPolyZ :: !k -> RecPoly k 0
-  RecPolyS :: KnownNat n => !(Unipol (RecPoly k n)) -> RecPoly k (Succ n)
+data CheckZero n where
+  EqZero :: CheckZero 0
+  EqSucc :: ((Succ m :== 0) ~ 'False) => Sing m -> CheckZero (Succ m)
 
-instance (CoeffRing k, KnownNat n) => Additive (RecPoly k n) where
-  (RecPolyS f) + (RecPolyS g) = RecPolyS $ f + g
-  (RecPolyZ f) + (RecPolyZ g) = RecPolyZ $ f + g
-  _            + _            = error "Bug in GHC"
+checkZero :: Sing n -> CheckZero n
+checkZero n =
+  case zeroOrSucc n of
+    IsZero -> EqZero
+    IsSucc m ->
+      case sSucc m %:== Zero of
+        SFalse -> EqSucc m
+        STrue  -> error "Cannot happen!"
+
+type AppS f g x (n :: Nat) = If (n :== 0) x (f (g (n-1)))
+newtype RecPoly k n = RecPoly { runRecPoly_ :: AppS Unipol (RecPoly k) k n }
+
+runRecPoly :: forall k n. KnownNat n
+           => RecPoly k (Succ n) -> Unipol (RecPoly k n)
+runRecPoly f =
+  case checkZero (sing :: Sing (Succ n)) of
+    EqSucc m ->
+      case f of
+        (RecPoly g) -> withKnownNat m g
+
+instance (KnownNat n, CoeffRing k) => Additive (RecPoly k n) where
+  RecPoly f + RecPoly g =
+    case checkZero (sing :: Sing n) of
+      EqZero -> RecPoly $ f + g
+      EqSucc m -> withKnownNat m $ RecPoly $ f + g
   {-# INLINE (+) #-}
-      
-instance (CoeffRing k, KnownNat n) => LeftModule Natural (RecPoly k n) where
-  n .* RecPolyZ f = RecPolyZ $ n .* f
-  n .* RecPolyS f = RecPolyS $ n .* f
-  {-# INLINE (.*) #-}
 
-instance (CoeffRing k, KnownNat n) => RightModule Natural (RecPoly k n) where
-  RecPolyZ f *. n = RecPolyZ $ f *. n 
-  RecPolyS f *. n = RecPolyS $ f *. n 
-  {-# INLINE (*.) #-}
-
-instance (CoeffRing k, KnownNat n) => LeftModule Integer (RecPoly k n) where
-  n .* RecPolyZ f = RecPolyZ $ n .* f
-  n .* RecPolyS f = RecPolyS $ n .* f
-  {-# INLINE (.*) #-}
-
-instance (CoeffRing k, KnownNat n) => RightModule Integer (RecPoly k n) where
-  RecPolyZ f *. n = RecPolyZ $ f *. n 
-  RecPolyS f *. n = RecPolyS $ f *. n 
-  {-# INLINE (*.) #-}
-
-instance (CoeffRing k, KnownNat n) => LeftModule (Scalar k) (RecPoly k n) where
-  Scalar n .* RecPolyZ f = RecPolyZ $ n * f
-  n        .* RecPolyS f = RecPolyS $ mapCoeff' (n .*) f
-  {-# INLINE (.*) #-}
-
-instance (CoeffRing k, KnownNat n) => RightModule (Scalar k) (RecPoly k n) where
-  RecPolyZ f *. Scalar n = RecPolyZ $ f *  n
-  RecPolyS f *. n        = RecPolyS $ mapCoeff' (*. n) f
-  {-# INLINE (*.) #-}
-
-instance (CoeffRing k, KnownNat n) => Monoidal (RecPoly k n) where
-  zero = case sing :: Sing n of
-      Zero -> RecPolyZ zero
-      Succ n -> withKnownNat n $ RecPolyS zero
-      _ -> error "Could not happen"
+instance (KnownNat n, CoeffRing k) => Monoidal (RecPoly k n) where
+  zero =
+    case checkZero (sing :: Sing n) of
+      EqZero -> RecPoly zero
+      EqSucc m -> withKnownNat m $ RecPoly zero
   {-# INLINE zero #-}
 
-instance (CoeffRing k, KnownNat n) => DecidableZero (RecPoly k n) where
-  isZero (RecPolyZ r) = isZero r
-  isZero (RecPolyS f) = withKnownNat (sArity f) $ isZero f
-  {-# INLINE isZero #-}
-
-instance (CoeffRing k, KnownNat n) => Eq (RecPoly k n) where
-  (RecPolyZ r) == (RecPolyZ q) = r == q
-  (RecPolyS r) == (RecPolyS q) = r == q
-  _ == _ = error "Cannot happen!"
-  {-# INLINE (==) #-}
-
-instance (CoeffRing k) => Multiplicative (RecPoly k n) where
-  (RecPolyS f) * (RecPolyS g) = RecPolyS $ f * g
-  (RecPolyZ f) * (RecPolyZ g) = RecPolyZ $ f * g
-  _            * _            = error "Bug in GHC"
-  {-# INLINE (*) #-}
-
-instance (CoeffRing k) => Commutative (RecPoly k n)
-instance (CoeffRing k, KnownNat n) => Group (RecPoly k n) where
-  (RecPolyS f) - (RecPolyS g) = RecPolyS $ f - g
-  (RecPolyZ f) - (RecPolyZ g) = RecPolyZ $ f - g
-  _            - _            = error "Bug in GHC"
+instance (KnownNat n, CoeffRing k) => Abelian (RecPoly k n)
+instance (KnownNat n, CoeffRing k) => Group (RecPoly k n) where
+  RecPoly f - RecPoly g =
+    case checkZero (sing :: Sing n) of
+      EqZero -> RecPoly $ f - g
+      EqSucc m -> withKnownNat m $ RecPoly $ f - g
   {-# INLINE (-) #-}
 
-  negate (RecPolyS f) = RecPolyS $ negate f
-  negate (RecPolyZ f) = RecPolyZ $ negate f
+  negate (RecPoly f) =
+    case checkZero (sing :: Sing n) of
+      EqZero -> RecPoly $ negate f
+      EqSucc m -> withKnownNat m $ RecPoly $ negate f
   {-# INLINE negate #-}
 
-instance (CoeffRing k, KnownNat n) => Ring (RecPoly k n) where
-  fromInteger n = case sing :: Sing n of
-    Zero -> RecPolyZ $ NA.fromInteger n
-    Succ m -> withKnownNat m $ RecPolyS $ NA.fromInteger n
-    _ -> error "Could not happen"
-  {-# INLINE fromInteger #-}
+instance (KnownNat n, CoeffRing k) => LeftModule Natural (RecPoly k n) where
+  n .* RecPoly g =
+    case checkZero (sing :: Sing n) of
+      EqZero -> RecPoly $ n .* g
+      EqSucc m -> withKnownNat m $ RecPoly $ n .* g
+  {-# INLINE (.*) #-}
 
-instance (CoeffRing k, KnownNat n) => Rig (RecPoly k n) where
-  fromNatural n = case sing :: Sing n of
-      Zero -> RecPolyZ $ NA.fromNatural n
-      Succ m -> withKnownNat m $ RecPolyS $ NA.fromNatural n
-      _ -> error "Could not happen"
-  {-# INLINE fromNatural #-}
-  
-instance (CoeffRing k, KnownNat n) => Semiring (RecPoly k n)
-instance (CoeffRing k, KnownNat n) => Unital (RecPoly k n) where
+instance (KnownNat n, CoeffRing k) => RightModule Natural (RecPoly k n) where
+  RecPoly g *. n =
+    case checkZero (sing :: Sing n) of
+      EqZero -> RecPoly $ g *. n
+      EqSucc m -> withKnownNat m $ RecPoly $ g *. n
+  {-# INLINE (*.) #-}
+
+instance (KnownNat n, CoeffRing k) => LeftModule Integer (RecPoly k n) where
+  n .* RecPoly g =
+    case checkZero (sing :: Sing n) of
+      EqZero -> RecPoly $ n .* g
+      EqSucc m -> withKnownNat m $ RecPoly $ n .* g
+  {-# INLINE (.*) #-}
+
+instance (KnownNat n, CoeffRing k) => RightModule Integer (RecPoly k n) where
+  RecPoly g *. n =
+    case checkZero (sing :: Sing n) of
+      EqZero -> RecPoly $ g *. n
+      EqSucc m -> withKnownNat m $ RecPoly $ g *. n
+  {-# INLINE (*.) #-}
+
+instance (KnownNat n, CoeffRing k) => Multiplicative (RecPoly k n) where
+  RecPoly f * RecPoly g =
+    case checkZero (sing :: Sing n) of
+      EqZero -> RecPoly $ f + g
+      EqSucc m -> withKnownNat m $ RecPoly $ f * g
+  {-# INLINE (*) #-}
+
+instance (KnownNat n, CoeffRing k) => LeftModule (Scalar k) (RecPoly k n) where
+  Scalar n .* RecPoly g =
+    case checkZero (sing :: Sing n) of
+      EqZero -> RecPoly $ n * g
+      EqSucc m ->
+        withKnownNat m $ withRefl (predSucc m) $
+        RecPoly $ mapCoeff' (Scalar n .*) g
+  {-# INLINE (.*) #-}
+
+instance (KnownNat n, CoeffRing k) => RightModule (Scalar k) (RecPoly k n) where
+  RecPoly g *. Scalar n =
+    case checkZero (sing :: Sing n) of
+      EqZero -> RecPoly $ g * n
+      EqSucc m ->
+        withKnownNat m $ withRefl (predSucc m) $
+        RecPoly $ mapCoeff' (*. Scalar n) g
+  {-# INLINE (*.) #-}
+
+instance (KnownNat n, CoeffRing k) => Unital (RecPoly k n) where
   one =
-    case sing :: Sing n of
-      Zero -> RecPolyZ one
-      Succ n -> withKnownNat n $ RecPolyS one
-      _ -> error "Could not happen"
+    case checkZero (sing :: Sing n) of
+      EqZero   -> RecPoly one
+      EqSucc m -> withKnownNat m $ RecPoly one
   {-# INLINE one #-}
 
-instance (CoeffRing k, KnownNat n) => Abelian (RecPoly k n)
-instance (CoeffRing k, KnownNat n) => IsPolynomial (RecPoly k n) where
-  type Arity (RecPoly k n) = n
+instance (KnownNat n, CoeffRing k) => Commutative (RecPoly k n)
+instance (KnownNat n, CoeffRing k) => Semiring (RecPoly k n)
+instance (KnownNat n, CoeffRing k) => Rig (RecPoly k n) where
+  fromNatural n =
+    case checkZero (sing :: Sing n) of
+      EqZero   -> RecPoly $ fromNatural n
+      EqSucc m -> withKnownNat m $ RecPoly $ fromNatural n
+  {-# INLINE fromNatural #-}
+
+instance (KnownNat n, CoeffRing k) => Ring (RecPoly k n) where
+  fromInteger n =
+    case checkZero (sing :: Sing n) of
+      EqZero   -> RecPoly $ NA.fromInteger n
+      EqSucc m -> withKnownNat m $ RecPoly $ NA.fromInteger n
+  {-# INLINE fromInteger #-}
+
+instance (KnownNat n, CoeffRing k) => DecidableZero (RecPoly k n) where
+  isZero (RecPoly n) =
+    case checkZero (sing :: Sing n) of
+      EqZero   -> isZero n
+      EqSucc m -> withKnownNat m $ isZero n
+  {-# INLINE isZero #-}
+
+instance (KnownNat n, CoeffRing k) => Eq (RecPoly k n) where
+  RecPoly f == RecPoly g =
+    case checkZero (sing :: Sing n) of
+      EqZero -> f == g
+      EqSucc m ->
+        withKnownNat m $ withRefl (predSucc m) $ f == g
+  {-# INLINE (==) #-}
+
+
+instance (KnownNat n, CoeffRing k) => IsPolynomial (RecPoly k n) where
   type Coefficient (RecPoly k n) = k
+  type Arity       (RecPoly k n) = n
   sArity _ = sing
   var o =
-    case zeroOrSucc (sing :: Sing n) of
-      IsZero   -> absurdOrd o
-      IsSucc m -> withKnownNat m $ withSingI (sToPeano m) $ 
-                  case o of
-                    OS n -> RecPolyS $ injectCoeff (var n)
-                    _    -> RecPolyS #x
+    case checkZero (sing :: Sing n) of
+      EqZero -> absurdOrd o
+      EqSucc m ->
+        withKnownNat m $ withRefl (predSucc m) $ case o of
+        OS n -> RecPoly $ injectCoeff (var n)
+        _    -> RecPoly $ var 0
+
   fromMonomial mon =
-    case mon of
-      n :< ls -> withKnownNat (SV.sLength ls) $ RecPolyS $ #x ^ fromIntegral n * injectCoeff (fromMonomial ls)
-      _ -> one
+    case checkZero (sing :: Sing n) of
+      EqZero   -> one
+      EqSucc m ->
+        withKnownNat m $
+        case mon of
+          n :< ls ->
+            let len = sizedLength ls
+            in withRefl (succInj' m len Refl) $
+               RecPoly $ var 0 ^ fromIntegral n * injectCoeff (fromMonomial ls)
+          _ -> one
+
+  liftMap f (RecPoly g) =
+    case checkZero (sing :: Sing n) of
+      EqZero -> Scalar g .* one
+      EqSucc m ->
+        withKnownNat m $ withRefl (predSucc m) $
+        substWith ((*) . liftMap (f . OS)) (singleton $ f 0) g
+
+
   injectCoeff k =
-    case zeroOrSucc (sing :: Sing n) of
-      IsZero -> RecPolyZ k
-      IsSucc (m :: SNat m) ->
-        withKnownNat m $ RecPolyS $ injectCoeff (injectCoeff k :: RecPoly k m)
-  terms' (RecPolyZ r) = M.singleton (fromList sZero []) r
-  terms' (RecPolyS f) =
-    ifoldMap (M.mapKeys . (:<) . (sIndex 0)) $
-    fmap terms' $ terms' f
-  liftMap _ (RecPolyZ q) = Scalar q .* one
-  liftMap f (RecPolyS q) =
-    substWith (\g r -> liftMap (f . OS) g * r) (singleton $ f 0) q
+    case checkZero (sing :: Sing n) of
+      EqZero -> RecPoly k
+      EqSucc (m :: Sing m) ->
+        withKnownNat m $ RecPoly $ injectCoeff (injectCoeff k :: RecPoly k m)
 
-instance (CoeffRing k, KnownNat n) => ZeroProductSemiring (RecPoly k n)
+  terms' (RecPoly f) =
+    case checkZero (sing :: Sing n) of
+      EqZero   -> M.singleton (fromList sZero []) f
+      EqSucc m ->
+        withKnownNat m $ withRefl (predSucc m) $
+        ifoldMap (M.mapKeys . (:<) . (sIndex 0)) $
+        fmap terms' $ terms' f
 
-instance (CoeffRing k, Field k) => Division (RecPoly k 0)  where
-  recip (RecPolyZ r) = RecPolyZ $ recip r
-
-instance (CoeffRing k, Field k) => PID (RecPoly k 0)
-instance (CoeffRing k, Field k) => PID (RecPoly k 1)
-instance (CoeffRing k, Field k, KnownNat n) => UFD (RecPoly k n)
-instance (CoeffRing k, Field k, KnownNat n) => GCDDomain (RecPoly k n) where
-  gcd f g = gcdPolynomial f g
-  lcm f g = lcmPolynomial f g
-instance (CoeffRing k, Field k, KnownNat n) => IntegralDomain (RecPoly k n) where
-  f `divides` g = isZero $ f `modPolynomial` [g]
-  maybeQuot f g =
-    let ([q], r) = f `divModPolynomial` [g]
-    in if isZero r then Just (snd q) else Nothing
-instance (CoeffRing k, Field k) => Euclidean (RecPoly k 0)
-instance (CoeffRing k, Field k) => Euclidean (RecPoly k 1) where
-  degree f | isZero f = Nothing
-           | otherwise = Just $ totalDegree' f
-  divide (RecPolyS f) (RecPolyS g) =
-    withRefl (succInj' (sing :: Sing 0) (sArity f) Refl) $
-    divide f g & both %~ RecPolyS
-
-instance (CoeffRing k, UnitNormalForm k, KnownNat n) => Num (RecPoly k n) where
-  fromInteger = unwrapAlgebra . P.fromInteger
-  (+) = (A.+)
-  (-) = (A.-)
-  negate = _Unwrapping' WrapAlgebra %~ P.negate
-  (*) = (A.*)
-  abs = _Unwrapping' WrapAlgebra %~ abs
-  signum = _Unwrapping' WrapAlgebra %~ signum
+instance (KnownNat n, CoeffRing r, PrettyCoeff r)
+       => Show (RecPoly r n) where
+  showsPrec =
+    showsPolynomialWith $ generate sing (\i -> "X_" ++ show (fromEnum i))
 
 instance (CoeffRing k, KnownNat n) => IsOrderedPolynomial (RecPoly k n) where
   type MOrder (RecPoly k n) = Lex
-  leadingTerm (RecPolyZ r) = (r, one)
-  leadingTerm (RecPolyS u) =
-    let (k , OrderedMonomial ind) = leadingTerm u
-        (c, OrderedMonomial ts) = leadingTerm k
-    in case ind of
-      n :< NilL -> (c, OrderedMonomial $ n :< ts)
-      _ -> error "bug in ghc"
+  leadingTerm (RecPoly u) =
+    case checkZero (sing :: Sing n) of
+      EqZero -> (u, one)
+      EqSucc m ->
+        withKnownNat m $
+        let (k , OrderedMonomial ind) = leadingTerm u
+            (c, OrderedMonomial ts) = leadingTerm k
+        in withRefl (succInj' (sizedLength ind) m Refl) $ case ind of
+          n :< NilL -> (c, OrderedMonomial $ n :< ts)
+          _ -> error "bug in ghc"
 
 instance (CoeffRing k, DecidableUnits k, KnownNat n) => DecidableUnits (RecPoly k n) where
   recipUnit = recipUnitDefault
@@ -196,6 +234,12 @@ instance (CoeffRing k, UnitNormalForm k, KnownNat n) => DecidableAssociates (Rec
 instance (CoeffRing k, UnitNormalForm k, KnownNat n) => UnitNormalForm (RecPoly k n) where
   splitUnit = splitUnitDefault
 
-instance (KnownNat n, CoeffRing r, PrettyCoeff r)
-       => Show (RecPoly r n) where
-  showsPrec = showsPolynomialWith $ generate sing (\i -> "X_" ++ show (fromEnum i))
+instance (CoeffRing k, UnitNormalForm k, KnownNat n)
+      => P.Num (RecPoly k n) where
+  fromInteger = unwrapAlgebra . fromInteger
+  (+) = (NA.+)
+  (-) = (NA.-)
+  negate = _Unwrapping' WrapAlgebra %~ P.negate
+  (*) = (NA.*)
+  abs = _Unwrapping' WrapAlgebra %~ P.abs
+  signum = _Unwrapping' WrapAlgebra %~ P.signum

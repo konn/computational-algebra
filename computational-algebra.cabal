@@ -66,6 +66,7 @@ library
                      , arithmoi
                      , ghc-typelits-knownnat
                      , ghc-typelits-presburger
+                     , ghc-typelits-natnormalise
     exposed-modules:   Algebra.Algorithms.ChineseRemainder
                        Algebra.Algorithms.Faugere4
                        Algebra.Algorithms.Faugere5
