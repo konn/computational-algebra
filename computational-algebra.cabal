@@ -1,10 +1,10 @@
 name: computational-algebra
-version: 0.4.0.0
+version: 0.5.0.0
 cabal-version: >=1.10
 build-type: Simple
 license: BSD3
 license-file: LICENSE
-copyright: (C) Hiromi ISHII 2013
+copyright: (C) Hiromi ISHII 2017
 maintainer: konn.jinro_at_gmail.com
 homepage: https://github.com/konn/computational-algebra
 synopsis: Well-kinded computational algebra library, currently supporting Groebner basis.
