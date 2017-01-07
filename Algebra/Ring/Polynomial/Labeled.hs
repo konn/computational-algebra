@@ -1,9 +1,9 @@
 {-# LANGUAGE CPP, ConstraintKinds, DataKinds, EmptyCase, FlexibleContexts  #-}
-{-# LANGUAGE FlexibleInstances, GADTs, KindSignatures, IncoherentInstances #-}
-{-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes                  #-}
-{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell      #-}
-{-# LANGUAGE TypeFamilies, TypeInType, TypeOperators, UndecidableInstances #-}
-{-# LANGUAGE UndecidableSuperClasses, OverloadedLabels                     #-}
+{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving          #-}
+{-# LANGUAGE IncoherentInstances, KindSignatures, MultiParamTypeClasses    #-}
+{-# LANGUAGE OverloadedLabels, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
+{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies, TypeInType #-}
+{-# LANGUAGE TypeOperators, UndecidableInstances, UndecidableSuperClasses  #-}
 module Algebra.Ring.Polynomial.Labeled
        (IsUniqueList, LabPolynomial(..),
         LabPolynomial', LabUnipol,
@@ -11,13 +11,14 @@ module Algebra.Ring.Polynomial.Labeled
         canonicalMap',
         IsSubsetOf) where
 import Algebra.Internal
-import Algebra.Ring.Polynomial.Class
 import Algebra.Ring.Polynomial
 import Algebra.Ring.Polynomial.Univariate
 import Algebra.Scalar
 
-import qualified Prelude as P
+import           AlgebraicPrelude
+import           Control.Lens                 (each, (%~), (&))
 import           Data.Function                (on)
+import qualified Data.List                    as L
 import           Data.Singletons.Prelude
 import           Data.Singletons.Prelude.Enum (SEnum (..))
 import           Data.Singletons.Prelude.List hiding (Group)
@@ -25,12 +26,9 @@ import qualified Data.Sized.Builtin           as S
 import           Data.Type.Natural.Class      (IsPeano (..), sOne)
 import           Data.Type.Ordinal
 import           GHC.Exts                     (Constraint)
-import qualified Data.List as L
-import           Numeric.Algebra              hiding (Order (..))
-import           Numeric.Decidable.Zero
-import           Prelude                      hiding (Integral (..), Num (..),
-                                               product, sum)
-import GHC.OverloadedLabels (IsLabel(..))
+import           GHC.OverloadedLabels         (IsLabel (..))
+import qualified Numeric.Algebra              as NA
+import qualified Prelude                      as P
 
 type family UniqueList' (x :: Symbol) (xs :: [Symbol]) :: Constraint where
   UniqueList' x '[] = ()
@@ -132,7 +130,7 @@ instance (Wraps vars poly, Monoidal poly) => Monoidal (LabPolynomial poly vars) 
 instance (Wraps vars poly, Semiring poly) => Semiring (LabPolynomial poly vars)
 instance (Wraps vars poly, Rig poly) => Rig (LabPolynomial poly vars)
 instance (Wraps vars poly, Ring poly) => Ring (LabPolynomial poly vars) where
-  fromInteger n = LabelPolynomial (fromInteger n :: poly)
+  fromInteger n = LabelPolynomial (NA.fromInteger n :: poly)
   {-# INLINE fromInteger #-}
 
 instance (Wraps vars poly, LeftModule (Scalar r) poly)  => LeftModule  (Scalar r) (LabPolynomial poly vars) where
@@ -222,6 +220,39 @@ class    (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf (xs :: [a])
   _suppress :: proxy xs -> proxy ys -> x -> x
   _suppress _ _ = id
 instance (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf (xs :: [a]) (ys :: [a])
+
+instance (ZeroProductSemiring poly , Wraps vars poly) => ZeroProductSemiring (LabPolynomial poly vars)
+instance (IntegralDomain poly , Wraps vars poly) => IntegralDomain (LabPolynomial poly vars) where
+  divides = divides `on` unLabelPolynomial
+  maybeQuot f g = LabelPolynomial <$> maybeQuot (unLabelPolynomial f) (unLabelPolynomial g)
+instance (UFD poly , Wraps vars poly) => UFD (LabPolynomial poly vars)
+instance (PID poly , Wraps vars poly) => PID (LabPolynomial poly vars) where
+  egcd (LabelPolynomial f) (LabelPolynomial g) =
+    egcd f g & each %~ LabelPolynomial
+instance (GCDDomain poly , Wraps vars poly) => GCDDomain (LabPolynomial poly vars) where
+  gcd f g = LabelPolynomial $ gcd (unLabelPolynomial f) (unLabelPolynomial g)
+  reduceFraction f g =
+    reduceFraction (unLabelPolynomial f) (unLabelPolynomial g)
+    & each %~ LabelPolynomial
+  lcm f g = LabelPolynomial $ lcm (unLabelPolynomial f) (unLabelPolynomial g)
+instance (UnitNormalForm poly , Wraps vars poly) => UnitNormalForm (LabPolynomial poly vars) where
+  splitUnit = (each %~ LabelPolynomial) . splitUnit . unLabelPolynomial
+instance (DecidableUnits poly , Wraps vars poly) => DecidableUnits (LabPolynomial poly vars) where
+  isUnit = isUnit . unLabelPolynomial
+  recipUnit = fmap LabelPolynomial . recipUnit . unLabelPolynomial
+  LabelPolynomial f ^? n = LabelPolynomial <$> (f ^? n)
+
+instance (DecidableAssociates poly , Wraps vars poly)
+      => DecidableAssociates (LabPolynomial poly vars) where
+  isAssociate = isAssociate `on` unLabelPolynomial
+
+instance (Euclidean poly , Wraps vars poly)
+      => Euclidean (LabPolynomial poly vars) where
+  degree = degree . unLabelPolynomial
+  divide (LabelPolynomial f) (LabelPolynomial g) =
+    divide f g & each %~ LabelPolynomial
+  quot f g = LabelPolynomial $ quot (unLabelPolynomial f) (unLabelPolynomial g)
+  rem f g = LabelPolynomial $ rem (unLabelPolynomial f) (unLabelPolynomial g)
 
 -- | So unsafe! Don't expose it!
 permute0 :: (SEq k) => SList (xs :: [k]) -> SList (ys :: [k]) -> Sized (Length xs) Integer
