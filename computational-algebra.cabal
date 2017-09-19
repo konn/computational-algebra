@@ -59,7 +59,8 @@ library
                      , control-monad-loop   >=0.1
                      , primes               >= 0.2.1
                      , singletons           == 2.2.*
-                     , arithmoi
+                     , arithmoi             >= 0.5
+                     , integer-logarithms    >= 1.0
                      , ghc-typelits-knownnat
     exposed-modules:   Algebra.Algorithms.ChineseRemainder
                        Algebra.Algorithms.Groebner
@@ -216,10 +217,10 @@ executable hensel-prof
                  , deepseq >= 1.3
                  , MonadRandom >= 0.1
      
-    buildable: False
+    buildable: True
     main-is: hensel-prof.hs
     hs-source-dirs: share examples
-    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded -eventlog
+    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
 
 executable sandpit-poly
     build-depends: semigroups >= 0.15.2

@@ -1,0 +1,42 @@
+resolver: lts-9.5
+packages:
+- '.'
+- 'algebraic-prelude'
+- location:
+    git: https://github.com/konn/sized.git
+    commit: 9c1401a5d0d878c85761bb9ffb7654db04ef73ca
+  extra-dep: true
+
+flags:
+  computational-algebra:
+    examples: false
+
+# build:
+#   haddock: true
+
+extra-deps:
+- algebra-4.3
+- equational-reasoning-0.4.1.1
+- monomorphic-0.0.3.3
+- sized-0.2.1.1
+- type-natural-0.7.1.3
+- unamb-0.2.5
+- ghc-typelits-presburger-0.1.1.0
+- presburger-1.3.1
+# - control-monad-loop-0.1
+# - ghc-typelits-natnormalise-0.5.1
+# - repa-3.4.1.1
+# - repa-algorithms-3.4.1.1
+# - trifecta-1.6
+# - type-natural-0.7.1.2
+# - equational-reasoning-0.4.1.1
+# - ghc-typelits-presburger-0.1.1.0
+# - monomorphic-0.0.3.3
+# - singletons-2.2
+# - presburger-1.3.1
+# - unamb-0.2.5
+# - lazysmallcheck-0.6
+# - algebra-4.3
+# - sized-0.2.1.0
+
+pvp-bounds: lower
