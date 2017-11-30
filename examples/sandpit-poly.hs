@@ -54,9 +54,13 @@ findRoot f
        | isZero f -> Just zero
        | otherwise -> Nothing
 
+sPolLex :: OrderedPolynomial Rational Lex 3
+sPolLex =
+  let [x,y,z] = vars
+  in sPolynomial (x ^ 2 * z + 3 * x * y ^ 2 - 4 * z + 1) (2 * x * y ^2 + y ^ 2 * z - 5)
 
-
-
-
-
+sPolGrevlex :: OrderedPolynomial Rational Grevlex 3
+sPolGrevlex =
+  let [x,y,z] = vars
+  in sPolynomial (x ^ 2 * z + 3 * x * y ^ 2 - 4 * z + 1) (2 * x * y ^2 + y ^ 2 * z - 5)
 

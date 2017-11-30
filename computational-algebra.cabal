@@ -62,8 +62,9 @@ library
                      , mono-traversable     >= 0.10
                      , control-monad-loop   >=0.1
                      , primes               >= 0.2.1
-                     , singletons == 2.2.*
-                     , arithmoi
+                     , singletons           >= 2.2 && < 2.4
+                     , arithmoi             >= 0.5
+                     , integer-logarithms    >= 1.0
                      , ghc-typelits-knownnat
                      , ghc-typelits-presburger
                      , ghc-typelits-natnormalise

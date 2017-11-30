@@ -9,15 +9,15 @@ cache:
 
 matrix:
   include:
-    - env: STACK_YAML=stack.yaml
-      compiler: ": #GHC 8.0.1"
+    - env: STACK_YAML=stack-800.yaml
+      compiler: ": #GHC 8.0.2"
       addons:
         apt:
           packages:
             - libgmp3-dev
             - libgsl0-dev
             - liblapack-dev
-    - env: STACK_YAML=stack-head.yaml
+    - env: STACK_YAML=stack-802.yaml
       compiler: ": #GHC HEAD"
       addons:
         apt:
