@@ -89,6 +89,7 @@ import           BasicPrelude                          as AlgebraicPrelude hidin
 import qualified Control.Lens.TH                       as L
 import qualified Data.Ratio                            as P
 import qualified Data.Semigroup                        as Semi
+import qualified GHC.OverloadedLabels                  as AlgebraicPrelude
 import           Numeric.Algebra                       as AlgebraicPrelude hiding
                                                                             (Order (..),
                                                                             fromInteger,
@@ -128,7 +129,6 @@ import           Prelude                               as AlgebraicPrelude (Show
                                                                             writeFile,
                                                                             (.))
 import qualified Prelude                               as P
-
 -- * Basic types and renamed operations
 -- | We use @'Fraction'@ instead of @'Ratio'@ for consistency.
 type Rational = Fraction Integer

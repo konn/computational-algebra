@@ -92,7 +92,7 @@ library
                        Algebra.Ring.Polynomial.Labeled
                        Algebra.Ring.Polynomial.Monomial
                        Algebra.Ring.Polynomial.Quotient
-                       Algebra.Ring.Polynomial.Recursive
+                       -- Algebra.Ring.Polynomial.Recursive
                        Algebra.Ring.Polynomial.Univariate
                        Algebra.Scalar
     exposed:           True

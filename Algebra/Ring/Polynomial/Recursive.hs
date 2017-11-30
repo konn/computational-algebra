@@ -5,6 +5,7 @@
 {-# LANGUAGE UndecidableSuperClasses                                    #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Presburger #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 module Algebra.Ring.Polynomial.Recursive
        (RecPoly, runRecPoly) where
 import Algebra.Prelude

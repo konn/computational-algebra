@@ -57,7 +57,7 @@ instance (KnownSymbol symb,
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 802
   fromLabel =
     let vs = map T.unpack $ fromSing (sing :: Sing vars)
-        v  = symbolVal' @symb
+        v  = symbolVal @symb Proxy
     in maybe (error "impossible!") (var . toEnum) $ L.elemIndex v vs
 #else
   fromLabel k =
