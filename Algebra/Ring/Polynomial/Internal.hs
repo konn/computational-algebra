@@ -170,7 +170,7 @@ instance (Eq r) => Eq (OrderedPolynomial r order n) where
 -- -- | By Hilbert's finite basis theorem, a polynomial ring over a noetherian ring is also a noetherian ring.
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Ring (OrderedPolynomial r order n) where
   fromInteger 0 = Polynomial M.empty
-  fromInteger n = Polynomial $ M.singleton one (fromInteger' n)
+  fromInteger n = Polynomial $ M.singleton one (NA.fromInteger n)
   {-# INLINE fromInteger #-}
 
 decZero :: DecidableZero r => r -> Maybe r
@@ -267,13 +267,13 @@ isConstantMonomial v = all (== 0) $ F.toList v
 --   Do not use signum or abs.
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n)
       => P.Num (OrderedPolynomial r order n) where
-  (+) = (+)
+  (+) = (NA.+)
   {-# INLINE (+) #-}
 
-  (*) = (*)
+  (*) = (NA.*)
   {-# INLINE (*) #-}
 
-  fromInteger = normalize . injectCoeff . fromInteger'
+  fromInteger = NA.fromInteger
   {-# INLINE fromInteger #-}
 
   signum f = if isZero f then zero else injectCoeff one
@@ -506,6 +506,8 @@ instance (KnownNat n, IsMonomialOrder n ord, IsPolynomial poly,
        => RightModule (Scalar r) (PadPolyL n ord poly) where
   PadPolyL f *. r = PadPolyL $ mapCoeff' (*. r) f
   {-# INLINE (*.) #-}
+deriving instance (KnownNat n, IsMonomialOrder n ord, IsPolynomial poly)
+               => Num (PadPolyL n ord poly)
 
 instance (KnownNat n, IsMonomialOrder n ord, IsPolynomial poly)
      =>  IsPolynomial (PadPolyL n ord poly) where
@@ -547,3 +549,8 @@ instance (SingI (Replicate n 1), KnownNat n, IsMonomialOrder n ord, IsOrderedPol
 padLeftPoly :: (IsMonomialOrder n ord, IsPolynomial poly)
             => Sing n -> ord -> poly -> PadPolyL n ord poly
 padLeftPoly n _ = withKnownNat n $ PadPolyL . injectCoeff
+
+instance (r ~ Coefficient poly, IsPolynomial poly,
+          KnownNat n, CoeffRing r, IsMonomialOrder n order, PrettyCoeff r)
+       => Show (PadPolyL n order poly) where
+  showsPrec = showsPolynomialWith $ generate sing (\i -> "X_" ++ show (fromEnum i))

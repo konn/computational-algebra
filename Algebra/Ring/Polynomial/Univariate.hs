@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns, ConstraintKinds, DataKinds, FlexibleContexts #-}
+{-# LANGUAGE BangPatterns, CPP, ConstraintKinds, DataKinds, FlexibleContexts #-}
 {-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, MultiParamTypeClasses   #-}
 {-# LANGUAGE NoImplicitPrelude, ScopedTypeVariables, StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications, TypeFamilies, UndecidableSuperClasses    #-}
@@ -42,7 +42,12 @@ instance Hashable r => Hashable (Unipol r) where
 -- | By this instance, you can use @#x@ for
 --   the unique variable of @'Unipol' r@.
 instance Unital r => IsLabel "x" (Unipol r) where
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 802
+  fromLabel   = Unipol $ IM.singleton 1 one
+#else
   fromLabel _ = Unipol $ IM.singleton 1 one
+#endif
+
 
 normaliseUP :: DecidableZero r => Unipol r -> Unipol r
 normaliseUP (Unipol r) = Unipol $ IM.filter (not . isZero) r

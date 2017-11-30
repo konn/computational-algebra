@@ -1,4 +1,4 @@
-resolver: lts-9.5
+resolver: lts-7.14
 packages:
 extra-deps:
 - algebra-4.3

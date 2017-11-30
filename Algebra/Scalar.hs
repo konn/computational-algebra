@@ -3,9 +3,7 @@
 {-# LANGUAGE StandaloneDeriving                                #-}
 module Algebra.Scalar (Scalar(..), (.*.)) where
 import           AlgebraicPrelude
-import qualified Data.Coerce as C
 import Algebra.Normed
-import Control.Lens
 import qualified Prelude          as P
 
 -- | @'Scalar' r@ provides almost the same type-instances as @r@,

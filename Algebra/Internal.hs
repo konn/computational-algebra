@@ -3,7 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses, PatternSynonyms, PolyKinds, RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeFamilies         #-}
 {-# LANGUAGE TypeOperators                                                 #-}
-{-# OPTIONS_GHC -fwarn-incomplete-patterns #-}
+{-# OPTIONS_GHC -Wincomplete-patterns -Wno-orphans #-}
 module Algebra.Internal
        (  (:~:)(..), withRefl,
           module Data.Proxy,
@@ -64,7 +64,7 @@ coerceLength eql = _Unwrapping Flipped.Flipped %~ coerce eql
 
 type SNat (n :: Nat) = Sing n
 
-sizedLength f = (S.sLength f)
+sizedLength f = S.sLength f
 
 padVecs :: forall a n m. a -> Sized' n a -> Sized' m a
         -> (SNat (Max n m), Sized' (Max n m) a, Sized' (Max n m) a)
