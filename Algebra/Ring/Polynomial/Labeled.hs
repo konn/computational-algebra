@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP, ConstraintKinds, DataKinds, EmptyCase, FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving          #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE IncoherentInstances, KindSignatures, MultiParamTypeClasses    #-}
 {-# LANGUAGE OverloadedLabels, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
 {-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies, TypeInType #-}
@@ -29,6 +30,10 @@ import           GHC.Exts                     (Constraint)
 import           GHC.OverloadedLabels         (IsLabel (..))
 import qualified Numeric.Algebra              as NA
 import qualified Prelude                      as P
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 802
+import qualified Data.Text as T
+#endif
+
 
 type family UniqueList' (x :: Symbol) (xs :: [Symbol]) :: Constraint where
   UniqueList' x '[] = ()
@@ -51,12 +56,15 @@ instance (KnownSymbol symb,
           Elem symb vars ~ 'True) => IsLabel symb (LabPolynomial poly vars) where
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 802
   fromLabel =
+    let vs = map T.unpack $ fromSing (sing :: Sing vars)
+        v  = symbolVal' @symb
+    in maybe (error "impossible!") (var . toEnum) $ L.elemIndex v vs
 #else
   fromLabel k =
-#endif
     let vs = fromSing (sing :: Sing vars)
         v    = symbolVal' k
     in maybe (error "impossible!") (var . toEnum) $ L.elemIndex v vs
+#endif
 
 data LabPolynomial poly (vars :: [Symbol]) where
   LabelPolynomial :: (IsUniqueList vars, Length vars ~ Arity poly)
@@ -78,7 +86,12 @@ instance (PrettyCoeff (Coefficient poly), IsOrderedPolynomial poly, SingI vars)
       => Show (LabPolynomial poly vars) where
   showsPrec d (LabelPolynomial f) =
     let svs   = sing :: Sing vars
-        vs    = fromSing svs
+        vs    =
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 802
+          map T.unpack $ 
+#endif
+
+          fromSing svs
         vsVec = generate sing $ \i -> vs !! fromEnum i
     in showsPolynomialWith vsVec d f
 
