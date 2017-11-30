@@ -49,7 +49,11 @@ instance (KnownSymbol symb,
           IsPolynomial poly,
           Wraps vars poly,
           Elem symb vars ~ 'True) => IsLabel symb (LabPolynomial poly vars) where
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 802
+  fromLabel =
+#else
   fromLabel k =
+#endif
     let vs = fromSing (sing :: Sing vars)
         v    = symbolVal' k
     in maybe (error "impossible!") (var . toEnum) $ L.elemIndex v vs
