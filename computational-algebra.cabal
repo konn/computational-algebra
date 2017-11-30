@@ -22,6 +22,9 @@ source-repository head
  
 flag examples
     Default: False
+
+flag profile
+    Default: False
  
 library
     build-depends:     repa                 >= 3.3
@@ -69,9 +72,10 @@ library
                      , ghc-typelits-presburger
                      , ghc-typelits-natnormalise
     exposed-modules:   Algebra.Algorithms.ChineseRemainder
+                       Algebra.Algorithms.Groebner
+                       Algebra.Repa
                        Algebra.Algorithms.Faugere4
                        Algebra.Algorithms.Faugere5
-                       Algebra.Algorithms.Groebner
                        Algebra.Algorithms.PrimeTest
                        Algebra.Algorithms.ZeroDim
                        Algebra.Field.AlgebraicReal
@@ -84,7 +88,6 @@ library
                        Algebra.Normed
                        Algebra.Prelude
                        Algebra.Prelude.Core
-                       Algebra.Repa
                        Algebra.Ring.Ideal
                        Algebra.Ring.Polynomial
                        Algebra.Ring.Polynomial.Class
@@ -92,7 +95,6 @@ library
                        Algebra.Ring.Polynomial.Labeled
                        Algebra.Ring.Polynomial.Monomial
                        Algebra.Ring.Polynomial.Quotient
-                       -- Algebra.Ring.Polynomial.Recursive
                        Algebra.Ring.Polynomial.Univariate
                        Algebra.Scalar
     exposed:           True
@@ -125,7 +127,7 @@ executable groebner-prof
   ghc-options:         -Wall -prof -fprof-auto -threaded -O2
   default-extensions:  NoImplicitPrelude
 
-  if !flag(examples)
+  if !flag(profile)
       Buildable: False
 
 executable solve
@@ -185,7 +187,7 @@ executable faugere-prof
                    vector >= 0.10, convertible >= 1.1, lens >= 3.9,
                    deepseq >= 1.3, MonadRandom >= 0.1
      
-    if !flag(examples)
+    if !flag(profile)
         buildable: False
     main-is: faugere-prof.hs
     hs-source-dirs: share examples
@@ -201,7 +203,7 @@ executable hensel-prof
                    vector >= 0.10, convertible >= 1.1, lens >= 3.9,
                    deepseq >= 1.3, MonadRandom >= 0.1
      
-    if !flag(examples)
+    if !flag(profile)
         buildable: False
     main-is: hensel-prof.hs
     hs-source-dirs: share examples
