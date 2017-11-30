@@ -18,7 +18,7 @@ matrix:
             - libgsl0-dev
             - liblapack-dev
     - env: STACK_YAML=stack-802.yaml
-      compiler: ": #GHC HEAD"
+      compiler: ": #GHC 8.2.2"
       addons:
         apt:
           packages:
