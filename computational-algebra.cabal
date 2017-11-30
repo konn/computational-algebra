@@ -22,6 +22,9 @@ source-repository head
  
 flag examples
     Default: False
+
+flag profile
+    Default: False
  
 library
     build-depends:     repa                 >= 3.3
@@ -121,7 +124,7 @@ executable groebner-prof
   ghc-options:         -Wall -prof -fprof-auto -threaded -O2
   default-extensions:  NoImplicitPrelude
 
-  if !flag(examples)
+  if !flag(profile)
       Buildable: False
 
 executable solve
@@ -181,7 +184,7 @@ executable faugere-prof
                    vector >= 0.10, convertible >= 1.1, lens >= 3.9,
                    deepseq >= 1.3, MonadRandom >= 0.1
      
-    if !flag(examples)
+    if !flag(profile)
         buildable: False
     main-is: faugere-prof.hs
     hs-source-dirs: share examples
@@ -197,7 +200,7 @@ executable hensel-prof
                    vector >= 0.10, convertible >= 1.1, lens >= 3.9,
                    deepseq >= 1.3, MonadRandom >= 0.1
      
-    if !flag(examples)
+    if !flag(profile)
         buildable: False
     main-is: hensel-prof.hs
     hs-source-dirs: share examples
