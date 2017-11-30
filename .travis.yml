@@ -38,6 +38,7 @@ before_install:
 install:
  - stack --version
  - stack build --jobs=3 --only-dependencies
+ - stack build --jobs=3 --test --only-dependencies
 
 # Here starts the actual work to be performed for the package under test;
 # any command which exits with a non-zero exit code causes the build to fail.
