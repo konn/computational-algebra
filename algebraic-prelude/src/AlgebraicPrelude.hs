@@ -89,7 +89,7 @@ import           BasicPrelude                          as AlgebraicPrelude hidin
 import qualified Control.Lens.TH                       as L
 import qualified Data.Ratio                            as P
 import qualified Data.Semigroup                        as Semi
-import qualified GHC.OverloadedLabels                  as AlgebraicPrelude
+import           GHC.OverloadedLabels                  as AlgebraicPrelude
 import           Numeric.Algebra                       as AlgebraicPrelude hiding
                                                                             (Order (..),
                                                                             fromInteger,
