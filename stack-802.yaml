@@ -3,18 +3,6 @@ skip-ghc-check: true
 packages:
 - '.'
 - 'algebraic-prelude'
-- location:
-    git: https://github.com/konn/ghc-typelits-presburger.git
-    commit: bc063fb13a335cdf5259a4d669fd1bc390c0f807
-  extra-dep: true
-- location:
-    git: https://github.com/konn/type-natural.git
-    commit: 25dd20cc03a98abfea67ebe1090d9eff4d2cedfe
-  extra-dep: true
-- location:
-    git: https://github.com/konn/sized.git
-    commit: bc99659f82565192914e0b7501482e478628c8a3
-  extra-dep: true
 
 flags:
   computational-algebra:
@@ -22,6 +10,7 @@ flags:
 
 extra-deps:
 - algebra-4.3
+- ghc-typelits-presburger-0.1.1.1
 - equational-reasoning-0.5.0.0
 - monomorphic-0.0.3.3
 - sized-0.2.1.1
