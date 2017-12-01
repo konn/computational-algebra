@@ -71,9 +71,6 @@ library
                      , ghc-typelits-natnormalise
     exposed-modules:   Algebra.Algorithms.ChineseRemainder
                        Algebra.Algorithms.Groebner
-                       Algebra.Repa
-                       Algebra.Algorithms.Faugere4
-                       Algebra.Algorithms.Faugere5
                        Algebra.Algorithms.PrimeTest
                        Algebra.Algorithms.ZeroDim
                        Algebra.Field.AlgebraicReal
