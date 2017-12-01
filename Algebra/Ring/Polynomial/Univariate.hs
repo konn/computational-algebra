@@ -28,7 +28,7 @@ import qualified Data.Sized.Builtin                    as SV
 import qualified Numeric.Algebra                       as NA
 import           Numeric.Decidable.Zero                (DecidableZero (..))
 import qualified Prelude as P
-import GHC.OverloadedLabels
+
 -- | Univariate polynomial.
 --   It uses @'IM.IntMap'@ as its internal representation;
 --   so if you want to treat the power greater than @maxBound :: Int@,
@@ -47,10 +47,6 @@ instance Unital r => IsLabel "x" (Unipol r) where
 #else
   fromLabel _ = Unipol $ IM.singleton 1 one
 #endif
-
-
-normaliseUP :: DecidableZero r => Unipol r -> Unipol r
-normaliseUP (Unipol r) = Unipol $ IM.filter (not . isZero) r
 
 divModUnipol :: (CoeffRing r, Field r) => Unipol r -> Unipol r -> (Unipol r, Unipol r)
 divModUnipol f g =
@@ -148,9 +144,6 @@ instance CoeffRing r => P.Num (Unipol r) where
     then zero
     else one
 
-(%!!) :: Sized (n :: Nat) a -> SV.Ordinal (n :: Nat) -> a
-(%!!) = (SV.%!!)
-
 {-# RULES
 "var x^n" forall (x :: SV.Ordinal 1) n.
   pow (varUnipol x) n = Unipol (IM.singleton (fromEnum n) one)
@@ -159,11 +152,6 @@ instance CoeffRing r => P.Num (Unipol r) where
 {-# RULES
 "pow1p x n" forall (x :: SV.Ordinal 1) n.
   NA.pow1p (varUnipol x) n = Unipol (IM.singleton (fromEnum n + 1) one)
-  #-}
-
-{-# RULES
-"x ^ n" forall (x :: SV.Ordinal 1) n.
-  (varUnipol x) ^ n = Unipol (IM.singleton (fromEnum n) one)
   #-}
 
 varUnipol :: Unital r => SV.Ordinal 1 -> Unipol r

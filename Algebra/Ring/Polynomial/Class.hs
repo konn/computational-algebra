@@ -201,7 +201,6 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
 
 {-# RULES
 "liftMap/identity"   liftMap (\ x -> x) = (P.id :: poly -> poly)
-"liftMap/identity-2" liftMap P.id = (P.id :: poly -> poly)
   #-}
 
 -- | Class to lookup ordering from its (type-level) name.

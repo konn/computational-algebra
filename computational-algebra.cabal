@@ -29,7 +29,8 @@ flag profile
     default: False
  
 library
-    build-depends:     MonadRandom          >= 0.1
+    build-depends:     ListLike >= 4.5
+                     , MonadRandom          >= 0.1
                      , algebra             >= 4.1
                      , algebraic-prelude    >= 0.1.1.0
                      , arithmoi             >= 0.5

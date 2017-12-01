@@ -19,7 +19,7 @@ module Algebra.LinkedMatrix (Matrix, toLists, fromLists, fromList,
                              scaleCol, clearRow, clearCol, index, (!),
                              nonZeroEntries, rankLM, splitIndependentDirs,
                              structuredGauss, multWithVector, solveWiedemann,
-                             henselLift, solveHensel, structuredGauss') where
+                             henselLift, solveHensel, structuredGauss', intDet) where
 import Algebra.Algorithms.ChineseRemainder
 import Algebra.Field.Finite
 import Algebra.Instances                   ()
@@ -587,31 +587,6 @@ structuredGauss' = evalState go . newGaussianState
 nonZeroEntries :: Matrix a -> Vector ((Int, Int), a)
 nonZeroEntries mat = V.map (view idx &&& view value) $ mat ^. coefficients
 
-matListView :: (Show a, Monoidal a) => Matrix a -> String
-matListView = unlines . map (('\t':).show) . toLists
-
-prettyMat :: Show a => Matrix a -> String
-prettyMat mat =
-  unlines [ "row start: " <> starter Row
-          , "col start: " <> starter Column
-          , "[" <> (intercalate ", " $ V.toList $ V.imap (\i e -> "(#" <> show i <> ") " <> prettyEntry e) $ mat^.coefficients) <> "]"
-          ]
-  where
-    starter dir = intercalate ", " (map (\(a,b) -> show a ++ " -> " ++ show b) (mat^.startL dir.to IM.toList))
-
-prettyEntry :: Show a => Entry a -> String
-prettyEntry ent =
-  concat [ show $ ent^.value, " "
-         , show $ ent^.idx
-         , "->("
-         ,showMaybe (ent^.nextL Row)
-         , ", "
-         ,showMaybe (ent^.nextL Column)
-         , ")"
-         ]
-  where
-    showMaybe = maybe "_" show
-
 multWithVector :: (Multiplicative a, Monoidal a)
                => Matrix a -> Vector a -> Vector a
 multWithVector mat v =
@@ -627,6 +602,7 @@ nonZeroRows = nonZeroDirs Row
 nonZeroCols :: Matrix r -> [Int]
 nonZeroCols = nonZeroDirs Column
 
+{-
 testCase :: Matrix (Fraction Integer)
 testCase = fromLists [[0,0,0,0,0,0,2,-3,-1,0]
                       ,[0,0,0,2,-3,-1,0,0,0,0]
@@ -635,6 +611,7 @@ testCase = fromLists [[0,0,0,0,0,0,2,-3,-1,0]
                       ,[2,-3,0,-1,0,0,0,0,0,0]
                       ,[1,0,1,0,0,1,0,0,0,-1]
                       ,[1,0,1,0,0,1,-2,0,0,0]]
+-}
 
 newtype Square n r = Square { runSquare :: Matrix r
                             } deriving (Show, Eq, Additive, Multiplicative)
@@ -838,16 +815,6 @@ triangulateModular mat0 =
             case mns of
               ((l,m):mn) | i == l -> build (m : ans) (i-1) mn vecs
               _ -> build (V.empty : ans) (i-1) mns vecs
-
-(.!) :: (a -> b) -> (t -> a) -> t -> b
-(f .! g) x = f $! g x
-
-infixr 9 .!
-
-clearDenom :: Euclidean a => Matrix (Fraction a) -> (a, Matrix a)
-clearDenom mat =
-  let g = V.foldr' (lcm' . denominator . snd) one $ nonZeroEntries mat
-  in (g, cmap (numerator . (* (g % one))) mat)
 
 lcm' :: Euclidean r => r -> r -> r
 lcm' n m = n * m `quot` gcd n m

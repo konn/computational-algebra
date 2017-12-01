@@ -132,20 +132,6 @@ instance KnownNat n => Unital (OrderedMonomial ord n) where
 class IsOrder (n :: Nat) (ordering :: *) where
   cmpMonomial :: Proxy ordering -> MonomialOrder n
 
-head' :: (0 :< n) ~ 'True => Sized' n a -> a
-head' = V.head
-{-# INLINE head' #-}
-
--- We know that Monomial ordering coincides on lex ordering
--- on univariate monomials.
-{-# RULES
-"cmpMonomial/unary" [~1]
-              forall (pxy :: IsMonomialOrder 1 (o :: *) => Proxy o)
-                     (xs :: Sized' 1 Int)
-                     (ys :: Sized' 1 Int).
-  cmpMonomial pxy xs ys = comparing head' xs ys
- #-}
-
 -- * Names for orderings.
 --   We didn't choose to define one single type for ordering names for the extensibility.
 -- | Lexicographical order

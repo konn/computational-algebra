@@ -23,8 +23,6 @@ import Data.Type.Ordinal.Builtin (Ordinal, enumOrdinal, od)
 n % m = injectCoeff (n / m)
 infixl 7 %
 
-type Rational = Fraction Integer
-
 logBase2 :: Int -> Int
 logBase2 x = finiteBitSize x - 1 - countLeadingZeros x
 {-# INLINE logBase2 #-}

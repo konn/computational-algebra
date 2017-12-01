@@ -37,7 +37,6 @@ import qualified Data.Ratio                         as R
 import qualified Data.Set                           as S
 import qualified Data.Sized.Builtin                 as SV
 import           GHC.Num                            (Num)
-import           GHC.OverloadedLabels               (IsLabel (fromLabel))
 import           Math.NumberTheory.Powers
 import           Numeric.Algebra.Complex            hiding (i)
 import           Numeric.Decidable.Zero             (isZero)
@@ -151,6 +150,8 @@ instance RightModule (Fraction Integer) Algebraic where
 instance Multiplicative Algebraic where
   (*) = multA
   {-# INLINE (*) #-}
+  pow1p a = powA a . succ
+  {-# INLINE pow1p #-}
 
 instance LeftModule (Scalar (Fraction Integer)) Algebraic where
   (.*) = multA . Rational . runScalar
@@ -309,10 +310,6 @@ sqFreePart f = f `quot` gcd f (diff 0 f)
   minusA (plusA x y) x = y
 "plusminus/left" [~1] forall x (y :: Algebraic) .
   plusA x (minusA y x) = y
-"plus-zero-left" [~1] forall x.
-  plusA 0 x = x
-"plus-zero-right" [~1] forall x.
-  plusA x 0 = x
   #-}
 
 plusA :: Algebraic -> Algebraic -> Algebraic
@@ -368,11 +365,6 @@ catcher _ _ _ _ = error "rational is impossible"
 
 normalize :: (Eq r, Euclidean r, Division r) => Unipol r -> Unipol r
 normalize = monoize . sqFreePart
-
-shiftP :: (Domain r, Division r, Eq r, Euclidean r)
-       => Unipol r -> Unipol r
-shiftP f | isZero (coeff one f) = f `quot` var 0
-         | otherwise = f
 
 stabilize :: Algebraic -> Algebraic
 stabilize r@Rational{} = r
@@ -526,10 +518,6 @@ multA a b =
       int = catcher multInt fg (stabilize a) (stabilize b)
   in fromJust $ algebraic fg int
 
-defEqn :: Algebraic -> Unipol Rational
-defEqn (Rational a) = var 0 - injectCoeff a
-defEqn a@Algebraic{} = eqn a
-
 improveNonzero :: Algebraic -> Interval Rational
 improveNonzero (Algebraic _ ss int0) = go int0
   where
@@ -637,10 +625,6 @@ powA r n | n < 0     = nthRoot' (abs $ fromIntegral n) r
          | n == 0    = Rational 1
          | otherwise = r ^ P.fromIntegral n
 {-# INLINE powA #-}
-
-iterateImprove :: Rational -> Unipol Rational -> Interval Rational -> Interval Rational
-iterateImprove eps f =
-  iterateImproveStrum eps (strum f)
 
 iterateImproveStrum :: Rational -> [Unipol Rational] -> Interval Rational -> Interval Rational
 iterateImproveStrum eps ss int0 =

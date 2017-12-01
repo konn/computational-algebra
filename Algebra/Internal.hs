@@ -41,6 +41,7 @@ import           Data.Type.Equality           ((:~:) (..))
 import           Data.Type.Natural.Class      as Algebra.Internal
 import qualified Data.Type.Ordinal            as O
 import qualified Data.Vector                  as DV
+import          Data.ListLike (ListLike)
 import           GHC.TypeLits                 as Algebra.Internal
 import           Proof.Equational             (coerce, withRefl)
 import           Proof.Equational             as Algebra.Internal (because,
@@ -64,6 +65,7 @@ coerceLength eql = _Unwrapping Flipped.Flipped %~ coerce eql
 
 type SNat (n :: Nat) = Sing n
 
+sizedLength :: ListLike (f a) a => S.Sized f n a -> Sing n
 sizedLength f = S.sLength f
 
 padVecs :: forall a n m. a -> Sized' n a -> Sized' m a

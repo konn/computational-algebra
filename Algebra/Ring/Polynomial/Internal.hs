@@ -33,7 +33,6 @@ import           AlgebraicPrelude
 import           Control.DeepSeq                       (NFData)
 import           Control.Lens                          hiding (assign)
 import qualified Data.Coerce                           as C
-import qualified Data.Foldable                         as F
 import qualified Data.HashSet                          as HS
 import           Data.Map                              (Map)
 import qualified Data.Map.Strict                       as M
@@ -92,9 +91,6 @@ instance (KnownNat n, IsMonomialOrder n ord, CoeffRing r) => IsPolynomial (Order
     where
       extractPower = runMult . ifoldMap (\ o -> Mult . pow (mor o) . fromIntegral) . getMonomial
   {-# INLINE liftMap #-}
-
-ordVec :: forall n. KnownNat n => Sized n (Ordinal n)
-ordVec = unsafeFromList' $ enumOrdinal (sing :: SNat n)
 
 instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
       => IsOrderedPolynomial (OrderedPolynomial r ord n) where
@@ -238,30 +234,6 @@ instance (IsMonomialOrder n ord, Characteristic r, KnownNat n, CoeffRing r)
 instance (KnownNat n, CoeffRing r, IsMonomialOrder n order, PrettyCoeff r)
        => Show (OrderedPolynomial r order n) where
   showsPrec = showsPolynomialWith $ generate sing (\i -> "X_" ++ show (fromEnum i))
-
-showPolynomialWithVars :: (CoeffRing a, Show a, KnownNat n, IsMonomialOrder n ordering)
-                       => [(Int, String)] -> OrderedPolynomial a ordering n -> String
-showPolynomialWithVars dic p0@(Polynomial d)
-    | isZero p0 = "0"
-    | otherwise = intercalate " + " $ mapMaybe showTerm $ M.toDescList d
-    where
-      showTerm (getMonomial -> deg, c)
-          | isZero c = Nothing
-          | otherwise =
-              let cstr = if (not (isZero $ c - one) || isConstantMonomial deg)
-                         then show c ++ " "
-                         else if isZero (c - one) then ""
-                              else if isZero (c + one)
-                              then if any (not . isZero) (F.toList deg) then "-" else "-1"
-                              else  ""
-              in Just $ cstr ++ unwords (mapMaybe showDeg (zip [0..] $ F.toList deg))
-      showDeg (n, p) | p == 0    = Nothing
-                     | p == 1    = Just $ showVar n
-                     | otherwise = Just $ showVar n ++ "^" ++ show p
-      showVar n = fromMaybe ("X_" ++ show n) $ lookup n dic
-
-isConstantMonomial :: Monomial n -> Bool
-isConstantMonomial v = all (== 0) $ F.toList v
 
 -- | We provide Num instance to use trivial injection R into R[X].
 --   Do not use signum or abs.
