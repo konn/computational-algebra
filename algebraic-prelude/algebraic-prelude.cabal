@@ -1,5 +1,5 @@
 name:                algebraic-prelude
-version:             0.1.0.1
+version:             0.1.1.0
 synopsis:            Algebraically structured Prelude
 description:         This package provides a drop-in replacement for Prelude module,
                      based on algebraic hierarchy provided by <https://hackage.haskell.org/package/algebra algebra> package.
