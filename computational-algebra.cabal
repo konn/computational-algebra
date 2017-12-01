@@ -1,5 +1,5 @@
 name: computational-algebra
-version: 0.4.0.0
+version: 0.5.1.0
 cabal-version: >=1.10
 build-type: Simple
 license: BSD3
