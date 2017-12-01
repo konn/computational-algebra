@@ -30,8 +30,8 @@ flag profile
  
 library
     build-depends:     MonadRandom          >= 0.1
-                     , algebra              >= 4.1
-                     , algebraic-prelude    >= 0.1
+                     , algebra             >= 4.1
+                     , algebraic-prelude    >= 0.1.1.0
                      , arithmoi             >= 0.5
                      , base                 >= 4
                      , constraints          >= 0.3
@@ -622,8 +622,7 @@ benchmark linear-bench
     ghc-options: -O2 -threaded -rtsopts
 
 benchmark division-bench
-    build-depends:
-                 , HUnit -any
+    build-depends: HUnit -any
                  , MonadRandom >= 0.1
                  , QuickCheck >= 2.6
                  , algebra
