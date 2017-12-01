@@ -3,9 +3,10 @@ language: c
 sudo: false
 
 cache:
-  directories:
-    - $HOME/.cabsnap
-    - $HOME/.stack
+  - apt
+  - directories:
+      - $HOME/.cabsnap
+      - $HOME/.stack
 
 matrix:
   include:
