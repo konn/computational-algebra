@@ -27,9 +27,7 @@ flag profile
     Default: False
  
 library
-    build-depends:     repa                 >= 3.3
-                     , repa-algorithms      >= 3.3
-                     , template-haskell     -any
+    build-depends:     template-haskell     -any
                      , MonadRandom          >= 0.1
                      , algebraic-prelude    >= 0.1
                      , algebra              >= 4.1
@@ -177,22 +175,6 @@ executable ipsolve
     if !flag(examples)
         buildable: False
  
-executable faugere-prof
-    build-depends: criterion >= 0.8.1.0,
-                   semigroups >= 0.15.2,
-                   constraints >=0.3, algebra,
-                   base >=4, type-natural,
-                   computational-algebra -any, random >= 1.0,
-                   hmatrix, matrix >= 0.3, sized,
-                   vector >= 0.10, convertible >= 1.1, lens >= 3.9,
-                   deepseq >= 1.3, MonadRandom >= 0.1
-     
-    if !flag(profile)
-        buildable: False
-    main-is: faugere-prof.hs
-    hs-source-dirs: share examples
-    ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
-
 executable hensel-prof
     build-depends: criterion >= 0.8.1.0,
                    semigroups >= 0.15.2,
@@ -511,24 +493,6 @@ benchmark coercion-bench
     type: exitcode-stdio-1.0
     main-is: coercion.hs
     buildable: False
-    hs-source-dirs: bench share
-    other-modules: Utils
-    ghc-options: -Wall -O2 -threaded -rtsopts
-
-benchmark faugere4-bench
-    build-depends: constraints >=0.3, HUnit -any, sized,
-                   QuickCheck >= 2.6, algebra, base >=4,
-                   computational-algebra -any, containers >= 0.5, criterion >= 0.8.1.0,
-                   deepseq >= 1.3, hspec -any, lens >= 3.9,
-                   monomorphic >=0.0.3, parallel >= 3.2, process >=1.1,
-                   quickcheck-instances -any, reflection >=1.4,
-                   smallcheck -any, tagged >= 0.7,
-                   test-framework -any, test-framework-hunit -any,
-                   type-natural, vector >= 0.10, random >= 1.0,
-                   equational-reasoning >= 0.2, matrix >= 0.3
-    type: exitcode-stdio-1.0
-    main-is: faugere4.hs
-    buildable: True
     hs-source-dirs: bench share
     other-modules: Utils
     ghc-options: -Wall -O2 -threaded -rtsopts
