@@ -15,7 +15,7 @@ data-dir: ""
 tested-with:        GHC == 8.0.2, GHC == 8.2.2
 extra-source-files: README.md examples/*.hs tests/*.hs bench/*.hs
                     share/*.hs data/conway.txt
- 
+
 source-repository head
     type: git
     location: git://github.com/konn/computational-algebra.git
@@ -29,49 +29,49 @@ flag profile
     default: False
  
 library
-    build-depends:     ListLike >= 4.5
-                     , MonadRandom          >= 0.1
-                     , algebra             >= 4.1
-                     , algebraic-prelude    >= 0.1.1.0
-                     , arithmoi             >= 0.5
-                     , base                 >= 4
-                     , constraints          >= 0.3
-                     , containers           >= 0.5
-                     , control-monad-loop   >=0.1
-                     , convertible          >= 1.1
-                     , deepseq              >= 1.3
-                     , dlist
-                     , entropy
-                     , equational-reasoning >= 0.4.1.1
-                     , ghc-typelits-knownnat
-                     , ghc-typelits-natnormalise
-                     , ghc-typelits-presburger
-                     , hashable             >= 1.1
-                     , heaps                >= 0.3
-                     , hmatrix              >= 0.16
-                     , hybrid-vectors       >= 0.1
-                     , hybrid-vectors       >=0.1
-                     , integer-logarithms    >= 1.0
-                     , lens                 >= 4.13
-                     , matrix               >= 0.3
-                     , monad-loops          >= 0.4
-                     , mono-traversable     >= 0.10
-                     , monomorphic          >= 0.0.3
-                     , mtl                  >= 2.1
-                     , parallel             >= 3.2
-                     , primes               >= 0.2.1
-                     , reflection           >= 2
-                     , semigroups           >= 0.15
-                     , singletons           >= 2.2 && < 2.4
-                     , sized                == 0.2.*
-                     , tagged               >= 0.7
-                     , template-haskell     -any
-                     , text                 >=0.11
-                     , type-natural         >= 0.7.1 && < 0.8
-                     , unamb                >= 0.2
-                     , unordered-containers >= 0.2
-                     , vector               >= 0.10
-                     , vector-algorithms
+    build-depends: ListLike ==4.5.*,
+                   MonadRandom >=0.1 && <0.6,
+                   algebra >=4.1 && <4.4,
+                   algebraic-prelude >=0.1.1.0 && <0.2,
+                   arithmoi >=0.5 && <0.7,
+                   base >=4 && <4.11,
+                   constraints >=0.3 && <0.10,
+                   containers ==0.5.*,
+                   control-monad-loop ==0.1.*,
+                   convertible ==1.1.*,
+                   deepseq >=1.3 && <1.5,
+                   dlist >=0.8.0.3 && <0.9,
+                   entropy >=0.3.8 && <0.4,
+                   equational-reasoning >=0.4.1.1 && <0.6,
+                   ghc-typelits-knownnat >=0.3.1 && <0.4,
+                   ghc-typelits-natnormalise >=0.5.7 && <0.6,
+                   ghc-typelits-presburger >=0.1.1.1 && <0.2,
+                   hashable >=1.1 && <1.3,
+                   heaps ==0.3.*,
+                   hmatrix >=0.16 && <0.19,
+                   hybrid-vectors >=0.1 && <0.3,
+                   hybrid-vectors >=0.1 && <0.3,
+                   integer-logarithms ==1.0.*,
+                   lens >=4.13 && <4.16,
+                   matrix ==0.3.*,
+                   monad-loops ==0.4.*,
+                   mono-traversable >=0.10 && <1.1,
+                   monomorphic >=0.0.3 && <0.1,
+                   mtl >=2.1 && <2.3,
+                   parallel ==3.2.*,
+                   primes >=0.2.1 && <0.3,
+                   reflection >=2 && <2.2,
+                   semigroups >=0.15 && <0.19,
+                   singletons >=2.2 && <2.4,
+                   sized ==0.2.*,
+                   tagged >=0.7 && <0.9,
+                   template-haskell >=2.12.0.0 && <2.13,
+                   text >=0.11 && <1.3,
+                   type-natural >=0.7.1 && <0.8,
+                   unamb ==0.2.*,
+                   unordered-containers ==0.2.*,
+                   vector >=0.10 && <0.13,
+                   vector-algorithms >=0.7.0.1 && <0.8
     exposed-modules:   Algebra.Algorithms.ChineseRemainder
                        Algebra.Algorithms.Groebner
                        Algebra.Algorithms.PrimeTest
@@ -131,19 +131,20 @@ executable groebner-prof
       Buildable: False
 
 executable solve
-    build-depends: MonadRandom >= 0.1
-                 , algebra >= 4.1
-                 , base >=4, type-natural
+    build-depends: MonadRandom
+                 , algebra
+                 , base
+                 , type-natural
                  , computational-algebra
-                 , constraints >=0.3
-                 , convertible >= 1.1
+                 , constraints
+                 , convertible
                  , hmatrix
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , random >= 1.0
-                 , semigroups >= 0.15.2
+                 , lens
+                 , matrix
+                 , random >=1.0 && <1.2
+                 , semigroups
                  , sized
-                 , vector >= 0.10
+                 , vector
      
     main-is: solve.hs
     hs-source-dirs: share examples
@@ -167,24 +168,24 @@ executable algebraic
 
 
 executable ipsolve
-    build-depends: MonadRandom >= 0.1
-                 , algebra >= 4.1
-                 , base >=4
+    build-depends: MonadRandom
+                 , algebra
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , convertible >= 1.1
-                 , equational-reasoning >= 0.2
+                 , constraints
+                 , convertible
+                 , equational-reasoning
                  , hmatrix
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , parallel >= 3.2
-                 , random >= 1.0
-                 , reflection >=1.4
-                 , semigroups >= 0.15.2
+                 , lens
+                 , matrix
+                 , parallel
+                 , random >=1.0 && <1.2
+                 , reflection
+                 , semigroups
                  , singletons
                  , sized
                  , type-natural
-                 , vector >= 0.10
+                 , vector
      
     main-is: ipsolve.hs
     hs-source-dirs: share examples
@@ -195,22 +196,22 @@ executable ipsolve
         buildable: False
  
 executable hensel-prof
-    build-depends: MonadRandom >= 0.1
+    build-depends: MonadRandom
                  , algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , convertible >= 1.1
-                 , criterion >= 0.8.1.0    
-                 , deepseq >= 1.3
+                 , constraints
+                 , convertible
+                 , criterion >=0.8.1.0 && <1.3
+                 , deepseq
                  , hmatrix
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , random >= 1.0
-                 , semigroups >= 0.15.2
+                 , lens
+                 , matrix
+                 , random >=1.0 && <1.2
+                 , semigroups
                  , sized
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     if flag(profile)
         ghc-options: -caf-all -auto-all -rtsopts -eventlog
     else
@@ -222,10 +223,10 @@ executable hensel-prof
 
 executable sandpit-poly
     build-depends: algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , semigroups >= 0.15.2
+                 , constraints
+                 , semigroups
                  , sized
                  , type-natural
      
@@ -237,11 +238,11 @@ executable sandpit-poly
 
 executable quotient
     build-depends: algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
+                 , constraints
                  , reflection
-                 , semigroups >= 0.15.2
+                 , semigroups
                  , sized
                  , type-natural
      
@@ -252,27 +253,28 @@ executable quotient
     default-language:   Haskell2010
  
 test-suite test-multi-table
-    build-depends: HUnit >=1.2.5.2
-                 , QuickCheck >= 2.6
+    build-depends: HUnit >=1.2.5.2 && <1.7
+                 , QuickCheck >=2.6 && <2.11
                  , algebra
-                 , base >=4
-                 , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , equational-reasoning >= 0.2
-                 , hspec >=1.9.5
-                 , lazysmallcheck >= 0.6
-                 , lens >= 3.9
-                 , quickcheck-instances >=0.3.8
-                 , reflection >=1.4
+                 , base
+                 , computational-algebra -any
+                 , constraints
+                 , containers
+                 , equational-reasoning
+                 , hspec >=1.9.5 && <2.5
+                 , lazysmallcheck ==0.6.*
+                 , lens
+                 , quickcheck-instances >=0.3.8 && <0.4
+                 , reflection
                  , sized
-                 , smallcheck >=1.1.1
-                 , tagged >= 0.7
-                 , test-framework >=0.8.0.3
-                 , test-framework-hunit >=0.3.0.1
-                 , transformers >= 0.3
+                 , smallcheck >=1.1.1 && <1.2
+                 , tagged
+                 , test-framework >=0.8.0.3 && <0.9
+                 , test-framework-hunit >=0.3.0.1 && <0.4
+                 , transformers
                  , type-natural
-                 , vector >= 0.10
+                 , vector
+
     type: exitcode-stdio-1.0
     main-is: multi-table.hs
     buildable: False
@@ -288,50 +290,50 @@ test-suite singular-test
     hs-source-dirs: tests share
     other-modules: Utils SingularBridge
     ghc-options: -Wall -threaded
-    build-depends: HUnit -any
-                 , MonadRandom >= 0.1
-                 , QuickCheck >= 2.6
+    build-depends: HUnit
+                 , MonadRandom
+                 , QuickCheck
                  , algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , deepseq >= 1.3
-                 , equational-reasoning >= 0.2
-                 , hspec -any
+                 , constraints
+                 , containers
+                 , deepseq
+                 , equational-reasoning
+                 , hspec
                  , lens
                  , matrix
-                 , monomorphic >=0.0.3
-                 , quickcheck-instances >= 0.3.8
+                 , monomorphic
+                 , quickcheck-instances
                  , reflection
                  , singletons
                  , sized
-                 , smallcheck -any
+                 , smallcheck
                  , tagged
-                 , test-framework -any
-                 , test-framework-hunit -any
+                 , test-framework
+                 , test-framework-hunit
                  , text
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     default-language:   Haskell2010
 
 test-suite monomial-order-test
     build-depends: HUnit -any
-                 , MonadRandom >= 0.1
-                 , QuickCheck >= 2.6
-                 , base >=4
+                 , MonadRandom
+                 , QuickCheck
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , deepseq >= 1.3
-                 , equational-reasoning >= 0.2
-                 , hspec -any
-                 , monomorphic >=0.0.3
+                 , constraints
+                 , containers
+                 , deepseq
+                 , equational-reasoning
+                 , hspec
+                 , monomorphic
                  , sized
-                 , smallcheck -any
-                 , test-framework -any
-                 , test-framework-hunit -any
-                 , vector >= 0.10
+                 , smallcheck
+                 , test-framework
+                 , test-framework-hunit
+                 , vector
     type: exitcode-stdio-1.0
     main-is: monomials.hs
     buildable: False
@@ -341,29 +343,29 @@ test-suite monomial-order-test
     default-language:   Haskell2010
 
 test-suite linear-test
-    build-depends: HUnit -any
-                 , MonadRandom >= 0.1
-                 , QuickCheck >= 2.6
+    build-depends: HUnit
+                 , MonadRandom
+                 , QuickCheck
                  , algebra
                  , base >=4
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , deepseq >= 1.3
-                 , equational-reasoning >= 0.2
-                 , hspec -any
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , monomorphic >=0.0.3
-                 , quickcheck-instances -any
-                 , reflection >=1.4
+                 , constraints
+                 , containers
+                 , deepseq
+                 , equational-reasoning
+                 , hspec
+                 , lens
+                 , matrix
+                 , monomorphic
+                 , quickcheck-instances
+                 , reflection
                  , sized
-                 , smallcheck -any
-                 , tagged >= 0.7
-                 , test-framework -any
-                 , test-framework-hunit -any
+                 , smallcheck
+                 , tagged
+                 , test-framework
+                 , test-framework-hunit
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     type: exitcode-stdio-1.0
     main-is: linear.hs
     buildable: True
@@ -373,29 +375,29 @@ test-suite linear-test
     default-language:   Haskell2010
 
 test-suite matrix-test
-    build-depends: HUnit -any
-                 , MonadRandom >= 0.1
-                 , QuickCheck >= 2.6
+    build-depends: HUnit
+                 , MonadRandom
+                 , QuickCheck
                  , algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , deepseq >= 1.3
-                 , equational-reasoning >= 0.2
-                 , hspec -any
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , monomorphic >=0.0.3
-                 , quickcheck-instances -any
-                 , reflection >=1.4
+                 , constraints
+                 , containers
+                 , deepseq
+                 , equational-reasoning
+                 , hspec
+                 , lens
+                 , matrix
+                 , monomorphic
+                 , quickcheck-instances
+                 , reflection
                  , sized
-                 , smallcheck -any
-                 , tagged >= 0.7
-                 , test-framework -any
-                 , test-framework-hunit -any
+                 , smallcheck
+                 , tagged
+                 , test-framework
+                 , test-framework-hunit
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     type: exitcode-stdio-1.0
     main-is: matrix.hs
     buildable: False
@@ -406,32 +408,32 @@ test-suite matrix-test
 
 test-suite specs
     build-depends: HUnit -any
-                 , MonadRandom >= 0.1
-                 , QuickCheck >= 2.6
+                 , MonadRandom
+                 , QuickCheck
                  , algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
+                 , constraints
+                 , containers
                  , convertible
-                 , deepseq >= 1.3
-                 , equational-reasoning >= 0.2
-                 , hspec -any
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , monomorphic >=0.0.3
-                 , process >=1.1
-                 , quickcheck-instances -any
-                 , reflection >=1.4
+                 , deepseq
+                 , equational-reasoning
+                 , hspec
+                 , lens
+                 , matrix
+                 , monomorphic
+                 , process >=1.1 && <1.7
+                 , quickcheck-instances
+                 , reflection
                  , singletons
                  , sized
-                 , smallcheck -any
-                 , tagged >= 0.7
-                 , test-framework -any
-                 , test-framework-hunit -any
-                 , text >= 0.11
+                 , smallcheck
+                 , tagged
+                 , test-framework
+                 , test-framework-hunit
+                 , text
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     type: exitcode-stdio-1.0
     main-is: Spec.hs
     buildable: True
@@ -442,28 +444,28 @@ test-suite specs
     default-language:   Haskell2010
 
 test-suite new-div-test
-    build-depends: HUnit -any
-                 , MonadRandom >= 0.1
-                 , QuickCheck >= 2.6
+    build-depends: HUnit
+                 , MonadRandom
+                 , QuickCheck
                  , algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , deepseq >= 1.3
-                 , equational-reasoning >= 0.2
-                 , hspec -any
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , monomorphic >=0.0.3
-                 , quickcheck-instances -any
-                 , reflection >=1.4
-                 , smallcheck -any
-                 , tagged >= 0.7
-                 , test-framework -any
-                 , test-framework-hunit -any
+                 , constraints
+                 , containers
+                 , deepseq
+                 , equational-reasoning
+                 , hspec
+                 , lens
+                 , matrix
+                 , monomorphic
+                 , quickcheck-instances
+                 , reflection
+                 , smallcheck
+                 , tagged
+                 , test-framework
+                 , test-framework-hunit
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     type: exitcode-stdio-1.0
     main-is: division.hs
     buildable: False
@@ -474,19 +476,19 @@ test-suite new-div-test
 
 benchmark unipol-bench
     build-depends: algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , criterion >= 0.8.1.0
-                 , deepseq >= 1.3
-                 , matrix >= 0.3
-                 , parallel >= 3.2
-                 , process >=1.1
+                 , constraints
+                 , containers
+                 , criterion
+                 , deepseq
+                 , matrix
+                 , parallel
+                 , process
                  , singletons
                  , sized
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     type: exitcode-stdio-1.0
     main-is: unipol-bench.hs
     hs-source-dirs: bench share
@@ -495,19 +497,19 @@ benchmark unipol-bench
 
 benchmark normal-bench
     build-depends: algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , criterion >= 0.8.1.0
-                 , deepseq >= 1.3
-                 , matrix >= 0.3
-                 , parallel >= 3.2
-                 , process >=1.1
+                 , constraints
+                 , containers
+                 , criterion
+                 , deepseq
+                 , matrix
+                 , parallel
+                 , process
                  , singletons
                  , sized
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     type: exitcode-stdio-1.0
     main-is: bench.hs
     -- buildable: False
@@ -518,19 +520,19 @@ benchmark normal-bench
 
 benchmark elimination-bench
     build-depends: algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , criterion >= 0.8.1.0
-                 , deepseq >= 1.3
-                 , matrix >= 0.3
-                 , parallel >= 3.2
-                 , process >=1.1
+                 , constraints
+                 , containers 
+                 , criterion
+                 , deepseq
+                 , matrix
+                 , parallel
+                 , process
                  , singletons
                  , sized
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     type: exitcode-stdio-1.0
     main-is: elimination-bench.hs
     buildable: False
@@ -540,29 +542,29 @@ benchmark elimination-bench
     default-language:   Haskell2010
 
 benchmark quotient-bench-randomized
-    build-depends: QuickCheck >= 2.6
+    build-depends: QuickCheck
                  , algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , containers >= 0.5
-                 , criterion >= 0.8.1.0
-                 , deepseq >= 1.3
-                 , equational-reasoning >= 0.2
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , monomorphic >=0.0.3
-                 , parallel >= 3.2
-                 , process >=1.1
-                 , quickcheck-instances -any
-                 , reflection >=1.4
+                 , containers
+                 , criterion
+                 , deepseq
+                 , equational-reasoning
+                 , lens
+                 , matrix
+                 , monomorphic
+                 , parallel
+                 , process
+                 , quickcheck-instances
+                 , reflection
                  , singletons
                  , sized
-                 , smallcheck -any
-                 , tagged >= 0.7
-                 , transformers >= 0.3
+                 , smallcheck
+                 , tagged
+                 , transformers
                  , type-natural
-                 , vector >= 0.10
-                , constraints >=0.3
+                 , vector
+                 , constraints
     type: exitcode-stdio-1.0
     main-is: quotient-bench-randomized.hs
     buildable: True
@@ -572,29 +574,29 @@ benchmark quotient-bench-randomized
     default-language:   Haskell2010
 
 benchmark monomial-order-bench
-    build-depends: QuickCheck >= 2.6
+    build-depends: QuickCheck
                  , algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , criterion >= 0.8.1.0
-                 , deepseq >= 1.3
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , monomorphic >=0.0.3
-                 , parallel >= 3.2
-                 , process >=1.1
-                 , quickcheck-instances -any
-                 , random >= 1.0
-                 , reflection >=1.4
+                 , constraint
+                 , containers
+                 , criterion
+                 , deepseq
+                 , lens
+                 , matrix
+                 , monomorphic
+                 , parallel
+                 , process
+                 , quickcheck-instances
+                 , random
+                 , reflection
                  , singletons
                  , sized
-                 , smallcheck -any
-                 , tagged >= 0.7
-                 , transformers >= 0.3
+                 , smallcheck
+                 , tagged
+                 , transformers
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     type: exitcode-stdio-1.0
     main-is: monomials.hs
     buildable: False
@@ -605,32 +607,31 @@ benchmark monomial-order-bench
 
 benchmark linear-bench
     build-depends: HUnit -any
-                 , MonadRandom >= 0.1
-                 , QuickCheck >= 2.6
+                 , MonadRandom
+                 , QuickCheck
                  , algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , criterion >= 0.8.1.0
-                 , deepseq >= 1.3
-                 , equational-reasoning >= 0.2
-                 , hspec -any
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , monomorphic >=0.0.3
-                 , monomorphic >=0.0.3
-                 , parallel >= 3.2
-                 , process >=1.1
-                 , quickcheck-instances -any
-                 , reflection >=1.4
+                 , constraints
+                 , containers
+                 , criterion
+                 , deepseq
+                 , equational-reasoning
+                 , hspec
+                 , lens
+                 , matrix
+                 , monomorphic
+                 , parallel
+                 , process
+                 , quickcheck-instances
+                 , reflection
                  , sized
-                 , smallcheck -any
-                 , tagged >= 0.7
-                 , test-framework -any
-                 , test-framework-hunit -any
+                 , smallcheck
+                 , tagged
+                 , test-framework
+                 , test-framework-hunit
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     type: exitcode-stdio-1.0
     main-is: linear.hs
     buildable: False
@@ -640,33 +641,32 @@ benchmark linear-bench
     default-language:   Haskell2010
 
 benchmark division-bench
-    build-depends: HUnit -any
-                 , MonadRandom >= 0.1
-                 , QuickCheck >= 2.6
+    build-depends: HUnit
+                 , MonadRandom
+                 , QuickCheck
                  , algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , criterion >= 0.8.1.0
-                 , deepseq >= 1.3
-                 , equational-reasoning >= 0.2
-                 , hspec -any
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , monomorphic >=0.0.3
-                 , monomorphic >=0.0.3
-                 , parallel >= 3.2
-                 , process >=1.1
-                 , quickcheck-instances -any
-                 , reflection >=1.4
+                 , constraints
+                 , containers
+                 , criterion
+                 , deepseq
+                 , equational-reasoning
+                 , hspec
+                 , lens
+                 , matrix
+                 , monomorphic
+                 , parallel
+                 , process
+                 , quickcheck-instances
+                 , reflection
                  , sized
-                 , smallcheck -any
-                 , tagged >= 0.7
-                 , test-framework -any
-                 , test-framework-hunit -any
+                 , smallcheck
+                 , tagged
+                 , test-framework
+                 , test-framework-hunit
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     type: exitcode-stdio-1.0
     main-is: division.hs
     buildable: False
@@ -676,33 +676,33 @@ benchmark division-bench
     default-language:   Haskell2010
 
 benchmark sugar-paper-bench
-    build-depends: HUnit -any
-                 , MonadRandom >= 0.1
-                 , QuickCheck >= 2.6
+    build-depends: HUnit
+                 , MonadRandom
+                 , QuickCheck
                  , algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , criterion >= 0.8.1.0
-                 , deepseq >= 1.3
-                 , equational-reasoning >= 0.2
-                 , hspec -any
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , monomorphic >=0.0.3
-                 , monomorphic >=0.0.3
-                 , parallel >= 3.2
-                 , process >=1.1
-                 , quickcheck-instances -any
-                 , reflection >=1.4
+                 , constraints
+                 , containers
+                 , criterion
+                 , deepseq
+                 , equational-reasoning
+                 , hspec
+                 , lens
+                 , matrix
+                 , monomorphic
+                 , monomorphic
+                 , parallel
+                 , process
+                 , quickcheck-instances
+                 , reflection
                  , sized
-                 , smallcheck -any
-                 , tagged >= 0.7
-                 , test-framework -any
-                 , test-framework-hunit -any
+                 , smallcheck
+                 , tagged
+                 , test-framework
+                 , test-framework-hunit
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     type: exitcode-stdio-1.0
     main-is: sugar-paper.hs
     buildable: True
@@ -712,33 +712,33 @@ benchmark sugar-paper-bench
     default-language:   Haskell2010
 
 benchmark solve-bench
-    build-depends: HUnit -any
-                 , MonadRandom >= 0.1
-                 , QuickCheck >= 2.6
+    build-depends: HUnit
+                 , MonadRandom
+                 , QuickCheck
                  , algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , criterion >= 0.8.1.0
-                 , deepseq >= 1.3
-                 , equational-reasoning >= 0.2
-                 , hspec -any
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , monomorphic >=0.0.3
-                 , parallel >= 3.2
-                 , process >=1.1
-                 , quickcheck-instances -any
-                 , random >= 1.0
-                 , reflection >=1.4
+                 , constraints
+                 , containers
+                 , criterion
+                 , deepseq
+                 , equational-reasoning
+                 , hspec
+                 , lens
+                 , matrix
+                 , monomorphic
+                 , parallel
+                 , process
+                 , quickcheck-instances
+                 , random
+                 , reflection
                  , sized
-                 , smallcheck -any
-                 , tagged >= 0.7
-                 , test-framework -any
-                 , test-framework-hunit -any
+                 , smallcheck
+                 , tagged
+                 , test-framework
+                 , test-framework-hunit
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     type: exitcode-stdio-1.0
     main-is: solve.hs
     buildable: True
@@ -748,33 +748,33 @@ benchmark solve-bench
     default-language:   Haskell2010
 
 benchmark coercion-bench
-    build-depends: HUnit -any
-                 , MonadRandom >= 0.1
-                 , QuickCheck >= 2.6
+    build-depends: HUnit
+                 , MonadRandom
+                 , QuickCheck
                  , algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , criterion >= 0.8.1.0
-                 , deepseq >= 1.3
-                 , equational-reasoning >= 0.2
-                 , hspec -any
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , monomorphic >=0.0.3
-                 , parallel >= 3.2
-                 , process >=1.1
-                 , quickcheck-instances -any
-                 , random >= 1.0
-                 , reflection >=1.4
+                 , constraints
+                 , containers
+                 , criterion
+                 , deepseq
+                 , equational-reasoning
+                 , hspec
+                 , lens
+                 , matrix
+                 , monomorphic
+                 , parallel
+                 , process
+                 , quickcheck-instances
+                 , random
+                 , reflection
                  , sized
-                 , smallcheck -any
-                 , tagged >= 0.7
-                 , test-framework -any
-                 , test-framework-hunit -any
+                 , smallcheck
+                 , tagged
+                 , test-framework
+                 , test-framework-hunit
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     type: exitcode-stdio-1.0
     main-is: coercion.hs
     buildable: False
@@ -784,32 +784,32 @@ benchmark coercion-bench
     default-language:   Haskell2010
 
 benchmark unipol-mult-bench
-    build-depends: HUnit -any
-                 , QuickCheck >= 2.6
+    build-depends: HUnit
+                 , QuickCheck
                  , algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , constraints >=0.3
-                 , containers >= 0.5
-                 , criterion >= 0.8.1.0
-                 , deepseq >= 1.3
-                 , equational-reasoning >= 0.2
-                 , hspec -any
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , monomorphic >=0.0.3
-                 , parallel >= 3.2
-                 , process >=1.1
-                 , quickcheck-instances -any
-                 , random >= 1.0
-                 , reflection >=1.4
+                 , constraints
+                 , containers
+                 , criterion
+                 , deepseq
+                 , equational-reasoning
+                 , hspec
+                 , lens
+                 , matrix
+                 , monomorphic
+                 , parallel
+                 , process
+                 , quickcheck-instances
+                 , random
+                 , reflection
                  , sized
-                 , smallcheck -any
-                 , tagged >= 0.7
-                 , test-framework -any
-                 , test-framework-hunit -any
+                 , smallcheck
+                 , tagged
+                 , test-framework
+                 , test-framework-hunit
                  , type-natural
-                 , vector >= 0.10
+                 , vector
     type: exitcode-stdio-1.0
     main-is: unipol-mult.hs
     buildable: True
@@ -819,32 +819,32 @@ benchmark unipol-mult-bench
     default-language:   Haskell2010
 
 benchmark unipol-div-bench
-    build-depends: HUnit -any
-                 , QuickCheck >= 2.6
+    build-depends: HUnit
+                 , QuickCheck
                  , algebra
-                 , base >=4
+                 , base
                  , computational-algebra
-                 , containers >= 0.5
-                 , criterion >= 0.8.1.0
-                 , deepseq >= 1.3
-                 , equational-reasoning >= 0.2
-                 , hspec -any
-                 , lens >= 3.9
-                 , matrix >= 0.3
-                 , monomorphic >=0.0.3
-                 , parallel >= 3.2
-                 , process >=1.1
-                 , quickcheck-instances -any
-                 , random >= 1.0
-                 , reflection >=1.4
+                 , containers
+                 , criterion
+                 , deepseq
+                 , equational-reasoning
+                 , hspec
+                 , lens
+                 , matrix
+                 , monomorphic
+                 , parallel
+                 , process
+                 , quickcheck-instances
+                 , random
+                 , reflection
                  , sized
-                 , smallcheck -any
-                 , tagged >= 0.7
-                 , test-framework -any
-                 , test-framework-hunit -any
+                 , smallcheck
+                 , tagged
+                 , test-framework
+                 , test-framework-hunit
                  , type-natural
-                 , vector >= 0.10
-                , constraints >=0.3
+                 , vector
+                , constraints
     type: exitcode-stdio-1.0
     main-is: unipol-div.hs
     buildable: True

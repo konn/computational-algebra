@@ -19,4 +19,4 @@ extra-deps:
 - presburger-1.3.1
 - lazysmallcheck-0.6
 
-pvp-bounds: both
+# pvp-bounds: both
