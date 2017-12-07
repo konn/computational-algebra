@@ -148,6 +148,7 @@ executable solve
     main-is: solve.hs
     hs-source-dirs: share examples
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
+    default-language:   Haskell2010
 
     if !flag(examples)
         buildable: False
@@ -188,6 +189,7 @@ executable ipsolve
     main-is: ipsolve.hs
     hs-source-dirs: share examples
     ghc-options: -caf-all -auto-all -rtsopts -O2 -threaded
+    default-language:   Haskell2010
 
     if !flag(examples)
         buildable: False
@@ -216,6 +218,7 @@ executable hensel-prof
     main-is: hensel-prof.hs
     hs-source-dirs: share examples
     ghc-options: -O2 -threaded
+    default-language:   Haskell2010
 
 executable sandpit-poly
     build-depends: algebra
@@ -230,7 +233,7 @@ executable sandpit-poly
         buildable: False
     main-is: sandpit-poly.hs
     hs-source-dirs: share examples
-
+    default-language:   Haskell2010
 
 executable quotient
     build-depends: algebra
@@ -246,6 +249,7 @@ executable quotient
         buildable: False
     main-is: quotient.hs
     hs-source-dirs: share examples
+    default-language:   Haskell2010
  
 test-suite test-multi-table
     build-depends: HUnit >=1.2.5.2
@@ -275,6 +279,7 @@ test-suite test-multi-table
     hs-source-dirs: tests share
     other-modules: Utils
     ghc-options: -Wall -threaded
+    default-language:   Haskell2010
 
 test-suite singular-test
     main-is: SingularTest.hs
@@ -308,6 +313,7 @@ test-suite singular-test
                  , text
                  , type-natural
                  , vector >= 0.10
+    default-language:   Haskell2010
 
 test-suite monomial-order-test
     build-depends: HUnit -any
@@ -332,6 +338,7 @@ test-suite monomial-order-test
     hs-source-dirs: tests share
     other-modules: Utils
     ghc-options: -Wall -threaded
+    default-language:   Haskell2010
 
 test-suite linear-test
     build-depends: HUnit -any
@@ -363,6 +370,7 @@ test-suite linear-test
     hs-source-dirs: tests share
     other-modules: Utils
     ghc-options: -Wall -threaded
+    default-language:   Haskell2010
 
 test-suite matrix-test
     build-depends: HUnit -any
@@ -394,6 +402,7 @@ test-suite matrix-test
     hs-source-dirs: tests share
     other-modules: Utils
     ghc-options: -Wall -threaded
+    default-language:   Haskell2010
 
 test-suite specs
     build-depends: HUnit -any
@@ -430,6 +439,7 @@ test-suite specs
     other-modules: QuotientSpec PolynomialSpec SingularBridge
                    Utils UnivariateSpec GroebnerSpec ZeroDimSpec
     ghc-options: -Wall -threaded
+    default-language:   Haskell2010
 
 test-suite new-div-test
     build-depends: HUnit -any
@@ -460,7 +470,8 @@ test-suite new-div-test
     hs-source-dirs: tests share
     other-modules: Utils
     ghc-options: -Wall -threaded
- 
+    default-language:   Haskell2010
+
 benchmark unipol-bench
     build-depends: algebra
                  , base >=4
@@ -480,6 +491,7 @@ benchmark unipol-bench
     main-is: unipol-bench.hs
     hs-source-dirs: bench share
     ghc-options: -O2 -threaded -rtsopts
+    default-language:   Haskell2010
 
 benchmark normal-bench
     build-depends: algebra
@@ -502,6 +514,7 @@ benchmark normal-bench
     hs-source-dirs: bench share
     other-modules: SingularBench
     ghc-options: -O2 -threaded -rtsopts
+    default-language:   Haskell2010
 
 benchmark elimination-bench
     build-depends: algebra
@@ -524,6 +537,7 @@ benchmark elimination-bench
     hs-source-dirs: bench share
     other-modules: SingularBench
     ghc-options: -O2 -threaded -rtsopts
+    default-language:   Haskell2010
 
 benchmark quotient-bench-randomized
     build-depends: QuickCheck >= 2.6
@@ -555,6 +569,7 @@ benchmark quotient-bench-randomized
     hs-source-dirs: bench share
     other-modules: SingularBench Utils
     ghc-options: -O2 -threaded -rtsopts
+    default-language:   Haskell2010
 
 benchmark monomial-order-bench
     build-depends: QuickCheck >= 2.6
@@ -586,6 +601,7 @@ benchmark monomial-order-bench
     hs-source-dirs: bench share
     other-modules: SingularBench Utils
     ghc-options: -O2 -threaded -rtsopts
+    default-language:   Haskell2010
 
 benchmark linear-bench
     build-depends: HUnit -any
@@ -621,6 +637,7 @@ benchmark linear-bench
     hs-source-dirs: bench share
     other-modules: Utils
     ghc-options: -O2 -threaded -rtsopts
+    default-language:   Haskell2010
 
 benchmark division-bench
     build-depends: HUnit -any
@@ -656,6 +673,7 @@ benchmark division-bench
     hs-source-dirs: bench share
     other-modules: Utils
     ghc-options: -O2 -threaded -rtsopts
+    default-language:   Haskell2010
 
 benchmark sugar-paper-bench
     build-depends: HUnit -any
@@ -691,6 +709,7 @@ benchmark sugar-paper-bench
     hs-source-dirs: bench share
     other-modules: Utils
     ghc-options: -O2 -threaded -rtsopts
+    default-language:   Haskell2010
 
 benchmark solve-bench
     build-depends: HUnit -any
@@ -726,6 +745,7 @@ benchmark solve-bench
     hs-source-dirs: bench share
     other-modules: Utils
     ghc-options: -O2 -threaded -rtsopts
+    default-language:   Haskell2010
 
 benchmark coercion-bench
     build-depends: HUnit -any
@@ -761,6 +781,7 @@ benchmark coercion-bench
     hs-source-dirs: bench share
     other-modules: Utils
     ghc-options: -Wall -O2 -threaded -rtsopts
+    default-language:   Haskell2010
 
 benchmark unipol-mult-bench
     build-depends: HUnit -any
@@ -795,6 +816,7 @@ benchmark unipol-mult-bench
     hs-source-dirs: bench share
     other-modules: Utils
     ghc-options: -Wall -O2 -threaded -rtsopts
+    default-language:   Haskell2010
 
 benchmark unipol-div-bench
     build-depends: HUnit -any
@@ -829,3 +851,4 @@ benchmark unipol-div-bench
     hs-source-dirs: bench share
     other-modules: Utils
     ghc-options: -Wall -O2 -threaded -rtsopts
+    default-language:   Haskell2010
