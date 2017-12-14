@@ -844,7 +844,7 @@ benchmark unipol-div-bench
                  , test-framework-hunit
                  , type-natural
                  , vector
-                , constraints
+                 , constraints
     type: exitcode-stdio-1.0
     main-is: unipol-div.hs
     buildable: True
