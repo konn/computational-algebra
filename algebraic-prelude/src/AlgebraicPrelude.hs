@@ -1,7 +1,7 @@
-{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses    #-}
-{-# LANGUAGE NoImplicitPrelude, TemplateHaskell, TypeFamilies     #-}
-{-# LANGUAGE UndecidableInstances                                 #-}
+{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances   #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses      #-}
+{-# LANGUAGE NoImplicitPrelude, NoRebindableSyntax, TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies, UndecidableInstances                     #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 -- | This module provides drop-in replacement for @'Prelude'@ module in base package,
 --   based on algebraic hierarchy provided by
