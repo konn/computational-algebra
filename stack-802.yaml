@@ -1,4 +1,4 @@
-resolver: nightly-2017-11-30
+resolver: lts-10.0
 skip-ghc-check: true
 packages:
 - '.'
@@ -10,13 +10,12 @@ flags:
 
 extra-deps:
 - algebra-4.3
-- ghc-typelits-presburger-0.1.1.1
 - equational-reasoning-0.5.0.0
+- ghc-typelits-presburger-0.1.1.1
 - monomorphic-0.0.3.3
+- presburger-1.3.1
 - sized-0.2.1.1
 - type-natural-0.7.1.4
 - unamb-0.2.5
-- presburger-1.3.1
-- lazysmallcheck-0.6
 
 # pvp-bounds: both
