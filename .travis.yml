@@ -26,6 +26,16 @@ matrix:
             - libgmp3-dev
             - libgsl0-dev
             - liblapack-dev
+    - env: STACK_YAML=stack-804.yaml
+      compiler: ": #GHC 8.4.1-alpha1"
+      addons:
+        apt:
+          packages:
+            - libgmp3-dev
+            - libgsl0-dev
+            - liblapack-dev
+  allow_failures:
+    - env: STACK_YAML=stack-804.yaml
 
 before_install:
  # install Stack
