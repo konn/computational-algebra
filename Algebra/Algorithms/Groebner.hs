@@ -3,6 +3,7 @@
 {-# LANGUAGE NoImplicitPrelude, ParallelListComp, PolyKinds, RankNTypes     #-}
 {-# LANGUAGE ScopedTypeVariables, TypeFamilies, TypeOperators, ViewPatterns #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 module Algebra.Algorithms.Groebner
        (
        -- * Groebner basis
@@ -435,7 +436,9 @@ saturationByPrincipalIdeal :: forall poly.
                            -> Ideal poly
 saturationByPrincipalIdeal is g =
   let n = sArity' g
-  in withRefl (plusMinus' sOne n) $ withRefl (plusComm n sOne) $
+  in withKnownNat n $
+     withKnownNat (sSucc n) $
+     withRefl (plusMinus' sOne n) $ withRefl (plusComm n sOne) $
      withWitness (leqStep sOne (sOne %:+ n) n Refl) $
      withWitness (lneqZero n) $
      eliminatePadding $

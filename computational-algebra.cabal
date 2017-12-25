@@ -12,7 +12,7 @@ description: Dependently-typed computational algebra library for Groebner basis.
 category: Math
 author: Hiromi ISHII
 data-dir: ""
-tested-with:        GHC == 8.0.2, GHC == 8.2.2
+tested-with:        GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.1
 extra-source-files: README.md examples/*.hs tests/*.hs bench/*.hs
                     share/*.hs data/conway.txt
 
