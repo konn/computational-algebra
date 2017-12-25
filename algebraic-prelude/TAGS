@@ -1,13 +1,17 @@
 
+./Setup.hs,15
+main main1,2
+
+./test/Spec.hs,30
+main main0,1
+main main1,2
+
 ./examples/sandpit.hs,85
 module Main Main1,2
 arg, main main6,7
 arg,arg6,7
 arg arg7,8
 main main12,13
-
-./Setup.hs,15
-main main1,2
 
 ./src/AlgebraicPrelude.hs,1398
 module AlgebraicPreludeAlgebraicPrelude48,49
@@ -44,7 +48,3 @@ newtype Add a = Add { runAdd runAdd537,538
 newtype Mult Mult561,562
 newtype Mult a = Mult Mult561,562
 newtype Mult a = Mult { runMult runMult561,562
-
-./test/Spec.hs,30
-main main0,1
-main main1,2

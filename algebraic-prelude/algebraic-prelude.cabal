@@ -17,8 +17,8 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     AlgebraicPrelude
-  build-depends:       base    >= 4.7 && < 5
-                     , algebra >= 4.3
+  build-depends:       base    >= 4.7    && < 5
+                     , algebra >= 4.3.1
                      , basic-prelude
                      , lens    == 4.*
                      , semigroups

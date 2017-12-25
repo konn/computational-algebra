@@ -16,26 +16,7 @@ setup-info:
 flags: {}
 packages:
 - '.'
-- location:
-    git: https://github.com/konn/equational-reasoning-in-haskell.git
-    commit: 47fc2944aa86ff3b37baad4583802937f9de63c9
-  extra-dep: true
-- location:
-    git: https://github.com/konn/presburger.git
-    commit: fd7746dbc63d427ab5670341cd0fd13cb2c087b6
-  extra-dep: true
-- location:
-    git: https://github.com/konn/type-natural.git
-    commit: 239cfcdb7641c204b95d707345eb39469b147a96
-  extra-dep: true
-- location:
-    git: https://github.com/konn/listlike.git
-    commit: 13ac6b36ae3e935bb1763a97a56be81bb43c0335
-  extra-dep: true
-- location:
-    git: https://github.com/konn/sized.git
-    commit: 12bc75a0d82ea00a81b43ec2cc5fae2110954147
-  extra-dep: true
+- 'algebraic-prelude'
 
 package-indices:
 - name: Hackage Head
@@ -52,9 +33,7 @@ extra-deps:
 - ReadArgs-1.2.3
 - StateVar-1.1.0.4
 - adjunctions-4.3
-- algebra-4.3
-- algebraic-prelude-0.1.1.0
-- arithmoi-0.6.0.1
+- algebra-4.3.1
 - base-orphans-0.6
 - basic-prelude-0.6.1.1
 - bifunctors-5.5
@@ -68,7 +47,6 @@ extra-deps:
 - distributive-0.5.3
 - dlist-0.8.0.3
 - entropy-0.3.8
-- exact-pi-0.4.1.2
 - exceptions-0.8.3
 - fail-4.9.0.0
 - fmlist-0.9
@@ -79,14 +57,11 @@ extra-deps:
 - ghc-typelits-presburger-0.1.1.1
 - hashable-1.2.6.1
 - heaps-0.3.5
-- hmatrix-0.18.1.0
-- hybrid-vectors-0.2.1
 - integer-logarithms-1.0.2
 - kan-extensions-5.0.2
 - lens-4.15.4
 - lifted-base-0.2.3.11
 - loop-0.3.0
-- matrix-0.3.5.0
 - monad-control-1.0.2.2
 - monad-loops-0.4.3
 - mono-traversable-1.0.6.0
@@ -127,3 +102,25 @@ extra-deps:
 - vector-0.12.0.1
 - vector-algorithms-0.7.0.1
 - void-0.7.2
+- git: https://github.com/konn/equational-reasoning-in-haskell.git
+  commit: 47fc2944aa86ff3b37baad4583802937f9de63c9
+- git: https://github.com/konn/presburger.git
+  commit: fd7746dbc63d427ab5670341cd0fd13cb2c087b6 
+- git: https://github.com/konn/type-natural.git
+  commit: 239cfcdb7641c204b95d707345eb39469b147a96
+- git: https://github.com/konn/listlike.git
+  commit: 13ac6b36ae3e935bb1763a97a56be81bb43c0335
+- git: https://github.com/konn/sized.git
+  commit: 12bc75a0d82ea00a81b43ec2cc5fae2110954147 
+- git: https://github.com/konn/exact-pi.git
+  commit: 47a89e45276077b382e14d133ca393b8e7178168 
+- git: https://github.com/cartazio/arithmoi.git
+  commit: 36f0989fd01562b39115da929c33c2a548f1a9f6
+- git: https://github.com/ekmett/hybrid-vectors.git
+  commit: 962847d1f497c6fa7241ec61fdae6d09f97938d7
+- git: https://github.com/konn/hmatrix.git
+  commit: e83e2023da77ecaa9aaba15bc9bd48757f73b3a9
+  subdirs:
+    - packages/base
+- git: https://github.com/konn/matrix.git
+  commit: 556016ba057ac04f5569c3f62f3352ac673cadd4
