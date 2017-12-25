@@ -29,7 +29,9 @@ package-indices:
 allow-newer: true
 
 extra-deps: 
+- HUnit-1.6.0.0
 - MonadRandom-0.5.1
+- QuickCheck-2.10.1
 - ReadArgs-1.2.3
 - StateVar-1.1.0.4
 - adjunctions-4.3
@@ -57,6 +59,7 @@ extra-deps:
 - ghc-typelits-presburger-0.1.1.1
 - hashable-1.2.6.1
 - heaps-0.3.5
+- hspec-2.4.4
 - integer-logarithms-1.0.2
 - kan-extensions-5.0.2
 - lens-4.15.4
@@ -75,17 +78,21 @@ extra-deps:
 - primes-0.2.1.0
 - primitive-0.6.2.0
 - profunctors-5.2.1
+- quickcheck-instances-0.3.16
 - random-1.1
 - reflection-2.1.2
 - safe-0.3.15
 - semigroupoids-5.2.1
 - semigroups-0.18.3
 - singletons-2.3.1
+- smallcheck-1.1.3.1
 - split-0.2.3.2
 - storable-complex-0.2.2
 - syb-0.7
 - system-filepath-0.4.13.4
 - tagged-0.8.5
+- test-framework-0.8.1.1
+- test-framework-hunit-0.3.0.2
 - th-abstraction-0.2.6.0
 - th-desugar-1.7
 - th-expand-syns-0.4.3.0
@@ -102,6 +109,8 @@ extra-deps:
 - vector-0.12.0.1
 - vector-algorithms-0.7.0.1
 - void-0.7.2
+
+# Unreleased, patched versions for GHC 8.4.x
 - git: https://github.com/konn/equational-reasoning-in-haskell.git
   commit: 47fc2944aa86ff3b37baad4583802937f9de63c9
 - git: https://github.com/konn/presburger.git
