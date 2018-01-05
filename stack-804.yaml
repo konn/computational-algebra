@@ -147,9 +147,9 @@ extra-deps:
   commit: 36f0989fd01562b39115da929c33c2a548f1a9f6
 - git: https://github.com/ekmett/hybrid-vectors.git
   commit: 962847d1f497c6fa7241ec61fdae6d09f97938d7
-- git: https://github.com/konn/hmatrix.git
-  commit: e83e2023da77ecaa9aaba15bc9bd48757f73b3a9
+- git: https://github.com/albertoruiz/hmatrix.git
+  commit: 0d4018b09f1d38bbc05fdc0d8197d0f8a6ce5571
   subdirs:
     - packages/base
-- git: https://github.com/konn/matrix.git
-  commit: 556016ba057ac04f5569c3f62f3352ac673cadd4
+- git: https://github.com/Daniel-Diaz/matrix.git
+  commit: 5781ad18ea070a60e6b6fc5470b7f1db999acf59
