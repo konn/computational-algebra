@@ -454,12 +454,12 @@ Internally, every algebraic real is represented by the real-coefficient polynomi
 
 Aside the basic field operations, we currently provide the following operations on algebraic reals:
 
-* [`nthRoot`{.haskell}](doc:Algebra-Field-AlgebraicReal#v:nthRoot), where `nthRoot n r`{.haskell} calculates an $n$<sup>th</sup> real root of the given algebraic real `r`.
+* [`nthRoot`{.haskell}](doc:Algebra-Field-AlgebraicReal.html#v:nthRoot), where `nthRoot n r`{.haskell} calculates an $n$<sup>th</sup> real root of the given algebraic real `r`.
   If there is no real root, it returns `Nothing`{.haskell}.
-* [`approximate`{.haskell}](doc:Algebra-Field-AlgebraicReal#v:approximate): `approximate e r`{.haskell} returns an approximating rational number $q$ with $\lvert q - r \rvert < e$.
-  There is also a type-generic variant [`approxFractional`{.haskell}](doc:Algebra-Field-AlgebraicReal#v:approxFractional), which returns any `Fractional`{.haskell} number (such as `Double`{.haskell} or `Float`{.haskell} ) instead of `Rational`.
-* [`realRoots`{.haskell}](doc:Algebra-Field-AlgebraicReal#v:realRoots): for the univariate polynomial $f$, `realRoots f`{.haskell} computes all the *real* roots of $f$.
-    * There is also [`complexRoots`{.haskell}](doc:Algebra-Field-AlgebraicReal#v:complexRoots) which computes all the *complex* roots of $f$, but it comes with really naive implementation and *not ready for the practical usage*.
+* [`approximate`{.haskell}](doc:Algebra-Field-AlgebraicReal.html#v:approximate): `approximate e r`{.haskell} returns an approximating rational number $q$ with $\lvert q - r \rvert < e$.
+  There is also a type-generic variant [`approxFractional`{.haskell}](doc:Algebra-Field-AlgebraicReal.html#v:approxFractional), which returns any `Fractional`{.haskell} number (such as `Double`{.haskell} or `Float`{.haskell} ) instead of `Rational`.
+* [`realRoots`{.haskell}](doc:Algebra-Field-AlgebraicReal.html#v:realRoots): for the univariate polynomial $f$, `realRoots f`{.haskell} computes all the *real* roots of $f$.
+    * There is also [`complexRoots`{.haskell}](doc:Algebra-Field-AlgebraicReal.html#v:complexRoots) which computes all the *complex* roots of $f$, but it comes with really naive implementation and *not ready for the practical usage*.
 
 [^1]: One can also construct ordinals using integer literals of Haskell, like `3 :: Ordinal 4`{.haskell}, but it is unsafe and so highly unrecommended.
 For example, although `[od|3|] :: Ordinal 2`{.haskell} is rejected by compiler as expected, but `3 :: Ordinal 2`{.haskell} passes the compile-time typecheck and throws run-time error.
