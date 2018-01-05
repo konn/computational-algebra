@@ -30,7 +30,7 @@ default (Text)
 main :: IO ()
 main = hakyllWith conf $ do
   setting "schemes" (def :: Schemes)
-  match "docs/**.html" $ do
+  match ("docs/algebra-*/**.html" .||. "docs/algebraic-prelude-*/**.html" .||. "docs/computational-algebra-*/**.html") $ do
     route idRoute
     compile $
       getResourceString >>= withItemBody procHaddock
