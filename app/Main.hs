@@ -5,22 +5,23 @@ module Main where
 import Lenses
 import Settings hiding (children)
 
-import           Control.Lens        hiding (children, element, elements,
-                                      setting)
-import           Control.Monad       ((>=>))
+import           Control.Lens              hiding (children, element, elements,
+                                            setting)
+import           Control.Monad             ((>=>))
+import           Control.Monad.Error.Class
 import           Data.Default
 import           Data.Foldable
 import           Data.Maybe
 import           Data.Monoid
-import           Data.Text           (Text)
-import qualified Data.Text           as T
-import qualified Data.Text.Lazy      as LT
+import           Data.Text                 (Text)
+import qualified Data.Text                 as T
+import qualified Data.Text.Lazy            as LT
 import           Data.Text.Lazy.Lens
 import           Data.Time.Format
 import           Data.Time.LocalTime
 import           Hakyll
 import           Shelly
-import           System.Exit         (ExitCode (..))
+import           System.Exit               (ExitCode (..))
 import           Text.Pandoc
 import           Text.Taggy.Lens
 
@@ -33,6 +34,8 @@ main = hakyllWith conf $ do
     route idRoute
     compile $
       getResourceString >>= withItemBody procHaddock
+  match ("katex/**" .&&. complement "**.md") $
+    route idRoute >> compile copyFileCompiler
   match "templates/**" $
     compile templateCompiler
   match "params.json" $ do
@@ -48,19 +51,47 @@ main = hakyllWith conf $ do
         defaultHakyllReaderOptions
         writerOpts
         procSchemes
-        <&> fmap (demoteHeaders . demoteHeaders)
-        >>= loadAndApplyTemplate "templates/default.html" defaultContext
+        <&> fmap (demoteHeaders)
+        >>= loadAndApplyTemplate "templates/default.html" myCtx
         >>= relativizeUrls
+        >>= withItemBody (unixFilter "node" ["javascripts/prerender.js"])
   return ()
+
+myCtx :: Hakyll.Context String
+myCtx =
+  mconcat [ defaultContext
+          , field "toc" tocField
+          ]
+
+tocField :: Item String -> Compiler String
+tocField i = do
+  pan <- either (throwError . lines . show) return $ readHtml readerOpts $ itemBody i
+  return $ writeHtmlString tocOpts pan
+
+readerOpts :: ReaderOptions
+readerOpts =
+  defaultHakyllReaderOptions { readerStandalone = True
+                             , readerParseRaw = True
+                             }
 
 writerOpts :: WriterOptions
 writerOpts =
   defaultHakyllWriterOptions
   { writerHTMLMathMethod = MathJax mathJaxCDN
-  -- , writerOpts = S.fromList []
+  , writerTOCDepth = 2
+  , writerTableOfContents  = True
+  , writerHtml5 = True
   }
   where
     mathJaxCDN = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"
+
+tocOpts :: WriterOptions
+tocOpts =
+  writerOpts { writerTemplate = Just "$toc$"
+             , writerTOCDepth = 4
+             , writerTableOfContents  = True
+             , writerHtml5 = True
+             }
 
 excluded :: [String]
 excluded = ["app", "sites.cabal", "TAGS", "stack.yaml"]

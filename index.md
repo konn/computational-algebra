@@ -1,8 +1,9 @@
 ---
 title: Home
-date: 2016/08/06 20:51:38 JST
+date: 2018/01/05 14:00:00 JST
 author: Hiromi ISHII
 ---
+
 
 Overview
 ========
@@ -109,8 +110,8 @@ main = do
   -- print $ f' * 5 + f -- ^ Type error!
 ```
 
-Type Interface
-==============
+Type Interface for Polynomials and Algebraic Structures
+=======================================================
 `computational-algebra` provides well-typed interface. In this section, we will see how this package represents mathematical objects by type.
 
 ## Type-level natural numbers and singletons
@@ -177,7 +178,7 @@ instance (CoeffRing r, IsMonomialOrder n ord)
   ...
 ```
 As their name indicates, `Arity poly`{.haskell} stands for the *arity* of `poly`{.haskell}, that is, the number of variables of `poly`{.haskell} and `Coefficient poly`{.haskell} stands for the coefficient ring of `poly`{.haskell}.
-The essential class functions of it is `[var](doc:Algebra-Ring-Polynomial-Class.html#v:var)`{.haskell} and [`liftMap`{.haskell}](doc:Algebra-Ring-Polynomial-Class.html#v:liftMap):
+The essential class functions of it is [`var`{.haskell}](doc:Algebra-Ring-Polynomial-Class.html#v:var) and [`liftMap`{.haskell}](doc:Algebra-Ring-Polynomial-Class.html#v:liftMap):
 
 ```haskell
 class IsPolynomial poly where
@@ -349,10 +350,28 @@ Of course, users can define their custom polynomial types and made them instance
 The module `Algebra.Ring.Polynomial.Class`{.haskell} provides the function [`injectVars`{.haskell}](doc:Algebra-Ring-Polynomial-Class.html#v:injectVars), which converts between different polynomial type with the same coefficient, just mapping each variable to corresponding one with the same index in the target.
 Sometimes (e.g. variable elimination) one might want to permute variables.
 In such a case, you can just use [`liftMap`{.haskell}](doc:Algebra-Ring-Polynomial-Class.html#v:liftMap), [`subst`{.haskell}](doc:Algebra-Ring-Polynomial-Class.html#v:subst) or their variants.
-    
+
+## Other polynomial operations
+* The module [`Algebra.Ring.Polynomial.Factorise`](doc:Algebra-Ring-Polynomial-Factorise.html) implements the factorisation algorithm for *integer-coefficient univariate* polynomials.
+* The module [`Algebra.Algorithms.ZeroDim`](doc:Algebra-Algorithms-ZeroDim.html) provides various algorithms to work with zero-dimensional ideals.
+
+# Provided Algebraic Structures
+This package comes with the following types for algebraic structures:
+
+* `Integer`{.haskell} for the ring of integers,
+* `Rational`{.haskell} for the rational field,
+    * **N.B.** `computational-algebra`'s `Rational`{.haskell} is *different* from the default
+      `Rational`{.haskell} type of Haskell.
+      This is so because Haskell's `Ratio a`{.haskell} type requires superfluous constraints
+      for some algebraic instances.
+* Indeed, `Rational` is a type synonym for `Fraction Integer`{.haskell},
+  where `Fraction r`{.haskell} stands for the field of fractions of an integral domain `r`.
+
+Aside from the basic structurs above, we have the following structures: *finite fields*, *quotient rings* of polynomial rings, and the field of *algebraic reals*, which we will describe below.
+
 ## Finite Fields
 [`Algebra.Field.Finite`{.haskell}](doc:Algebra-Field-Finite.html) provides the type-class for finite fields [`FiniteField`{.haskell} ](doc:Algebra-Field-Finite.html#t:FiniteField) and concrete types for prime field [`F p`{.haskell}](doc:Algebra-Field-Finite.html#t:F) which corresponds to $\mathbb{F}_p = \mathbb{Z}/p\mathbb{Z}$.
-Note that, this type doesn't check primarity of type parameter $p$ (too expensive!).
+Note that, this type *doesn't check primarity* of type parameter $p$ (too expensive!).
 
 For other general finite fields other than prime fields (Galois Field), you can use [`Algebra.Field.Galois`{.haskell}](doc:Algebra-Field-Galois.html) module provides types [`GF p n`{.haskell}](doc:Algebra-Field-Galois.html#t:GF), which corresponds to $\mathbb{F}_{p^n}$.
 We use [Conway polynomial](https://en.wikipedia.org/wiki/Conway_polynomial_(finite_fields)) for internal representation of Galois Fields.
@@ -423,11 +442,24 @@ Also, `Algebra.Field.Galois`{.haskell} comes with monadic function [`generateIrr
 There is another function [`withGF'`{.haskell}](doc:Algebra-Field-Galois.html#v:withGF') to retrieve linear representation of elements of Galois Field.
 See [documents](doc:Algebra-Field-Galois.html) for more information.
 
-## Quotient ring ##
+## Quotient rings ##
 The type `Quotient k ord n ideal`{.haskell} stands for the quotient ring of n-variate polynomial ring over the field `k`{.haskell}.
 In order to distinguish the quotient ring over different ideals, we parametrize ideals in type.
 We use the functionalities provided by `reflection`{.haskell} package here, again.
 
+## Algebraic Reals ##
+[`Algebra.Field.AlgebraicReal`{.haskell}](doc:Algebra-Field-AlgebraicReal) module provides the type [`Algebraic`{.haskell}](doc:Algebra-Field-AlgebraicReal#t:Algebraic) for the field of *algebraic reals*, i.e. real roots of real coefficient polynomials.
+
+Internally, every algebraic real is represented by the real-coefficient polynomial $f \in \mathbb{R}[X]$ and the interval $I \subseteq \mathbb{R}$ which contains exactly one real root of $f$.
+
+Aside the basic field operations, we currently provide the following operations on algebraic reals:
+
+* [`nthRoot`{.haskell}](doc:Algebra-Field-AlgebraicReal#v:nthRoot), where `nthRoot n r`{.haskell} calculates an $n$<sup>th</sup> real root of the given algebraic real `r`.
+  If there is no real root, it returns `Nothing`{.haskell}.
+* [`approximate`{.haskell}](doc:Algebra-Field-AlgebraicReal#v:approximate): `approximate e r`{.haskell} returns an approximating rational number $q$ with $\lvert q - r \rvert < e$.
+  There is also a type-generic variant [`approxFractional`{.haskell}](doc:Algebra-Field-AlgebraicReal#v:approxFractional), which returns any `Fractional`{.haskell} number (such as `Double`{.haskell} or `Float`{.haskell} ) instead of `Rational`.
+* [`realRoots`{.haskell}](doc:Algebra-Field-AlgebraicReal#v:realRoots): for the univariate polynomial $f$, `realRoots f`{.haskell} computes all the *real* roots of $f$.
+    * There is also [`complexRoots`{.haskell}](doc:Algebra-Field-AlgebraicReal#v:complexRoots) which computes all the *complex* roots of $f$, but it comes with really naive implementation and *not ready for the practical usage*.
 
 [^1]: One can also construct ordinals using integer literals of Haskell, like `3 :: Ordinal 4`{.haskell}, but it is unsafe and so highly unrecommended.
 For example, although `[od|3|] :: Ordinal 2`{.haskell} is rejected by compiler as expected, but `3 :: Ordinal 2`{.haskell} passes the compile-time typecheck and throws run-time error.

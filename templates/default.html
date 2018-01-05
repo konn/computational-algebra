@@ -8,6 +8,7 @@
 
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/pygments.css">
+    <link href="/katex/katex.min.css" type="text/css" rel="stylesheet">
     <script type="text/x-mathjax-config">
       MathJax.Hub.Config({
       extensions: ["tex2jax.js"],
@@ -17,15 +18,14 @@
       TeX: { extensions: ["AMSmath.js", "AMSsymbols.js", "https://konn.github.io/xyjax/extensions/TeX/xypic.js"] }
       });
     </script>
+
     <script type="text/javascript" async
             src="https://cdn.mathjax.org/mathjax/latest/MathJax.js">
     </script>
-    
 
     <title>$title$ - Computational Algebra System in Haskell</title>
   </head>
   <body>
-
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
         <header class="inner">
@@ -44,6 +44,12 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
+        $if(toc)$
+        <section id="toc">
+        <h1>Table of Contents</h1>
+        $toc$
+        </section>
+        $endif$
         $body$
       </section>
     </div>
