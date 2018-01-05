@@ -871,6 +871,41 @@ arg,arg6,7
 arg arg7,8
 main main12,13
 
+./algebraic-prelude/.stack-work/dist/x86_64-osx/Cabal-2.1.0.0/build/autogen/Paths_algebraic_prelude.hs,1263
+module Paths_algebraic_prelude Paths_algebraic_prelude3,4
+catchIO catchIO17,18
+catchIO catchIO19,20
+catchIO catchIO23,24
+catchIO catchIO25,26
+version version27,28
+version version28,29
+bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir sysconfdir29,30
+bindir, libdir, dynlibdir, datadir, libexecdir,libexecdir29,30
+bindir, libdir, dynlibdir, datadir,datadir29,30
+bindir, libdir, dynlibdir,dynlibdir29,30
+bindir, libdir,libdir29,30
+bindir,bindir29,30
+bindir bindir31,32
+libdir libdir32,33
+dynlibdir dynlibdir33,34
+datadir datadir34,35
+libexecdir libexecdir35,36
+sysconfdir sysconfdir36,37
+getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir getSysconfDir38,39
+getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir,getLibexecDir38,39
+getBinDir, getLibDir, getDynLibDir, getDataDir,getDataDir38,39
+getBinDir, getLibDir, getDynLibDir,getDynLibDir38,39
+getBinDir, getLibDir,getLibDir38,39
+getBinDir,getBinDir38,39
+getBinDir getBinDir39,40
+getLibDir getLibDir40,41
+getDynLibDir getDynLibDir41,42
+getDataDir getDataDir42,43
+getLibexecDir getLibexecDir43,44
+getSysconfDir getSysconfDir44,45
+getDataFileName getDataFileName46,47
+getDataFileName getDataFileName47,48
+
 ./algebraic-prelude/.stack-work/dist/x86_64-osx/Cabal-1.22.5.0/build/autogen/Paths_algebraic_prelude.hs,984
 module Paths_algebraic_prelude Paths_algebraic_prelude0,1
 catchIO catchIO11,12
@@ -1037,7 +1072,81 @@ newtype Mult Mult561,562
 newtype Mult a = Mult Mult561,562
 newtype Mult a = Mult { runMult runMult561,562
 
+./algebraic-prelude/.stack-work/intero/intero429kkQ-STAGING.hs,1398
+module AlgebraicPreludeAlgebraicPrelude48,49
+type Rational Rational133,134
+fromInteger fromInteger138,139
+fromInteger fromInteger139,140
+fromInteger' fromInteger'147,148
+fromInteger' fromInteger'148,149
+fromRational fromRational150,151
+fromRational fromRational151,152
+normaliseUnit normaliseUnit158,159
+normaliseUnit normaliseUnit159,160
+(^)^162,163
+(^(163,164
+(^^)^^166,167
+ifThenElse ifThenElse179,180
+ifThenElse ifThenElse180,181
+newtype WrapNum WrapNum198,199
+newtype WrapNum a = WrapNum WrapNum198,199
+newtype WrapNum a = WrapNum { unwrapNum unwrapNum198,199
+instance instance201,202
+newtype WrapFractional WrapFractional270,271
+newtype WrapFractional a = WrapFractional WrapFractional270,271
+newtype WrapFractional a = WrapFractional { unwrapFractional unwrapFractional270,271
+newtype WrapIntegral WrapIntegral374,375
+newtype WrapIntegral a = WrapIntegral WrapIntegral374,375
+newtype WrapIntegral a = WrapIntegral { unwrapIntegral unwrapIntegral374,375
+newtype WrapAlgebra WrapAlgebra491,492
+newtype WrapAlgebra a = WrapAlgebra WrapAlgebra491,492
+newtype WrapAlgebra a = WrapAlgebra { unwrapAlgebra unwrapAlgebra491,492
+newtype Add Add537,538
+newtype Add a = Add Add537,538
+newtype Add a = Add { runAdd runAdd537,538
+newtype Mult Mult561,562
+newtype Mult a = Mult Mult561,562
+newtype Mult a = Mult { runMult runMult561,562
+
+./algebraic-prelude/.stack-work/intero/intero429xuW-TEMP.hs,0
+
 ./algebraic-prelude/.stack-work/intero/intero81235PvQ-TEMP.hs,1398
+module AlgebraicPreludeAlgebraicPrelude48,49
+type Rational Rational133,134
+fromInteger fromInteger138,139
+fromInteger fromInteger139,140
+fromInteger' fromInteger'147,148
+fromInteger' fromInteger'148,149
+fromRational fromRational150,151
+fromRational fromRational151,152
+normaliseUnit normaliseUnit158,159
+normaliseUnit normaliseUnit159,160
+(^)^162,163
+(^(163,164
+(^^)^^166,167
+ifThenElse ifThenElse179,180
+ifThenElse ifThenElse180,181
+newtype WrapNum WrapNum198,199
+newtype WrapNum a = WrapNum WrapNum198,199
+newtype WrapNum a = WrapNum { unwrapNum unwrapNum198,199
+instance instance201,202
+newtype WrapFractional WrapFractional270,271
+newtype WrapFractional a = WrapFractional WrapFractional270,271
+newtype WrapFractional a = WrapFractional { unwrapFractional unwrapFractional270,271
+newtype WrapIntegral WrapIntegral374,375
+newtype WrapIntegral a = WrapIntegral WrapIntegral374,375
+newtype WrapIntegral a = WrapIntegral { unwrapIntegral unwrapIntegral374,375
+newtype WrapAlgebra WrapAlgebra491,492
+newtype WrapAlgebra a = WrapAlgebra WrapAlgebra491,492
+newtype WrapAlgebra a = WrapAlgebra { unwrapAlgebra unwrapAlgebra491,492
+newtype Add Add537,538
+newtype Add a = Add Add537,538
+newtype Add a = Add { runAdd runAdd537,538
+newtype Mult Mult561,562
+newtype Mult a = Mult Mult561,562
+newtype Mult a = Mult { runMult runMult561,562
+
+./algebraic-prelude/.stack-work/intero/intero18366O4s-TEMP.hs,1398
 module AlgebraicPreludeAlgebraicPrelude48,49
 type Rational Rational133,134
 fromInteger fromInteger138,139
@@ -1206,90 +1315,90 @@ class (Ord (Norm a)) => Normed Normed4,5
 instance instance9,10
 
 ./Algebra/Algorithms/Groebner.hs,3687
-module Algebra.Algorithms.GroebnerAlgebra.Algorithms.Groebner5,6
-isGroebnerBasis isGroebnerBasis49,50
-isGroebnerBasis isGroebnerBasis51,52
-simpleBuchberger simpleBuchberger58,59
-simpleBuchberger simpleBuchberger60,61
-primeTestBuchberger primeTestBuchberger70,71
-primeTestBuchberger primeTestBuchberger72,73
-(.(83,84
-(.=.=83,84
-x x84,85
-(%=%=86,87
-combinations combinations89,90
+module Algebra.Algorithms.GroebnerAlgebra.Algorithms.Groebner6,7
+isGroebnerBasis isGroebnerBasis50,51
+isGroebnerBasis isGroebnerBasis52,53
+simpleBuchberger simpleBuchberger59,60
+simpleBuchberger simpleBuchberger61,62
+primeTestBuchberger primeTestBuchberger71,72
+primeTestBuchberger primeTestBuchberger73,74
+(.(84,85
+(.=.=84,85
+x x85,86
+(%=%=87,88
 combinations combinations90,91
-buchberger buchberger95,96
-buchberger buchberger97,98
-syzygyBuchberger syzygyBuchberger102,103
-syzygyBuchberger syzygyBuchberger104,105
-syzygyBuchbergerWithStrategy syzygyBuchbergerWithStrategy116,117
-syzygyBuchbergerWithStrategy syzygyBuchbergerWithStrategy120,121
-calcWeight' calcWeight'171,172
-calcWeight' calcWeight'173,174
-class SelectionStrategy SelectionStrategy177,178
-             => Proxy Proxy181,182
-  type Weight Weight178,179
-  calcWeight calcWeight180,181
-data NormalStrategy NormalStrategy185,186
-data NormalStrategy = NormalStrategy NormalStrategy185,186
-instance instance187,188
-data GrevlexStrategy GrevlexStrategy193,194
-data GrevlexStrategy = GrevlexStrategy GrevlexStrategy193,194
-data GradedStrategy GradedStrategy201,202
-data GradedStrategy = GradedStrategy GradedStrategy201,202
-data SugarStrategy SugarStrategy212,213
-data SugarStrategy s = SugarStrategy SugarStrategy212,213
-minimizeGroebnerBasis minimizeGroebnerBasis224,225
-minimizeGroebnerBasis minimizeGroebnerBasis226,227
-reduceMinimalGroebnerBasis reduceMinimalGroebnerBasis239,240
-reduceMinimalGroebnerBasis reduceMinimalGroebnerBasis241,242
-calcGroebnerBasisWith calcGroebnerBasisWith253,254
-calcGroebnerBasisWith calcGroebnerBasisWith258,259
-calcGroebnerBasisWithStrategy calcGroebnerBasisWithStrategy266,267
-calcGroebnerBasisWithStrategy calcGroebnerBasisWithStrategy270,271
-calcGroebnerBasis calcGroebnerBasis274,275
-calcGroebnerBasis calcGroebnerBasis276,277
-isIdealMember isIdealMember289,290
-isIdealMember isIdealMember291,292
-groebnerTest groebnerTest294,295
-groebnerTest groebnerTest296,297
-newtype LengthReplicate LengthReplicate298,299
-  LengthReplicate LengthReplicate299,300
-  LengthReplicate { runLengthReplicate runLengthReplicate299,300
-  LengthReplicate { runLengthReplicate :: forall x. Sing (x x299,300
-lengthReplicate lengthReplicate302,303
+combinations combinations91,92
+buchberger buchberger96,97
+buchberger buchberger98,99
+syzygyBuchberger syzygyBuchberger103,104
+syzygyBuchberger syzygyBuchberger105,106
+syzygyBuchbergerWithStrategy syzygyBuchbergerWithStrategy117,118
+syzygyBuchbergerWithStrategy syzygyBuchbergerWithStrategy121,122
+calcWeight' calcWeight'172,173
+calcWeight' calcWeight'174,175
+class SelectionStrategy SelectionStrategy178,179
+             => Proxy Proxy182,183
+  type Weight Weight179,180
+  calcWeight calcWeight181,182
+data NormalStrategy NormalStrategy186,187
+data NormalStrategy = NormalStrategy NormalStrategy186,187
+instance instance188,189
+data GrevlexStrategy GrevlexStrategy194,195
+data GrevlexStrategy = GrevlexStrategy GrevlexStrategy194,195
+data GradedStrategy GradedStrategy202,203
+data GradedStrategy = GradedStrategy GradedStrategy202,203
+data SugarStrategy SugarStrategy213,214
+data SugarStrategy s = SugarStrategy SugarStrategy213,214
+minimizeGroebnerBasis minimizeGroebnerBasis225,226
+minimizeGroebnerBasis minimizeGroebnerBasis227,228
+reduceMinimalGroebnerBasis reduceMinimalGroebnerBasis240,241
+reduceMinimalGroebnerBasis reduceMinimalGroebnerBasis242,243
+calcGroebnerBasisWith calcGroebnerBasisWith254,255
+calcGroebnerBasisWith calcGroebnerBasisWith259,260
+calcGroebnerBasisWithStrategy calcGroebnerBasisWithStrategy267,268
+calcGroebnerBasisWithStrategy calcGroebnerBasisWithStrategy271,272
+calcGroebnerBasis calcGroebnerBasis275,276
+calcGroebnerBasis calcGroebnerBasis277,278
+isIdealMember isIdealMember290,291
+isIdealMember isIdealMember292,293
+groebnerTest groebnerTest295,296
+groebnerTest groebnerTest297,298
+newtype LengthReplicate LengthReplicate299,300
+  LengthReplicate LengthReplicate300,301
+  LengthReplicate { runLengthReplicate runLengthReplicate300,301
+  LengthReplicate { runLengthReplicate :: forall x. Sing (x x300,301
 lengthReplicate lengthReplicate303,304
-lengthCong lengthCong324,325
+lengthReplicate lengthReplicate304,305
 lengthCong lengthCong325,326
-replicateCong replicateCong327,328
+lengthCong lengthCong326,327
 replicateCong replicateCong328,329
-thEliminationIdeal thEliminationIdeal331,332
-thEliminationIdeal thEliminationIdeal331,332
-thEliminationIdealWith thEliminationIdealWith346,347
-thEliminationIdealWith thEliminationIdealWith346,347
-unsafeThEliminationIdealWith unsafeThEliminationIdealWith360,361
-unsafeThEliminationIdealWith unsafeThEliminationIdealWith360,361
-eliminatePadding eliminatePadding376,377
-eliminatePadding eliminatePadding383,384
-intersection intersection391,392
-intersection intersection395,396
-quotByPrincipalIdeal quotByPrincipalIdeal411,412
-quotByPrincipalIdeal quotByPrincipalIdeal415,416
-quotIdeal quotIdeal420,421
-quotIdeal quotIdeal425,426
-saturationByPrincipalIdeal saturationByPrincipalIdeal430,431
-saturationByPrincipalIdeal saturationByPrincipalIdeal435,436
-saturationIdeal saturationIdeal445,446
-saturationIdeal saturationIdeal451,452
-resultant resultant456,457
-resultant resultant463,464
-hasCommonFactor hasCommonFactor479,480
-hasCommonFactor hasCommonFactor485,486
-lcmPolynomial lcmPolynomial488,489
-lcmPolynomial lcmPolynomial494,495
-gcdPolynomial gcdPolynomial497,498
-gcdPolynomial gcdPolynomial502,503
+replicateCong replicateCong329,330
+thEliminationIdeal thEliminationIdeal332,333
+thEliminationIdeal thEliminationIdeal332,333
+thEliminationIdealWith thEliminationIdealWith347,348
+thEliminationIdealWith thEliminationIdealWith347,348
+unsafeThEliminationIdealWith unsafeThEliminationIdealWith361,362
+unsafeThEliminationIdealWith unsafeThEliminationIdealWith361,362
+eliminatePadding eliminatePadding377,378
+eliminatePadding eliminatePadding384,385
+intersection intersection392,393
+intersection intersection396,397
+quotByPrincipalIdeal quotByPrincipalIdeal412,413
+quotByPrincipalIdeal quotByPrincipalIdeal416,417
+quotIdeal quotIdeal421,422
+quotIdeal quotIdeal426,427
+saturationByPrincipalIdeal saturationByPrincipalIdeal431,432
+saturationByPrincipalIdeal saturationByPrincipalIdeal436,437
+saturationIdeal saturationIdeal448,449
+saturationIdeal saturationIdeal454,455
+resultant resultant459,460
+resultant resultant466,467
+hasCommonFactor hasCommonFactor482,483
+hasCommonFactor hasCommonFactor488,489
+lcmPolynomial lcmPolynomial491,492
+lcmPolynomial lcmPolynomial497,498
+gcdPolynomial gcdPolynomial500,501
+gcdPolynomial gcdPolynomial505,506
 
 ./Algebra/Algorithms/ChineseRemainder.hs,255
 module Algebra.Algorithms.ChineseRemainderAlgebra.Algorithms.ChineseRemainder4,5
