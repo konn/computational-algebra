@@ -1,0 +1,390 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-name-shadowing #-}</span><span>
+</span><a name="line-2"></a><span class="hs-pragma">{-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures            #-}</span><span>
+</span><a name="line-3"></a><span class="hs-pragma">{-# LANGUAGE ExplicitNamespaces, FlexibleContexts, FlexibleInstances  #-}</span><span>
+</span><a name="line-4"></a><span class="hs-pragma">{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}</span><span>
+</span><a name="line-5"></a><span class="hs-pragma">{-# LANGUAGE NoMonomorphismRestriction, OverloadedStrings             #-}</span><span>
+</span><a name="line-6"></a><span class="hs-pragma">{-# LANGUAGE ParallelListComp, PatternSynonyms, PolyKinds             #-}</span><span>
+</span><a name="line-7"></a><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell #-}</span><span>
+</span><a name="line-8"></a><span class="hs-pragma">{-# LANGUAGE TypeFamilies, TypeOperators, TypeSynonymInstances        #-}</span><span>
+</span><a name="line-9"></a><span class="hs-pragma">{-# LANGUAGE UndecidableInstances                                     #-}</span><span>
+</span><a name="line-10"></a><span class="hs-comment">-- | Algorithms for zero-dimensional ideals.</span><span>
+</span><a name="line-11"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra</span><span class="hs-operator">.</span><span class="hs-identifier">Algorithms</span><span class="hs-operator">.</span><span class="hs-identifier">ZeroDim</span><span> </span><span class="hs-special">(</span><a href="Algebra.Algorithms.ZeroDim.html#univPoly"><span class="hs-identifier hs-var">univPoly</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Algorithms.ZeroDim.html#radical"><span class="hs-identifier hs-var">radical</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Algorithms.ZeroDim.html#isRadical"><span class="hs-identifier hs-var">isRadical</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Algorithms.ZeroDim.html#solveWith"><span class="hs-identifier hs-var">solveWith</span></a><span class="hs-special">,</span><span>
+</span><a name="line-12"></a><span>                                   </span><a href="Algebra.Algorithms.ZeroDim.html#reduction"><span class="hs-identifier hs-var">reduction</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Algorithms.ZeroDim.html#solveViaCompanion"><span class="hs-identifier hs-var">solveViaCompanion</span></a><span class="hs-special">,</span><span>
+</span><a name="line-13"></a><span>                                   </span><a href="Algebra.Algorithms.ZeroDim.html#solveM"><span class="hs-identifier hs-var">solveM</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Algorithms.ZeroDim.html#solve%27"><span class="hs-identifier hs-var">solve'</span></a><span class="hs-special">,</span><span>  </span><a href="Algebra.Algorithms.ZeroDim.html#matrixRep"><span class="hs-identifier hs-var">matrixRep</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Algorithms.ZeroDim.html#subspMatrix"><span class="hs-identifier hs-var">subspMatrix</span></a><span class="hs-special">,</span><span>
+</span><a name="line-14"></a><span>                                   </span><a href="Algebra.Ring.Polynomial.Quotient.html#vectorRep"><span class="hs-identifier hs-var">vectorRep</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Algorithms.ZeroDim.html#solveLinear"><span class="hs-identifier hs-var">solveLinear</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Algorithms.ZeroDim.html#fglm"><span class="hs-identifier hs-var">fglm</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Algorithms.ZeroDim.html#fglmMap"><span class="hs-identifier hs-var">fglmMap</span></a><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><a name="line-15"></a><span class="hs-keyword">import</span><span>           </span><a href="Algebra.Algorithms.FGLM.html"><span class="hs-identifier">Algebra</span><span class="hs-operator">.</span><span class="hs-identifier">Algorithms</span><span class="hs-operator">.</span><span class="hs-identifier">FGLM</span></a><span>
+</span><a name="line-16"></a><span class="hs-keyword">import</span><span>           </span><a href="Algebra.Algorithms.Groebner.html"><span class="hs-identifier">Algebra</span><span class="hs-operator">.</span><span class="hs-identifier">Algorithms</span><span class="hs-operator">.</span><span class="hs-identifier">Groebner</span></a><span>
+</span><a name="line-17"></a><span class="hs-keyword">import</span><span>           </span><a href="Algebra.Instances.html"><span class="hs-identifier">Algebra</span><span class="hs-operator">.</span><span class="hs-identifier">Instances</span></a><span>                </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><a name="line-18"></a><span class="hs-keyword">import</span><span>           </span><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra</span><span class="hs-operator">.</span><span class="hs-identifier">Internal</span></a><span>                 </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><a href="Algebra.Internal.html#OLt"><span class="hs-identifier hs-type">OLt</span></a><span class="hs-special">)</span><span>
+</span><a name="line-19"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><a href="Algebra.Matrix.html"><span class="hs-identifier">Algebra</span><span class="hs-operator">.</span><span class="hs-identifier">Matrix</span></a><span>                   </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">AM</span><span>
+</span><a name="line-20"></a><span class="hs-keyword">import</span><span>           </span><a href="Algebra.Prelude.Core.html"><span class="hs-identifier">Algebra</span><span class="hs-operator">.</span><span class="hs-identifier">Prelude</span><span class="hs-operator">.</span><span class="hs-identifier">Core</span></a><span>
+</span><a name="line-21"></a><span class="hs-keyword">import</span><span>           </span><a href="Algebra.Ring.Polynomial.Quotient.html"><span class="hs-identifier">Algebra</span><span class="hs-operator">.</span><span class="hs-identifier">Ring</span><span class="hs-operator">.</span><span class="hs-identifier">Polynomial</span><span class="hs-operator">.</span><span class="hs-identifier">Quotient</span></a><span>
+</span><a name="line-22"></a><span>
+</span><a name="line-23"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Lens</span><span>         </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-operator hs-type">:&lt;</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a name="line-24"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Monad</span><span class="hs-operator">.</span><span class="hs-identifier">Loops</span><span>
+</span><a name="line-25"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Monad</span><span class="hs-operator">.</span><span class="hs-identifier">Random</span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">next</span><span class="hs-special">)</span><span>
+</span><a name="line-26"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Monad</span><span class="hs-operator">.</span><span class="hs-identifier">Reader</span><span>
+</span><a name="line-27"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Monad</span><span class="hs-operator">.</span><span class="hs-identifier">ST</span><span>     </span><span class="hs-special">(</span><span class="hs-identifier hs-var">runST</span><span class="hs-special">)</span><span>
+</span><a name="line-28"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Coerce</span><span>          </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">C</span><span>
+</span><a name="line-29"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Complex</span><span>
+</span><a name="line-30"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Convertible</span><span>
+</span><a name="line-31"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Matrix</span><span>          </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">M</span><span>
+</span><a name="line-32"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Maybe</span><span>
+</span><a name="line-33"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Ord</span><span>             </span><span class="hs-special">(</span><span class="hs-identifier hs-var">comparing</span><span class="hs-special">)</span><span>
+</span><a name="line-34"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Reflection</span><span>
+</span><a name="line-35"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Sized</span><span class="hs-operator">.</span><span class="hs-identifier">Builtin</span><span>   </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">SV</span><span>
+</span><a name="line-36"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">STRef</span><span class="hs-operator">.</span><span class="hs-identifier">Strict</span><span>    </span><span class="hs-special">(</span><span class="hs-identifier hs-var">newSTRef</span><span class="hs-special">)</span><span>
+</span><a name="line-37"></a><span class="hs-comment">-- import           Data.Type.Ordinal</span><span>
+</span><a name="line-38"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Vector</span><span>           </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">V</span><span>
+</span><a name="line-39"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Vector</span><span class="hs-operator">.</span><span class="hs-identifier">Mutable</span><span>   </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">MV</span><span>
+</span><a name="line-40"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Numeric</span><span class="hs-operator">.</span><span class="hs-identifier">Algebra</span><span>       </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">NA</span><span>
+</span><a name="line-41"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Numeric</span><span class="hs-operator">.</span><span class="hs-identifier">LinearAlgebra</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">LA</span><span>
+</span><a name="line-42"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Prelude</span><span>               </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">P</span><span>
+</span><a name="line-43"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Proof</span><span class="hs-operator">.</span><span class="hs-identifier">Propositional</span><span>   </span><span class="hs-special">(</span><span class="hs-identifier hs-type">IsTrue</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">Witness</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a name="line-44"></a><span class="hs-comment">-- import qualified Sparse.Matrix                    as Sparse</span><span>
+</span><a name="line-45"></a><span>
+</span><a name="line-46"></a><span class="hs-identifier">solveM</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><a name="local-1633128450"><a href="#local-1633128450"><span class="hs-identifier">m</span></a></a><span> </span><a name="local-1633128451"><a href="#local-1633128451"><span class="hs-identifier">r</span></a></a><span> </span><a name="local-1633128452"><a href="#local-1633128452"><span class="hs-identifier">ord</span></a></a><span> </span><a name="local-1633128453"><a href="#local-1633128453"><span class="hs-identifier">n</span></a></a><span class="hs-operator">.</span><span>
+</span><a name="line-47"></a><span>          </span><span class="hs-special">(</span><a href="Algebra.Normed.html#Normed"><span class="hs-identifier hs-type">Normed</span></a><span> </span><a href="#local-1633128451"><span class="hs-identifier hs-type">r</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Ord</span><span> </span><a href="#local-1633128451"><span class="hs-identifier hs-type">r</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">MonadRandom</span><span> </span><a href="#local-1633128450"><span class="hs-identifier hs-type">m</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Field</span><span> </span><a href="#local-1633128451"><span class="hs-identifier hs-type">r</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Class.html#CoeffRing"><span class="hs-identifier hs-type">CoeffRing</span></a><span> </span><a href="#local-1633128451"><span class="hs-identifier hs-type">r</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">KnownNat</span><span> </span><a href="#local-1633128453"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">,</span><span>
+</span><a name="line-48"></a><span>           </span><a href="Algebra.Ring.Polynomial.Monomial.html#IsMonomialOrder"><span class="hs-identifier hs-type">IsMonomialOrder</span></a><span> </span><a href="#local-1633128453"><span class="hs-identifier hs-type">n</span></a><span> </span><a href="#local-1633128452"><span class="hs-identifier hs-type">ord</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Convertible</span><span> </span><a href="#local-1633128451"><span class="hs-identifier hs-type">r</span></a><span> </span><span class="hs-identifier hs-type">Double</span><span class="hs-special">,</span><span>
+</span><a name="line-49"></a><span>           </span><span class="hs-special">(</span><span class="hs-number">0</span><span> </span><span class="hs-operator">:&lt;</span><span> </span><a href="#local-1633128453"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">~</span><span> </span><span class="hs-char">'True)
+       =&gt; Ideal (OrderedPolynomial r ord n)
+       -&gt; m [Sized n (Complex Double)]
+solveM ideal = {-# SCC &quot;solveM&quot; #-}
+  withKnownNat (sSucc (sing :: SNat n)) $
+  reifyQuotient (radical ideal) $ \pxy -&gt;
+  case standardMonomials' pxy of
+    Just bs -&gt; step 10 (length bs)
+    Nothing -&gt; error &quot;Given ideal is not zero-dimensional&quot;
+  where
+    step bd len = {-# SCC &quot;solveM/step&quot; #-}do
+      coeffs &lt;- {-# SCC &quot;solveM/coeff-gen&quot; #-}
+        replicateM (sNatToInt (sSucc (sing :: SNat n))) $ getRandomR (-bd, bd)
+      let vars = one : SV.toList allVars
+          f = sum $ zipWith (.*.) (map (NA.fromInteger :: Integer -&gt; r) coeffs) vars
+      case solveWith f ideal of
+        Nothing -&gt; step (bd*2) len
+        Just sols -&gt; return sols
+
+solveWith :: forall r n ord. (DecidableZero r, Normed r, Ord r, Field r, CoeffRing r,
+                              (0 :&lt; n) ~ 'True, IsMonomialOrder n ord,
+                              KnownNat n, Convertible r Double)
+          =&gt; OrderedPolynomial r ord n
+          -&gt; Ideal (OrderedPolynomial r ord n)
+          -&gt; Maybe [Sized n (Complex Double)]
+solveWith f0 i0 = {-# SCC &quot;solveWith&quot; #-}
+  withKnownNat (sSucc (sing :: SNat n)) $
+  reifyQuotient (radical i0) $ \pxy -&gt;
+    let ideal = gBasis' pxy
+        Just base = map (leadingMonomial . quotRepr) &lt;$&gt; standardMonomials' pxy
+    in case {-# SCC &quot;findOne&quot; #-} elemIndex one base of
+      Nothing -&gt; Just []
+      Just cind -&gt;
+        let f = modIdeal' pxy f0
+            vars = sortBy (flip $ comparing snd) $
+                   map (\on -&gt; (on, leadingMonomial $ var on `asTypeOf` f0)) $
+                   enumOrdinal $ sArity' f0
+            inds = flip map vars $ second $ \b -&gt;
+              case findIndex (==b) base of
+                Just ind -&gt; Right ind
+                Nothing  -&gt;
+                  let Just g = find ((==b) . leadingMonomial) ideal
+                      r = leadingCoeff g
+                      answer = mapCoeff toComplex $ injectCoeff (recip r) * (toPolynomial (leadingTerm g) - g)
+                  in Left answer
+            mf = AM.fromLists $ map (map toComplex) $ matrixRep f
+            (_, evecs) = LA.eig $ LA.tr mf
+            calc vec ={-# SCC &quot;calc&quot; #-}
+              let c = vec LA.! cind
+                  phi (idx, Right nth) acc = acc &amp; ix idx .~ (vec LA.! nth) P./ c
+                  phi (idx, Left g)    acc = acc &amp; ix idx .~ substWith (*) acc g
+              in if c == 0
+                 then Nothing
+                 else Just $ foldr ({-# SCC &quot;rewrite-answer&quot; #-} phi) (SV.replicate (sArity' f0) (error &quot;indec!&quot;)) inds
+        in sequence $ map calc $ LA.toColumns evecs
+
+solve' :: forall r n ord.
+          (Field r, CoeffRing r, KnownNat n, (0 :&lt; n) ~ 'True,
+           IsMonomialOrder n ord, Convertible r Double)
+       =&gt; Double
+       -&gt; Ideal (OrderedPolynomial r ord n)
+       -&gt; [Sized n (Complex Double)]
+solve' err ideal =
+  reifyQuotient ideal $ \ii -&gt;
+  if gBasis' ii == [one]
+  then []
+  else
+    let vs = map (nub . LA.toList . LA.eigenvalues . AM.fromLists . map (map toComplex). matrixRep . modIdeal' ii) $
+             SV.toList allVars
+        mul p q = toComplex p * q
+    in [ xs
+       | xs0 &lt;- sequence vs
+       , let xs = SV.unsafeFromList' xs0
+       , all ((&lt; err) . magnitude . substWith mul xs) $ generators ideal
+       ]
+  where
+    _ = Witness :: IsTrue (0 :&lt; n) -- Just to suppress &quot;redundant constraint&quot; warning
+
+subspMatrix :: (Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord)
+            =&gt; Ordinal n -&gt; Ideal (OrderedPolynomial r ord n) -&gt; M.Matrix r
+subspMatrix on ideal =
+  let poly = univPoly on ideal
+      v    = var on `asTypeOf` head (generators ideal)
+      dim  = fromIntegral $ totalDegree' poly
+      cfs  = [negate $ coeff (leadingMonomial $ pow v (j :: Natural)) poly | j &lt;- [0..fromIntegral (dim - 1)]]
+  in (M.fromLists [replicate (dim - 1) zero]
+          M.&lt;-&gt;
+      fmap unwrapAlgebra (M.identity (dim - 1))) M.&lt;|&gt; M.colVector (V.fromList cfs)
+
+solveViaCompanion :: forall r ord n.
+                     (Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord, Convertible r Double)
+                  =&gt; Double
+                  -&gt; Ideal (OrderedPolynomial r ord n)
+                  -&gt; [Sized n (Complex Double)]
+solveViaCompanion err ideal =
+  if calcGroebnerBasis ideal == [one]
+  then []
+  else
+  let vs = map (nub . LA.toList . LA.eigenvalues . LA.fromLists . matToLists . fmap toComplex . flip subspMatrix ideal) $
+           enumOrdinal (sing :: SNat n)
+      mul p q = toComplex p * q
+  in [ xs
+     | xs0 &lt;- sequence vs
+     , let xs = SV.unsafeFromList' xs0
+     , all ((&lt; err) . magnitude . substWith mul xs) $ generators ideal
+     ]
+
+matToLists :: M.Matrix a -&gt; [[a]]
+matToLists mat = [ V.toList $ M.getRow i mat | i &lt;- [1.. M.nrows mat] ]
+
+matrixRep :: (DecidableZero t, Eq t, Field t, KnownNat n, IsMonomialOrder n order,
+              Reifies ideal (QIdeal (OrderedPolynomial t order n)))
+           =&gt; Quotient (OrderedPolynomial t order n) ideal -&gt; [[t]]
+matrixRep f = {-# SCC &quot;matrixRep&quot; #-}
+  case standardMonomials of
+    Just []    -&gt; []
+    Just bases -&gt;
+      let anss = map (quotRepr . (f *)) bases
+      in transpose $ map (\a -&gt; map (flip coeff a . leadingMonomial . quotRepr) bases) anss
+    Nothing -&gt; error &quot;Not finite dimension&quot;
+
+toComplex :: Convertible a Double =&gt; a -&gt; Complex Double
+toComplex a = convert a :+ 0
+
+reduction :: (CoeffRing r, KnownNat n, IsMonomialOrder n ord, Field r)
+             =&gt; Ordinal n -&gt; OrderedPolynomial r ord n -&gt; OrderedPolynomial r ord n
+reduction on f = {-# SCC &quot;reduction&quot; #-}
+  let df = {-# SCC &quot;differentiate&quot; #-} diff on f
+  in snd $ head $ f `divPolynomial` calcGroebnerBasis (toIdeal [f, df])
+
+-- | Calculate the monic generator of k[X_0, ..., X_n] `intersect` k[X_i].
+univPoly :: forall r ord n. (Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord)
+         =&gt; Ordinal n
+         -&gt; Ideal (OrderedPolynomial r ord n)
+         -&gt; OrderedPolynomial r ord n
+univPoly nth ideal = {-# SCC &quot;univPoly&quot; #-}
+  reifyQuotient ideal $ \pxy -&gt;
+  if gBasis' pxy == [one]
+  then one
+  else let x = var nth
+           p0 : pows = [fmap WrapAlgebra $ vectorRep $ modIdeal' pxy (pow x i)
+                       | i &lt;- [0:: Natural ..]
+                       | _ &lt;- zero : fromJust (standardMonomials' pxy) ]
+           step m (p : ps) = {-# SCC &quot;univPoly/step&quot; #-}
+             case solveLinear m p of
+               Nothing  -&gt; {-# SCC &quot;recur&quot; #-} step ({-# SCC &quot;consCol&quot; #-}m M.&lt;|&gt; M.colVector p) ps
+               Just ans -&gt;
+                 let cur = fromIntegral $ V.length ans :: Natural
+                 in {-# SCC &quot;buildRelation&quot; #-}
+                    pow x cur - sum (zipWith (.*.) (fmap unwrapAlgebra $ V.toList ans)
+                                     [pow x i | i &lt;- [0 :: Natural .. cur P.- 1]])
+       in step (M.colVector p0) pows
+
+-- | Solves linear system. If the given matrix is degenerate, this returns @Nothing@.
+solveLinear :: (Ord r, P.Fractional r)
+            =&gt; M.Matrix r
+            -&gt; V.Vector r
+            -&gt; Maybe (V.Vector r)
+solveLinear mat vec = {-# SCC &quot;solveLinear&quot; #-}
+  if ({-# SCC &quot;uRank&quot; #-} uRank u) &lt; uRank u' || M.diagProd u == 0 || uRank u &lt; M.ncols mat
+  then Nothing
+  else let ans = M.getCol 1 $ p P.* M.colVector vec
+           lsol = {-# SCC &quot;solveL&quot; #-} solveL ans
+           cfs = M.getCol 1 $ q P.* M.colVector ({-# SCC &quot;solveU&quot; #-} solveU lsol)
+       in Just cfs
+  where
+    Just (u, l, p, q, _, _) = M.luDecomp' mat
+    Just (u', _,_, _, _, _) = M.luDecomp' (mat M.&lt;|&gt; M.colVector vec)
+    uRank = V.foldr (\a acc -&gt; if a /= 0 then acc + 1 else acc) (0 :: Int) . M.getDiag
+    solveL v = V.create $ do
+      let stop = min (M.ncols l) (M.nrows l)
+      mv &lt;- MV.replicate (M.ncols l) 0
+      forM_ [0..stop - 1] $ \i -&gt; do
+        MV.write mv i $ v V.! i
+        forM_ [0,1..min (i-1) (M.ncols l - 1)] $ \j -&gt; do
+          a &lt;- MV.read mv i
+          b &lt;- MV.read mv j
+          MV.write mv i $ a P.- (l M.! (i + 1, j + 1)) P.* b
+      return mv
+    solveU v = V.create $ do
+      let stop = min (M.ncols u) (M.nrows u)
+      mv &lt;- MV.replicate (M.ncols u) 0
+      forM_ [stop - 1, stop - 2 .. 0] $ \ i -&gt; do
+        MV.write mv i $ v V.! i
+        forM_ [i+1,i+2..M.ncols u-1] $ \j -&gt; do
+          a &lt;- MV.read mv i
+          b &lt;- MV.read mv j
+          MV.write mv i $ a P.- (u M.! (i+1, j+1)) P.* b
+        a0 &lt;- MV.read mv i
+        MV.write mv i $ a0 P./ (u M.! (i+1, i+1))
+      return mv
+
+-- | Calculate the radical of the given zero-dimensional ideal.
+radical :: forall r ord n . (Ord r, CoeffRing r,
+                             KnownNat n, Field r, IsMonomialOrder  n ord)
+        =&gt; Ideal (OrderedPolynomial r ord n) -&gt; Ideal (OrderedPolynomial r ord n)
+radical ideal = {-# SCC &quot;radical&quot; #-}
+  let gens  = {-# SCC &quot;calcGens&quot; #-} map (\on -&gt; reduction on $ univPoly on ideal) $ enumOrdinal (sing :: SNat n)
+  in toIdeal $ calcGroebnerBasis $ toIdeal $ generators ideal ++ gens
+
+-- | Test if the given zero-dimensional ideal is radical or not.
+isRadical :: forall r ord n. (Ord r, CoeffRing r, KnownNat n,
+                              (0 :&lt; n) ~ 'True,
+                              Field r, IsMonomialOrder n ord)
+          =&gt; Ideal (OrderedPolynomial r ord n) -&gt; Bool
+isRadical ideal =
+  let gens  = map (\on -&gt; reduction on $ univPoly on ideal) $
+              enumOrdinal (sing :: SNat n)
+  in all (`isIdealMember` ideal) gens
+  where
+    _ = Witness :: IsTrue (0 :&lt; n) -- Just to suppress &quot;redundant constraint&quot; warning
+
+-- solve'' :: forall r ord n.
+--            (Show r, Sparse.Eq0 r, Normed r, Ord r, Field r, CoeffRing r, KnownNat n,
+--             IsMonomialOrder ord, Convertible r Double, (0 :&lt; n) ~ 'True)
+--        =&gt; Double
+--        -&gt; Ideal (OrderedPolynomial r ord n)
+--        -&gt; [Sized n  (Complex Double)]
+-- solve'' err ideal =
+--   reifyQuotient (radical ideal) $ \ii -&gt;
+--   let gbs = gBasis' ii
+--       lexBase = fst $ fglm $ toIdeal gbs
+--       upoly = last lexBase
+--       restVars = init $ SV.toList allVars
+--       calcEigs = nub . LA.toList . LA.eigenvalues . AM.fromLists
+--       lastEigs = calcEigs $ matToLists $ fmap toComplex $ fmapUnwrap
+--                  (AM.companion maxBound $ mapCoeff WrapField upoly)
+--   in if gbs == [one]
+--      then []
+--      else if length (lastEigs) == length (fromJust $ standardMonomials' ii)
+--           then solveSpan (init lexBase) lastEigs
+--           else chooseAnswer $
+--                lastEigs : map (calcEigs . map (map toComplex) . matrixRep . modIdeal' ii)
+--                               restVars
+--   where
+--     mul p q = toComplex p * q
+--     solveSpan rest lastEigs =
+--       let answers = map (\f -&gt; toPolynomial (leadingTerm f) - f) rest
+--           substEig eig = substWith (\d b -&gt; toComplex d * b) $ SV.unsafeFromList' $ map (const zero) rest ++ [eig]
+--       in [ SV.unsafeFromList' $ map (substEig eig) answers ++ [eig]
+--          | eig &lt;- lastEigs
+--          ]
+--     chooseAnswer vs =
+--           [ xs
+--             | xs0 &lt;- sequence vs
+--             , let xs = SV.unsafeFromList' xs0
+--             , all ((&lt;err) . magnitude . substWith mul xs) $ generators ideal
+--             ]
+
+solveLinearNA :: (Ord b, Field b) =&gt; M.Matrix b -&gt; V.Vector b -&gt; Maybe (V.Vector b)
+solveLinearNA m v = C.coerce $ solveLinear (fmap WrapAlgebra m) (fmap WrapAlgebra v)
+
+toDM :: (AM.Matrix mat, AM.Elem mat a, AM.Elem M.Matrix a) =&gt; mat a -&gt; M.Matrix a
+toDM = AM.fromCols . AM.toCols
+
+-- * FGLM
+
+-- | Calculate the Groebner basis w.r.t. lex ordering of the zero-dimensional ideal using FGLM algorithm.
+--   If the given ideal is not zero-dimensional this function may diverge.
+fglm :: (Ord r, KnownNat n, Field r,
+         IsMonomialOrder n ord, (0 :&lt; n) ~ 'True)
+     =&gt; Ideal (OrderedPolynomial r ord n)
+     -&gt; ([OrderedPolynomial r Lex n], [OrderedPolynomial r Lex n])
+fglm ideal = reifyQuotient ideal $ \pxy -&gt;
+  fglmMap (\f -&gt; vectorRep $ modIdeal' pxy f)
+
+-- | Compute the kernel and image of the given linear map using generalized FGLM algorithm.
+fglmMap :: forall k ord n. (Ord k, Field k, (0 :&lt; n) ~ 'True,
+                            IsMonomialOrder n ord, CoeffRing k, KnownNat n)
+        =&gt; (OrderedPolynomial k ord n -&gt; V.Vector k)
+        -- ^ Linear map from polynomial ring.
+        -&gt; ( [OrderedPolynomial k Lex n]
+           , [OrderedPolynomial k Lex n]
+           ) -- ^ The tuple of:
+             --
+             --     * lex-Groebner basis of the kernel of the given linear map.
+             --
+             --     * The vector basis of the image of the linear map.
+fglmMap l = runST $ do
+  env &lt;- FGLMEnv l &lt;$&gt; newSTRef [] &lt;*&gt; newSTRef [] &lt;*&gt; newSTRef Nothing &lt;*&gt; newSTRef one
+  flip runReaderT env $ do
+    mainLoop
+    whileM_ toContinue $ nextMonomial &gt;&gt; mainLoop
+    (,) &lt;$&gt; look gLex &lt;*&gt; (map (changeOrder Lex) &lt;$&gt; look bLex)
+
+mainLoop :: (DecidableZero r, Ord r,  KnownNat n, Field r, IsMonomialOrder n o)
+         =&gt; Machine s r o n ()
+mainLoop = do
+  m &lt;- look monomial
+  let f = toPolynomial (one, changeMonomialOrderProxy Proxy m)
+  lx &lt;- image f
+  bs &lt;- mapM image =&lt;&lt; look bLex
+  let mat  = foldr (M.&lt;|&gt;) (M.fromList 0 0 []) $ map (M.colVector . fmap WrapAlgebra) bs
+      cond | null bs   = if V.all (== zero) lx
+                         then Just $ V.replicate (length bs) 0
+                         else Nothing
+           | otherwise = solveLinear mat (fmap WrapAlgebra lx)
+  case cond of
+    Nothing -&gt; do
+      proced .== Nothing
+      bLex %== (f : )
+    Just cs -&gt; do
+      bps &lt;- look bLex
+      let g = changeOrder Lex $ f - sum (zipWith (.*.) (V.toList $ fmap unwrapAlgebra cs) bps)
+      proced .== Just (changeOrder Lex f)
+      gLex %== (g :)
+
+toContinue :: forall s r o n.
+              ((0 :&lt; n) ~ 'True, Ord r,
+               KnownNat n, Field r)
+           =&gt; Machine s r o n Bool
+toContinue = do
+  mans &lt;- look proced
+  case mans of
+    Nothing -&gt; return True
+    Just g -&gt; do
+      let xLast = P.maximum allVars `asTypeOf` g
+      return $ not $ leadingMonomial g `isPowerOf` leadingMonomial xLast
+  where
+    _ = Witness :: IsTrue (0 :&lt; n) -- Just to suppress &quot;redundant constraint&quot; warning
+
+nextMonomial :: forall s r ord n.
+                (CoeffRing r, KnownNat n) =&gt; Machine s r ord n ()
+nextMonomial = do
+  m &lt;- look monomial
+  gs &lt;- map leadingMonomial &lt;$&gt; look gLex
+  let next = fst $ maximumBy (comparing snd) $
+             [ (OrderedMonomial monom, fromEnum od)
+             | od &lt;- enumOrdinal (sing :: SNat n)
+             , let monom = beta (getMonomial m) od
+             , all (not . (`divs` OrderedMonomial monom)) gs
+             ]
+  monomial .== next
+
+beta :: Monomial n -&gt; Ordinal n -&gt; Monomial n
+beta xs o@(OLt k) =
+  let n = sizedLength xs
+  in withRefl (lneqSuccLeq k n) $
+     withRefl (plusComm (n %:- sSucc k) (sSucc k)) $
+     withRefl (minusPlus n (sSucc k) Witness) $
+     (SV.take (sSucc k) $ xs &amp; ix o +~ 1) SV.++ SV.replicate (n %:- sSucc k) 0
+</span></pre></body></html>

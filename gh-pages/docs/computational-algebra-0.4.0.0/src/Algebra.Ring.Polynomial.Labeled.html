@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP, ConstraintKinds, DataKinds, EmptyCase, FlexibleContexts  #-}</span><span>
+</span><a name="line-2"></a><span class="hs-pragma">{-# LANGUAGE FlexibleInstances, GADTs, KindSignatures, IncoherentInstances #-}</span><span>
+</span><a name="line-3"></a><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes                  #-}</span><span>
+</span><a name="line-4"></a><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell      #-}</span><span>
+</span><a name="line-5"></a><span class="hs-pragma">{-# LANGUAGE TypeFamilies, TypeInType, TypeOperators, UndecidableInstances #-}</span><span>
+</span><a name="line-6"></a><span class="hs-pragma">{-# LANGUAGE UndecidableSuperClasses, OverloadedLabels                     #-}</span><span>
+</span><a name="line-7"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra</span><span class="hs-operator">.</span><span class="hs-identifier">Ring</span><span class="hs-operator">.</span><span class="hs-identifier">Polynomial</span><span class="hs-operator">.</span><span class="hs-identifier">Labeled</span><span>
+</span><a name="line-8"></a><span>       </span><span class="hs-special">(</span><a href="Algebra.Ring.Polynomial.Labeled.html#IsUniqueList"><span class="hs-identifier hs-type">IsUniqueList</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Labeled.html#LabPolynomial"><span class="hs-identifier hs-type">LabPolynomial</span></a><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><a name="line-9"></a><span>        </span><a href="Algebra.Ring.Polynomial.Labeled.html#LabPolynomial%27"><span class="hs-identifier hs-type">LabPolynomial'</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Labeled.html#LabUnipol"><span class="hs-identifier hs-type">LabUnipol</span></a><span class="hs-special">,</span><span>
+</span><a name="line-10"></a><span>        </span><a href="Algebra.Ring.Polynomial.Labeled.html#canonicalMap"><span class="hs-identifier hs-var">canonicalMap</span></a><span class="hs-special">,</span><span>
+</span><a name="line-11"></a><span>        </span><a href="Algebra.Ring.Polynomial.Labeled.html#canonicalMap%27"><span class="hs-identifier hs-var">canonicalMap'</span></a><span class="hs-special">,</span><span>
+</span><a name="line-12"></a><span>        </span><a href="Algebra.Ring.Polynomial.Labeled.html#IsSubsetOf"><span class="hs-identifier hs-type">IsSubsetOf</span></a><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><a name="line-13"></a><span class="hs-keyword">import</span><span> </span><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra</span><span class="hs-operator">.</span><span class="hs-identifier">Internal</span></a><span>
+</span><a name="line-14"></a><span class="hs-keyword">import</span><span> </span><a href="Algebra.Ring.Polynomial.Class.html"><span class="hs-identifier">Algebra</span><span class="hs-operator">.</span><span class="hs-identifier">Ring</span><span class="hs-operator">.</span><span class="hs-identifier">Polynomial</span><span class="hs-operator">.</span><span class="hs-identifier">Class</span></a><span>
+</span><a name="line-15"></a><span class="hs-keyword">import</span><span> </span><a href="Algebra.Ring.Polynomial.html"><span class="hs-identifier">Algebra</span><span class="hs-operator">.</span><span class="hs-identifier">Ring</span><span class="hs-operator">.</span><span class="hs-identifier">Polynomial</span></a><span>
+</span><a name="line-16"></a><span class="hs-keyword">import</span><span> </span><a href="Algebra.Ring.Polynomial.Univariate.html"><span class="hs-identifier">Algebra</span><span class="hs-operator">.</span><span class="hs-identifier">Ring</span><span class="hs-operator">.</span><span class="hs-identifier">Polynomial</span><span class="hs-operator">.</span><span class="hs-identifier">Univariate</span></a><span>
+</span><a name="line-17"></a><span class="hs-keyword">import</span><span> </span><a href="Algebra.Scalar.html"><span class="hs-identifier">Algebra</span><span class="hs-operator">.</span><span class="hs-identifier">Scalar</span></a><span>
+</span><a name="line-18"></a><span>
+</span><a name="line-19"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Prelude</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">P</span><span>
+</span><a name="line-20"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Function</span><span>                </span><span class="hs-special">(</span><span class="hs-identifier hs-var">on</span><span class="hs-special">)</span><span>
+</span><a name="line-21"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Singletons</span><span class="hs-operator">.</span><span class="hs-identifier">Prelude</span><span>
+</span><a name="line-22"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Singletons</span><span class="hs-operator">.</span><span class="hs-identifier">Prelude</span><span class="hs-operator">.</span><span class="hs-identifier">Enum</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">SEnum</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a name="line-23"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Singletons</span><span class="hs-operator">.</span><span class="hs-identifier">Prelude</span><span class="hs-operator">.</span><span class="hs-identifier">List</span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Group</span><span class="hs-special">)</span><span>
+</span><a name="line-24"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Sized</span><span class="hs-operator">.</span><span class="hs-identifier">Builtin</span><span>           </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">S</span><span>
+</span><a name="line-25"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Type</span><span class="hs-operator">.</span><span class="hs-identifier">Natural</span><span class="hs-operator">.</span><span class="hs-identifier">Class</span><span>      </span><span class="hs-special">(</span><span class="hs-identifier hs-type">IsPeano</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">sOne</span><span class="hs-special">)</span><span>
+</span><a name="line-26"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Type</span><span class="hs-operator">.</span><span class="hs-identifier">Ordinal</span><span>
+</span><a name="line-27"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">GHC</span><span class="hs-operator">.</span><span class="hs-identifier">Exts</span><span>                     </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Constraint</span><span class="hs-special">)</span><span>
+</span><a name="line-28"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">List</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">L</span><span>
+</span><a name="line-29"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Numeric</span><span class="hs-operator">.</span><span class="hs-identifier">Algebra</span><span>              </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Order</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a name="line-30"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Numeric</span><span class="hs-operator">.</span><span class="hs-identifier">Decidable</span><span class="hs-operator">.</span><span class="hs-identifier">Zero</span><span>
+</span><a name="line-31"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Prelude</span><span>                      </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Integral</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Num</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><a name="line-32"></a><span>                                               </span><span class="hs-identifier hs-var">product</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">sum</span><span class="hs-special">)</span><span>
+</span><a name="line-33"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">GHC</span><span class="hs-operator">.</span><span class="hs-identifier">OverloadedLabels</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">IsLabel</span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a name="line-34"></a><span>
+</span><a name="line-35"></a><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">family</span><span> </span><a name="UniqueList%27"><a href="Algebra.Ring.Polynomial.Labeled.html#UniqueList%27"><span class="hs-identifier">UniqueList'</span></a></a><span> </span><span class="hs-special">(</span><a name="local-1629257738"><a href="#local-1629257738"><span class="hs-identifier">x</span></a></a><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Symbol</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><a name="local-1629257739"><a href="#local-1629257739"><span class="hs-identifier">xs</span></a></a><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-identifier hs-type">Symbol</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Constraint</span><span> </span><span class="hs-keyword">where</span><span>
+</span><a name="line-36"></a><span>  </span><span class="hs-identifier">UniqueList'</span><span> </span><a href="#local-1629257740"><span class="hs-identifier hs-type">x</span></a><span> </span><span class="hs-char">'[] = ()
+  UniqueList' x (x ': xs) = TypeError ('Text &quot;The variable &quot; ':&lt;&gt;: 'ShowType x ':&lt;&gt;: 'Text &quot; occurs more than once!&quot;)
+  UniqueList' x (y ': xs) = UniqueList' x xs
+
+type family UniqueList (xs :: [Symbol]) :: Constraint where
+  UniqueList '[] = ()
+  UniqueList (x ': xs) = (UniqueList' x xs, UniqueList xs)
+
+class    (UniqueList xs) =&gt; IsUniqueList (xs :: [Symbol])
+instance (UniqueList xs) =&gt; IsUniqueList (xs :: [Symbol])
+
+-- | This instance allows something like @#x :: LabPolynomial (OrderedPolynomial Integer Grevlex 3) '[&quot;x&quot;, &quot;y&quot;, &quot;z&quot;]@.
+instance (KnownSymbol symb,
+          SingI vars,
+          UniqueList vars,
+          IsPolynomial poly,
+          Wraps vars poly,
+          Elem symb vars ~ 'True) =&gt; IsLabel symb (LabPolynomial poly vars) where
+  fromLabel k =
+    let vs = fromSing (sing :: Sing vars)
+        v    = symbolVal' k
+    in maybe (error &quot;impossible!&quot;) (var . toEnum) $ L.elemIndex v vs
+
+data LabPolynomial poly (vars :: [Symbol]) where
+  LabelPolynomial :: (IsUniqueList vars, Length vars ~ Arity poly)
+                  =&gt; { unLabelPolynomial :: poly }
+                  -&gt; LabPolynomial poly vars
+
+-- | Convenient type-synonym for @'LabPlynomial'@ wrapping @'OrderedPolynomial'@
+--   and @'Unipol'@.
+type family LabPolynomial' r ord vars where
+  LabPolynomial' r ord '[x] = LabPolynomial (Unipol r) '[x]
+  LabPolynomial' r ord vars = LabPolynomial (OrderedPolynomial r ord (Length vars)) vars
+
+-- | Convenient type-synonym for @'LabPlynomial'@ wrapping univariate polynomial @'Unipol'@.
+type LabUnipol r sym = LabPolynomial (Unipol r) '[sym]
+
+type Wraps vars poly = (IsUniqueList vars, Arity poly ~ Length vars)
+
+instance (PrettyCoeff (Coefficient poly), IsOrderedPolynomial poly, SingI vars)
+      =&gt; Show (LabPolynomial poly vars) where
+  showsPrec d (LabelPolynomial f) =
+    let svs   = sing :: Sing vars
+        vs    = fromSing svs
+        vsVec = generate sing $ \i -&gt; vs !! fromEnum i
+    in showsPolynomialWith vsVec d f
+
+instance (UniqueList vars, Arity poly ~ Length vars, P.Num poly)
+      =&gt; P.Num (LabPolynomial poly vars) where
+  fromInteger = LabelPolynomial . P.fromInteger
+  LabelPolynomial f + LabelPolynomial g = LabelPolynomial $ f P.+ g
+  LabelPolynomial f * LabelPolynomial g = LabelPolynomial $ f P.* g
+  abs = LabelPolynomial . P.abs . unLabelPolynomial
+  LabelPolynomial f - LabelPolynomial g = LabelPolynomial $ f P.- g
+  negate = LabelPolynomial . P.negate . unLabelPolynomial
+  signum = LabelPolynomial . P.signum . unLabelPolynomial
+
+instance (Wraps vars poly, Additive poly) =&gt; Additive (LabPolynomial poly vars) where
+  LabelPolynomial f + LabelPolynomial g = LabelPolynomial $ f + g
+  {-# INLINE (+) #-}
+
+instance (Wraps vars poly, Multiplicative poly) =&gt; Multiplicative (LabPolynomial poly vars) where
+  LabelPolynomial f * LabelPolynomial g =
+    LabelPolynomial $ f * g
+  {-# INLINE (*) #-}
+
+instance (Wraps vars poly, Abelian poly)     =&gt; Abelian (LabPolynomial poly vars)
+instance (Wraps vars poly, Commutative poly) =&gt; Commutative (LabPolynomial poly vars)
+instance (Wraps vars poly, Unital poly) =&gt; Unital (LabPolynomial poly vars) where
+  one = LabelPolynomial one
+  {-# INLINE one #-}
+
+instance (Wraps vars poly, Group poly) =&gt; Group (LabPolynomial poly vars) where
+  negate (LabelPolynomial f) = LabelPolynomial (negate f)
+  {-# INLINE negate #-}
+
+instance (Wraps vars poly, RightModule Natural poly) =&gt; RightModule Natural (LabPolynomial poly vars) where
+  LabelPolynomial f *. a = LabelPolynomial $  f *. a
+  {-# INLINE (*.) #-}
+
+instance (Wraps vars poly, LeftModule Natural poly) =&gt; LeftModule Natural (LabPolynomial poly vars) where
+  a .* LabelPolynomial f = LabelPolynomial $ a .* f
+  {-# INLINE (.*) #-}
+
+instance (Wraps vars poly, RightModule Integer poly) =&gt; RightModule Integer (LabPolynomial poly vars) where
+  LabelPolynomial f *. a = LabelPolynomial $  f *. a
+  {-# INLINE (*.) #-}
+
+instance (Wraps vars poly, LeftModule Integer poly) =&gt; LeftModule Integer (LabPolynomial poly vars) where
+  a .* LabelPolynomial f = LabelPolynomial $ a .* f
+  {-# INLINE (.*) #-}
+
+instance (Wraps vars poly, Monoidal poly) =&gt; Monoidal (LabPolynomial poly vars) where
+  zero = LabelPolynomial zero
+  {-# INLINE zero #-}
+
+instance (Wraps vars poly, Semiring poly) =&gt; Semiring (LabPolynomial poly vars)
+instance (Wraps vars poly, Rig poly) =&gt; Rig (LabPolynomial poly vars)
+instance (Wraps vars poly, Ring poly) =&gt; Ring (LabPolynomial poly vars) where
+  fromInteger n = LabelPolynomial (fromInteger n :: poly)
+  {-# INLINE fromInteger #-}
+
+instance (Wraps vars poly, LeftModule (Scalar r) poly)  =&gt; LeftModule  (Scalar r) (LabPolynomial poly vars) where
+  a .* LabelPolynomial f = LabelPolynomial $ a .* f
+  {-# INLINE (.*) #-}
+
+instance (Wraps vars poly, RightModule (Scalar r) poly) =&gt; RightModule (Scalar r) (LabPolynomial poly vars) where
+  LabelPolynomial f *. a = LabelPolynomial $ f *. a
+  {-# INLINE (*.) #-}
+
+instance (Wraps vars poly, DecidableZero poly) =&gt; DecidableZero (LabPolynomial poly vars) where
+  isZero = isZero . unLabelPolynomial
+
+instance (Wraps vars poly, Eq poly) =&gt; Eq (LabPolynomial poly vars) where
+  (==) = (==) `on` unLabelPolynomial
+  (/=) = (/=) `on` unLabelPolynomial
+
+instance (Wraps vars poly, Ord poly) =&gt; Ord (LabPolynomial poly vars) where
+  compare = compare `on` unLabelPolynomial
+  (&lt;=) = (&lt;=) `on` unLabelPolynomial
+  (&gt;=) = (&gt;=) `on` unLabelPolynomial
+  (&lt;)  = (&lt;) `on` unLabelPolynomial
+  (&gt;)  = (&gt;) `on` unLabelPolynomial
+
+instance (IsPolynomial poly, Wraps vars poly) =&gt; IsPolynomial (LabPolynomial poly vars) where
+  type Coefficient (LabPolynomial poly vars) = Coefficient poly
+  type Arity (LabPolynomial poly vars) = Arity poly
+
+  liftMap mor = liftMap mor . unLabelPolynomial
+  {-# INLINE liftMap #-}
+
+  terms' = terms' . unLabelPolynomial
+  {-# INLINE terms' #-}
+
+  monomials = monomials . unLabelPolynomial
+  {-# INLINE monomials #-}
+
+  coeff' m = coeff' m . unLabelPolynomial
+  {-# INLINE coeff' #-}
+
+  constantTerm = constantTerm . unLabelPolynomial
+  {-# INLINE constantTerm #-}
+
+  sArity _ = sArity (Proxy :: Proxy poly)
+  {-# INLINE sArity #-}
+
+  arity _ = arity (Proxy :: Proxy poly)
+  {-# INLINE arity #-}
+
+  fromMonomial m = LabelPolynomial (fromMonomial m :: poly)
+  {-# INLINE fromMonomial #-}
+
+  toPolynomial' (r, deg) = LabelPolynomial (toPolynomial' (r, deg) :: poly)
+  {-# INLINE toPolynomial' #-}
+
+  polynomial' dic = LabelPolynomial (polynomial' dic :: poly)
+  {-# INLINE polynomial' #-}
+
+  totalDegree' = totalDegree' . unLabelPolynomial
+  {-# INLINE totalDegree' #-}
+
+instance (IsOrderedPolynomial poly, Wraps vars poly) =&gt; IsOrderedPolynomial (LabPolynomial poly vars) where
+  type MOrder (LabPolynomial poly vars) = MOrder poly
+
+  leadingTerm = leadingTerm . unLabelPolynomial
+  {-# INLINE leadingTerm #-}
+
+  leadingCoeff = leadingCoeff . unLabelPolynomial
+  {-# INLINE leadingCoeff #-}
+
+  fromOrderedMonomial m = LabelPolynomial (fromOrderedMonomial m :: poly)
+  {-# INLINE fromOrderedMonomial #-}
+
+  toPolynomial (r, deg) = LabelPolynomial (toPolynomial (r, deg) :: poly)
+  {-# INLINE toPolynomial #-}
+
+  polynomial dic = LabelPolynomial (polynomial dic :: poly)
+  {-# INLINE polynomial #-}
+
+  terms = terms . unLabelPolynomial
+  {-# INLINE terms #-}
+
+  coeff m = coeff m . unLabelPolynomial
+  {-# INLINE coeff #-}
+
+class    (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) =&gt; IsSubsetOf (xs :: [a]) (ys :: [a]) where
+  _suppress :: proxy xs -&gt; proxy ys -&gt; x -&gt; x
+  _suppress _ _ = id
+instance (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) =&gt; IsSubsetOf (xs :: [a]) (ys :: [a])
+
+-- | So unsafe! Don't expose it!
+permute0 :: (SEq k) =&gt; SList (xs :: [k]) -&gt; SList (ys :: [k]) -&gt; Sized (Length xs) Integer
+permute0 SNil _ = S.NilL
+permute0 (SCons x xs) ys =
+  case sElemIndex x ys of
+    SJust n  -&gt;
+      let k = sLength xs
+      in coerceLength (plusComm k sOne) $ withKnownNat (sSucc k) $
+         withKnownNat k $ (fromSing n S.:&lt; permute0 xs ys)
+    SNothing -&gt; error &quot;oops, you called permute0 for non-subset...&quot;
+
+permute :: forall (xs :: [k])  ys. (IsSubsetOf xs ys , SEq k)
+        =&gt; SList xs -&gt; SList ys -&gt; Sized (Length xs) Integer
+permute = _suppress (Proxy :: Proxy xs) (Proxy :: Proxy ys) permute0
+
+canonicalMap :: forall xs ys poly poly'.
+                (SingI xs, SingI ys, IsSubsetOf xs ys,
+                 Wraps xs poly, Wraps ys poly',
+                 IsPolynomial poly, IsPolynomial poly',
+                 Coefficient poly ~ Coefficient poly')
+             =&gt; LabPolynomial poly xs -&gt; LabPolynomial poly' ys
+canonicalMap (LabelPolynomial f) =
+  let sxs  = sing :: Sing xs
+      sys  = sing :: Sing ys
+      dics = permute sxs sys
+      ords = enumOrdinal (sArity $ Just ans)
+      mor o = var (ords !! fromInteger (dics S.%!! o)) :: poly'
+      ans   = liftMap mor f
+  in LabelPolynomial ans
+{-# INLINE canonicalMap #-}
+
+canonicalMap' :: (SingI xs, SingI ys, IsSubsetOf xs ys,
+                 Wraps xs poly, Wraps ys poly',
+                 IsPolynomial poly, IsPolynomial poly',
+                 Coefficient poly ~ Coefficient poly')
+              =&gt; proxy poly' -&gt; proxy' ys -&gt; LabPolynomial poly xs -&gt; LabPolynomial poly' ys
+canonicalMap' _ _ = canonicalMap
+{-# INLINE canonicalMap' #-}
+</span></pre></body></html>
