@@ -29,45 +29,43 @@ flag profile
     default: False
 
 library
-    build-depends: ListLike ==4.5.*,
+    build-depends: ListLike >= 4.5 && < 4.7,
                    MonadRandom >=0.1 && <0.6,
                    algebra >=4.1 && <4.4,
                    algebraic-prelude >=0.1.1.0 && <0.2,
                    arithmoi >=0.5 && <0.7,
-                   base >=4 && <4.11,
-                   constraints >=0.3 && <0.10,
+                   base == 4.*,
+                   constraints >=0.3 && <0.11,
                    containers ==0.5.*,
                    control-monad-loop ==0.1.*,
                    convertible ==1.1.*,
                    deepseq >=1.3 && <1.5,
                    dlist >=0.8 && <0.9,
-                   entropy >=0.3.8 && <0.4,
+                   entropy >=0.3.8 && <0.5,
                    equational-reasoning >=0.4 && <0.6,
-                   ghc-typelits-knownnat >=0.3.1 && <0.4,
-                   ghc-typelits-natnormalise >=0.5 && <0.6,
-                   ghc-typelits-presburger >=0.1.1.1 && <0.2,
+                   ghc-typelits-knownnat >=0.3.1 && <0.5,
+                   ghc-typelits-natnormalise >=0.5 && <0.7,
+                   ghc-typelits-presburger >= 0.2.0.0,
                    hashable >=1.1 && <1.3,
                    heaps ==0.3.*,
                    hmatrix >=0.16 && <0.19,
                    hybrid-vectors >=0.1 && <0.3,
-                   hybrid-vectors >=0.1 && <0.3,
                    integer-logarithms ==1.0.*,
-                   lens >=4.13 && <4.16,
+                   lens >=4.13 && <4.17,
                    matrix ==0.3.*,
                    monad-loops ==0.4.*,
                    mono-traversable >=0.10 && <1.1,
-                   monomorphic >=0.0.3 && <0.1,
                    mtl >=2.1 && <2.3,
                    parallel ==3.2.*,
                    primes >=0.2.1 && <0.3,
                    reflection >=2 && <2.2,
                    semigroups >=0.15 && <0.19,
-                   singletons >=2.2 && <2.4,
+                   singletons >=2.2 && <2.5,
                    sized ==0.2.*,
                    tagged >=0.7 && <0.9,
-                   template-haskell >=2.10 && <2.13,
+                   template-haskell >=2.10 && <2.14,
                    text >=0.11 && <1.3,
-                   type-natural >=0.7.1 && <0.8,
+                   type-natural >=0.7.1 && <0.9,
                    unamb ==0.2.*,
                    unordered-containers ==0.2.*,
                    vector >=0.10 && <0.13,
@@ -100,7 +98,7 @@ library
                        Algebra.Field.Galois.Conway
                        Algebra.Field.Galois.Internal
                        Algebra.Ring.Polynomial.Internal
-    ghc-options:      -O2 -Wall -Wno-unused-top-binds
+    ghc-options:      -O -Wall -Wno-unused-top-binds
                       -fplugin GHC.TypeLits.KnownNat.Solver
     default-language:   Haskell2010
     default-extensions: CPP
@@ -202,7 +200,7 @@ executable hensel-prof
                  , computational-algebra
                  , constraints
                  , convertible
-                 , criterion >=0.8.1.0 && <1.3
+                 , gauge >=0.2.0
                  , deepseq
                  , hmatrix
                  , lens
@@ -480,7 +478,7 @@ benchmark unipol-bench
                  , computational-algebra
                  , constraints
                  , containers
-                 , criterion
+                 , gauge
                  , deepseq
                  , matrix
                  , parallel
@@ -501,7 +499,7 @@ benchmark normal-bench
                  , computational-algebra
                  , constraints
                  , containers
-                 , criterion
+                 , gauge
                  , deepseq
                  , matrix
                  , parallel
@@ -524,7 +522,7 @@ benchmark elimination-bench
                  , computational-algebra
                  , constraints
                  , containers
-                 , criterion
+                 , gauge
                  , deepseq
                  , matrix
                  , parallel
@@ -547,7 +545,7 @@ benchmark quotient-bench-randomized
                  , base
                  , computational-algebra
                  , containers
-                 , criterion
+                 , gauge
                  , deepseq
                  , equational-reasoning
                  , lens
@@ -580,7 +578,7 @@ benchmark monomial-order-bench
                  , computational-algebra
                  , constraint
                  , containers
-                 , criterion
+                 , gauge
                  , deepseq
                  , lens
                  , matrix
@@ -614,7 +612,7 @@ benchmark linear-bench
                  , computational-algebra
                  , constraints
                  , containers
-                 , criterion
+                 , gauge
                  , deepseq
                  , equational-reasoning
                  , hspec
@@ -649,7 +647,7 @@ benchmark division-bench
                  , computational-algebra
                  , constraints
                  , containers
-                 , criterion
+                 , gauge
                  , deepseq
                  , equational-reasoning
                  , hspec
@@ -684,7 +682,7 @@ benchmark sugar-paper-bench
                  , computational-algebra
                  , constraints
                  , containers
-                 , criterion
+                 , gauge
                  , deepseq
                  , equational-reasoning
                  , hspec
@@ -720,7 +718,7 @@ benchmark solve-bench
                  , computational-algebra
                  , constraints
                  , containers
-                 , criterion
+                 , gauge
                  , deepseq
                  , equational-reasoning
                  , hspec
@@ -756,7 +754,7 @@ benchmark coercion-bench
                  , computational-algebra
                  , constraints
                  , containers
-                 , criterion
+                 , gauge
                  , deepseq
                  , equational-reasoning
                  , hspec
@@ -791,7 +789,7 @@ benchmark unipol-mult-bench
                  , computational-algebra
                  , constraints
                  , containers
-                 , criterion
+                 , gauge
                  , deepseq
                  , equational-reasoning
                  , hspec
@@ -825,7 +823,7 @@ benchmark unipol-div-bench
                  , base
                  , computational-algebra
                  , containers
-                 , criterion
+                 , gauge
                  , deepseq
                  , equational-reasoning
                  , hspec
