@@ -1,6 +1,7 @@
 resolver: lts-9.5
 packages:
 - '.'
+- 'halg-core'
 - 'algebraic-prelude'
 
 flags:

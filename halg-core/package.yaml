@@ -1,0 +1,81 @@
+name:                halg-core
+version:             0.1.0.0
+github:              "konn/halg-core"
+license:             BSD3
+author:              "Hiromi ISHII"
+maintainer:          "konn.jinro _at_ gmail.com"
+copyright:           "2018 (c) Hiromi ISHII"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on Github at <https://github.com/konn/halg-core#readme>
+
+dependencies:
+- ListLike
+- MonadRandom
+- algebra
+- algebraic-prelude
+- base >= 4.7 && < 5
+# - constraints
+- containers
+- convertible
+- deepseq
+- equational-reasoning
+# - hashable
+- lens
+- singletons
+- sized
+- type-natural
+# - unordered-containers
+- vector
+
+default-extensions:
+- CPP
+- DataKinds
+- FlexibleContexts
+- FlexibleInstances
+- GADTs
+- MultiParamTypeClasses
+- NoImplicitPrelude
+- OverloadedLabels
+- PolyKinds
+- TypeFamilies
+- TypeInType
+- UndecidableInstances  
+
+library:
+  source-dirs: src
+  ghc-options: ["-Wall", "-O2"]
+
+executables: {}
+  # halg-core-exe:
+  #   main:                Main.hs
+  #   source-dirs:         examples
+  #   ghc-options:
+  #   - -Wall
+  #   - -threaded
+  #   - -rtsopts
+  #   - -with-rtsopts=-N
+  #   dependencies:
+  #   - halg-core
+
+tests: {}
+  # halg-core-test:
+  #   main:                Spec.hs
+  #   source-dirs:         test
+  #   ghc-options:
+  #   - -Wall
+  #   - -threaded
+  #   - -rtsopts
+  #   - -with-rtsopts=-N
+  #   dependencies:
+  #   - halg-core

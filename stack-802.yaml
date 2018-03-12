@@ -2,6 +2,7 @@ resolver: lts-10.0
 skip-ghc-check: true
 packages:
 - '.'
+- 'halg-core'
 - 'algebraic-prelude'
 
 flags:

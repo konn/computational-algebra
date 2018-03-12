@@ -4,6 +4,7 @@ compiler: ghc-8.4.1
 flags: {}
 packages:
 - '.'
+- 'halg-core'
 - 'algebraic-prelude'
 
 extra-deps: 
