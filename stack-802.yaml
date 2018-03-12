@@ -9,6 +9,7 @@ packages:
 - 'halg-galois-fields'
 - 'halg-matrices'
 - 'halg-algorithms'
+- 'halg-polyn-parser'
 - 'halg-factor'
 - 'halg-algebraic'
 

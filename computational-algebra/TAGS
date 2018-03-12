@@ -39,14 +39,14 @@ main main39,40
 
 ./bench/quotient-bench-randomized.hs,210
 module Main Main4,5
+sTwo sTwo24,25
 sTwo sTwo25,26
-sTwo sTwo26,27
+makeIdeals makeIdeals27,28
 makeIdeals makeIdeals28,29
-makeIdeals makeIdeals29,30
+mkTestCases mkTestCases30,31
 mkTestCases mkTestCases31,32
-mkTestCases mkTestCases32,33
+main main44,45
 main main45,46
-main main46,47
 
 ./bench/coercion.hs,392
 module Main Main4,5
@@ -184,29 +184,29 @@ main main42,43
 
 ./bench/solve.hs,444
 module Main Main4,5
+sFour sFour27,28
 sFour sFour28,29
-sFour sFour29,30
-x, y, z z31,32
-x, y,y31,32
-x,x31,32
-[x,[x32,33
-(.*).*34,35
-(.(35,36
-(^^)^^39,40
+x, y, z z30,31
+x, y,y30,31
+x,x30,31
+[x,[x31,32
+(.*).*33,34
+(.(34,35
+(^^)^^38,39
+eqn01 eqn0141,42
 eqn01 eqn0142,43
-eqn01 eqn0143,44
+eqn02 eqn0244,45
 eqn02 eqn0245,46
-eqn02 eqn0246,47
+eqn03 eqn0351,52
 eqn03 eqn0352,53
-eqn03 eqn0353,54
+eqn04 eqn0457,58
 eqn04 eqn0458,59
-eqn04 eqn0459,60
+mkBench mkBench60,61
 mkBench mkBench61,62
-mkBench mkBench62,63
-randomCase randomCase70,71
-randomCase randomCase72,73
+randomCase randomCase69,70
+randomCase randomCase71,72
+main main75,76
 main main76,77
-main main77,78
 
 ./bench/elimination-bench.hs,544
 x, y, z, w, s, a, b, c, t, u, v v15,16
@@ -254,18 +254,18 @@ main main63,64
 
 ./bench/division.hs,290
 module Main Main4,5
+sTwo sTwo21,22
 sTwo sTwo22,23
-sTwo sTwo23,24
+sThree sThree23,24
 sThree sThree24,25
-sThree sThree25,26
+sFour sFour25,26
 sFour sFour26,27
-sFour sFour27,28
+makeIdeals makeIdeals28,29
 makeIdeals makeIdeals29,30
-makeIdeals makeIdeals30,31
+mkTestCases mkTestCases34,35
 mkTestCases mkTestCases35,36
-mkTestCases mkTestCases36,37
+main main45,46
 main main46,47
-main main47,48
 
 ./bench/faugere4.hs,449
 module Main Main2,3
@@ -295,27 +295,27 @@ main main59,60
 
 ./bench/unipol-mult.hs,509
 module Main Main1,2
+x x14,15
 x x15,16
-x x16,17
+allCoeffOne allCoeffOne17,18
 allCoeffOne allCoeffOne18,19
-allCoeffOne allCoeffOne19,20
+mkSimpleEnv mkSimpleEnv20,21
 mkSimpleEnv mkSimpleEnv21,22
-mkSimpleEnv mkSimpleEnv22,23
-fromOP fromOP24,25
-fromOP fromOP26,27
+fromOP fromOP23,24
+fromOP fromOP25,26
+showProxyType showProxyType27,28
 showProxyType showProxyType28,29
-showProxyType showProxyType29,30
+fromCoeffVec fromCoeffVec34,35
 fromCoeffVec fromCoeffVec35,36
-fromCoeffVec fromCoeffVec36,37
-genPoly genPoly38,39
-genPoly genPoly40,41
-genPair genPair42,43
+genPoly genPoly37,38
+genPoly genPoly39,40
+genPair genPair41,42
+int int48,49
 int int49,50
-int int50,51
+rat rat51,52
 rat rat52,53
-rat rat53,54
+main main54,55
 main main55,56
-main main56,57
 
 ./Setup.hs,15
 main main1,2
@@ -336,28 +336,6 @@ spec spec19,20
 prop01 prop0123,24
 prop01 prop0124,25
 
-./tests/ZeroDimSpec.hs,692
-module ZeroDimSpec ZeroDimSpec2,3
-asGenListOf asGenListOf27,28
-asGenListOf asGenListOf28,29
-spec spec30,31
-spec spec31,32
-isDescending isDescending104,105
-isDescending isDescending105,106
-prop_isApproximateZero prop_isApproximateZero107,108
-prop_isApproximateZero prop_isApproximateZero112,113
-prop_univPoly prop_univPoly121,122
-prop_univPoly prop_univPoly122,123
-rank rank130,131
-rank rank131,132
-data TestSet TestSet135,136
-data TestSet = TestSet TestSet135,136
-data TestSet = TestSet { inputMat inputMat135,136
-                       , inputVec inputVec136,137
-                       , answer answer137,138
-linSet linSet140,141
-linSet linSet141,142
-
 ./tests/monomials.hs,174
 module Main Main1,2
 main main12,13
@@ -369,38 +347,6 @@ compQC compQC28,29
 compSC compSC38,39
 compSC compSC39,40
 
-./tests/PolynomialSpec.hs,586
-module PolynomialSpec PolynomialSpec2,3
-asGenListOf asGenListOf15,16
-asGenListOf asGenListOf16,17
-spec spec18,19
-spec spec19,20
-prop_passesSTest prop_passesSTest22,23
-prop_passesSTest prop_passesSTest23,24
-prop_groebnerDivsOrig prop_groebnerDivsOrig29,30
-prop_groebnerDivsOrig prop_groebnerDivsOrig30,31
-prop_divCorrect prop_divCorrect37,38
-prop_divCorrect prop_divCorrect38,39
-prop_indivisible prop_indivisible46,47
-prop_indivisible prop_indivisible47,48
-prop_degdecay prop_degdecay55,56
-prop_degdecay prop_degdecay56,57
-rank rank64,65
-rank rank65,66
-
-./tests/UnivariateSpec.hs,308
-module UnivariateSpec UnivariateSpec2,3
-asGenListOf asGenListOf20,21
-asGenListOf asGenListOf21,22
-toOP toOP23,24
-toOP toOP24,25
-liftMult liftMult26,27
-liftMult liftMult27,28
-spec spec31,32
-spec spec32,33
-divModUnipolCases divModUnipolCases61,62
-divModUnipolCases divModUnipolCases62,63
-
 ./tests/Faugere5Spec-disabled.hs,228
 module Faugere5Spec Faugere5Spec2,3
 spec spec15,16
@@ -409,25 +355,6 @@ prop_computesGroebner prop_computesGroebner23,24
 prop_computesGroebner prop_computesGroebner24,25
 testCases testCases30,31
 testCases testCases31,32
-
-./tests/QuotientSpec.hs,582
-module QuotientSpec QuotientSpec2,3
-asGenListOf asGenListOf16,17
-asGenListOf asGenListOf17,18
-spec spec19,20
-spec spec20,21
-prop_passesSTest prop_passesSTest23,24
-prop_passesSTest prop_passesSTest24,25
-prop_groebnerDivsOrig prop_groebnerDivsOrig31,32
-prop_groebnerDivsOrig prop_groebnerDivsOrig32,33
-prop_divCorrect prop_divCorrect39,40
-prop_divCorrect prop_divCorrect40,41
-prop_indivisible prop_indivisible48,49
-prop_indivisible prop_indivisible49,50
-prop_degdecay prop_degdecay57,58
-prop_degdecay prop_degdecay58,59
-rank rank66,67
-rank rank67,68
 
 ./tests/matrix.hs,188
 module Main Main0,1
@@ -448,33 +375,6 @@ prop_indivisible prop_indivisible31,32
 prop_indivisible prop_indivisible32,33
 prop_degdecay prop_degdecay39,40
 prop_degdecay prop_degdecay40,41
-
-./tests/GroebnerSpec.hs,938
-module GroebnerSpec GroebnerSpec2,3
-asGenListOf asGenListOf18,19
-asGenListOf asGenListOf19,20
-spec spec21,22
-spec spec22,23
-prop_intersection prop_intersection57,58
-prop_intersection prop_intersection58,59
-prop_isMinimal prop_isMinimal65,66
-prop_isMinimal prop_isMinimal66,67
-prop_isReduced prop_isReduced72,73
-prop_isReduced prop_isReduced73,74
-prop_passesSTest prop_passesSTest79,80
-prop_passesSTest prop_passesSTest80,81
-prop_groebnerDivsOrig prop_groebnerDivsOrig85,86
-prop_groebnerDivsOrig prop_groebnerDivsOrig86,87
-prop_divCorrect prop_divCorrect92,93
-prop_divCorrect prop_divCorrect93,94
-prop_indivisible prop_indivisible100,101
-prop_indivisible prop_indivisible101,102
-prop_degdecay prop_degdecay108,109
-prop_degdecay prop_degdecay109,110
-data IntersectCase IntersectCase116,117
-data IntersectCase r ord n = IC IC116,117
-ics_binary ics_binary118,119
-ics_binary ics_binary119,120
 
 ./tests/Spec.hs,0
 

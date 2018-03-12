@@ -1,0 +1,48 @@
+
+./Setup.hs,15
+main main1,2
+
+./app/Main.hs,52
+module Main Main0,1
+main main4,5
+main main5,6
+
+./test/Spec.hs,30
+main main0,1
+main main1,2
+
+./src/Algebra/Ring/Polynomial/Parser.hs,958
+module Algebra.Ring.Polynomial.ParserAlgebra.Ring.Polynomial.Parser4,5
+lexeme lexeme27,28
+lexeme lexeme28,29
+symbol symbol30,31
+symbol symbol31,32
+type Parser Parser33,34
+type VariableParser VariableParser34,35
+type VariableParser n n34,35
+unlabeldVarP unlabeldVarP36,37
+unlabeldVarP unlabeldVarP38,39
+labeledVarP labeledVarP44,45
+labeledVarP labeledVarP46,47
+varPowP varPowP51,52
+varPowP varPowP52,53
+monomialP monomialP56,57
+monomialP monomialP57,58
+factorP factorP60,61
+factorP factorP62,63
+binary binary65,66
+binary binary66,67
+prefix prefix68,69
+prefix prefix69,70
+table table71,72
+table table72,73
+polynomialP polynomialP79,80
+polynomialP polynomialP81,82
+rationalP rationalP84,85
+rationalP rationalP85,86
+integerP integerP87,88
+integerP integerP88,89
+fromRat fromRat90,91
+fromRat fromRat91,92
+parsePolynomialWith parsePolynomialWith93,94
+parsePolynomialWith parsePolynomialWith97,98
