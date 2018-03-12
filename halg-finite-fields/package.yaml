@@ -1,0 +1,54 @@
+name:                halg-finite-fields
+version:             0.1.0.0
+github:              "konn/halg-finite-fields"
+license:             BSD3
+author:              "Hiromi ISHII"
+maintainer:          "konn.jinro _at_ gmail.com"
+copyright:           "2018 (c) Hiromi ISHII"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on Github at <https://github.com/konn/halg-finite-fields#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- halg-core
+- halg-polynomials
+- algebraic-prelude
+- algebra
+
+data-files:
+- data/*
+
+library:
+  source-dirs: src
+  ghc-options:  -Wall
+  dependencies:
+  - MonadRandom
+  - deepseq
+  - integer-gmp
+  - lens
+  - monad-loops
+  - reflection
+  - singletons
+  - sized
+  - template-haskell
+  - vector
+  other-modules:
+  - Algebra.Field.Galois.Conway
+  - Algebra.Field.Galois.Internal
+  default-extensions:
+  - NoImplicitPrelude
+
+executables: {}
+
+tests: {}

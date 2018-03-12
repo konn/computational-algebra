@@ -14,7 +14,7 @@ author: Hiromi ISHII
 data-dir: ""
 tested-with:        GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.1
 extra-source-files: README.md examples/*.hs tests/*.hs bench/*.hs
-                    share/*.hs data/conway.txt
+                    share/*.hs
 
 source-repository head
     type: git

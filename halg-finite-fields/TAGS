@@ -1,0 +1,111 @@
+
+./Setup.hs,15
+main main1,2
+
+./app/Main.hs,52
+module Main Main0,1
+main main4,5
+main main5,6
+
+./test/Spec.hs,30
+main main0,1
+main main1,2
+
+./src/Algebra/Algorithms/ChineseRemainder.hs,255
+module Algebra.Algorithms.ChineseRemainderAlgebra.Algorithms.ChineseRemainder4,5
+recoverRat recoverRat16,17
+recoverRat recoverRat20,21
+rationalChineseRemainder rationalChineseRemainder41,42
+rationalChineseRemainder rationalChineseRemainder44,45
+
+./src/Algebra/Field/Galois.hs,1139
+module Algebra.Field.Galois Algebra.Field.Galois5,6
+data GF' GF'39,40
+data GF' p (n :: TL.Nat) (f :: *) = GF' GF'39,40
+data GF' p (n :: TL.Nat) (f :: *) = GF' { runGF' runGF'39,40
+type GF GF46,47
+type GF (p(46,47
+modPoly modPoly48,49
+modPoly modPoly49,50
+modVec modVec51,52
+modVec modVec52,53
+instance instance54,55
+varX varX63,64
+varX varX64,65
+vecToPoly vecToPoly66,67
+vecToPoly vecToPoly68,69
+polyToVec polyToVec70,71
+polyToVec polyToVec71,72
+generateIrreducible generateIrreducible179,180
+generateIrreducible generateIrreducible181,182
+withIrreducible withIrreducible187,188
+withIrreducible withIrreducible191,192
+reifyGF' reifyGF'197,198
+reifyGF' reifyGF'201,202
+linearRepGF linearRepGF206,207
+linearRepGF linearRepGF207,208
+linearRepGF' linearRepGF'209,210
+linearRepGF' linearRepGF'210,211
+withGF' withGF'212,213
+withGF' withGF'217,218
+proxyGF' proxyGF'219,220
+proxyGF' proxyGF'220,221
+class (KnownNat n, KnownNat p, Reifies f (Unipol (F p))) => IsGF' IsGF'223,224
+primitive primitive236,237
+primitive primitive237,238
+conway conway240,241
+conway conway242,243
+
+./src/Algebra/Field/Galois/Conway.hs,223
+module Algebra.Field.Galois.ConwayAlgebra.Field.Galois.Conway3,4
+addConwayPolynomials addConwayPolynomials18,19
+addConwayPolynomials addConwayPolynomials19,20
+conwayFile conwayFile24,25
+conwayFile conwayFile25,26
+
+./src/Algebra/Field/Galois/Internal.hs,467
+module Algebra.Field.Galois.InternalAlgebra.Field.Galois.Internal4,5
+class ConwayPolynomial ConwayPolynomial23,24
+class ConwayPolynomial ConwayPolynomial23,24
+  conwayPolynomial conwayPolynomial24,25
+data Conway Conway27,28
+instance instance32,33
+parseLine parseLine35,36
+parseLine parseLine36,37
+plusOp plusOp44,45
+plusOp plusOp45,46
+toPoly toPoly47,48
+toPoly toPoly48,49
+buildInstance buildInstance53,54
+buildInstance buildInstance54,55
+
+./src/Algebra/Field/Finite.hs,880
+module Algebra.Field.Finite Algebra.Field.Finite5,6
+newtype F F30,31
+newtype F (p :: k) = F F30,31
+newtype F (p :: k) = F { runF runF30,31
+naturalRepr naturalRepr33,34
+naturalRepr naturalRepr34,35
+instance instance36,37
+modNat modNat47,48
+modNat modNat48,49
+modNat' modNat'51,52
+modNat' modNat'52,53
+reifyPrimeField reifyPrimeField57,58
+reifyPrimeField reifyPrimeField58,59
+withPrimeField withPrimeField60,61
+withPrimeField withPrimeField61,62
+proxyF proxyF63,64
+proxyF proxyF64,65
+pows pows96,97
+pows pows97,98
+class (Field k, Characteristic k) => FiniteField FiniteField210,211
+class (Field k, Characteristic k) => FiniteField FiniteField210,211
+  power power211,212
+  elements elements212,213
+order order221,222
+order order222,223
+modRat modRat231,232
+modRat modRat232,233
+modRat' modRat'235,236
+modRat' modRat'236,237

@@ -5,7 +5,6 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Field.Finite (F(), naturalRepr, reifyPrimeField, withPrimeField,
                              modNat, modNat', modRat, modRat', FiniteField(..), order) where
-import Algebra.Algorithms.PrimeTest
 import Algebra.Prelude.Core          hiding (pow)
 import Algebra.Ring.Polynomial.Class (PrettyCoeff (..), ShowSCoeff (..))
 
@@ -17,6 +16,7 @@ import qualified Data.Coerce                  as C
 import           Data.Maybe                   (fromMaybe)
 import qualified Data.Ratio                   as R
 import           Data.Reflection              (Reifies (reflect), reifyNat)
+import           GHC.Integer.GMP.Internals    (powModInteger)
 import           GHC.TypeLits                 (KnownNat)
 import           Numeric.Algebra              (Field)
 import           Numeric.Algebra              (char)
@@ -95,7 +95,7 @@ instance Reifies p Integer => P.Num (F p) where
   signum (F _) = F 1
 
 pows :: (P.Integral a1, Reifies p Integer) => F p -> a1 -> F p
-pows a n = modNat $ modPow (runF a) (reflect a) n
+pows a n = modNat $ powModInteger (runF a) (toInteger n) (reflect a)
 
 instance Reifies p Integer => NA.Additive (F p) where
   F a + F b = modNat $ a + b
