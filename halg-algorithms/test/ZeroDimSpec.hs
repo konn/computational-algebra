@@ -19,7 +19,6 @@ import qualified Data.Sized.Builtin     as SV
 import           Data.Type.Ordinal
 import qualified Data.Vector            as V
 import           Numeric.Field.Fraction (Fraction, (%))
-import           SingularBridge
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck        hiding (promote)

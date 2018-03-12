@@ -23,7 +23,9 @@ description:         Please see the project Web Site <https://konn.github.io/com
 dependencies:
 - algebraic-prelude
 - algebra
+- base
 - halg-core
+- sized
 
 default-extensions:
 - CPP
@@ -32,7 +34,6 @@ default-extensions:
 - FlexibleInstances
 - GADTs
 - MultiParamTypeClasses
-- NoImplicitPrelude
 - OverloadedLabels
 - PolyKinds
 - TypeFamilies
@@ -59,12 +60,14 @@ library:
   - monad-loops
   - reflection
   - singletons
-  - sized
   - text
   - type-natural
   - unamb
   - unordered-containers
   - vector
+  default-extensions:
+  - NoImplicitPrelude
+
 
 executables: {}
   # halg-polynomials-exe:
@@ -78,14 +81,41 @@ executables: {}
   #   dependencies:
   #   - halg-polynomials
 
-tests: {}
-  # halg-polynomials-test:
-  #   main:                Spec.hs
-  #   source-dirs:         test
-  #   ghc-options:
-  #   - -Wall
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-  #   dependencies:
-  #   - halg-polynomials
+tests:
+  spec:
+    main:                Spec.hs
+    source-dirs:         test
+    other-modules:
+    - GroebnerSpec
+    - PolynomialSpec
+    - UnivariateSpec
+    - QuotientSpec
+    - Utils
+    ghc-options:
+    - -Wall
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    build-tools:
+    - hspec-discover
+    dependencies:
+    - halg-core-test
+    - halg-polynomials
+    - HUnit
+    - QuickCheck
+    - constraints
+    - convertible
+    - containers
+    - equational-reasoning
+    - hspec
+    - lens
+    - matrix
+    - quickcheck-instances
+    - reflection
+    - smallcheck
+    - lazysmallcheck
+    - test-framework >=0.8.0.3 && <0.9
+    - test-framework-hunit >=0.3.0.1 && <0.4
+    - transformers
+    - type-natural
+    - vector

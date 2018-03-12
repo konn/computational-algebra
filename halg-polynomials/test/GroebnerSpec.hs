@@ -1,16 +1,17 @@
 {-# LANGUAGE DataKinds, ExplicitNamespaces, GADTs, PatternSynonyms #-}
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 module GroebnerSpec where
-import           Algebra.Algorithms.Groebner
-import           Algebra.Internal            (pattern (:<), KnownNat,
-                                              pattern NilL, SNat)
-import           Algebra.Ring.Ideal
-import           Algebra.Ring.Polynomial
+import Algebra.Algorithms.Groebner
+import Algebra.Internal            (pattern (:<), KnownNat, pattern NilL, SNat)
+import Algebra.Ring.Ideal
+import Algebra.Ring.Polynomial
+import Utils
+
 import           Control.Monad
-import qualified Data.Foldable               as F
-import           Data.List                   (delete)
-import qualified Data.Sized.Builtin          as SV
-import           Numeric.Field.Fraction      (Fraction)
+import qualified Data.Foldable          as F
+import           Data.List              (delete)
+import qualified Data.Sized.Builtin     as SV
+import           Numeric.Field.Fraction (Fraction)
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
@@ -36,8 +37,8 @@ spec = do
     it "generates the same ideal as original" $ do
       pendingWith "need example"
     it "contains the original ideal" $ checkForArity [1..3] $ \ari ->
-      forAll (idealOfDim ari) $ \i ->
-      forAll (vectorOf (length $ generators i) $ polyOfDim ari) $ \fs ->
+      forAll (idealOfArity ari) $ \i ->
+      forAll (vectorOf (length $ generators i) $ polynomialOfArity ari) $ \fs ->
       let f = sum $ zipWith (*) fs (generators i)
           gs = calcGroebnerBasis i
       in f `modPolynomial` gs == 0
@@ -57,59 +58,59 @@ spec = do
 
 prop_intersection :: KnownNat n => SNat n -> Property
 prop_intersection sdim =
-  forAll (idealOfDim sdim) $ \ideal ->
-  forAll (idealOfDim sdim) $ \jdeal ->
-  forAll (polyOfDim sdim) $ \f ->
+  forAll (idealOfArity sdim) $ \ideal ->
+  forAll (idealOfArity sdim) $ \jdeal ->
+  forAll (polynomialOfArity sdim) $ \f ->
   (f `isIdealMember` ideal && f `isIdealMember` jdeal)
   == f `isIdealMember` intersection [ideal, jdeal]
 
 prop_isMinimal :: KnownNat n => SNat n -> Property
 prop_isMinimal sdim =
-  forAll (idealOfDim sdim) $ \ideal ->
+  forAll (idealOfArity sdim) $ \ideal ->
   let gs = calcGroebnerBasis ideal
   in all ((== 1) . leadingCoeff) gs &&
      all (\f -> all (\g -> not $ leadingMonomial g `divs` leadingMonomial f) (delete f gs)) gs
 
 prop_isReduced :: KnownNat n => SNat n -> Property
 prop_isReduced sdim =
-  forAll (idealOfDim sdim) $ \ideal ->
+  forAll (idealOfArity sdim) $ \ideal ->
   let gs = calcGroebnerBasis ideal
   in all ((== 1) . leadingCoeff) gs &&
      all (\f -> all (\g -> all (\(_, m) -> not $ leadingMonomial g `divs` m) $ getTerms f) (delete f gs)) gs
 
 prop_passesSTest :: KnownNat n => SNat n -> Property
 prop_passesSTest sdim =
-  forAll (sized $ \size -> vectorOf size (polyOfDim sdim)) $ \ideal ->
+  forAll (sized $ \size -> vectorOf size (polynomialOfArity sdim)) $ \ideal ->
   let gs = calcGroebnerBasis $ toIdeal ideal
   in all ((== 0) . (`modPolynomial` gs)) [sPolynomial f g | f <- gs, g <- gs, f /= g]
 
 prop_groebnerDivsOrig :: KnownNat n => SNat n -> Property
 prop_groebnerDivsOrig sdim =
   forAll (elements [3..15]) $ \count ->
-  forAll (vectorOf count (polyOfDim sdim)) $ \ideal ->
+  forAll (vectorOf count (polynomialOfArity sdim)) $ \ideal ->
   let gs = calcGroebnerBasis $ toIdeal ideal
   in all ((== 0) . (`modPolynomial` gs)) ideal
 
 prop_divCorrect :: KnownNat n => SNat n -> Property
 prop_divCorrect sdim =
-  forAll (polyOfDim sdim) $ \poly ->
-  forAll (idealOfDim sdim) $ \ideal ->
+  forAll (polynomialOfArity sdim) $ \poly ->
+  forAll (idealOfArity sdim) $ \ideal ->
   let dvs = generators ideal
       (qds, r) = poly `divModPolynomial` dvs
   in poly == sum (map (uncurry (*)) qds) + r
 
 prop_indivisible :: KnownNat n => SNat n -> Property
 prop_indivisible sdim =
-  forAll (polyOfDim sdim) $ \poly ->
-  forAll (idealOfDim sdim) $ \ideal ->
+  forAll (polynomialOfArity sdim) $ \poly ->
+  forAll (idealOfArity sdim) $ \ideal ->
   let dvs = generators ideal
       (_, r) = changeOrder Grevlex poly `divModPolynomial` dvs
   in r /= 0 ==> all (\f -> all (\(_, m) -> not $ leadingMonomial f `divs` m) $ getTerms r)  dvs
 
 prop_degdecay :: KnownNat n => SNat n -> Property
 prop_degdecay sdim =
-  forAll (polyOfDim sdim) $ \poly ->
-  forAll (idealOfDim sdim) $ \ideal ->
+  forAll (polynomialOfArity sdim) $ \poly ->
+  forAll (idealOfArity sdim) $ \ideal ->
   let dvs = generators ideal
       (qs, _) = poly `divModPolynomial` dvs
   in all (\(a, f) -> (a * f == 0) || (leadingMonomial poly >= leadingMonomial (a * f))) qs

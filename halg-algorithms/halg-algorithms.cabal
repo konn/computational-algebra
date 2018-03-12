@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 93a99b9143ed0584a453fd927fb17c16f6bd8273f091db1b9523ca935fb0266d
+-- hash: c043f0915803bffaf23c17567b6f5a0fd513d1a31b2812358337e3bd11829d98
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -30,7 +30,7 @@ source-repository head
 library
   hs-source-dirs:
       src
-  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses NoImplicitPrelude OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances NoImplicitPrelude
   ghc-options: -Wall
   build-depends:
       MonadRandom
@@ -54,4 +54,47 @@ library
       Algebra.Algorithms.ZeroDim
   other-modules:
       Algebra.Algorithms.FGLM
+  default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs:
+      test
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      HUnit
+    , MonadRandom
+    , QuickCheck
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , constraints
+    , containers
+    , convertible
+    , equational-reasoning
+    , halg-algorithms
+    , halg-core
+    , halg-core-test
+    , halg-matrices
+    , halg-polynomials
+    , hspec
+    , lazysmallcheck
+    , lens
+    , matrix
+    , quickcheck-instances
+    , reflection
+    , sized
+    , smallcheck
+    , test-framework >=0.8.0.3 && <0.9
+    , test-framework-hunit >=0.3.0.1 && <0.4
+    , transformers
+    , type-natural
+    , vector
+  build-tools:
+      hspec-discover
+  other-modules:
+      ZeroDimSpec
+      Utils
   default-language: Haskell2010

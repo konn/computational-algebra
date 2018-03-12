@@ -1,0 +1,37 @@
+name:                halg-core-test
+version:             0.1.0.0
+github:              "konn/halg-core-test"
+license:             BSD3
+author:              "Hiromi ISHII"
+maintainer:          "konn.jinro _at_ gmail.com"
+copyright:           "2018 (c) Hiromi ISHII"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on Github at <https://github.com/konn/halg-core-test#readme>
+
+dependencies:
+- algebraic-prelude
+- base >= 4.7 && < 5
+- containers
+- halg-core
+- QuickCheck
+- quickcheck-instances
+- reflection
+- sized
+- smallcheck
+- type-natural
+- lazysmallcheck
+
+library:
+  source-dirs: src
+  ghc-options:  -Wall -Wno-orphans

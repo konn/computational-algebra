@@ -6,6 +6,7 @@ packages:
 - 'computational-algebra'
 - 'algebraic-prelude'
 - 'halg-core'
+- 'halg-core-test'
 - 'halg-polynomials'
 - 'halg-galois-fields'
 - 'halg-matrices'

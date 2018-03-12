@@ -62,23 +62,6 @@ library:
       - -prof
       - -fprof-auto-exported
 
-internal-libraries:
-  computational-algebra-shared:
-    source-dirs: share
-    dependencies:
-    - computational-algebra
-    - lazysmallcheck ==0.6.*
-    - smallcheck >=1.1.1 && <1.2
-    - QuickCheck >=2.6 && <2.11
-    - HUnit >=1.2.5.2 && <1.7
-    - hspec == 2.4.*
-    - quickcheck-instances
-    - deepseq
-    - text
-    - process
-    - vector
-    - reflection
-
 _exe-defaults: &exe-defaults
   source-dirs: examples
   default-extensions:
@@ -183,21 +166,6 @@ _test-default: &test-default
   - -Wall
   - -threaded
 
-tests:
-  linear-test:
-    <<: *test-default
-    main: linear.hs
-    other-modules: []
-  specs:
-    <<: *test-default
-    main: Spec.hs
-    other-modules:
-    - QuotientSpec
-    - PolynomialSpec
-    - UnivariateSpec
-    - GroebnerSpec
-    - ZeroDimSpec
-      
 executables:
   <<: *examples
   <<: *profiles

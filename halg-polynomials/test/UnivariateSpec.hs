@@ -2,7 +2,7 @@
 {-# OPTIONS_GHC -fno-warn-unused-imports -Wno-type-defaults #-}
 module UnivariateSpec where
 import           Algebra.Algorithms.Groebner
-import           Algebra.Field.Finite
+import           Algebra.Field.Prime
 import           Algebra.Internal                   (pattern (:<), KnownNat,
                                                      pattern NilL, SNat)
 import           Algebra.Ring.Polynomial            (OrderedPolynomial)

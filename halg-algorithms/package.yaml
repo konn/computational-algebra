@@ -26,7 +26,6 @@ default-extensions:
 - FlexibleInstances
 - GADTs
 - MultiParamTypeClasses
-- NoImplicitPrelude
 - OverloadedLabels
 - PolyKinds
 - TypeFamilies
@@ -40,6 +39,8 @@ dependencies:
 - halg-matrices
 - algebraic-prelude
 - algebra
+- MonadRandom
+- sized
 
 library:
   source-dirs: src
@@ -47,38 +48,51 @@ library:
   - Algebra.Algorithms.FGLM
   ghc-options:  -Wall
   dependencies:
-  - MonadRandom
   - lens
   - mtl
   - vector
   - reflection
   - matrix
   - convertible
-  - sized
   - equational-reasoning
   - monad-loops
   - hmatrix
+  default-extensions:
+  - NoImplicitPrelude
 
-executables: {}
-  # halg-groebner-exe:
-  #   main:                Main.hs
-  #   source-dirs:         app
-  #   ghc-options:
-  #   - -Wall
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-  #   dependencies:
-  #   - halg-algorithms
-
-tests: {}
-  # halg-groebner-test:
-  #   main:                Spec.hs
-  #   source-dirs:         test
-  #   ghc-options:
-  #   - -Wall
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-  #   dependencies:
-  #   - halg-algorithms
+tests:
+  spec:
+    main:                Spec.hs
+    source-dirs:         test
+    other-modules:
+    - ZeroDimSpec
+    - Utils
+    ghc-options:
+    - -Wall
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    build-tools:
+    - hspec-discover
+    dependencies:
+    - halg-core-test
+    - halg-polynomials
+    - halg-algorithms
+    - HUnit
+    - QuickCheck
+    - constraints
+    - convertible
+    - containers
+    - equational-reasoning
+    - hspec
+    - lens
+    - matrix
+    - quickcheck-instances
+    - reflection
+    - smallcheck
+    - lazysmallcheck
+    - test-framework >=0.8.0.3 && <0.9
+    - test-framework-hunit >=0.3.0.1 && <0.4
+    - transformers
+    - type-natural
+    - vector

@@ -7,9 +7,69 @@ module Main Main0,1
 main main4,5
 main main5,6
 
-./test/Spec.hs,30
-main main0,1
-main main1,2
+./test/Utils.hs,1322
+module Utils Utils7,8
+newtype ZeroDimIdeal ZeroDimIdeal36,37
+newtype ZeroDimIdeal n = ZeroDimIdeal ZeroDimIdeal36,37
+newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal getIdeal36,37
+instance instance39,40
+genUnipol genUnipol42,43
+genUnipol genUnipol43,44
+appendLM appendLM47,48
+appendLM appendLM48,49
+xPoly xPoly50,51
+xPoly xPoly51,52
+yPoly yPoly57,58
+yPoly yPoly58,59
+genLM genLM79,80
+genLM genLM80,81
+zeroDimOf zeroDimOf91,92
+zeroDimOf zeroDimOf92,93
+zeroDimG zeroDimG97,98
+zeroDimG zeroDimG98,99
+isNonTrivial isNonTrivial103,104
+isNonTrivial isNonTrivial104,105
+data Equation Equation106,107
+data Equation = Equation Equation106,107
+data Equation = Equation { coefficients coefficients106,107
+                         , answers answers107,108
+newtype MatrixCase MatrixCase110,111
+newtype MatrixCase a = MatrixCase MatrixCase110,111
+newtype MatrixCase a = MatrixCase { getMatrix getMatrix110,111
+arbitrarySolvable arbitrarySolvable125,126
+arbitrarySolvable arbitrarySolvable126,127
+unaryPoly unaryPoly131,132
+unaryPoly unaryPoly132,133
+stdReduced stdReduced137,138
+stdReduced stdReduced139,140
+idealOfArity idealOfArity150,151
+idealOfArity idealOfArity151,152
+polynomialOfArity polynomialOfArity154,155
+polynomialOfArity polynomialOfArity156,157
+
+./test/ZeroDimSpec.hs,692
+module ZeroDimSpec ZeroDimSpec2,3
+asGenListOf asGenListOf26,27
+asGenListOf asGenListOf27,28
+spec spec29,30
+spec spec30,31
+isDescending isDescending103,104
+isDescending isDescending104,105
+prop_isApproximateZero prop_isApproximateZero106,107
+prop_isApproximateZero prop_isApproximateZero111,112
+prop_univPoly prop_univPoly120,121
+prop_univPoly prop_univPoly121,122
+rank rank129,130
+rank rank130,131
+data TestSet TestSet134,135
+data TestSet = TestSet TestSet134,135
+data TestSet = TestSet { inputMat inputMat134,135
+                       , inputVec inputVec135,136
+                       , answer answer136,137
+linSet linSet139,140
+linSet linSet140,141
+
+./test/Spec.hs,0
 
 ./src/Algebra/Algorithms/FGLM.hs,611
 module Algebra.Algorithms.FGLM Algebra.Algorithms.FGLM2,3
@@ -72,22 +132,3 @@ nextMonomial nextMonomial388,389
 nextMonomial nextMonomial390,391
 beta beta401,402
 beta beta402,403
-
-./src/Algebra/Algorithms/Arithmetic.hs,610
-module Algebra.ArithmeticAlgebra.Arithmetic1,2
-data PrimeResult PrimeResult13,14
-data PrimeResult = Composite Composite13,14
-data PrimeResult = Composite | ProbablyPrime ProbablyPrime13,14
-data PrimeResult = Composite | ProbablyPrime | PrimePrime13,14
-repeatedSquare repeatedSquare17,18
-repeatedSquare repeatedSquare18,19
-binRep binRep27,28
-binRep binRep28,29
-fermatTest fermatTest34,35
-fermatTest fermatTest35,36
-modPow modPow44,45
-modPow modPow45,46
-splitFactor splitFactor50,51
-splitFactor splitFactor51,52
-isPseudoPrime isPseudoPrime61,62
-isPseudoPrime isPseudoPrime63,64
