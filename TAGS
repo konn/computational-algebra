@@ -34,34 +34,34 @@ newtype NavBar NavBar80,81
 newtype NavBar  = NavBar NavBar80,81
 newtype NavBar  = NavBar { runNavBar runNavBar80,81
 
-./app/Main.hs,701
-module Main Main3,4
-main main29,30
-main main30,31
-myCtx myCtx59,60
-myCtx myCtx60,61
-tocField tocField65,66
-tocField tocField66,67
-readerOpts readerOpts70,71
-readerOpts readerOpts71,72
-writerOpts writerOpts76,77
-writerOpts writerOpts77,78
-tocOpts tocOpts87,88
-tocOpts tocOpts88,89
-excluded excluded95,96
-excluded excluded96,97
-testIgnore testIgnore98,99
-testIgnore testIgnore99,100
-deploy deploy102,103
-deploy deploy103,104
-conf conf129,130
-conf conf130,131
-procSchemes procSchemes136,137
-procSchemes procSchemes137,138
-procSchemes0 procSchemes0139,140
-procSchemes0 procSchemes0140,141
-procHaddock procHaddock153,154
-procHaddock procHaddock154,155
+./app/Main.hs,696
+module Main Main2,3
+main main24,25
+main main25,26
+myCtx myCtx54,55
+myCtx myCtx55,56
+tocField tocField60,61
+tocField tocField61,62
+readerOpts readerOpts65,66
+readerOpts readerOpts66,67
+writerOpts writerOpts71,72
+writerOpts writerOpts72,73
+tocOpts tocOpts82,83
+tocOpts tocOpts83,84
+excluded excluded90,91
+excluded excluded91,92
+testIgnore testIgnore93,94
+testIgnore testIgnore94,95
+deploy deploy97,98
+deploy deploy98,99
+conf conf124,125
+conf conf125,126
+procSchemes procSchemes131,132
+procSchemes procSchemes132,133
+procSchemes0 procSchemes0134,135
+procSchemes0 procSchemes0135,136
+procHaddock procHaddock148,149
+procHaddock procHaddock149,150
 
 ./app/Instances.hs,325
 module Instances Instances2,3
@@ -171,6 +171,41 @@ getDataFileName getDataFileName31,32
 getDataFileName getDataFileName32,33
 
 ./algebraic-prelude/.stack-work/dist/x86_64-osx/Cabal-2.1.0.0/build/autogen/Paths_algebraic_prelude.hs,1263
+module Paths_algebraic_prelude Paths_algebraic_prelude3,4
+catchIO catchIO17,18
+catchIO catchIO19,20
+catchIO catchIO23,24
+catchIO catchIO25,26
+version version27,28
+version version28,29
+bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir sysconfdir29,30
+bindir, libdir, dynlibdir, datadir, libexecdir,libexecdir29,30
+bindir, libdir, dynlibdir, datadir,datadir29,30
+bindir, libdir, dynlibdir,dynlibdir29,30
+bindir, libdir,libdir29,30
+bindir,bindir29,30
+bindir bindir31,32
+libdir libdir32,33
+dynlibdir dynlibdir33,34
+datadir datadir34,35
+libexecdir libexecdir35,36
+sysconfdir sysconfdir36,37
+getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir getSysconfDir38,39
+getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir,getLibexecDir38,39
+getBinDir, getLibDir, getDynLibDir, getDataDir,getDataDir38,39
+getBinDir, getLibDir, getDynLibDir,getDynLibDir38,39
+getBinDir, getLibDir,getLibDir38,39
+getBinDir,getBinDir38,39
+getBinDir getBinDir39,40
+getLibDir getLibDir40,41
+getDynLibDir getDynLibDir41,42
+getDataDir getDataDir42,43
+getLibexecDir getLibexecDir43,44
+getSysconfDir getSysconfDir44,45
+getDataFileName getDataFileName46,47
+getDataFileName getDataFileName47,48
+
+./algebraic-prelude/.stack-work/dist/x86_64-osx/Cabal-2.2.0.0/build/autogen/Paths_algebraic_prelude.hs,1263
 module Paths_algebraic_prelude Paths_algebraic_prelude3,4
 catchIO catchIO17,18
 catchIO catchIO19,20

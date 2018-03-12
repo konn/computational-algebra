@@ -34,8 +34,7 @@ executable site
                      , pandoc-citeproc
                      , pandoc-types
                      , shelly
-                     , taggy
-                     , taggy-lens
+                     , tagsoup
                      , template-haskell
                      , text
                      , time

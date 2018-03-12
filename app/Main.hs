@@ -1,13 +1,10 @@
 {-# LANGUAGE ExtendedDefaultRules, FlexibleContexts, OverloadedStrings #-}
-{-# LANGUAGE ViewPatterns                                              #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Main where
 import Lenses
-import Settings hiding (children)
+import Settings
 
-import           Control.Lens              hiding (children, element, elements,
-                                            setting)
-import           Control.Monad             ((>=>))
+import           Control.Lens              hiding (setting)
 import           Control.Monad.Error.Class
 import           Data.Default
 import           Data.Foldable
@@ -15,15 +12,13 @@ import           Data.Maybe
 import           Data.Monoid
 import           Data.Text                 (Text)
 import qualified Data.Text                 as T
-import qualified Data.Text.Lazy            as LT
-import           Data.Text.Lazy.Lens
 import           Data.Time.Format
 import           Data.Time.LocalTime
-import           Hakyll
+import           Hakyll                    hiding (renderTags)
 import           Shelly
 import           System.Exit               (ExitCode (..))
+import           Text.HTML.TagSoup
 import           Text.Pandoc
-import           Text.Taggy.Lens
 
 default (Text)
 
@@ -33,7 +28,7 @@ main = hakyllWith conf $ do
   match ("docs/algebra-*/**.html" .||. "docs/algebraic-prelude-*/**.html" .||. "docs/computational-algebra-*/**.html") $ do
     route idRoute
     compile $
-      getResourceString >>= withItemBody procHaddock
+      getResourceString >>= withItemBody (fmap T.unpack . procHaddock . T.pack)
   match ("katex/**" .&&. complement "**.md") $
     route idRoute >> compile copyFileCompiler
   match "templates/**" $
@@ -41,20 +36,20 @@ main = hakyllWith conf $ do
   match "params.json" $ do
     route idRoute
     compile copyFileCompiler
-  match ("**.css" .||. "**.js" .||. "**.png" .||. "**.jpg" .||. "**.svg" .||. "**.html") $ do
+  match ("**.css" .||. "**.js" .||. "**.gif" .||. "**.png" .||. "**.jpg" .||. "**.svg" .||. "**.html") $ do
     route idRoute
     compile copyFileCompiler
   match "index.md" $ do
     route $ setExtension "html"
-    compile $ do
+    compile $
       pandocCompilerWithTransformM
-        defaultHakyllReaderOptions
-        writerOpts
-        procSchemes
-        <&> fmap (demoteHeaders)
-        >>= loadAndApplyTemplate "templates/default.html" myCtx
-        >>= relativizeUrls
-        >>= withItemBody (unixFilter "node" ["javascripts/prerender.js"])
+      defaultHakyllReaderOptions
+      writerOpts
+      procSchemes
+      <&> fmap demoteHeaders
+      >>= loadAndApplyTemplate "templates/default.html" myCtx
+      >>= relativizeUrls
+      >>= withItemBody (unixFilter "node" ["javascripts/prerender.js"])
   return ()
 
 myCtx :: Hakyll.Context String
@@ -101,14 +96,14 @@ testIgnore fp =
   fp `elem` excluded || ignoreFile def fp
 
 deploy :: Configuration -> IO ExitCode
-deploy cnf = shelly $ handleany_sh (const $ return $ ExitFailure 1)  $do
+deploy cnf = shelly $ handleany_sh (const $ return $ ExitFailure 1) $ do
   dest <- canonicalize $ fromText $ T.pack $ destinationDirectory cnf
   mkdir_p dest
   cd dest
   isGit <- test_d ".git"
   timeStamp <- formatTime defaultTimeLocale "%c" <$> liftIO getZonedTime
   let msg = "Updated (" ++ timeStamp ++  ")"
-      msgOpt =  ("-m" <> T.pack msg)
+      msgOpt = "-m" <> T.pack msg
   unless isGit $ withTmpDir $ \tdir -> do
     cd tdir
     run_ "git" ["init"]
@@ -123,7 +118,7 @@ deploy cnf = shelly $ handleany_sh (const $ return $ ExitFailure 1)  $do
   msgZ <- cmd "git" "log" "HEAD" "--format=%s" "-n1"
   cd ".."
   run_ "git" ["add", "."]
-  run_ "git" $ ["commit", "-m"] ++ (take 1 $ T.lines msgZ)
+  run_ "git" $ ["commit", "-m"] ++ take 1 (T.lines msgZ)
   run_ "git"   ["push", "origin", "gh-pages-devel"]
   return ExitSuccess
 
@@ -151,19 +146,18 @@ procSchemes0 inl =
   where
     sandwitched s e t = s <> t <> e
 
-procHaddock :: String -> Compiler String
-procHaddock  = packed (( html . element . transformM . attr "href" $ traverse rewriteUrl)
-                       >=> return . LT.replace "</span><" "</span> <")
+procHaddock :: Text -> Compiler Text
+procHaddock  = fmap renderTags . mapM rewriter . parseTags
   where
-    rewriteUrl :: Text -> Compiler Text
-    rewriteUrl ref = do
-      case T.stripPrefix "../" ref of
-        Just (T.breakOn "/" -> (pkg, rest)) -> do
-          known <- unsafeCompiler $ shelly $ test_e $ "docs" </> pkg
-          return $
-            if known
-            then ref
-            else T.concat
-                 ["http://hackage.haskell.org/package/", pkg,
-                  "/docs", rest]
-        _ -> return $ ref
+    rewriter :: Tag Text -> Compiler (Tag Text)
+    rewriter (TagOpen "a" atts)
+      | Just ref <- T.stripPrefix "../" =<< lookup "href" atts
+      = do let (pkg, rest) = T.breakOn "/" ref
+           known <- unsafeCompiler $ shelly $ test_e $ "docs" </> pkg
+           let href | known = ref
+                    | otherwise = T.concat ["https://hackage.haskell.org/package/", pkg
+                                           ,"/docs", rest]
+           return $ TagOpen "a" $ ("href", href): filter ((/= "href") . fst) atts
+    rewriter t = return t
+
+

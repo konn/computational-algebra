@@ -1,2 +1,2 @@
 #!/bin/sh
-stack run -- site $@
+stack run -- site "$@"
