@@ -2,15 +2,16 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6976b598d9cdd37b1c61f4f3333c8bbad69e0d0d121714620c8fd203c425ccd8
+-- hash: 4211398d0bb865672e0ee6802af492ce6261139d734148f6d50389d05f2ac21f
 
-name:           halg-algorithms
+name:           halg-polynomials
 version:        0.6.0.0
-synopsis:       Algorithms related to Gröbner basis, part of halg computational algebra suite.
+synopsis:       Polynomial rings and basic Gröbner basis computation,  part of halg computational algebra suite.
+
 description:    Please see the project Web Site <https://konn.github.io/computational-algebra>
 category:       Math
-homepage:       https://github.com/konn/halg-groebner#readme
-bug-reports:    https://github.com/konn/halg-groebner/issues
+homepage:       https://github.com/konn/halg-polynomials#readme
+bug-reports:    https://github.com/konn/halg-polynomials/issues
 author:         Hiromi ISHII
 maintainer:     konn.jinro _at_ gmail.com
 copyright:      2018 (c) Hiromi ISHII
@@ -25,35 +26,46 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/konn/halg-groebner
+  location: https://github.com/konn/halg-polynomials
 
 library
   hs-source-dirs:
       src
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances NoImplicitPrelude
-  ghc-options: -Wall
+  ghc-options: -Wall -O2
   build-depends:
-      MonadRandom
+      ListLike
     , algebra
     , algebraic-prelude
     , base >=4.7 && <5
-    , convertible
+    , constraints
+    , containers
+    , deepseq
     , equational-reasoning
+    , ghc-typelits-knownnat
     , halg-core
-    , halg-matrices
-    , halg-polynomials
-    , hmatrix
+    , hashable
+    , heaps
     , lens
     , matrix
     , monad-loops
-    , mtl
     , reflection
+    , singletons
     , sized
+    , text
+    , type-natural
+    , unamb
+    , unordered-containers
     , vector
   exposed-modules:
-      Algebra.Algorithms.ZeroDim
+      Algebra.Algorithms.Groebner
+      Algebra.Prelude.Core
+      Algebra.Ring.Polynomial
+      Algebra.Ring.Polynomial.Labeled
+      Algebra.Ring.Polynomial.Quotient
+      Algebra.Ring.Polynomial.Univariate
   other-modules:
-      Algebra.Algorithms.FGLM
+      Algebra.Ring.Polynomial.Internal
   default-language: Haskell2010
 
 test-suite spec
@@ -65,19 +77,16 @@ test-suite spec
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       HUnit
-    , MonadRandom
     , QuickCheck
     , algebra
     , algebraic-prelude
-    , base >=4.7 && <5
+    , base
     , constraints
     , containers
     , convertible
     , equational-reasoning
-    , halg-algorithms
     , halg-core
     , halg-core-test
-    , halg-matrices
     , halg-polynomials
     , hspec
     , lazysmallcheck
@@ -95,7 +104,10 @@ test-suite spec
   build-tools:
       hspec-discover
   other-modules:
-      ZeroDimSpec
+      GroebnerSpec
+      PolynomialSpec
+      UnivariateSpec
+      QuotientSpec
       Utils
   default-language: Haskell2010
   build-tool-depends:

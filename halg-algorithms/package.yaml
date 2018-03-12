@@ -96,3 +96,6 @@ tests:
     - transformers
     - type-natural
     - vector
+    verbatim: |
+      build-tool-depends:
+          hspec-discover:hspec-discover == 2.*
