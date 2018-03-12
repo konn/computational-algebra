@@ -38,13 +38,13 @@ import           Data.Kind                    (Type)
 import           Data.Maybe                   (catMaybes)
 import           Data.Monoid                  ((<>))
 import           Data.Ord                     (comparing)
-import           Data.Singletons.Prelude      (POrd (..), SList, Sing ())
+import           Data.Singletons.Prelude      (POrd (..), SList, Sing)
 import           Data.Singletons.Prelude      (SingKind (..))
 import           Data.Singletons.Prelude.List (Length, Replicate, sReplicate)
 import           Data.Singletons.TypeLits     (withKnownNat)
 import qualified Data.Sized.Builtin           as V
 import           Data.Type.Natural.Class      (IsPeano (..), PeanoOrder (..))
-import           Data.Type.Ordinal            (Ordinal (..), ordToInt)
+import           Data.Type.Ordinal            (Ordinal (..), ordToNatural)
 -- import           Prelude                         hiding (Fractional (..),
 --                                                   Integral (..), Num (..),
 --                                                   Real (..), lex, product, sum)
@@ -113,7 +113,7 @@ instance KnownNat n => Show (OrderedMonomial ord n) where
     let vs = catMaybes $ V.toList $
             imap (\n i ->
                    if i > 0
-                   then Just ("X_" ++ show (ordToInt n) ++ if i == 1 then "" else "^" ++ show i)
+                   then Just ("X_" ++ show (ordToNatural n) ++ if i == 1 then "" else "^" ++ show i)
                    else Nothing)
             $ getMonomial xs
     in if null vs then "1" else unwords vs
@@ -129,7 +129,7 @@ instance KnownNat n => Unital (OrderedMonomial ord n) where
   one = OrderedMonomial $ fromList sing []
 
 -- | Class to lookup ordering from its (type-level) name.
-class IsOrder (n :: Nat) (ordering :: *) where
+class IsOrder (n :: Nat) (ordering :: Type) where
   cmpMonomial :: Proxy ordering -> MonomialOrder n
 
 -- * Names for orderings.
@@ -151,7 +151,7 @@ data Grlex = Grlex
              deriving (Show, Eq, Ord)
 
 -- | Graded order from another monomial order.
-data Graded ord = Graded ord
+newtype Graded ord = Graded ord
                   deriving (Read, Show, Eq, Ord)
 
 instance IsOrder n ord => IsOrder n (Graded ord) where
@@ -160,7 +160,7 @@ instance IsOrder n ord => IsOrder n (Graded ord) where
 
 instance IsMonomialOrder n ord => IsMonomialOrder n (Graded ord)
 
-data ProductOrder (n :: Nat) (m :: Nat) (a :: *) (b :: *) where
+data ProductOrder (n :: Nat) (m :: Nat) (a :: Type) (b :: Type) where
   ProductOrder :: Sing n -> Sing m -> ord -> ord' -> ProductOrder n m ord ord'
 
 productOrder :: forall ord ord' n m. (IsOrder n ord, IsOrder m ord', KnownNat n, KnownNat m)
@@ -207,12 +207,12 @@ weightOrder Proxy m m' =
 
 instance (KnownNat n, IsOrder n ord, SingI ws)
        => IsOrder n (WeightOrder ws ord) where
-  cmpMonomial p = weightOrder p
+  cmpMonomial = weightOrder
   {-# INLINE [1] cmpMonomial #-}
 
 instance (IsOrder n ord, IsOrder m ord', KnownNat m, KnownNat n, k ~ (n + m))
       => IsOrder k (ProductOrder n m ord ord') where
-  cmpMonomial p = productOrder p
+  cmpMonomial = productOrder
   {-# INLINE [1] cmpMonomial #-}
 
 -- They're all total orderings.
@@ -330,7 +330,7 @@ withStrongMonomialOrder :: forall ord n r proxy (proxy' :: Nat -> Type).
                         => proxy ord -> proxy' n -> (IsMonomialOrder n ord => r) -> r
 withStrongMonomialOrder _ _ r = r C.\\ dict
   where
-    ismToPrim = (ins :: IsMonomialOrder' ord n C.:- IsMonomialOrder n ord)
+    ismToPrim = ins :: IsMonomialOrder' ord n C.:- IsMonomialOrder n ord
     primeInst = inst :: Forall (IsMonomialOrder' ord) C.:- IsMonomialOrder' ord n
     dict = ismToPrim `C.trans` primeInst
 

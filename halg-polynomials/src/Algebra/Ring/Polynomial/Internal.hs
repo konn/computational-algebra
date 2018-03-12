@@ -1,13 +1,13 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, ExplicitNamespaces            #-}
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, LiberalTypeSynonyms           #-}
-{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction          #-}
-{-# LANGUAGE PatternGuards, PolyKinds, RankNTypes, ScopedTypeVariables #-}
-{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies         #-}
-{-# LANGUAGE TypeOperators, TypeSynonymInstances, UndecidableInstances #-}
-{-# LANGUAGE ViewPatterns                                              #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, ExplicitNamespaces              #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                  #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, LiberalTypeSynonyms             #-}
+{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction, PolyKinds #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, StandaloneDeriving         #-}
+{-# LANGUAGE TypeFamilies, TypeOperators, TypeSynonymInstances           #-}
+{-# LANGUAGE UndecidableInstances, ViewPatterns                          #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 module Algebra.Ring.Polynomial.Internal
     ( module Algebra.Ring.Polynomial.Monomial,
       module Algebra.Ring.Polynomial.Class,
@@ -31,7 +31,7 @@ import Algebra.Scalar
 
 import           AlgebraicPrelude
 import           Control.DeepSeq                       (NFData)
-import           Control.Lens                          hiding (assign)
+import           Control.Lens
 import qualified Data.Coerce                           as C
 import qualified Data.HashSet                          as HS
 import           Data.Map                              (Map)

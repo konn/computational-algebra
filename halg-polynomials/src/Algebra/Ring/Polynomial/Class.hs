@@ -33,6 +33,7 @@ import           Data.Foldable            (foldr, maximum)
 import qualified Data.Foldable            as F
 import qualified Data.HashSet             as HS
 import           Data.Int
+import           Data.Kind                (Type)
 import qualified Data.List                as L
 import qualified Data.Map.Strict          as M
 import           Data.Maybe               (catMaybes, fromJust, fromMaybe)
@@ -68,7 +69,7 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
    => IsPolynomial poly where
   {-# MINIMAL ((liftMap , monomials) | terms'), (sArity | sArity') , (fromMonomial | toPolynomial' | polynomial') #-}
   -- | Coefficient ring of polynomial type.
-  type Coefficient poly :: *
+  type Coefficient poly :: Type
   -- | Arity of polynomial type.
   type Arity poly :: Nat
 
@@ -199,13 +200,9 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
     _Terms' %~ M.mapKeysWith (+) tr
   {-# INLINE mapMonomial #-}
 
-{-# RULES
-"liftMap/identity"   liftMap (\ x -> x) = (P.id :: poly -> poly)
-  #-}
-
 -- | Class to lookup ordering from its (type-level) name.
 class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrderedPolynomial poly where
-  type MOrder poly :: *
+  type MOrder poly :: Type
   {-# MINIMAL leadingTerm | (leadingMonomial , leadingCoeff) #-}
 
   -- | A variant of @'coeff''@ which takes @'OrderedMonomial'@ instead of @'Monomial'@

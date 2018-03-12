@@ -1,10 +1,9 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, ExplicitNamespaces            #-}
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, LiberalTypeSynonyms           #-}
-{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction          #-}
-{-# LANGUAGE PatternGuards, PolyKinds, RankNTypes, ScopedTypeVariables #-}
-{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies         #-}
-{-# LANGUAGE TypeOperators, TypeSynonymInstances, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, ExplicitNamespaces   #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs       #-}
+{-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses       #-}
+{-# LANGUAGE NoMonomorphismRestriction, PolyKinds, RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables, TypeFamilies, TypeOperators #-}
+{-# LANGUAGE TypeSynonymInstances, UndecidableInstances       #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 module Algebra.Ring.Polynomial
@@ -28,7 +27,6 @@ import Algebra.Ring.Polynomial.Internal
 import Algebra.Ring.Polynomial.Monomial
 
 import AlgebraicPrelude
-
 
 instance {-# OVERLAPPABLE #-}
          (KnownNat n, Eq r, DecidableUnits r, DecidableZero r, Field r,

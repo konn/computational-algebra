@@ -2,6 +2,7 @@ resolver: lts-9.5
 packages:
 - '.'
 - 'halg-core'
+- 'halg-polynomials'
 - 'algebraic-prelude'
 
 flags:

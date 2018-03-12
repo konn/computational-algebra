@@ -3,6 +3,7 @@ skip-ghc-check: true
 packages:
 - '.'
 - 'halg-core'
+- 'halg-polynomials'
 - 'algebraic-prelude'
 
 flags:

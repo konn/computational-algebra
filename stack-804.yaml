@@ -5,6 +5,7 @@ flags: {}
 packages:
 - '.'
 - 'halg-core'
+- 'halg-polynomials'
 - 'algebraic-prelude'
 
 extra-deps: 

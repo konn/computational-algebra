@@ -1,0 +1,92 @@
+name:                halg-polynomials
+version:             0.1.0.0
+github:              "konn/halg-polynomials"
+license:             BSD3
+author:              "Hiromi ISHII"
+maintainer:          "konn.jinro _at_ gmail.com"
+copyright:           "2018 (c) Hiromi ISHII"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on Github at <https://github.com/konn/halg-polynomials#readme>
+
+dependencies:
+- algebraic-prelude
+- algebra
+- halg-core
+
+default-extensions:
+- CPP
+- DataKinds
+- FlexibleContexts
+- FlexibleInstances
+- GADTs
+- MultiParamTypeClasses
+- NoImplicitPrelude
+- OverloadedLabels
+- PolyKinds
+- TypeFamilies
+- TypeInType
+- UndecidableInstances  
+
+library:
+  source-dirs: src
+  ghc-options: ["-Wall", "-O2"]
+  other-modules:
+  - Algebra.Ring.Polynomial.Internal
+  dependencies:
+  - ListLike
+  - MonadRandom
+  - base >= 4.7 && < 5
+  - constraints
+  - containers
+  - convertible
+  - deepseq
+  - equational-reasoning
+  - ghc-typelits-knownnat
+  - hashable
+  - heaps
+  - lens
+  - matrix
+  - monad-loops
+  - reflection
+  - singletons
+  - sized
+  - text
+  - type-natural
+  - unamb
+  - unordered-containers
+  - vector
+
+executables: {}
+  # halg-polynomials-exe:
+  #   main:                Main.hs
+  #   source-dirs:         app
+  #   ghc-options:
+  #   - -Wall
+  #   - -threaded
+  #   - -rtsopts
+  #   - -with-rtsopts=-N
+  #   dependencies:
+  #   - halg-polynomials
+
+tests: {}
+  # halg-polynomials-test:
+  #   main:                Spec.hs
+  #   source-dirs:         test
+  #   ghc-options:
+  #   - -Wall
+  #   - -threaded
+  #   - -rtsopts
+  #   - -with-rtsopts=-N
+  #   dependencies:
+  #   - halg-polynomials

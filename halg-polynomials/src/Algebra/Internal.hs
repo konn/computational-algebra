@@ -38,11 +38,12 @@ import           Data.Sized.Builtin           as Algebra.Internal (pattern (:<),
 import qualified Data.Sized.Builtin           as S
 import qualified Data.Sized.Flipped           as Flipped (Flipped (..))
 import           Data.Type.Equality           ((:~:) (..))
-import           Data.Type.Natural.Class      as Algebra.Internal
+import           Data.Type.Natural.Class      as Algebra.Internal hiding (fromNatural)
 import qualified Data.Type.Ordinal            as O
 import qualified Data.Vector                  as DV
 import          Data.ListLike (ListLike)
 import           GHC.TypeLits                 as Algebra.Internal
+  hiding (type (<=), type (-), type (*), type (+))
 import           Proof.Equational             (coerce, withRefl)
 import           Proof.Equational             as Algebra.Internal (because,
                                                                    coerce,

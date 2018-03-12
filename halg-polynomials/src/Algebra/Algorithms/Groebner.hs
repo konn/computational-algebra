@@ -33,14 +33,15 @@ import Algebra.Ring.Polynomial.Univariate (Unipol)
 import           Control.Lens                 ((%~), (&), _Wrapped)
 import           Control.Monad.Loops          (whileM_)
 import           Control.Monad.ST             (ST, runST)
+import qualified Data.Foldable                as F
 import qualified Data.Foldable                as H
 import qualified Data.Heap                    as H
+import           Data.Kind                    (Type)
 import qualified Data.Map                     as M
 import           Data.Singletons.Prelude      (POrd (..), SEq (..))
 import           Data.Singletons.Prelude      (Sing (SFalse, STrue), withSingI)
 import           Data.Singletons.Prelude.List (Length, Replicate, Sing (SCons))
 import           Data.Singletons.Prelude.List (sLength, sReplicate)
-import           Data.Sized.Builtin           (toList)
 import qualified Data.Sized.Builtin           as V
 import           Data.STRef                   (STRef, modifySTRef, newSTRef)
 import           Data.STRef                   (readSTRef, writeSTRef)
@@ -132,12 +133,12 @@ syzygyBuchbergerWithStrategy strategy ideal = runST $ do
         g0 = leadingMonomial g
         l  = lcmMonomial f0 g0
         redundant = H.any (\(H.Entry _ h) -> (h `notElem` [f, g])
-                                  && (all (\k -> H.all ((/=k) . H.payload) rest)
-                                                     [(f, h), (g, h), (h, f), (h, g)])
+                                  && all (\k -> H.all ((/=k) . H.payload) rest)
+                                                     [(f, h), (g, h), (h, f), (h, g)]
                                   && leadingMonomial h `divs` l) gs0
     when (l /= f0 * g0 && not redundant) $ do
       len0 <- readSTRef len
-      let qs = (H.toList gs0)
+      let qs = H.toList gs0
           s = sPolynomial f g `modPolynomial` map H.payload qs
       when (s /= zero) $ do
         b %= H.union (H.fromList [H.Entry (calcWeight' strategy q s, j) (q, s) | H.Entry _ q <- qs | j <- [len0+1..]])
@@ -177,7 +178,7 @@ calcWeight' s = calcWeight (toProxy s)
 
 -- | Type-class for selection strategies in Buchberger's algorithm.
 class SelectionStrategy n s where
-  type Weight n s ord :: *
+  type Weight n s ord :: Type
   -- | Calculates the weight for the given pair of polynomial used for selection strategy.
   calcWeight :: (IsOrderedPolynomial poly, n ~ Arity poly)
              => Proxy s -> poly -> poly -> Weight n s (MOrder poly)
@@ -211,7 +212,7 @@ instance SelectionStrategy n GradedStrategy where
 
 
 -- | Sugar strategy. This chooses the pair with the least phantom homogenized degree and then break the tie with the given strategy (say @s@).
-data SugarStrategy s = SugarStrategy s deriving (Read, Show, Eq, Ord)
+newtype SugarStrategy s = SugarStrategy s deriving (Read, Show, Eq, Ord)
 
 instance SelectionStrategy n s => SelectionStrategy n (SugarStrategy s) where
   type Weight n (SugarStrategy s) ord = (Int, Weight n s ord)
@@ -321,7 +322,7 @@ lengthReplicate = runLengthReplicate . induction base step
             === sSucc (sLength (sReplicate n x))
                 `because` succCong (lengthCong (replicateCong (plusMinus n sOne) x))
             === sSucc n `because` succCong (ih x)
-        STrue -> case sCompare (n %:+ sOne) sZero of {}
+        STrue -> error "Cannot happen!"
 
 lengthCong :: a :~: b -> Length a :~: Length b
 lengthCong Refl = Refl
@@ -337,23 +338,23 @@ thEliminationIdeal :: forall poly n.
                         (n :<= Arity poly) ~ 'True)
                    => SNat n
                    -> Ideal poly
-                   -> Ideal (OrderedPolynomial (Coefficient poly) (MOrder poly) (Arity poly :-. n))
+                   -> Ideal (OrderedPolynomial (Coefficient poly) (MOrder poly) (Arity poly -. n))
 thEliminationIdeal n = withSingI (sOnes n) $
   withRefl (lengthReplicate n sOne) $
   withKnownNat n $
-  withKnownNat ((sing :: SNat (Arity poly)) %:-. n) $
+  withKnownNat ((sing :: SNat (Arity poly)) %-. n) $
   mapIdeal (changeOrderProxy Proxy) . thEliminationIdealWith (weightedEliminationOrder n) n
 
 -- | Calculate n-th elimination ideal using the specified n-th elimination type order.
 thEliminationIdealWith :: ( IsOrderedPolynomial poly,
                             m ~ Arity poly,
                             k ~ Coefficient poly, Field k,
-                            KnownNat (m :-. n), (n :<= m) ~ 'True,
+                            KnownNat (m -. n), (n :<= m) ~ 'True,
                             EliminationType m n ord)
                    => ord
                    -> SNat n
                    -> Ideal poly
-                   -> Ideal (OrderedPolynomial k Grevlex (m :-. n))
+                   -> Ideal (OrderedPolynomial k Grevlex (m -. n))
 thEliminationIdealWith = unsafeThEliminationIdealWith
 
 -- | Calculate n-th elimination ideal using the specified n-th elimination type order.
@@ -364,16 +365,16 @@ unsafeThEliminationIdealWith :: ( IsOrderedPolynomial poly,
                                   k ~ Coefficient poly,
                                   Field k,
                                   IsMonomialOrder m ord,
-                                  KnownNat (m :-. n), (n :<= m) ~ 'True)
+                                  KnownNat (m -. n), (n :<= m) ~ 'True)
                              => ord
                              -> SNat n
                              -> Ideal poly
-                             -> Ideal (OrderedPolynomial k Grevlex (m :-. n))
+                             -> Ideal (OrderedPolynomial k Grevlex (m -. n))
 unsafeThEliminationIdealWith ord n ideal =
-  withKnownNat n $ toIdeal $ [ f & _Wrapped %~ M.mapKeys (orderMonomial Nothing . V.drop n . getMonomial)
-                             | f <- calcGroebnerBasisWith ord ideal
-                             , all (all (== 0) . V.takeAtMost n . getMonomial . snd) $ getTerms f
-                             ]
+  withKnownNat n $ toIdeal [ f & _Wrapped %~ M.mapKeys (orderMonomial Nothing . V.drop n . getMonomial)
+                           | f <- calcGroebnerBasisWith ord ideal
+                           , all (all (== 0) . V.takeAtMost n . getMonomial . snd) $ getTerms f
+                           ]
 
 eliminatePadding :: (IsOrderedPolynomial poly,
                      IsMonomialOrder n ord,
@@ -383,31 +384,33 @@ eliminatePadding :: (IsOrderedPolynomial poly,
                     )
                  => Ideal (PadPolyL n ord poly) -> Ideal poly
 eliminatePadding ideal =
-  toIdeal $ [ c
-            | f0 <- calcGroebnerBasis ideal
-            , let (c, m) = leadingTerm $ runPadPolyL f0
-            , m == one
-            ]
+  toIdeal [ c
+          | f0 <- calcGroebnerBasis ideal
+          , let (c, m) = leadingTerm $ runPadPolyL f0
+          , m == one
+          ]
 
 -- | An intersection ideal of given ideals (using 'WeightedEliminationOrder').
-intersection :: forall poly k.
+intersection :: forall poly.
                 ( Field (Coefficient poly), IsOrderedPolynomial poly)
-             => Sized k (Ideal poly)
+             => [Ideal poly]
              -> Ideal poly
-intersection idsv@(_ :< _) =
-    let sk = sizedLength idsv
-    in withSingI (sOnes sk) $ withKnownNat sk $
-    let ts  = take (fromIntegral $ fromSing sk) vars
-        inj = padLeftPoly sk Grevlex
-        tis = zipWith (\ideal t -> mapIdeal ((t *) . inj) ideal) (toList idsv) ts
-        j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
+intersection ideals
+  | null ideals = principalIdeal one
+  | otherwise =
+    case toSing $ fromIntegral $ F.length ideals of
+      SomeSing sk ->
+        withSingI (sOnes sk) $ withKnownNat sk $
+        let ts  = genericTake (fromSing sk) vars
+            inj = padLeftPoly sk Grevlex
+            tis = zipWith (\ideal t -> mapIdeal ((t *) . inj) ideal) (F.toList ideals) ts
+            j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
     -- in withRefl (plusMinus' sk sn) $
     --    withWitness (plusLeqL sk sn) $
     --    mapIdeal injectVars $
     --    coerce (cong Proxy $ minusCongL (plusComm sk sn) sk `trans` plusMinus sn sk) $
     --    thEliminationIdeal sk j
-    in eliminatePadding j
-intersection _ = Ideal $ singleton one
+        in eliminatePadding j
 
 -- | Ideal quotient by a principal ideals.
 quotByPrincipalIdeal :: (Field (Coefficient poly), IsOrderedPolynomial poly)
@@ -415,18 +418,16 @@ quotByPrincipalIdeal :: (Field (Coefficient poly), IsOrderedPolynomial poly)
                      -> poly
                      -> Ideal poly
 quotByPrincipalIdeal i g =
-    case intersection (i :< (Ideal $ singleton g) :< NilL) of
-      Ideal gs -> Ideal $ V.map (snd . head . (`divPolynomial` [g])) gs
+  fmap (snd . head . (`divPolynomial` [g])) $ intersection [i, principalIdeal g]
 
 -- | Ideal quotient by the given ideal.
-quotIdeal :: forall poly l.
+quotIdeal :: forall poly.
              (IsOrderedPolynomial poly, Field (Coefficient poly))
           => Ideal poly
-          -> Sized l poly
+          -> Ideal poly
           -> Ideal poly
 quotIdeal i g =
-  withKnownNat (sizedLength g) $
-  intersection $ V.map (i `quotByPrincipalIdeal`) g
+  intersection $ map (i `quotByPrincipalIdeal`) $ F.toList g
 
 -- | Saturation by a principal ideal.
 saturationByPrincipalIdeal :: forall poly.
@@ -446,15 +447,14 @@ saturationByPrincipalIdeal is g =
      mapIdeal (padLeftPoly sOne Grevlex) is
 
 -- | Saturation ideal
-saturationIdeal :: forall poly l.
+saturationIdeal :: forall poly.
                    (Field (Coefficient poly),
                     IsOrderedPolynomial poly)
                 => Ideal poly
-                -> Sized l poly
+                -> Ideal poly
                 -> Ideal poly
 saturationIdeal i g =
-  withKnownNat (sizedLength g) $
-  intersection $ V.map (i `saturationByPrincipalIdeal`) g
+  intersection $ map (i `saturationByPrincipalIdeal`) $ F.toList g
 
 -- | Calculate resultant for given two unary polynomimals.
 resultant :: forall poly.
@@ -463,14 +463,14 @@ resultant :: forall poly.
               Arity poly ~ 1)
           => poly
           -> poly
-          -> (Coefficient poly)
+          -> Coefficient poly
 resultant = go one
   where
     go res h s
         | totalDegree' s > 0     =
           let r    = h `modPolynomial` [s]
               res' = res * negate one ^ (totalDegree' h * totalDegree' s)
-                     * (leadingCoeff s) ^ (totalDegree' h P.- totalDegree' r)
+                     * leadingCoeff s ^ (totalDegree' h P.- totalDegree' r)
           in go res' s r
         | isZero h || isZero s = zero
         | totalDegree' h > 0     = (leadingCoeff s ^ totalDegree' h) * res
@@ -495,7 +495,7 @@ lcmPolynomial :: forall poly.
               => poly
               -> poly
               -> poly
-lcmPolynomial f g = head $ generators $ intersection (principalIdeal f :< principalIdeal g :< NilL)
+lcmPolynomial f g = head $ generators $ intersection [principalIdeal f,  principalIdeal g]
 
 -- | Calculates the Greatest Common Divisor of the given pair of polynomials.
 gcdPolynomial :: (Field (Coefficient poly),

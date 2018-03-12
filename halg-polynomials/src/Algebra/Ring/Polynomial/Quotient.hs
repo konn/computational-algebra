@@ -13,7 +13,6 @@ module Algebra.Ring.Polynomial.Quotient
        )
        where
 import Algebra.Algorithms.Groebner        (calcGroebnerBasis)
-import Algebra.Field.Finite               (F)
 import Algebra.Internal
 import Algebra.Prelude.Core
 import Algebra.Ring.Polynomial.Univariate (Unipol)
@@ -22,6 +21,7 @@ import           Control.DeepSeq
 import           Control.Lens      (folded, ifoldMap, minimumOf)
 import qualified Data.Coerce       as C
 import qualified Data.HashMap.Lazy as HM
+import           Data.Kind         (Type)
 import qualified Data.Map          as Map
 import qualified Data.Matrix       as M
 import           Data.Monoid       (Sum (..))
@@ -79,15 +79,6 @@ vectorRep f =
    vectorRep :: (Reifies ideal (QIdeal (Unipol Rational)))
              => Quotient (Unipol Rational) ideal -> V.Vector Rational
  #-}
-{-# SPECIALISE INLINE
-   vectorRep :: (KnownNat p, IsMonomialOrder n ord, KnownNat n,
-                 Reifies ideal (QIdeal (OrderedPolynomial (F p) ord n)))
-             => Quotient (OrderedPolynomial (F p) ord n) ideal -> V.Vector (F p)
- #-}
-{-# SPECIALISE INLINE
-   vectorRep :: (Reifies ideal (QIdeal (Unipol (F p))), KnownNat p)
-             => Quotient (Unipol (F p)) ideal -> V.Vector (F p)
- #-}
 {-# INLINE vectorRep #-}
 
 matRepr' :: forall poly ideal.
@@ -119,15 +110,6 @@ matRepr' f =
    matRepr' :: (Reifies ideal (QIdeal (Unipol Rational)))
              => Quotient (Unipol Rational) ideal -> M.Matrix Rational
  #-}
-{-# SPECIALISE INLINE
-   matRepr' :: (IsMonomialOrder n ord, KnownNat n, KnownNat p,
-                 Reifies ideal (QIdeal (OrderedPolynomial (F p) ord n)))
-             => Quotient (OrderedPolynomial (F p) ord n) ideal -> M.Matrix (F p)
- #-}
-{-# SPECIALISE INLINE
-   matRepr' :: (Reifies ideal (QIdeal (Unipol (F p))), KnownNat p)
-             => Quotient (Unipol (F p)) ideal -> M.Matrix (F p)
- #-}
 {-# INLINE matRepr' #-}
 
 matRep0 :: forall poly ideal.
@@ -155,15 +137,6 @@ matRep0 _ pxy m =
 {-# SPECIALISE INLINE
    matRep0 :: (Reifies ideal (QIdeal (Unipol Rational)))
              => Proxy (Unipol Rational) -> Proxy ideal -> OrderedMonomial Grevlex 1 -> M.Matrix Rational
- #-}
-{-# SPECIALISE INLINE
-   matRep0 :: (IsMonomialOrder n ord,KnownNat n, KnownNat p,
-               Reifies ideal (QIdeal (OrderedPolynomial (F p) ord n)))
-             => Proxy (OrderedPolynomial (F p) ord n) -> Proxy ideal -> OrderedMonomial ord n -> M.Matrix (F p)
- #-}
-{-# SPECIALISE INLINE
-   matRep0 :: (Reifies ideal (QIdeal (Unipol (F p))), KnownNat p)
-             => Proxy (Unipol (F p)) -> Proxy ideal -> OrderedMonomial Grevlex 1 -> M.Matrix (F p)
  #-}
 {-# INLINE matRep0 #-}
 
@@ -197,19 +170,6 @@ multUnamb a b = unamb (a * b) (multWithTable a b)
             => Quotient (Unipol Rational) ideal
             -> Quotient (Unipol Rational) ideal
             -> Quotient (Unipol Rational) ideal
- #-}
-{-# SPECIALISE INLINE
-  multUnamb :: (IsMonomialOrder n ord, KnownNat n, KnownNat p,
-                Reifies ideal (QIdeal (OrderedPolynomial (F p) ord n)))
-            => Quotient (OrderedPolynomial (F p) ord n) ideal
-            -> Quotient (OrderedPolynomial (F p) ord n) ideal
-            -> Quotient (OrderedPolynomial (F p) ord n) ideal
- #-}
-{-# SPECIALISE INLINE
-  multUnamb :: (Reifies ideal (QIdeal (Unipol (F p))), KnownNat p)
-            => Quotient (Unipol (F p)) ideal
-            -> Quotient (Unipol (F p)) ideal
-            -> Quotient (Unipol (F p)) ideal
  #-}
 {-# INLINE multUnamb #-}
 
@@ -426,7 +386,7 @@ buildQIdeal ideal =
 -- | Reifies the ideal at the type-level. The ideal can be recovered with 'reflect'.
 reifyQuotient :: (IsOrderedPolynomial poly, Field (Coefficient poly))
               => Ideal poly
-              -> (forall (ideal :: *). Reifies ideal (QIdeal poly) => Proxy ideal -> a)
+              -> (forall (ideal :: Type). Reifies ideal (QIdeal poly) => Proxy ideal -> a)
               -> a
 reifyQuotient ideal = reify (buildQIdeal ideal)
 {-# INLINE reifyQuotient #-}
@@ -434,7 +394,7 @@ reifyQuotient ideal = reify (buildQIdeal ideal)
 -- | Computes polynomial modulo ideal.
 withQuotient :: (IsOrderedPolynomial poly, Field (Coefficient poly))
              => Ideal poly
-             -> (forall (ideal :: *). Reifies ideal (QIdeal poly) => Quotient poly ideal)
+             -> (forall (ideal :: Type). Reifies ideal (QIdeal poly) => Quotient poly ideal)
              -> poly
 withQuotient ideal v = reifyQuotient ideal (quotRepr_ . asProxyOf v)
 {-# INLINE withQuotient #-}
