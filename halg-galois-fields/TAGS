@@ -11,11 +11,11 @@ main main5,6
 main main0,1
 main main1,2
 
-./src/Algebra/Field/Galois.hs,1145
+./src/Algebra/Field/Galois.hs,1154
 module Algebra.Field.Galois Algebra.Field.Galois5,6
-data GF' GF'40,41
-data GF' p (n :: TL.Nat) (f :: Type) = GF' GF'40,41
-data GF' p (n :: TL.Nat) (f :: Type) = GF' { runGF' runGF'40,41
+newtype GF' GF'40,41
+newtype GF' p (n :: TL.Nat) (f :: Type) = GF' GF'40,41
+newtype GF' p (n :: TL.Nat) (f :: Type) = GF' { runGF' runGF'40,41
 type GF GF47,48
 type GF (p(47,48
 modPoly modPoly49,50
@@ -71,34 +71,3 @@ toPoly toPoly47,48
 toPoly toPoly48,49
 buildInstance buildInstance53,54
 buildInstance buildInstance54,55
-
-./src/Algebra/Field/Finite.hs,880
-module Algebra.Field.Finite Algebra.Field.Finite5,6
-newtype F F30,31
-newtype F (p :: k) = F F30,31
-newtype F (p :: k) = F { runF runF30,31
-naturalRepr naturalRepr33,34
-naturalRepr naturalRepr34,35
-instance instance36,37
-modNat modNat47,48
-modNat modNat48,49
-modNat' modNat'51,52
-modNat' modNat'52,53
-reifyPrimeField reifyPrimeField57,58
-reifyPrimeField reifyPrimeField58,59
-withPrimeField withPrimeField60,61
-withPrimeField withPrimeField61,62
-proxyF proxyF63,64
-proxyF proxyF64,65
-pows pows96,97
-pows pows97,98
-class (Field k, Characteristic k) => FiniteField FiniteField210,211
-class (Field k, Characteristic k) => FiniteField FiniteField210,211
-  power power211,212
-  elements elements212,213
-order order221,222
-order order222,223
-modRat modRat231,232
-modRat modRat232,233
-modRat' modRat'235,236
-modRat' modRat'236,237

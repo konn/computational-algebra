@@ -1,0 +1,305 @@
+
+./Setup.hs,15
+main main1,2
+
+./app/Main.hs,52
+module Main Main0,1
+main main4,5
+main main5,6
+
+./test/Spec.hs,30
+main main0,1
+main main1,2
+
+./src/Algebra/Algorithms/ChineseRemainder.hs,255
+module Algebra.Algorithms.ChineseRemainderAlgebra.Algorithms.ChineseRemainder4,5
+recoverRat recoverRat16,17
+recoverRat recoverRat20,21
+rationalChineseRemainder rationalChineseRemainder41,42
+rationalChineseRemainder rationalChineseRemainder44,45
+
+./src/Algebra/Matrix.hs,1715
+module Algebra.Matrix Algebra.Matrix4,5
+class Matrix Matrix25,26
+  nonZeroCols :: (DecidableZero a, Elem mat a) => mat mat66,67
+  type Elem Elem26,27
+  cmap cmap27,28
+  empty empty28,29
+  fromLists fromLists29,30
+  fromCols fromCols30,31
+  fromCols fromCols31,32
+  fromRows fromRows33,34
+  fromRows fromRows34,35
+  toCols toCols36,37
+  toCols toCols37,38
+  toRows toRows38,39
+  toRows toRows39,40
+  ncols ncols40,41
+  nrows nrows41,42
+  identity identity42,43
+  diag diag43,44
+  getDiag getDiag44,45
+  trace trace45,46
+  diagProd diagProd46,47
+  zero zero47,48
+  colVector colVector48,49
+  rowVector rowVector49,50
+  getCol getCol50,51
+  getRow getRow51,52
+  switchRows switchRows52,53
+  scaleRow scaleRow53,54
+  combineRows combineRows54,55
+  trans trans55,56
+  buildMatrix buildMatrix56,57
+  index index57,58
+  index index58,59
+  (!)!61,62
+  (<||>)<||>62,63
+  (<-->)<-->63,64
+  nonZeroRows nonZeroRows64,65
+  nonZeroRows nonZeroRows65,66
+  nonZeroCols nonZeroCols66,67
+  nonZeroCols nonZeroCols67,68
+instance instance69,70
+swapIJ swapIJ96,97
+swapIJ swapIJ97,98
+toIntLA toIntLA131,132
+toIntLA toIntLA132,133
+delta delta163,164
+delta delta164,165
+companion companion167,168
+companion companion170,171
+gaussReduction gaussReduction184,185
+gaussReduction gaussReduction186,187
+gaussReduction' gaussReduction'190,191
+gaussReduction' gaussReduction'192,193
+det det213,214
+det det215,216
+maxNorm maxNorm217,218
+maxNorm maxNorm218,219
+rankWith rankWith220,221
+rankWith rankWith222,223
+inverse inverse224,225
+inverse inverse226,227
+inverseWith inverseWith228,229
+inverseWith inverseWith229,230
+
+./src/Algebra/LinkedMatrix.hs,6745
+module Algebra.LinkedMatrix Algebra.LinkedMatrix8,9
+data Entry Entry66,67
+data Entry a = Entry Entry66,67
+data Entry a = Entry { _value _value66,67
+                     , _idx _idx67,68
+                     , _rowNext _rowNext68,69
+                     , _colNext _colNext69,70
+newEntry newEntry74,75
+newEntry newEntry75,76
+data Matrix Matrix77,78
+data Matrix a = Matrix Matrix77,78
+data Matrix a = Matrix { _coefficients _coefficients77,78
+                       , _rowStart _rowStart78,79
+                       , _colStart _colStart79,80
+                       , _height _height80,81
+                       , _width _width81,82
+data BuildState BuildState86,87
+data BuildState = BuildState BuildState86,87
+data BuildState = BuildState { _colMap _colMap86,87
+                             , _rowMap _rowMap87,88
+                             , _curIdx _curIdx88,89
+data GaussianState GaussianState92,93
+data GaussianState a = GaussianState GaussianState92,93
+data GaussianState a = GaussianState { _input _input92,93
+                                     , _output _output93,94
+                                     , _prevCol _prevCol94,95
+                                     , _heavyCols _heavyCols95,96
+                                     , _curRow _curRow96,97
+                                     , _detAcc _detAcc97,98
+instance instance101,102
+data MaxEntry MaxEntry107,108
+data MaxEntry a b = MaxEntry MaxEntry107,108
+data MaxEntry a b = MaxEntry { _weight _weight107,108
+                             , entry entry108,109
+empty empty111,112
+empty empty112,113
+fromLists fromLists114,115
+fromLists fromLists115,116
+fromCols fromCols120,121
+fromCols fromCols121,122
+fromList fromList128,129
+fromList fromList129,130
+getDiag getDiag151,152
+getDiag getDiag152,153
+diagProd diagProd157,158
+diagProd diagProd158,159
+trace trace160,161
+trace trace161,162
+toLists toLists163,164
+toLists toLists164,165
+swapRows swapRows172,173
+swapRows swapRows173,174
+swapCols swapCols175,176
+swapCols swapCols176,177
+swapper swapper178,179
+swapper swapper179,180
+scaleDir scaleDir193,194
+scaleDir scaleDir194,195
+clearAt clearAt198,199
+clearAt clearAt199,200
+clearDir clearDir222,223
+clearDir clearDir223,224
+clearRow clearRow225,226
+clearRow clearRow226,227
+clearCol clearCol228,229
+clearCol clearCol229,230
+scaleRow scaleRow231,232
+scaleRow scaleRow232,233
+scaleCol scaleCol234,235
+scaleCol scaleCol235,236
+mapDir mapDir237,238
+mapDir mapDir239,240
+traverseDir traverseDir243,244
+traverseDir traverseDir246,247
+traverseDirM traverseDirM249,250
+traverseDirM traverseDirM252,253
+getDir getDir260,261
+getDir getDir262,263
+igetDir igetDir271,272
+igetDir igetDir272,273
+getRow getRow281,282
+getRow getRow282,283
+getCol getCol284,285
+getCol getCol285,286
+data Direction Direction287,288
+data Direction = Row Row287,288
+data Direction = Row | Column Column287,288
+lenL, countL countL289,290
+lenL,lenL289,290
+lenL lenL290,291
+countL countL292,293
+nthL, coordL coordL295,296
+nthL,nthL295,296
+coordL coordL296,297
+nthL nthL299,300
+startL startL302,303
+startL startL303,304
+nextL nextL306,307
+nextL nextL307,308
+addDir addDir310,311
+addDir addDir312,313
+perp perp344,345
+perp perp345,346
+addRow addRow348,349
+addRow addRow349,350
+addCol addCol351,352
+addCol addCol352,353
+inBound inBound354,355
+inBound inBound355,356
+index index357,358
+index index358,359
+(!)!369,370
+(!(370,371
+combineDir combineDir372,373
+combineDir combineDir373,374
+combineRows combineRows375,376
+combineRows combineRows376,377
+combineCols combineCols378,379
+combineCols combineCols379,380
+nrows, ncols ncols381,382
+nrows,nrows381,382
+ncols ncols382,383
+nrows nrows383,384
+identity identity385,386
+identity identity386,387
+diag diag391,392
+diag diag392,393
+catDir catDir398,399
+catDir catDir399,400
+dirVector dirVector420,421
+dirVector dirVector421,422
+rowVector rowVector424,425
+rowVector rowVector425,426
+colVector colVector427,428
+colVector colVector428,429
+toDirs toDirs430,431
+toDirs toDirs431,432
+toRows toRows433,434
+toRows toRows434,435
+toCols toCols436,437
+toCols toCols437,438
+appendDir appendDir439,440
+appendDir appendDir440,441
+(<-->)<-->442,443
+(<||>)<||>445,446
+catRow catRow448,449
+catRow catRow449,450
+catCol catCol451,452
+catCol catCol452,453
+switchRows switchRows454,455
+switchRows switchRows455,456
+switchCols switchCols457,458
+switchCols switchCols458,459
+cmap cmap460,461
+cmap cmap461,462
+clearZero clearZero463,464
+clearZero clearZero464,465
+transpose transpose467,468
+transpose transpose468,469
+zeroMat zeroMat478,479
+zeroMat zeroMat479,480
+dirCount dirCount481,482
+dirCount dirCount482,483
+rowCount rowCount484,485
+rowCount rowCount485,486
+colCount colCount487,488
+colCount colCount488,489
+newGaussianState newGaussianState506,507
+newGaussianState newGaussianState507,508
+getHeaviest getHeaviest510,511
+getHeaviest getHeaviest511,512
+traverseRow traverseRow518,519
+traverseRow traverseRow519,520
+traverseCol traverseCol521,522
+traverseCol traverseCol522,523
+structuredGauss structuredGauss524,525
+structuredGauss structuredGauss526,527
+structuredGauss' structuredGauss'528,529
+structuredGauss' structuredGauss'530,531
+nonZeroEntries nonZeroEntries586,587
+nonZeroEntries nonZeroEntries587,588
+multWithVector multWithVector589,590
+multWithVector multWithVector591,592
+nonZeroDirs nonZeroDirs595,596
+nonZeroDirs nonZeroDirs596,597
+nonZeroRows nonZeroRows598,599
+nonZeroRows nonZeroRows599,600
+nonZeroCols nonZeroCols601,602
+nonZeroCols nonZeroCols602,603
+newtype Square Square615,616
+newtype Square n r = Square Square615,616
+newtype Square n r = Square { runSquare runSquare615,616
+substMatrix substMatrix671,672
+substMatrix substMatrix673,674
+toSquare toSquare679,680
+toSquare toSquare680,681
+(<.>)<.>682,683
+v v683,684
+krylovMinpol krylovMinpol685,686
+krylovMinpol krylovMinpol689,690
+solveWiedemann solveWiedemann701,702
+solveWiedemann solveWiedemann704,705
+rankLM rankLM714,715
+rankLM rankLM715,716
+splitIndependentDirs splitIndependentDirs719,720
+splitIndependentDirs splitIndependentDirs724,725
+intDet intDet740,741
+intDet intDet741,742
+shiftHalf shiftHalf758,759
+shiftHalf shiftHalf759,760
+triangulateModular triangulateModular763,764
+triangulateModular triangulateModular766,767
+lcm' lcm'818,819
+lcm' lcm'819,820
+henselLift henselLift821,822
+henselLift henselLift821,822
+solveHensel solveHensel837,838
+solveHensel solveHensel841,842

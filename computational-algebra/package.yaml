@@ -41,7 +41,7 @@ dependencies:
 - halg-algorithms
 - halg-core
 - halg-factor
-- halg-finite-fields
+- halg-galois-fields
 - halg-matrices
 - halg-polynomials
 - hmatrix

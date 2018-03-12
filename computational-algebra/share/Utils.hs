@@ -8,8 +8,8 @@ module Utils (ZeroDimIdeal(..), polyOfDim, arbitraryRational,homogPolyOfDim,arbV
               arbitrarySolvable, zeroDimOf, zeroDimG, unaryPoly, stdReduced,
               quotOfDim, isNonTrivial, Equation(..), liftSNat, checkForArity,
               MatrixCase(..), idealOfDim) where
-import           Algebra.Field.Finite
-import qualified Algebra.Field.Finite               as F
+import           Algebra.Field.Prime
+import qualified Algebra.Field.Prime                as F
 import           Algebra.Internal
 import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial            hiding (Positive)

@@ -4,7 +4,7 @@ packages:
 - 'algebraic-prelude'
 - 'halg-core'
 - 'halg-polynomials'
-- 'halg-finite-fields'
+- 'halg-galois-fields'
 - 'halg-matrices'
 - 'halg-algorithms'
 - 'halg-factor'

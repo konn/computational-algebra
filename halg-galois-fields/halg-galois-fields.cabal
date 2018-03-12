@@ -2,13 +2,15 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e9c6ff2b05c873e563c058d28222a837cf5690dbd0f1b7f81b2926d13f6cf649
+-- hash: ef73d7b23efdd0584f4cdf876a273adc6c99f7cbd64fe0d23b34910dcab88f74
 
-name:           halg-finite-fields
+name:           halg-galois-fields
 version:        0.6.0.0
-description:    Please see the README on Github at <https://github.com/konn/halg-finite-fields#readme>
-homepage:       https://github.com/konn/halg-finite-fields#readme
-bug-reports:    https://github.com/konn/halg-finite-fields/issues
+synopsis:       General Galois fields, part of halg computational algebra suite.
+description:    Please see the project Web Site <https://konn.github.io/computational-algebra>
+category:       Math
+homepage:       https://github.com/konn/computational-algebra#readme
+bug-reports:    https://github.com/konn/computational-algebra/issues
 author:         Hiromi ISHII
 maintainer:     konn.jinro _at_ gmail.com
 copyright:      2018 (c) Hiromi ISHII
@@ -26,7 +28,7 @@ data-files:
 
 source-repository head
   type: git
-  location: https://github.com/konn/halg-finite-fields
+  location: https://github.com/konn/computational-algebra
 
 library
   hs-source-dirs:
@@ -49,7 +51,6 @@ library
     , template-haskell
     , vector
   exposed-modules:
-      Algebra.Field.Finite
       Algebra.Field.Galois
   other-modules:
       Algebra.Field.Galois.Conway

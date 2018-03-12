@@ -21,7 +21,7 @@ module Algebra.LinkedMatrix (Matrix, toLists, fromLists, fromList,
                              structuredGauss, multWithVector, solveWiedemann,
                              henselLift, solveHensel, structuredGauss', intDet) where
 import Algebra.Algorithms.ChineseRemainder
-import Algebra.Field.Finite
+import Algebra.Field.Prime
 import Algebra.Instances                   ()
 import Algebra.Prelude.Core                hiding (Vector, empty, fromList,
                                             generate, insert, transpose, (%),

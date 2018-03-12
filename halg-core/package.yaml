@@ -34,13 +34,23 @@ default-extensions:
 - UndecidableInstances  
 
 dependencies:
+- ListLike
 - MonadRandom
 - algebra
 - algebraic-prelude
 - base >= 4.7 && < 5
+- constraints
+- containers
 - convertible
 - deepseq
+- equational-reasoning
+- hashable
 - lens
+- reflection
+- singletons
+- sized
+- type-natural
+- unordered-containers
 - vector
 
 default-extensions:

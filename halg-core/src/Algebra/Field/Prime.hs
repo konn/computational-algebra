@@ -1,49 +1,40 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances               #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses, PolyKinds #-}
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeFamilies                #-}
-{-# LANGUAGE UndecidableInstances                                         #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
-module Algebra.Field.Finite (F(), naturalRepr, reifyPrimeField, withPrimeField,
-                             modNat, modNat', modRat, modRat', FiniteField(..), order) where
-import           Algebra.Arithmetic            (modPow)
-import           Algebra.Prelude.Core          hiding (pow)
-import           Algebra.Ring.Polynomial.Class (PrettyCoeff (..),
-                                                ShowSCoeff (..))
-import           Control.DeepSeq               (NFData (..))
-import           Control.Monad.Random          (uniform)
-import           Control.Monad.Random          (runRand)
-import           Control.Monad.Random          (Random (..))
-import qualified Data.Coerce                   as C
-import           Data.Maybe                    (fromMaybe)
-import qualified Data.Ratio                    as R
-import           Data.Reflection               (Reifies (reflect), reifyNat)
-import           GHC.TypeLits                  (KnownNat)
-import           Numeric.Algebra               (Field)
-import           Numeric.Algebra               (char)
-import           Numeric.Algebra               (Natural)
-import qualified Numeric.Algebra               as NA
-import           Numeric.Rig.Characteristic    (Characteristic)
-import           Numeric.Semiring.ZeroProduct  (ZeroProductSemiring)
-import qualified Prelude                       as P
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+-- | Prime fields
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances          #-}
+{-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes            #-}
+{-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances #-}
+module Algebra.Field.Prime
+       ( F(), naturalRepr, reifyPrimeField, withPrimeField
+       , modNat, modNat', modRat, modRat'
+       , FiniteField(..), order
+       ) where
+import Algebra.Arithmetic            (modPow)
+import Algebra.Field.Finite
+import Algebra.Normed
+import Algebra.Ring.Polynomial.Class (PrettyCoeff (..), ShowSCoeff (..))
+
+import           AlgebraicPrelude
+import           Control.DeepSeq              (NFData (..))
+import           Control.Monad.Random         (uniform)
+import           Control.Monad.Random         (runRand)
+import           Control.Monad.Random         (Random (..))
+import qualified Data.Coerce                  as C
+import           Data.Maybe                   (fromMaybe)
+import           Data.Proxy                   (Proxy (..), asProxyTypeOf)
+import qualified Data.Ratio                   as R
+import           Data.Reflection              (Reifies (reflect), reifyNat)
+import           GHC.TypeLits                 (KnownNat)
+import           Numeric.Algebra              (char)
+import           Numeric.Algebra              (Natural)
+import qualified Numeric.Algebra              as NA
+import           Numeric.Semiring.ZeroProduct (ZeroProductSemiring)
+import qualified Prelude                      as P
 
 -- | Prime field of characteristic @p@.
 --   @p@ should be prime, and not statically checked.
 newtype F (p :: k) = F { runF :: Integer }
                    deriving (NFData)
 
-naturalRepr :: F p -> Integer
-naturalRepr = runF
-
-instance Reifies (p :: k) Integer => Show (F p) where
-  showsPrec d n@(F p) = showsPrec d (p `rem` reflect n)
-
-instance Reifies (p :: k) Integer => PrettyCoeff (F p) where
-  showsCoeff d (F p) =
-    if p == 0
-    then Vanished
-    else if p == 1
-         then OneCoeff
-         else Positive $ showsPrec d p
 
 modNat :: Reifies (p :: k) Integer => Integer -> F p
 modNat = modNat' Proxy
@@ -56,15 +47,16 @@ modNat' _ i =
 {-# INLINE modNat' #-}
 
 reifyPrimeField :: Integer -> (forall p. KnownNat p => Proxy (F p) -> a) -> a
-reifyPrimeField p f = reifyNat p (\pxy -> f (proxyF pxy))
+reifyPrimeField p f = reifyNat p (f . proxyF)
 
 withPrimeField :: Integer -> (forall p. KnownNat p => F p) -> Integer
 withPrimeField p f = reifyPrimeField p $ runF . asProxyTypeOf f
 
+naturalRepr :: F p -> Integer
+naturalRepr = runF
+
 proxyF :: Proxy (a :: k) -> Proxy (F a)
 proxyF Proxy = Proxy
-
--- instance Reifies p Int => Noetherian (F p)
 
 instance Eq (F p) where
   F n == F m = n == m
@@ -208,20 +200,22 @@ instance Reifies p Integer => NA.Characteristic (F p) where
   char _ = fromIntegral $ reflect (Proxy :: Proxy p)
   {-# INLINE char #-}
 
-class (Field k, Characteristic k) => FiniteField k where
-  power :: proxy k -> Natural
-  elements :: proxy k -> [k]
 
-instance Reifies p Integer => FiniteField (F p) where
+instance Reifies (p :: k) Integer => Show (F p) where
+  showsPrec d n@(F p) = showsPrec d (p `rem` reflect n)
+
+instance Reifies (p :: k) Integer => PrettyCoeff (F p) where
+  showsCoeff d (F p)
+    | p == 0 = Vanished
+    | p == 1 = OneCoeff
+    | otherwise = Positive $ showsPrec d p
+
+instance Reifies p P.Integer => FiniteField (F p) where
   power _ = 1
   {-# INLINE power #-}
 
   elements p = map modNat [0.. fromIntegral (char p) - 1]
   {-# INLINE elements #-}
-
-order :: FiniteField k => proxy k -> Natural
-order p = char p ^ power p
-{-# INLINE order #-}
 
 instance Reifies p Integer => Random (F p) where
   random = runRand $ uniform (elements Proxy)

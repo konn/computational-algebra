@@ -1,16 +1,16 @@
-{-# LANGUAGE DataKinds, EmptyDataDecls, FlexibleContexts, FlexibleInstances #-}
-{-# LANGUAGE GADTs, MultiParamTypeClasses, NoMonomorphismRestriction        #-}
-{-# LANGUAGE ParallelListComp, PolyKinds, QuasiQuotes, RankNTypes           #-}
-{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeFamilies          #-}
-{-# LANGUAGE TypeOperators, UndecidableInstances                            #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction      #-}
+{-# LANGUAGE ParallelListComp, PolyKinds, QuasiQuotes, RankNTypes  #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeFamilies #-}
+{-# LANGUAGE TypeOperators, UndecidableInstances                   #-}
 module Algebra.Field.Galois (GF'(), IsGF', modPoly, modVec,
                              withIrreducible, linearRepGF, linearRepGF',
                              reifyGF', generateIrreducible,
                              withGF', GF, ConwayPolynomial(..),
                              Conway, primitive, conway,
                              conwayFile, addConwayPolynomials)  where
-import Algebra.Field.Finite
 import Algebra.Field.Galois.Conway
+import Algebra.Field.Prime
 import Algebra.Internal
 import Algebra.Prelude.Core               hiding (varX)
 import Algebra.Ring.Polynomial.Univariate
@@ -38,7 +38,7 @@ import qualified Prelude                      as P
 
 -- | Galois field of order @p^n@.
 --   @f@ stands for the irreducible polynomial over @F_p@ of degree @n@.
-data GF' p (n :: TL.Nat) (f :: Type) = GF' { runGF' :: Sized n (F p) }
+newtype GF' p (n :: TL.Nat) (f :: Type) = GF' { runGF' :: Sized n (F p) }
 deriving instance Reifies p Integer => Eq (GF' p n f)
 
 -- | Galois Field of order @p^n@. This uses conway polynomials

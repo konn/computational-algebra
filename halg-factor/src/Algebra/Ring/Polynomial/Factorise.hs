@@ -14,7 +14,7 @@ module Algebra.Ring.Polynomial.Factorise
          squareFreePart, squareFreeDecomp
        ) where
 import           Algebra.Arithmetic                 hiding (modPow)
-import           Algebra.Field.Finite
+import           Algebra.Field.Prime
 import           Algebra.Prelude.Core
 import           Algebra.Ring.Polynomial.Quotient
 import           Algebra.Ring.Polynomial.Univariate

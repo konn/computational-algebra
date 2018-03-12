@@ -8,7 +8,7 @@ module Algebra.Field.Galois.Internal
         buildInstance,
         parseLine
        ) where
-import           Algebra.Field.Finite
+import           Algebra.Field.Prime
 import           Algebra.Prelude.Core               hiding (lex, lift)
 import           Algebra.Ring.Polynomial.Univariate (Unipol)
 import           Data.Char                          (isDigit)
@@ -43,7 +43,7 @@ parseLine ('[':xs) =
 parseLine _ = []
 
 plusOp :: ExpQ -> ExpQ -> ExpQ
-plusOp e f = infixApp e [| (+) |] f
+plusOp e = infixApp e [| (+) |]
 
 toPoly :: [Integer] -> ExpQ
 toPoly as =

@@ -22,7 +22,7 @@ description:         Please see the project Web Site <https://konn.github.io/com
 dependencies:
 - base >= 4.7 && < 5
 - halg-core
-- halg-finite-fields
+- halg-galois-fields
 - halg-polynomials
 - algebraic-prelude
 - algebra

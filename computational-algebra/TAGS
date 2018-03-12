@@ -182,22 +182,6 @@ mkTC mkTC33,34
 main main41,42
 main main42,43
 
-./bench/monomials.hs,480
-module Main Main1,2
-data MonomPair MonomPair14,15
-data MonomPair = forall forall14,15
-data MonomPair = forall n. MonomPair { getMonoms getMonoms14,15
-data AMonomPair AMonomPair15,16
-data AMonomPair = forall forall15,16
-data AMonomPair = forall n. AMonomPair { getAMonoms getAMonoms15,16
-instance instance17,18
-main main23,24
-main main24,25
-genMonomial genMonomial29,30
-genMonomial genMonomial30,31
-mkTestCase mkTestCase44,45
-mkTestCase mkTestCase45,46
-
 ./bench/solve.hs,444
 module Main Main4,5
 sFour sFour28,29
@@ -308,15 +292,6 @@ buildCase buildCase55,56
 buildCase buildCase56,57
 main main58,59
 main main59,60
-
-./bench/linear.hs,176
-module Main Main4,5
-makeLinear makeLinear19,20
-makeLinear makeLinear20,21
-mkTestCases mkTestCases25,26
-mkTestCases mkTestCases26,27
-main main34,35
-main main35,36
 
 ./bench/unipol-mult.hs,509
 module Main Main1,2

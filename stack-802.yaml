@@ -1,11 +1,11 @@
-resolver: lts-10.0
+resolver: lts-10.8
 skip-ghc-check: true
 packages:
 - 'computational-algebra'
 - 'algebraic-prelude'
 - 'halg-core'
 - 'halg-polynomials'
-- 'halg-finite-fields'
+- 'halg-galois-fields'
 - 'halg-matrices'
 - 'halg-algorithms'
 - 'halg-factor'

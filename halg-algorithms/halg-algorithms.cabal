@@ -2,11 +2,13 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e0df2299a395522ce755cae7930c615b98d22b96f8a53a8e404a5a2e758b9330
+-- hash: 93a99b9143ed0584a453fd927fb17c16f6bd8273f091db1b9523ca935fb0266d
 
 name:           halg-algorithms
 version:        0.6.0.0
-description:    Please see the README on Github at <https://github.com/konn/halg-groebner#readme>
+synopsis:       Algorithms related to Gröbner basis, part of halg computational algebra suite.
+description:    Please see the project Web Site <https://konn.github.io/computational-algebra>
+category:       Math
 homepage:       https://github.com/konn/halg-groebner#readme
 bug-reports:    https://github.com/konn/halg-groebner/issues
 author:         Hiromi ISHII
