@@ -174,6 +174,41 @@ procSchemes0 procSchemes0155,156
 procHaddock procHaddock168,169
 procHaddock procHaddock169,170
 
+./app/flycheck_Main.hs,866
+module Main Main2,3
+algpacks algpacks25,26
+algpacks algpacks26,27
+alghtmls alghtmls32,33
+alghtmls alghtmls33,34
+algCopies algCopies36,37
+algCopies algCopies37,38
+main main42,43
+main main43,44
+myCtx myCtx72,73
+myCtx myCtx73,74
+tocField tocField78,79
+tocField tocField79,80
+readerOpts readerOpts85,86
+readerOpts readerOpts86,87
+writerOpts writerOpts92,93
+writerOpts writerOpts93,94
+tocOpts tocOpts103,104
+tocOpts tocOpts104,105
+excluded excluded110,111
+excluded excluded111,112
+testIgnore testIgnore113,114
+testIgnore testIgnore114,115
+deploy deploy117,118
+deploy deploy118,119
+conf conf144,145
+conf conf145,146
+procSchemes procSchemes151,152
+procSchemes procSchemes152,153
+procSchemes0 procSchemes0154,155
+procSchemes0 procSchemes0155,156
+procHaddock procHaddock168,169
+procHaddock procHaddock169,170
+
 ./app/Instances.hs,325
 module Instances Instances2,3
 newtype BibTeX BibTeX13,14

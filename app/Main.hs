@@ -32,11 +32,11 @@ algpacks =
 
 alghtmls :: Pattern
 alghtmls =
-  foldr1 (.||.) $ [ fromGlob $ p ++ "/**.html" | p <- algpacks]
+  foldr1 (.||.) [ fromGlob $ p ++ "/**.html" | p <- algpacks]
 
 algCopies :: Pattern
 algCopies =
-  foldr1 (.||.) $ [ fromGlob $ p ++ "/**." ++ ext | p <- algpacks, ext <- exts]
+  foldr1 (.||.) [ fromGlob $ p ++ "/**." ++ ext | p <- algpacks, ext <- exts]
   where
     exts = ["css", "js", "gif", "png", "jpg", "svg"]
 
@@ -81,7 +81,7 @@ tocField i = do
   pan <- either (throwError . lines . show) return $
          runPure $
          writeHtml5String tocOpts =<< readHtml readerOpts (T.pack $ itemBody i)
-  return $ T.unpack $  pan
+  return $ T.unpack pan
 
 readerOpts :: ReaderOptions
 readerOpts =
