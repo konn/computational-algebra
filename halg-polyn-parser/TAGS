@@ -13,36 +13,36 @@ main main1,2
 
 ./src/Algebra/Ring/Polynomial/Parser.hs,958
 module Algebra.Ring.Polynomial.ParserAlgebra.Ring.Polynomial.Parser4,5
-lexeme lexeme27,28
 lexeme lexeme28,29
-symbol symbol30,31
+lexeme lexeme29,30
 symbol symbol31,32
-type Parser Parser33,34
-type VariableParser VariableParser34,35
-type VariableParser n n34,35
-unlabeldVarP unlabeldVarP36,37
-unlabeldVarP unlabeldVarP38,39
-labeledVarP labeledVarP44,45
-labeledVarP labeledVarP46,47
-varPowP varPowP51,52
+symbol symbol32,33
+type Parser Parser34,35
+type VariableParser VariableParser35,36
+type VariableParser n n35,36
+unlabeldVarP unlabeldVarP37,38
+unlabeldVarP unlabeldVarP39,40
+labeledVarP labeledVarP45,46
+labeledVarP labeledVarP47,48
 varPowP varPowP52,53
-monomialP monomialP56,57
+varPowP varPowP53,54
 monomialP monomialP57,58
-factorP factorP60,61
-factorP factorP62,63
-binary binary65,66
+monomialP monomialP58,59
+factorP factorP61,62
+factorP factorP63,64
 binary binary66,67
-prefix prefix68,69
+binary binary67,68
 prefix prefix69,70
-table table71,72
+prefix prefix70,71
 table table72,73
-polynomialP polynomialP79,80
-polynomialP polynomialP81,82
-rationalP rationalP84,85
+table table73,74
+polynomialP polynomialP80,81
+polynomialP polynomialP82,83
 rationalP rationalP85,86
-integerP integerP87,88
+rationalP rationalP86,87
 integerP integerP88,89
-fromRat fromRat90,91
+integerP integerP89,90
 fromRat fromRat91,92
-parsePolynomialWith parsePolynomialWith93,94
-parsePolynomialWith parsePolynomialWith97,98
+fromRat fromRat92,93
+parsePolynomialWith parsePolynomialWith94,95
+parsePolynomialWith parsePolynomialWith98,99
