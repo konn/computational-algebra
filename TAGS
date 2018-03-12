@@ -34,34 +34,34 @@ newtype NavBar NavBar80,81
 newtype NavBar  = NavBar NavBar80,81
 newtype NavBar  = NavBar { runNavBar runNavBar80,81
 
-./app/Main.hs,696
+./app/Main.hs,697
 module Main Main2,3
-main main24,25
 main main25,26
-myCtx myCtx54,55
+main main26,27
 myCtx myCtx55,56
-tocField tocField60,61
+myCtx myCtx56,57
 tocField tocField61,62
-readerOpts readerOpts65,66
+tocField tocField62,63
 readerOpts readerOpts66,67
-writerOpts writerOpts71,72
+readerOpts readerOpts67,68
 writerOpts writerOpts72,73
-tocOpts tocOpts82,83
+writerOpts writerOpts73,74
 tocOpts tocOpts83,84
-excluded excluded90,91
+tocOpts tocOpts84,85
 excluded excluded91,92
-testIgnore testIgnore93,94
+excluded excluded92,93
 testIgnore testIgnore94,95
-deploy deploy97,98
+testIgnore testIgnore95,96
 deploy deploy98,99
-conf conf124,125
+deploy deploy99,100
 conf conf125,126
-procSchemes procSchemes131,132
+conf conf126,127
 procSchemes procSchemes132,133
-procSchemes0 procSchemes0134,135
+procSchemes procSchemes133,134
 procSchemes0 procSchemes0135,136
-procHaddock procHaddock148,149
+procSchemes0 procSchemes0136,137
 procHaddock procHaddock149,150
+procHaddock procHaddock150,151
 
 ./app/Instances.hs,325
 module Instances Instances2,3

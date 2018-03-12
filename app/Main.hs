@@ -6,6 +6,7 @@ import Settings
 
 import           Control.Lens              hiding (setting)
 import           Control.Monad.Error.Class
+import           Control.Monad.IO.Class
 import           Data.Default
 import           Data.Foldable
 import           Data.Maybe
@@ -28,7 +29,7 @@ main = hakyllWith conf $ do
   match ("docs/algebra-*/**.html" .||. "docs/algebraic-prelude-*/**.html" .||. "docs/computational-algebra-*/**.html") $ do
     route idRoute
     compile $
-      getResourceString >>= withItemBody (fmap T.unpack . procHaddock . T.pack)
+      getResourceString >>= withItemBody (fmap T.unpack . unsafeCompiler . procHaddock . T.pack)
   match ("katex/**" .&&. complement "**.md") $
     route idRoute >> compile copyFileCompiler
   match "templates/**" $
@@ -146,14 +147,13 @@ procSchemes0 inl =
   where
     sandwitched s e t = s <> t <> e
 
-procHaddock :: Text -> Compiler Text
+procHaddock :: Text -> IO Text
 procHaddock  = fmap renderTags . mapM rewriter . parseTags
   where
-    rewriter :: Tag Text -> Compiler (Tag Text)
     rewriter (TagOpen "a" atts)
       | Just ref <- T.stripPrefix "../" =<< lookup "href" atts
       = do let (pkg, rest) = T.breakOn "/" ref
-           known <- unsafeCompiler $ shelly $ test_e $ "docs" </> pkg
+           known <- shelly $ test_e $ "docs" </> pkg
            let href | known = ref
                     | otherwise = T.concat ["https://hackage.haskell.org/package/", pkg
                                            ,"/docs", rest]
