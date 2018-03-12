@@ -23,10 +23,27 @@ import           Text.Pandoc
 
 default (Text)
 
+algpacks :: [String]
+algpacks =
+  ["docs/algebra-*"
+  , "docs/algebraic-prelude-*"
+  , "docs/computational-algebra-*"
+  , "docs/halg-*"]
+
+alghtmls :: Pattern
+alghtmls =
+  foldr1 (.||.) $ [ fromGlob $ p ++ "/**.html" | p <- algpacks]
+
+algCopies :: Pattern
+algCopies =
+  foldr1 (.||.) $ [ fromGlob $ p ++ "/**." ++ ext | p <- algpacks, ext <- exts]
+  where
+    exts = ["css", "js", "gif", "png", "jpg", "svg"]
+
 main :: IO ()
 main = hakyllWith conf $ do
   setting "schemes" (def :: Schemes)
-  match ("docs/algebra-*/**.html" .||. "docs/algebraic-prelude-*/**.html" .||. "docs/computational-algebra-*/**.html") $ do
+  match alghtmls $ do
     route idRoute
     compile $
       getResourceString >>= withItemBody (fmap T.unpack . unsafeCompiler . procHaddock . T.pack)
@@ -37,7 +54,7 @@ main = hakyllWith conf $ do
   match "params.json" $ do
     route idRoute
     compile copyFileCompiler
-  match ("**.css" .||. "**.js" .||. "**.gif" .||. "**.png" .||. "**.jpg" .||. "**.svg" .||. "**.html") $ do
+  match algCopies $ do
     route idRoute
     compile copyFileCompiler
   match "index.md" $ do

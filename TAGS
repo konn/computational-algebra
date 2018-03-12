@@ -34,34 +34,40 @@ newtype NavBar NavBar80,81
 newtype NavBar  = NavBar NavBar80,81
 newtype NavBar  = NavBar { runNavBar runNavBar80,81
 
-./app/Main.hs,697
+./app/Main.hs,866
 module Main Main2,3
-main main25,26
-main main26,27
-myCtx myCtx55,56
-myCtx myCtx56,57
-tocField tocField61,62
-tocField tocField62,63
-readerOpts readerOpts66,67
-readerOpts readerOpts67,68
-writerOpts writerOpts72,73
-writerOpts writerOpts73,74
-tocOpts tocOpts83,84
-tocOpts tocOpts84,85
-excluded excluded91,92
-excluded excluded92,93
-testIgnore testIgnore94,95
-testIgnore testIgnore95,96
-deploy deploy98,99
-deploy deploy99,100
-conf conf125,126
-conf conf126,127
-procSchemes procSchemes132,133
-procSchemes procSchemes133,134
-procSchemes0 procSchemes0135,136
-procSchemes0 procSchemes0136,137
-procHaddock procHaddock149,150
-procHaddock procHaddock150,151
+algpacks algpacks25,26
+algpacks algpacks26,27
+alghtmls alghtmls32,33
+alghtmls alghtmls33,34
+algCopies algCopies36,37
+algCopies algCopies37,38
+main main42,43
+main main43,44
+myCtx myCtx72,73
+myCtx myCtx73,74
+tocField tocField78,79
+tocField tocField79,80
+readerOpts readerOpts83,84
+readerOpts readerOpts84,85
+writerOpts writerOpts89,90
+writerOpts writerOpts90,91
+tocOpts tocOpts100,101
+tocOpts tocOpts101,102
+excluded excluded108,109
+excluded excluded109,110
+testIgnore testIgnore111,112
+testIgnore testIgnore112,113
+deploy deploy115,116
+deploy deploy116,117
+conf conf142,143
+conf conf143,144
+procSchemes procSchemes149,150
+procSchemes procSchemes150,151
+procSchemes0 procSchemes0152,153
+procSchemes0 procSchemes0153,154
+procHaddock procHaddock166,167
+procHaddock procHaddock167,168
 
 ./app/Instances.hs,325
 module Instances Instances2,3
