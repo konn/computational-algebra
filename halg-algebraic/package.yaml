@@ -50,7 +50,6 @@ library:
   - lens
   - mono-traversable
   - sized
-  - type-natural
   - arithmoi
 
 executables: {}

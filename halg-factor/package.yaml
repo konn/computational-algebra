@@ -36,7 +36,6 @@ library:
   - halg-core
   - halg-finite-fields
   - halg-polynomials
-  - halg-algorithms
   - integer-logarithms
   - lens
   - monad-loops
