@@ -50,6 +50,7 @@ library:
   - containers
   - deepseq
   - equational-reasoning
+  - ghc-typelits-knownnat
   - hashable
   - heaps
   - lens
