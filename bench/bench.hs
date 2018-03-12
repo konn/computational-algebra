@@ -1,12 +1,12 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs            #-}
-{-# LANGUAGE MultiParamTypeClasses, OverloadedStrings, PolyKinds, QuasiQuotes #-}
-{-# LANGUAGE TemplateHaskell, UndecidableInstances, DataKinds, NoImplicitPrelude   #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs         #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, OverloadedStrings   #-}
+{-# LANGUAGE PolyKinds, QuasiQuotes, TemplateHaskell, UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 import Algebra.Algorithms.Groebner
 import Algebra.Prelude
 import Control.DeepSeq
 import Control.Parallel.Strategies
-import Criterion.Main
+import Gauge.Main
 
 i1, i2, i4 :: [OrderedPolynomial (Fraction Integer) Grevlex 3]
 (i1, i2, i4) = ([x^2 + y^2 + z^2 - 1, x^2 + y^2 + z^2 - 2*x, 2*x -3*y - z],

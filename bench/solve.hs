@@ -14,8 +14,8 @@ import           Control.DeepSeq
 import           Control.Monad
 import           Control.Monad.Random
 import           Control.Parallel.Strategies
-import           Criterion
-import           Criterion.Main
+import           Gauge
+import           Gauge.Main
 import           Numeric.Algebra             hiding ((<), (^))
 import qualified Numeric.Algebra             as NA
 import           Numeric.Field.Fraction      (Fraction)
@@ -71,7 +71,7 @@ mkBench is = do
 randomCase :: (0 :< n) ~ 'True
            => Int -> SNat n -> IO [Ideal (Polynomial (Fraction Integer) n)]
 randomCase count sn = do
-  as <- take count . map getIdeal <$> sample' (zeroDimOf sn)
+  as <- take count . P.map getIdeal <$> sample' (zeroDimOf sn)
   mapM (\a -> return $!! (a `using` rdeepseq)) as
 
 main :: IO ()
@@ -89,5 +89,5 @@ main = do
     , bgroup "ternary-02" case02
     , bgroup "ternary-03" case03
     , bgroup "ternary-04" case04
-    ] ++ zipWith (\i -> bgroup ("4-ary-0"++show i)) [5..]  cases
+    ] P.++ zipWith (\i -> bgroup ("4-ary-0" P.++ show i)) [5..]  cases
 --    ++ zipWith (\i -> bgroup ("10-ary-0"++show i)) [8]  cases'

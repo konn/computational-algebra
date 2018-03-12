@@ -1,12 +1,12 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs            #-}
-{-# LANGUAGE MultiParamTypeClasses, OverloadedStrings, PolyKinds, QuasiQuotes #-}
-{-# LANGUAGE TemplateHaskell, UndecidableInstances                            #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses, OverloadedStrings, PolyKinds   #-}
+{-# LANGUAGE QuasiQuotes, TemplateHaskell, UndecidableInstances    #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 import Algebra.Algorithms.Groebner.Monomorphic
 import Algebra.Ring.Polynomial.Monomorphic
 import Control.DeepSeq
 import Control.Parallel.Strategies
-import Criterion.Main
+import Gauge.Main
 import SingularBench
 
 x, y, z, w, s, a, b, c :: Polynomial (Fraction Integer)

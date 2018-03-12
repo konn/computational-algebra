@@ -6,7 +6,7 @@ import Algebra.Algorithms.Groebner.Monomorphic
 import Algebra.Ring.Polynomial.Monomorphic
 import Control.DeepSeq
 import Control.Parallel.Strategies
-import Criterion.Main
+import Gauge.Main
 
 x, y, z, w, s, a, b, c :: Polynomial (Fraction Integer)
 [x, y, z, w, s, a, b, c] = map (injectVar . flip Variable Nothing) "xyzwSabc"

@@ -3,9 +3,9 @@ module Main where
 import           Algebra.Field.Finite
 import           Algebra.Prelude                    hiding ((%))
 import           Algebra.Ring.Polynomial.Univariate
-import           Criterion.Main
 import qualified Data.Map                           as M
 import qualified Data.Sized.Builtin                 as SV
+import           Gauge.Main
 import           Numeric.Field.Fraction             ((%))
 
 main :: IO ()

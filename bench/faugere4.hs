@@ -1,4 +1,5 @@
-{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction, DataKinds, FlexibleContexts #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, NoImplicitPrelude #-}
+{-# LANGUAGE NoMonomorphismRestriction                      #-}
 module Main where
 import           Algebra.Algorithms.Faugere4
 import           Algebra.Algorithms.Groebner
@@ -7,10 +8,10 @@ import           Algebra.Matrix
 import           Algebra.Prelude
 import           Control.DeepSeq
 import           Control.Parallel.Strategies
-import           Criterion
-import           Criterion.Main
 import qualified Data.Matrix                 as DM
 import           Data.Proxy                  (Proxy (..))
+import           Gauge
+import           Gauge.Main
 import           Test.QuickCheck
 
 import Utils

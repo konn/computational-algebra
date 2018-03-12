@@ -10,10 +10,10 @@ import           Algebra.Scalar
 import           Control.DeepSeq
 import           Control.Monad
 import           Control.Parallel.Strategies
-import           Criterion
 import           Data.Type.Natural           hiding (one)
 import           Data.Vector.Sized           (Vector (..))
 import qualified Data.Vector.Sized           as V
+import           Gauge
 import           Numeric.Algebra             hiding ((.*), (<), (^))
 import qualified Numeric.Algebra             as NA
 import           Numeric.Field.Fraction      (Fraction)

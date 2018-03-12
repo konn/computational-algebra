@@ -6,8 +6,8 @@ import           Control.Applicative
 import           Control.DeepSeq
 import           Control.Monad
 import           Control.Parallel.Strategies
-import           Criterion.Main
 import           Data.Type.Monomorphic
+import           Gauge.Main
 import qualified SequenceMonomial                   as S
 import           System.Random
 import           Test.QuickCheck

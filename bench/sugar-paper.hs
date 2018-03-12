@@ -11,7 +11,7 @@ import Algebra.Ring.Polynomial
 import Algebra.Scalar
 
 import Control.Parallel.Strategies
-import Criterion.Main
+import Gauge.Main
 import Numeric.Field.Fraction      (Fraction)
 
 i1 :: [OrderedPolynomial (Fraction Integer) Grevlex 7]

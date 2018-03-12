@@ -2,13 +2,13 @@
 module Main where
 import           Algebra.Ring.Polynomial            (OrderedPolynomial)
 import           Algebra.Ring.Polynomial.Univariate
-import           Criterion.Main
 import           Data.Char                          (toLower)
 import           Data.List                          (intercalate)
 import qualified Data.Map                           as M
 import           Data.Proxy                         (Proxy (..))
 import           Data.Sized.Builtin                 (singleton)
 import           Data.Typeable
+import           Gauge.Main
 import           Numeric.Field.Fraction
 import qualified Test.QuickCheck                    as QC
 import           Utils                              ()

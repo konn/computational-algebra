@@ -7,9 +7,9 @@ import           Algebra.Ring.Polynomial                 (eliminationOrder, weig
 import           Algebra.Ring.Polynomial.Monomorphic
 import           Control.DeepSeq
 import           Control.Parallel.Strategies
-import           Criterion.Main
-import           Criterion.Types
 import           Data.Type.Natural
+import           Gauge.Main
+import           Gauge.Types
 import           Numeric.Algebra                         (LeftModule (..))
 import qualified Numeric.Algebra                         as NA
 

@@ -12,9 +12,9 @@ import           Control.Concurrent
 import           Control.DeepSeq
 import           Control.Monad
 import           Control.Parallel.Strategies
-import           Criterion.Main
 import           Data.List                        (foldl')
 import           Data.Maybe
+import           Gauge.Main
 import           Numeric.Algebra                  hiding ((>), (^))
 import           Numeric.Field.Fraction           (Fraction)
 import           Prelude                          hiding (product)

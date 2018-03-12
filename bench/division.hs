@@ -1,6 +1,6 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs            #-}
-{-# LANGUAGE MultiParamTypeClasses, OverloadedStrings, PolyKinds, QuasiQuotes #-}
-{-# LANGUAGE TemplateHaskell, UndecidableInstances                            #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses, OverloadedStrings, PolyKinds   #-}
+{-# LANGUAGE QuasiQuotes, TemplateHaskell, UndecidableInstances    #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
 import Algebra.Algorithms.Groebner
@@ -11,8 +11,8 @@ import Control.Concurrent
 import Control.DeepSeq
 import Control.Monad
 import Control.Parallel.Strategies
-import Criterion.Main
 import Data.Type.Natural           hiding (one)
+import Gauge.Main
 import Prelude                     hiding (product)
 import System.Process
 import Test.QuickCheck
