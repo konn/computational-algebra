@@ -11,6 +11,7 @@ packages:
 - 'halg-matrices'
 - 'halg-algorithms'
 - 'halg-factor'
+- 'halg-algebraic'
 
 extra-deps: 
 - Cabal-2.2.0.0

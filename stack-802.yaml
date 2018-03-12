@@ -9,6 +9,7 @@ packages:
 - 'halg-matrices'
 - 'halg-algorithms'
 - 'halg-factor'
+- 'halg-algebraic'
 
 flags:
   computational-algebra:
