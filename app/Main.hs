@@ -19,7 +19,7 @@ import           Hakyll                    hiding (renderTags)
 import           Shelly
 import           System.Exit               (ExitCode (..))
 import           Text.HTML.TagSoup
-import           Text.Pandoc
+import           Text.Pandoc               hiding (getZonedTime)
 
 default (Text)
 
@@ -54,7 +54,7 @@ main = hakyllWith conf $ do
   match "params.json" $ do
     route idRoute
     compile copyFileCompiler
-  match algCopies $ do
+  match (algCopies .||. "**.js" .||. "**.css") $ do
     route idRoute
     compile copyFileCompiler
   match "index.md" $ do
@@ -78,13 +78,16 @@ myCtx =
 
 tocField :: Item String -> Compiler String
 tocField i = do
-  pan <- either (throwError . lines . show) return $ readHtml readerOpts $ itemBody i
-  return $ writeHtmlString tocOpts pan
+  pan <- either (throwError . lines . show) return $
+         runPure $
+         writeHtml5String tocOpts =<< readHtml readerOpts (T.pack $ itemBody i)
+  return $ T.unpack $  pan
 
 readerOpts :: ReaderOptions
 readerOpts =
   defaultHakyllReaderOptions { readerStandalone = True
-                             , readerParseRaw = True
+                             , readerExtensions =
+                               enableExtension Ext_raw_html pandocExtensions
                              }
 
 writerOpts :: WriterOptions
@@ -93,7 +96,7 @@ writerOpts =
   { writerHTMLMathMethod = MathJax mathJaxCDN
   , writerTOCDepth = 2
   , writerTableOfContents  = True
-  , writerHtml5 = True
+  , writerExtensions = enableExtension Ext_raw_html pandocExtensions
   }
   where
     mathJaxCDN = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"
@@ -103,7 +106,6 @@ tocOpts =
   writerOpts { writerTemplate = Just "$toc$"
              , writerTOCDepth = 4
              , writerTableOfContents  = True
-             , writerHtml5 = True
              }
 
 excluded :: [String]
