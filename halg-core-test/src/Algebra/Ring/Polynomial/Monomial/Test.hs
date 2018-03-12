@@ -8,7 +8,7 @@ import           Algebra.Internal
 import           Algebra.Ring.Polynomial.Monomial (Monomial,
                                                    OrderedMonomial (..))
 import qualified Data.Sized.Builtin               as SV
-import           GHC.TypeNats                     (KnownNat)
+import           GHC.TypeLits                     (KnownNat)
 import           Prelude
 import           Test.QuickCheck                  (Arbitrary, Gen, arbitrary,
                                                    arbitrarySizedBoundedIntegral,
