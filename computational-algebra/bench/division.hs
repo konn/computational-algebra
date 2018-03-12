@@ -18,7 +18,6 @@ import GHC.TypeNats                (KnownNat)
 import Prelude                     hiding (product)
 import System.Process
 import Test.QuickCheck
-import Utils
 
 sTwo :: Sing 2
 sTwo = [snat|2|]

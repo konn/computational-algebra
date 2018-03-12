@@ -2,6 +2,7 @@
 module Main where
 import           Algebra.Ring.Polynomial            (OrderedPolynomial)
 import           Algebra.Ring.Polynomial.Univariate
+import           Algebra.TestUtils
 import           Data.Char                          (toLower)
 import           Data.List                          (intercalate)
 import qualified Data.Map                           as M
@@ -11,7 +12,6 @@ import           Data.Typeable
 import           Gauge.Main
 import           Numeric.Field.Fraction
 import qualified Test.QuickCheck                    as QC
-import           Utils                              ()
 
 x :: Unipol (Fraction Integer)
 x = var 0

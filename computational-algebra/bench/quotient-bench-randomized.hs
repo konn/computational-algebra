@@ -21,7 +21,6 @@ import           Prelude                          hiding (concat, map, product)
 import qualified Prelude                          as P
 import           System.Process
 import           Test.QuickCheck
-import           Utils
 
 sTwo :: SNat 2
 sTwo = sing

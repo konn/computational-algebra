@@ -11,7 +11,6 @@ import           Data.Typeable
 import           Gauge.Main
 import           Numeric.Field.Fraction
 import qualified Test.QuickCheck                    as QC
-import           Utils                              ()
 
 x :: Unipol Integer
 x = var 0

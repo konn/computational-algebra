@@ -83,7 +83,6 @@ _example-cond: &example-cond
         buildable: false
   dependencies:
   - computational-algebra
-  - computational-algebra-shared
   - deepseq
   - algebraic-prelude
   - halg-polynomials
@@ -96,7 +95,6 @@ _profile-cond: &profile-cond
   <<:   *exe-defaults
   dependencies:
   - computational-algebra
-  - computational-algebra-shared
   - deepseq
   - algebraic-prelude
   - halg-polynomials
@@ -140,38 +138,13 @@ _profiles: &profiles
     <<: *profile-cond
     main: hensel-prof.hs
 
-_test-default: &test-default
-  source-dirs:  tests
-  dependencies:
-  - computational-algebra-shared
-  - HUnit
-  - QuickCheck
-  - constraints
-  - convertible
-  - containers
-  - equational-reasoning
-  - hspec
-  - lens
-  - quickcheck-instances
-  - reflection
-  - smallcheck
-  - lazysmallcheck
-  - test-framework >=0.8.0.3 && <0.9
-  - test-framework-hunit >=0.3.0.1 && <0.4
-  - transformers
-  - type-natural
-  buildable: true
-  ghc-options:
-  - -O2
-  - -Wall
-  - -threaded
-
 executables:
   <<: *examples
   <<: *profiles
 
 _bench-common: &bench-common
     dependencies:
+    - halg-core-test
     - constraints
     - containers
     - gauge
@@ -180,7 +153,6 @@ _bench-common: &bench-common
     - parallel
     - process
     - sized
-    - computational-algebra-shared
     - computational-algebra
     - QuickCheck
     source-dirs:

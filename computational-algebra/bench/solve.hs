@@ -24,7 +24,6 @@ import           Prelude                     hiding (Fractional (..),
                                               Real (..), sum, (^^))
 import qualified Prelude                     as P
 import           Test.QuickCheck
-import           Utils
 
 sFour :: Sing 4
 sFour = sing :: SNat 4
