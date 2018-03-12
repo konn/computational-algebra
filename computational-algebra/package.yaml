@@ -184,26 +184,6 @@ _test-default: &test-default
   - -threaded
 
 tests:
-  test-multi-table:
-    buildable: false
-    <<: *test-default
-    main: multi-table.hs
-  singular-test:
-    buildable: false
-    <<: *test-default
-    main: SingularTest.hs
-  monomial-order-test:
-    <<: *test-default
-    main: monomials.hs
-    buildable: false
-  matrix-test:
-    buildable: false
-    <<: *test-default
-    main: matrix.hs
-  new-div-test:
-    buildable: false
-    <<: *test-default
-    main: division.hs
   linear-test:
     <<: *test-default
     main: linear.hs
@@ -251,29 +231,14 @@ benchmarks:
     <<: *bench-common
     main: bench.hs
     other-modules: []
-  eliminate-bench:
-    <<: *bench-common
-    main: elimination-bench.hs
-    other-modules: []
-    buildable: false
   quotient-bench-randomized:
     <<: *bench-common
     main: quotient-bench-randomized.hs
-    other-modules: []
-  division-bench:
-    <<: *bench-common
-    main: division.hs
-    buildable: false
     other-modules: []
   sugar-paper-bench:
     <<: *bench-common
     main: sugar-paper.hs
     other-modules: []
-  sugar-bench:
-    <<: *bench-common
-    main: sugar.hs
-    buildable: false
-    other-modules: SingularBench
   solve-bench:
     <<: *bench-common
     main: solve.hs
