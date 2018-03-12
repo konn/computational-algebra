@@ -1,29 +1,28 @@
 {-# LANGUAGE DataKinds, GADTs, RankNTypes, TypeOperators #-}
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 module ZeroDimSpec where
-import           Algebra.Algorithms.Groebner
-import           Algebra.Algorithms.ZeroDim
-import           Algebra.Internal
-import           Algebra.Ring.Ideal
-import           Algebra.Ring.Polynomial
-import           Algebra.Ring.Polynomial.Quotient
+import Algebra.Algorithms.Groebner
+import Algebra.Algorithms.ZeroDim
 import Algebra.Internal
+import Algebra.Internal
+import Algebra.Ring.Ideal
+import Algebra.Ring.Polynomial
+import Algebra.Ring.Polynomial.Quotient
 
 import           Control.Monad
 import           Control.Monad.Random
 import           Data.Complex
-import           Data.Convertible                 (convert)
-import qualified Data.Matrix                      as M
+import           Data.Convertible       (convert)
+import qualified Data.Matrix            as M
 import           Data.Maybe
-import           Data.Type.Monomorphic
+import qualified Data.Sized.Builtin     as SV
 import           Data.Type.Ordinal
-import qualified Data.Vector                      as V
-import qualified Data.Sized.Builtin                as SV
-import           Numeric.Field.Fraction           (Fraction, (%))
+import qualified Data.Vector            as V
+import           Numeric.Field.Fraction (Fraction, (%))
 import           SingularBridge
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
-import           Test.QuickCheck                  hiding (promote)
+import           Test.QuickCheck        hiding (promote)
 import           Utils
 
 asGenListOf :: Gen [a] -> a -> Gen [a]

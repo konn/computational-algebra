@@ -7,7 +7,6 @@ import           Algebra.Internal
 import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial
 import qualified Data.Matrix                 as M
-import           Data.Type.Monomorphic
 import qualified Data.Vector                 as V
 import           Test.Hspec
 import           Test.Hspec.QuickCheck

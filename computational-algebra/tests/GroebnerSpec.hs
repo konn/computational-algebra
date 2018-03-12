@@ -10,7 +10,6 @@ import           Control.Monad
 import qualified Data.Foldable               as F
 import           Data.List                   (delete)
 import qualified Data.Sized.Builtin          as SV
-import           Data.Type.Monomorphic
 import           Numeric.Field.Fraction      (Fraction)
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
@@ -54,7 +53,7 @@ spec = do
       checkForArity [2..3] prop_intersection
     it "can solve test-cases correctly" $ do
       forM_ ics_binary $ \(IC i j ans) ->
-        intersection (toIdeal i :< toIdeal j :< NilL) `shouldBe` toIdeal ans
+        F.toList (intersection [toIdeal i, toIdeal j]) `shouldBe` ans
 
 prop_intersection :: KnownNat n => SNat n -> Property
 prop_intersection sdim =
@@ -62,7 +61,7 @@ prop_intersection sdim =
   forAll (idealOfDim sdim) $ \jdeal ->
   forAll (polyOfDim sdim) $ \f ->
   (f `isIdealMember` ideal && f `isIdealMember` jdeal)
-  == f `isIdealMember` (intersection $ ideal :< jdeal :< NilL)
+  == f `isIdealMember` intersection [ideal, jdeal]
 
 prop_isMinimal :: KnownNat n => SNat n -> Property
 prop_isMinimal sdim =

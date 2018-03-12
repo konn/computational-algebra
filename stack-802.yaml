@@ -1,7 +1,7 @@
 resolver: lts-10.0
 skip-ghc-check: true
 packages:
-- '.'
+- 'computational-algebra'
 - 'algebraic-prelude'
 - 'halg-core'
 - 'halg-polynomials'
@@ -14,12 +14,14 @@ packages:
 flags:
   computational-algebra:
     examples: true
+    profile:  false
 
 extra-deps:
 - algebra-4.3
 - equational-reasoning-0.5.1.0
 - ghc-typelits-presburger-0.2.0.0
 - unamb-0.2.5
+- hspec-smallcheck-0.5.0
 
 - git: https://github.com/cartazio/arithmoi.git
   commit: a3e189cca4c2961796c7ca74eccb29ff89f0e3d3

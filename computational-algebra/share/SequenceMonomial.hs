@@ -2,7 +2,7 @@
 module SequenceMonomial (Monomial(), MonomialOrder, length, viewl
                         , totalDegree, viewr, lex, graded, revlex, grlex, grevlex, fromList) where
 import           Control.DeepSeq
-import           Data.Foldable
+import           Data.Foldable   hiding (length)
 import           Data.Monoid
 import           Data.Ord
 import           Data.Sequence   (Seq)

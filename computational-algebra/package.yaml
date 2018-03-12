@@ -1,0 +1,278 @@
+name:                computational-algebra
+version:             0.6.0.0
+github:              "konn/computational-algebra"
+license:             BSD3
+author:              "Hiromi ISHII"
+maintainer:          "konn.jinro _at_ gmail.com"
+copyright:           "2018 (c) Hiromi ISHII"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+category:            Math
+
+description:         Please see the project Web Site at <https://konn.github.io/computational-algebra>
+
+github: konn/computational-algebra
+
+flags:
+  examples:
+    default: false
+    manual:  true
+    description: |
+      Whether to build example binaries (default: False)
+
+  profile:
+    default: false
+    manual:  true
+    description: |
+      Whether to build profiling binaries (default: False)
+
+dependencies:
+- MonadRandom
+- algebra
+- algebraic-prelude
+- base >= 4.7 && < 5
+- containers
+- halg-algebraic
+- halg-algorithms
+- halg-core
+- halg-factor
+- halg-finite-fields
+- halg-matrices
+- halg-polynomials
+- hmatrix
+- lens
+- matrix
+- random
+- singletons
+- sized
+- type-natural
+- vector
+
+library:
+  source-dirs: src
+  ghc-options:  -Wall
+  when:
+    - condition: flag(profile)
+      ghc-options:
+      - -prof
+      - -fprof-auto-exported
+
+internal-libraries:
+  computational-algebra-shared:
+    source-dirs: share
+    dependencies:
+    - computational-algebra
+    - lazysmallcheck ==0.6.*
+    - smallcheck >=1.1.1 && <1.2
+    - QuickCheck >=2.6 && <2.11
+    - HUnit >=1.2.5.2 && <1.7
+    - hspec == 2.4.*
+    - quickcheck-instances
+    - deepseq
+    - text
+    - process
+    - vector
+    - reflection
+
+_exe-defaults: &exe-defaults
+  source-dirs: examples
+  default-extensions:
+  - DataKinds
+  - NoImplicitPrelude
+  ghc-options:
+  - -Wall
+  - -threaded
+  - -rtsopts
+  - -with-rtsopts=-N
+
+_example-cond: &example-cond
+  <<:   *exe-defaults
+  when:
+    - condition: flag(examples)
+      then: 
+        buildable: true
+      else:
+        buildable: false
+  dependencies:
+  - computational-algebra
+  - computational-algebra-shared
+  - deepseq
+  - algebraic-prelude
+  - halg-polynomials
+  - convertible
+  - vector
+  - singletons
+  - reflection
+
+_profile-cond: &profile-cond
+  <<:   *exe-defaults
+  dependencies:
+  - computational-algebra
+  - computational-algebra-shared
+  - deepseq
+  - algebraic-prelude
+  - halg-polynomials
+  - hspec-smallcheck == 0.5.*
+  when:
+    - condition: flag(profile)
+      then: 
+        buildable: true
+      else:
+        buildable: false
+  ghc-options:
+  - -caf-all
+  - -auto-all
+  - -rtsopts
+  - -eventlog
+  - -prof
+  - -fprof-auto-exported
+  
+_examples: &examples
+  solve:
+    <<:   *example-cond
+    main: solve.hs
+  algebraic:
+    <<:   *example-cond
+    main: algebraic.hs
+  algebraic:
+    <<:   *example-cond
+    main: algebraic.hs
+  sandpit-poly:
+    <<:   *example-cond
+    main: sandpit-poly.hs
+  quotient:
+    <<:   *example-cond
+    main: quotient.hs
+
+_profiles: &profiles
+  groebner-prof:
+    <<: *profile-cond
+    main: groebner-prof.hs
+  hensel-prof:
+    <<: *profile-cond
+    main: hensel-prof.hs
+
+_test-default: &test-default
+  source-dirs:  tests
+  dependencies:
+  - computational-algebra-shared
+  - HUnit
+  - QuickCheck
+  - constraints
+  - convertible
+  - containers
+  - equational-reasoning
+  - hspec
+  - lens
+  - quickcheck-instances
+  - reflection
+  - smallcheck
+  - lazysmallcheck
+  - test-framework >=0.8.0.3 && <0.9
+  - test-framework-hunit >=0.3.0.1 && <0.4
+  - transformers
+  - type-natural
+  buildable: true
+  ghc-options:
+  - -O2
+  - -Wall
+  - -threaded
+
+tests:
+  test-multi-table:
+    buildable: false
+    <<: *test-default
+    main: multi-table.hs
+  singular-test:
+    buildable: false
+    <<: *test-default
+    main: SingularTest.hs
+  monomial-order-test:
+    buildable: false
+    <<: *test-default
+    main: monomials.hs
+  matrix-test:
+    buildable: false
+    <<: *test-default
+    main: matrix.hs
+  new-div-test:
+    buildable: false
+    <<: *test-default
+    main: division.hs
+  linear-test:
+    <<: *test-default
+    main: linear.hs
+    other-modules: []
+  specs:
+    <<: *test-default
+    main: Spec.hs
+    other-modules:
+    - QuotientSpec
+    - PolynomialSpec
+    - UnivariateSpec
+    - GroebnerSpec
+    - ZeroDimSpec
+      
+executables:
+  <<: *examples
+  <<: *profiles
+
+_bench-common: &bench-common
+    dependencies:
+    - constraints
+    - containers
+    - gauge
+    - deepseq
+    - matrix
+    - parallel
+    - process
+    - computational-algebra-shared
+    source-dirs:
+    - bench
+    ghc-options:
+    - -O2
+    - -threaded
+    - -rtsopts
+
+benchmarks:
+  unipol-bench:
+    <<: *bench-common
+    main: unipol-bench.hs
+  normal-bench:
+    <<: *bench-common
+    main: bench.hs
+  eliminate-bench:
+    <<: *bench-common
+    main: eliminate-bench.hs
+  quotient-bench-randomized:
+    <<: *bench-common
+    main: quotient-bench-randomized.hs
+  monomial-order-bench:
+    <<: *bench-common
+    main: monomials.hs
+  linear-bench:
+    <<: *bench-common
+    main: linear.hs
+  division-bench:
+    <<: *bench-common
+    main: division.hs
+  sugar-paper-bench:
+    <<: *bench-common
+    main: sugar-paper.hs
+  solve-bench:
+    <<: *bench-common
+    main: solve.hs
+  coercion-bench:
+    <<: *bench-common
+    main: coercion.hs
+  unipol-mult-bench:
+    <<: *bench-common
+    main: unipol-mult.hs
+  unipol-div-bench:
+    <<: *bench-common
+    main: unipol-div.hs

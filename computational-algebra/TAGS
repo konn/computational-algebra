@@ -1,0 +1,537 @@
+
+./Setup.hs,15
+main main1,2
+
+./app/Main.hs,52
+module Main Main0,1
+main main4,5
+main main5,6
+
+./tests/multi-table.hs,158
+module Main Main1,2
+main main12,13
+main main13,14
+i1 i115,16
+i1 i116,17
+spec spec18,19
+spec spec19,20
+prop01 prop0123,24
+prop01 prop0124,25
+
+./tests/ZeroDimSpec.hs,692
+module ZeroDimSpec ZeroDimSpec2,3
+asGenListOf asGenListOf27,28
+asGenListOf asGenListOf28,29
+spec spec30,31
+spec spec31,32
+isDescending isDescending104,105
+isDescending isDescending105,106
+prop_isApproximateZero prop_isApproximateZero107,108
+prop_isApproximateZero prop_isApproximateZero112,113
+prop_univPoly prop_univPoly121,122
+prop_univPoly prop_univPoly122,123
+rank rank130,131
+rank rank131,132
+data TestSet TestSet135,136
+data TestSet = TestSet TestSet135,136
+data TestSet = TestSet { inputMat inputMat135,136
+                       , inputVec inputVec136,137
+                       , answer answer137,138
+linSet linSet140,141
+linSet linSet141,142
+
+./tests/monomials.hs,174
+module Main Main1,2
+main main12,13
+main main13,14
+spec spec15,16
+spec spec16,17
+compQC compQC27,28
+compQC compQC28,29
+compSC compSC38,39
+compSC compSC39,40
+
+./tests/PolynomialSpec.hs,586
+module PolynomialSpec PolynomialSpec2,3
+asGenListOf asGenListOf15,16
+asGenListOf asGenListOf16,17
+spec spec18,19
+spec spec19,20
+prop_passesSTest prop_passesSTest22,23
+prop_passesSTest prop_passesSTest23,24
+prop_groebnerDivsOrig prop_groebnerDivsOrig29,30
+prop_groebnerDivsOrig prop_groebnerDivsOrig30,31
+prop_divCorrect prop_divCorrect37,38
+prop_divCorrect prop_divCorrect38,39
+prop_indivisible prop_indivisible46,47
+prop_indivisible prop_indivisible47,48
+prop_degdecay prop_degdecay55,56
+prop_degdecay prop_degdecay56,57
+rank rank64,65
+rank rank65,66
+
+./tests/UnivariateSpec.hs,308
+module UnivariateSpec UnivariateSpec2,3
+asGenListOf asGenListOf20,21
+asGenListOf asGenListOf21,22
+toOP toOP23,24
+toOP toOP24,25
+liftMult liftMult26,27
+liftMult liftMult27,28
+spec spec31,32
+spec spec32,33
+divModUnipolCases divModUnipolCases61,62
+divModUnipolCases divModUnipolCases62,63
+
+./tests/Faugere5Spec-disabled.hs,228
+module Faugere5Spec Faugere5Spec2,3
+spec spec15,16
+spec spec16,17
+prop_computesGroebner prop_computesGroebner23,24
+prop_computesGroebner prop_computesGroebner24,25
+testCases testCases30,31
+testCases testCases31,32
+
+./tests/QuotientSpec.hs,582
+module QuotientSpec QuotientSpec2,3
+asGenListOf asGenListOf16,17
+asGenListOf asGenListOf17,18
+spec spec19,20
+spec spec20,21
+prop_passesSTest prop_passesSTest23,24
+prop_passesSTest prop_passesSTest24,25
+prop_groebnerDivsOrig prop_groebnerDivsOrig31,32
+prop_groebnerDivsOrig prop_groebnerDivsOrig32,33
+prop_divCorrect prop_divCorrect39,40
+prop_divCorrect prop_divCorrect40,41
+prop_indivisible prop_indivisible48,49
+prop_indivisible prop_indivisible49,50
+prop_degdecay prop_degdecay57,58
+prop_degdecay prop_degdecay58,59
+rank rank66,67
+rank rank67,68
+
+./tests/matrix.hs,188
+module Main Main0,1
+main main12,13
+main main13,14
+prop_matrixRep prop_matrixRep18,19
+prop_matrixRep prop_matrixRep19,20
+matToLists matToLists26,27
+matToLists matToLists27,28
+
+./tests/division.hs,286
+module Main Main2,3
+main main13,14
+main main14,15
+prop_divCorrect prop_divCorrect23,24
+prop_divCorrect prop_divCorrect24,25
+prop_indivisible prop_indivisible31,32
+prop_indivisible prop_indivisible32,33
+prop_degdecay prop_degdecay39,40
+prop_degdecay prop_degdecay40,41
+
+./tests/GroebnerSpec.hs,938
+module GroebnerSpec GroebnerSpec2,3
+asGenListOf asGenListOf18,19
+asGenListOf asGenListOf19,20
+spec spec21,22
+spec spec22,23
+prop_intersection prop_intersection57,58
+prop_intersection prop_intersection58,59
+prop_isMinimal prop_isMinimal65,66
+prop_isMinimal prop_isMinimal66,67
+prop_isReduced prop_isReduced72,73
+prop_isReduced prop_isReduced73,74
+prop_passesSTest prop_passesSTest79,80
+prop_passesSTest prop_passesSTest80,81
+prop_groebnerDivsOrig prop_groebnerDivsOrig85,86
+prop_groebnerDivsOrig prop_groebnerDivsOrig86,87
+prop_divCorrect prop_divCorrect92,93
+prop_divCorrect prop_divCorrect93,94
+prop_indivisible prop_indivisible100,101
+prop_indivisible prop_indivisible101,102
+prop_degdecay prop_degdecay108,109
+prop_degdecay prop_degdecay109,110
+data IntersectCase IntersectCase116,117
+data IntersectCase r ord n = IC IC116,117
+ics_binary ics_binary118,119
+ics_binary ics_binary119,120
+
+./tests/Spec.hs,0
+
+./tests/SingularTest.hs,55
+module Main Main1,2
+main main9,10
+main main10,11
+
+./tests/linear.hs,315
+module Main Main0,1
+main main9,10
+main main10,11
+prop_luDecomp prop_luDecomp15,16
+prop_luDecomp prop_luDecomp16,17
+isLowerTriangle isLowerTriangle22,23
+isLowerTriangle isLowerTriangle23,24
+isUpperTriangle isUpperTriangle25,26
+isUpperTriangle isUpperTriangle26,27
+rank rank28,29
+rank rank29,30
+
+./examples/faugere-prof.hs,93
+module Main Main1,2
+main main6,7
+main main7,8
+ideal3 ideal39,10
+ideal3 ideal310,11
+
+./examples/sandpit-poly.hs,476
+module Main Main2,3
+u, v, x, y, z z14,15
+u, v, x, y,y14,15
+u, v, x,x14,15
+u, v,v14,15
+u,u14,15
+[u,[u15,16
+fromRight fromRight17,18
+fromRight fromRight18,19
+main, act act22,23
+main,main22,23
+main main23,24
+act act24,25
+findDifference findDifference31,32
+findDifference findDifference33,34
+findRoot findRoot49,50
+findRoot findRoot50,51
+sPolLex sPolLex56,57
+sPolLex sPolLex57,58
+sPolGrevlex sPolGrevlex61,62
+sPolGrevlex sPolGrevlex62,63
+
+./examples/hensel-prof.hs,53
+module Main Main1,2
+main main8,9
+main main9,10
+
+./examples/solve.hs,923
+module Main Main4,5
+tr tr23,24
+tr tr24,25
+x, y, z z26,27
+x, y,y26,27
+x,x26,27
+[x,[x27,28
+seed seed29,30
+seed seed30,31
+seedMat seedMat32,33
+seedMat seedMat33,34
+toDouble toDouble35,36
+toDouble toDouble36,37
+fromRight fromRight38,39
+fromRight fromRight39,40
+printLvl printLvl42,43
+printLvl printLvl43,44
+eqn01 eqn0145,46
+eqn01 eqn0146,47
+eqn02 eqn0248,49
+eqn02 eqn0249,50
+eqn03 eqn0355,56
+eqn03 eqn0356,57
+jdeal jdeal61,62
+jdeal jdeal62,63
+vs vs65,66
+vs vs66,67
+mat mat68,69
+mat mat69,70
+fromCols fromCols71,72
+fromCols fromCols72,73
+findUnivar findUnivar74,75
+findUnivar findUnivar76,77
+toCoeffList toCoeffList81,82
+toCoeffList toCoeffList82,83
+showSols showSols86,87
+showSols showSols88,89
+main main103,104
+main main104,105
+substIdeal substIdeal136,137
+substIdeal substIdeal140,141
+toComplex toComplex142,143
+toComplex toComplex143,144
+
+./examples/ipsolve.hs,2264
+module Main Main5,6
+newtype IsOrder_ IsOrder_16,17
+newtype IsOrder_ n = IsOrder_ IsOrder_16,17
+newtype IsOrder_ n = IsOrder_ { cmp cmp16,17
+data ReifiedOrder ReifiedOrder17,18
+data ReifiedOrder a = ReifiedOrderReifiedOrder17,18
+retrieveOrder retrieveOrder19,20
+retrieveOrder retrieveOrder20,21
+instance instance22,23
+type IPOrder IPOrder27,28
+type IPOrder n n27,28
+ipOrder ipOrder30,31
+ipOrder ipOrder31,32
+toMonomial toMonomial36,37
+toMonomial toMonomial39,40
+calcCost calcCost47,48
+calcCost calcCost48,49
+costCmp costCmp50,51
+costCmp costCmp51,52
+toReifiedOrder toReifiedOrder54,55
+toReifiedOrder toReifiedOrder55,56
+solveIP' solveIP'58,59
+solveIP' solveIP'63,64
+vars' vars'83,84
+vars' vars'84,85
+data Cnstr Cnstr86,87
+data Cnstr n = (:(86,87
+infix infix91,92
+data IPProblem IPProblem93,94
+data IPProblem n m = IPProblem IPProblem93,94
+data IPProblem n m = IPProblem { objectCnstr objectCnstr93,94
+                               , cnstrs cnstrs94,95
+solveCnstrs solveCnstrs98,99
+solveCnstrs solveCnstrs99,100
+extractProblem extractProblem107,108
+extractProblem extractProblem108,109
+nfProblem nfProblem110,111
+nfProblem nfProblem111,112
+ordVec ordVec115,116
+ordVec ordVec116,117
+nfCnstrs nfCnstrs118,119
+nfCnstrs nfCnstrs120,121
+testC testC126,127
+testM testM127,128
+testB testB128,129
+(t(129,130
+data Rect Rect134,135
+data Rect = Rect Rect134,135
+data Rect = Rect { _height _height134,135
+data Rect = Rect { _height :: Int, _width _width134,135
+data Design Design138,139
+data Design = Design Design138,139
+data Design = Design { _frame _frame138,139
+                     , _pictures _pictures139,140
+data Department Department143,144
+data Department = Department Department143,144
+data Department = Department { _area _area143,144
+                             , _aspect _aspect144,145
+                             , _maxSide _maxSide145,146
+                             , _minSide _minSide146,147
+data SomeIPProblem SomeIPProblem149,150
+data SomeIPProblem = forall forall149,150
+designConstraint designConstraint151,152
+designConstraint designConstraint152,153
+main main154,155
+main main155,156
+act act157,158
+act act158,159
+
+./examples/groebner-prof.hs,74
+module Main Main1,2
+i i6,7
+i i7,8
+main main14,15
+main main15,16
+
+./examples/quotient.hs,171
+module Main Main3,4
+x, y y13,14
+x,x13,14
+[x,[x14,15
+(/)/16,17
+p p17,18
+fromRight fromRight20,21
+fromRight fromRight21,22
+main main24,25
+main main25,26
+
+./examples/polymorphic.hs,543
+module Example Example4,5
+x, y, f, f1, f2 f212,13
+x, y, f, f1,f112,13
+x, y, f,f12,13
+x, y,y12,13
+x,x12,13
+x x13,14
+y y14,15
+f f15,16
+f1 f116,17
+f2 f217,18
+type LexPolynomial LexPolynomial19,20
+type LexPolynomial r r19,20
+type XYABCS XYABCS20,21
+type ABCS ABCS21,22
+s s23,24
+s s24,25
+heronIdeal heronIdeal26,27
+heronIdeal heronIdeal27,28
+main main38,39
+main main39,40
+toABCSIdeal toABCSIdeal68,69
+toABCSIdeal toABCSIdeal69,70
+sFour sFour71,72
+sFour sFour72,73
+sTwo sTwo74,75
+sTwo sTwo75,76
+
+./examples/algebraic.hs,73
+module Main Main1,2
+f f6,7
+f f7,8
+main main9,10
+main main10,11
+
+./examples/monomorphic.hs,368
+module Example Example3,4
+(^^)^^20,21
+(^(21,22
+x, y, f, f1, f2 f223,24
+x, y, f, f1,f123,24
+x, y, f,f23,24
+x, y,y23,24
+x,x23,24
+x x24,25
+y y25,26
+f f26,27
+f1 f127,28
+f2 f228,29
+heron heron30,31
+heron heron31,32
+main main39,40
+main main40,41
+idealMembershipDemo idealMembershipDemo66,67
+idealMembershipDemo idealMembershipDemo67,68
+
+./examples/site-example.hs,223
+module Main Main3,4
+x x11,12
+x x13,14
+y y16,17
+y y18,19
+z z21,22
+z z22,23
+f f25,26
+f f26,27
+f' f'29,30
+f' f'30,31
+heron heron33,34
+heron heron34,35
+main main42,43
+main main43,44
+act act45,46
+
+./share/Utils.hs,1954
+module Utils Utils6,7
+newtype ZeroDimIdeal ZeroDimIdeal41,42
+newtype ZeroDimIdeal n = ZeroDimIdeal ZeroDimIdeal41,42
+newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal getIdeal41,42
+(%.)%.44,45
+a a45,46
+instance instance48,49
+genUnipol genUnipol76,77
+genUnipol genUnipol77,78
+appendLM appendLM81,82
+appendLM appendLM82,83
+xPoly xPoly84,85
+xPoly xPoly85,86
+yPoly yPoly91,92
+yPoly yPoly92,93
+arbVecOfSum arbVecOfSum112,113
+arbVecOfSum arbVecOfSum113,114
+arbVec arbVec125,126
+arbVec arbVec126,127
+polyOfDim polyOfDim157,158
+polyOfDim polyOfDim158,159
+newtype HomogPoly HomogPoly160,161
+newtype HomogPoly r ord n = HomogPoly HomogPoly160,161
+newtype HomogPoly r ord n = HomogPoly { getHomogPoly getHomogPoly160,161
+homogPolyOfDim homogPolyOfDim162,163
+homogPolyOfDim homogPolyOfDim163,164
+idealOfDim idealOfDim165,166
+idealOfDim idealOfDim166,167
+quotOfDim quotOfDim168,169
+quotOfDim quotOfDim170,171
+genLM genLM172,173
+genLM genLM173,174
+zeroDimOf zeroDimOf184,185
+zeroDimOf zeroDimOf185,186
+zeroDimG zeroDimG190,191
+zeroDimG zeroDimG191,192
+arbitraryRational arbitraryRational196,197
+arbitraryRational arbitraryRational197,198
+isNonTrivial isNonTrivial203,204
+isNonTrivial isNonTrivial204,205
+data Equation Equation206,207
+data Equation = Equation Equation206,207
+data Equation = Equation { coefficients coefficients206,207
+                         , answers answers207,208
+newtype MatrixCase MatrixCase210,211
+newtype MatrixCase a = MatrixCase MatrixCase210,211
+newtype MatrixCase a = MatrixCase { getMatrix getMatrix210,211
+arbitrarySolvable arbitrarySolvable228,229
+arbitrarySolvable arbitrarySolvable229,230
+liftSNat liftSNat234,235
+liftSNat liftSNat235,236
+unaryPoly unaryPoly239,240
+unaryPoly unaryPoly240,241
+checkForArity checkForArity245,246
+checkForArity checkForArity246,247
+stdReduced stdReduced248,249
+stdReduced stdReduced250,251
+
+./share/SequenceMonomial.hs,854
+module SequenceMonomial SequenceMonomial1,2
+length length11,12
+length length12,13
+fromList fromList14,15
+fromList fromList15,16
+viewl viewl17,18
+viewl viewl18,19
+viewr viewr23,24
+viewr viewr24,25
+data ViewL ViewL29,30
+data ViewL = EmptyL EmptyL29,30
+data ViewL = EmptyL | Int Int29,30
+data ViewR ViewR30,31
+data ViewR = EmptyR EmptyR30,31
+data ViewR = EmptyR | Monomial Monomial30,31
+data Monomial Monomial32,33
+data Monomial = Monomial Monomial32,33
+data Monomial = Monomial { getSeq getSeq32,33
+                         , totalDegree totalDegree33,34
+instance instance36,37
+type MonomialOrder MonomialOrder39,40
+lex lex42,43
+lex lex43,44
+revlex revlex48,49
+revlex revlex49,50
+graded graded54,55
+graded graded55,56
+grlex grlex59,60
+grlex grlex60,61
+grevlex grevlex64,65
+grevlex grevlex65,66
+
+./share/SingularBridge.hs,664
+module SingularBridge SingularBridge4,5
+class IsStrongMonomialOrder ord => SingularOrder SingularOrder19,20
+class IsStrongMonomialOrder ord => SingularOrder SingularOrder19,20
+  singularOrder singularOrder20,21
+instance instance22,23
+idealProgram idealProgram28,29
+idealProgram idealProgram32,33
+singular singular47,48
+singular singular48,49
+readSingularIdeal readSingularIdeal50,51
+readSingularIdeal readSingularIdeal52,53
+readSingularPoly readSingularPoly55,56
+readSingularPoly readSingularPoly57,58
+singIdealFun singIdealFun107,108
+singIdealFun singIdealFun109,110
+singPolyFun singPolyFun115,116
+singPolyFun singPolyFun119,120
+
+./src/Algebra/Prelude.hs,43
+module Algebra.PreludeAlgebra.Prelude1,2

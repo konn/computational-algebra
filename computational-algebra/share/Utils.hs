@@ -26,8 +26,7 @@ import           Data.Reflection
 import           Data.Sized.Builtin                 hiding (head, length, map,
                                                      sortBy, (++))
 import qualified Data.Sized.Builtin                 as SV
-import           Data.Type.Monomorphic
-import qualified Data.Type.Monomorphic              as M
+import qualified Data.Type.Natural.Builtin          as TN
 import qualified Data.Vector                        as V
 import           Numeric.Algebra                    (DecidableZero)
 import           Numeric.Algebra                    (Ring)
@@ -41,7 +40,7 @@ import           Test.SmallCheck.Series
 import qualified Test.SmallCheck.Series             as SC
 
 newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal :: Ideal (Polynomial (Fraction Integer) n)
-                                      } deriving (Show, Eq, Ord)
+                                      } deriving (Show)
 
 (%.) :: Euclidean a => a -> SC.Positive a -> Fraction a
 a %. SC.Positive b = a % b
@@ -67,7 +66,7 @@ instance (Eq r, CoeffRing r, KnownNat n, IsMonomialOrder n ord,
           => Serial m (OrderedPolynomial r ord n) where
   series = cons2 (curry toPolynomial) \/ cons2 (NA.+)
 
-instance (Ord r, Ring r, Serial m r) => Serial m (Ideal r) where
+instance (Ord r, DecidableZero r, Ring r, Serial m r) => Serial m (Ideal r) where
   series = newtypeCons toIdeal
 
 instance (CoeffRing r, Arbitrary r) => Arbitrary (Unipol r) where
@@ -143,7 +142,7 @@ instance (KnownNat n, IsMonomialOrder n ord)
     HomogPoly . polynomial . M.fromList <$>
       listOf1 ((,) <$> (OrderedMonomial <$> arbVecOfSum (sing :: SNat n) deg) <*> arbitraryRational)
 
-instance (Num r, Ord r, Ring r, Arbitrary r) => Arbitrary (Ideal r) where
+instance (Num r, Ord r, DecidableZero r, Ring r, Arbitrary r) => Arbitrary (Ideal r) where
   arbitrary = toIdeal . map QC.getNonZero . QC.getNonEmpty <$> arbitrary
 
 instance (KnownNat n) => Arbitrary (ZeroDimIdeal n) where
@@ -233,10 +232,10 @@ arbitrarySolvable = do
     v <- vector $ length $ head as
     return $ Equation as (V.toList $ M.getCol 1 $ M.fromLists as * M.colVector (V.fromList v))
 
-liftSNat :: (forall n. KnownNat (n :: Nat) => Sing n -> Property) -> Integer -> Property
+liftSNat :: (forall n. KnownNat (n :: Nat) => Sing n -> Property) -> NA.Natural -> Property
 liftSNat f i =
-  case M.promote i of
-    Monomorphic sn -> withKnownNat sn $ f sn
+  case TN.fromNatural i of
+    SomeSing sn -> withKnownNat sn $ f sn
 
 unaryPoly :: SNat n -> Ordinal n -> Gen (Polynomial (Fraction Integer) n)
 unaryPoly ar (OLt sm) = do
@@ -244,7 +243,7 @@ unaryPoly ar (OLt sm) = do
   withKnownNat ar $ withKnownNat (sm %:+ sOne) $
     return $ scastPolynomial ar $ shiftR sm f
 
-checkForArity :: [Integer] -> (forall n. KnownNat (n :: Nat) => Sing n -> Property) -> Property
+checkForArity :: [NA.Natural] -> (forall n. KnownNat (n :: Nat) => Sing n -> Property) -> Property
 checkForArity as test = forAll (QC.elements as) $ liftSNat test
 
 stdReduced :: (CoeffRing r, KnownNat n, NA.Field r, IsMonomialOrder n order)

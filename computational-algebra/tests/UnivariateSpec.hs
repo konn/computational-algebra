@@ -11,7 +11,6 @@ import           Control.Monad
 import qualified Data.Foldable                      as F
 import           Data.List                          (delete)
 import qualified Data.Sized.Builtin                 as SV
-import           Data.Type.Monomorphic
 import           Numeric.Decidable.Zero
 import           Numeric.Field.Fraction             (Fraction)
 import           Test.Hspec
