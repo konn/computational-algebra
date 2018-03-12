@@ -19,6 +19,20 @@ extra-source-files:
 # common to point users to the README.md file.
 description:         Please see the README on Github at <https://github.com/konn/halg-groebner#readme>
 
+default-extensions:
+- CPP
+- DataKinds
+- FlexibleContexts
+- FlexibleInstances
+- GADTs
+- MultiParamTypeClasses
+- NoImplicitPrelude
+- OverloadedLabels
+- PolyKinds
+- TypeFamilies
+- TypeInType
+- UndecidableInstances  
+
 dependencies:
 - base >= 4.7 && < 5
 - halg-core

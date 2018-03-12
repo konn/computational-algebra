@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f18b78a77c056e9abeb23c72e923c563e0256481f0aee797fe91945d24eac12e
+-- hash: 39c0bfeca1574855d78b10be9d5305cfcfeeda885f2fafae690dfc49ba0172e5
 
 name:           halg-algorithms
 version:        0.1.0.0
@@ -28,6 +28,7 @@ source-repository head
 library
   hs-source-dirs:
       src
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses NoImplicitPrelude OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
   ghc-options: -Wall
   build-depends:
       MonadRandom

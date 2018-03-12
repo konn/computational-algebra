@@ -27,6 +27,20 @@ dependencies:
 - algebraic-prelude
 - algebra
 
+default-extensions:
+- CPP
+- DataKinds
+- FlexibleContexts
+- FlexibleInstances
+- GADTs
+- MultiParamTypeClasses
+- NoImplicitPrelude
+- OverloadedLabels
+- PolyKinds
+- TypeFamilies
+- TypeInType
+- UndecidableInstances  
+
 library:
   source-dirs: src
   ghc-options:  -Wall

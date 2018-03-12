@@ -21,6 +21,7 @@ import           Control.Monad.Loops          (iterateUntil)
 import           Control.Monad.Random         (MonadRandom)
 import           Control.Monad.Random         (uniform)
 import qualified Data.Foldable                as F
+import           Data.Kind                    (Type)
 import qualified Data.Ratio                   as Rat
 import           Data.Reflection              (Reifies (..), reify)
 import           Data.Singletons.Prelude.Enum (SEnum (..))
@@ -37,7 +38,7 @@ import qualified Prelude                      as P
 
 -- | Galois field of order @p^n@.
 --   @f@ stands for the irreducible polynomial over @F_p@ of degree @n@.
-data GF' p (n :: TL.Nat) (f :: *) = GF' { runGF' :: Sized n (F p) }
+data GF' p (n :: TL.Nat) (f :: Type) = GF' { runGF' :: Sized n (F p) }
 deriving instance Reifies p Integer => Eq (GF' p n f)
 
 -- | Galois Field of order @p^n@. This uses conway polynomials
@@ -196,7 +197,7 @@ withIrreducible r f =
       reify r (f. proxyGF' (Proxy :: Proxy (F n)) sn)
 
 reifyGF' :: MonadRandom m => Natural -> Natural
-         -> (forall (p :: TL.Nat) (f :: *) (n :: TL.Nat) . (Reifies p Integer, Reifies f (Unipol (F p)))
+         -> (forall (p :: TL.Nat) (f :: Type) (n :: TL.Nat) . (Reifies p Integer, Reifies f (Unipol (F p)))
                        => Proxy (GF' p n f) -> a)
          -> m a
 reifyGF' p n f = reifyPrimeField (P.toInteger p) $ \pxy -> do
