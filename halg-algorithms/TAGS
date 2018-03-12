@@ -73,8 +73,8 @@ nextMonomial nextMonomial390,391
 beta beta401,402
 beta beta402,403
 
-./src/Algebra/Algorithms/PrimeTest.hs,630
-module Algebra.Algorithms.PrimeTestAlgebra.Algorithms.PrimeTest1,2
+./src/Algebra/Algorithms/Arithmetic.hs,610
+module Algebra.ArithmeticAlgebra.Arithmetic1,2
 data PrimeResult PrimeResult13,14
 data PrimeResult = Composite Composite13,14
 data PrimeResult = Composite | ProbablyPrime ProbablyPrime13,14

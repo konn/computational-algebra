@@ -20,28 +20,24 @@ class (Ord (Norm a)) => Normed Normed4,5
   liftNorm liftNorm7,8
 instance instance9,10
 
-./src/Algebra/Internal.hs,572
-module Algebra.InternalAlgebra.Internal6,7
-import import44,45
-toProxy toProxy57,58
-toProxy toProxy58,59
-type Sized Sized60,61
-type Sized n n60,61
-type Sized' Sized'61,62
-coerceLength coerceLength63,64
-coerceLength coerceLength64,65
-type SNat SNat66,67
-type SNat (n(66,67
-sizedLength sizedLength68,69
-sizedLength sizedLength69,70
-padVecs padVecs71,72
-padVecs padVecs73,74
-type family family98,99
-type family Flipped Flipped98,99
-pattern pattern102,103
-sNatToInt sNatToInt111,112
-sNatToInt sNatToInt112,113
-instance instance114,115
+./src/Algebra/Arithmetic.hs,610
+module Algebra.ArithmeticAlgebra.Arithmetic1,2
+data PrimeResult PrimeResult13,14
+data PrimeResult = Composite Composite13,14
+data PrimeResult = Composite | ProbablyPrime ProbablyPrime13,14
+data PrimeResult = Composite | ProbablyPrime | PrimePrime13,14
+repeatedSquare repeatedSquare17,18
+repeatedSquare repeatedSquare18,19
+binRep binRep22,23
+binRep binRep23,24
+fermatTest fermatTest29,30
+fermatTest fermatTest30,31
+modPow modPow39,40
+modPow modPow40,41
+splitFactor splitFactor45,46
+splitFactor splitFactor46,47
+isPseudoPrime isPseudoPrime56,57
+isPseudoPrime isPseudoPrime58,59
 
 ./src/Algebra/Scalar.hs,218
 module Algebra.Scalar Algebra.Scalar3,4

@@ -1,0 +1,73 @@
+
+./Setup.hs,15
+main main1,2
+
+./app/Main.hs,52
+module Main Main0,1
+main main4,5
+main main5,6
+
+./test/Spec.hs,30
+main main0,1
+main main1,2
+
+./src/Algebra/Ring/Polynomial/Factorise.hs,2021
+module Algebra.Ring.Polynomial.FactoriseAlgebra.Ring.Polynomial.Factorise6,7
+distinctDegFactor distinctDegFactor56,57
+distinctDegFactor distinctDegFactor59,60
+modPow modPow70,71
+modPow modPow72,73
+traceCharTwo traceCharTwo75,76
+traceCharTwo traceCharTwo76,77
+equalDegreeSplitM equalDegreeSplitM78,79
+  | fromIntegral (totalDegree' f) `mod`mod83,84
+equalDegreeFactorM equalDegreeFactorM100,101
+equalDegreeFactorM equalDegreeFactorM102,103
+factorSquareFree factorSquareFree114,115
+factorSquareFree factorSquareFree116,117
+squareFreePart squareFreePart119,120
+squareFreePart squareFreePart121,122
+yun yun130,131
+yun yun132,133
+charUnipol charUnipol146,147
+charUnipol charUnipol147,148
+powerUnipol powerUnipol149,150
+powerUnipol powerUnipol150,151
+pthRoot pthRoot152,153
+pthRoot pthRoot153,154
+squareFreeDecomp squareFreeDecomp159,160
+squareFreeDecomp squareFreeDecomp161,162
+factorise factorise173,174
+factorise factorise175,176
+clearDenom clearDenom178,179
+clearDenom clearDenom180,181
+factorQBigPrime factorQBigPrime186,187
+factorQBigPrime factorQBigPrime188,189
+factorHensel factorHensel191,192
+factorHensel factorHensel193,194
+wrapSQFFactor wrapSQFFactor195,196
+wrapSQFFactor wrapSQFFactor198,199
+secondM secondM207,208
+secondM secondM208,209
+(<@>)<@>210,211
+(<(211,212
+factorSqFreeQBP factorSqFreeQBP215,216
+factorSqFreeQBP factorSqFreeQBP217,218
+factorHenselSqFree factorHenselSqFree260,261
+factorHenselSqFree factorHenselSqFree262,263
+henselStep henselStep297,298
+henselStep henselStep305,306
+repeatHensel repeatHensel320,321
+repeatHensel repeatHensel325,326
+multiHensel multiHensel331,332
+multiHensel multiHensel336,337
+recipMod recipMod356,357
+recipMod recipMod357,358
+modFraction modFraction362,363
+modFraction modFraction363,364
+comb comb365,366
+comb comb366,367
+normalizeMod normalizeMod372,373
+normalizeMod normalizeMod373,374
+isSquareFree isSquareFree376,377
+isSquareFree isSquareFree377,378

@@ -1,11 +1,11 @@
 {-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
-module Algebra.Algorithms.PrimeTest
+module Algebra.Arithmetic
        (repeatedSquare, modPow, fermatTest, isPseudoPrime
        ) where
-import           Algebra.Prelude.Core     hiding (div, mod)
+import           AlgebraicPrelude         hiding (div, mod)
 import           Control.Lens             ((&), (+~), _1)
 import           Control.Monad.Random     (MonadRandom, uniform)
-import           Data.List                (findIndex)
+import           Data.List                (elemIndex)
 import           Numeric.Decidable.Zero   (isZero)
 import           Numeric.Domain.Euclidean ()
 import           Prelude                  (div, mod)
@@ -18,12 +18,7 @@ data PrimeResult = Composite | ProbablyPrime | Prime
 repeatedSquare :: Multiplicative r => r -> Natural -> r
 repeatedSquare a n =
   let bits = tail $ binRep n
-  in go a bits
-  where
-    go b []        = b
-    go b (nk : ns) =
-      go (if nk == 1 then (b*b*a) else b*b) ns
-
+  in foldl (\b nk -> if nk == 1 then b * b * a else b * b) a bits
 
 binRep :: Natural -> [Natural]
 binRep = flip go []
@@ -74,7 +69,7 @@ isPseudoPrime n = do
         bs = take (v+1) $ iterate (\b -> b*b `mod` n) b0
     in if b0 == 1
        then Right True
-       else case findIndex (== 1) bs of
+       else case elemIndex 1 bs of
          Nothing -> Right False
          Just j ->
            let g = P.gcd (bs !! j - 1) n

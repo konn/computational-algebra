@@ -10,6 +10,7 @@ packages:
 - 'halg-finite-fields'
 - 'halg-matrices'
 - 'halg-algorithms'
+- 'halg-factor'
 
 extra-deps: 
 - Cabal-2.2.0.0

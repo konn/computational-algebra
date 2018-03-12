@@ -13,44 +13,44 @@ module Algebra.Ring.Polynomial.Factorise
          henselStep, clearDenom,
          squareFreePart, squareFreeDecomp
        ) where
-import Algebra.Algorithms.PrimeTest       hiding (modPow)
-import Algebra.Field.Finite
-import Algebra.Prelude.Core
-import Algebra.Ring.Polynomial.Quotient
-import Algebra.Ring.Polynomial.Univariate
-
-import           Control.Applicative              ((<|>))
-import           Control.Arrow                    ((***), (<<<))
-import           Control.Lens                     (both, ifoldl, (%~), (&))
-import           Control.Monad                    (guard, replicateM)
-import           Control.Monad                    (when)
-import           Control.Monad.Loops              (iterateUntil, untilJust)
-import           Control.Monad.Random             (MonadRandom, uniform)
-import           Control.Monad.ST.Strict          (ST, runST)
-import           Control.Monad.Trans              (lift)
-import           Control.Monad.Trans.Loop         (continue, foreach, while)
-import qualified Data.DList                       as DL
-import           Data.IntMap                      (IntMap)
-import qualified Data.IntMap.Strict               as IM
-import qualified Data.List                        as L
-import           Data.Maybe                       (fromJust)
-import           Data.Monoid                      (Sum (..))
-import           Data.Monoid                      ((<>))
-import           Data.Numbers.Primes              (primes)
-import           Data.Proxy                       (Proxy (..))
-import qualified Data.Set                         as S
-import qualified Data.Sized.Builtin               as SV
-import           Data.STRef.Strict                (STRef, modifySTRef, newSTRef)
-import           Data.STRef.Strict                (readSTRef, writeSTRef)
-import qualified Data.Traversable                 as F
-import           Data.Type.Ordinal                (pattern OZ)
-import qualified Data.Vector                      as V
-import           Math.NumberTheory.Logarithms     (intLog2', integerLogBase')
-import           Math.NumberTheory.Powers.Squares (integerSquareRoot)
-import           Numeric.Decidable.Zero           (isZero)
-import           Numeric.Domain.GCD               (gcd, lcm)
-import qualified Numeric.Field.Fraction           as F
-import qualified Prelude                          as P
+import           Algebra.Arithmetic                 hiding (modPow)
+import           Algebra.Field.Finite
+import           Algebra.Prelude.Core
+import           Algebra.Ring.Polynomial.Quotient
+import           Algebra.Ring.Polynomial.Univariate
+import           Control.Applicative                ((<|>))
+import           Control.Arrow                      ((***), (<<<))
+import           Control.Lens                       (both, ifoldl, (%~), (&))
+import           Control.Monad                      (guard, replicateM)
+import           Control.Monad                      (when)
+import           Control.Monad.Loops                (iterateUntil, untilJust)
+import           Control.Monad.Random               (MonadRandom, uniform)
+import           Control.Monad.ST.Strict            (ST, runST)
+import           Control.Monad.Trans                (lift)
+import           Control.Monad.Trans.Loop           (continue, foreach, while)
+import qualified Data.DList                         as DL
+import           Data.IntMap                        (IntMap)
+import qualified Data.IntMap.Strict                 as IM
+import qualified Data.List                          as L
+import           Data.Maybe                         (fromJust)
+import           Data.Monoid                        (Sum (..))
+import           Data.Monoid                        ((<>))
+import           Data.Numbers.Primes                (primes)
+import           Data.Proxy                         (Proxy (..))
+import qualified Data.Set                           as S
+import qualified Data.Sized.Builtin                 as SV
+import           Data.STRef.Strict                  (STRef, modifySTRef,
+                                                     newSTRef)
+import           Data.STRef.Strict                  (readSTRef, writeSTRef)
+import qualified Data.Traversable                   as F
+import           Data.Type.Ordinal                  (pattern OZ)
+import qualified Data.Vector                        as V
+import           Math.NumberTheory.Logarithms       (intLog2', integerLogBase')
+import           Math.NumberTheory.Powers.Squares   (integerSquareRoot)
+import           Numeric.Decidable.Zero             (isZero)
+import           Numeric.Domain.GCD                 (gcd, lcm)
+import qualified Numeric.Field.Fraction             as F
+import qualified Prelude                            as P
 
 -- | @distinctDegFactor f@ computes the distinct-degree decomposition of the given
 --   square-free polynomial over finite field @f@.

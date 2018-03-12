@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 39c0bfeca1574855d78b10be9d5305cfcfeeda885f2fafae690dfc49ba0172e5
+-- hash: 473144e9c2cda928d9353eab87e4609d5c6be8fc96d5ecef53fbd81583e7a4b2
 
 name:           halg-algorithms
 version:        0.1.0.0
@@ -49,7 +49,6 @@ library
     , sized
     , vector
   exposed-modules:
-      Algebra.Algorithms.PrimeTest
       Algebra.Algorithms.ZeroDim
   other-modules:
       Algebra.Algorithms.FGLM

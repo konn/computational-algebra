@@ -1,6 +1,6 @@
-name:                halg-finite-fields
+name:                halg-factor
 version:             0.1.0.0
-github:              "konn/halg-finite-fields"
+github:              "konn/halg-factor"
 license:             BSD3
 author:              "Hiromi ISHII"
 maintainer:          "konn.jinro _at_ gmail.com"
@@ -17,48 +17,34 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on Github at <https://github.com/konn/halg-finite-fields#readme>
-
-default-extensions:
-- CPP
-- DataKinds
-- FlexibleContexts
-- FlexibleInstances
-- GADTs
-- MultiParamTypeClasses
-- NoImplicitPrelude
-- OverloadedLabels
-- PolyKinds
-- TypeFamilies
-- TypeInType
-- UndecidableInstances  
+description:         Please see the README on Github at <https://github.com/konn/halg-factor#readme>
 
 dependencies:
 - base >= 4.7 && < 5
-- halg-core
-- halg-polynomials
-- algebraic-prelude
-- algebra
-
-data-files:
-- data/*
 
 library:
   source-dirs: src
   ghc-options:  -Wall
   dependencies:
   - MonadRandom
-  - deepseq
+  - algebra
+  - algebraic-prelude
+  - arithmoi
+  - containers
+  - control-monad-loop
+  - dlist
+  - halg-core
+  - halg-finite-fields
+  - halg-polynomials
+  - halg-algorithms
+  - integer-logarithms
   - lens
   - monad-loops
-  - reflection
-  - singletons
+  - mtl
+  - primes
   - sized
-  - template-haskell
+  - type-natural
   - vector
-  other-modules:
-  - Algebra.Field.Galois.Conway
-  - Algebra.Field.Galois.Internal
   default-extensions:
   - NoImplicitPrelude
 
