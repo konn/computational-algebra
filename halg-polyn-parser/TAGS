@@ -11,7 +11,7 @@ main main5,6
 main main0,1
 main main1,2
 
-./src/Algebra/Ring/Polynomial/Parser.hs,958
+./src/Algebra/Ring/Polynomial/Parser.hs,1029
 module Algebra.Ring.Polynomial.ParserAlgebra.Ring.Polynomial.Parser4,5
 lexeme lexeme28,29
 lexeme lexeme29,30
@@ -22,27 +22,29 @@ type VariableParser VariableParser35,36
 type VariableParser n n35,36
 unlabeldVarP unlabeldVarP37,38
 unlabeldVarP unlabeldVarP39,40
-labeledVarP labeledVarP45,46
-labeledVarP labeledVarP47,48
-varPowP varPowP52,53
-varPowP varPowP53,54
-monomialP monomialP57,58
-monomialP monomialP58,59
-factorP factorP61,62
-factorP factorP63,64
-binary binary66,67
-binary binary67,68
-prefix prefix69,70
-prefix prefix70,71
-table table72,73
-table table73,74
-polynomialP polynomialP80,81
-polynomialP polynomialP82,83
-rationalP rationalP85,86
-rationalP rationalP86,87
-integerP integerP88,89
-integerP integerP89,90
-fromRat fromRat91,92
-fromRat fromRat92,93
-parsePolynomialWith parsePolynomialWith94,95
-parsePolynomialWith parsePolynomialWith98,99
+fromSingList fromSingList45,46
+fromSingList fromSingList47,48
+labeledVarP labeledVarP52,53
+labeledVarP labeledVarP54,55
+varPowP varPowP59,60
+varPowP varPowP60,61
+monomialP monomialP64,65
+monomialP monomialP65,66
+factorP factorP68,69
+factorP factorP70,71
+binary binary73,74
+binary binary74,75
+prefix prefix76,77
+prefix prefix77,78
+table table79,80
+table table80,81
+polynomialP polynomialP87,88
+polynomialP polynomialP89,90
+rationalP rationalP92,93
+rationalP rationalP93,94
+integerP integerP95,96
+integerP integerP96,97
+fromRat fromRat98,99
+fromRat fromRat99,100
+parsePolynomialWith parsePolynomialWith101,102
+parsePolynomialWith parsePolynomialWith105,106

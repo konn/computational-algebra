@@ -28,6 +28,7 @@ extra-deps:
 - repa-algorithms-3.4.1.2
 - lazysmallcheck-0.6
 - hspec-smallcheck-0.5.0
+- megaparsec-6.3.0
 
 - git: https://github.com/cartazio/arithmoi.git
   commit: a3e189cca4c2961796c7ca74eccb29ff89f0e3d3

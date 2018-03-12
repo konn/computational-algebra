@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, GADTs, KindSignatures            #-}
+{-# LANGUAGE CPP, DataKinds, FlexibleContexts, GADTs, KindSignatures       #-}
 {-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction                  #-}
 {-# LANGUAGE OverloadedStrings, PartialTypeSignatures, ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies                                                  #-}
@@ -43,10 +43,17 @@ unlabeldVarP pxy pfx = lexeme $ do
     Just o -> return o
     Nothing -> fail $ "Number " ++ show i ++ " is out of bound: " ++ show (natVal pxy)
 
+fromSingList :: Sing (list :: [Symbol]) -> [T.Text]
+#if MIN_VERSION_singletons(2,3,0)
+fromSingList = fromSing
+#else
+fromSingList = map T.pack . fromSing
+#endif
+
 labeledVarP :: forall list.
                Sing (list :: [Symbol]) -> VariableParser (Length list)
 labeledVarP slist =
-  choice $ zipWith go (enumOrdinal $ sLength slist) $ fromSing slist
+  choice $ zipWith go (enumOrdinal $ sLength slist) $ fromSingList slist
   where
     go i v = i <$ symbol v
 
