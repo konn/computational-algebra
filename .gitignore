@@ -84,3 +84,13 @@ tramp
 # Other custom ignores
 _site
 _cache
+halg-algebraic
+halg-algorithms
+halg-core
+halg-core-test
+halg-factor
+halg-galois-fields
+halg-matrices
+halg-polyn-parser
+halg-polynomials
+computational-algebra
