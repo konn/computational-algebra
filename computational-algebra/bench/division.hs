@@ -14,7 +14,7 @@ import Control.Monad
 import Control.Parallel.Strategies
 import Data.Type.Natural.Builtin   hiding (one)
 import Gauge.Main
-import GHC.TypeNats                (KnownNat)
+import GHC.TypeLits                (KnownNat)
 import Prelude                     hiding (product)
 import System.Process
 import Test.QuickCheck

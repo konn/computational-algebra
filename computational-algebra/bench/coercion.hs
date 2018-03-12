@@ -13,7 +13,7 @@ import           Control.Parallel.Strategies
 import           Data.Type.Natural.Builtin   hiding (one)
 import           Gauge
 import           Gauge.Main
-import           GHC.TypeNats                (KnownNat)
+import           GHC.TypeLits                (KnownNat)
 import           Numeric.Algebra             hiding ((.*), (<), (^))
 import qualified Numeric.Algebra             as NA
 import           Numeric.Field.Fraction      (Fraction)
