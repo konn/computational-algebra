@@ -1,0 +1,57 @@
+-- This file has been generated from package.yaml by hpack version 0.20.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: e9c6ff2b05c873e563c058d28222a837cf5690dbd0f1b7f81b2926d13f6cf649
+
+name:           halg-finite-fields
+version:        0.6.0.0
+description:    Please see the README on Github at <https://github.com/konn/halg-finite-fields#readme>
+homepage:       https://github.com/konn/halg-finite-fields#readme
+bug-reports:    https://github.com/konn/halg-finite-fields/issues
+author:         Hiromi ISHII
+maintainer:     konn.jinro _at_ gmail.com
+copyright:      2018 (c) Hiromi ISHII
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+
+extra-source-files:
+    ChangeLog.md
+    README.md
+
+data-files:
+    data/conway.txt
+
+source-repository head
+  type: git
+  location: https://github.com/konn/halg-finite-fields
+
+library
+  hs-source-dirs:
+      src
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses NoImplicitPrelude OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances NoImplicitPrelude
+  ghc-options: -Wall
+  build-depends:
+      MonadRandom
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , deepseq
+    , halg-core
+    , halg-polynomials
+    , lens
+    , monad-loops
+    , reflection
+    , singletons
+    , sized
+    , template-haskell
+    , vector
+  exposed-modules:
+      Algebra.Field.Finite
+      Algebra.Field.Galois
+  other-modules:
+      Algebra.Field.Galois.Conway
+      Algebra.Field.Galois.Internal
+  default-language: Haskell2010

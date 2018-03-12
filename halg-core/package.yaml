@@ -11,7 +11,7 @@ extra-source-files:
 - ChangeLog.md
 
 # Metadata used when publishing your package
-# synopsis:            Short description of your package
+synopsis:            Core types and functions of halg computational algebra suite.
 category:            Math
 
 # To avoid duplicated efforts in documentation and dealing with the
