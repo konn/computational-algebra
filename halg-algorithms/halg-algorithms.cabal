@@ -2,10 +2,10 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 473144e9c2cda928d9353eab87e4609d5c6be8fc96d5ecef53fbd81583e7a4b2
+-- hash: e0df2299a395522ce755cae7930c615b98d22b96f8a53a8e404a5a2e758b9330
 
 name:           halg-algorithms
-version:        0.1.0.0
+version:        0.6.0.0
 description:    Please see the README on Github at <https://github.com/konn/halg-groebner#readme>
 homepage:       https://github.com/konn/halg-groebner#readme
 bug-reports:    https://github.com/konn/halg-groebner/issues
