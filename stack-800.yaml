@@ -6,6 +6,7 @@ packages:
 - 'halg-polynomials'
 - 'halg-finite-fields'
 - 'halg-matrices'
+- 'halg-algorithms'
 
 flags:
   computational-algebra:

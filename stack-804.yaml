@@ -8,6 +8,8 @@ packages:
 - 'halg-core'
 - 'halg-polynomials'
 - 'halg-finite-fields'
+- 'halg-matrices'
+- 'halg-algorithms'
 
 extra-deps: 
 - Cabal-2.2.0.0

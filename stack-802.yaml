@@ -2,9 +2,12 @@ resolver: lts-10.0
 skip-ghc-check: true
 packages:
 - '.'
+- 'algebraic-prelude'
 - 'halg-core'
 - 'halg-polynomials'
-- 'algebraic-prelude'
+- 'halg-finite-fields'
+- 'halg-matrices'
+- 'halg-algorithms'
 
 flags:
   computational-algebra:

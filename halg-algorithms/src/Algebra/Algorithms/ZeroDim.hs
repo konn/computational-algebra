@@ -365,12 +365,12 @@ mainLoop = do
   case cond of
     Nothing -> do
       proced .== Nothing
-      bLex %== (f : )
+      bLex @== (f : )
     Just cs -> do
       bps <- look bLex
       let g = changeOrder Lex $ f - sum (zipWith (.*.) (V.toList $ fmap unwrapAlgebra cs) bps)
       proced .== Just (changeOrder Lex f)
-      gLex %== (g :)
+      gLex @== (g :)
 
 toContinue :: forall s r o n.
               ((0 :< n) ~ 'True, Ord r,

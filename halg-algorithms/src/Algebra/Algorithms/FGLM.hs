@@ -1,7 +1,7 @@
 {-# LANGUAGE ConstraintKinds, FlexibleContexts, MultiParamTypeClasses #-}
 {-# LANGUAGE NoImplicitPrelude, TemplateHaskell                       #-}
 module Algebra.Algorithms.FGLM (FGLMEnv(..), lMap, gLex, bLex, proced,
-                                monomial, look, (.==), (%==), image, Machine) where
+                                monomial, look, (.==), (@==), image, Machine) where
 import           Algebra.Ring.Polynomial
 import           Control.Lens
 import           Control.Monad
@@ -32,12 +32,12 @@ v .== a = do
   ref <- view v
   lift $ writeSTRef ref a
 
-(%==) :: (MonadTrans t, MonadReader s (t (ST s1))) => Getting (STRef s1 a) s (STRef s1 a) -> (a -> a) -> t (ST s1) ()
-v %== f = do
+(@==) :: (MonadTrans t, MonadReader s (t (ST s1))) => Getting (STRef s1 a) s (STRef s1 a) -> (a -> a) -> t (ST s1) ()
+v @== f = do
   ref <- view v
   lift $ modifySTRef' ref f
 
-infix 4 .==, %==
+infix 4 .==, @==
 
 image :: (MonadReader (FGLMEnv s r ord n) f) => OrderedPolynomial r ord n -> f (V.Vector r)
 image a = views lMap ($ a)
