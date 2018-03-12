@@ -323,7 +323,7 @@ instance (CoeffRing r, IsMonomialOrder n ord, DecidableUnits r, KnownNat n)
   isUnit = isUnitDefault
   recipUnit = recipUnitDefault
 
-varX :: forall r n order. (CoeffRing r, KnownNat n, IsMonomialOrder n order, (0 :< n) ~ 'True)
+varX :: forall r n order. (CoeffRing r, KnownNat n, IsMonomialOrder n order, (0 < n) ~ 'True)
      => OrderedPolynomial r order n
 varX = var OZ
 
@@ -354,7 +354,7 @@ eval = substWith (*)
 
 -- | @substVar n f@ substitutes @n@-th variable with polynomial @f@,
 --   without changing arity.
-substVar :: (CoeffRing r, KnownNat n, IsMonomialOrder n ord, (1 :<= n) ~  'True)
+substVar :: (CoeffRing r, KnownNat n, IsMonomialOrder n ord, (1 <= n) ~  'True)
          => Ordinal n
          -> OrderedPolynomial r ord n
          -> OrderedPolynomial r ord n
@@ -388,8 +388,8 @@ p `orderedBy` _ = p
 
 shiftR :: forall k r n ord. (CoeffRing r, KnownNat n, IsMonomialOrder n ord,
                              IsMonomialOrder (k + n) ord)
-       => SNat k -> OrderedPolynomial r ord n -> OrderedPolynomial r ord (k :+ n)
-shiftR k = withKnownNat (k %:+ (sing :: SNat n)) $
+       => SNat k -> OrderedPolynomial r ord n -> OrderedPolynomial r ord (k + n)
+shiftR k = withKnownNat (k %+ (sing :: SNat n)) $
   withKnownNat k $ transformMonomial (S.append (fromList k []))
 
 -- | Calculate the homogenized polynomial of given one, with additional variable is the last variable.

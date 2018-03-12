@@ -31,7 +31,7 @@ import qualified Algebra.Matrix                   as AM
 import           Algebra.Prelude.Core
 import           Algebra.Ring.Polynomial.Quotient
 
-import           Control.Lens          hiding ((:<))
+import           Control.Lens          hiding ((<))
 import           Control.Monad.Loops   (whileM_)
 import           Control.Monad.Random  hiding (next)
 import           Control.Monad.Reader  (runReaderT)
@@ -58,7 +58,7 @@ import           Proof.Propositional   (IsTrue (Witness))
 solveM :: forall m r ord n.
           (Normed r, Ord r, MonadRandom m, Field r, CoeffRing r, KnownNat n,
            IsMonomialOrder n ord, Convertible r Double,
-           (0 :< n) ~ 'True)
+           (0 < n) ~ 'True)
        => Ideal (OrderedPolynomial r ord n)
        -> m [Sized n (Complex Double)]
 solveM ideal = {-# SCC "solveM" #-}
@@ -80,7 +80,7 @@ solveM ideal = {-# SCC "solveM" #-}
 -- | @solveWith f is@ finds complex approximate roots of the given zero-dimensional @n@-variate polynomial system @is@,
 --   using the given relatively prime polynomial @f@.
 solveWith :: forall r n ord. (DecidableZero r, Normed r, Ord r, Field r, CoeffRing r,
-                              (0 :< n) ~ 'True, IsMonomialOrder n ord,
+                              (0 < n) ~ 'True, IsMonomialOrder n ord,
                               KnownNat n, Convertible r Double)
           => OrderedPolynomial r ord n
           -> Ideal (OrderedPolynomial r ord n)
@@ -122,7 +122,7 @@ solveWith f0 i0 = {-# SCC "solveWith" #-}
 --
 --   See also @'solveViaCompanion'@ and @'solveM'@.
 solve' :: forall r n ord.
-          (Field r, CoeffRing r, KnownNat n, (0 :< n) ~ 'True,
+          (Field r, CoeffRing r, KnownNat n, (0 < n) ~ 'True,
            IsMonomialOrder n ord, Convertible r Double)
        => Double
        -> Ideal (OrderedPolynomial r ord n)
@@ -141,7 +141,7 @@ solve' err ideal =
        , all ((< err) . magnitude . substWith mul xs) $ generators ideal
        ]
   where
-    _ = Witness :: IsTrue (0 :< n) -- Just to suppress "redundant constraint" warning
+    _ = Witness :: IsTrue (0 < n) -- Just to suppress "redundant constraint" warning
 
 subspMatrix :: (Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord)
             => Ordinal n -> Ideal (OrderedPolynomial r ord n) -> M.Matrix r
@@ -273,7 +273,7 @@ radical ideal = {-# SCC "radical" #-}
 
 -- | Test if the given zero-dimensional ideal is radical or not.
 isRadical :: forall r ord n. (Ord r, CoeffRing r, KnownNat n,
-                              (0 :< n) ~ 'True,
+                              (0 < n) ~ 'True,
                               Field r, IsMonomialOrder n ord)
           => Ideal (OrderedPolynomial r ord n) -> Bool
 isRadical ideal =
@@ -281,11 +281,11 @@ isRadical ideal =
               enumOrdinal (sing :: SNat n)
   in all (`isIdealMember` ideal) gens
   where
-    _ = Witness :: IsTrue (0 :< n) -- Just to suppress "redundant constraint" warning
+    _ = Witness :: IsTrue (0 < n) -- Just to suppress "redundant constraint" warning
 
 -- solve'' :: forall r ord n.
 --            (Show r, Sparse.Eq0 r, Normed r, Ord r, Field r, CoeffRing r, KnownNat n,
---             IsMonomialOrder ord, Convertible r Double, (0 :< n) ~ 'True)
+--             IsMonomialOrder ord, Convertible r Double, (0 < n) ~ 'True)
 --        => Double
 --        -> Ideal (OrderedPolynomial r ord n)
 --        -> [Sized n  (Complex Double)]
@@ -325,14 +325,14 @@ isRadical ideal =
 -- | Calculate the Groebner basis w.r.t. lex ordering of the zero-dimensional ideal using FGLM algorithm.
 --   If the given ideal is not zero-dimensional this function may diverge.
 fglm :: (Ord r, KnownNat n, Field r,
-         IsMonomialOrder n ord, (0 :< n) ~ 'True)
+         IsMonomialOrder n ord, (0 < n) ~ 'True)
      => Ideal (OrderedPolynomial r ord n)
      -> ([OrderedPolynomial r Lex n], [OrderedPolynomial r Lex n])
 fglm ideal = reifyQuotient ideal $ \pxy ->
   fglmMap (\f -> vectorRep $ modIdeal' pxy f)
 
 -- | Compute the kernel and image of the given linear map using generalized FGLM algorithm.
-fglmMap :: forall k ord n. (Ord k, Field k, (0 :< n) ~ 'True,
+fglmMap :: forall k ord n. (Ord k, Field k, (0 < n) ~ 'True,
                             IsMonomialOrder n ord, CoeffRing k, KnownNat n)
         => (OrderedPolynomial k ord n -> V.Vector k)
         -- ^ Linear map from polynomial ring.
@@ -373,7 +373,7 @@ mainLoop = do
       gLex @== (g :)
 
 toContinue :: forall s r o n.
-              ((0 :< n) ~ 'True, Ord r,
+              ((0 < n) ~ 'True, Ord r,
                KnownNat n, Field r)
            => Machine s r o n Bool
 toContinue = do
@@ -384,7 +384,7 @@ toContinue = do
       let xLast = P.maximum allVars `asTypeOf` g
       return $ not $ leadingMonomial g `isPowerOf` leadingMonomial xLast
   where
-    _ = Witness :: IsTrue (0 :< n) -- Just to suppress "redundant constraint" warning
+    _ = Witness :: IsTrue (0 < n) -- Just to suppress "redundant constraint" warning
 
 nextMonomial :: forall s r ord n.
                 (CoeffRing r, KnownNat n) => Machine s r ord n ()
@@ -403,7 +403,7 @@ beta :: Monomial n -> Ordinal n -> Monomial n
 beta xs o@(OLt k) =
   let n = sizedLength xs
   in withRefl (lneqSuccLeq k n) $
-     withRefl (plusComm (n %:- sSucc k) (sSucc k)) $
+     withRefl (plusComm (n %- sSucc k) (sSucc k)) $
      withRefl (minusPlus n (sSucc k) Witness) $
-     (SV.take (sSucc k) $ xs & ix o +~ 1) SV.++ SV.replicate (n %:- sSucc k) 0
+     (SV.take (sSucc k) $ xs & ix o +~ 1) SV.++ SV.replicate (n %- sSucc k) 0
 beta _ _ = error "beta: Bug in ghc!"

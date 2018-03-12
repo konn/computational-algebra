@@ -310,14 +310,14 @@ lengthReplicate = runLengthReplicate . induction base step
 
     step :: SNat n -> LengthReplicate n -> LengthReplicate (Succ n)
     step n (LengthReplicate ih) = LengthReplicate $ \x ->
-      case (n %:+ sOne) %:== sZero of
+      case (n %+ sOne) %== sZero of
         SFalse ->
           start (sLength (sReplicate (sSucc n) x))
-            =~= sLength (SCons x (sReplicate (sSucc n %:- sOne) x))
-            =~= sOne %:+ sLength (sReplicate (sSucc n %:- sOne) x)
-            === sSucc (sLength (sReplicate (sSucc n %:- sOne) x))
-                `because` sym (succAndPlusOneL (sLength (sReplicate (sSucc n %:- sOne) x)))
-            === sSucc (sLength (sReplicate (n %:+ sOne %:- sOne) x))
+            =~= sLength (SCons x (sReplicate (sSucc n %- sOne) x))
+            =~= sOne %+ sLength (sReplicate (sSucc n %- sOne) x)
+            === sSucc (sLength (sReplicate (sSucc n %- sOne) x))
+                `because` sym (succAndPlusOneL (sLength (sReplicate (sSucc n %- sOne) x)))
+            === sSucc (sLength (sReplicate (n %+ sOne %- sOne) x))
                 `because` succCong (lengthCong (replicateCong (minusCongL (succAndPlusOneR n) sOne) x))
             === sSucc (sLength (sReplicate n x))
                 `because` succCong (lengthCong (replicateCong (plusMinus n sOne) x))
@@ -335,7 +335,7 @@ thEliminationIdeal :: forall poly n.
                       ( IsMonomialOrder (Arity poly - n) (MOrder poly),
                         Field (Coefficient poly),
                         IsOrderedPolynomial poly,
-                        (n :<= Arity poly) ~ 'True)
+                        (n <= Arity poly) ~ 'True)
                    => SNat n
                    -> Ideal poly
                    -> Ideal (OrderedPolynomial (Coefficient poly) (MOrder poly) (Arity poly -. n))
@@ -349,7 +349,7 @@ thEliminationIdeal n = withSingI (sOnes n) $
 thEliminationIdealWith :: ( IsOrderedPolynomial poly,
                             m ~ Arity poly,
                             k ~ Coefficient poly, Field k,
-                            KnownNat (m -. n), (n :<= m) ~ 'True,
+                            KnownNat (m -. n), (n <= m) ~ 'True,
                             EliminationType m n ord)
                    => ord
                    -> SNat n
@@ -365,7 +365,7 @@ unsafeThEliminationIdealWith :: ( IsOrderedPolynomial poly,
                                   k ~ Coefficient poly,
                                   Field k,
                                   IsMonomialOrder m ord,
-                                  KnownNat (m -. n), (n :<= m) ~ 'True)
+                                  KnownNat (m -. n), (n <= m) ~ 'True)
                              => ord
                              -> SNat n
                              -> Ideal poly
@@ -440,7 +440,7 @@ saturationByPrincipalIdeal is g =
   in withKnownNat n $
      withKnownNat (sSucc n) $
      withRefl (plusMinus' sOne n) $ withRefl (plusComm n sOne) $
-     withWitness (leqStep sOne (sOne %:+ n) n Refl) $
+     withWitness (leqStep sOne (sOne %+ n) n Refl) $
      withWitness (lneqZero n) $
      eliminatePadding $
      addToIdeal (one - (padLeftPoly sOne Grevlex g * var 0)) $

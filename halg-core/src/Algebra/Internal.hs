@@ -74,12 +74,12 @@ padVecs :: forall a n m. a -> Sized' n a -> Sized' m a
 padVecs d xs ys
   = let (n, m) = (S.sLength xs, S.sLength ys)
         l = sMax n m
-    in case n %:<= m of
+    in case n %<= m of
       STrue ->
         let maxISm = leqToMax n m Witness
-            k      = m %:- n
-            nPLUSk = start (n %:+ (m %:- n))
-                       === m %:- n %:+ n `because` plusComm n (m %:- n)
+            k      = m %- n
+            nPLUSk = start (n %+ (m %- n))
+                       === m %- n %+ n `because` plusComm n (m %- n)
                        === m `because` minusPlus m n Witness
                        === sMax n m `because` maxISm
         in (l,
@@ -87,14 +87,14 @@ padVecs d xs ys
             coerceLength maxISm ys)
       SFalse -> withWitness (notLeqToLeq n m) $
         let maxISn = geqToMax n m Witness
-            mPLUSk :: m :+ (n :- m) :~: Max n m
-            mPLUSk = start (m %:+ (n %:- m))
-                       === n %:- m %:+ m `because` plusComm m (n %:- m)
+            mPLUSk :: m + (n - m) :~: Max n m
+            mPLUSk = start (m %+ (n %- m))
+                       === n %- m %+ m `because` plusComm m (n %- m)
                        === n             `because` minusPlus n m Witness
                        === sMax n m      `because` maxISn
         in (l,
             coerceLength maxISn xs,
-            coerceLength mPLUSk $ ys S.++ S.replicate (n %:- m) d)
+            coerceLength mPLUSk $ ys S.++ S.replicate (n %- m) d)
 
 type family Flipped f a :: Nat -> Type where
   Flipped f a = Flipped.Flipped f a
@@ -105,12 +105,12 @@ pattern Flipped xs = Flipped.Flipped xs
 
 pattern OLt :: forall (t :: Nat). ()
             => forall (n1 :: Nat).
-               ((n1 :< t) ~ 'True)
+               ((n1 < t) ~ 'True)
             => Sing n1 -> O.Ordinal t
 pattern OLt n = O.OLt n
 
 sNatToInt :: SNat n -> Int
-sNatToInt = fromInteger . fromSing
+sNatToInt = fromIntegral . fromSing
 
 instance Hashable a => Hashable (Seq.Seq a) where
   hashWithSalt d = hashWithSalt d . F.toList

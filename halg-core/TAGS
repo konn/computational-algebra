@@ -96,6 +96,30 @@ splitFactor splitFactor46,47
 isPseudoPrime isPseudoPrime56,57
 isPseudoPrime isPseudoPrime58,59
 
+./src/Algebra/Ring/Ideal.hs,689
+module Algebra.Ring.Ideal Algebra.Ring.Ideal5,6
+newtype Ideal Ideal20,21
+newtype Ideal r = Ideal Ideal20,21
+isEmptyIdeal isEmptyIdeal24,25
+isEmptyIdeal isEmptyIdeal25,26
+instance instance27,28
+addToIdeal addToIdeal30,31
+addToIdeal addToIdeal31,32
+toIdeal toIdeal37,38
+toIdeal toIdeal38,39
+appendIdeal appendIdeal40,41
+appendIdeal appendIdeal41,42
+generators generators43,44
+generators generators44,45
+filterIdeal filterIdeal46,47
+filterIdeal filterIdeal47,48
+principalIdeal principalIdeal49,50
+principalIdeal principalIdeal50,51
+mapIdeal mapIdeal52,53
+mapIdeal mapIdeal53,54
+someSizedIdeal someSizedIdeal56,57
+someSizedIdeal someSizedIdeal57,58
+
 ./src/Algebra/Ring/Polynomial/Class.hs,4854
 module Algebra.Ring.Polynomial.ClassAlgebra.Ring.Polynomial.Class7,8
 class    (DecidableZero r, Ring r, Commutative r, Eq r) => CoeffRing CoeffRing59,60

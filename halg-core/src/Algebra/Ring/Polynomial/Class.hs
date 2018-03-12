@@ -112,7 +112,7 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
 
   -- | Non-dependent version of arity.
   arity :: proxy poly -> P.Integer
-  arity _pxy = fromSing (sArity' (zero :: poly))
+  arity _pxy = fromIntegral $ fromSing $ sArity' (zero :: poly)
   {-# INLINE arity #-}
 
   -- | Inject coefficient into polynomial.
@@ -358,7 +358,7 @@ pp :: (Euclidean (Coefficient poly), IsPolynomial poly) => poly -> poly
 pp f = mapCoeff' (`quot` content f) f
 {-# INLINE pp #-}
 
-injectVars :: ((Arity r :<= Arity r') ~ 'P.True,
+injectVars :: ((Arity r <= Arity r') ~ 'P.True,
                IsPolynomial r,
                IsPolynomial r',
                Coefficient r ~ Coefficient r') => r -> r'

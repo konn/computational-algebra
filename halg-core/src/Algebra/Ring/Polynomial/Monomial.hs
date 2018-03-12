@@ -277,7 +277,7 @@ instance KnownNat n => EliminationType n m Lex
 instance (KnownNat n, KnownNat m, IsMonomialOrder n ord, IsMonomialOrder m ord', k ~ (n + m), KnownNat k)
       => EliminationType k n (ProductOrder n m ord ord')
 instance (IsMonomialOrder k ord, ones ~ (Replicate n 1), SingI ones,
-          (Length ones :<= k) ~ 'True, KnownNat k)
+          (Length ones <= k) ~ 'True, KnownNat k)
       => EliminationType k n (WeightOrder ones ord)
 
 type EliminationOrder n m = ProductOrder n m Grevlex Grevlex

@@ -279,7 +279,7 @@ permute0 (SCons x xs) ys =
     SJust n  ->
       let k = sLength xs
       in coerceLength (plusComm k sOne) $ withKnownNat (sSucc k) $
-         withKnownNat k $ (fromSing n S.:< permute0 xs ys)
+         withKnownNat k $ (fromIntegral (toNatural n) S.:< permute0 xs ys)
     SNothing -> error "oops, you called permute0 for non-subset..."
 
 permute :: forall (xs :: [k])  ys. (IsSubsetOf xs ys , SEq k)
