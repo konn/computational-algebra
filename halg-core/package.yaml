@@ -12,12 +12,12 @@ extra-source-files:
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
-# category:            Web
+category:            Math
 
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on Github at <https://github.com/konn/halg-core#readme>
+description:         Please see the project Web Site <https://konn.github.io/computational-algebra>
 
 default-extensions:
 - CPP
@@ -34,22 +34,13 @@ default-extensions:
 - UndecidableInstances  
 
 dependencies:
-- ListLike
 - MonadRandom
 - algebra
 - algebraic-prelude
 - base >= 4.7 && < 5
-# - constraints
-- containers
 - convertible
 - deepseq
-- equational-reasoning
-# - hashable
 - lens
-- singletons
-- sized
-- type-natural
-# - unordered-containers
 - vector
 
 default-extensions:
@@ -69,27 +60,3 @@ default-extensions:
 library:
   source-dirs: src
   ghc-options: ["-Wall", "-O2"]
-
-executables: {}
-  # halg-core-exe:
-  #   main:                Main.hs
-  #   source-dirs:         examples
-  #   ghc-options:
-  #   - -Wall
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-  #   dependencies:
-  #   - halg-core
-
-tests: {}
-  # halg-core-test:
-  #   main:                Spec.hs
-  #   source-dirs:         test
-  #   ghc-options:
-  #   - -Wall
-  #   - -threaded
-  #   - -rtsopts
-  #   - -with-rtsopts=-N
-  #   dependencies:
-  #   - halg-core
