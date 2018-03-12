@@ -17,7 +17,7 @@ import           Data.Maybe
 import           Gauge.Main
 import           Numeric.Algebra                  hiding ((>), (^))
 import           Numeric.Field.Fraction           (Fraction)
-import           Prelude                          hiding (product)
+import           Prelude                          hiding (concat, map, product)
 import qualified Prelude                          as P
 import           System.Process
 import           Test.QuickCheck

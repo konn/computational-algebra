@@ -193,9 +193,9 @@ tests:
     <<: *test-default
     main: SingularTest.hs
   monomial-order-test:
-    buildable: false
     <<: *test-default
     main: monomials.hs
+    buildable: false
   matrix-test:
     buildable: false
     <<: *test-default
@@ -231,7 +231,10 @@ _bench-common: &bench-common
     - matrix
     - parallel
     - process
+    - sized
     - computational-algebra-shared
+    - computational-algebra
+    - QuickCheck
     source-dirs:
     - bench
     ghc-options:
@@ -243,36 +246,47 @@ benchmarks:
   unipol-bench:
     <<: *bench-common
     main: unipol-bench.hs
+    other-modules: []
   normal-bench:
     <<: *bench-common
     main: bench.hs
+    other-modules: []
   eliminate-bench:
     <<: *bench-common
-    main: eliminate-bench.hs
+    main: elimination-bench.hs
+    other-modules: []
+    buildable: false
   quotient-bench-randomized:
     <<: *bench-common
     main: quotient-bench-randomized.hs
-  monomial-order-bench:
-    <<: *bench-common
-    main: monomials.hs
-  linear-bench:
-    <<: *bench-common
-    main: linear.hs
+    other-modules: []
   division-bench:
     <<: *bench-common
     main: division.hs
+    buildable: false
+    other-modules: []
   sugar-paper-bench:
     <<: *bench-common
     main: sugar-paper.hs
+    other-modules: []
+  sugar-bench:
+    <<: *bench-common
+    main: sugar.hs
+    buildable: false
+    other-modules: SingularBench
   solve-bench:
     <<: *bench-common
     main: solve.hs
+    other-modules: []
   coercion-bench:
     <<: *bench-common
+    other-modules: []
     main: coercion.hs
   unipol-mult-bench:
     <<: *bench-common
     main: unipol-mult.hs
+    other-modules: []
   unipol-div-bench:
     <<: *bench-common
+    other-modules: []
     main: unipol-div.hs

@@ -1,4 +1,347 @@
 
+./bench/SingularBench.hs,652
+module SingularBench SingularBench2,3
+formatPoly formatPoly15,16
+formatPoly formatPoly16,17
+formatTerm formatTerm19,20
+formatTerm formatTerm20,21
+showCoeff showCoeff24,25
+showCoeff showCoeff25,26
+formatMonom formatMonom30,31
+formatMonom formatMonom31,32
+formatIdeal formatIdeal33,34
+formatIdeal formatIdeal34,35
+class IsMonomialOrder ord => SingularRep SingularRep36,37
+class IsMonomialOrder ord => SingularRep SingularRep36,37
+  singularRep singularRep37,38
+instance instance39,40
+type Ideal Ideal62,63
+skeleton skeleton64,65
+skeleton skeleton65,66
+singularWith singularWith75,76
+singularWith singularWith76,77
+
+./bench/unipol-div.hs,317
+module Main Main1,2
+x x15,16
+x x16,17
+mkSimpleEnv mkSimpleEnv18,19
+mkSimpleEnv mkSimpleEnv19,20
+fromOP fromOP21,22
+fromOP fromOP23,24
+fromCoeffVec fromCoeffVec25,26
+fromCoeffVec fromCoeffVec26,27
+genPoly genPoly28,29
+genPoly genPoly29,30
+genPair genPair31,32
+main main38,39
+main main39,40
+
+./bench/quotient-bench-randomized.hs,210
+module Main Main4,5
+sTwo sTwo25,26
+sTwo sTwo26,27
+makeIdeals makeIdeals28,29
+makeIdeals makeIdeals29,30
+mkTestCases mkTestCases31,32
+mkTestCases mkTestCases32,33
+main main45,46
+main main46,47
+
+./bench/coercion.hs,392
+module Main Main4,5
+x, y, z z24,25
+x, y,y24,25
+x,x24,25
+[x,[x25,26
+(.*).*27,28
+(.(28,29
+(^^)^^32,33
+eqn01 eqn0135,36
+eqn01 eqn0136,37
+eqn02 eqn0238,39
+eqn02 eqn0239,40
+eqn03 eqn0345,46
+eqn03 eqn0346,47
+eqn04 eqn0451,52
+eqn04 eqn0452,53
+f01 f0154,55
+f01 f0155,56
+f02 f0257,58
+f02 f0258,59
+f03 f0360,61
+f03 f0361,62
+main main66,67
+main main67,68
+
+./bench/sugar.hs,372
+x, y, z, w, s, a, b, c c11,12
+x, y, z, w, s, a, b,b11,12
+x, y, z, w, s, a,a11,12
+x, y, z, w, s,s11,12
+x, y, z, w,w11,12
+x, y, z,z11,12
+x, y,y11,12
+x,x11,12
+[x,[x12,13
+instance instance14,15
+i1, i2, i3, i4 i420,21
+i1, i2, i3,i320,21
+i1, i2,i220,21
+i1,i120,21
+i1 i121,22
+i2 i222,23
+i3 i323,24
+i4 i425,26
+main main27,28
+main main28,29
+
+./bench/bench.hs,122
+i1, i2, i4 i410,11
+i1, i2,i210,11
+i1,i110,11
+(i(11,12
+i3 i318,19
+i3 i319,20
+main main23,24
+main main24,25
+
+./bench/unipol-bench.hs,1849
+module Main Main1,2
+main main10,11
+main main11,12
+f103_5_a, f103_5_b f103_5_b199,200
+f103_5_a,f103_5_a199,200
+f103_5_a f103_5_a200,201
+f103_5_b f103_5_b201,202
+f103_500_a, f103_250_b f103_250_b203,204
+f103_500_a,f103_500_a203,204
+f103_500_a f103_500_a204,205
+f103_250_b f103_250_b205,206
+f103_100_a, f103_100_b f103_100_b208,209
+f103_100_a,f103_100_a208,209
+f103_100_a f103_100_a209,210
+f103_100_b f103_100_b210,211
+f103_1000_a, f103_1000_b f103_1000_b212,213
+f103_1000_a,f103_1000_a212,213
+f103_1000_a f103_1000_a213,214
+f103_1000_b f103_1000_b215,216
+type OGUnipol OGUnipol217,218
+type OGUnipol k k217,218
+type OLUnipol OLUnipol218,219
+generateFrom generateFrom220,221
+generateFrom generateFrom222,223
+rat_5_simple_a, rat_5_simple_b rat_5_simple_b226,227
+rat_5_simple_a,rat_5_simple_a226,227
+rat_5_simple_a rat_5_simple_a227,228
+rat_5_simple_b rat_5_simple_b228,229
+rat_5_complex_a, rat_5_complex_b rat_5_complex_b230,231
+rat_5_complex_a,rat_5_complex_a230,231
+rat_5_complex_a rat_5_complex_a231,232
+rat_5_complex_b rat_5_complex_b232,233
+rat_100_simple_a, rat_100_simple_b rat_100_simple_b234,235
+rat_100_simple_a,rat_100_simple_a234,235
+rat_100_simple_a rat_100_simple_a235,236
+rat_100_simple_b rat_100_simple_b236,237
+rat_100_complex_a, rat_100_complex_b rat_100_complex_b238,239
+rat_100_complex_a,rat_100_complex_a238,239
+rat_100_complex_a rat_100_complex_a239,240
+rat_100_complex_b rat_100_complex_b240,241
+rat_1000_simple_a, rat_1000_simple_b rat_1000_simple_b242,243
+rat_1000_simple_a,rat_1000_simple_a242,243
+rat_1000_simple_a rat_1000_simple_a243,244
+rat_1000_simple_b rat_1000_simple_b245,246
+rat_500_simple rat_500_simple248,249
+rat_500_simple rat_500_simple249,250
+rat_400_simple rat_400_simple251,252
+rat_400_simple rat_400_simple252,253
+
+./bench/sugar-bench.hs,468
+x, y, z, w, s, a, b, c c10,11
+x, y, z, w, s, a, b,b10,11
+x, y, z, w, s, a,a10,11
+x, y, z, w, s,s10,11
+x, y, z, w,w10,11
+x, y, z,z10,11
+x, y,y10,11
+x,x10,11
+[x,[x11,12
+instance instance13,14
+i1, i2, i3, i4 i419,20
+i1, i2, i3,i319,20
+i1, i2,i219,20
+i1,i119,20
+i1 i120,21
+i2 i221,22
+i3 i322,23
+i4 i424,25
+mkTestCases mkTestCases26,27
+mkTestCases mkTestCases27,28
+mkTC mkTC32,33
+mkTC mkTC33,34
+main main41,42
+main main42,43
+
+./bench/monomials.hs,480
+module Main Main1,2
+data MonomPair MonomPair14,15
+data MonomPair = forall forall14,15
+data MonomPair = forall n. MonomPair { getMonoms getMonoms14,15
+data AMonomPair AMonomPair15,16
+data AMonomPair = forall forall15,16
+data AMonomPair = forall n. AMonomPair { getAMonoms getAMonoms15,16
+instance instance17,18
+main main23,24
+main main24,25
+genMonomial genMonomial29,30
+genMonomial genMonomial30,31
+mkTestCase mkTestCase44,45
+mkTestCase mkTestCase45,46
+
+./bench/solve.hs,444
+module Main Main4,5
+sFour sFour28,29
+sFour sFour29,30
+x, y, z z31,32
+x, y,y31,32
+x,x31,32
+[x,[x32,33
+(.*).*34,35
+(.(35,36
+(^^)^^39,40
+eqn01 eqn0142,43
+eqn01 eqn0143,44
+eqn02 eqn0245,46
+eqn02 eqn0246,47
+eqn03 eqn0352,53
+eqn03 eqn0353,54
+eqn04 eqn0458,59
+eqn04 eqn0459,60
+mkBench mkBench61,62
+mkBench mkBench62,63
+randomCase randomCase70,71
+randomCase randomCase72,73
+main main76,77
+main main77,78
+
+./bench/elimination-bench.hs,544
+x, y, z, w, s, a, b, c, t, u, v v15,16
+x, y, z, w, s, a, b, c, t, u,u15,16
+x, y, z, w, s, a, b, c, t,t15,16
+x, y, z, w, s, a, b, c,c15,16
+x, y, z, w, s, a, b,b15,16
+x, y, z, w, s, a,a15,16
+x, y, z, w, s,s15,16
+x, y, z, w,w15,16
+x, y, z,z15,16
+x, y,y15,16
+x,x15,16
+[x,[x16,17
+instance instance18,19
+i1, i2, i3, i4 i424,25
+i1, i2, i3,i324,25
+i1, i2,i224,25
+i1,i124,25
+i1 i125,26
+i2 i226,27
+i3 i327,28
+i4 i429,30
+mkTestCase mkTestCase31,32
+mkTestCase mkTestCase32,33
+main main38,39
+main main39,40
+
+./bench/sugar-paper.hs,256
+module Main Main5,6
+i1 i116,17
+i1 i117,18
+i2 i235,36
+i2 i236,37
+i3 i341,42
+i3 i342,43
+i4 i446,47
+i4 i447,48
+mkTestCases mkTestCases51,52
+mkTestCases mkTestCases52,53
+mkTC mkTC56,57
+mkTC mkTC57,58
+main main62,63
+main main63,64
+
+./bench/division.hs,290
+module Main Main4,5
+sTwo sTwo22,23
+sTwo sTwo23,24
+sThree sThree24,25
+sThree sThree25,26
+sFour sFour26,27
+sFour sFour27,28
+makeIdeals makeIdeals29,30
+makeIdeals makeIdeals30,31
+mkTestCases mkTestCases35,36
+mkTestCases mkTestCases36,37
+main main46,47
+main main47,48
+
+./bench/faugere4.hs,449
+module Main Main2,3
+s3 s318,19
+s3 s319,20
+s4 s421,22
+s4 s422,23
+s6 s624,25
+s6 s625,26
+f4Repa f4Repa27,28
+f4DM f4DM28,29
+f4LM f4LM30,31
+f4LMN f4LMN31,32
+f4Mod f4Mod32,33
+ideal3 ideal334,35
+ideal3 ideal335,36
+ideal4 ideal439,40
+ideal4 ideal440,41
+ideal5 ideal544,45
+ideal5 ideal545,46
+ideal6 ideal650,51
+ideal6 ideal651,52
+buildCase buildCase55,56
+buildCase buildCase56,57
+main main58,59
+main main59,60
+
+./bench/linear.hs,176
+module Main Main4,5
+makeLinear makeLinear19,20
+makeLinear makeLinear20,21
+mkTestCases mkTestCases25,26
+mkTestCases mkTestCases26,27
+main main34,35
+main main35,36
+
+./bench/unipol-mult.hs,509
+module Main Main1,2
+x x15,16
+x x16,17
+allCoeffOne allCoeffOne18,19
+allCoeffOne allCoeffOne19,20
+mkSimpleEnv mkSimpleEnv21,22
+mkSimpleEnv mkSimpleEnv22,23
+fromOP fromOP24,25
+fromOP fromOP26,27
+showProxyType showProxyType28,29
+showProxyType showProxyType29,30
+fromCoeffVec fromCoeffVec35,36
+fromCoeffVec fromCoeffVec36,37
+genPoly genPoly38,39
+genPoly genPoly40,41
+genPair genPair42,43
+int int49,50
+int int50,51
+rat rat52,53
+rat rat53,54
+main main55,56
+main main56,57
+
 ./Setup.hs,15
 main main1,2
 

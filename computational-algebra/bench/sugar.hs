@@ -2,14 +2,14 @@
 {-# LANGUAGE MultiParamTypeClasses, OverloadedStrings, PolyKinds   #-}
 {-# LANGUAGE QuasiQuotes, TemplateHaskell, UndecidableInstances    #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
-import Algebra.Algorithms.Groebner.Monomorphic
-import Algebra.Ring.Polynomial.Monomorphic
+import Algebra.Algorithms.Groebner
+import Algebra.Ring.Polynomial
 import Control.DeepSeq
 import Control.Parallel.Strategies
 import Gauge.Main
 import SingularBench
 
-x, y, z, w, s, a, b, c :: Polynomial (Fraction Integer)
+x, y, z, w, s, a, b, c :: LabPolynomial (Fraction Integer)
 [x, y, z, w, s, a, b, c] = map (injectVar . flip Variable Nothing) "xyzwSabc"
 
 instance NFData Variable where

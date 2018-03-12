@@ -1,18 +1,13 @@
 {-# LANGUAGE GADTs, OverloadedStrings, QuasiQuotes #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module SingularBench where
-import           Algebra.Algorithms.Groebner.Monomorphic
 import           Algebra.Internal
-import           Algebra.Ring.Polynomial                 (Coefficient (..),
-                                                          ProductOrder (..),
-                                                          ToWeightVector (..),
-                                                          WeightOrder (..),
-                                                          WeightProxy (..),
-                                                          showRational)
-import           Algebra.Ring.Polynomial.Monomorphic
+import           Algebra.Ring.Polynomial (Coefficient (..), ProductOrder (..),
+                                          WeightOrder (..), WeightProxy (..),
+                                          showRational)
 import           Control.Arrow
 import           Data.List
-import qualified Data.Map                                as M
+import qualified Data.Map                as M
 import           Data.Monoid
 import           Data.Singletons
 import           Data.Type.Natural
