@@ -42,6 +42,7 @@ extra-deps:
 - kan-extensions-5.1
 - lens-4.16
 - loop-0.3.0
+- matrix-0.3.6.0
 - monad-loops-0.4.3
 - mono-traversable-1.0.8.1
 - nats-1.1.2
@@ -89,9 +90,6 @@ extra-deps:
 
 - git: https://github.com/clash-lang/ghc-typelits-natnormalise.git
   commit: 1178631cc6b78ea9b92fcf29e2944d1a148f2d71
-
-- git: https://github.com/Daniel-Diaz/matrix.git
-  commit: 5781ad18ea070a60e6b6fc5470b7f1db999acf59
 
 - git: https://github.com/konn/sized.git
   commit: 086fa341c564dcc96e4154b948e93de0208c118a 
