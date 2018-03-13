@@ -39,6 +39,10 @@ matrix:
             - singular
 
 before_install:
+ # Set up apt so that singular can be installed
+  - curl ftp://jim.mathematik.uni-kl.de/repo/extra/gpg | sudo apt-key add -
+  - echo "deb ftp://jim.mathematik.uni-kl.de/repo/debian jessie main" | sudo tee -a /etc/apt/sources.list
+  - sudo apt-get update -qq
  # install Stack
  - mkdir -p ~/.local/bin
  - export PATH=$HOME/.local/bin:$PATH
