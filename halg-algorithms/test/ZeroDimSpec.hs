@@ -16,7 +16,6 @@ import           Data.Convertible       (convert)
 import qualified Data.Matrix            as M
 import           Data.Maybe
 import qualified Data.Sized.Builtin     as SV
-import           Data.Type.Ordinal
 import qualified Data.Vector            as V
 import           Numeric.Field.Fraction (Fraction, (%))
 import           Test.Hspec

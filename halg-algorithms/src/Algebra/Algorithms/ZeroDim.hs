@@ -1,12 +1,10 @@
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
-{-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures            #-}
-{-# LANGUAGE ExplicitNamespaces, FlexibleContexts, FlexibleInstances  #-}
-{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
-{-# LANGUAGE NoMonomorphismRestriction, OverloadedStrings             #-}
-{-# LANGUAGE ParallelListComp, PatternSynonyms, PolyKinds             #-}
-{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, TypeSynonymInstances        #-}
-{-# LANGUAGE UndecidableInstances                                     #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, ExplicitNamespaces              #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                  #-}
+{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction            #-}
+{-# LANGUAGE OverloadedStrings, ParallelListComp, PatternSynonyms        #-}
+{-# LANGUAGE PolyKinds, ScopedTypeVariables, TypeFamilies, TypeOperators #-}
+{-# LANGUAGE TypeSynonymInstances, UndecidableInstances                  #-}
 -- | Algorithms for zero-dimensional ideals.
 --
 --   Since 0.4.0.0
@@ -31,7 +29,7 @@ import qualified Algebra.Matrix                   as AM
 import           Algebra.Prelude.Core
 import           Algebra.Ring.Polynomial.Quotient
 
-import           Control.Lens          hiding ((<))
+import           Control.Lens
 import           Control.Monad.Loops   (whileM_)
 import           Control.Monad.Random  hiding (next)
 import           Control.Monad.Reader  (runReaderT)
@@ -329,7 +327,7 @@ fglm :: (Ord r, KnownNat n, Field r,
      => Ideal (OrderedPolynomial r ord n)
      -> ([OrderedPolynomial r Lex n], [OrderedPolynomial r Lex n])
 fglm ideal = reifyQuotient ideal $ \pxy ->
-  fglmMap (\f -> vectorRep $ modIdeal' pxy f)
+  fglmMap (vectorRep . modIdeal' pxy)
 
 -- | Compute the kernel and image of the given linear map using generalized FGLM algorithm.
 fglmMap :: forall k ord n. (Ord k, Field k, (0 < n) ~ 'True,
@@ -391,7 +389,7 @@ nextMonomial :: forall s r ord n.
 nextMonomial = do
   m <- look monomial
   gs <- map leadingMonomial <$> look gLex
-  let next = fst $ maximumBy (comparing snd) $
+  let next = fst $ maximumBy (comparing snd)
              [ (OrderedMonomial monom, fromEnum od)
              | od <- enumOrdinal (sing :: SNat n)
              , let monom = beta (getMonomial m) od

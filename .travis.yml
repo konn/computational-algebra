@@ -1,5 +1,6 @@
 # This file has been generated -- see https://github.com/hvr/multi-ghc-travis
 language: c
+dist: trusty
 sudo: false
 
 cache:
@@ -8,35 +9,35 @@ cache:
       - $HOME/.cabsnap
       - $HOME/.stack
 
+_apts: &apts
+  sources:
+    - sourceline: 'deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu14 trusty main'
+      key_url:    'ftp://jim.mathematik.uni-kl.de/repo/extra/gpg'
+  packages:
+    - libgmp3-dev
+    - libgsl0-dev
+    - liblapack-dev
+    - singular
+
 matrix:
   include:
     - env: STACK_YAML=stack-800.yaml
       compiler: ": #GHC 8.0.2"
       addons:
         apt:
-          packages:
-            - libgmp3-dev
-            - libgsl0-dev
-            - liblapack-dev
+          <<: *apts
     - env: STACK_YAML=stack-802.yaml
       compiler: ": #GHC 8.2.2"
       addons:
         apt:
-          packages:
-            - libgmp3-dev
-            - libgsl0-dev
-            - liblapack-dev
+          <<: *apts
     - env: STACK_YAML=stack-804.yaml
       compiler: ": #GHC 8.4.1"
       addons:
         apt:
-          packages:
-            - libgmp3-dev
-            - libgsl0-dev
-            - liblapack-dev
+          <<: *apts
 
 before_install:
- # install Stack
  - mkdir -p ~/.local/bin
  - export PATH=$HOME/.local/bin:$PATH
  - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'

@@ -1,4 +1,21 @@
 
+./bench/homog-bench.hs,256
+module Main Main5,6
+i1 i117,18
+i1 i118,19
+i2 i236,37
+i2 i237,38
+i3 i342,43
+i3 i343,44
+i4 i447,48
+i4 i448,49
+mkTestCases mkTestCases52,53
+mkTestCases mkTestCases53,54
+mkTC mkTC57,58
+mkTC mkTC58,59
+main main63,64
+main main64,65
+
 ./Setup.hs,15
 main main1,2
 
@@ -9,65 +26,78 @@ main main5,6
 
 ./test/Utils.hs,1322
 module Utils Utils7,8
-newtype ZeroDimIdeal ZeroDimIdeal36,37
-newtype ZeroDimIdeal n = ZeroDimIdeal ZeroDimIdeal36,37
-newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal getIdeal36,37
-instance instance39,40
+newtype ZeroDimIdeal ZeroDimIdeal35,36
+newtype ZeroDimIdeal n = ZeroDimIdeal ZeroDimIdeal35,36
+newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal getIdeal35,36
+instance instance38,39
+genUnipol genUnipol41,42
 genUnipol genUnipol42,43
-genUnipol genUnipol43,44
+appendLM appendLM46,47
 appendLM appendLM47,48
-appendLM appendLM48,49
+xPoly xPoly49,50
 xPoly xPoly50,51
-xPoly xPoly51,52
+yPoly yPoly56,57
 yPoly yPoly57,58
-yPoly yPoly58,59
+genLM genLM78,79
 genLM genLM79,80
-genLM genLM80,81
+zeroDimOf zeroDimOf90,91
 zeroDimOf zeroDimOf91,92
-zeroDimOf zeroDimOf92,93
+zeroDimG zeroDimG96,97
 zeroDimG zeroDimG97,98
-zeroDimG zeroDimG98,99
+isNonTrivial isNonTrivial102,103
 isNonTrivial isNonTrivial103,104
-isNonTrivial isNonTrivial104,105
-data Equation Equation106,107
-data Equation = Equation Equation106,107
-data Equation = Equation { coefficients coefficients106,107
-                         , answers answers107,108
-newtype MatrixCase MatrixCase110,111
-newtype MatrixCase a = MatrixCase MatrixCase110,111
-newtype MatrixCase a = MatrixCase { getMatrix getMatrix110,111
+data Equation Equation105,106
+data Equation = Equation Equation105,106
+data Equation = Equation { coefficients coefficients105,106
+                         , answers answers106,107
+newtype MatrixCase MatrixCase109,110
+newtype MatrixCase a = MatrixCase MatrixCase109,110
+newtype MatrixCase a = MatrixCase { getMatrix getMatrix109,110
+arbitrarySolvable arbitrarySolvable124,125
 arbitrarySolvable arbitrarySolvable125,126
-arbitrarySolvable arbitrarySolvable126,127
+unaryPoly unaryPoly130,131
 unaryPoly unaryPoly131,132
-unaryPoly unaryPoly132,133
-stdReduced stdReduced137,138
-stdReduced stdReduced139,140
+stdReduced stdReduced136,137
+stdReduced stdReduced138,139
+idealOfArity idealOfArity149,150
 idealOfArity idealOfArity150,151
-idealOfArity idealOfArity151,152
-polynomialOfArity polynomialOfArity154,155
-polynomialOfArity polynomialOfArity156,157
+polynomialOfArity polynomialOfArity153,154
+polynomialOfArity polynomialOfArity155,156
 
 ./test/ZeroDimSpec.hs,692
 module ZeroDimSpec ZeroDimSpec2,3
+asGenListOf asGenListOf25,26
 asGenListOf asGenListOf26,27
-asGenListOf asGenListOf27,28
+spec spec28,29
 spec spec29,30
-spec spec30,31
+isDescending isDescending102,103
 isDescending isDescending103,104
-isDescending isDescending104,105
-prop_isApproximateZero prop_isApproximateZero106,107
-prop_isApproximateZero prop_isApproximateZero111,112
+prop_isApproximateZero prop_isApproximateZero105,106
+prop_isApproximateZero prop_isApproximateZero110,111
+prop_univPoly prop_univPoly119,120
 prop_univPoly prop_univPoly120,121
-prop_univPoly prop_univPoly121,122
+rank rank128,129
 rank rank129,130
-rank rank130,131
-data TestSet TestSet134,135
-data TestSet = TestSet TestSet134,135
-data TestSet = TestSet { inputMat inputMat134,135
-                       , inputVec inputVec135,136
-                       , answer answer136,137
+data TestSet TestSet133,134
+data TestSet = TestSet TestSet133,134
+data TestSet = TestSet { inputMat inputMat133,134
+                       , inputVec inputVec134,135
+                       , answer answer135,136
+linSet linSet138,139
 linSet linSet139,140
-linSet linSet140,141
+
+./test/HomogeneousSpec.hs,474
+module HomogeneousSpec HomogeneousSpec4,5
+asGenListOf asGenListOf28,29
+asGenListOf asGenListOf29,30
+spec spec31,32
+spec spec32,33
+prop_passesSTestWith prop_passesSTestWith48,49
+prop_passesSTestWith prop_passesSTestWith53,54
+prop_groebnerDivsOrigWith prop_groebnerDivsOrigWith58,59
+prop_groebnerDivsOrigWith prop_groebnerDivsOrigWith63,64
+prop_groebnerIncludedWith prop_groebnerIncludedWith70,71
+prop_groebnerIncludedWith prop_groebnerIncludedWith75,76
 
 ./test/Spec.hs,0
 
@@ -93,42 +123,78 @@ image image41,42
 image image42,43
 
 ./src/Algebra/Algorithms/ZeroDim.hs,1141
-module Algebra.Algorithms.ZeroDimAlgebra.Algorithms.ZeroDim12,13
-solveM solveM57,58
-solveM solveM63,64
-solveWith solveWith81,82
-solveWith solveWith87,88
-solve' solve'123,124
-solve' solve'129,130
+module Algebra.Algorithms.ZeroDimAlgebra.Algorithms.ZeroDim10,11
+solveM solveM55,56
+solveM solveM61,62
+solveWith solveWith79,80
+solveWith solveWith85,86
+solve' solve'121,122
+solve' solve'127,128
+subspMatrix subspMatrix143,144
 subspMatrix subspMatrix145,146
-subspMatrix subspMatrix147,148
-solveViaCompanion solveViaCompanion161,162
-solveViaCompanion solveViaCompanion166,167
-matToLists matToLists179,180
-matToLists matToLists180,181
-matrixRep matrixRep182,183
-matrixRep matrixRep185,186
-toComplex toComplex193,194
-toComplex toComplex194,195
+solveViaCompanion solveViaCompanion159,160
+solveViaCompanion solveViaCompanion164,165
+matToLists matToLists177,178
+matToLists matToLists178,179
+matrixRep matrixRep180,181
+matrixRep matrixRep183,184
+toComplex toComplex191,192
+toComplex toComplex192,193
+reduction reduction195,196
 reduction reduction197,198
-reduction reduction199,200
-univPoly univPoly204,205
-univPoly univPoly208,209
-solveLinear solveLinear227,228
-solveLinear solveLinear231,232
-radical radical266,267
-radical radical269,270
-isRadical isRadical274,275
-isRadical isRadical278,279
-fglm fglm326,327
-fglm fglm330,331
-fglmMap fglmMap334,335
-fglmMap fglmMap345,346
+univPoly univPoly202,203
+univPoly univPoly206,207
+solveLinear solveLinear225,226
+solveLinear solveLinear229,230
+radical radical264,265
+radical radical267,268
+isRadical isRadical272,273
+isRadical isRadical276,277
+fglm fglm324,325
+fglm fglm328,329
+fglmMap fglmMap332,333
+fglmMap fglmMap343,344
+mainLoop mainLoop350,351
 mainLoop mainLoop352,353
-mainLoop mainLoop354,355
-toContinue toContinue374,375
-toContinue toContinue378,379
+toContinue toContinue372,373
+toContinue toContinue376,377
+nextMonomial nextMonomial386,387
 nextMonomial nextMonomial388,389
-nextMonomial nextMonomial390,391
-beta beta401,402
-beta beta402,403
+beta beta399,400
+beta beta400,401
+
+./src/Algebra/Algorithms/Groebner/Homogeneous.hs,867
+module Algebra.Algorithms.Groebner.HomogeneousAlgebra.Algorithms.Groebner.Homogeneous0,1
+isHomogeneous isHomogeneous19,20
+isHomogeneous isHomogeneous21,22
+calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising27,28
+calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising29,30
+calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis38,39
+calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis40,41
+unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis49,50
+unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis51,52
+type Signatures Signatures67,68
+type Signatures weight weight67,68
+buildTable buildTable69,70
+buildTable buildTable71,72
+type RefVec RefVec78,79
+type RefVec s s78,79
+at at80,81
+at at81,82
+snoc snoc83,84
+snoc snoc84,85
+deg deg92,93
+deg deg93,94
+
+./src/Algebra/Ring/Polynomial/Homogenised.hs,421
+module Algebra.Ring.Polynomial.HomogenisedAlgebra.Ring.Polynomial.Homogenised3,4
+newtype Homogenised Homogenised10,11
+newtype Homogenised poly = Homogenised Homogenised10,11
+instance instance29,30
+type HomogOrder HomogOrder58,59
+type HomogOrder n n58,59
+  f0 `divide`divide74,75
+homogenise homogenise97,98
+homogenise homogenise98,99
+unhomogenise unhomogenise106,107
+unhomogenise unhomogenise107,108

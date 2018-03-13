@@ -46,17 +46,22 @@ library:
   - Algebra.Algorithms.FGLM
   ghc-options:  -Wall
   dependencies:
+  - ghc-typelits-knownnat
+  - sized
   - algebraic-prelude
-  - lens
-  - mtl
-  - vector
-  - reflection
-  - matrix
+  - containers
   - convertible
-  - equational-reasoning
   - monad-loops
+  - equational-reasoning
   - halg-matrices
+  - heaps
   - hmatrix
+  - lens
+  - matrix
+  - monad-loops
+  - mtl
+  - reflection
+  - vector
   default-extensions:
   - NoImplicitPrelude
 
@@ -66,6 +71,7 @@ tests:
     source-dirs:         test
     other-modules:
     - ZeroDimSpec
+    - HomogeneousSpec
     - Utils
     ghc-options:
     - -Wall
@@ -73,9 +79,12 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
+    - HUnit
+    - ghc-typelits-knownnat
     - halg-core-test
     - halg-polynomials
     - halg-algorithms
+    - halg-bridge-singular
     - QuickCheck
     - convertible
     - containers
@@ -89,3 +98,12 @@ tests:
     - type-natural
     - vector
     - hspec-discover
+
+benchmarks:
+  homog-bench:
+    source-dirs:  bench
+    main:         homog-bench.hs
+    dependencies:
+    - halg-algorithms
+    - gauge
+    - parallel
