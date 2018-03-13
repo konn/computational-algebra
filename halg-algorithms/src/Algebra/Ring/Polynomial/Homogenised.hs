@@ -1,11 +1,10 @@
 {-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving, TypeOperators                      #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
-module Algebra.Ring.Polynomial.Homogenise where
+module Algebra.Ring.Polynomial.Homogenised where
 import Algebra.Prelude.Core
 import Algebra.Ring.Polynomial.Class
 import Algebra.Ring.Polynomial.Univariate
-import Data.Sized.Builtin                 (sLength)
 
 newtype Homogenised poly = Homogenised { runHomogenised :: Unipol poly }
 
@@ -37,9 +36,9 @@ instance IsOrderedPolynomial poly => IsPolynomial (Homogenised poly) where
   type Coefficient (Homogenised poly) = Coefficient poly
   type Arity (Homogenised poly) = Succ (Arity poly)
   sArity _ = sing
-  liftMap gen (Homogenised f) =
-    let g = liftMap (gen . OS)
-    in undefined
+  -- liftMap gen (Homogenised f) =
+  --   let g = liftMap (gen . OS)
+  --   in liftMap (const $ _ $ gen 0) f
 
 -- deriving instance IsOrderedPolynomial poly => PID (Homogenised poly)
 -- deriving instance IsOrderedPolynomial poly => Euclidean (Homogenised poly)

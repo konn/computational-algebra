@@ -184,9 +184,9 @@ snoc snoc73,74
 deg deg81,82
 deg deg82,83
 
-./src/Algebra/Ring/Polynomial/Homogenise.hs,279
-module Algebra.Ring.Polynomial.Homogenise Algebra.Ring.Polynomial.Homogenise3,4
-newtype Homogenised Homogenised9,10
-newtype Homogenised poly = Homogenised Homogenised9,10
-newtype Homogenised poly = Homogenised { runHomogenised runHomogenised9,10
-instance instance28,29
+./src/Algebra/Ring/Polynomial/Homogenised.hs,278
+module Algebra.Ring.Polynomial.Homogenised Algebra.Ring.Polynomial.Homogenised3,4
+newtype Homogenised Homogenised8,9
+newtype Homogenised poly = Homogenised Homogenised8,9
+newtype Homogenised poly = Homogenised { runHomogenised runHomogenised8,9
+instance instance27,28

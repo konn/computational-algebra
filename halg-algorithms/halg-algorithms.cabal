@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ef34744e5d0ba75a912e2380a4db186de77ed9a704990978a8cf729066580252
+-- hash: 969eb1d0b419135a22166e5752382fe7ca4f8703bb11a10e24316173b704bcd2
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -55,7 +55,7 @@ library
   exposed-modules:
       Algebra.Algorithms.Groebner.Homogeneous
       Algebra.Algorithms.ZeroDim
-      Algebra.Ring.Polynomial.Homogenise
+      Algebra.Ring.Polynomial.Homogenised
   other-modules:
       Algebra.Algorithms.FGLM
   default-language: Haskell2010
