@@ -8,7 +8,7 @@ cache:
       - $HOME/.cabsnap
       - $HOME/.stack
 
-_apts: *apts
+_apts: &apts
   sources:
     - sourceline: 'deb ftp://jim.mathematik.uni-kl.de/repo/debian jessie main'
       key_url:    'ftp://jim.mathematik.uni-kl.de/repo/extra/gpg'
@@ -23,17 +23,17 @@ matrix:
       compiler: ": #GHC 8.0.2"
       addons:
         apt:
-          <<: &apts
+          <<: *apts
     - env: STACK_YAML=stack-802.yaml
       compiler: ": #GHC 8.2.2"
       addons:
         apt:
-          <<: &apts
+          <<: *apts
     - env: STACK_YAML=stack-804.yaml
       compiler: ": #GHC 8.4.1"
       addons:
         apt:
-          <<: &apts
+          <<: *apts
 
 before_install:
  - mkdir -p ~/.local/bin
