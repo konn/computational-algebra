@@ -40,7 +40,6 @@ import qualified Data.Set                              as Set
 import           Data.Singletons.Prelude               (POrd (..))
 import           Data.Singletons.Prelude.List          (Replicate)
 import qualified Data.Sized.Builtin                    as S
-import           Data.Type.Ordinal
 import qualified Numeric.Algebra                       as NA
 import           Numeric.Algebra.Unital.UnitNormalForm (UnitNormalForm (..))
 import           Numeric.Domain.Integral               (IntegralDomain (..))

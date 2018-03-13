@@ -187,34 +187,34 @@ instance instance35,36
 
 ./src/Algebra/Ring/Polynomial/Labeled.hs,1159
 module Algebra.Ring.Polynomial.LabeledAlgebra.Ring.Polynomial.Labeled7,8
-type family family37,38
-type family UniqueList' UniqueList'37,38
-type family family42,43
-type family UniqueList UniqueList42,43
-class    (UniqueList xs) => IsUniqueList IsUniqueList46,47
-instance instance50,51
-data LabPolynomial LabPolynomial68,69
-data LabPolynomial poly (vars vars68,69
-  LabelPolynomial LabelPolynomial69,70
-                  => { unLabelPolynomial unLabelPolynomial70,71
-type family family75,76
-type family LabPolynomial' LabPolynomial'75,76
-type LabUnipol LabUnipol80,81
-type LabUnipol r r80,81
-type Wraps Wraps82,83
-type Wraps vars vars82,83
-class    (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf IsSubsetOf235,236
-class    (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf IsSubsetOf235,236
+type family family36,37
+type family UniqueList' UniqueList'36,37
+type family family41,42
+type family UniqueList UniqueList41,42
+class    (UniqueList xs) => IsUniqueList IsUniqueList45,46
+instance instance49,50
+data LabPolynomial LabPolynomial67,68
+data LabPolynomial poly (vars vars67,68
+  LabelPolynomial LabelPolynomial68,69
+                  => { unLabelPolynomial unLabelPolynomial69,70
+type family family74,75
+type family LabPolynomial' LabPolynomial'74,75
+type LabUnipol LabUnipol79,80
+type LabUnipol r r79,80
+type Wraps Wraps81,82
+type Wraps vars vars81,82
+class    (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf IsSubsetOf234,235
+class    (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf IsSubsetOf234,235
+  _suppress _suppress235,236
   _suppress _suppress236,237
-  _suppress _suppress237,238
+permute0 permute0273,274
 permute0 permute0274,275
-permute0 permute0275,276
-permute permute284,285
-permute permute286,287
-canonicalMap canonicalMap288,289
-canonicalMap canonicalMap294,295
-canonicalMap' canonicalMap'304,305
-canonicalMap' canonicalMap'309,310
+permute permute283,284
+permute permute285,286
+canonicalMap canonicalMap287,288
+canonicalMap canonicalMap293,294
+canonicalMap' canonicalMap'303,304
+canonicalMap' canonicalMap'308,309
 
 ./src/Algebra/Ring/Polynomial/Univariate.hs,1147
 module Algebra.Ring.Polynomial.UnivariateAlgebra.Ring.Polynomial.Univariate6,7
@@ -253,63 +253,63 @@ liftMapUnipol liftMapUnipol365,366
 
 ./src/Algebra/Ring/Polynomial/Internal.hs,2041
 module Algebra.Ring.Polynomial.InternalAlgebra.Ring.Polynomial.Internal10,11
-instance instance50,51
-newtype OrderedPolynomial OrderedPolynomial56,57
-newtype OrderedPolynomial r order n = Polynomial Polynomial56,57
-newtype OrderedPolynomial r order n = Polynomial { _terms _terms56,57
-type Polynomial Polynomial58,59
-type Polynomial r r58,59
-castPolynomial castPolynomial136,137
-castPolynomial castPolynomial140,141
-scastPolynomial scastPolynomial143,144
-scastPolynomial scastPolynomial146,147
-mapCoeff mapCoeff149,150
-mapCoeff mapCoeff151,152
-normalize normalize154,155
-normalize normalize156,157
+instance instance49,50
+newtype OrderedPolynomial OrderedPolynomial55,56
+newtype OrderedPolynomial r order n = Polynomial Polynomial55,56
+newtype OrderedPolynomial r order n = Polynomial { _terms _terms55,56
+type Polynomial Polynomial57,58
+type Polynomial r r57,58
+castPolynomial castPolynomial135,136
+castPolynomial castPolynomial139,140
+scastPolynomial scastPolynomial142,143
+scastPolynomial scastPolynomial145,146
+mapCoeff mapCoeff148,149
+mapCoeff mapCoeff150,151
+normalize normalize153,154
+normalize normalize155,156
+decZero decZero170,171
 decZero decZero171,172
-decZero decZero172,173
-  f0 `divide`divide286,287
-  p `divides`divides311,312
-varX varX325,326
-varX varX327,328
-substUnivariate substUnivariate330,331
-substUnivariate substUnivariate332,333
+  f0 `divide`divide285,286
+  p `divides`divides310,311
+varX varX324,325
+varX varX326,327
+substUnivariate substUnivariate329,330
+substUnivariate substUnivariate331,332
+evalUnivariate evalUnivariate337,338
 evalUnivariate evalUnivariate338,339
-evalUnivariate evalUnivariate339,340
-eval eval346,347
-eval eval348,349
-substVar substVar356,357
-substVar substVar356,357
-allVars allVars364,365
-allVars allVars366,367
-changeOrder changeOrder368,369
-changeOrder changeOrder370,371
-changeOrderProxy changeOrderProxy372,373
-changeOrderProxy changeOrderProxy375,376
+eval eval345,346
+eval eval347,348
+substVar substVar355,356
+substVar substVar355,356
+allVars allVars363,364
+allVars allVars365,366
+changeOrder changeOrder367,368
+changeOrder changeOrder369,370
+changeOrderProxy changeOrderProxy371,372
+changeOrderProxy changeOrderProxy374,375
+getTerms getTerms376,377
 getTerms getTerms377,378
-getTerms getTerms378,379
-transformMonomial transformMonomial380,381
-transformMonomial transformMonomial382,383
-orderedBy orderedBy385,386
-p `orderedBy`orderedBy386,387
-shiftR shiftR388,389
-shiftR shiftR391,392
-homogenize homogenize395,396
-homogenize homogenize398,399
-unhomogenize unhomogenize404,405
-unhomogenize unhomogenize408,409
-reversal reversal415,416
-reversal reversal417,418
-padeApprox padeApprox419,420
-padeApprox padeApprox423,424
-minpolRecurrent minpolRecurrent428,429
-minpolRecurrent minpolRecurrent430,431
-newtype PadPolyL PadPolyL437,438
-newtype PadPolyL n ord poly = PadPolyL PadPolyL437,438
-newtype PadPolyL n ord poly = PadPolyL { runPadPolyL runPadPolyL437,438
-padLeftPoly padLeftPoly520,521
-padLeftPoly padLeftPoly522,523
+transformMonomial transformMonomial379,380
+transformMonomial transformMonomial381,382
+orderedBy orderedBy384,385
+p `orderedBy`orderedBy385,386
+shiftR shiftR387,388
+shiftR shiftR390,391
+homogenize homogenize394,395
+homogenize homogenize397,398
+unhomogenize unhomogenize403,404
+unhomogenize unhomogenize407,408
+reversal reversal414,415
+reversal reversal416,417
+padeApprox padeApprox418,419
+padeApprox padeApprox422,423
+minpolRecurrent minpolRecurrent427,428
+minpolRecurrent minpolRecurrent429,430
+newtype PadPolyL PadPolyL436,437
+newtype PadPolyL n ord poly = PadPolyL PadPolyL436,437
+newtype PadPolyL n ord poly = PadPolyL { runPadPolyL runPadPolyL436,437
+padLeftPoly padLeftPoly519,520
+padLeftPoly padLeftPoly521,522
 
 ./src/Algebra/Ring/Polynomial/Quotient.hs,2050
 module Algebra.Ring.Polynomial.QuotientAlgebra.Ring.Polynomial.Quotient6,7

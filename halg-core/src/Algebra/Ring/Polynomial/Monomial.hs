@@ -44,7 +44,6 @@ import           Data.Singletons.Prelude.List (Length, Replicate, sReplicate)
 import           Data.Singletons.TypeLits     (withKnownNat)
 import qualified Data.Sized.Builtin           as V
 import           Data.Type.Natural.Class      (IsPeano (..), PeanoOrder (..))
-import           Data.Type.Ordinal            (Ordinal (..), ordToNatural)
 -- import           Prelude                         hiding (Fractional (..),
 --                                                   Integral (..), Num (..),
 --                                                   Real (..), lex, product, sum)

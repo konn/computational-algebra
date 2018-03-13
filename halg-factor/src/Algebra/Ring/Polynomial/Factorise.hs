@@ -1,8 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
-{-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, GADTs            #-}
-{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, OverloadedStrings #-}
-{-# LANGUAGE ParallelListComp, PatternSynonyms, PolyKinds                #-}
-{-# LANGUAGE ScopedTypeVariables, TupleSections                          #-}
+{-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, GADTs               #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, OverloadedStrings    #-}
+{-# LANGUAGE PatternSynonyms, PolyKinds, ScopedTypeVariables, TupleSections #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Algebra.Ring.Polynomial.Factorise
        ( -- * Factorisation
@@ -43,7 +42,6 @@ import           Data.STRef.Strict                  (STRef, modifySTRef,
                                                      newSTRef)
 import           Data.STRef.Strict                  (readSTRef, writeSTRef)
 import qualified Data.Traversable                   as F
-import           Data.Type.Ordinal                  (pattern OZ)
 import qualified Data.Vector                        as V
 import           Math.NumberTheory.Logarithms       (intLog2', integerLogBase')
 import           Math.NumberTheory.Powers.Squares   (integerSquareRoot)
@@ -93,7 +91,7 @@ equalDegreeSplitM f d
         g1 = gcd a f
     return $ (guard (g1 /= one) >> return g1)
          <|> do let b | charUnipol f == 2  = traceCharTwo (powerUnipol f*d) a
-                      | otherwise = modPow a ((pred $ q^d)`div`2) f
+                      | otherwise = modPow a (pred (q^d) `div`2) f
                     g2 = gcd (b - one) f
                 guard (g2 /= one && g2 /= f)
                 return g2
@@ -163,9 +161,7 @@ squareFreeDecomp f =
   let dcmp = yun f
       f'   = ifoldl (\i u g -> u `quot` (g ^ fromIntegral i)) f dcmp
       p    = fromIntegral $ charUnipol f
-  in if charUnipol f == 0
-     then dcmp
-     else if isZero (f' - one)
+  in if charUnipol f == 0 || isZero (f' - one)
      then dcmp
      else IM.filter (not . isZero . subtract one) $
           IM.unionWith (*) dcmp $ IM.mapKeys (p*) $ squareFreeDecomp $ pthRoot f'
@@ -173,7 +169,7 @@ squareFreeDecomp f =
 -- | Factorise a polynomial over finite field using Cantor-Zassenhaus algorithm
 factorise :: (MonadRandom m, CoeffRing k, FiniteField k)
           => Unipol k -> m [(Unipol k, Natural)]
-factorise f = do
+factorise f =
   concat <$> mapM (\(r, h) -> map (,fromIntegral r) <$> factorSquareFree h) (IM.toList $  squareFreeDecomp f)
 
 clearDenom :: (CoeffRing a, Euclidean a)
@@ -202,7 +198,7 @@ wrapSQFFactor fac f0 = do
   ts0 <- F.mapM (secondM fac . clearDenom) (squareFreeDecomp $ monoize $ mapCoeffUnipol (F.% 1) g)
   let anss = IM.toList ts0
       k = c * leadingCoeff g `div` product (map (fst.snd) anss)
-  return $ (k, IM.fromList $ map (second $ S.fromList . snd) anss)
+  return (k, IM.fromList $ map (second $ S.fromList . snd) anss)
 
 
 secondM :: Functor f => (t -> f a) -> (t1, t) -> f (t1, a)

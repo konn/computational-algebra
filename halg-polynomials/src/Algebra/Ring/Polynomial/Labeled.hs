@@ -25,7 +25,6 @@ import           Data.Singletons.Prelude.Enum (SEnum (..))
 import           Data.Singletons.Prelude.List hiding (Group)
 import qualified Data.Sized.Builtin           as S
 import           Data.Type.Natural.Class      (IsPeano (..), sOne)
-import           Data.Type.Ordinal
 import           GHC.Exts                     (Constraint)
 import           GHC.OverloadedLabels         (IsLabel (..))
 import qualified Numeric.Algebra              as NA
