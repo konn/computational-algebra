@@ -1,8 +1,7 @@
-{-# LANGUAGE CPP, DataKinds, EmptyDataDecls, ExplicitNamespaces            #-}
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs, KindSignatures    #-}
+{-# LANGUAGE CPP, DataKinds, ExplicitNamespaces, FlexibleContexts          #-}
+{-# LANGUAGE FlexibleInstances, GADTs, KindSignatures                      #-}
 {-# LANGUAGE MultiParamTypeClasses, PatternSynonyms, PolyKinds, RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeFamilies         #-}
-{-# LANGUAGE TypeOperators                                                 #-}
+{-# LANGUAGE ScopedTypeVariables, TypeFamilies, TypeOperators              #-}
 {-# OPTIONS_GHC -Wincomplete-patterns -Wno-orphans #-}
 module Algebra.Internal
        (  (:~:)(..), withRefl,
@@ -73,7 +72,7 @@ coerceLength eql = _Unwrapping Flipped.Flipped %~ coerce eql
 type SNat (n :: Nat) = Sing n
 
 sizedLength :: ListLike (f a) a => S.Sized f n a -> Sing n
-sizedLength f = S.sLength f
+sizedLength = S.sLength
 
 padVecs :: forall a n m. a -> Sized' n a -> Sized' m a
         -> (SNat (Max n m), Sized' (Max n m) a, Sized' (Max n m) a)
@@ -113,3 +112,6 @@ sNatToInt = fromIntegral . fromSing
 
 instance Hashable a => Hashable (Seq.Seq a) where
   hashWithSalt d = hashWithSalt d . F.toList
+
+
+
