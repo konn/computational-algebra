@@ -1,34 +1,44 @@
-{-# LANGUAGE ExtendedDefaultRules, FlexibleContexts, OverloadedStrings #-}
+{-# LANGUAGE ExtendedDefaultRules, FlexibleContexts, LambdaCase #-}
+{-# LANGUAGE OverloadedStrings                                  #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Main where
 import Lenses
 import Settings
 
 import           Control.Lens              hiding (setting)
+import           Control.Monad             ((<=<))
 import           Control.Monad.Error.Class
 import           Control.Monad.IO.Class
 import           Data.Default
 import           Data.Foldable
 import           Data.Maybe
 import           Data.Monoid
+import           Data.String               (fromString)
 import           Data.Text                 (Text)
 import qualified Data.Text                 as T
 import           Data.Time.Format
 import           Data.Time.LocalTime
+import           Filesystem.Path           hiding ((</>))
+import qualified Filesystem.Path.CurrentOS as FS
 import           Hakyll                    hiding (renderTags)
+import           Prelude                   hiding (FilePath)
 import           Shelly
 import           System.Exit               (ExitCode (..))
 import           Text.HTML.TagSoup
 import           Text.Pandoc               hiding (getZonedTime)
+import           Text.Pandoc.Highlighting  (pygments, styleToCss)
 
 default (Text)
 
 algpacks :: [String]
 algpacks =
-  ["docs/algebra-*"
+  [ "docs/algebra-*"
   , "docs/algebraic-prelude-*"
   , "docs/computational-algebra-*"
-  , "docs/halg-*"]
+  , "docs/halg-*"
+  , "docs/type-natural*"
+  , "docs/sized*"
+  ]
 
 alghtmls :: Pattern
 alghtmls =
@@ -43,10 +53,10 @@ algCopies =
 main :: IO ()
 main = hakyllWith conf $ do
   setting "schemes" (def :: Schemes)
-  match alghtmls $ do
+  match (alghtmls .||. "docs/index.html" .||. "docs/doc-index.html") $ do
     route idRoute
     compile $
-      getResourceString >>= withItemBody (fmap T.unpack . unsafeCompiler . procHaddock . T.pack)
+      haddockExternal =<< relativizeUrls =<< getResourceString
   match ("katex/**" .&&. complement "**.md") $
     route idRoute >> compile copyFileCompiler
   match "templates/**" $
@@ -54,6 +64,9 @@ main = hakyllWith conf $ do
   match "params.json" $ do
     route idRoute
     compile copyFileCompiler
+  create ["stylesheets/syntax.css"] $ do
+    route idRoute
+    compile $ makeItem (styleToCss pygments)
   match (algCopies .||. "**.js" .||. "**.css") $ do
     route idRoute
     compile copyFileCompiler
@@ -97,6 +110,7 @@ writerOpts =
   , writerTOCDepth = 2
   , writerTableOfContents  = True
   , writerExtensions = enableExtension Ext_raw_html pandocExtensions
+  , writerHighlightStyle  = Just pygments
   }
   where
     mathJaxCDN = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"
@@ -106,6 +120,8 @@ tocOpts =
   writerOpts { writerTemplate = Just "$toc$"
              , writerTOCDepth = 4
              , writerTableOfContents  = True
+             , writerSectionDivs = True
+             , writerHighlightStyle  = Just pygments
              }
 
 excluded :: [String]
@@ -150,7 +166,20 @@ conf = def { deploySite = deploy
            }
 
 procSchemes :: Pandoc -> Compiler Pandoc
-procSchemes = bottomUpM procSchemes0
+procSchemes = bottomUpM (procSchemes0 <=< unsafeCompiler . procDoc)
+
+procDoc :: MonadIO m => Inline -> m Inline
+procDoc inl
+  | Just pth <- T.stripPrefix "doc:" . T.pack =<< (inl ^? linkUrl)
+  = shelly $
+    let (url, frag) = splitFragment pth
+        pat = foldr1 (.||.) $
+              map (fromGlob .  (++ ('/':T.unpack url))) algpacks
+        chk fp = return $ pat `matches` fromString (FS.encodeString fp)
+    in findWhen chk "docs" >>= \case
+    [] -> return inl
+    (a : _) -> return $ inl & linkUrl .~ (FS.encodeString a ++ T.unpack frag)
+procDoc inl = return inl
 
 procSchemes0 :: Inline -> Compiler Inline
 procSchemes0 inl =
@@ -166,17 +195,49 @@ procSchemes0 inl =
   where
     sandwitched s e t = s <> t <> e
 
-procHaddock :: Text -> IO Text
-procHaddock  = fmap renderTags . mapM rewriter . parseTags
+walkPath :: FilePath -> FilePath -> T.Text
+walkPath par child
+  | absolute child = FS.encode child
+  | otherwise = go (splitDirectories child) (reverse $ splitDirectories par)
   where
-    rewriter (TagOpen "a" atts)
-      | Just ref <- T.stripPrefix "../" =<< lookup "href" atts
-      = do let (pkg, rest) = T.breakOn "/" ref
-           known <- shelly $ test_e $ "docs" </> pkg
-           let href | known = ref
-                    | otherwise = T.concat ["https://hackage.haskell.org/package/", pkg
-                                           ,"/docs", rest]
-           return $ TagOpen "a" $ ("href", href): filter ((/= "href") . fst) atts
-    rewriter t = return t
+    go []            pts      = T.concat $ map FS.encode $ reverse pts
+    go ("../" : chs) (r : rs)
+      |  isDirectory r = go chs rs
+      | otherwise = go ("../" : chs) rs
+    go ("./" : chs) rs        = go chs rs
+    go (ch : chs) rs = go chs (ch : rs)
+        -- (r : rs')
+        --   | isDirectory r -> go chs (ch : r : rs')
+        --   | otherwise -> go chs (ch : rs')
 
+isDirectory :: FilePath -> Bool
+isDirectory ch = "/" `T.isSuffixOf` FS.encode ch
 
+splitFragment :: Text -> (Text, Text)
+splitFragment txt =
+  case T.breakOnEnd "#" txt of
+    (l, r) | T.null l -> (l, r)
+           | otherwise ->  (T.init l, T.cons (T.last l) r)
+
+haddockExternal :: Item String -> Compiler (Item String)
+haddockExternal i = do
+  Just fp <- getRoute $ itemIdentifier i
+  mapM (fmap (T.unpack . renderTags) . mapM (rewriter $ FS.decodeString fp) . parseTags . T.pack)  i
+  where
+    rewriter fp t@(TagOpen "a" atts)
+      | Just ref <- lookup "href" atts
+      , not ("://" `T.isInfixOf` ref)
+      , (targ, frag) <- splitFragment ref
+      , not $ T.null targ
+      = unsafeCompiler $ shelly $ do
+        let targFP = walkPath (directory fp) (FS.decode targ)
+        let (pkg, rest) = T.breakOn "/" $ fromJust $ T.stripPrefix "docs/" targFP
+        known <- test_e $ FS.decode targFP
+        if known && foldr1 (.||.) (map fromGlob algpacks) `matches` fromString (T.unpack ("docs/" <> pkg))
+          then return t
+          else do
+          let href = T.concat ["https://hackage.haskell.org/package/", pkg
+                              ,"/docs", rest, frag]
+          return $
+            TagOpen "a" $ ("href", href) : filter ((/= "href") . fst) atts
+    rewriter _ t = return t

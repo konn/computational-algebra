@@ -473,3 +473,4 @@ but it is too expensive for library writers compared to the result we gain,
 hence we haven't include such "proof requirement" to class.
 Another reason is that, it makes difficult to treat *dynamically generated orderings*,
 which occurs in some applications such as integer programming.
+

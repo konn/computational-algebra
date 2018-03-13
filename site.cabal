@@ -34,6 +34,7 @@ executable site
                      , pandoc-citeproc
                      , pandoc-types
                      , shelly
+                     , system-filepath
                      , tagsoup
                      , template-haskell
                      , text
