@@ -15,7 +15,6 @@ module Algebra.Bridge.Singular
        ) where
 import Algebra.Bridge.Singular.Syntax
 
-import           Algebra.Internal
 import           Algebra.Prelude.Core
 import           Algebra.Ring.Polynomial.Parser
 import           Data.List                      ()
@@ -56,15 +55,11 @@ readSingularIdeal p code =
   mapM (readSingularPoly p . (fromMaybe <*> T.stripSuffix ",")) $
   T.lines code
 
-morderProxy :: proxy poly -> Proxy (MOrder poly)
-morderProxy _ = Proxy
-
 readSingularPoly :: (IsSingularPolynomial poly)
                  => proxy poly
                  -> Text
                  -> Maybe poly
-readSingularPoly pxy code =
-  withStrongMonomialOrder (morderProxy pxy) (sArity pxy) $
+readSingularPoly _ code =
   either (const Nothing) Just $ parsePolynomialWith parseSingularCoeff varP code
   where
     varP = do
