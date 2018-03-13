@@ -63,6 +63,19 @@ instance SingularCoeff Rational where
 
   coeffType _ = Char 0
 
+  prettySingularCoeff _ = prettyRat
+
+
+prettyRat :: Rational -> ShowSCoeff
+prettyRat r
+  | r == 0 = Vanished
+  | r == 1 = OneCoeff
+  | r == -1 = Negative Nothing
+  | r <  0 = Negative $ Just $ showParen True $
+             shows (abs $ numerator r) . showChar '/' . shows (abs $ denominator r)
+  | otherwise = Positive $
+                shows (abs $ numerator r) . showChar '/' . shows (abs $ denominator r)
+
 instance SingularCoeff Integer where
   parseSingularCoeff = integerP
 
