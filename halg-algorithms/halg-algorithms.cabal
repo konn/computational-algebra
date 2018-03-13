@@ -1,8 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.20.0.
+-- This file has been generated from package.yaml by hpack version 0.27.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 68dfb92f67443846fe847bf6ea92b77b99e2197f71fb0328ab86c084856aec5f
+-- hash: 76c6085d25952167e02fdf954be2b35d18c72527fbaa02b663884712d0260c62
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -64,37 +64,27 @@ test-suite spec
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      HUnit
-    , MonadRandom
+      MonadRandom
     , QuickCheck
     , algebra
-    , algebraic-prelude
     , base >=4.7 && <5
-    , constraints
     , containers
     , convertible
     , equational-reasoning
     , halg-algorithms
     , halg-core
     , halg-core-test
-    , halg-matrices
     , halg-polynomials
     , hspec
     , hspec-discover
-    , lazysmallcheck
     , lens
     , matrix
     , quickcheck-instances
     , reflection
     , sized
     , smallcheck
-    , test-framework >=0.8.0.3 && <0.9
-    , test-framework-hunit >=0.3.0.1 && <0.4
-    , transformers
     , type-natural
     , vector
-  build-tools:
-      hspec-discover
   other-modules:
       ZeroDimSpec
       Utils

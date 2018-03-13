@@ -46,9 +46,7 @@ library:
   other-modules:
   - Algebra.Ring.Polynomial.Internal
   dependencies:
-  - ListLike
   - base >= 4.7 && < 5
-  - constraints
   - containers
   - deepseq
   - equational-reasoning
@@ -97,24 +95,11 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
+    - QuickCheck
+    - containers
     - halg-core-test
     - halg-polynomials
-    - HUnit
-    - QuickCheck
-    - constraints
-    - convertible
-    - containers
-    - equational-reasoning
     - hspec
-    - lens
-    - matrix
-    - quickcheck-instances
-    - reflection
-    - smallcheck
-    - lazysmallcheck
-    - test-framework >=0.8.0.3 && <0.9
-    - test-framework-hunit >=0.3.0.1 && <0.4
-    - transformers
-    - type-natural
-    - vector
     - hspec-discover
+    - matrix
+    - vector

@@ -34,7 +34,6 @@ library:
   - control-monad-loop
   - dlist
   - halg-core
-  - halg-galois-fields
   - halg-polynomials
   - integer-logarithms
   - lens

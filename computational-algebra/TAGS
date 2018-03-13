@@ -295,27 +295,27 @@ main main59,60
 
 ./bench/unipol-mult.hs,509
 module Main Main1,2
-x x14,15
 x x15,16
-allCoeffOne allCoeffOne17,18
+x x16,17
 allCoeffOne allCoeffOne18,19
-mkSimpleEnv mkSimpleEnv20,21
+allCoeffOne allCoeffOne19,20
 mkSimpleEnv mkSimpleEnv21,22
-fromOP fromOP23,24
-fromOP fromOP25,26
-showProxyType showProxyType27,28
+mkSimpleEnv mkSimpleEnv22,23
+fromOP fromOP24,25
+fromOP fromOP26,27
 showProxyType showProxyType28,29
-fromCoeffVec fromCoeffVec34,35
+showProxyType showProxyType29,30
 fromCoeffVec fromCoeffVec35,36
-genPoly genPoly37,38
-genPoly genPoly39,40
-genPair genPair41,42
-int int48,49
+fromCoeffVec fromCoeffVec36,37
+genPoly genPoly38,39
+genPoly genPoly40,41
+genPair genPair42,43
 int int49,50
-rat rat51,52
+int int50,51
 rat rat52,53
-main main54,55
+rat rat53,54
 main main55,56
+main main56,57
 
 ./Setup.hs,15
 main main1,2

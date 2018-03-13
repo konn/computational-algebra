@@ -30,7 +30,6 @@ dependencies:
 - sized
 - smallcheck
 - type-natural
-- lazysmallcheck
 
 library:
   source-dirs: src

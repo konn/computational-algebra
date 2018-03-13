@@ -1,8 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.20.0.
+-- This file has been generated from package.yaml by hpack version 0.27.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ef73d7b23efdd0584f4cdf876a273adc6c99f7cbd64fe0d23b34910dcab88f74
+-- hash: 27fb3df31515a0628f2b2276566bfca4aafc1bc92c88d4f088bcf1e268599aa3
 
 name:           halg-galois-fields
 version:        0.6.0.0
@@ -40,7 +40,6 @@ library
     , algebra
     , algebraic-prelude
     , base >=4.7 && <5
-    , deepseq
     , halg-core
     , halg-polynomials
     , lens

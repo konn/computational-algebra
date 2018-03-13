@@ -1,8 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.20.0.
+-- This file has been generated from package.yaml by hpack version 0.27.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1f8d09c90cd8d85e4da980dadea2746260eea65add909c41499baff09fd4bd9b
+-- hash: 2b6696c9cd889e66fd3e44e80d92035e70ec2c1ee636ee568323fb8ae47cd5e8
 
 name:           halg-polynomials
 version:        0.6.0.0
@@ -34,11 +34,9 @@ library
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances NoImplicitPrelude
   ghc-options: -Wall -O2
   build-depends:
-      ListLike
-    , algebra
+      algebra
     , algebraic-prelude
     , base >=4.7 && <5
-    , constraints
     , containers
     , deepseq
     , equational-reasoning
@@ -76,34 +74,19 @@ test-suite spec
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      HUnit
-    , QuickCheck
+      QuickCheck
     , algebra
     , algebraic-prelude
     , base
-    , constraints
     , containers
-    , convertible
-    , equational-reasoning
     , halg-core
     , halg-core-test
     , halg-polynomials
     , hspec
     , hspec-discover
-    , lazysmallcheck
-    , lens
     , matrix
-    , quickcheck-instances
-    , reflection
     , sized
-    , smallcheck
-    , test-framework >=0.8.0.3 && <0.9
-    , test-framework-hunit >=0.3.0.1 && <0.4
-    , transformers
-    , type-natural
     , vector
-  build-tools:
-      hspec-discover
   other-modules:
       GroebnerSpec
       PolynomialSpec

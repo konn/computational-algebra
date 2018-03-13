@@ -20,12 +20,22 @@ category:            Math
 description:         Please see the project Web Site <https://konn.github.io/computational-algebra>
 
 dependencies:
-- base >= 4.7 && < 5
-- halg-core
-- halg-galois-fields
-- halg-polynomials
-- algebraic-prelude
+- MonadRandom
 - algebra
+- algebraic-prelude
+- base >= 4.7 && < 5
+- containers
+- halg-core
+- halg-polynomials
+- hmatrix
+- lens
+- matrix
+- monad-loops
+- mtl
+- parallel
+- primes
+- reflection
+- vector
 
 default-extensions:
 - CPP
@@ -44,21 +54,6 @@ default-extensions:
 library:
   source-dirs: src
   ghc-options:  -Wall
-  dependencies:
-  - matrix
-  # - convertible
-  # - sized
-  # - equational-reasoning
-  - mtl
-  - monad-loops
-  - hmatrix
-  - lens
-  - vector
-  - reflection
-  - primes
-  - containers
-  - parallel
-  - MonadRandom
 
 executables: {}
 

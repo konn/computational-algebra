@@ -36,8 +36,6 @@ dependencies:
 - base >= 4.7 && < 5
 - halg-core
 - halg-polynomials
-- halg-matrices
-- algebraic-prelude
 - algebra
 - MonadRandom
 - sized
@@ -48,6 +46,7 @@ library:
   - Algebra.Algorithms.FGLM
   ghc-options:  -Wall
   dependencies:
+  - algebraic-prelude
   - lens
   - mtl
   - vector
@@ -56,6 +55,7 @@ library:
   - convertible
   - equational-reasoning
   - monad-loops
+  - halg-matrices
   - hmatrix
   default-extensions:
   - NoImplicitPrelude
@@ -76,9 +76,7 @@ tests:
     - halg-core-test
     - halg-polynomials
     - halg-algorithms
-    - HUnit
     - QuickCheck
-    - constraints
     - convertible
     - containers
     - equational-reasoning
@@ -88,10 +86,6 @@ tests:
     - quickcheck-instances
     - reflection
     - smallcheck
-    - lazysmallcheck
-    - test-framework >=0.8.0.3 && <0.9
-    - test-framework-hunit >=0.3.0.1 && <0.4
-    - transformers
     - type-natural
     - vector
     - hspec-discover
