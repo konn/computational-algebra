@@ -57,8 +57,8 @@ mkTestCases num ideal = [ mkTC ("lex0" ++ show num) (mapIdeal (changeOrder Lex) 
 
 mkTC :: (IsMonomialOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
 mkTC name ideal =
-    bgroup name [ bench "calcGroebnerBasis" $ nf (calcGroebnerBasis NormalStrategy) ideal
-                , bench "homogenized" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)) ideal
+    bgroup name [ bench "calcGroebnerBasis" $ nf calcGroebnerBasis ideal
+                , bench "homogenized" $ nf calcGroebnerBasisAfterHomogenising ideal
                 ]
 
 main :: IO ()
