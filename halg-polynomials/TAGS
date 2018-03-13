@@ -216,40 +216,42 @@ canonicalMap canonicalMap293,294
 canonicalMap' canonicalMap'303,304
 canonicalMap' canonicalMap'308,309
 
-./src/Algebra/Ring/Polynomial/Univariate.hs,1147
-module Algebra.Ring.Polynomial.UnivariateAlgebra.Ring.Polynomial.Univariate6,7
-newtype Unipol Unipol35,36
-newtype Unipol r = Unipol Unipol35,36
-newtype Unipol r = Unipol { runUnipol runUnipol35,36
-instance instance38,39
-divModUnipol divModUnipol50,51
+./src/Algebra/Ring/Polynomial/Univariate.hs,1231
+module Algebra.Ring.Polynomial.UnivariateAlgebra.Ring.Polynomial.Univariate7,8
+newtype Unipol Unipol36,37
+newtype Unipol r = Unipol Unipol36,37
+newtype Unipol r = Unipol { runUnipol runUnipol36,37
+instance instance39,40
 divModUnipol divModUnipol51,52
-divModUnipolByMult divModUnipolByMult66,67
+divModUnipol divModUnipol52,53
 divModUnipolByMult divModUnipolByMult67,68
-recipBinPow recipBinPow81,82
-recipBinPow recipBinPow83,84
-modVarPower modVarPower90,91
+divModUnipolByMult divModUnipolByMult68,69
+recipBinPow recipBinPow82,83
+recipBinPow recipBinPow84,85
 modVarPower modVarPower91,92
-reversalIM reversalIM94,95
+modVarPower modVarPower92,93
 reversalIM reversalIM95,96
-reversalIMWith reversalIMWith98,99
+reversalIM reversalIM96,97
 reversalIMWith reversalIMWith99,100
-leadingTermIM leadingTermIM130,131
+reversalIMWith reversalIMWith100,101
 leadingTermIM leadingTermIM131,132
-varUnipol varUnipol156,157
-varUnipol varUnipol157,158
-naiveMult naiveMult172,173
-naiveMult naiveMult173,174
-karatsuba karatsuba182,183
-karatsuba karatsuba183,184
-decZero decZero233,234
-decZero decZero234,235
-diffIMap diffIMap260,261
-diffIMap diffIMap261,262
-mapCoeffUnipol mapCoeffUnipol358,359
-mapCoeffUnipol mapCoeffUnipol359,360
-liftMapUnipol liftMapUnipol363,364
-liftMapUnipol liftMapUnipol365,366
+leadingTermIM leadingTermIM132,133
+varUnipol varUnipol147,148
+varUnipol varUnipol148,149
+naiveMult naiveMult163,164
+naiveMult naiveMult164,165
+karatsuba karatsuba173,174
+karatsuba karatsuba174,175
+decZero decZero224,225
+decZero decZero225,226
+diffIMap diffIMap251,252
+diffIMap diffIMap252,253
+mapCoeffUnipol mapCoeffUnipol351,352
+mapCoeffUnipol mapCoeffUnipol352,353
+liftMapUnipol liftMapUnipol356,357
+liftMapUnipol liftMapUnipol358,359
+substWithUnipol substWithUnipol366,367
+substWithUnipol substWithUnipol370,371
 
 ./src/Algebra/Ring/Polynomial/Internal.hs,2041
 module Algebra.Ring.Polynomial.InternalAlgebra.Ring.Polynomial.Internal10,11

@@ -92,8 +92,10 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
   -- | Another variant of @'liftMap'@.
   --   This function relies on @'terms''@; if you have more efficient implementation,
   --   it is encouraged to override this method.
-  substWith :: (Unital r, Monoidal m)
-            => (Coefficient poly -> r -> m) -> Sized (Arity poly) r -> poly -> m
+  --
+  --   Since 0.6.0.0
+  substWith :: (Ring m)
+            => (Coefficient poly -> m -> m) -> Sized (Arity poly) m -> poly -> m
   substWith o pt poly =
     runAdd $ ifoldMap ((Add .) . flip o . extractPower) $ terms' poly
     where

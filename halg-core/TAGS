@@ -55,27 +55,27 @@ order order14,15
 order order15,16
 
 ./src/Algebra/Internal.hs,576
-module Algebra.InternalAlgebra.Internal6,7
-import import50,51
+module Algebra.InternalAlgebra.Internal5,6
+import import49,50
+toProxy toProxy62,63
 toProxy toProxy63,64
-toProxy toProxy64,65
-type Sized Sized66,67
-type Sized n n66,67
-type Sized' Sized'67,68
+type Sized Sized65,66
+type Sized n n65,66
+type Sized' Sized'66,67
+coerceLength coerceLength68,69
 coerceLength coerceLength69,70
-coerceLength coerceLength70,71
-type SNat SNat72,73
-type SNat (n(72,73
+type SNat SNat71,72
+type SNat (n(71,72
+sizedLength sizedLength73,74
 sizedLength sizedLength74,75
-sizedLength sizedLength75,76
-padVecs padVecs77,78
-padVecs padVecs79,80
-type family family104,105
-type family Flipped Flipped104,105
-pattern pattern108,109
+padVecs padVecs76,77
+padVecs padVecs78,79
+type family family103,104
+type family Flipped Flipped103,104
+pattern pattern107,108
+sNatToInt sNatToInt109,110
 sNatToInt sNatToInt110,111
-sNatToInt sNatToInt111,112
-instance instance113,114
+instance instance112,113
 
 ./src/Algebra/Arithmetic.hs,610
 module Algebra.ArithmeticAlgebra.Arithmetic1,2
@@ -124,7 +124,7 @@ someSizedIdeal someSizedIdeal57,58
 module Algebra.Ring.Polynomial.ClassAlgebra.Ring.Polynomial.Class6,7
 class    (DecidableZero r, Ring r, Commutative r, Eq r) => CoeffRing CoeffRing58,59
    => IsPolynomial IsPolynomial67,68
-            => (Coefficient Coefficient95,96
+            => (Coefficient Coefficient97,98
   type Coefficient Coefficient70,71
   type Coefficient poly poly70,71
   type Arity Arity72,73
@@ -133,136 +133,136 @@ class    (DecidableZero r, Ring r, Commutative r, Eq r) => CoeffRing CoeffRing
   liftMap liftMap78,79
   subst subst86,87
   subst subst88,89
-  substWith substWith94,95
   substWith substWith96,97
-  sArity' sArity'103,104
-  sArity' sArity'104,105
-  sArity sArity107,108
-  sArity sArity108,109
-  arity arity112,113
-  arity arity113,114
-  injectCoeff injectCoeff117,118
-  injectCoeff injectCoeff118,119
-  injectCoeff' injectCoeff'122,123
-  injectCoeff' injectCoeff'123,124
-  monomials monomials127,128
-  monomials monomials128,129
-  terms' terms'133,134
-  terms' terms'134,135
-  coeff' coeff'142,143
-  coeff' coeff'143,144
-  constantTerm constantTerm147,148
-  constantTerm constantTerm148,149
-  fromMonomial fromMonomial152,153
-  fromMonomial fromMonomial153,154
-  toPolynomial' toPolynomial'157,158
-  toPolynomial' toPolynomial'158,159
-  polynomial' polynomial'162,163
-  polynomial' polynomial'163,164
-  totalDegree' totalDegree'168,169
-  totalDegree' totalDegree'169,170
-  var var173,174
-  var var174,175
-  mapCoeff' mapCoeff'177,178
-  mapCoeff' mapCoeff'178,179
-  (>|*)>|*181,182
-  m m182,183
-  (*|<)*|<185,186
-  (*(186,187
-  (!*)!*188,189
-  _Terms' _Terms'192,193
-  _Terms' _Terms'193,194
-  mapMonomial mapMonomial196,197
-  mapMonomial mapMonomial197,198
-class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrderedPolynomial IsOrderedPolynomial202,203
-class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrderedPolynomial IsOrderedPolynomial202,203
-  type MOrder MOrder203,204
-  type MOrder poly poly203,204
-  coeff coeff207,208
-  coeff coeff208,209
-  terms terms214,215
-  terms terms215,216
-  leadingTerm leadingTerm218,219
-  leadingTerm leadingTerm219,220
-  leadingMonomial leadingMonomial223,224
-  leadingMonomial leadingMonomial224,225
-  leadingCoeff leadingCoeff228,229
-  leadingCoeff leadingCoeff229,230
-  orderedMonomials orderedMonomials234,235
-  orderedMonomials orderedMonomials235,236
-  fromOrderedMonomial fromOrderedMonomial239,240
-  fromOrderedMonomial fromOrderedMonomial240,241
-  toPolynomial toPolynomial244,245
-  toPolynomial toPolynomial245,246
-  polynomial polynomial253,254
+  substWith substWith98,99
+  sArity' sArity'105,106
+  sArity' sArity'106,107
+  sArity sArity109,110
+  sArity sArity110,111
+  arity arity114,115
+  arity arity115,116
+  injectCoeff injectCoeff119,120
+  injectCoeff injectCoeff120,121
+  injectCoeff' injectCoeff'124,125
+  injectCoeff' injectCoeff'125,126
+  monomials monomials129,130
+  monomials monomials130,131
+  terms' terms'135,136
+  terms' terms'136,137
+  coeff' coeff'144,145
+  coeff' coeff'145,146
+  constantTerm constantTerm149,150
+  constantTerm constantTerm150,151
+  fromMonomial fromMonomial154,155
+  fromMonomial fromMonomial155,156
+  toPolynomial' toPolynomial'159,160
+  toPolynomial' toPolynomial'160,161
+  polynomial' polynomial'164,165
+  polynomial' polynomial'165,166
+  totalDegree' totalDegree'170,171
+  totalDegree' totalDegree'171,172
+  var var175,176
+  var var176,177
+  mapCoeff' mapCoeff'179,180
+  mapCoeff' mapCoeff'180,181
+  (>|*)>|*183,184
+  m m184,185
+  (*|<)*|<187,188
+  (*(188,189
+  (!*)!*190,191
+  _Terms' _Terms'194,195
+  _Terms' _Terms'195,196
+  mapMonomial mapMonomial198,199
+  mapMonomial mapMonomial199,200
+class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrderedPolynomial IsOrderedPolynomial204,205
+class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrderedPolynomial IsOrderedPolynomial204,205
+  type MOrder MOrder205,206
+  type MOrder poly poly205,206
+  coeff coeff209,210
+  coeff coeff210,211
+  terms terms216,217
+  terms terms217,218
+  leadingTerm leadingTerm220,221
+  leadingTerm leadingTerm221,222
+  leadingMonomial leadingMonomial225,226
+  leadingMonomial leadingMonomial226,227
+  leadingCoeff leadingCoeff230,231
+  leadingCoeff leadingCoeff231,232
+  orderedMonomials orderedMonomials236,237
+  orderedMonomials orderedMonomials237,238
+  fromOrderedMonomial fromOrderedMonomial241,242
+  fromOrderedMonomial fromOrderedMonomial242,243
+  toPolynomial toPolynomial246,247
+  toPolynomial toPolynomial247,248
   polynomial polynomial255,256
-  (>*)>*259,260
-  (*<)*<264,265
-  _Terms _Terms268,269
-  _Terms _Terms269,270
-  diff diff275,276
-  diff diff276,277
-  mapMonomialMonotonic mapMonomialMonotonic292,293
-liftMapCoeff liftMapCoeff296,297
-liftMapCoeff liftMapCoeff297,298
-substCoeff substCoeff300,301
-substCoeff substCoeff301,302
-oneNorm oneNorm305,306
+  polynomial polynomial257,258
+  (>*)>*261,262
+  (*<)*<266,267
+  _Terms _Terms270,271
+  _Terms _Terms271,272
+  diff diff277,278
+  diff diff278,279
+  mapMonomialMonotonic mapMonomialMonotonic294,295
+liftMapCoeff liftMapCoeff298,299
+liftMapCoeff liftMapCoeff299,300
+substCoeff substCoeff302,303
+substCoeff substCoeff303,304
 oneNorm oneNorm307,308
-maxNorm maxNorm311,312
-maxNorm maxNorm312,313
-monoize monoize317,318
+oneNorm oneNorm309,310
+maxNorm maxNorm313,314
+maxNorm maxNorm314,315
 monoize monoize319,320
-sPolynomial sPolynomial324,325
-sPolynomial sPolynomial327,328
-pDivModPoly pDivModPoly332,333
-f0 `pDivModPoly`pDivModPoly335,336
-content content351,352
-content content352,353
-pp pp357,358
-pp pp358,359
-injectVars injectVars361,362
-injectVars injectVars361,362
-vars vars369,370
-vars vars370,371
-class (P.Show r) => PrettyCoeff PrettyCoeff373,374
-class (P.Show r) => PrettyCoeff PrettyCoeff373,374
-  showsCoeff showsCoeff374,375
-  showsCoeff showsCoeff375,376
-defaultShowsOrdCoeff defaultShowsOrdCoeff377,378
+monoize monoize321,322
+sPolynomial sPolynomial326,327
+sPolynomial sPolynomial329,330
+pDivModPoly pDivModPoly334,335
+f0 `pDivModPoly`pDivModPoly337,338
+content content353,354
+content content354,355
+pp pp359,360
+pp pp360,361
+injectVars injectVars363,364
+injectVars injectVars363,364
+vars vars371,372
+vars vars372,373
+class (P.Show r) => PrettyCoeff PrettyCoeff375,376
+class (P.Show r) => PrettyCoeff PrettyCoeff375,376
+  showsCoeff showsCoeff376,377
+  showsCoeff showsCoeff377,378
 defaultShowsOrdCoeff defaultShowsOrdCoeff379,380
-instance instance386,387
-data ShowSCoeff ShowSCoeff451,452
-data ShowSCoeff = Negative Negative451,452
-                | VanishedVanished452,453
-                | OneCoeffOneCoeff453,454
-                | Positive Positive454,455
-showsCoeffAsTerm showsCoeffAsTerm463,464
-showsCoeffAsTerm showsCoeffAsTerm464,465
-showsCoeffWithOp showsCoeffWithOp476,477
-showsCoeffWithOp showsCoeffWithOp477,478
-showPolynomialWith showPolynomialWith482,483
-showPolynomialWith showPolynomialWith487,488
-showPolynomialWith' showPolynomialWith'489,490
-showPolynomialWith' showPolynomialWith'496,497
-showsPolynomialWith showsPolynomialWith498,499
-showsPolynomialWith showsPolynomialWith503,504
-showsPolynomialWith' showsPolynomialWith'505,506
-showsPolynomialWith' showsPolynomialWith'517,518
-divModPolynomial divModPolynomial548,549
-divModPolynomial divModPolynomial551,552
-modPolynomial modPolynomial566,567
+defaultShowsOrdCoeff defaultShowsOrdCoeff381,382
+instance instance388,389
+data ShowSCoeff ShowSCoeff453,454
+data ShowSCoeff = Negative Negative453,454
+                | VanishedVanished454,455
+                | OneCoeffOneCoeff455,456
+                | Positive Positive456,457
+showsCoeffAsTerm showsCoeffAsTerm465,466
+showsCoeffAsTerm showsCoeffAsTerm466,467
+showsCoeffWithOp showsCoeffWithOp478,479
+showsCoeffWithOp showsCoeffWithOp479,480
+showPolynomialWith showPolynomialWith484,485
+showPolynomialWith showPolynomialWith489,490
+showPolynomialWith' showPolynomialWith'491,492
+showPolynomialWith' showPolynomialWith'498,499
+showsPolynomialWith showsPolynomialWith500,501
+showsPolynomialWith showsPolynomialWith505,506
+showsPolynomialWith' showsPolynomialWith'507,508
+showsPolynomialWith' showsPolynomialWith'519,520
+divModPolynomial divModPolynomial550,551
+divModPolynomial divModPolynomial553,554
 modPolynomial modPolynomial568,569
-divPolynomial divPolynomial571,572
+modPolynomial modPolynomial570,571
 divPolynomial divPolynomial573,574
-isUnitDefault isUnitDefault579,580
+divPolynomial divPolynomial575,576
 isUnitDefault isUnitDefault581,582
-recipUnitDefault recipUnitDefault583,584
+isUnitDefault isUnitDefault583,584
 recipUnitDefault recipUnitDefault585,586
-isAssociateDefault isAssociateDefault589,590
+recipUnitDefault recipUnitDefault587,588
 isAssociateDefault isAssociateDefault591,592
-splitUnitDefault splitUnitDefault596,597
+isAssociateDefault isAssociateDefault593,594
 splitUnitDefault splitUnitDefault598,599
+splitUnitDefault splitUnitDefault600,601
 
 ./src/Algebra/Ring/Polynomial/Monomial.hs,3895
 module Algebra.Ring.Polynomial.MonomialAlgebra.Ring.Polynomial.Monomial8,9
