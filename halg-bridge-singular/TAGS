@@ -11,143 +11,141 @@ main main5,6
 main main0,1
 main main1,2
 
-./src/Algebra/Bridge/Singular/Syntax.hs,3778
+./src/Algebra/Bridge/Singular/Syntax.hs,3786
 module Algebra.Bridge.Singular.SyntaxAlgebra.Bridge.Singular.Syntax7,8
 type SingularLibrary SingularLibrary41,42
-class IsStrongMonomialOrder ord => SingularOrder SingularOrder43,44
-class IsStrongMonomialOrder ord => SingularOrder SingularOrder43,44
+class IsMonomialOrder n ord => SingularOrder SingularOrder43,44
+class IsMonomialOrder n ord => SingularOrder SingularOrder43,44
   singularOrder singularOrder44,45
 instance instance46,47
-class (PrettyCoeff r, CoeffRing r) => SingularCoeff SingularCoeff52,53
-class (PrettyCoeff r, CoeffRing r) => SingularCoeff SingularCoeff52,53
-  parseSingularCoeff parseSingularCoeff53,54
-  prettySingularCoeff prettySingularCoeff55,56
-  prettySingularCoeff prettySingularCoeff56,57
-  coeffType coeffType58,59
-prettyRat prettyRat68,69
-prettyRat prettyRat69,70
-type IsSingularPolynomial IsSingularPolynomial89,90
-type IsSingularPolynomial poly poly89,90
-data SingularExpr SingularExpr91,92
-  SingVar SingVar92,93
-  SingFunction SingFunction93,94
-  SingInfix SingInfix94,95
-  SingList SingList95,96
-  SingIdeal SingIdeal96,97
-  SingPolynomial SingPolynomial97,98
-  SingCoeff SingCoeff98,99
-  SingVerbatim SingVerbatim99,100
-  SingRing SingRing100,101
-data RingCoeffSpec RingCoeffSpec102,103
-data RingCoeffSpec = RealCoeffRealCoeff102,103
-                   | ComplexCoeffComplexCoeff103,104
-                   | IntegerCoeffIntegerCoeff104,105
-                   | Char Char105,106
-data RingSpec RingSpec108,109
-  RingSpec RingSpec109,110
-  RingSpec RingSpec109,110
-coeffProxy coeffProxy115,116
-coeffProxy coeffProxy116,117
-morderProxy morderProxy118,119
-morderProxy morderProxy119,120
-toRingSpec toRingSpec121,122
-toRingSpec toRingSpec122,123
-class PrettySingular PrettySingular125,126
-class PrettySingular PrettySingular125,126
-  prettySingular prettySingular126,127
-prettySingularPolynomial prettySingularPolynomial128,129
-prettySingularPolynomial prettySingularPolynomial130,131
-funE funE184,185
-funE funE185,186
-polyE polyE187,188
-polyE polyE188,189
-coeffE coeffE190,191
-coeffE coeffE191,192
-listE listE193,194
-listE listE194,195
-idealE' idealE'196,197
-idealE' idealE'197,198
-idealE idealE199,200
-idealE idealE200,201
-binE binE202,203
-binE binE203,204
-verbE verbE205,206
-verbE verbE206,207
-varE varE208,209
-varE varE209,210
-data SingularType SingularType211,212
-data SingularType = IdealTIdealT211,212
-                  | IntTIntT212,213
-                  | RingTRingT213,214
-                  | PolyTPolyT214,215
-                  | OtherT OtherT215,216
-data SingularCommand SingularCommand218,219
-  SingExpr SingExpr219,220
-  SingDeclOnly SingDeclOnly221,222
-  SingDeclAssign SingDeclAssign222,223
-  SingAssign SingAssign224,225
-  SingLibrary SingLibrary226,227
-  SingVerbD SingVerbD227,228
-  Directive Directive228,229
-  SingExpr SingExpr219,220
-  SingDeclOnly SingDeclOnly221,222
-  SingDeclAssign SingDeclAssign222,223
-  SingAssign SingAssign224,225
-  SingLibrary SingLibrary226,227
-  SingVerbD SingVerbD227,228
-  Directive Directive228,229
-newtype SingularProgramM SingularProgramM230,231
-newtype SingularProgramM a = SingularProgramM SingularProgramM230,231
-type SingularProgram SingularProgram233,234
-exprC exprC267,268
-exprC exprC268,269
-declOnlyC declOnlyC270,271
-declOnlyC declOnlyC271,272
-declC declC273,274
-declC declC275,276
-letC letC279,280
-letC letC281,282
-idealC' idealC'283,284
-idealC' idealC'285,286
-idealC idealC287,288
-idealC idealC288,289
-ringC ringC290,291
-ringC ringC292,293
-polyC polyC294,295
-polyC polyC295,296
-libC libC297,298
-libC libC298,299
-directC directC300,301
-directC directC301,302
-optionC optionC303,304
-optionC optionC304,305
-printC printC306,307
-printC printC307,308
-type SingularOption SingularOption309,310
+class (PrettyCoeff r, CoeffRing r) => SingularCoeff SingularCoeff59,60
+class (PrettyCoeff r, CoeffRing r) => SingularCoeff SingularCoeff59,60
+  parseSingularCoeff parseSingularCoeff60,61
+  prettySingularCoeff prettySingularCoeff62,63
+  prettySingularCoeff prettySingularCoeff63,64
+  coeffType coeffType65,66
+prettyRat prettyRat75,76
+prettyRat prettyRat76,77
+type IsSingularPolynomial IsSingularPolynomial96,97
+type IsSingularPolynomial poly poly96,97
+data SingularExpr SingularExpr99,100
+  SingVar SingVar100,101
+  SingFunction SingFunction101,102
+  SingInfix SingInfix102,103
+  SingList SingList103,104
+  SingIdeal SingIdeal104,105
+  SingPolynomial SingPolynomial105,106
+  SingCoeff SingCoeff106,107
+  SingVerbatim SingVerbatim107,108
+  SingRing SingRing108,109
+data RingCoeffSpec RingCoeffSpec110,111
+data RingCoeffSpec = RealCoeffRealCoeff110,111
+                   | ComplexCoeffComplexCoeff111,112
+                   | IntegerCoeffIntegerCoeff112,113
+                   | Char Char113,114
+data RingSpec RingSpec116,117
+  RingSpec RingSpec117,118
+  RingSpec RingSpec117,118
+coeffProxy coeffProxy123,124
+coeffProxy coeffProxy124,125
+morderProxy morderProxy126,127
+morderProxy morderProxy127,128
+toRingSpec toRingSpec129,130
+toRingSpec toRingSpec130,131
+class PrettySingular PrettySingular133,134
+class PrettySingular PrettySingular133,134
+  prettySingular prettySingular134,135
+prettySingularPolynomial prettySingularPolynomial136,137
+prettySingularPolynomial prettySingularPolynomial138,139
+funE funE193,194
+funE funE194,195
+polyE polyE196,197
+polyE polyE197,198
+coeffE coeffE199,200
+coeffE coeffE200,201
+listE listE202,203
+listE listE203,204
+idealE' idealE'205,206
+idealE' idealE'206,207
+idealE idealE208,209
+idealE idealE209,210
+binE binE211,212
+binE binE212,213
+verbE verbE214,215
+verbE verbE215,216
+varE varE217,218
+varE varE218,219
+data SingularType SingularType220,221
+data SingularType = IdealTIdealT220,221
+                  | IntTIntT221,222
+                  | RingTRingT222,223
+                  | PolyTPolyT223,224
+                  | OtherT OtherT224,225
+data SingularCommand SingularCommand227,228
+  SingExpr SingExpr228,229
+  SingDeclOnly SingDeclOnly230,231
+  SingDeclAssign SingDeclAssign231,232
+  SingAssign SingAssign233,234
+  SingLibrary SingLibrary235,236
+  SingVerbD SingVerbD236,237
+  Directive Directive237,238
+  SingExpr SingExpr228,229
+  SingDeclOnly SingDeclOnly230,231
+  SingDeclAssign SingDeclAssign231,232
+  SingAssign SingAssign233,234
+  SingLibrary SingLibrary235,236
+  SingVerbD SingVerbD236,237
+  Directive Directive237,238
+newtype SingularProgramM SingularProgramM239,240
+newtype SingularProgramM a = SingularProgramM SingularProgramM239,240
+type SingularProgram SingularProgram242,243
+exprC exprC276,277
+exprC exprC277,278
+declOnlyC declOnlyC279,280
+declOnlyC declOnlyC280,281
+declC declC282,283
+declC declC284,285
+letC letC288,289
+letC letC290,291
+idealC' idealC'292,293
+idealC' idealC'294,295
+idealC idealC296,297
+idealC idealC297,298
+ringC ringC299,300
+ringC ringC301,302
+polyC polyC303,304
+polyC polyC304,305
+libC libC306,307
+libC libC307,308
+directC directC309,310
+directC directC310,311
+optionC optionC312,313
+optionC optionC313,314
+printC printC315,316
+printC printC316,317
+type SingularOption SingularOption318,319
 
-./src/Algebra/Bridge/Singular.hs,879
+./src/Algebra/Bridge/Singular.hs,814
 module Algebra.Bridge.SingularAlgebra.Bridge.Singular6,7
+symbol symbol30,31
 symbol symbol31,32
-symbol symbol32,33
+lexeme lexeme33,34
 lexeme lexeme34,35
-lexeme lexeme35,36
+parens parens36,37
 parens parens37,38
-parens parens38,39
+readProcess readProcess39,40
 readProcess readProcess40,41
-readProcess readProcess41,42
+singular singular46,47
 singular singular47,48
-singular singular48,49
-readSingularIdeal readSingularIdeal50,51
-readSingularIdeal readSingularIdeal54,55
-morderProxy morderProxy58,59
-morderProxy morderProxy59,60
+readSingularIdeal readSingularIdeal49,50
+readSingularIdeal readSingularIdeal53,54
+readSingularPoly readSingularPoly57,58
 readSingularPoly readSingularPoly61,62
-readSingularPoly readSingularPoly65,66
-evalSingularWith evalSingularWith76,77
-evalSingularWith evalSingularWith80,81
-evalSingular evalSingular88,89
-evalSingular evalSingular90,91
-evalSingularIdealWith evalSingularIdealWith92,93
-evalSingularIdealWith evalSingularIdealWith96,97
-evalSingularPolyWith evalSingularPolyWith100,101
-evalSingularPolyWith evalSingularPolyWith104,105
+evalSingularWith evalSingularWith71,72
+evalSingularWith evalSingularWith75,76
+evalSingular evalSingular83,84
+evalSingular evalSingular85,86
+evalSingularIdealWith evalSingularIdealWith87,88
+evalSingularIdealWith evalSingularIdealWith91,92
+evalSingularPolyWith evalSingularPolyWith95,96
+evalSingularPolyWith evalSingularPolyWith99,100

@@ -1,9 +1,9 @@
-{-# LANGUAGE ConstraintKinds, DeriveFunctor, FlexibleContexts     #-}
-{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude             #-}
-{-# LANGUAGE NoMonomorphismRestriction, OverloadedStrings         #-}
-{-# LANGUAGE ScopedTypeVariables, TypeSynonymInstances            #-}
-{-# LANGUAGE UndecidableInstances, UndecidableSuperClasses        #-}
+{-# LANGUAGE ConstraintKinds, DeriveFunctor, FlexibleContexts         #-}
+{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving     #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude                 #-}
+{-# LANGUAGE NoMonomorphismRestriction, OverloadedStrings             #-}
+{-# LANGUAGE ScopedTypeVariables, TypeOperators, TypeSynonymInstances #-}
+{-# LANGUAGE UndecidableInstances, UndecidableSuperClasses            #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Algebra.Bridge.Singular.Syntax
        ( SingularOrder(..)
@@ -41,14 +41,21 @@ import qualified Prelude                        as P
 
 type SingularLibrary = Text
 
-class IsStrongMonomialOrder ord => SingularOrder ord where
-  singularOrder :: p ord -> Text
+class IsMonomialOrder n ord => SingularOrder n ord where
+  singularOrder :: q n -> p ord -> Text
 
-instance SingularOrder Lex where
-  singularOrder _ = "lp"
+instance SingularOrder n Lex where
+  singularOrder _ _ = "lp"
 
-instance SingularOrder Grevlex where
-  singularOrder _ = "dp"
+instance SingularOrder n Grevlex where
+  singularOrder _ _ = "dp"
+
+instance (SingularOrder n o1, SingularOrder m o2, KnownNat m, KnownNat n, (n + m) ~ k)
+      => SingularOrder k (ProductOrder n m o1 o2) where
+  singularOrder _ _ =
+    let (sn, sm) = (sing :: Sing n, sing :: Sing m)
+    in T.concat ["(", singularOrder sn (Proxy :: Proxy o1), "[", tshow (natVal sn), "],"
+                , singularOrder sm (Proxy :: Proxy o2), "[", tshow (natVal sm), "])"]
 
 class (PrettyCoeff r, CoeffRing r) => SingularCoeff r where
   parseSingularCoeff :: Parser r
@@ -87,7 +94,8 @@ instance KnownNat p => SingularCoeff (F p) where
   coeffType = Char . char
 
 -- | Polynomial type which can be encoded to/decoded from singular polynomials.
-type IsSingularPolynomial poly = (IsOrderedPolynomial poly, SingularCoeff (Coefficient poly), SingularOrder (MOrder poly))
+type IsSingularPolynomial poly =
+  (IsOrderedPolynomial poly, SingularCoeff (Coefficient poly), SingularOrder (Arity poly) (MOrder poly))
 
 data SingularExpr poly where
   SingVar        :: Text -> SingularExpr poly
@@ -107,9 +115,9 @@ data RingCoeffSpec = RealCoeff
                    deriving (Read, Show, Eq, Ord)
 
 data RingSpec where
-  RingSpec :: SingularOrder ord
+  RingSpec :: SingularOrder n ord
            => RingCoeffSpec
-           -> Natural
+           -> Sing n
            -> proxy ord
            -> RingSpec
 
@@ -121,7 +129,7 @@ morderProxy _ = Proxy
 
 toRingSpec :: IsSingularPolynomial poly => proxy poly -> RingSpec
 toRingSpec pxy =
-  RingSpec (coeffType $ coeffProxy pxy) (fromIntegral $ arity pxy) (morderProxy pxy)
+  RingSpec (coeffType $ coeffProxy pxy) (sArity pxy) (morderProxy pxy)
 
 class PrettySingular a where
   prettySingular :: a -> Text
@@ -159,9 +167,10 @@ instance PrettySingular RingCoeffSpec where
 
 instance PrettySingular RingSpec where
   prettySingular (RingSpec coe vs ord) =
+    withKnownNat vs $
     T.concat ["(", prettySingular coe
-             , "),(x(0..", tshow (vs P.- 1), ")),("
-             , singularOrder ord
+             , "),(x(0..", tshow (natVal vs P.- 1), ")),("
+             , singularOrder vs ord
              ,")"
              ]
 
