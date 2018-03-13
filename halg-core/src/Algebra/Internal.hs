@@ -109,6 +109,12 @@ pattern OLt :: forall (t :: Nat). ()
             => Sing n1 -> O.Ordinal t
 pattern OLt n = O.OLt n
 
+pattern OS :: forall t. KnownNat t => O.Ordinal (t :: Nat) -> O.Ordinal (Succ t)
+pattern OS n = O.OS n
+
+pattern OZ :: forall n. (0 < n) ~ 'True => O.Ordinal n
+pattern OZ = O.OZ
+
 sNatToInt :: SNat n -> Int
 sNatToInt = fromIntegral . fromSing
 
