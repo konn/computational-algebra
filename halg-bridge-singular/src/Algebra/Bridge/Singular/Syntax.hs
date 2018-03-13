@@ -54,8 +54,8 @@ instance (SingularOrder n o1, SingularOrder m o2, KnownNat m, KnownNat n, (n + m
       => SingularOrder k (ProductOrder n m o1 o2) where
   singularOrder _ _ =
     let (sn, sm) = (sing :: Sing n, sing :: Sing m)
-    in T.concat ["(", singularOrder sn (Proxy :: Proxy o1), "[", tshow (natVal sn), "],"
-                , singularOrder sm (Proxy :: Proxy o2), "[", tshow (natVal sm), "])"]
+    in T.concat ["(", singularOrder sn (Proxy :: Proxy o1), "(", tshow (natVal sn), "),"
+                , singularOrder sm (Proxy :: Proxy o2), "(", tshow (natVal sm), "))"]
 
 class (PrettyCoeff r, CoeffRing r) => SingularCoeff r where
   parseSingularCoeff :: Parser r
@@ -169,9 +169,8 @@ instance PrettySingular RingSpec where
   prettySingular (RingSpec coe vs ord) =
     withKnownNat vs $
     T.concat ["(", prettySingular coe
-             , "),(x(0..", tshow (natVal vs P.- 1), ")),("
+             , "),(x(0..", tshow (natVal vs P.- 1), ")),"
              , singularOrder vs ord
-             ,")"
              ]
 
 instance Num (Coefficient poly) => Num (SingularExpr poly) where
