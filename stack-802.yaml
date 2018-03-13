@@ -12,6 +12,7 @@ packages:
 - 'halg-polyn-parser'
 - 'halg-factor'
 - 'halg-algebraic'
+- 'halg-bridge-singular'
 
 flags:
   computational-algebra:

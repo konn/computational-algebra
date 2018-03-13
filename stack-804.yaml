@@ -14,6 +14,7 @@ packages:
 - 'halg-algorithms'
 - 'halg-factor'
 - 'halg-algebraic'
+- 'halg-bridge-singular'
 
 extra-deps: 
 - Cabal-2.2.0.0
