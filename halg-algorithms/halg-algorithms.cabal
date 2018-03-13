@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 76c6085d25952167e02fdf954be2b35d18c72527fbaa02b663884712d0260c62
+-- hash: 3c6c0713314eb165e3ac78e0fa793bba83a621ed36a9a2ea5c4248d01886b05c
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -42,6 +42,7 @@ library
     , halg-core
     , halg-matrices
     , halg-polynomials
+    , heaps
     , hmatrix
     , lens
     , matrix
@@ -51,6 +52,7 @@ library
     , sized
     , vector
   exposed-modules:
+      Algebra.Algorithms.Groebner.Homogeneous
       Algebra.Algorithms.ZeroDim
   other-modules:
       Algebra.Algorithms.FGLM
@@ -71,6 +73,7 @@ test-suite spec
     , containers
     , convertible
     , equational-reasoning
+    , ghc-typelits-knownnat
     , halg-algorithms
     , halg-core
     , halg-core-test
@@ -87,5 +90,6 @@ test-suite spec
     , vector
   other-modules:
       ZeroDimSpec
+      HomogeneousSpec
       Utils
   default-language: Haskell2010

@@ -69,6 +69,17 @@ data TestSet = TestSet { inputMat inputMat134,135
 linSet linSet139,140
 linSet linSet140,141
 
+./test/HomogeneousSpec.hs,324
+module HomogeneousSpec HomogeneousSpec3,4
+asGenListOf asGenListOf22,23
+asGenListOf asGenListOf23,24
+spec spec25,26
+spec spec26,27
+prop_passesSTest prop_passesSTest35,36
+prop_passesSTest prop_passesSTest36,37
+prop_groebnerDivsOrig prop_groebnerDivsOrig41,42
+prop_groebnerDivsOrig prop_groebnerDivsOrig42,43
+
 ./test/Spec.hs,0
 
 ./src/Algebra/Algorithms/FGLM.hs,611
@@ -93,42 +104,63 @@ image image41,42
 image image42,43
 
 ./src/Algebra/Algorithms/ZeroDim.hs,1141
-module Algebra.Algorithms.ZeroDimAlgebra.Algorithms.ZeroDim12,13
-solveM solveM57,58
-solveM solveM63,64
-solveWith solveWith81,82
-solveWith solveWith87,88
-solve' solve'123,124
-solve' solve'129,130
+module Algebra.Algorithms.ZeroDimAlgebra.Algorithms.ZeroDim10,11
+solveM solveM55,56
+solveM solveM61,62
+solveWith solveWith79,80
+solveWith solveWith85,86
+solve' solve'121,122
+solve' solve'127,128
+subspMatrix subspMatrix143,144
 subspMatrix subspMatrix145,146
-subspMatrix subspMatrix147,148
-solveViaCompanion solveViaCompanion161,162
-solveViaCompanion solveViaCompanion166,167
-matToLists matToLists179,180
-matToLists matToLists180,181
-matrixRep matrixRep182,183
-matrixRep matrixRep185,186
-toComplex toComplex193,194
-toComplex toComplex194,195
+solveViaCompanion solveViaCompanion159,160
+solveViaCompanion solveViaCompanion164,165
+matToLists matToLists177,178
+matToLists matToLists178,179
+matrixRep matrixRep180,181
+matrixRep matrixRep183,184
+toComplex toComplex191,192
+toComplex toComplex192,193
+reduction reduction195,196
 reduction reduction197,198
-reduction reduction199,200
-univPoly univPoly204,205
-univPoly univPoly208,209
-solveLinear solveLinear227,228
-solveLinear solveLinear231,232
-radical radical266,267
-radical radical269,270
-isRadical isRadical274,275
-isRadical isRadical278,279
-fglm fglm326,327
-fglm fglm330,331
-fglmMap fglmMap334,335
-fglmMap fglmMap345,346
+univPoly univPoly202,203
+univPoly univPoly206,207
+solveLinear solveLinear225,226
+solveLinear solveLinear229,230
+radical radical264,265
+radical radical267,268
+isRadical isRadical272,273
+isRadical isRadical276,277
+fglm fglm324,325
+fglm fglm328,329
+fglmMap fglmMap332,333
+fglmMap fglmMap343,344
+mainLoop mainLoop350,351
 mainLoop mainLoop352,353
-mainLoop mainLoop354,355
-toContinue toContinue374,375
-toContinue toContinue378,379
+toContinue toContinue372,373
+toContinue toContinue376,377
+nextMonomial nextMonomial386,387
 nextMonomial nextMonomial388,389
-nextMonomial nextMonomial390,391
-beta beta401,402
-beta beta402,403
+beta beta399,400
+beta beta400,401
+
+./src/Algebra/Algorithms/Groebner/Homogeneous.hs,713
+module Algebra.Algorithms.Groebner.HomogeneousAlgebra.Algorithms.Groebner.Homogeneous0,1
+isHomogeneous isHomogeneous16,17
+isHomogeneous isHomogeneous18,19
+calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis27,28
+calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis29,30
+unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis38,39
+unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis40,41
+type Signatures Signatures56,57
+type Signatures weight weight56,57
+buildTable buildTable58,59
+buildTable buildTable60,61
+type RefVec RefVec67,68
+type RefVec s s67,68
+at at69,70
+at at70,71
+snoc snoc72,73
+snoc snoc73,74
+deg deg81,82
+deg deg82,83
