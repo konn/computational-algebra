@@ -11,6 +11,7 @@ packages:
 - 'halg-algorithms'
 - 'halg-factor'
 - 'halg-algebraic'
+- 'halg-bridge-singular'
 
 flags:
   computational-algebra:

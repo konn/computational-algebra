@@ -1,9 +1,8 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, DefaultSignatures              #-}
-{-# LANGUAGE ExplicitNamespaces, FlexibleContexts, FlexibleInstances    #-}
-{-# LANGUAGE GADTs, LiberalTypeSynonyms, MultiParamTypeClasses          #-}
-{-# LANGUAGE NoImplicitPrelude, ParallelListComp, PolyKinds, RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables, TypeFamilies, TypeOperators           #-}
-{-# LANGUAGE UndecidableInstances                                       #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, ExplicitNamespaces                #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                    #-}
+{-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, NoImplicitPrelude #-}
+{-# LANGUAGE ParallelListComp, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
+{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances             #-}
 -- | This module provides abstract classes for finitary polynomial types.
 module Algebra.Ring.Polynomial.Class
        ( IsPolynomial(..), IsOrderedPolynomial(..)
@@ -13,7 +12,8 @@ module Algebra.Ring.Polynomial.Class
          injectVars, vars,
          PrettyCoeff(..), ShowSCoeff(..),
          showsCoeffAsTerm, showsCoeffWithOp,
-         showsPolynomialWith, showPolynomialWith,
+         showsPolynomialWith, showsPolynomialWith',
+         showPolynomialWith, showPolynomialWith',
          -- * Polynomial division
          divModPolynomial, divPolynomial, modPolynomial
          -- * Default instances
@@ -87,7 +87,7 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
   -- | A variant of @'liftMap'@, each value is given by @'Sized'@.
   subst :: (Ring alg, Commutative alg, Module (Scalar (Coefficient poly)) alg)
         => Sized (Arity poly) alg -> poly -> alg
-  subst dic f = liftMap (dic V.%!!) f
+  subst dic = liftMap (dic V.%!!)
   {-# INLINE subst #-}
 
   -- | Another variant of @'liftMap'@.
@@ -295,7 +295,7 @@ class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrder
     _Terms %~ M.mapKeysMonotonic tr
   {-# INLINE mapMonomialMonotonic #-}
 
-liftMapCoeff :: IsPolynomial poly => (Ordinal (Arity poly) -> (Coefficient poly)) -> poly -> Coefficient poly
+liftMapCoeff :: IsPolynomial poly => (Ordinal (Arity poly) -> Coefficient poly) -> poly -> Coefficient poly
 liftMapCoeff l = runScalar . liftMap (Scalar . l)
 {-# INLINE liftMapCoeff #-}
 
@@ -343,7 +343,9 @@ f0 `pDivModPoly` g =
     step p quo
         | isZero p = (quo, p)
         | lm `divs` leadingMonomial p =
-            let q   = toPolynomial $ (leadingCoeff p `quot` leadingCoeff g, leadingMonomial p / leadingMonomial g)
+            let coe = leadingCoeff p `quot` leadingCoeff g
+                mon = leadingMonomial p / leadingMonomial g
+                q   = toPolynomial (coe, mon)
             in step (p - (q * g)) (quo + q)
         | otherwise = (quo, p)
 
@@ -486,17 +488,39 @@ showPolynomialWith :: (IsPolynomial poly, PrettyCoeff (Coefficient poly))
                     -> P.String
 showPolynomialWith vs i p = showsPolynomialWith vs i p ""
 
+showPolynomialWith' :: (IsPolynomial poly)
+                     => Bool
+                     -> (Int -> Coefficient poly -> ShowSCoeff)
+                     -> Sized (Arity poly) P.String
+                     -> Int
+                     -> poly
+                     -> P.String
+showPolynomialWith' b showsCoe vs i p = showsPolynomialWith' b showsCoe vs i p ""
+
 showsPolynomialWith :: (IsPolynomial poly, PrettyCoeff (Coefficient poly))
-                    => Sized (Arity poly) P.String
-                    -> Int
-                    -> poly
-                    -> P.ShowS
-showsPolynomialWith vsVec d f = P.showParen (d P.> 10) $
-  let tms  = map (showMonom *** showsCoeff 10) $ M.toDescList $ terms' f
+                     => Sized (Arity poly) P.String
+                     -> Int
+                     -> poly
+                     -> P.ShowS
+showsPolynomialWith = showsPolynomialWith' True showsCoeff
+
+showsPolynomialWith' :: (IsPolynomial poly)
+                     => Bool
+                        -- ^ Whether print multiplication as @*@ or not.
+                     -> (Int -> Coefficient poly -> ShowSCoeff)
+                        -- ^ Coefficient printer
+                     -> Sized (Arity poly) P.String
+                        -- ^ Variables
+                     -> Int
+                        -- ^ Precision
+                     -> poly
+                        -- ^ Polynomial
+                     -> P.ShowS
+showsPolynomialWith' showMult showsCoe vsVec d f = P.showParen (d P.> 10) $
+  let tms  = map (showMonom *** showsCoe 10) $ M.toDescList $ terms' f
   in case tms of
     [] -> P.showString "0"
-    (mc : ts) -> P.foldr1 (.) $
-                 (showTermOnly mc) : map showRestTerm ts
+    (mc : ts) -> P.foldr1 (.) $ showTermOnly mc : map showRestTerm ts
   where
     showTermOnly (Nothing, Vanished) = P.id
     showTermOnly (Nothing, s)        = showsCoeffAsTerm s
@@ -511,11 +535,13 @@ showsPolynomialWith vsVec d f = P.showParen (d P.> 10) $
     showRestTerm (Just _, Vanished)  = P.id
     showRestTerm (Just m, t)         = showsCoeffWithOp t . P.showChar ' ' . m
     vs = F.toList vsVec
+    multSymb | showMult  = '*'
+             | otherwise = ' '
     showMonom m =
       let fs = catMaybes $ P.zipWith showFactor vs $ F.toList m
       in if P.null fs
          then Nothing
-         else Just $ foldr (.) P.id $ L.intersperse (P.showChar ' ') (map P.showString fs)
+         else Just $ foldr (.) P.id $ L.intersperse (P.showChar multSymb) (map P.showString fs)
     showFactor _ 0 = Nothing
     showFactor v 1 = Just v
     showFactor v n = Just $ v P.++ "^" P.++ P.show n

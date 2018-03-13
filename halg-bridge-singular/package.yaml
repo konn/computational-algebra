@@ -1,0 +1,39 @@
+name:                halg-bridge-singular
+version:             0.6.0.0
+github:              "konn/halg-bridge-singular"
+license:             BSD3
+author:              "Hiromi ISHII"
+maintainer:          "konn.jinro _at_ gmail.com"
+copyright:           "2018 (c) Hiromi ISHII"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+synopsis:            Bridge interface between Singular and halg computational algebra suite.
+category:            Math
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the project Web Site <https://konn.github.io/computational-algebra>
+
+dependencies:
+- base >= 4.7 && < 5
+- halg-core
+- text
+
+library:
+  source-dirs: src
+  ghc-options:  -Wall
+  dependencies:
+  - halg-polynomials
+  - halg-polyn-parser
+  - process
+  - binary
+  - semigroups
+  - megaparsec
+  - process-extras
+  - type-natural
+  - transformers

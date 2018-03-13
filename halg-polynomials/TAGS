@@ -66,32 +66,32 @@ prop_degdecay prop_degdecay59,60
 rank rank67,68
 rank rank68,69
 
-./test/GroebnerSpec.hs,938
+./test/GroebnerSpec.hs,934
 module GroebnerSpec GroebnerSpec2,3
 asGenListOf asGenListOf19,20
 asGenListOf asGenListOf20,21
 spec spec22,23
 spec spec23,24
-prop_intersection prop_intersection58,59
-prop_intersection prop_intersection59,60
-prop_isMinimal prop_isMinimal66,67
-prop_isMinimal prop_isMinimal67,68
-prop_isReduced prop_isReduced73,74
-prop_isReduced prop_isReduced74,75
-prop_passesSTest prop_passesSTest80,81
-prop_passesSTest prop_passesSTest81,82
-prop_groebnerDivsOrig prop_groebnerDivsOrig86,87
-prop_groebnerDivsOrig prop_groebnerDivsOrig87,88
-prop_divCorrect prop_divCorrect93,94
-prop_divCorrect prop_divCorrect94,95
-prop_indivisible prop_indivisible101,102
-prop_indivisible prop_indivisible102,103
-prop_degdecay prop_degdecay109,110
-prop_degdecay prop_degdecay110,111
-data IntersectCase IntersectCase117,118
-data IntersectCase r ord n = IC IC117,118
-ics_binary ics_binary119,120
-ics_binary ics_binary120,121
+prop_intersection prop_intersection52,53
+prop_intersection prop_intersection53,54
+prop_isMinimal prop_isMinimal60,61
+prop_isMinimal prop_isMinimal61,62
+prop_isReduced prop_isReduced67,68
+prop_isReduced prop_isReduced68,69
+prop_passesSTest prop_passesSTest74,75
+prop_passesSTest prop_passesSTest75,76
+prop_groebnerDivsOrig prop_groebnerDivsOrig80,81
+prop_groebnerDivsOrig prop_groebnerDivsOrig81,82
+prop_divCorrect prop_divCorrect87,88
+prop_divCorrect prop_divCorrect88,89
+prop_indivisible prop_indivisible95,96
+prop_indivisible prop_indivisible96,97
+prop_degdecay prop_degdecay103,104
+prop_degdecay prop_degdecay104,105
+data IntersectCase IntersectCase111,112
+data IntersectCase r ord n = IC IC111,112
+ics_binary ics_binary113,114
+ics_binary ics_binary114,115
 
 ./test/Spec.hs,0
 
