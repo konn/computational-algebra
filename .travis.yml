@@ -16,6 +16,7 @@ _apts: &apts
     - libgmp3-dev
     - libgsl0-dev
     - liblapack-dev
+    - singular
 
 matrix:
   include:
