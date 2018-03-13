@@ -80,6 +80,7 @@ extra-deps:
 - parser-combinators-0.4.0
 - primes-0.2.1.0
 - primitive-0.6.3.0
+- process-extras-0.7.4
 - profunctors-5.2.2
 - quickcheck-instances-0.3.18
 - quickcheck-io-0.2.0
