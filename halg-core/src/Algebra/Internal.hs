@@ -7,12 +7,17 @@
 module Algebra.Internal
        (  (:~:)(..), withRefl,
           module Data.Proxy,
-          module Algebra.Internal) where
-import           Algebra.Instances            ()
+          module Algebra.Internal,
+          module Data.Type.Ordinal.Builtin) where
+import Algebra.Instances ()
 
-import AlgebraicPrelude
+import           AlgebraicPrelude
 import           Control.Lens                 ((%~), _Unwrapping)
+import qualified Data.Foldable                as F
+import           Data.Kind                    (Type)
+import           Data.ListLike                (ListLike)
 import           Data.Proxy
+import qualified Data.Sequence                as Seq
 import           Data.Singletons.Prelude      as Algebra.Internal (PNum (..),
                                                                    POrd (..),
                                                                    SNum (..),
@@ -30,7 +35,8 @@ import           Data.Sized.Builtin           as Algebra.Internal (pattern (:<),
                                                                    pattern (:>),
                                                                    pattern NilL,
                                                                    pattern NilR,
-                                                                   sIndex,generate,
+                                                                   generate,
+                                                                   sIndex,
                                                                    singleton,
                                                                    unsafeFromList,
                                                                    unsafeFromList',
@@ -38,12 +44,15 @@ import           Data.Sized.Builtin           as Algebra.Internal (pattern (:<),
 import qualified Data.Sized.Builtin           as S
 import qualified Data.Sized.Flipped           as Flipped (Flipped (..))
 import           Data.Type.Equality           ((:~:) (..))
-import           Data.Type.Natural.Class      as Algebra.Internal hiding (fromNatural)
-import qualified Data.Type.Ordinal            as O
+import           Data.Type.Natural.Class      as Algebra.Internal hiding
+                                                                   (fromNatural)
+import           Data.Type.Ordinal.Builtin
 import qualified Data.Vector                  as DV
-import          Data.ListLike (ListLike)
-import           GHC.TypeLits                 as Algebra.Internal
-  hiding (type (<=), type (-), type (*), type (+))
+import           GHC.TypeLits                 as Algebra.Internal hiding
+                                                                   (type (*),
+                                                                   type (+),
+                                                                   type (-),
+                                                                   type (<=))
 import           Proof.Equational             (coerce, withRefl)
 import           Proof.Equational             as Algebra.Internal (because,
                                                                    coerce,
@@ -51,9 +60,6 @@ import           Proof.Equational             as Algebra.Internal (because,
                                                                    (=~=))
 import           Proof.Propositional          as Algebra.Internal (IsTrue (..),
                                                                    withWitness)
-import qualified Data.Foldable as F
-import qualified Data.Sequence as Seq
-import Data.Kind (Type)
 
 toProxy :: a -> Proxy a
 toProxy _ = Proxy
@@ -101,19 +107,6 @@ type family Flipped f a :: Nat -> Type where
 
 pattern Flipped :: S.Sized f n a -> Flipped f a n
 pattern Flipped xs = Flipped.Flipped xs
-
-
-pattern OLt :: forall (t :: Nat). ()
-            => forall (n1 :: Nat).
-               ((n1 < t) ~ 'True)
-            => Sing n1 -> O.Ordinal t
-pattern OLt n = O.OLt n
-
-pattern OS :: forall t. KnownNat t => O.Ordinal (t :: Nat) -> O.Ordinal (Succ t)
-pattern OS n = O.OS n
-
-pattern OZ :: forall n. (0 < n) ~ 'True => O.Ordinal n
-pattern OZ = O.OZ
 
 sNatToInt :: SNat n -> Int
 sNatToInt = fromIntegral . fromSing

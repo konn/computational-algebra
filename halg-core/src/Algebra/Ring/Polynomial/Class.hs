@@ -41,7 +41,6 @@ import qualified Data.Ratio               as R
 import qualified Data.Set                 as S
 import           Data.Singletons.Prelude  (SingKind (..))
 import qualified Data.Sized.Builtin       as V
-import           Data.Type.Ordinal        (Ordinal, enumOrdinal, inclusion)
 import           Data.Word
 import           GHC.TypeLits             (KnownNat, Nat)
 import qualified Numeric.Algebra.Complex  as NA
