@@ -11,7 +11,7 @@ main main5,6
 main main0,1
 main main1,2
 
-./src/Algebra/Bridge/Singular/Syntax.hs,3705
+./src/Algebra/Bridge/Singular/Syntax.hs,3778
 module Algebra.Bridge.Singular.SyntaxAlgebra.Bridge.Singular.Syntax7,8
 type SingularLibrary SingularLibrary41,42
 class IsStrongMonomialOrder ord => SingularOrder SingularOrder43,44
@@ -24,104 +24,106 @@ class (PrettyCoeff r, CoeffRing r) => SingularCoeff SingularCoeff52,53
   prettySingularCoeff prettySingularCoeff55,56
   prettySingularCoeff prettySingularCoeff56,57
   coeffType coeffType58,59
-type IsSingularPolynomial IsSingularPolynomial76,77
-type IsSingularPolynomial poly poly76,77
-data SingularExpr SingularExpr78,79
-  SingVar SingVar79,80
-  SingFunction SingFunction80,81
-  SingInfix SingInfix81,82
-  SingList SingList82,83
-  SingIdeal SingIdeal83,84
-  SingPolynomial SingPolynomial84,85
-  SingCoeff SingCoeff85,86
-  SingVerbatim SingVerbatim86,87
-  SingRing SingRing87,88
-data RingCoeffSpec RingCoeffSpec89,90
-data RingCoeffSpec = RealCoeffRealCoeff89,90
-                   | ComplexCoeffComplexCoeff90,91
-                   | IntegerCoeffIntegerCoeff91,92
-                   | Char Char92,93
-data RingSpec RingSpec95,96
-  RingSpec RingSpec96,97
-  RingSpec RingSpec96,97
-coeffProxy coeffProxy102,103
-coeffProxy coeffProxy103,104
-morderProxy morderProxy105,106
-morderProxy morderProxy106,107
-toRingSpec toRingSpec108,109
-toRingSpec toRingSpec109,110
-class PrettySingular PrettySingular112,113
-class PrettySingular PrettySingular112,113
-  prettySingular prettySingular113,114
-prettySingularPolynomial prettySingularPolynomial115,116
-prettySingularPolynomial prettySingularPolynomial117,118
-funE funE171,172
-funE funE172,173
-polyE polyE174,175
-polyE polyE175,176
-coeffE coeffE177,178
-coeffE coeffE178,179
-listE listE180,181
-listE listE181,182
-idealE' idealE'183,184
-idealE' idealE'184,185
-idealE idealE186,187
-idealE idealE187,188
-binE binE189,190
-binE binE190,191
-verbE verbE192,193
-verbE verbE193,194
-varE varE195,196
-varE varE196,197
-data SingularType SingularType198,199
-data SingularType = IdealTIdealT198,199
-                  | IntTIntT199,200
-                  | RingTRingT200,201
-                  | PolyTPolyT201,202
-                  | OtherT OtherT202,203
-data SingularCommand SingularCommand205,206
-  SingExpr SingExpr206,207
-  SingDeclOnly SingDeclOnly208,209
-  SingDeclAssign SingDeclAssign209,210
-  SingAssign SingAssign211,212
-  SingLibrary SingLibrary213,214
-  SingVerbD SingVerbD214,215
-  Directive Directive215,216
-  SingExpr SingExpr206,207
-  SingDeclOnly SingDeclOnly208,209
-  SingDeclAssign SingDeclAssign209,210
-  SingAssign SingAssign211,212
-  SingLibrary SingLibrary213,214
-  SingVerbD SingVerbD214,215
-  Directive Directive215,216
-newtype SingularProgramM SingularProgramM217,218
-newtype SingularProgramM a = SingularProgramM SingularProgramM217,218
-type SingularProgram SingularProgram220,221
-exprC exprC254,255
-exprC exprC255,256
-declOnlyC declOnlyC257,258
-declOnlyC declOnlyC258,259
-declC declC260,261
-declC declC262,263
-letC letC266,267
-letC letC268,269
-idealC' idealC'270,271
-idealC' idealC'272,273
-idealC idealC274,275
-idealC idealC275,276
-ringC ringC277,278
-ringC ringC279,280
-polyC polyC281,282
-polyC polyC282,283
-libC libC284,285
-libC libC285,286
-directC directC287,288
-directC directC288,289
-optionC optionC290,291
-optionC optionC291,292
-printC printC293,294
-printC printC294,295
-type SingularOption SingularOption296,297
+prettyRat prettyRat68,69
+prettyRat prettyRat69,70
+type IsSingularPolynomial IsSingularPolynomial89,90
+type IsSingularPolynomial poly poly89,90
+data SingularExpr SingularExpr91,92
+  SingVar SingVar92,93
+  SingFunction SingFunction93,94
+  SingInfix SingInfix94,95
+  SingList SingList95,96
+  SingIdeal SingIdeal96,97
+  SingPolynomial SingPolynomial97,98
+  SingCoeff SingCoeff98,99
+  SingVerbatim SingVerbatim99,100
+  SingRing SingRing100,101
+data RingCoeffSpec RingCoeffSpec102,103
+data RingCoeffSpec = RealCoeffRealCoeff102,103
+                   | ComplexCoeffComplexCoeff103,104
+                   | IntegerCoeffIntegerCoeff104,105
+                   | Char Char105,106
+data RingSpec RingSpec108,109
+  RingSpec RingSpec109,110
+  RingSpec RingSpec109,110
+coeffProxy coeffProxy115,116
+coeffProxy coeffProxy116,117
+morderProxy morderProxy118,119
+morderProxy morderProxy119,120
+toRingSpec toRingSpec121,122
+toRingSpec toRingSpec122,123
+class PrettySingular PrettySingular125,126
+class PrettySingular PrettySingular125,126
+  prettySingular prettySingular126,127
+prettySingularPolynomial prettySingularPolynomial128,129
+prettySingularPolynomial prettySingularPolynomial130,131
+funE funE184,185
+funE funE185,186
+polyE polyE187,188
+polyE polyE188,189
+coeffE coeffE190,191
+coeffE coeffE191,192
+listE listE193,194
+listE listE194,195
+idealE' idealE'196,197
+idealE' idealE'197,198
+idealE idealE199,200
+idealE idealE200,201
+binE binE202,203
+binE binE203,204
+verbE verbE205,206
+verbE verbE206,207
+varE varE208,209
+varE varE209,210
+data SingularType SingularType211,212
+data SingularType = IdealTIdealT211,212
+                  | IntTIntT212,213
+                  | RingTRingT213,214
+                  | PolyTPolyT214,215
+                  | OtherT OtherT215,216
+data SingularCommand SingularCommand218,219
+  SingExpr SingExpr219,220
+  SingDeclOnly SingDeclOnly221,222
+  SingDeclAssign SingDeclAssign222,223
+  SingAssign SingAssign224,225
+  SingLibrary SingLibrary226,227
+  SingVerbD SingVerbD227,228
+  Directive Directive228,229
+  SingExpr SingExpr219,220
+  SingDeclOnly SingDeclOnly221,222
+  SingDeclAssign SingDeclAssign222,223
+  SingAssign SingAssign224,225
+  SingLibrary SingLibrary226,227
+  SingVerbD SingVerbD227,228
+  Directive Directive228,229
+newtype SingularProgramM SingularProgramM230,231
+newtype SingularProgramM a = SingularProgramM SingularProgramM230,231
+type SingularProgram SingularProgram233,234
+exprC exprC267,268
+exprC exprC268,269
+declOnlyC declOnlyC270,271
+declOnlyC declOnlyC271,272
+declC declC273,274
+declC declC275,276
+letC letC279,280
+letC letC281,282
+idealC' idealC'283,284
+idealC' idealC'285,286
+idealC idealC287,288
+idealC idealC288,289
+ringC ringC290,291
+ringC ringC292,293
+polyC polyC294,295
+polyC polyC295,296
+libC libC297,298
+libC libC298,299
+directC directC300,301
+directC directC301,302
+optionC optionC303,304
+optionC optionC304,305
+printC printC306,307
+printC printC307,308
+type SingularOption SingularOption309,310
 
 ./src/Algebra/Bridge/Singular.hs,879
 module Algebra.Bridge.SingularAlgebra.Bridge.Singular6,7
