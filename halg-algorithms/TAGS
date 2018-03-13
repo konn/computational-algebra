@@ -69,16 +69,18 @@ data TestSet = TestSet { inputMat inputMat134,135
 linSet linSet139,140
 linSet linSet140,141
 
-./test/HomogeneousSpec.hs,324
-module HomogeneousSpec HomogeneousSpec3,4
-asGenListOf asGenListOf22,23
-asGenListOf asGenListOf23,24
-spec spec25,26
-spec spec26,27
-prop_passesSTest prop_passesSTest35,36
-prop_passesSTest prop_passesSTest36,37
-prop_groebnerDivsOrig prop_groebnerDivsOrig41,42
-prop_groebnerDivsOrig prop_groebnerDivsOrig42,43
+./test/HomogeneousSpec.hs,426
+module HomogeneousSpec HomogeneousSpec4,5
+asGenListOf asGenListOf26,27
+asGenListOf asGenListOf27,28
+spec spec29,30
+spec spec30,31
+prop_passesSTest prop_passesSTest39,40
+prop_passesSTest prop_passesSTest40,41
+prop_groebnerDivsOrig prop_groebnerDivsOrig45,46
+prop_groebnerDivsOrig prop_groebnerDivsOrig46,47
+prop_groebnerIncluded prop_groebnerIncluded53,54
+prop_groebnerIncluded prop_groebnerIncluded54,55
 
 ./test/Spec.hs,0
 

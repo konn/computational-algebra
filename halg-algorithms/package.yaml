@@ -76,10 +76,12 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
+    - HUnit
     - ghc-typelits-knownnat
     - halg-core-test
     - halg-polynomials
     - halg-algorithms
+    - halg-bridge-singular
     - QuickCheck
     - convertible
     - containers

@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3c6c0713314eb165e3ac78e0fa793bba83a621ed36a9a2ea5c4248d01886b05c
+-- hash: 1a1497a12e204dbac12605dc19e252d64205d2c000314b6e58c6816e7b274bad
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -66,7 +66,8 @@ test-suite spec
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      MonadRandom
+      HUnit
+    , MonadRandom
     , QuickCheck
     , algebra
     , base >=4.7 && <5
@@ -75,6 +76,7 @@ test-suite spec
     , equational-reasoning
     , ghc-typelits-knownnat
     , halg-algorithms
+    , halg-bridge-singular
     , halg-core
     , halg-core-test
     , halg-polynomials
