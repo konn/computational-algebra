@@ -120,8 +120,8 @@ mapIdeal mapIdeal53,54
 someSizedIdeal someSizedIdeal56,57
 someSizedIdeal someSizedIdeal57,58
 
-./src/Algebra/Ring/Polynomial/Class.hs,4854
-module Algebra.Ring.Polynomial.ClassAlgebra.Ring.Polynomial.Class7,8
+./src/Algebra/Ring/Polynomial/Class.hs,5054
+module Algebra.Ring.Polynomial.ClassAlgebra.Ring.Polynomial.Class6,7
 class    (DecidableZero r, Ring r, Commutative r, Eq r) => CoeffRing CoeffRing59,60
    => IsPolynomial IsPolynomial68,69
             => (Coefficient Coefficient96,97
@@ -217,48 +217,52 @@ sPolynomial sPolynomial325,326
 sPolynomial sPolynomial328,329
 pDivModPoly pDivModPoly333,334
 f0 `pDivModPoly`pDivModPoly336,337
-content content350,351
-content content351,352
-pp pp356,357
-pp pp357,358
-injectVars injectVars360,361
-injectVars injectVars360,361
-vars vars368,369
-vars vars369,370
-class (P.Show r) => PrettyCoeff PrettyCoeff372,373
-class (P.Show r) => PrettyCoeff PrettyCoeff372,373
-  showsCoeff showsCoeff373,374
-  showsCoeff showsCoeff374,375
-defaultShowsOrdCoeff defaultShowsOrdCoeff376,377
+content content352,353
+content content353,354
+pp pp358,359
+pp pp359,360
+injectVars injectVars362,363
+injectVars injectVars362,363
+vars vars370,371
+vars vars371,372
+class (P.Show r) => PrettyCoeff PrettyCoeff374,375
+class (P.Show r) => PrettyCoeff PrettyCoeff374,375
+  showsCoeff showsCoeff375,376
+  showsCoeff showsCoeff376,377
 defaultShowsOrdCoeff defaultShowsOrdCoeff378,379
-instance instance385,386
-data ShowSCoeff ShowSCoeff450,451
-data ShowSCoeff = Negative Negative450,451
-                | VanishedVanished451,452
-                | OneCoeffOneCoeff452,453
-                | Positive Positive453,454
-showsCoeffAsTerm showsCoeffAsTerm462,463
-showsCoeffAsTerm showsCoeffAsTerm463,464
-showsCoeffWithOp showsCoeffWithOp475,476
-showsCoeffWithOp showsCoeffWithOp476,477
-showPolynomialWith showPolynomialWith481,482
-showPolynomialWith showPolynomialWith486,487
-showsPolynomialWith showsPolynomialWith488,489
-showsPolynomialWith showsPolynomialWith493,494
-divModPolynomial divModPolynomial523,524
-divModPolynomial divModPolynomial526,527
-modPolynomial modPolynomial541,542
-modPolynomial modPolynomial543,544
-divPolynomial divPolynomial546,547
-divPolynomial divPolynomial548,549
-isUnitDefault isUnitDefault554,555
-isUnitDefault isUnitDefault556,557
-recipUnitDefault recipUnitDefault558,559
-recipUnitDefault recipUnitDefault560,561
-isAssociateDefault isAssociateDefault564,565
-isAssociateDefault isAssociateDefault566,567
-splitUnitDefault splitUnitDefault571,572
-splitUnitDefault splitUnitDefault573,574
+defaultShowsOrdCoeff defaultShowsOrdCoeff380,381
+instance instance387,388
+data ShowSCoeff ShowSCoeff452,453
+data ShowSCoeff = Negative Negative452,453
+                | VanishedVanished453,454
+                | OneCoeffOneCoeff454,455
+                | Positive Positive455,456
+showsCoeffAsTerm showsCoeffAsTerm464,465
+showsCoeffAsTerm showsCoeffAsTerm465,466
+showsCoeffWithOp showsCoeffWithOp477,478
+showsCoeffWithOp showsCoeffWithOp478,479
+showPolynomialWith showPolynomialWith483,484
+showPolynomialWith showPolynomialWith488,489
+showPolynomialWith' showPolynomialWith'490,491
+showPolynomialWith' showPolynomialWith'497,498
+showsPolynomialWith showsPolynomialWith499,500
+showsPolynomialWith showsPolynomialWith504,505
+showsPolynomialWith' showsPolynomialWith'506,507
+showsPolynomialWith' showsPolynomialWith'518,519
+divModPolynomial divModPolynomial549,550
+divModPolynomial divModPolynomial552,553
+modPolynomial modPolynomial567,568
+modPolynomial modPolynomial569,570
+divPolynomial divPolynomial572,573
+divPolynomial divPolynomial574,575
+isUnitDefault isUnitDefault580,581
+isUnitDefault isUnitDefault582,583
+recipUnitDefault recipUnitDefault584,585
+recipUnitDefault recipUnitDefault586,587
+isAssociateDefault isAssociateDefault590,591
+isAssociateDefault isAssociateDefault592,593
+splitUnitDefault splitUnitDefault597,598
+splitUnitDefault splitUnitDefault599,600
 
 ./src/Algebra/Ring/Polynomial/Monomial.hs,3897
 module Algebra.Ring.Polynomial.MonomialAlgebra.Ring.Polynomial.Monomial8,9

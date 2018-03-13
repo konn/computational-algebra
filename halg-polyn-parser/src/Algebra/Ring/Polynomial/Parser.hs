@@ -6,7 +6,7 @@ module Algebra.Ring.Polynomial.Parser
        ( unlabeldVarP, labeledVarP, polynomialP
        , rationalP, integerP
        , parsePolynomialWith
-       , VariableParser
+       , Parser , VariableParser
        )
        where
 import           Algebra.Ring.Polynomial.Class
