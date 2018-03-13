@@ -22,8 +22,7 @@ import qualified Data.Map                           as M
 import qualified Data.Matrix                        as M hiding (fromList)
 import           Data.Ord
 import           Data.Reflection
-import           Data.Sized.Builtin                 hiding (head, length, map,
-                                                     sortBy, (++))
+import           Data.Sized.Builtin                 (fromListWithDefault)
 import qualified Data.Vector                        as V
 import qualified Numeric.Algebra                    as NA
 import           Numeric.Field.Fraction

@@ -49,6 +49,7 @@ library:
   - ghc-typelits-knownnat
   - sized
   - algebraic-prelude
+  - containers
   - convertible
   - monad-loops
   - equational-reasoning

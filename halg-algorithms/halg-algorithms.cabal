@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 969eb1d0b419135a22166e5752382fe7ca4f8703bb11a10e24316173b704bcd2
+-- hash: d87024d6408b36777bc33dbc085d37b5b41ed769fe532a649fd6ca397c46234f
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -37,6 +37,7 @@ library
     , algebra
     , algebraic-prelude
     , base >=4.7 && <5
+    , containers
     , convertible
     , equational-reasoning
     , ghc-typelits-knownnat
