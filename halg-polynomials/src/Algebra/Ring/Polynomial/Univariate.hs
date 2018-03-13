@@ -313,7 +313,7 @@ instance CoeffRing r => IsPolynomial (Unipol r) where
   liftMap = liftMapUnipol
   {-# INLINABLE liftMap #-}
   substWith = substWithUnipol
-  {-# INLINE substWithUnipol #-}
+  {-# INLINE substWith #-}
   fromMonomial = Unipol . flip IM.singleton one . SV.head
   {-# INLINE fromMonomial #-}
   toPolynomial' (c, m) =
