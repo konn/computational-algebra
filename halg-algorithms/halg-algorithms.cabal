@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1a1497a12e204dbac12605dc19e252d64205d2c000314b6e58c6816e7b274bad
+-- hash: ef34744e5d0ba75a912e2380a4db186de77ed9a704990978a8cf729066580252
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -39,6 +39,7 @@ library
     , base >=4.7 && <5
     , convertible
     , equational-reasoning
+    , ghc-typelits-knownnat
     , halg-core
     , halg-matrices
     , halg-polynomials
@@ -54,6 +55,7 @@ library
   exposed-modules:
       Algebra.Algorithms.Groebner.Homogeneous
       Algebra.Algorithms.ZeroDim
+      Algebra.Ring.Polynomial.Homogenise
   other-modules:
       Algebra.Algorithms.FGLM
   default-language: Haskell2010
@@ -94,4 +96,24 @@ test-suite spec
       ZeroDimSpec
       HomogeneousSpec
       Utils
+  default-language: Haskell2010
+
+benchmark homog-bench
+  type: exitcode-stdio-1.0
+  main-is: homog-bench.hs
+  other-modules:
+      Paths_halg_algorithms
+  hs-source-dirs:
+      bench
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  build-depends:
+      MonadRandom
+    , algebra
+    , base >=4.7 && <5
+    , gauge
+    , halg-algorithms
+    , halg-core
+    , halg-polynomials
+    , parallel
+    , sized
   default-language: Haskell2010

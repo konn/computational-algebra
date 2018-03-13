@@ -46,6 +46,8 @@ library:
   - Algebra.Algorithms.FGLM
   ghc-options:  -Wall
   dependencies:
+  - ghc-typelits-knownnat
+  - sized
   - algebraic-prelude
   - convertible
   - monad-loops
@@ -95,3 +97,12 @@ tests:
     - type-natural
     - vector
     - hspec-discover
+
+benchmarks:
+  homog-bench:
+    source-dirs:  bench
+    main:         homog-bench.hs
+    dependencies:
+    - halg-algorithms
+    - gauge
+    - parallel
