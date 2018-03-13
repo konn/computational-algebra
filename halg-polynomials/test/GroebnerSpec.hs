@@ -29,19 +29,13 @@ spec = do
       checkForArity [1..4] prop_degdecay
     prop "divides correctly" $
       checkForArity [1..4] prop_divCorrect
-  describe "calcGroebnerBasis" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 50) $ do
+  describe "calcGroebnerBasis" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
     prop "passes S-test" $
       checkForArity [2..3] prop_passesSTest
     prop "divides all original generators" $ do
       checkForArity [2..3] prop_groebnerDivsOrig
     it "generates the same ideal as original" $ do
       pendingWith "need example"
-    it "contains the original ideal" $ checkForArity [1..3] $ \ari ->
-      forAll (idealOfArity ari) $ \i ->
-      forAll (vectorOf (length $ generators i) $ polynomialOfArity ari) $ \fs ->
-      let f = sum $ zipWith (*) fs (generators i)
-          gs = calcGroebnerBasis i
-      in f `modPolynomial` gs == 0
     it "produces minimal basis" $ do
       checkForArity [2..3] prop_isMinimal
     it "produces reduced basis" $ do
