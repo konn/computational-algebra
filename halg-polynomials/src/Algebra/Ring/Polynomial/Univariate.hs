@@ -1,7 +1,8 @@
-{-# LANGUAGE BangPatterns, CPP, ConstraintKinds, DataKinds, FlexibleContexts #-}
-{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, MultiParamTypeClasses   #-}
-{-# LANGUAGE NoImplicitPrelude, ScopedTypeVariables, StandaloneDeriving #-}
-{-# LANGUAGE TypeApplications, TypeFamilies, UndecidableSuperClasses    #-}
+{-# LANGUAGE BangPatterns, CPP, ConstraintKinds, DataKinds                 #-}
+{-# LANGUAGE FlexibleContexts, GADTs, GeneralizedNewtypeDeriving           #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving, TypeApplications, TypeFamilies            #-}
+{-# LANGUAGE UndecidableSuperClasses                                       #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 -- | Polynomial type optimized to univariate polynomial.
 module Algebra.Ring.Polynomial.Univariate
@@ -14,20 +15,20 @@ import Algebra.Prelude.Core
 import Algebra.Ring.Polynomial.Class
 import Algebra.Ring.Polynomial.Monomial
 
-import           Control.Arrow                         (first)
-import           Control.DeepSeq                       (NFData)
-import           Data.Function                         (on)
-import           Data.Hashable                         (Hashable (hashWithSalt))
-import qualified Data.HashSet                          as HS
-import           Data.IntMap                           (IntMap)
-import qualified Data.IntMap                           as IM
-import qualified Data.Map.Strict                       as M
-import           Data.Maybe                            (mapMaybe)
-import           Data.Ord                              (comparing)
-import qualified Data.Sized.Builtin                    as SV
-import qualified Numeric.Algebra                       as NA
-import           Numeric.Decidable.Zero                (DecidableZero (..))
-import qualified Prelude as P
+import           Control.Arrow          (first)
+import           Control.DeepSeq        (NFData)
+import           Data.Function          (on)
+import           Data.Hashable          (Hashable (hashWithSalt))
+import qualified Data.HashSet           as HS
+import           Data.IntMap            (IntMap)
+import qualified Data.IntMap            as IM
+import qualified Data.Map.Strict        as M
+import           Data.Maybe             (mapMaybe)
+import           Data.Ord               (comparing)
+import qualified Data.Sized.Builtin     as SV
+import qualified Numeric.Algebra        as NA
+import           Numeric.Decidable.Zero (DecidableZero (..))
+import qualified Prelude                as P
 
 -- | Univariate polynomial.
 --   It uses @'IM.IntMap'@ as its internal representation;
@@ -144,19 +145,9 @@ instance CoeffRing r => P.Num (Unipol r) where
     then zero
     else one
 
-{-# RULES
-"var x^n" forall (x :: SV.Ordinal 1) n.
-  pow (varUnipol x) n = Unipol (IM.singleton (fromEnum n) one)
-  #-}
-
-{-# RULES
-"pow1p x n" forall (x :: SV.Ordinal 1) n.
-  NA.pow1p (varUnipol x) n = Unipol (IM.singleton (fromEnum n + 1) one)
-  #-}
-
 varUnipol :: Unital r => SV.Ordinal 1 -> Unipol r
 varUnipol _ = Unipol $ IM.singleton 1 one
-{-# NOINLINE CONLIKE [1] varUnipol #-}
+{-# NOINLINE [1] varUnipol #-}
 
 instance (Eq r, DecidableZero r) => Eq (Unipol r) where
   (==) = (==) `on` IM.filter (not . isZero) . runUnipol
@@ -310,7 +301,7 @@ instance CoeffRing r => IsPolynomial (Unipol r) where
   {-# INLINE injectCoeff #-}
   coeff' l = IM.findWithDefault zero (SV.head l) . runUnipol
   {-# INLINE coeff' #-}
-  monomials = HS.fromList . map (singleton) . IM.keys . runUnipol
+  monomials = HS.fromList . map singleton . IM.keys . runUnipol
   {-# INLINE monomials #-}
   terms' = M.fromList . map (first singleton) . IM.toList . runUnipol
   {-# INLINE terms' #-}
@@ -321,6 +312,8 @@ instance CoeffRing r => IsPolynomial (Unipol r) where
   {-# INLINE constantTerm #-}
   liftMap = liftMapUnipol
   {-# INLINABLE liftMap #-}
+  substWith = substWithUnipol
+  {-# INLINE substWithUnipol #-}
   fromMonomial = Unipol . flip IM.singleton one . SV.head
   {-# INLINE fromMonomial #-}
   toPolynomial' (c, m) =
@@ -363,10 +356,25 @@ mapCoeffUnipol f (Unipol a) =
 
 liftMapUnipol :: (Module (Scalar k) r, Monoidal k, Unital r)
               => (Ordinal 1 -> r) -> Unipol k -> r
-liftMapUnipol g f@(Unipol dic) = 
+liftMapUnipol g f@(Unipol dic) =
     let u = g 0
         n = maybe 0 (fst . fst) $ IM.maxViewWithKey $ runUnipol f
     in foldr (\a b -> a .*. one + b * u)
              (IM.findWithDefault zero n dic .*. one)
              [IM.findWithDefault zero k dic | k <- [0..n-1]]
 {-# INLINE liftMapUnipol #-}
+
+substWithUnipol :: (Ring m, CoeffRing k)
+                => (k -> m -> m)
+                -> Sized 1 m
+                -> Unipol k -> m
+substWithUnipol (|*) g f@(Unipol dic) =
+    let u = g SV.%!! 0
+        n = maybe 0 (fst . fst) $ IM.maxViewWithKey $ runUnipol f
+    in foldr (\a b -> (a |* one) + (b * u))
+             (IM.findWithDefault zero n dic |* one)
+             [IM.findWithDefault zero k dic | k <- [0..n-1]]
+{-# INLINE substWithUnipol #-}
+--    a_0 + a_1 x + ... + a_{n-1} x^{n-1} + a_n x^n
+--  = a_0 + x (a_1 + ... + a_{n-1} x^{n-2} + a_n x^{n - 1})
+--  = a_0 + x (a_1 +
