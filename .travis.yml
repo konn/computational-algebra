@@ -1,5 +1,6 @@
 # This file has been generated -- see https://github.com/hvr/multi-ghc-travis
 language: c
+dist: trusty
 sudo: false
 
 cache:
@@ -10,7 +11,7 @@ cache:
 
 _apts: &apts
   sources:
-    - sourceline: 'deb ftp://jim.mathematik.uni-kl.de/repo/debian jessie main'
+    - sourceline: 'deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu14 trusty main'
       key_url:    'ftp://jim.mathematik.uni-kl.de/repo/extra/gpg'
   packages:
     - libgmp3-dev
