@@ -1,21 +1,34 @@
+{-# LANGUAGE DataKinds, DeriveFoldable, DeriveFunctor, MultiWayIf #-}
+{-# LANGUAGE OverloadedLabels, ScopedTypeVariables                #-}
 module Algebra.Algorithms.Groebner.Homogeneous
        ( calcGroebnerBasisAfterHomogenising
        , calcHomogeneousGroebnerBasis
        , unsafeCalcHomogeneousGroebnerBasis
+       , hilbertPoincareSeries
        ) where
-import           Algebra.Prelude.Core
+import           Algebra.Field.RationalFunction
+import           Algebra.Prelude.Core                hiding (empty, filter,
+                                                      insert)
 import           Algebra.Ring.Polynomial.Homogenised
+import           Control.Lens                        (ix, (%~), (&))
 import           Control.Monad.Loops                 (whileJust_)
 import           Control.Monad.ST.Strict
+import qualified Data.Coerce                         as C
 import qualified Data.Foldable                       as F
 import           Data.Function                       (on)
-import           Data.Heap                           (Entry (..))
+import           Data.Functor.Identity
+import           Data.Heap                           (Entry (..), Heap)
 import qualified Data.Heap                           as H
+import qualified Data.List                           as L
+import           Data.Maybe                          (fromJust)
+import qualified Data.Sized.Builtin                  as SV
 import           Data.STRef                          (STRef, modifySTRef',
                                                       newSTRef, readSTRef,
                                                       writeSTRef)
 import qualified Data.Vector                         as V
 import qualified Data.Vector.Mutable                 as MV
+import           GHC.Exts                            (Constraint)
+import qualified Prelude                             as P
 
 isHomogeneous :: IsOrderedPolynomial poly
               => poly -> Bool
@@ -97,3 +110,90 @@ deg gs i j = do
        <$> MV.read vec i
        <*> MV.read vec j
 {-# INLINE deg #-}
+
+data ReversedEntry p a = ReversedEntry { rePriority :: p
+                                       , rePayload  :: a}
+                     deriving (Read, Show, Functor, Foldable)
+
+instance Eq p => Eq (ReversedEntry p a) where
+  (==) = (==) `on` rePriority
+
+instance (Ord p) => Ord (ReversedEntry p a) where
+  compare = flip (comparing rePriority)
+
+viewMax :: Ord p => Heap (ReversedEntry p a) -> Maybe (ReversedEntry p a, Heap (ReversedEntry p a))
+viewMax = H.viewMin
+
+-- | @'hilbertPoincareSeries' k i@ computes a Hilbert-Poincare formal series
+--   for given monomial ideal i over a field k.
+hilbertPoincareSeries :: forall n. (KnownNat n)
+                      => [Monomial n] -> RationalFunction Rational
+hilbertPoincareSeries ms0 =
+  go $ H.fromList [ ReversedEntry (F.sum m) m | m <- minimalGenerators ms0 ]
+  where
+    go ms =
+      let n  = fromIntegral $ natVal (Proxy :: Proxy n)
+      in case viewMax ms of
+        Nothing -> recip ((one - #x) ^ n)
+        Just (ReversedEntry 0 _, _) -> 0
+        Just (ReversedEntry 1 _, _) -> recip ((one - #x) ^ (n P.- fromIntegral (H.size ms)))
+        Just (ReversedEntry _ m, _) ->
+          let Just i = SV.sFindIndex (> 0) m
+              xi = varMonom sing i
+              upd (ReversedEntry d xs) =
+                   ReversedEntry (d - 1) (xs & ix i %~ pred)
+              added = minimalGenerators' $ insert (ReversedEntry 1 xi) ms
+              quo = minimalGenerators' $ H.mapMonotonic upd $
+                    filter ((>0) . sIndex i . rePayload) ms
+          in go added + #x * go quo
+
+class (Foldable f) => Container f where
+  type Element f a :: Constraint
+  filter    :: (a -> Bool) -> f a -> f a
+  insert    :: Element f a => a -> f a -> f a
+  empty     :: f a
+
+instance Container Heap where
+  {-# SPECIALISE instance Container Heap #-}
+  type Element Heap a = (Ord a)
+  filter = H.filter
+  insert = H.insert
+  empty = H.empty
+
+instance Container [] where
+  {-# SPECIALISE instance Container [] #-}
+  type Element [] a = ()
+  filter = L.filter
+  insert = (:)
+  empty = []
+
+head' :: Foldable t => t a -> a
+head' = fromJust . F.find (const True)
+
+divs' :: Foldable t => t (Monomial n) -> t (Monomial n) -> Bool
+divs' = divs `on` orderMonomial (Just Lex) . head'
+
+minimalGenerators' :: forall t f n. (Container t, KnownNat n, Element t (f (Monomial n)), Foldable f)
+                  => t (f (Monomial n)) -> t (f (Monomial n))
+minimalGenerators' bs
+  | any (all (== 0) . head') bs = empty
+  | otherwise = F.foldr check empty bs
+  where
+    check a acc =
+      if any (`divs'` a) acc
+      then acc
+      else insert a $ filter (not . (a `divs'`)) acc
+{-# SPECIALISE minimalGenerators' :: KnownNat n => [Identity (Monomial n)] -> [Identity (Monomial n)] #-}
+{-# SPECIALISE minimalGenerators' :: (KnownNat n, Ord p) => Heap (ReversedEntry p (Monomial n)) -> Heap (ReversedEntry p (Monomial n)) #-}
+
+-- | Computes a minimal generator of monomial ideal
+minimalGenerators :: KnownNat n => [Monomial n] -> [Monomial n]
+minimalGenerators =
+  C.coerce . minimalGenerators' .
+  (C.coerce :: [Monomial n] -> [Identity (Monomial n)])
+{-# INLINE minimalGenerators #-}
+
+-- homogeneousHilbertPoincareSeries :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+--                                  => Ideal poly -> RationalFunction Rational
+-- homogeneousHilbertPoincareSeries is = do
+

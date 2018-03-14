@@ -163,28 +163,71 @@ nextMonomial nextMonomial388,389
 beta beta399,400
 beta beta400,401
 
-./src/Algebra/Algorithms/Groebner/Homogeneous.hs,867
-module Algebra.Algorithms.Groebner.HomogeneousAlgebra.Algorithms.Groebner.Homogeneous0,1
-isHomogeneous isHomogeneous19,20
-isHomogeneous isHomogeneous21,22
-calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising27,28
-calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising29,30
-calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis38,39
-calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis40,41
-unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis49,50
-unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis51,52
-type Signatures Signatures67,68
-type Signatures weight weight67,68
-buildTable buildTable69,70
-buildTable buildTable71,72
-type RefVec RefVec78,79
-type RefVec s s78,79
-at at80,81
-at at81,82
-snoc snoc83,84
-snoc snoc84,85
-deg deg92,93
-deg deg93,94
+./src/Algebra/Algorithms/Groebner/Homogeneous.hs,1767
+module Algebra.Algorithms.Groebner.HomogeneousAlgebra.Algorithms.Groebner.Homogeneous2,3
+isHomogeneous isHomogeneous32,33
+isHomogeneous isHomogeneous34,35
+calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising40,41
+calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising42,43
+calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis51,52
+calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis53,54
+unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis62,63
+unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis64,65
+type Signatures Signatures80,81
+type Signatures weight weight80,81
+buildTable buildTable82,83
+buildTable buildTable84,85
+type RefVec RefVec91,92
+type RefVec s s91,92
+at at93,94
+at at94,95
+snoc snoc96,97
+snoc snoc97,98
+deg deg105,106
+deg deg106,107
+data ReversedEntry ReversedEntry113,114
+data ReversedEntry p a = ReversedEntry ReversedEntry113,114
+data ReversedEntry p a = ReversedEntry { rePriority rePriority113,114
+                                       , rePayload rePayload114,115
+instance instance117,118
+viewMax viewMax123,124
+viewMax viewMax124,125
+hilbertPoincareSeries hilbertPoincareSeries128,129
+hilbertPoincareSeries hilbertPoincareSeries130,131
+class (Foldable f) => Container Container149,150
+  insert    :: Element f a => a a152,153
+  type Element Element150,151
+  filter filter151,152
+  insert insert152,153
+  empty empty153,154
+head' head'169,170
+head' head'170,171
+divs' divs'172,173
+divs' divs'173,174
+minimalGenerators' minimalGenerators'175,176
+minimalGenerators' minimalGenerators'177,178
+minimalGenerators minimalGenerators189,190
+minimalGenerators minimalGenerators190,191
+
+./src/Algebra/Field/RationalFunction.hs,683
+module Algebra.Field.RationalFunctionAlgebra.Field.RationalFunction2,3
+newtype RationalFunction RationalFunction17,18
+newtype RationalFunction k = RF RF17,18
+instance instance28,29
+evalRationalFunctionOnField evalRationalFunctionOnField40,41
+evalRationalFunctionOnField evalRationalFunctionOnField41,42
+fromPolynomial fromPolynomial45,46
+fromPolynomial fromPolynomial47,48
+variable variable49,50
+variable variable50,51
+evalRationalFunction evalRationalFunction52,53
+evalRationalFunction evalRationalFunction53,54
+diffRF diffRF59,60
+diffRF diffRF60,61
+taylor taylor66,67
+taylor taylor67,68
+taylorCoeff taylorCoeff73,74
+taylorCoeff taylorCoeff74,75
 
 ./src/Algebra/Ring/Polynomial/Homogenised.hs,421
 module Algebra.Ring.Polynomial.HomogenisedAlgebra.Ring.Polynomial.Homogenised3,4
