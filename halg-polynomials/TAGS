@@ -253,65 +253,67 @@ liftMapUnipol liftMapUnipol358,359
 substWithUnipol substWithUnipol366,367
 substWithUnipol substWithUnipol370,371
 
-./src/Algebra/Ring/Polynomial/Internal.hs,2041
+./src/Algebra/Ring/Polynomial/Internal.hs,2143
 module Algebra.Ring.Polynomial.InternalAlgebra.Ring.Polynomial.Internal10,11
-instance instance49,50
-newtype OrderedPolynomial OrderedPolynomial55,56
-newtype OrderedPolynomial r order n = Polynomial Polynomial55,56
-newtype OrderedPolynomial r order n = Polynomial { _terms _terms55,56
-type Polynomial Polynomial57,58
-type Polynomial r r57,58
-castPolynomial castPolynomial135,136
-castPolynomial castPolynomial139,140
-scastPolynomial scastPolynomial142,143
-scastPolynomial scastPolynomial145,146
-mapCoeff mapCoeff148,149
-mapCoeff mapCoeff150,151
-normalize normalize153,154
-normalize normalize155,156
+instance instance48,49
+newtype OrderedPolynomial OrderedPolynomial54,55
+newtype OrderedPolynomial r order n = Polynomial Polynomial54,55
+newtype OrderedPolynomial r order n = Polynomial { _terms _terms54,55
+type Polynomial Polynomial56,57
+type Polynomial r r56,57
+castPolynomial castPolynomial134,135
+castPolynomial castPolynomial138,139
+scastPolynomial scastPolynomial141,142
+scastPolynomial scastPolynomial144,145
+mapCoeff mapCoeff147,148
+mapCoeff mapCoeff149,150
+normalize normalize152,153
+normalize normalize154,155
+decZero decZero169,170
 decZero decZero170,171
-decZero decZero171,172
-  f0 `divide`divide285,286
-  p `divides`divides310,311
-varX varX324,325
-varX varX326,327
-substUnivariate substUnivariate329,330
-substUnivariate substUnivariate331,332
+  f0 `divide`divide284,285
+  p `divides`divides309,310
+varX varX323,324
+varX varX325,326
+substUnivariate substUnivariate328,329
+substUnivariate substUnivariate330,331
+evalUnivariate evalUnivariate336,337
 evalUnivariate evalUnivariate337,338
-evalUnivariate evalUnivariate338,339
-eval eval345,346
-eval eval347,348
-substVar substVar355,356
-substVar substVar355,356
-allVars allVars363,364
-allVars allVars365,366
-changeOrder changeOrder367,368
-changeOrder changeOrder369,370
-changeOrderProxy changeOrderProxy371,372
-changeOrderProxy changeOrderProxy374,375
+eval eval344,345
+eval eval346,347
+substVar substVar354,355
+substVar substVar354,355
+allVars allVars362,363
+allVars allVars364,365
+changeOrder changeOrder366,367
+changeOrder changeOrder368,369
+changeOrderProxy changeOrderProxy370,371
+changeOrderProxy changeOrderProxy373,374
+getTerms getTerms375,376
 getTerms getTerms376,377
-getTerms getTerms377,378
-transformMonomial transformMonomial379,380
-transformMonomial transformMonomial381,382
-orderedBy orderedBy384,385
-p `orderedBy`orderedBy385,386
-shiftR shiftR387,388
-shiftR shiftR390,391
-homogenize homogenize394,395
-homogenize homogenize397,398
-unhomogenize unhomogenize403,404
-unhomogenize unhomogenize407,408
-reversal reversal414,415
-reversal reversal416,417
-padeApprox padeApprox418,419
-padeApprox padeApprox422,423
-minpolRecurrent minpolRecurrent427,428
-minpolRecurrent minpolRecurrent429,430
-newtype PadPolyL PadPolyL436,437
-newtype PadPolyL n ord poly = PadPolyL PadPolyL436,437
-newtype PadPolyL n ord poly = PadPolyL { runPadPolyL runPadPolyL436,437
-padLeftPoly padLeftPoly519,520
-padLeftPoly padLeftPoly521,522
+transformMonomial transformMonomial378,379
+transformMonomial transformMonomial380,381
+orderedBy orderedBy383,384
+p `orderedBy`orderedBy384,385
+shiftR shiftR386,387
+shiftR shiftR389,390
+homogenize homogenize393,394
+homogenize homogenize396,397
+unhomogenize unhomogenize402,403
+unhomogenize unhomogenize406,407
+reversal reversal413,414
+reversal reversal415,416
+padeApprox padeApprox417,418
+padeApprox padeApprox421,422
+minpolRecurrent minpolRecurrent426,427
+minpolRecurrent minpolRecurrent428,429
+newtype PadPolyL PadPolyL435,436
+newtype PadPolyL n ord poly = PadPolyL PadPolyL435,436
+newtype PadPolyL n ord poly = PadPolyL { runPadPolyL runPadPolyL435,436
+padLeftPoly padLeftPoly518,519
+padLeftPoly padLeftPoly520,521
+mapOrderedPolynomial mapOrderedPolynomial527,528
+mapOrderedPolynomial mapOrderedPolynomial531,532
 
 ./src/Algebra/Ring/Polynomial/Quotient.hs,2050
 module Algebra.Ring.Polynomial.QuotientAlgebra.Ring.Polynomial.Quotient6,7

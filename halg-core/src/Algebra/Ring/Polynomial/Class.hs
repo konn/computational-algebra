@@ -15,9 +15,11 @@ module Algebra.Ring.Polynomial.Class
          showsPolynomialWith, showsPolynomialWith',
          showPolynomialWith, showPolynomialWith',
          -- * Polynomial division
-         divModPolynomial, divPolynomial, modPolynomial
+         divModPolynomial, divPolynomial, modPolynomial,
+         -- * Conversion between polynomial types
+         convertPolynomial, convertPolynomial', mapPolynomial,
          -- * Default instances
-       , isUnitDefault, recipUnitDefault, isAssociateDefault
+         isUnitDefault, recipUnitDefault, isAssociateDefault
        , splitUnitDefault
        ) where
 import Algebra.Internal
@@ -602,3 +604,41 @@ splitUnitDefault f =
   let u = leadingUnit $ leadingCoeff f
       u' = fromJust $ recipUnit u
   in (injectCoeff u, u' !* f)
+
+
+-- | Conversion between polynomials with the same monomial orderings,
+--   coefficents and variables.
+convertPolynomial :: ( IsOrderedPolynomial poly, IsOrderedPolynomial poly'
+                     , Coefficient poly ~ Coefficient poly'
+                     , MOrder poly ~ MOrder poly', Arity poly ~ Arity poly'
+                     )
+                  => poly -> poly'
+convertPolynomial = polynomial . terms
+{-# INLINE [3] convertPolynomial #-}
+{-# RULES
+"convertPolynomial id" [~3] convertPolynomial = id
+  #-}
+
+-- | Conversion between polynomials with the same monomial coefficents and variables.
+convertPolynomial' :: ( IsOrderedPolynomial poly, IsOrderedPolynomial poly'
+                      , Coefficient poly ~ Coefficient poly'
+                      , Arity poly ~ Arity poly'
+                      )
+                   => poly -> poly'
+convertPolynomial' = polynomial' . terms'
+{-# INLINE [3] convertPolynomial' #-}
+{-# RULES
+"convertPolynomial' id" [~3] convertPolynomial' = id
+  #-}
+
+mapPolynomial :: (IsOrderedPolynomial poly, IsOrderedPolynomial poly')
+              => (Coefficient poly -> Coefficient poly') -> (Ordinal (Arity poly) -> Ordinal (Arity poly'))
+              -> poly -> poly'
+mapPolynomial mapCoe injVar =
+  substWith (\coe g -> mapCoe coe !* g) (generate sing (var . injVar))
+{-# INLINE [3] mapPolynomial #-}
+{-# RULES
+"mapPolynomial/id" mapPolynomial id id = id
+
+"mapPolynomial/convertPolynomial" [~2] mapPolynomial id id = convertPolynomial'
+#-}

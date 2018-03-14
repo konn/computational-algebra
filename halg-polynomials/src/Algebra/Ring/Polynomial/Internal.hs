@@ -37,7 +37,6 @@ import qualified Data.HashSet                          as HS
 import           Data.Map                              (Map)
 import qualified Data.Map.Strict                       as M
 import qualified Data.Set                              as Set
-import           Data.Singletons.Prelude               (POrd (..))
 import           Data.Singletons.Prelude.List          (Replicate)
 import qualified Data.Sized.Builtin                    as S
 import qualified Numeric.Algebra                       as NA
@@ -525,3 +524,28 @@ instance (r ~ Coefficient poly, IsPolynomial poly,
           KnownNat n, CoeffRing r, IsMonomialOrder n order, PrettyCoeff r)
        => Show (PadPolyL n order poly) where
   showsPrec = showsPolynomialWith $ generate sing (\i -> "X_" ++ show (fromEnum i))
+
+mapOrderedPolynomial :: forall r r' n n' ord' ord.
+                        (KnownNat n, KnownNat n', CoeffRing r', IsMonomialOrder n' ord')
+                     => (r -> r') -> (Ordinal n -> Ordinal n')
+                     -> OrderedPolynomial r ord n -> OrderedPolynomial r' ord' n'
+mapOrderedPolynomial mapCoe mapVar (Polynomial dic) =
+  let toGenerator = OrderedMonomial
+                  . generate sing
+                  . ifoldMapBy (+) (const 0)
+                       (\o l j -> if j == mapVar o then l else 0)
+                  . getMonomial
+  in Polynomial $ M.mapKeys toGenerator $
+     M.mapMaybe (\i -> let c = mapCoe i in if isZero c then Nothing else Just c) dic
+-- Orphan Rules
+{-# RULES
+"convertPolynomial/OrderedPolynomial" [~2]
+    convertPolynomial = id
+"convertPolynomial'/OrderedPolynomial" [~2]
+    convertPolynomial' = castPolynomial
+"mapPolynomial/OrderedPolynomial" [~2]
+  forall
+    (mapC :: CoeffRing r' => r -> r')
+    (mapV :: KnownNat n' => Ordinal n -> Ordinal n').
+  mapPolynomial mapC mapV = mapOrderedPolynomial mapC mapV
+  #-}
