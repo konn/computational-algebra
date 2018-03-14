@@ -64,6 +64,12 @@ makeWrapped ''OrderedMonomial
 fromList :: SNat n -> [Int] -> Monomial n
 fromList len = V.fromListWithDefault len 0
 
+instance Multiplicative (Monomial n) where
+  (*) = zipWithSame (+)
+
+instance KnownNat n => Unital (Monomial n) where
+  one = fromList sing []
+
 -- | Monomial order (of degree n). This should satisfy following laws:
 -- (1) Totality: forall a, b (a < b || a == b || b < a)
 -- (2) Additivity: a <= b ==> a + c <= b + c
