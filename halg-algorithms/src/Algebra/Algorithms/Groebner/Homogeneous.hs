@@ -5,7 +5,9 @@ module Algebra.Algorithms.Groebner.Homogeneous
        , calcHomogeneousGroebnerBasis
        , unsafeCalcHomogeneousGroebnerBasis
        , hilbertPoincareSeries
+       , hilbertPoincareSeriesBy
        ) where
+import           Algebra.Algorithms.Groebner
 import           Algebra.Field.RationalFunction
 import           Algebra.Prelude.Core                hiding (empty, filter,
                                                       insert)
@@ -126,9 +128,9 @@ viewMax = H.viewMin
 
 -- | @'hilbertPoincareSeries' k i@ computes a Hilbert-Poincare formal series
 --   for given monomial ideal i over a field k.
-hilbertPoincareSeries :: forall n. (KnownNat n)
-                      => [Monomial n] -> RationalFunction Rational
-hilbertPoincareSeries ms0 =
+hilbertPoincareSeriesForMonomials :: forall n. (KnownNat n)
+                                  => [Monomial n] -> RationalFunction Rational
+hilbertPoincareSeriesForMonomials ms0 =
   go $ H.fromList [ ReversedEntry (F.sum m) m | m <- minimalGenerators ms0 ]
   where
     go ms =
@@ -193,7 +195,16 @@ minimalGenerators =
   (C.coerce :: [Monomial n] -> [Identity (Monomial n)])
 {-# INLINE minimalGenerators #-}
 
--- homogeneousHilbertPoincareSeries :: (Field (Coefficient poly), IsOrderedPolynomial poly)
---                                  => Ideal poly -> RationalFunction Rational
--- homogeneousHilbertPoincareSeries is = do
+-- | Calculates the Hilbert-Poincare serires of a given homogeneous ideal,
+--   using the specified monomial ordering.
+hilbertPoincareSeriesBy :: (IsMonomialOrder (Arity poly) ord, Field (Coefficient poly), IsOrderedPolynomial poly)
+                        => ord -> Ideal poly -> RationalFunction Rational
+hilbertPoincareSeriesBy ord =
+    hilbertPoincareSeriesForMonomials
+  . map (getMonomial . leadingMonomial)
+  . calcGroebnerBasisWith ord
 
+-- | A variant of @'hilbertPoincareSeriesBy'@ using @'Grevlex'@ ordering.
+hilbertPoincareSeries :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+                      =>  Ideal poly -> RationalFunction Rational
+hilbertPoincareSeries = hilbertPoincareSeriesBy Grevlex
