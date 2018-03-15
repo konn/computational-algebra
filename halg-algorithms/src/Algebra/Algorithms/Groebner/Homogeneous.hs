@@ -9,6 +9,9 @@ module Algebra.Algorithms.Groebner.Homogeneous
        , hilbertPoincareSeriesBy
        , hilbertPoincareSeriesForMonomials
        , HPS, taylorHPS, toRationalFunction
+       , calcHomogeneousGroebnerBasisHilbert
+       , calcHomogeneousGroebnerBasisHilbertBy
+       , calcHomogeneousGroebnerBasisHilbertWithSeries
        ) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Field.RationalFunction
@@ -211,8 +214,6 @@ instance Ord a => Ord (Compactified a) where
   Finite a <= Finite b = a <= b
   Infinity <= Finite _ = False
 
-type HilbDic p = IntMap [p]
-
 data HPS n = HPS { taylorHPS :: [Integer]
                  , hpsNumerator :: Unipol Integer
                  }
@@ -270,10 +271,11 @@ toRationalFunction :: KnownNat n => HPS n -> RationalFunction Rational
 toRationalFunction s@(HPS _ f) =
   fromPolynomial (mapCoeffUnipol (NA.% 1) f) / fromPolynomial ((1 - #x) ^ fromIntegral (natVal s) :: Unipol Rational)
 
-hilbertPoincareSeriesForMonomials :: forall n. (KnownNat n)
-                                  => [Monomial n] -> HPS n
+hilbertPoincareSeriesForMonomials :: forall t n. (KnownNat n, Foldable t)
+                                  => t (Monomial n) -> HPS n
 hilbertPoincareSeriesForMonomials ms0 =
-  go $ H.fromList [ ReversedEntry (F.sum m) m | m <- minimalGenerators ms0 ]
+  go $ H.fromList [ ReversedEntry (F.sum m) m
+                  | m <- minimalGenerators $ F.toList ms0 ]
   where
     go ms =
       let n  = fromIntegral $ natVal (Proxy :: Proxy n)
@@ -291,12 +293,74 @@ hilbertPoincareSeriesForMonomials ms0 =
                     filter ((>0) . sIndex i . rePayload) ms
           in go added + (#x :: Unipol Integer) .* go quo
 
-unionDic :: IntMap [a] -> IntMap [a] -> IntMap [a]
-unionDic =  IM.unionWith (++)
+buildHilbTable :: IsOrderedPolynomial poly
+               => RefVec s poly
+               -> [Int]
+               -> ST s (IntMap [(Int, Int)])
+buildHilbTable gs js =
+  IM.unionsWith (++) <$>
+         sequence [ flip IM.singleton [(i,j)] <$> deg gs i j
+                  | j <- js, i <- [0..j-1]
+                  ]
 
-calcGroebnerBasisHilbertWithSeries :: Ideal poly
-                                   -> RationalFunction Rational
-                                   -> [poly]
-calcGroebnerBasisHilbertWithSeries ip hp = undefined
+whileForM_ :: Monad m => m Bool -> [a] -> (a -> m b) -> m ()
+whileForM_ test xs f = go xs
+  where
+    go [] = return ()
+    go (x : zs) = do
+      chk <- test
+      when chk $ f x >> go zs
+{-# INLINE whileForM_ #-}
 
+calcHomogeneousGroebnerBasisHilbertWithSeries :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+                                              => Ideal poly
+                                              -> HPS (Arity poly)
+                                              -> [poly]
+calcHomogeneousGroebnerBasisHilbertWithSeries ip hps = runST $ do
+  delta <- newSTRef (Infinity :: Compactified Integer)
+  let v0 = V.fromList $ generators ip
+  gs <- newSTRef =<< V.unsafeThaw v0
+  bs <- newSTRef . IM.insertWith (++) 0 []
+        =<< buildHilbTable gs [0..V.length v0 - 1]
+  let ins g = do
+        j <- snoc gs g
+        news <- buildHilbTable gs [j]
+        modifySTRef' bs $ IM.unionWith (++) news
+  whileJust_ (IM.minView <$> readSTRef bs) $ \(sigs, bs') -> do
+    writeSTRef bs bs'
+    whileForM_ ((> Finite 0) <$> readSTRef delta) sigs $ \(i, j) -> do
+      spol <- sPolynomial <$> at gs i <*> at gs j
+      unless (isZero spol) $ do
+        ins spol
+        modifySTRef' delta (fmap pred)
+      return ()
+    hps' <- hilbertPoincareSeriesForMonomials . fmap (getMonomial . leadingMonomial)
+              <$> (V.unsafeFreeze =<< readSTRef gs)
+    if hps' == hps
+      then writeSTRef bs IM.empty
+      else do
+        let Just (m', orig, new) =
+              find (\(_,b,c) -> b /= c) $
+              zip3 [0..] (taylorHPS hps) (taylorHPS hps')
+            upd d =
+              case IM.splitLookup m' d of
+                (_, mans, gt) -> maybe id (IM.insert m') mans gt
+        writeSTRef delta $ Finite $ new - orig
+        writeSTRef bs . upd =<< readSTRef bs
+  V.toList <$> (V.unsafeFreeze =<< readSTRef gs)
 
+-- | First compute Hilbert-Poicare series w.r.t. @ord@ by
+--   @'hilbertPoincareSeriesBy'@, and then apply @'calcHomogeneousGroebnerBasisHilbertWithSeries'@.
+calcHomogeneousGroebnerBasisHilbertBy :: (Field (Coefficient poly),
+                                          IsOrderedPolynomial poly,
+                                          IsMonomialOrder (Arity poly) ord)
+                                      => ord -> Ideal poly -> [poly]
+calcHomogeneousGroebnerBasisHilbertBy ord is =
+  calcHomogeneousGroebnerBasisHilbertWithSeries is (hilbertPoincareSeriesBy ord is)
+
+-- | Calculates homogeneous Groebner basis by Hilbert-driven method,
+--   computing Hilbert-Poincare series w.r.t. Grevlex.
+calcHomogeneousGroebnerBasisHilbert :: (Field (Coefficient poly),
+                                        IsOrderedPolynomial poly)
+                                    => Ideal poly -> [poly]
+calcHomogeneousGroebnerBasisHilbert = calcHomogeneousGroebnerBasisHilbertBy Grevlex

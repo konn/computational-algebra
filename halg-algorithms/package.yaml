@@ -46,13 +46,12 @@ library:
   - Algebra.Algorithms.FGLM
   ghc-options:  -Wall
   dependencies:
-  - ghc-typelits-knownnat
-  - sized
   - algebraic-prelude
   - containers
+  - control-monad-loop
   - convertible
-  - monad-loops
   - equational-reasoning
+  - ghc-typelits-knownnat
   - halg-matrices
   - heaps
   - hmatrix
@@ -61,6 +60,7 @@ library:
   - monad-loops
   - mtl
   - reflection
+  - sized
   - vector
   default-extensions:
   - NoImplicitPrelude

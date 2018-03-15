@@ -92,12 +92,12 @@ asGenListOf asGenListOf28,29
 asGenListOf asGenListOf29,30
 spec spec31,32
 spec spec32,33
-prop_passesSTestWith prop_passesSTestWith48,49
-prop_passesSTestWith prop_passesSTestWith53,54
-prop_groebnerDivsOrigWith prop_groebnerDivsOrigWith58,59
-prop_groebnerDivsOrigWith prop_groebnerDivsOrigWith63,64
-prop_groebnerIncludedWith prop_groebnerIncludedWith70,71
-prop_groebnerIncludedWith prop_groebnerIncludedWith75,76
+prop_passesSTestWith prop_passesSTestWith55,56
+prop_passesSTestWith prop_passesSTestWith60,61
+prop_groebnerDivsOrigWith prop_groebnerDivsOrigWith65,66
+prop_groebnerDivsOrigWith prop_groebnerDivsOrigWith70,71
+prop_groebnerIncludedWith prop_groebnerIncludedWith77,78
+prop_groebnerIncludedWith prop_groebnerIncludedWith82,83
 
 ./test/Spec.hs,0
 
@@ -163,51 +163,80 @@ nextMonomial nextMonomial388,389
 beta beta399,400
 beta beta400,401
 
-./src/Algebra/Algorithms/Groebner/Homogeneous.hs,1767
-module Algebra.Algorithms.Groebner.HomogeneousAlgebra.Algorithms.Groebner.Homogeneous2,3
-isHomogeneous isHomogeneous32,33
-isHomogeneous isHomogeneous34,35
-calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising40,41
-calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising42,43
-calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis51,52
-calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis53,54
-unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis62,63
-unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis64,65
-type Signatures Signatures80,81
-type Signatures weight weight80,81
-buildTable buildTable82,83
-buildTable buildTable84,85
-type RefVec RefVec91,92
-type RefVec s s91,92
-at at93,94
-at at94,95
-snoc snoc96,97
-snoc snoc97,98
-deg deg105,106
-deg deg106,107
-data ReversedEntry ReversedEntry113,114
-data ReversedEntry p a = ReversedEntry ReversedEntry113,114
-data ReversedEntry p a = ReversedEntry { rePriority rePriority113,114
-                                       , rePayload rePayload114,115
-instance instance117,118
-viewMax viewMax123,124
-viewMax viewMax124,125
-hilbertPoincareSeries hilbertPoincareSeries128,129
-hilbertPoincareSeries hilbertPoincareSeries130,131
-class (Foldable f) => Container Container149,150
-  insert    :: Element f a => a a152,153
-  type Element Element150,151
-  filter filter151,152
-  insert insert152,153
-  empty empty153,154
-head' head'169,170
-head' head'170,171
-divs' divs'172,173
-divs' divs'173,174
-minimalGenerators' minimalGenerators'175,176
-minimalGenerators' minimalGenerators'177,178
-minimalGenerators minimalGenerators189,190
-minimalGenerators minimalGenerators190,191
+./src/Algebra/Algorithms/Groebner/Homogeneous.hs,3248
+module Algebra.Algorithms.Groebner.HomogeneousAlgebra.Algorithms.Groebner.Homogeneous3,4
+isHomogeneous isHomogeneous43,44
+isHomogeneous isHomogeneous45,46
+calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising51,52
+calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising53,54
+calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis62,63
+calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis64,65
+unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis73,74
+unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis75,76
+type Signatures Signatures91,92
+type Signatures weight weight91,92
+buildTable buildTable93,94
+buildTable buildTable95,96
+type RefVec RefVec102,103
+type RefVec s s102,103
+at at104,105
+at at105,106
+snoc snoc107,108
+snoc snoc108,109
+deg deg116,117
+deg deg117,118
+data ReversedEntry ReversedEntry124,125
+data ReversedEntry p a = ReversedEntry ReversedEntry124,125
+data ReversedEntry p a = ReversedEntry { rePriority rePriority124,125
+                                       , rePayload rePayload125,126
+instance instance128,129
+viewMax viewMax134,135
+viewMax viewMax135,136
+class (Foldable f) => Container Container137,138
+  insert    :: Element f a => a a140,141
+  type Element Element138,139
+  filter filter139,140
+  insert insert140,141
+  empty empty141,142
+head' head'157,158
+head' head'158,159
+divs' divs'160,161
+divs' divs'161,162
+minimalGenerators' minimalGenerators'163,164
+minimalGenerators' minimalGenerators'165,166
+minimalGenerators minimalGenerators177,178
+minimalGenerators minimalGenerators178,179
+hilbertPoincareSeriesBy hilbertPoincareSeriesBy185,186
+hilbertPoincareSeriesBy hilbertPoincareSeriesBy187,188
+hilbertPoincareSeries hilbertPoincareSeries193,194
+hilbertPoincareSeries hilbertPoincareSeries195,196
+data Compactified Compactified198,199
+data Compactified a = InfinityInfinity198,199
+                    | Finite Finite199,200
+data HPS HPS216,217
+data HPS n = HPS HPS216,217
+data HPS n = HPS { taylorHPS taylorHPS216,217
+                 , hpsNumerator hpsNumerator217,218
+convolute convolute249,250
+convolute convolute250,251
+binoms binoms257,258
+binoms binoms258,259
+binom binom264,265
+binom binom265,266
+toRationalFunction toRationalFunction269,270
+toRationalFunction toRationalFunction270,271
+hilbertPoincareSeriesForMonomials hilbertPoincareSeriesForMonomials273,274
+hilbertPoincareSeriesForMonomials hilbertPoincareSeriesForMonomials275,276
+buildHilbTable buildHilbTable295,296
+buildHilbTable buildHilbTable299,300
+whileForM_ whileForM_305,306
+whileForM_ whileForM_306,307
+calcHomogeneousGroebnerBasisHilbertWithSeries calcHomogeneousGroebnerBasisHilbertWithSeries314,315
+calcHomogeneousGroebnerBasisHilbertWithSeries calcHomogeneousGroebnerBasisHilbertWithSeries318,319
+calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy353,354
+calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy357,358
+calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert362,363
+calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert365,366
 
 ./src/Algebra/Field/RationalFunction.hs,683
 module Algebra.Field.RationalFunctionAlgebra.Field.RationalFunction2,3
