@@ -10,6 +10,7 @@ import Algebra.Internal
 import Algebra.Prelude.Core
 import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
+import Algebra.Ring.Polynomial.Homogenised
 import Algebra.Scalar
 
 import Control.Parallel.Strategies

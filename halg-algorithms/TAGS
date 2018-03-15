@@ -1,20 +1,20 @@
 
 ./bench/homog-bench.hs,256
 module Main Main5,6
-i1 i117,18
 i1 i118,19
-i2 i236,37
+i1 i119,20
 i2 i237,38
-i3 i342,43
+i2 i238,39
 i3 i343,44
-i4 i447,48
+i3 i344,45
 i4 i448,49
-mkTestCases mkTestCases52,53
+i4 i449,50
 mkTestCases mkTestCases53,54
-mkTC mkTC57,58
+mkTestCases mkTestCases54,55
 mkTC mkTC58,59
-main main65,66
+mkTC mkTC59,60
 main main66,67
+main main67,68
 
 ./Setup.hs,15
 main main1,2
