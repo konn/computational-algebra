@@ -7,13 +7,15 @@
 -- | Polynomial type optimized to univariate polynomial.
 module Algebra.Ring.Polynomial.Univariate
        (Unipol(), naiveMult, karatsuba,
+        coeffList,
         divModUnipolByMult, divModUnipol,
         mapCoeffUnipol, liftMapUnipol,
         module Algebra.Ring.Polynomial.Class,
         module Algebra.Ring.Polynomial.Monomial) where
-import Algebra.Prelude.Core
-import Algebra.Ring.Polynomial.Class
-import Algebra.Ring.Polynomial.Monomial
+import           Algebra.Prelude.Core
+import           Algebra.Ring.Polynomial.Class
+import           Algebra.Ring.Polynomial.Monomial
+import qualified Data.Foldable                    as F
 
 import           Control.Arrow          (first)
 import           Control.DeepSeq        (NFData)
@@ -375,6 +377,9 @@ substWithUnipol (|*) g f@(Unipol dic) =
              (IM.findWithDefault zero n dic |* one)
              [IM.findWithDefault zero k dic | k <- [0..n-1]]
 {-# INLINE substWithUnipol #-}
---    a_0 + a_1 x + ... + a_{n-1} x^{n-1} + a_n x^n
---  = a_0 + x (a_1 + ... + a_{n-1} x^{n-2} + a_n x^{n - 1})
---  = a_0 + x (a_1 +
+
+-- | The list of coefficients, in ascending order.
+coeffList :: Monoidal k => Unipol k -> [k]
+coeffList (Unipol dic) =
+  F.toList $ IM.unionWith (+) dic $
+  IM.fromList [(n, zero) | n <- [0..maybe (- 1) (fst . fst) (IM.maxViewWithKey dic)] ]
