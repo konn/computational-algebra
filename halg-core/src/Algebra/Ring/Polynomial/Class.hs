@@ -639,6 +639,4 @@ mapPolynomial mapCoe injVar =
 {-# INLINE [3] mapPolynomial #-}
 {-# RULES
 "mapPolynomial/id" mapPolynomial id id = id
-
-"mapPolynomial/convertPolynomial" [~2] mapPolynomial id id = convertPolynomial'
-#-}
+ #-}

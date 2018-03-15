@@ -1,6 +1,6 @@
 {-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving, TypeOperators                      #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver               #-}
 module Algebra.Ring.Polynomial.Homogenised
        (Homogenised, homogenise, unhomogenise, HomogOrder) where
 import           Algebra.Prelude.Core
@@ -53,6 +53,7 @@ instance IsOrderedPolynomial poly => IsPolynomial (Homogenised poly) where
     , (mr, cf) <- M.toList $ terms' fpol
     ]
   liftMap gen (Homogenised f) =
+    withKnownNat (sSucc $ sArity f) $
     withRefl (lneqToLT (sArity f) (sSucc (sArity f))  $ lneqSucc (sArity f)) $
     substWith (\g alg -> alg * liftMap (gen . inclusion) g) (singleton $ gen maxBound) f
 
