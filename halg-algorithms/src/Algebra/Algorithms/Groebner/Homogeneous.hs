@@ -1,17 +1,21 @@
-{-# LANGUAGE DataKinds, DeriveFoldable, DeriveFunctor, MultiWayIf #-}
-{-# LANGUAGE OverloadedLabels, ScopedTypeVariables                #-}
+{-# LANGUAGE CPP, DataKinds, DeriveFoldable, DeriveFunctor   #-}
+{-# LANGUAGE DeriveTraversable, MultiWayIf, OverloadedLabels #-}
+{-# LANGUAGE ScopedTypeVariables                             #-}
 module Algebra.Algorithms.Groebner.Homogeneous
        ( calcGroebnerBasisAfterHomogenising
        , calcHomogeneousGroebnerBasis
        , unsafeCalcHomogeneousGroebnerBasis
        , hilbertPoincareSeries
        , hilbertPoincareSeriesBy
+       , hilbertPoincareSeriesForMonomials
+       , HPS, taylorHPS, toRationalFunction
        ) where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Field.RationalFunction
 import           Algebra.Prelude.Core                hiding (empty, filter,
                                                       insert)
 import           Algebra.Ring.Polynomial.Homogenised
+import           Algebra.Ring.Polynomial.Univariate
 import           Control.Lens                        (ix, (%~), (&))
 import           Control.Monad.Loops                 (whileJust_)
 import           Control.Monad.ST.Strict
@@ -21,6 +25,7 @@ import           Data.Function                       (on)
 import           Data.Functor.Identity
 import           Data.Heap                           (Entry (..), Heap)
 import qualified Data.Heap                           as H
+import qualified Data.IntMap                         as IM
 import qualified Data.List                           as L
 import           Data.Maybe                          (fromJust)
 import qualified Data.Sized.Builtin                  as SV
@@ -30,6 +35,7 @@ import           Data.STRef                          (STRef, modifySTRef',
 import qualified Data.Vector                         as V
 import qualified Data.Vector.Mutable                 as MV
 import           GHC.Exts                            (Constraint)
+import qualified Numeric.Field.Fraction              as NA
 import qualified Prelude                             as P
 
 isHomogeneous :: IsOrderedPolynomial poly
@@ -126,29 +132,6 @@ instance (Ord p) => Ord (ReversedEntry p a) where
 viewMax :: Ord p => Heap (ReversedEntry p a) -> Maybe (ReversedEntry p a, Heap (ReversedEntry p a))
 viewMax = H.viewMin
 
--- | @'hilbertPoincareSeries' k i@ computes a Hilbert-Poincare formal series
---   for given monomial ideal i over a field k.
-hilbertPoincareSeriesForMonomials :: forall n. (KnownNat n)
-                                  => [Monomial n] -> RationalFunction Rational
-hilbertPoincareSeriesForMonomials ms0 =
-  go $ H.fromList [ ReversedEntry (F.sum m) m | m <- minimalGenerators ms0 ]
-  where
-    go ms =
-      let n  = fromIntegral $ natVal (Proxy :: Proxy n)
-      in case viewMax ms of
-        Nothing -> recip ((one - #x) ^ n)
-        Just (ReversedEntry 0 _, _) -> 0
-        Just (ReversedEntry 1 _, _) -> recip ((one - #x) ^ (n P.- fromIntegral (H.size ms)))
-        Just (ReversedEntry _ m, _) ->
-          let Just i = SV.sFindIndex (> 0) m
-              xi = varMonom sing i
-              upd (ReversedEntry d xs) =
-                   ReversedEntry (d - 1) (xs & ix i %~ pred)
-              added = minimalGenerators' $ insert (ReversedEntry 1 xi) ms
-              quo = minimalGenerators' $ H.mapMonotonic upd $
-                    filter ((>0) . sIndex i . rePayload) ms
-          in go added + #x * go quo
-
 class (Foldable f) => Container f where
   type Element f a :: Constraint
   filter    :: (a -> Bool) -> f a -> f a
@@ -198,7 +181,7 @@ minimalGenerators =
 -- | Calculates the Hilbert-Poincare serires of a given homogeneous ideal,
 --   using the specified monomial ordering.
 hilbertPoincareSeriesBy :: (IsMonomialOrder (Arity poly) ord, Field (Coefficient poly), IsOrderedPolynomial poly)
-                        => ord -> Ideal poly -> RationalFunction Rational
+                        => ord -> Ideal poly -> HPS (Arity poly)
 hilbertPoincareSeriesBy ord =
     hilbertPoincareSeriesForMonomials
   . map (getMonomial . leadingMonomial)
@@ -206,5 +189,114 @@ hilbertPoincareSeriesBy ord =
 
 -- | A variant of @'hilbertPoincareSeriesBy'@ using @'Grevlex'@ ordering.
 hilbertPoincareSeries :: (Field (Coefficient poly), IsOrderedPolynomial poly)
-                      =>  Ideal poly -> RationalFunction Rational
+                      =>  Ideal poly -> HPS (Arity poly)
 hilbertPoincareSeries = hilbertPoincareSeriesBy Grevlex
+
+-- | One-point compactification of ordered space.
+data Compactified a = Infinity
+                    | Finite a
+                      deriving (Read, Show, Eq, Functor, Foldable, Traversable)
+
+instance Ord a => Ord (Compactified a) where
+  compare Infinity   Infinity   = EQ
+  compare Infinity   _          = GT
+  compare _          Infinity   = LT
+  compare (Finite a) (Finite b) = compare a b
+
+  Infinity < _         = False
+  Finite _ < Infinity  = True
+  Finite a < Finite b  = a < b
+
+  _        <= Infinity = True
+  Finite a <= Finite b = a <= b
+  Infinity <= Finite _ = False
+
+type HilbDic p = IntMap [p]
+
+data HPS n = HPS { taylorHPS :: [Integer]
+                 , hpsNumerator :: Unipol Integer
+                 }
+
+instance Eq (HPS a) where
+  (==) = (==) `on` hpsNumerator
+
+instance KnownNat n => Show (HPS n) where
+  showsPrec d = showsPrec d . toRationalFunction
+
+instance Additive (HPS n) where
+  HPS cs f + HPS ds g = HPS (zipWith (+) cs ds) (f + g)
+
+instance LeftModule Natural (HPS n) where
+  n .* HPS cs f = HPS (map (toInteger n*) cs) (n .* f)
+
+instance RightModule Natural (HPS n) where
+  HPS cs f *. n = HPS (map (*toInteger n) cs) (f *. n)
+
+instance LeftModule Integer (HPS n) where
+  n .* HPS cs f = HPS (map (n*) cs) (n .* f)
+
+instance RightModule Integer (HPS n) where
+  HPS cs f *. n = HPS (map (*n) cs) (f *. n)
+
+instance Monoidal (HPS n) where
+  zero = HPS (repeat 0) zero
+
+instance Group (HPS n) where
+  negate (HPS cs f) = HPS (map negate cs) (negate f)
+  HPS cs f - HPS ds g = HPS (zipWith (-) cs ds) (f - g)
+instance Abelian (HPS n)
+
+convolute :: [Integer] -> [Integer] -> [Integer]
+convolute ~(x : xs) ~(y : ys) =
+  x * y : zipWith3 (\a b c -> a + b + c) (map (x*) ys) (map (y*) xs) (0 : convolute xs ys)
+{-# INLINE convolute #-}
+
+instance LeftModule (Unipol Integer) (HPS n) where
+  poly .* HPS cs g = HPS (convolute (coeffList poly ++ repeat 0) cs) (poly * g)
+
+binoms :: forall n. KnownNat n => Integer -> HPS n
+binoms p =
+  let n = natVal (sing :: Sing n)
+  in ((1 - #x) ^ (fromIntegral n P.- fromIntegral p) :: Unipol Integer)
+     .* HPS [ binom (n + m - 1) m | m <- [0..]] 1
+{-# INLINE binoms #-}
+
+binom :: Integer -> Integer -> Integer
+binom m k | m < k = 0
+          | otherwise = product [m - k + 1 .. m] `div` product [1..k]
+{-# INLINE binom #-}
+
+toRationalFunction :: KnownNat n => HPS n -> RationalFunction Rational
+toRationalFunction s@(HPS _ f) =
+  fromPolynomial (mapCoeffUnipol (NA.% 1) f) / fromPolynomial ((1 - #x) ^ fromIntegral (natVal s) :: Unipol Rational)
+
+hilbertPoincareSeriesForMonomials :: forall n. (KnownNat n)
+                                  => [Monomial n] -> HPS n
+hilbertPoincareSeriesForMonomials ms0 =
+  go $ H.fromList [ ReversedEntry (F.sum m) m | m <- minimalGenerators ms0 ]
+  where
+    go ms =
+      let n  = fromIntegral $ natVal (Proxy :: Proxy n)
+      in case viewMax ms of
+        Nothing                     -> binoms n
+        Just (ReversedEntry 0 _, _) -> zero
+        Just (ReversedEntry 1 _, _) -> binoms (n - toInteger (H.size ms))
+        Just (ReversedEntry _ m, _) ->
+          let Just i = SV.sFindIndex (> 0) m
+              xi = varMonom sing i
+              upd (ReversedEntry d xs) =
+                   ReversedEntry (d - 1) (xs & ix i %~ pred)
+              added = minimalGenerators' $ insert (ReversedEntry 1 xi) ms
+              quo = minimalGenerators' $ H.mapMonotonic upd $
+                    filter ((>0) . sIndex i . rePayload) ms
+          in go added + (#x :: Unipol Integer) .* go quo
+
+unionDic :: IntMap [a] -> IntMap [a] -> IntMap [a]
+unionDic =  IM.unionWith (++)
+
+calcGroebnerBasisHilbertWithSeries :: Ideal poly
+                                   -> RationalFunction Rational
+                                   -> [poly]
+calcGroebnerBasisHilbertWithSeries ip hp = undefined
+
+
