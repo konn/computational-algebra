@@ -59,6 +59,8 @@ mkTC :: (IsMonomialOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomia
 mkTC name ideal =
     bgroup name [ bench "calcGroebnerBasis" $ nf calcGroebnerBasis ideal
                 , bench "homogenized" $ nf calcGroebnerBasisAfterHomogenising ideal
+                , bench "hilbertPoincareSeries" $
+                  nf (map unhomogenise . calcHomogeneousGroebnerBasisHilbert . fmap homogenise) ideal
                 ]
 
 main :: IO ()

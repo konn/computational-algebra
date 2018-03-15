@@ -13,8 +13,8 @@ mkTestCases mkTestCases52,53
 mkTestCases mkTestCases53,54
 mkTC mkTC57,58
 mkTC mkTC58,59
-main main63,64
-main main64,65
+main main65,66
+main main66,67
 
 ./Setup.hs,15
 main main1,2
