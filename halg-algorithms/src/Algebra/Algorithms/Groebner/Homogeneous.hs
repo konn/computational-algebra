@@ -13,7 +13,6 @@ module Algebra.Algorithms.Groebner.Homogeneous
        , calcHomogeneousGroebnerBasisHilbertBy
        , calcHomogeneousGroebnerBasisHilbertWithSeries
        ) where
-import           Algebra.Algorithms.Groebner
 import           Algebra.Field.RationalFunction
 import           Algebra.Prelude.Core                hiding (empty, filter,
                                                       insert)
@@ -39,7 +38,6 @@ import qualified Data.Vector                         as V
 import qualified Data.Vector.Mutable                 as MV
 import           GHC.Exts                            (Constraint)
 import qualified Numeric.Field.Fraction              as NA
-import qualified Prelude                             as P
 
 isHomogeneous :: IsOrderedPolynomial poly
               => poly -> Bool
@@ -183,12 +181,16 @@ minimalGenerators =
 
 -- | Calculates the Hilbert-Poincare serires of a given homogeneous ideal,
 --   using the specified monomial ordering.
-hilbertPoincareSeriesBy :: (IsMonomialOrder (Arity poly) ord, Field (Coefficient poly), IsOrderedPolynomial poly)
+hilbertPoincareSeriesBy :: forall ord poly.
+                           (IsMonomialOrder (Arity poly) ord,
+                            Field (Coefficient poly),
+                            IsOrderedPolynomial poly)
                         => ord -> Ideal poly -> HPS (Arity poly)
-hilbertPoincareSeriesBy ord =
+hilbertPoincareSeriesBy _ =
     hilbertPoincareSeriesForMonomials
   . map (getMonomial . leadingMonomial)
-  . calcGroebnerBasisWith ord
+  . unsafeCalcHomogeneousGroebnerBasis
+  . map (mapPolynomial id id :: poly -> OrderedPolynomial (Coefficient poly) ord (Arity poly))
 
 -- | A variant of @'hilbertPoincareSeriesBy'@ using @'Grevlex'@ ordering.
 hilbertPoincareSeries :: (Field (Coefficient poly), IsOrderedPolynomial poly)
@@ -255,16 +257,15 @@ convolute ~(x : xs) ~(y : ys) =
 instance LeftModule (Unipol Integer) (HPS n) where
   poly .* HPS cs g = HPS (convolute (coeffList poly ++ repeat 0) cs) (poly * g)
 
-binoms :: forall n. KnownNat n => Integer -> HPS n
+binoms :: forall n. KnownNat n => Natural -> HPS n
 binoms p =
   let n = natVal (sing :: Sing n)
-  in ((1 - #x) ^ (fromIntegral n P.- fromIntegral p) :: Unipol Integer)
+  in ((1 - #x) ^ p :: Unipol Integer)
      .* HPS [ binom (n + m - 1) m | m <- [0..]] 1
 {-# INLINE binoms #-}
 
 binom :: Integer -> Integer -> Integer
-binom m k | m < k = 0
-          | otherwise = product [m - k + 1 .. m] `div` product [1..k]
+binom m k = product [m - k + 1 .. m] `div` product [1..k]
 {-# INLINE binom #-}
 
 toRationalFunction :: KnownNat n => HPS n -> RationalFunction Rational
@@ -282,15 +283,15 @@ hilbertPoincareSeriesForMonomials ms0 =
       in case viewMax ms of
         Nothing                     -> binoms n
         Just (ReversedEntry 0 _, _) -> zero
-        Just (ReversedEntry 1 _, _) -> binoms (n - toInteger (H.size ms))
+        Just (ReversedEntry 1 _, _) -> binoms $ fromIntegral $ H.size ms
         Just (ReversedEntry _ m, _) ->
           let Just i = SV.sFindIndex (> 0) m
               xi = varMonom sing i
               upd (ReversedEntry d xs) =
-                   ReversedEntry (d - 1) (xs & ix i %~ pred)
+                   let xs' = (xs & ix i %~ max 0 . pred)
+                   in ReversedEntry (F.sum xs') xs'
               added = minimalGenerators' $ insert (ReversedEntry 1 xi) ms
-              quo = minimalGenerators' $ H.mapMonotonic upd $
-                    filter ((>0) . sIndex i . rePayload) ms
+              quo = minimalGenerators' $ H.map upd ms
           in go added + (#x :: Unipol Integer) .* go quo
 
 buildHilbTable :: IsOrderedPolynomial poly
@@ -303,21 +304,17 @@ buildHilbTable gs js =
                   | j <- js, i <- [0..j-1]
                   ]
 
-whileForM_ :: Monad m => m Bool -> [a] -> (a -> m b) -> m ()
-whileForM_ test xs f = go xs
-  where
-    go [] = return ()
-    go (x : zs) = do
-      chk <- test
-      when chk $ f x >> go zs
+whileForM_ :: (Foldable t, Monad m) => m Bool -> t a -> (a -> m b) -> m ()
+whileForM_ test xs f =
+  F.foldr (\x act -> test >>= flip when (f x >> act)) (return ()) xs
 {-# INLINE whileForM_ #-}
 
-calcHomogeneousGroebnerBasisHilbertWithSeries :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+calcHomogeneousGroebnerBasisHilbertWithSeries :: ( Field (Coefficient poly), IsOrderedPolynomial poly)
                                               => Ideal poly
                                               -> HPS (Arity poly)
                                               -> [poly]
 calcHomogeneousGroebnerBasisHilbertWithSeries ip hps = runST $ do
-  delta <- newSTRef (Infinity :: Compactified Integer)
+  delta <- newSTRef Infinity
   let v0 = V.fromList $ generators ip
   gs <- newSTRef =<< V.unsafeThaw v0
   bs <- newSTRef . IM.insertWith (++) 0 []
@@ -329,24 +326,21 @@ calcHomogeneousGroebnerBasisHilbertWithSeries ip hps = runST $ do
   whileJust_ (IM.minView <$> readSTRef bs) $ \(sigs, bs') -> do
     writeSTRef bs bs'
     whileForM_ ((> Finite 0) <$> readSTRef delta) sigs $ \(i, j) -> do
-      spol <- sPolynomial <$> at gs i <*> at gs j
+      spol <- modPolynomial <$> (sPolynomial <$> at gs i <*> at gs j)
+                            <*> (F.toList <$> (V.unsafeFreeze =<< readSTRef gs))
       unless (isZero spol) $ do
         ins spol
         modifySTRef' delta (fmap pred)
-      return ()
     hps' <- hilbertPoincareSeriesForMonomials . fmap (getMonomial . leadingMonomial)
               <$> (V.unsafeFreeze =<< readSTRef gs)
     if hps' == hps
       then writeSTRef bs IM.empty
       else do
-        let Just (m', orig, new) =
+        let Just (m',  orig, new) =
               find (\(_,b,c) -> b /= c) $
               zip3 [0..] (taylorHPS hps) (taylorHPS hps')
-            upd d =
-              case IM.splitLookup m' d of
-                (_, mans, gt) -> maybe id (IM.insert m') mans gt
         writeSTRef delta $ Finite $ new - orig
-        writeSTRef bs . upd =<< readSTRef bs
+        writeSTRef bs . snd . IM.split (m' - 1) =<< readSTRef bs
   V.toList <$> (V.unsafeFreeze =<< readSTRef gs)
 
 -- | First compute Hilbert-Poicare series w.r.t. @ord@ by

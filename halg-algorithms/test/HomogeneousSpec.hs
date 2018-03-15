@@ -40,11 +40,12 @@ spec = do
       checkForArity [2..3] $ prop_groebnerIncludedWith homogenise unsafeCalcHomogeneousGroebnerBasis
   describe "calcHomogeneousGroebnerBasisHilbert" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
     prop "passes S-test" $
-      checkForArity [2..3] $ prop_passesSTestWith homogenise unsafeCalcHomogeneousGroebnerBasisHilbert
+      checkForArity [2..3] $ prop_passesSTestWith (homogenise . changeOrder Lex)
+      calcHomogeneousGroebnerBasisHilbert
     prop "includes the original ideal" $
-      checkForArity [2..3] $ prop_groebnerDivsOrigWith homogenise unsafeCalcHomogeneousGroebnerBasisHilbert
+      checkForArity [2..3] $ prop_groebnerDivsOrigWith (homogenise . changeOrder Lex) calcHomogeneousGroebnerBasisHilbert
     prop "is included in the orignal ideal" $
-      checkForArity [2..3] $ prop_groebnerIncludedWith homogenise unsafeCalcHomogeneousGroebnerBasisHilbert
+      checkForArity [2..3] $ prop_groebnerIncludedWith (homogenise . changeOrder Lex) calcHomogeneousGroebnerBasisHilbert
   describe "calcGroebnerBasisAfterHomogenising" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
     prop "passes S-test" $
       checkForArity [2..3] $ prop_passesSTestWith id calcGroebnerBasisAfterHomogenising
