@@ -304,44 +304,42 @@ henselLift henselLift821,822
 solveHensel solveHensel837,838
 solveHensel solveHensel841,842
 
-./src/Algebra/Matrix/CSR.hs,1297
-module Algebra.Matrix.CSRAlgebra.Matrix.CSR3,4
-data CSRMatrix CSRMatrix25,26
-data CSRMatrix a = CSRMatrix CSRMatrix25,26
-data CSRMatrix a = CSRMatrix { rowVector rowVector25,26
-                             , colVector colVector26,27
-                             , valVector valVector27,28
-                             , _colCount _colCount28,29
-data MCSRMatrix MCSRMatrix32,33
-data MCSRMatrix s a = MCSR MCSR32,33
-data MCSRMatrix s a = MCSR { mrowVector mrowVector32,33
-                           , mcolVector mcolVector33,34
-                           , mvalVector mvalVector34,35
-                           , _mcolCount _mcolCount35,36
-type instance instance38,39
-type instance MRow MRow38,39
-type instance instance39,40
-type instance MColumn MColumn39,40
-instance instance40,41
-colCount colCount76,77
-colCount colCount77,78
-prettyMatrix prettyMatrix79,80
-prettyMatrix prettyMatrix80,81
-index index92,93
-index index93,94
-(!?)!?98,99
-(!(99,100
-(!)!102,103
-unsafeIndex unsafeIndex106,107
-unsafeIndex unsafeIndex107,108
-nonZeroCount nonZeroCount114,115
-nonZeroCount nonZeroCount115,116
-rowCount rowCount117,118
-rowCount rowCount118,119
-fromLists fromLists120,121
-fromLists fromLists121,122
-rows rows141,142
-rows rows142,143
+./src/Algebra/Matrix/RepaIntMap.hs,1200
+module Albgebra.Matrix.RepaIntMapAlbgebra.Matrix.RepaIntMap5,6
+import import10,11
+type RIMMatrix RIMMatrix24,25
+type URIMMatrix URIMMatrix25,26
+data RIMMatrix' RIMMatrix'27,28
+data RIMMatrix' repr a = RIM RIM27,28
+data RIMMatrix' repr a = RIM { _rimColCount _rimColCount27,28
+                             , _rimRows _rimRows28,29
+instance instance33,34
+toRows toRows36,37
+toRows toRows37,38
+fromRows fromRows39,40
+fromRows fromRows40,41
+vecToIM vecToIM46,47
+vecToIM vecToIM47,48
+indexed indexed49,50
+indexed indexed51,52
+data Weighted Weighted53,54
+data Weighted w a = Weighted Weighted53,54
+data Weighted w a = Weighted { getWeight getWeight53,54
+                             , unWeight unWeight54,55
+type Trivial Trivial64,65
+type Trivial a a64,65
+guardZero guardZero66,67
+guardZero guardZero67,68
+withArray withArray71,72
+withArray withArray73,74
+gaussReductionS gaussReductionS76,77
+gaussReductionS gaussReductionS80,81
+gaussReductionP gaussReductionP83,84
+gaussReductionP gaussReductionP87,88
+rankG rankG89,90
+  | i `IS.notMember`IS.notMember93,94
+gaussReductionD gaussReductionD99,100
+gaussReductionD gaussReductionD101,102
 
 ./src/Algebra/Matrix/Generic/Mutable.hs,3738
 module Algebra.Matrix.Generic.MutableAlgebra.Matrix.Generic.Mutable1,2
@@ -493,46 +491,48 @@ type instance MRow MRow114,115
 type instance instance115,116
 type instance MColumn MColumn115,116
 
-./src/Algebra/Matrix/Generic.hs,1371
+./src/Algebra/Matrix/Generic.hs,1493
 module Algebra.Matrix.GenericAlgebra.Matrix.Generic1,2
 type family family15,16
 type family family16,17
    => Matrix Matrix24,25
-  toColumns :: Matrix mat a => mat mat48,49
+  gaussReduction :: (Eq a, Normed a, Field a) => mat mat57,58
   basicRowCount basicRowCount25,26
   basicColumnCount basicColumnCount26,27
   unsafeFreeze unsafeFreeze27,28
   unsafeThaw unsafeThaw28,29
   basicUnsafeIndexM basicUnsafeIndexM29,30
   basicUnsafeGetRowM basicUnsafeGetRowM30,31
-  basicUnsafeGetColumnM basicUnsafeGetColumnM31,32
-  basicUnsafeCopy basicUnsafeCopy33,34
-  basicUnsafeCopy basicUnsafeCopy34,35
-  unsafeGenerate unsafeGenerate36,37
-  unsafeGenerate unsafeGenerate37,38
-  unsafeFromRows unsafeFromRows39,40
-  unsafeFromRows unsafeFromRows40,41
-  unsafeFromColumns unsafeFromColumns42,43
-  unsafeFromColumns unsafeFromColumns43,44
-  toRows toRows45,46
-  toRows toRows46,47
-  toColumns toColumns48,49
-  toColumns toColumns49,50
-rowCount rowCount51,52
-rowCount rowCount52,53
-columnCount columnCount54,55
-columnCount columnCount55,56
-generate generate57,58
-generate generate58,59
-freeze freeze60,61
-freeze freeze61,62
-thaw thaw63,64
-thaw thaw64,65
-fromRows fromRows66,67
-fromRows fromRows67,68
-fromColumns fromColumns72,73
-fromColumns fromColumns73,74
-gaussReduction gaussReduction78,79
-gaussReduction gaussReduction79,80
-create create85,86
-create create86,87
+  basicUnsafeGetRowM basicUnsafeGetRowM31,32
+  basicUnsafeGetColumnM basicUnsafeGetColumnM34,35
+  basicUnsafeGetColumnM basicUnsafeGetColumnM35,36
+  basicUnsafeCopy basicUnsafeCopy39,40
+  basicUnsafeCopy basicUnsafeCopy40,41
+  unsafeGenerate unsafeGenerate42,43
+  unsafeGenerate unsafeGenerate43,44
+  unsafeFromRows unsafeFromRows45,46
+  unsafeFromRows unsafeFromRows46,47
+  unsafeFromColumns unsafeFromColumns48,49
+  unsafeFromColumns unsafeFromColumns49,50
+  toRows toRows51,52
+  toRows toRows52,53
+  toColumns toColumns54,55
+  toColumns toColumns55,56
+  gaussReduction gaussReduction57,58
+  gaussReduction gaussReduction58,59
+rowCount rowCount65,66
+rowCount rowCount66,67
+columnCount columnCount68,69
+columnCount columnCount69,70
+generate generate71,72
+generate generate72,73
+freeze freeze74,75
+freeze freeze75,76
+thaw thaw77,78
+thaw thaw78,79
+fromRows fromRows80,81
+fromRows fromRows81,82
+fromColumns fromColumns86,87
+fromColumns fromColumns87,88
+create create92,93
+create create93,94

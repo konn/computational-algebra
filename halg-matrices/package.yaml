@@ -36,6 +36,7 @@ dependencies:
 - primes
 - primitive
 - reflection
+- repa
 - vector
 
 default-extensions:
