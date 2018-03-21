@@ -18,71 +18,71 @@ recoverRat recoverRat20,21
 rationalChineseRemainder rationalChineseRemainder41,42
 rationalChineseRemainder rationalChineseRemainder44,45
 
-./src/Algebra/Matrix.hs,1715
+./src/Algebra/Matrix.hs,1716
 module Algebra.Matrix Algebra.Matrix4,5
-class Matrix Matrix25,26
-  nonZeroCols :: (DecidableZero a, Elem mat a) => mat mat66,67
-  type Elem Elem26,27
-  cmap cmap27,28
-  empty empty28,29
-  fromLists fromLists29,30
-  fromCols fromCols30,31
-  fromCols fromCols31,32
-  fromRows fromRows33,34
-  fromRows fromRows34,35
-  toCols toCols36,37
-  toCols toCols37,38
-  toRows toRows38,39
-  toRows toRows39,40
-  ncols ncols40,41
-  nrows nrows41,42
-  identity identity42,43
-  diag diag43,44
-  getDiag getDiag44,45
-  trace trace45,46
-  diagProd diagProd46,47
-  zero zero47,48
-  colVector colVector48,49
-  rowVector rowVector49,50
-  getCol getCol50,51
-  getRow getRow51,52
-  switchRows switchRows52,53
-  scaleRow scaleRow53,54
-  combineRows combineRows54,55
-  trans trans55,56
-  buildMatrix buildMatrix56,57
-  index index57,58
-  index index58,59
-  (!)!61,62
-  (<||>)<||>62,63
-  (<-->)<-->63,64
-  nonZeroRows nonZeroRows64,65
-  nonZeroRows nonZeroRows65,66
-  nonZeroCols nonZeroCols66,67
-  nonZeroCols nonZeroCols67,68
-instance instance69,70
-swapIJ swapIJ96,97
-swapIJ swapIJ97,98
-toIntLA toIntLA131,132
-toIntLA toIntLA132,133
-delta delta163,164
-delta delta164,165
-companion companion167,168
-companion companion170,171
-gaussReduction gaussReduction184,185
-gaussReduction gaussReduction186,187
-gaussReduction' gaussReduction'190,191
-gaussReduction' gaussReduction'192,193
-det det213,214
-det det215,216
-maxNorm maxNorm217,218
-maxNorm maxNorm218,219
-rankWith rankWith220,221
-rankWith rankWith222,223
-inverse inverse224,225
-inverse inverse226,227
-inverseWith inverseWith228,229
-inverseWith inverseWith229,230
+class Matrix Matrix27,28
+  nonZeroCols :: (DecidableZero a, Elem mat a) => mat mat68,69
+  type Elem Elem28,29
+  cmap cmap29,30
+  empty empty30,31
+  fromLists fromLists31,32
+  fromCols fromCols32,33
+  fromCols fromCols33,34
+  fromRows fromRows35,36
+  fromRows fromRows36,37
+  toCols toCols38,39
+  toCols toCols39,40
+  toRows toRows40,41
+  toRows toRows41,42
+  ncols ncols42,43
+  nrows nrows43,44
+  identity identity44,45
+  diag diag45,46
+  getDiag getDiag46,47
+  trace trace47,48
+  diagProd diagProd48,49
+  zero zero49,50
+  colVector colVector50,51
+  rowVector rowVector51,52
+  getCol getCol52,53
+  getRow getRow53,54
+  switchRows switchRows54,55
+  scaleRow scaleRow55,56
+  combineRows combineRows56,57
+  trans trans57,58
+  buildMatrix buildMatrix58,59
+  index index59,60
+  index index60,61
+  (!)!63,64
+  (<||>)<||>64,65
+  (<-->)<-->65,66
+  nonZeroRows nonZeroRows66,67
+  nonZeroRows nonZeroRows67,68
+  nonZeroCols nonZeroCols68,69
+  nonZeroCols nonZeroCols69,70
+instance instance71,72
+swapIJ swapIJ98,99
+swapIJ swapIJ99,100
+toIntLA toIntLA136,137
+toIntLA toIntLA137,138
+delta delta168,169
+delta delta169,170
+companion companion172,173
+companion companion175,176
+gaussReduction gaussReduction189,190
+gaussReduction gaussReduction191,192
+gaussReduction' gaussReduction'195,196
+gaussReduction' gaussReduction'197,198
+det det218,219
+det det220,221
+maxNorm maxNorm222,223
+maxNorm maxNorm223,224
+rankWith rankWith225,226
+rankWith rankWith227,228
+inverse inverse229,230
+inverse inverse231,232
+inverseWith inverseWith233,234
+inverseWith inverseWith234,235
 
 ./src/Algebra/LinkedMatrix.hs,6745
 module Algebra.LinkedMatrix Algebra.LinkedMatrix8,9
@@ -303,3 +303,236 @@ henselLift henselLift821,822
 henselLift henselLift821,822
 solveHensel solveHensel837,838
 solveHensel solveHensel841,842
+
+./src/Algebra/Matrix/CSR.hs,1297
+module Algebra.Matrix.CSRAlgebra.Matrix.CSR3,4
+data CSRMatrix CSRMatrix25,26
+data CSRMatrix a = CSRMatrix CSRMatrix25,26
+data CSRMatrix a = CSRMatrix { rowVector rowVector25,26
+                             , colVector colVector26,27
+                             , valVector valVector27,28
+                             , _colCount _colCount28,29
+data MCSRMatrix MCSRMatrix32,33
+data MCSRMatrix s a = MCSR MCSR32,33
+data MCSRMatrix s a = MCSR { mrowVector mrowVector32,33
+                           , mcolVector mcolVector33,34
+                           , mvalVector mvalVector34,35
+                           , _mcolCount _mcolCount35,36
+type instance instance38,39
+type instance MRow MRow38,39
+type instance instance39,40
+type instance MColumn MColumn39,40
+instance instance40,41
+colCount colCount76,77
+colCount colCount77,78
+prettyMatrix prettyMatrix79,80
+prettyMatrix prettyMatrix80,81
+index index92,93
+index index93,94
+(!?)!?98,99
+(!(99,100
+(!)!102,103
+unsafeIndex unsafeIndex106,107
+unsafeIndex unsafeIndex107,108
+nonZeroCount nonZeroCount114,115
+nonZeroCount nonZeroCount115,116
+rowCount rowCount117,118
+rowCount rowCount118,119
+fromLists fromLists120,121
+fromLists fromLists121,122
+rows rows141,142
+rows rows142,143
+
+./src/Algebra/Matrix/Generic/Mutable.hs,3738
+module Algebra.Matrix.Generic.MutableAlgebra.Matrix.Generic.Mutable1,2
+import import12,13
+type family family18,19
+type family family19,20
+type Index Index21,22
+type Size Size22,23
+class (MVector (MColumn mat) a, MVector (MRow mat) a) => MMatrix MMatrix24,25
+  toColumns :: PrimMonad m => mat mat102,103
+  basicUnsafeNew basicUnsafeNew28,29
+  basicInitialise basicInitialise29,30
+  basicRowCount basicRowCount30,31
+  basicColumnCount basicColumnCount31,32
+  unsafeGetRow unsafeGetRow32,33
+  unsafeGetColumn unsafeGetColumn33,34
+  unsafeFill unsafeFill34,35
+  unsafeFill unsafeFill35,36
+  unsafeFromRow unsafeFromRow40,41
+  unsafeFromRow unsafeFromRow41,42
+  unsafeFromRows unsafeFromRows43,44
+  unsafeFromColumn unsafeFromColumn46,47
+  unsafeFromColumn unsafeFromColumn47,48
+  unsafeFromColumns unsafeFromColumns48,49
+  unsafeFromColumns unsafeFromColumns49,50
+  unsafeCopy unsafeCopy54,55
+  unsafeRead unsafeRead58,59
+  unsafeWrite unsafeWrite59,60
+  basicSet basicSet60,61
+  basicUnsafeIMapRowM basicUnsafeIMapRowM61,62
+  basicUnsafeIMapColumnM basicUnsafeIMapColumnM62,63
+  basicUnsafeIMapRow basicUnsafeIMapRow63,64
+  basicUnsafeIMapRow basicUnsafeIMapRow64,65
+  basicUnsafeIMapColumn basicUnsafeIMapColumn65,66
+  basicUnsafeIMapColumn basicUnsafeIMapColumn66,67
+  basicUnsafeSwapRows basicUnsafeSwapRows67,68
+  basicUnsafeSwapRows basicUnsafeSwapRows68,69
+  basicUnsafeSwapColumns basicUnsafeSwapColumns73,74
+  basicUnsafeSwapColumns basicUnsafeSwapColumns74,75
+  unsafeScaleRow unsafeScaleRow80,81
+  unsafeGenerate unsafeGenerate82,83
+  unsafeGenerate unsafeGenerate83,84
+  unsafeGenerateM unsafeGenerateM91,92
+  unsafeGenerateM unsafeGenerateM92,93
+  toRows toRows99,100
+  toRows toRows100,101
+  toColumns toColumns102,103
+  toColumns toColumns103,104
+columnCount columnCount105,106
+columnCount columnCount106,107
+rowCount rowCount109,110
+rowCount rowCount110,111
+new new114,115
+new new115,116
+unsafeNew unsafeNew121,122
+unsafeNew unsafeNew122,123
+checkBound checkBound125,126
+checkBound checkBound126,127
+getRow getRow132,133
+getRow getRow133,134
+getColumn getColumn138,139
+getColumn getColumn139,140
+imapRow imapRow146,147
+imapRow imapRow147,148
+mapRow mapRow154,155
+mapRow mapRow155,156
+imapColumn imapColumn162,163
+imapColumn imapColumn163,164
+mapColumn mapColumn170,171
+mapColumn mapColumn171,172
+scaleRow scaleRow176,177
+scaleRow scaleRow178,179
+scaleColumnL scaleColumnL184,185
+scaleColumnL scaleColumnL185,186
+scaleColumnR scaleColumnR191,192
+scaleColumnR scaleColumnR192,193
+scaleColumn scaleColumn198,199
+scaleColumn scaleColumn200,201
+fill fill206,207
+fill fill207,208
+read read213,214
+read read214,215
+write write219,220
+write write220,221
+unsafeSwapRows unsafeSwapRows225,226
+unsafeSwapRows unsafeSwapRows226,227
+swapRows swapRows231,232
+swapRows swapRows232,233
+unsafeSwapColumns unsafeSwapColumns237,238
+unsafeSwapColumns unsafeSwapColumns238,239
+swapColumns swapColumns243,244
+swapColumns swapColumns244,245
+combineRows combineRows247,248
+combineRows combineRows248,249
+combineColumns combineColumns252,253
+combineColumns combineColumns254,255
+copy copy257,258
+copy copy258,259
+clone clone262,263
+clone clone263,264
+fromRow fromRow268,269
+fromRow fromRow269,270
+fromColumn fromColumn271,272
+fromColumn fromColumn272,273
+generate generate274,275
+generate generate276,277
+generateM generateM279,280
+generateM generateM281,282
+gaussReduction gaussReduction286,287
+gaussReduction gaussReduction288,289
+unsafeGaussReduction unsafeGaussReduction294,295
+unsafeGaussReduction unsafeGaussReduction296,297
+
+./src/Algebra/Matrix/IntMap.hs,1176
+module Algebra.Matrix.IntMap Algebra.Matrix.IntMap0,1
+data IMMatrix IMMatrix18,19
+data IMMatrix a = IMM IMM18,19
+data IMMatrix a = IMM { imRows imRows18,19
+                      , imColCount imColCount19,20
+instance instance23,24
+lookCoe lookCoe26,27
+lookCoe lookCoe27,28
+data MIMMatrix MIMMatrix30,31
+data MIMMatrix s a = MIM MIM30,31
+data MIMMatrix s a = MIM { _mimRows _mimRows30,31
+                         , _mimColCount _mimColCount31,32
+guardZero guardZero34,35
+guardZero guardZero35,36
+cmpMatrixSizeMsg cmpMatrixSizeMsg39,40
+cmpMatrixSizeMsg cmpMatrixSizeMsg40,41
+dot dot57,58
+dot dot58,59
+type instance instance72,73
+type instance Mutable Mutable72,73
+type instance instance73,74
+type instance Row Row73,74
+type instance instance74,75
+type instance Column Column74,75
+mfromIM mfromIM86,87
+mfromIM mfromIM87,88
+mappedVM mappedVM92,93
+mappedVM mappedVM93,94
+mrowToIM mrowToIM99,100
+mrowToIM mrowToIM100,101
+mappedToMVM mappedToMVM107,108
+mappedToMVM mappedToMVM108,109
+type instance instance114,115
+type instance MRow MRow114,115
+type instance instance115,116
+type instance MColumn MColumn115,116
+
+./src/Algebra/Matrix/Generic.hs,1371
+module Algebra.Matrix.GenericAlgebra.Matrix.Generic1,2
+type family family15,16
+type family family16,17
+   => Matrix Matrix24,25
+  toColumns :: Matrix mat a => mat mat48,49
+  basicRowCount basicRowCount25,26
+  basicColumnCount basicColumnCount26,27
+  unsafeFreeze unsafeFreeze27,28
+  unsafeThaw unsafeThaw28,29
+  basicUnsafeIndexM basicUnsafeIndexM29,30
+  basicUnsafeGetRowM basicUnsafeGetRowM30,31
+  basicUnsafeGetColumnM basicUnsafeGetColumnM31,32
+  basicUnsafeCopy basicUnsafeCopy33,34
+  basicUnsafeCopy basicUnsafeCopy34,35
+  unsafeGenerate unsafeGenerate36,37
+  unsafeGenerate unsafeGenerate37,38
+  unsafeFromRows unsafeFromRows39,40
+  unsafeFromRows unsafeFromRows40,41
+  unsafeFromColumns unsafeFromColumns42,43
+  unsafeFromColumns unsafeFromColumns43,44
+  toRows toRows45,46
+  toRows toRows46,47
+  toColumns toColumns48,49
+  toColumns toColumns49,50
+rowCount rowCount51,52
+rowCount rowCount52,53
+columnCount columnCount54,55
+columnCount columnCount55,56
+generate generate57,58
+generate generate58,59
+freeze freeze60,61
+freeze freeze61,62
+thaw thaw63,64
+thaw thaw64,65
+fromRows fromRows66,67
+fromRows fromRows67,68
+fromColumns fromColumns72,73
+fromColumns fromColumns73,74
+gaussReduction gaussReduction78,79
+gaussReduction gaussReduction79,80
+create create85,86
+create create86,87
