@@ -2,7 +2,7 @@
 module Algebra.Matrix.Generic
   ( Matrix(..), Column, Row, Size, Index
   , rowCount, columnCount, generate, freeze, thaw
-  , fromRows, fromColumns, gaussReduction, create
+  , fromRows, fromColumns, create
   ) where
 import           Algebra.Matrix.Generic.Mutable (Index, MMatrix, Size)
 import qualified Algebra.Matrix.Generic.Mutable as GM
@@ -29,7 +29,13 @@ class ( Vector (Column mat) a, Vector (Row mat) a
   unsafeThaw            :: PrimMonad m => mat a -> m (Mutable mat (PrimState m) a)
   basicUnsafeIndexM     :: Monad m => mat a -> Index -> Index -> m a
   basicUnsafeGetRowM    :: Monad m => mat a -> Index -> m (Row mat a)
-  basicUnsafeGetColumnM :: Monad m => mat a -> Index -> m (Row mat a)
+  basicUnsafeGetRowM m i = return $ runST $ do
+    m' <- unsafeThaw m
+    GV.unsafeFreeze =<< GM.unsafeGetRow i m'
+  basicUnsafeGetColumnM :: Monad m => mat a -> Index -> m (Column mat a)
+  basicUnsafeGetColumnM m i = return $ runST $ do
+    m' <- unsafeThaw m
+    GV.unsafeFreeze =<< GM.unsafeGetColumn i m'
 
   basicUnsafeCopy      :: PrimMonad m => Mutable mat (PrimState m) a -> mat a -> m ()
   basicUnsafeCopy mmat = GM.unsafeCopy mmat <=< unsafeThaw
@@ -48,6 +54,14 @@ class ( Vector (Column mat) a, Vector (Row mat) a
 
   toColumns :: Matrix mat a => mat a -> [Column mat a]
   toColumns mat = runST $ mapM GV.unsafeFreeze =<< GM.toColumns =<< unsafeThaw mat
+
+  gaussReduction :: (Eq a, Normed a, Field a) => mat a -> (mat a, mat a, a)
+  gaussReduction mat = runST $ do
+    (m', p, d) <- GM.gaussReduction =<< unsafeThaw mat
+    tmat <- unsafeFreeze m'
+    piv <- unsafeFreeze p
+    return (tmat, piv, d)
+
 
 rowCount :: Matrix mat a => mat a -> Size
 rowCount = basicRowCount
@@ -75,13 +89,6 @@ fromColumns cs
   | let lens = map GV.length cs
   , and $ zipWith (==) lens (tail lens) = unsafeFromColumns cs
   | otherwise = error "fromColumns: columns should be of the same length"
-
-gaussReduction :: (Eq a, Matrix mat a, Normed a, Field a) => mat a -> (mat a, mat a, a)
-gaussReduction mat = runST $ do
-  (m', p, d) <- GM.gaussReduction =<< unsafeThaw mat
-  tmat <- unsafeFreeze m'
-  piv <- unsafeFreeze p
-  return (tmat, piv, d)
 
 create :: Matrix mat a => (forall s. ST s (Mutable mat s a)) -> mat a
 create act = runST $ unsafeFreeze =<< act
