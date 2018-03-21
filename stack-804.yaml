@@ -25,6 +25,7 @@ extra-deps:
 - ghc-typelits-natnormalise-0.5.9
 - ghc-typelits-presburger-0.2.0.0
 - matrix-0.3.6.0
+- repa-3.4.1.3
 - transformers-compat-0.5.1.4
 - unamb-0.2.7
 - type-natural-0.8.0.0
