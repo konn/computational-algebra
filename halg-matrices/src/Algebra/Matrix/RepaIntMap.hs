@@ -3,7 +3,7 @@
 {-# OPTIONS_GHC -Odph -rtsopts -threaded -fno-liberate-case     #-}
 {-# OPTIONS_GHC -funfolding-keeness-factor1000 -fllvm -optlo-O3 #-}
 {-# OPTIONS_GHC -funfolding-use-threshold1000                   #-}
-module Albgebra.Matrix.RepaIntMap
+module Algbebra.Matrix.RepaIntMap
   ( RIMMatrix', RIMMatrix, URIMMatrix, fromRows
   , gaussReductionD, gaussReductionP, gaussReductionS
   ) where

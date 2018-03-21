@@ -305,7 +305,7 @@ solveHensel solveHensel837,838
 solveHensel solveHensel841,842
 
 ./src/Algebra/Matrix/RepaIntMap.hs,1200
-module Albgebra.Matrix.RepaIntMapAlbgebra.Matrix.RepaIntMap5,6
+module Algbebra.Matrix.RepaIntMapAlgbebra.Matrix.RepaIntMap5,6
 import import10,11
 type RIMMatrix RIMMatrix24,25
 type URIMMatrix URIMMatrix25,26
