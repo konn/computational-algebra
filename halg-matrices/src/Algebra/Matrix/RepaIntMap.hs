@@ -109,14 +109,15 @@ gaussReductionD (RIM nCol r0) = RIM nCol $ fst $ execState loop (delay r0, IS.fr
           Nothing -> return ()
           Just (Min (col, Weighted _ newC, k, unWeight -> dic)) -> do
             _2 %= IS.delete k
-            let cancel d =
-                  case IM.lookup col d of
-                    Nothing -> d
-                    Just c ->
-                      let scale = c * recip newC
-                      in IM.filter (not . isZero) $ IM.unionWith (-) d (fmap (scale *) dic)
-                cases i
-                  | i == k = fmap (/newC)
-                  | otherwise = cancel
+            let cases i d
+                  | i == k = fmap (/newC) d
+                  | otherwise =
+                    case IM.lookup col d of
+                      Nothing -> d
+                      Just c ->
+                        let scale = c * recip newC
+                        in IM.filter (not . isZero) $
+                           IM.unionWith (-) d $
+                           fmap (scale *) dic
             _1 %= Repa.map (uncurry cases) . indexed
             loop
