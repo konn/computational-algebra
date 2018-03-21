@@ -304,8 +304,8 @@ henselLift henselLift821,822
 solveHensel solveHensel837,838
 solveHensel solveHensel841,842
 
-./src/Algebra/Matrix/RepaIntMap.hs,1200
-module Algbebra.Matrix.RepaIntMapAlgbebra.Matrix.RepaIntMap5,6
+./src/Algebra/Matrix/RepaIntMap.hs,1198
+module Algebra.Matrix.RepaIntMapAlgebra.Matrix.RepaIntMap5,6
 import import10,11
 type RIMMatrix RIMMatrix24,25
 type URIMMatrix URIMMatrix25,26
