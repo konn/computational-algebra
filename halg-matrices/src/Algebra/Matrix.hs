@@ -181,11 +181,6 @@ companion odn poly =
   then delta j (k+1)
   else NA.negate $ coeff (NA.pow vx (fromIntegral $ j-1 :: NA.Natural)) poly
 
--- instance SM.Arrayed (Fraction Integer) where
---   type Arr (Fraction Integer) = V.Vector
-
--- instance SM.Eq0 (Fraction Integer)
-
 -- | @gaussReduction a = (a', p)@ where @a'@ is row echelon form and @p@ is pivoting matrix.
 gaussReduction :: (Matrix mat, Elem mat a, Normed a, Eq a, NA.Field a)
                => mat a -> (mat a, mat a)

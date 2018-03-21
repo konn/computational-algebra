@@ -69,20 +69,20 @@ delta delta168,169
 delta delta169,170
 companion companion172,173
 companion companion175,176
-gaussReduction gaussReduction189,190
-gaussReduction gaussReduction191,192
-gaussReduction' gaussReduction'195,196
-gaussReduction' gaussReduction'197,198
-det det218,219
-det det220,221
-maxNorm maxNorm222,223
-maxNorm maxNorm223,224
-rankWith rankWith225,226
-rankWith rankWith227,228
-inverse inverse229,230
-inverse inverse231,232
-inverseWith inverseWith233,234
-inverseWith inverseWith234,235
+gaussReduction gaussReduction184,185
+gaussReduction gaussReduction186,187
+gaussReduction' gaussReduction'190,191
+gaussReduction' gaussReduction'192,193
+det det213,214
+det det215,216
+maxNorm maxNorm217,218
+maxNorm maxNorm218,219
+rankWith rankWith220,221
+rankWith rankWith222,223
+inverse inverse224,225
+inverse inverse226,227
+inverseWith inverseWith228,229
+inverseWith inverseWith229,230
 
 ./src/Algebra/LinkedMatrix.hs,6745
 module Algebra.LinkedMatrix Algebra.LinkedMatrix8,9
