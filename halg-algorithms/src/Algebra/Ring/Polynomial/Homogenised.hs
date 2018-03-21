@@ -62,7 +62,8 @@ type HomogOrder n ord = ProductOrder n 1 ord Lex
 instance IsOrderedPolynomial poly => IsOrderedPolynomial (Homogenised poly) where
   type MOrder (Homogenised poly) = HomogOrder (Arity poly) (MOrder poly)
   leadingTerm poly =
-    maybe (zero, one) swap $ M.lookupMax $ M.mapKeys OrderedMonomial $ terms' poly
+    let dic = M.mapKeys OrderedMonomial $ terms' poly
+    in if M.null dic then (zero, one) else swap $ M.findMax dic
 
 instance (IsOrderedPolynomial poly, PrettyCoeff (Coefficient poly))
       => Show (Homogenised poly) where

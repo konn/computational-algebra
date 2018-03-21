@@ -258,15 +258,15 @@ taylor taylor67,68
 taylorCoeff taylorCoeff73,74
 taylorCoeff taylorCoeff74,75
 
-./src/Algebra/Ring/Polynomial/Homogenised.hs,422
+./src/Algebra/Ring/Polynomial/Homogenised.hs,424
 module Algebra.Ring.Polynomial.HomogenisedAlgebra.Ring.Polynomial.Homogenised3,4
 newtype Homogenised Homogenised10,11
 newtype Homogenised poly = Homogenised Homogenised10,11
 instance instance29,30
 type HomogOrder HomogOrder59,60
 type HomogOrder n n59,60
-  f0 `divide`divide75,76
-homogenise homogenise98,99
+  f0 `divide`divide76,77
 homogenise homogenise99,100
-unhomogenise unhomogenise107,108
+homogenise homogenise100,101
 unhomogenise unhomogenise108,109
+unhomogenise unhomogenise109,110
