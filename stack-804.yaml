@@ -20,23 +20,12 @@ extra-deps:
 - MonadRandom-0.5.1
 - control-monad-loop-0.1
 - equational-reasoning-0.5.1.0
+- ghc-tcplugins-extra-0.2.4
+- ghc-typelits-knownnat-0.4.1
+- ghc-typelits-natnormalise-0.5.9
 - ghc-typelits-presburger-0.2.0.0
 - matrix-0.3.6.0
 - transformers-compat-0.5.1.4
 - unamb-0.2.7
-
-# Unreleased, patched versions for GHC 8.4.x
-- git: https://github.com/cartazio/arithmoi.git
-  commit: a3e189cca4c2961796c7ca74eccb29ff89f0e3d3
-
-- git: https://github.com/konn/ghc-typelits-knownnat.git
-  commit: d296ffd02eb74cb7338058ee609f170bf0cdf606
-
-- git: https://github.com/clash-lang/ghc-typelits-natnormalise.git
-  commit: 1178631cc6b78ea9b92fcf29e2944d1a148f2d71
-
-- git: https://github.com/konn/sized.git
-  commit: 086fa341c564dcc96e4154b948e93de0208c118a 
-
-- git: https://github.com/konn/type-natural.git
-  commit: 15b929cb78f30abe9e6531936d15e6d6d8f30f3c
+- type-natural-0.8.0.0
+- sized-0.3.0.0
