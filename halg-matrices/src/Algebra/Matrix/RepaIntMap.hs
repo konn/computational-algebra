@@ -5,10 +5,14 @@
 {-# OPTIONS_GHC -funfolding-use-threshold1000                   #-}
 module Algebra.Matrix.RepaIntMap
   ( RIMMatrix', RIMMatrix, URIMMatrix, fromRows
+  , delayMatrix
   , gaussReductionD, gaussReductionP, gaussReductionS
   ) where
-import Algebra.Prelude.Core hiding (Max, Min, traverse)
-import Control.Lens         (ifoldMap, imap, (%=), _1, _2)
+import           Algebra.Matrix.Generic (Column, Matrix, Mutable, Row,
+                                         WrapImmutable)
+import qualified Algebra.Matrix.Generic as GM
+import           Algebra.Prelude.Core   hiding (Max, Min, traverse)
+import           Control.Lens           (ifoldMap, imap, (%=), _1, _2)
 
 import           Control.Monad.State
 import           Data.Array.Repa             as Repa
@@ -35,7 +39,10 @@ instance (Monoidal a, Show a, Source repr (IntMap a)) => Show (RIMMatrix' repr a
   showsPrec d = showsPrec d . toRows
 
 toRows :: (Monoidal a, Source r (IntMap a)) => RIMMatrix' r a -> [Vector a]
-toRows (RIM c rs) = toList $ Repa.map (\ d -> V.generate c $ \i -> fromMaybe zero $ IM.lookup i d) rs
+toRows (RIM c rs) = toList $ Repa.map (dicToRow c) rs
+
+dicToRow :: Monoidal a => Int -> IntMap a -> Vector a
+dicToRow c d = V.generate c $ \i -> fromMaybe zero $ IM.lookup i d
 
 fromRows :: DecidableZero a => [Vector a] -> RIMMatrix a
 fromRows vs =
@@ -73,6 +80,9 @@ withArray :: (Array rep DIM1 (IntMap a) -> Array rep' DIM1 (IntMap a))
           -> RIMMatrix' rep a -> RIMMatrix' rep' a
 withArray f (RIM c rs) = RIM c (f rs)
 
+delayMatrix :: Source rep (IntMap a) => RIMMatrix' rep a -> RIMMatrix' D a
+delayMatrix = withArray delay
+
 -- | Perofms row echelon reduction, sequentially
 gaussReductionS :: ( Source repr (IntMap a), Target repr (IntMap a)
                    , Field a, DecidableZero a, Normed a
@@ -96,12 +106,14 @@ rankG remain i dic
   ((k, v), _) <- IM.minViewWithKey dic
   return (Min (k, Weighted (Down $ norm v) v, i, Weighted () dic))
 
+rowCount :: Source r (IntMap a) => RIMMatrix' r a -> Int
+rowCount m = let (Z :. n) = extent $ _rimRows m in n
 
 gaussReductionD :: (DecidableZero a, Normed a , Field a, Source repr (IntMap a))
                 => RIMMatrix' repr a -> RIMMatrix' D a
-gaussReductionD (RIM nCol r0) = RIM nCol $ fst $ execState loop (delay r0, IS.fromList [0..nRow - 1])
+gaussReductionD matr@(RIM nCol r0) = RIM nCol $ fst $ execState loop (delay r0, IS.fromList [0..nRow - 1])
   where
-    Z :. nRow = extent r0
+    nRow = rowCount matr
     loop = do
       (rs, remain) <- get
       unless (IS.null remain) $
@@ -121,3 +133,66 @@ gaussReductionD (RIM nCol r0) = RIM nCol $ fst $ execState loop (delay r0, IS.fr
                            fmap (scale *) dic
             _1 %= Repa.map (uncurry cases) . indexed
             loop
+
+type instance Mutable (RIMMatrix' r) = WrapImmutable (RIMMatrix' r)
+type instance Row (RIMMatrix' r) = Vector
+type instance Column (RIMMatrix' r) = Vector
+
+lookCoe :: Monoidal c => Int -> IntMap c -> c
+lookCoe i = fromMaybe zero . IM.lookup i
+
+updateAtRowIndex :: Source r1 (IntMap a) => RIMMatrix' r1 a -> Int -> (IntMap a -> IntMap a) -> RIMMatrix' D a
+updateAtRowIndex (RIM c m) i f = RIM c $
+  let (sh, fun) = toFunction m
+  in fromFunction sh $ \(Z :. k) ->
+    if k == i
+    then f $ fun $ Z :. k
+    else fun $ Z :. k
+{-# INLINE updateAtRowIndex #-}
+
+instance (DecidableZero a) => Matrix (RIMMatrix' D) a where
+  basicRowCount = rowCount
+  basicColumnCount = _rimColCount
+  basicUnsafeIndexM (RIM _ m) i j =
+    return $ lookCoe j $ m Repa.! (Z :. i)
+  basicUnsafeGetRowM (RIM c m) i = return $ dicToRow c $ m Repa.! (Z :. i)
+  basicUnsafeGetColumnM (RIM _ m) i = toVector <$> computeP (Repa.map (lookCoe i) m)
+  unsafeGenerate rs cs f = RIM cs $ fromFunction (Z :. rs) $ \(Z :. i) ->
+    vecToIM $ V.generate cs $ \j -> f i j
+  unsafeWrite m i j x = flip withArray m $ \n ->
+    let (sh, fun) = toFunction n
+    in fromFunction sh $ \(Z :. k) ->
+      if k == i
+      then if isZero x
+      then IM.delete j $ fun $ Z:. k
+      else IM.insert j x $ fun $ Z:. k
+      else fun $ Z :. k
+  unsafeFromRows = withArray delay . fromRows
+  unsafeFromColumns cs0 =
+    let cs = V.fromList cs0
+        ncol = V.length cs
+    in RIM ncol $ fromFunction (Z :. V.length (head cs0)) $ \(Z :. i) ->
+      IM.fromList [ (i, c)
+                  | j <- [0.. ncol - 1]
+                  , let c = cs V.! j V.! i
+                  , not $ isZero c
+                  ]
+  toRows = toRows
+  toColumns (RIM c m) =
+    fmap (\j -> V.map (lookCoe j) $ toVector $ runIdentity $ computeP m) [0.. c - 1]
+
+  swapRows im i j = flip withArray im $ \m ->
+    let (sh, fun) = toFunction m
+    in fromFunction sh $ \(Z :. k) ->
+      if i == k
+      then fun (Z :. j)
+      else if j == k
+      then fun (Z :. i)
+      else fun (Z :. k)
+  scaleRow im i c = updateAtRowIndex im i $ \d ->
+      if isZero c
+      then IM.empty
+      else IM.map (c *) d
+  unsafeIMapRow m i f =
+    updateAtRowIndex m i $
+    IM.mapMaybeWithKey (\ j -> guardZero . f j)

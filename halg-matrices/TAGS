@@ -304,42 +304,58 @@ henselLift henselLift821,822
 solveHensel solveHensel837,838
 solveHensel solveHensel841,842
 
-./src/Algebra/Matrix/RepaIntMap.hs,1198
+./src/Algebra/Matrix/RepaIntMap.hs,1707
 module Algebra.Matrix.RepaIntMapAlgebra.Matrix.RepaIntMap5,6
-import import10,11
-type RIMMatrix RIMMatrix24,25
-type URIMMatrix URIMMatrix25,26
-data RIMMatrix' RIMMatrix'27,28
-data RIMMatrix' repr a = RIM RIM27,28
-data RIMMatrix' repr a = RIM { _rimColCount _rimColCount27,28
-                             , _rimRows _rimRows28,29
-instance instance33,34
-toRows toRows36,37
-toRows toRows37,38
-fromRows fromRows39,40
-fromRows fromRows40,41
-vecToIM vecToIM46,47
-vecToIM vecToIM47,48
-indexed indexed49,50
-indexed indexed51,52
-data Weighted Weighted53,54
-data Weighted w a = Weighted Weighted53,54
-data Weighted w a = Weighted { getWeight getWeight53,54
-                             , unWeight unWeight54,55
-type Trivial Trivial64,65
-type Trivial a a64,65
-guardZero guardZero66,67
-guardZero guardZero67,68
-withArray withArray71,72
-withArray withArray73,74
-gaussReductionS gaussReductionS76,77
-gaussReductionS gaussReductionS80,81
-gaussReductionP gaussReductionP83,84
-gaussReductionP gaussReductionP87,88
-rankG rankG89,90
-  | i `IS.notMember`IS.notMember93,94
-gaussReductionD gaussReductionD99,100
-gaussReductionD gaussReductionD101,102
+import import14,15
+type RIMMatrix RIMMatrix28,29
+type URIMMatrix URIMMatrix29,30
+data RIMMatrix' RIMMatrix'31,32
+data RIMMatrix' repr a = RIM RIM31,32
+data RIMMatrix' repr a = RIM { _rimColCount _rimColCount31,32
+                             , _rimRows _rimRows32,33
+instance instance37,38
+toRows toRows40,41
+toRows toRows41,42
+dicToRow dicToRow43,44
+dicToRow dicToRow44,45
+fromRows fromRows46,47
+fromRows fromRows47,48
+vecToIM vecToIM53,54
+vecToIM vecToIM54,55
+indexed indexed56,57
+indexed indexed58,59
+data Weighted Weighted60,61
+data Weighted w a = Weighted Weighted60,61
+data Weighted w a = Weighted { getWeight getWeight60,61
+                             , unWeight unWeight61,62
+type Trivial Trivial71,72
+type Trivial a a71,72
+guardZero guardZero73,74
+guardZero guardZero74,75
+withArray withArray78,79
+withArray withArray80,81
+delayMatrix delayMatrix82,83
+delayMatrix delayMatrix83,84
+gaussReductionS gaussReductionS86,87
+gaussReductionS gaussReductionS90,91
+gaussReductionP gaussReductionP93,94
+gaussReductionP gaussReductionP97,98
+rankG rankG99,100
+  | i `IS.notMember`IS.notMember103,104
+rowCount rowCount108,109
+rowCount rowCount109,110
+gaussReductionD gaussReductionD111,112
+gaussReductionD gaussReductionD113,114
+type instance instance136,137
+type instance Mutable Mutable136,137
+type instance instance137,138
+type instance Row Row137,138
+type instance instance138,139
+type instance Column Column138,139
+lookCoe lookCoe140,141
+lookCoe lookCoe141,142
+updateAtRowIndex updateAtRowIndex143,144
+updateAtRowIndex updateAtRowIndex144,145
 
 ./src/Algebra/Matrix/HMatrix.hs,660
 module Algebra.Matrix.HMatrix Algebra.Matrix.HMatrix3,4
