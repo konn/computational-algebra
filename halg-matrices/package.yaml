@@ -56,6 +56,8 @@ default-extensions:
 library:
   source-dirs: src
   ghc-options:  -Wall
+  other-modules:
+  - Algebra.Matrix.Generic.Base
 
 executables: {}
 
