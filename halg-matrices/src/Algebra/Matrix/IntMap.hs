@@ -1,13 +1,10 @@
 module Algebra.Matrix.IntMap (IMMatrix, MIMMatrix) where
 import           Algebra.Matrix.Generic
-import           Algebra.Matrix.Generic.Mutable (MColumn, MMatrix, MRow)
+import           Algebra.Matrix.Generic.Mutable (MMatrix)
 import qualified Algebra.Matrix.Generic.Mutable as GM
 import           Algebra.Prelude.Core
-import           Control.Lens                   (iforM_)
-import           Control.Monad.Primitive
 import           Data.IntMap                    (IntMap)
 import qualified Data.IntMap                    as IM
-import           Data.Primitive.MutVar
 import           Data.Vector                    (MVector, Vector)
 import qualified Data.Vector                    as V
 import           Data.Vector.Generic            (Mutable)
@@ -84,44 +81,26 @@ instance DecidableZero a => Matrix IMMatrix a where
     fromMaybe zero $ IM.lookup j $ v V.! i
   basicUnsafeGetColumnM (IMM v _) j = return $ V.map (fromMaybe zero . IM.lookup j) v
 
-mfromIM :: (PrimMonad m, Monoidal a) => Size -> IntMap a -> m (MVector (PrimState m) a)
-mfromIM n dic = do
-  m <- MV.replicate n zero
-  sequence_ $ IM.mapWithKey (MV.write m) dic
-  return m
+mfromIM :: Monoidal a => Size -> IntMap a -> Vector a
+mfromIM n dic = V.generate n $ \k -> fromMaybe zero $ IM.lookup k dic
 
-mappedVM :: (PrimMonad m) => (a -> b) -> MVector (PrimState m) a -> m (MVector (PrimState m) b)
-mappedVM f v = do
-  let len = MV.length v
-  v' <- MV.new len
-  forM_ [0..len-1] $ \i -> MV.write v' i . f =<< MV.read v i
-  return v'
+mrowToIM :: (DecidableZero a) => Vector a -> IntMap a
+mrowToIM mv =
+  IM.fromList $ V.toList $
+  V.imapMaybe (\i k -> if isZero k then Nothing else Just (i, k)) mv
 
-mrowToIM :: (PrimMonad m, DecidableZero a) => MVector (PrimState m) a -> m (IntMap a)
-mrowToIM mv = do
-  d <- newMutVar IM.empty
-  forM_ [0..MV.length mv - 1] $ \i -> do
-    k <- MV.read mv i
-    unless (isZero k) $ modifyMutVar' d $ IM.insert i k
-  readMutVar d
-
-mappedToMVM :: (PrimMonad m) => (a -> m b) -> [a] -> m (MVector (PrimState m) b)
-mappedToMVM f v = do
-  let len = length v
-  v' <- MV.new len
-  iforM_ v $ \i -> MV.write v' i <=< f
-  return v'
-
-type instance MRow    MIMMatrix = MVector
-type instance MColumn MIMMatrix = MVector
+type instance Row    MIMMatrix = Vector
+type instance Column MIMMatrix = Vector
 instance DecidableZero a => MMatrix MIMMatrix a where
   basicUnsafeNew n m = flip MIM m <$> MV.unsafeNew n
   basicInitialise (MIM v _) = MV.basicInitialize v >> MV.set v IM.empty
   basicRowCount (MIM v _) = MV.basicLength v
   basicColumnCount (MIM _ w) = w
-  unsafeGetRow i (MIM v c) = mfromIM c =<< MV.read v i
-  unsafeGetColumn i (MIM v _) = mappedVM (fromMaybe zero . IM.lookup i) v
-  unsafeFromRows rs = flip MIM (MV.length $ head rs) <$> mappedToMVM mrowToIM rs
+  unsafeGetRow i (MIM v c) = mfromIM c <$> MV.read v i
+  unsafeGetColumn i (MIM v _) =
+    V.map (fromMaybe zero . IM.lookup i) <$> V.unsafeFreeze v
+  unsafeFromRows rs =
+    flip MIM (V.length $ head rs) <$> V.unsafeThaw (V.fromList $ map mrowToIM rs)
   unsafeCopy (MIM v _) (MIM u _) = MV.unsafeCopy v u
   unsafeRead (MIM v _) r c =
     fromMaybe zero . IM.lookup c <$> MV.unsafeRead v r
@@ -140,10 +119,3 @@ instance DecidableZero a => MMatrix MIMMatrix a where
     if isZero a
       then MV.write v i $ IM.delete j dic
       else MV.write v i $ IM.insert j a dic
-  basicUnsafeIMapColumnM (MIM v _) j f =
-    forM_ [0.. MV.length v - 1] $ \ i -> do
-    dic <- MV.read v i
-    a' <- f i $ fromMaybe zero $ IM.lookup j dic
-    if isZero a'
-      then MV.write v i $ IM.delete j dic
-      else MV.write v i $ IM.insert j a' dic
