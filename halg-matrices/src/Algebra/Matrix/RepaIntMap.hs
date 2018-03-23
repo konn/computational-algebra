@@ -4,7 +4,7 @@
 {-# OPTIONS_GHC -funfolding-keeness-factor1000 -fllvm -optlo-O3 #-}
 {-# OPTIONS_GHC -funfolding-use-threshold1000                   #-}
 module Algebra.Matrix.RepaIntMap
-  ( RIMMatrix', RIMMatrix, URIMMatrix, fromRows
+  ( RIMMatrix', RIMMatrix, URIMMatrix, DRIMMatrix, fromRows
   , delayMatrix
   , gaussReductionD, gaussReductionP, gaussReductionS
   ) where
@@ -28,6 +28,7 @@ import qualified Data.Vector                 as V
 
 type RIMMatrix  = RIMMatrix' V
 type URIMMatrix = RIMMatrix' U
+type DRIMMatrix = RIMMatrix' D
 
 data RIMMatrix' repr a = RIM { _rimColCount :: Int
                              , _rimRows :: Array repr (Z :. Int) (IntMap a)

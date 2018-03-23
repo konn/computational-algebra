@@ -304,58 +304,59 @@ henselLift henselLift821,822
 solveHensel solveHensel837,838
 solveHensel solveHensel841,842
 
-./src/Algebra/Matrix/RepaIntMap.hs,1707
+./src/Algebra/Matrix/RepaIntMap.hs,1742
 module Algebra.Matrix.RepaIntMapAlgebra.Matrix.RepaIntMap5,6
 import import14,15
 type RIMMatrix RIMMatrix28,29
 type URIMMatrix URIMMatrix29,30
-data RIMMatrix' RIMMatrix'31,32
-data RIMMatrix' repr a = RIM RIM31,32
-data RIMMatrix' repr a = RIM { _rimColCount _rimColCount31,32
-                             , _rimRows _rimRows32,33
-instance instance37,38
-toRows toRows40,41
+type DRIMMatrix DRIMMatrix30,31
+data RIMMatrix' RIMMatrix'32,33
+data RIMMatrix' repr a = RIM RIM32,33
+data RIMMatrix' repr a = RIM { _rimColCount _rimColCount32,33
+                             , _rimRows _rimRows33,34
+instance instance38,39
 toRows toRows41,42
-dicToRow dicToRow43,44
+toRows toRows42,43
 dicToRow dicToRow44,45
-fromRows fromRows46,47
+dicToRow dicToRow45,46
 fromRows fromRows47,48
-vecToIM vecToIM53,54
+fromRows fromRows48,49
 vecToIM vecToIM54,55
-indexed indexed56,57
-indexed indexed58,59
-data Weighted Weighted60,61
-data Weighted w a = Weighted Weighted60,61
-data Weighted w a = Weighted { getWeight getWeight60,61
-                             , unWeight unWeight61,62
-type Trivial Trivial71,72
-type Trivial a a71,72
-guardZero guardZero73,74
+vecToIM vecToIM55,56
+indexed indexed57,58
+indexed indexed59,60
+data Weighted Weighted61,62
+data Weighted w a = Weighted Weighted61,62
+data Weighted w a = Weighted { getWeight getWeight61,62
+                             , unWeight unWeight62,63
+type Trivial Trivial72,73
+type Trivial a a72,73
 guardZero guardZero74,75
-withArray withArray78,79
-withArray withArray80,81
-delayMatrix delayMatrix82,83
+guardZero guardZero75,76
+withArray withArray79,80
+withArray withArray81,82
 delayMatrix delayMatrix83,84
-gaussReductionS gaussReductionS86,87
-gaussReductionS gaussReductionS90,91
-gaussReductionP gaussReductionP93,94
-gaussReductionP gaussReductionP97,98
-rankG rankG99,100
-  | i `IS.notMember`IS.notMember103,104
-rowCount rowCount108,109
+delayMatrix delayMatrix84,85
+gaussReductionS gaussReductionS87,88
+gaussReductionS gaussReductionS91,92
+gaussReductionP gaussReductionP94,95
+gaussReductionP gaussReductionP98,99
+rankG rankG100,101
+  | i `IS.notMember`IS.notMember104,105
 rowCount rowCount109,110
-gaussReductionD gaussReductionD111,112
-gaussReductionD gaussReductionD113,114
-type instance instance136,137
-type instance Mutable Mutable136,137
+rowCount rowCount110,111
+gaussReductionD gaussReductionD112,113
+gaussReductionD gaussReductionD114,115
 type instance instance137,138
-type instance Row Row137,138
+type instance Mutable Mutable137,138
 type instance instance138,139
-type instance Column Column138,139
-lookCoe lookCoe140,141
+type instance Row Row138,139
+type instance instance139,140
+type instance Column Column139,140
 lookCoe lookCoe141,142
-updateAtRowIndex updateAtRowIndex143,144
+lookCoe lookCoe142,143
 updateAtRowIndex updateAtRowIndex144,145
+updateAtRowIndex updateAtRowIndex145,146
 
 ./src/Algebra/Matrix/HMatrix.hs,660
 module Algebra.Matrix.HMatrix Algebra.Matrix.HMatrix3,4
