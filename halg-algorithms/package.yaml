@@ -39,6 +39,8 @@ dependencies:
 - algebra
 - MonadRandom
 - sized
+- semigroups
+- dlist
 
 library:
   source-dirs: src
