@@ -45,6 +45,6 @@ newtype WrapAlgebra a = WrapAlgebra { unwrapAlgebra unwrapAlgebra484,485
 newtype Add Add542,543
 newtype Add a = Add Add542,543
 newtype Add a = Add { runAdd runAdd542,543
-newtype Mult Mult566,567
-newtype Mult a = Mult Mult566,567
-newtype Mult a = Mult { runMult runMult566,567
+newtype Mult Mult571,572
+newtype Mult a = Mult Mult571,572
+newtype Mult a = Mult { runMult runMult571,572

@@ -490,7 +490,7 @@ newtype WrapAlgebra a = WrapAlgebra { unwrapAlgebra :: a }
                                , DecidableZero, Euclidean, Division
                                , PID , UFD, DecidableAssociates
                                , IntegralDomain, GCDDomain
-                               , ZeroProductSemiring, Field)
+                               , ZeroProductSemiring)
 
 deriving instance LeftModule Natural a => LeftModule Natural (WrapAlgebra a)
 deriving instance RightModule Natural a => RightModule Natural (WrapAlgebra a)
