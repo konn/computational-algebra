@@ -541,7 +541,12 @@ instance Euclidean d => P.Fractional (Fraction d) where
 --   N.B. Unlike @'WrapNum'@, @'P.Num'@ instance is
 --   just inhereted from the unwrapped data.
 newtype Add a = Add { runAdd :: a }
-              deriving (Read, Show, Eq, Ord, P.Num, Additive, Monoidal)
+              deriving (Read, Show, Eq, Ord, P.Num, Additive, Monoidal, Abelian)
+
+deriving instance LeftModule Natural a => LeftModule Natural (Add a)
+deriving instance RightModule Natural a => RightModule Natural (Add a)
+deriving instance LeftModule Integer a => LeftModule Integer (Add a)
+deriving instance RightModule Integer a => RightModule Integer (Add a)
 
 instance Additive a => Semi.Semigroup (Add a) where
   Add a <> Add b = Add (a NA.+ b)
@@ -565,7 +570,7 @@ instance Monoidal a => Monoid (Add a) where
 --   N.B. Unlike @'WrapNum'@, @'P.Num'@ instance is
 --   just inhereted from the unwrapped data.
 newtype Mult a = Mult { runMult :: a }
-              deriving (Read, Show, Eq, Ord, P.Num, Multiplicative, Unital)
+              deriving (Read, Show, Eq, Ord, P.Num, Multiplicative, Unital, Commutative)
 
 instance Multiplicative a => Semi.Semigroup (Mult a) where
   Mult a <> Mult b = Mult (a NA.* b)
