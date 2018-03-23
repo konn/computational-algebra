@@ -3,7 +3,7 @@
 module Algebra.Matrix.Generic
   ( Matrix(..), Column, Row, Size, Index, WrapImmutable, Mutable
   , rowCount, columnCount, generate, freeze, thaw
-  , fromRows, fromColumns, create, (!)
+  , fromRows, fromColumns, create, (!), wrapImmutable
   ) where
 import           Algebra.Matrix.Generic.Base
 import           Algebra.Matrix.Generic.Mutable (Index, MMatrix, Size)
