@@ -1,7 +1,7 @@
-{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances   #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses      #-}
-{-# LANGUAGE NoImplicitPrelude, NoRebindableSyntax, TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies, UndecidableInstances                     #-}
+{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances      #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses         #-}
+{-# LANGUAGE NoImplicitPrelude, NoRebindableSyntax, StandaloneDeriving #-}
+{-# LANGUAGE TemplateHaskell, TypeFamilies, UndecidableInstances       #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 -- | This module provides drop-in replacement for @'Prelude'@ module in base package,
 --   based on algebraic hierarchy provided by
@@ -109,7 +109,7 @@ import           Numeric.Domain.PID                    as AlgebraicPrelude
 import           Numeric.Domain.UFD                    as AlgebraicPrelude
 import           Numeric.Field.Fraction                as AlgebraicPrelude
 import           Numeric.Semiring.ZeroProduct          as AlgebraicPrelude
-import           Prelude                               as AlgebraicPrelude (Show (..),
+import           Prelude                               as AlgebraicPrelude (Num, Show (..),
                                                                             ceiling,
                                                                             div,
                                                                             floor,
@@ -167,15 +167,6 @@ normaliseUnit = NA.normalize
 (^^) :: Division r => r -> Integer -> r
 (^^) = (NA.^)
 
-{-# RULES
-"negate/Ring" forall (x :: Ring a => a).
-  P.negate x = NA.negate x
-
-"minus/Ring" forall (x :: Ring a => a) y.
-  x P.- y = x NA.- y
-
- #-}
-
 -- * Combinator to use with @RebindableSyntax@ extensions.
 ifThenElse :: Bool -> a -> a -> a
 ifThenElse p t f = if p then t else f
@@ -197,7 +188,7 @@ ifThenElse p t f = if p then t else f
 --           with @'Num'@ instance, but it doesn't support @'negate'@,
 --           so it cannot be @'Group'@.
 newtype WrapNum a = WrapNum { unwrapNum :: a }
-                      deriving (Read, Show, Eq, Ord)
+                      deriving (Read, Show, Eq, Ord, P.Num)
 
 instance (P.Num a) => Additive (WrapNum a) where
   WrapNum a + WrapNum b = WrapNum (a P.+ b)
@@ -216,7 +207,7 @@ instance (P.Num a) => RightModule Natural (WrapNum a) where
 instance (P.Num a) => Monoidal (WrapNum a) where
   zero = WrapNum (P.fromInteger 0)
   {-# INLINE zero #-}
-  sinnum n (WrapNum a) = WrapNum ((fromIntegral n) P.* a)
+  sinnum n (WrapNum a) = WrapNum (fromIntegral n P.* a)
   {-# INLINE sinnum #-}
 
 instance (P.Num a) => LeftModule Integer (WrapNum a) where
@@ -269,6 +260,7 @@ instance (P.Num a, Eq a) => DecidableZero (WrapNum a) where
 --
 --   See also: @'WrapIntegral'@ and @'WrapNum'@.
 newtype WrapFractional a = WrapFractional { unwrapFractional :: a }
+  deriving (Read, Show, Eq, Ord, Num, Enum, P.Real, P.Fractional)
 
 instance (P.Num a) => Additive (WrapFractional a) where
   WrapFractional a + WrapFractional b = WrapFractional (a P.+ b)
@@ -287,7 +279,7 @@ instance (P.Num a) => RightModule Natural (WrapFractional a) where
 instance (P.Num a) => Monoidal (WrapFractional a) where
   zero = WrapFractional (P.fromInteger 0)
   {-# INLINE zero #-}
-  sinnum n (WrapFractional a) = WrapFractional ((fromIntegral n) P.* a)
+  sinnum n (WrapFractional a) = WrapFractional (fromIntegral n P.* a)
   {-# INLINE sinnum #-}
 
 instance (P.Num a) => LeftModule Integer (WrapFractional a) where
@@ -373,6 +365,7 @@ instance (Eq a, P.Fractional a) => UFD (WrapFractional a)
 --
 --   See also: @'WrapFractional'@ and @'WrapNum'@.
 newtype WrapIntegral a = WrapIntegral { unwrapIntegral :: a }
+  deriving (Read, Show, Eq, Ord, P.Num, P.Real, P.Enum, P.Integral)
 
 instance (P.Num a) => Additive (WrapIntegral a) where
   WrapIntegral a + WrapIntegral b = WrapIntegral (a P.+ b)
@@ -391,7 +384,7 @@ instance (P.Num a) => RightModule Natural (WrapIntegral a) where
 instance (P.Num a) => Monoidal (WrapIntegral a) where
   zero = WrapIntegral (P.fromInteger 0)
   {-# INLINE zero #-}
-  sinnum n (WrapIntegral a) = WrapIntegral ((fromIntegral n) P.* a)
+  sinnum n (WrapIntegral a) = WrapIntegral (fromIntegral n P.* a)
   {-# INLINE sinnum #-}
 
 instance (P.Num a) => LeftModule Integer (WrapIntegral a) where
@@ -490,7 +483,21 @@ instance (Eq a, P.Integral a) => UFD (WrapIntegral a)
 --        we won't provide the inverse of @'WrapIntegral'@ and
 --        provide @'Fractional'@ instance only.
 newtype WrapAlgebra a = WrapAlgebra { unwrapAlgebra :: a }
-                      deriving (Read, Show, Eq, Ord)
+                      deriving ( Read, Show, Eq, Ord, Additive
+                               , Unital, Multiplicative, Abelian
+                               , Commutative, Semiring, Rig
+                               , Ring, DecidableUnits, UnitNormalForm
+                               , DecidableZero, Euclidean, Division
+                               , PID , UFD, DecidableAssociates
+                               , IntegralDomain, GCDDomain
+                               , ZeroProductSemiring)
+
+deriving instance LeftModule Natural a => LeftModule Natural (WrapAlgebra a)
+deriving instance RightModule Natural a => RightModule Natural (WrapAlgebra a)
+deriving instance LeftModule Integer a => LeftModule Integer (WrapAlgebra a)
+deriving instance RightModule Integer a => RightModule Integer (WrapAlgebra a)
+deriving instance Monoidal a => Monoidal (WrapAlgebra a)
+deriving instance Group    a => Group    (WrapAlgebra a)
 
 instance (Ring a, UnitNormalForm a) => P.Num (WrapAlgebra a) where
   WrapAlgebra a + WrapAlgebra b = WrapAlgebra $ a NA.+ b
@@ -536,7 +543,14 @@ instance Euclidean d => P.Fractional (Fraction d) where
 --   N.B. Unlike @'WrapNum'@, @'P.Num'@ instance is
 --   just inhereted from the unwrapped data.
 newtype Add a = Add { runAdd :: a }
-              deriving (Read, Show, Eq, Ord, P.Num)
+              deriving (Read, Show, Eq, Ord, P.Num, Additive, Abelian)
+
+deriving instance LeftModule Natural a => LeftModule Natural (Add a)
+deriving instance RightModule Natural a => RightModule Natural (Add a)
+deriving instance LeftModule Integer a => LeftModule Integer (Add a)
+deriving instance RightModule Integer a => RightModule Integer (Add a)
+deriving instance Monoidal a => Monoidal (Add a)
+
 
 instance Additive a => Semi.Semigroup (Add a) where
   Add a <> Add b = Add (a NA.+ b)
@@ -560,7 +574,7 @@ instance Monoidal a => Monoid (Add a) where
 --   N.B. Unlike @'WrapNum'@, @'P.Num'@ instance is
 --   just inhereted from the unwrapped data.
 newtype Mult a = Mult { runMult :: a }
-              deriving (Read, Show, Eq, Ord, P.Num)
+              deriving (Read, Show, Eq, Ord, P.Num, Multiplicative, Unital, Commutative)
 
 instance Multiplicative a => Semi.Semigroup (Mult a) where
   Mult a <> Mult b = Mult (a NA.* b)
@@ -586,3 +600,5 @@ L.makeWrapped ''WrapFractional
 L.makeWrapped ''WrapAlgebra
 L.makeWrapped ''Add
 L.makeWrapped ''Mult
+
+{-# ANN module "Hlint: ignore Redundant fromInteger" #-}
