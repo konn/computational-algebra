@@ -238,6 +238,25 @@ calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy351
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert356,357
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert359,360
 
+./src/Algebra/Algorithms/Groebner/F4.hs,651
+module Algebra.Algorithms.Groebner.F4Algebra.Algorithms.Groebner.F43,4
+data MinTag MinTag12,13
+data MinTag w m = MinTag MinTag12,13
+data MinTag w m = MinTag { _getWeight _getWeight12,13
+                         , getMonoid getMonoid13,14
+                | NoMinNoMin15,16
+instance instance19,20
+degPair degPair29,30
+degPair degPair30,31
+normalStrategy normalStrategy32,33
+normalStrategy normalStrategy35,36
+f4WithStrategy' f4WithStrategy'40,41
+f4WithStrategy' f4WithStrategy'42,43
+f4WithStrategy f4WithStrategy45,46
+f4WithStrategy f4WithStrategy47,48
+computeMatrix computeMatrix49,50
+computeMatrix computeMatrix54,55
+
 ./src/Algebra/Field/RationalFunction.hs,683
 module Algebra.Field.RationalFunctionAlgebra.Field.RationalFunction2,3
 newtype RationalFunction RationalFunction17,18
