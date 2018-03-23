@@ -1,28 +1,20 @@
 {-# LANGUAGE TupleSections #-}
 module Algebra.Matrix.Generic.Mutable
-  ( MMatrix(..), Index, Size, MColumn, MRow
+  ( MMatrix(..), Index, Size, Column, Row
   , new, unsafeNew, copy, clone, generate, generateM
   , fromRow, fromColumn, getRow, getColumn
-  , imapRow, mapRow, imapColumn, mapColumn, fill, read, write
+  , imapRow, mapRow, fill, read, write
   , scaleRow, unsafeSwapRows, swapRows
-  , scaleColumnL, scaleColumnR, scaleColumn, unsafeSwapColumns, swapColumns
-  , combineRows, combineColumns
+  , combineRows
   , gaussReduction, unsafeGaussReduction
   ) where
+import           Algebra.Matrix.Generic.Base
 import           Algebra.Prelude.Core        hiding (Vector, generate)
-import           Control.Monad               ((<=<))
 import           Control.Monad.Primitive     (PrimMonad, PrimState)
-import           Data.Kind
-import           Data.Vector.Generic.Mutable (MVector)
-import qualified Data.Vector.Generic.Mutable as MV
+import qualified Data.Vector.Generic         as GV
 
-type family MColumn (mat :: k -> Type -> Type) :: k -> Type -> Type
-type family MRow    (mat :: k -> Type -> Type) :: k -> Type -> Type
-
-type Index = Int
-type Size = Int
-
-class (MVector (MColumn mat) a, MVector (MRow mat) a) => MMatrix mat a where
+-- | Mutable, row-based @0@-origin matrix
+class (GV.Vector (Column mat) a, GV.Vector (Row mat) a) => MMatrix mat a where
   -- | @'basicUnsafeNew' n m@ creates a mutable matrix with @n@ rows and @m@ columns,
   --   without initialisation.
   --   This method should not be used directly, use @'unsafeNew'@ instead.
@@ -30,26 +22,25 @@ class (MVector (MColumn mat) a, MVector (MRow mat) a) => MMatrix mat a where
   basicInitialise           :: PrimMonad m => mat (PrimState m) a -> m ()
   basicRowCount             :: mat s a -> Size
   basicColumnCount          :: mat s a -> Size
-  unsafeGetRow              :: PrimMonad m => Index -> mat (PrimState m) a -> m (MRow    mat (PrimState m) a)
-  unsafeGetColumn           :: PrimMonad m => Index -> mat (PrimState m) a -> m (MColumn mat (PrimState m) a)
+  unsafeGetRow              :: PrimMonad m => Index -> mat (PrimState m) a -> m (Row    mat a)
+  unsafeGetColumn           :: PrimMonad m => Index -> mat (PrimState m) a -> m (Column mat a)
   unsafeFill                :: PrimMonad m => Size -> Size -> a -> m (mat (PrimState m) a)
   unsafeFill w h a = do
     m <- basicUnsafeNew w h
     forM_ [0..w-1] $ \i -> forM_ [0..h-1] $ \j -> unsafeWrite m i j a
     return m
   -- | Construct a mutable matrix consisting of a single row, perhaps without any copy.
-  unsafeFromRow             :: PrimMonad m => MRow mat (PrimState m) a -> m (mat (PrimState m) a)
+  unsafeFromRow             :: PrimMonad m => Row mat a -> m (mat (PrimState m) a)
   unsafeFromRow = unsafeFromRows . (:[])
   -- | Construct a mutable matrix consisting a single column, perhaps without any copy.
-  unsafeFromRows            :: PrimMonad m => [MRow mat (PrimState m) a] -> m (mat (PrimState m) a)
+  unsafeFromRows            :: PrimMonad m => [Row mat a] -> m (mat (PrimState m) a)
 
   -- | Construct a mutable matrix consisting a single column, perhaps without any copy.
-  unsafeFromColumn          :: PrimMonad m => MColumn mat (PrimState m) a -> m (mat (PrimState m) a)
+  unsafeFromColumn          :: PrimMonad m => Column mat a -> m (mat (PrimState m) a)
   unsafeFromColumn          = unsafeFromColumns . (:[])
-  unsafeFromColumns         :: PrimMonad m => [MColumn mat (PrimState m) a] -> m (mat (PrimState m) a)
+  unsafeFromColumns         :: PrimMonad m => [Column mat a] -> m (mat (PrimState m) a)
   unsafeFromColumns [] = new 0 0
-  unsafeFromColumns xs = unsafeGenerateM (MV.length $ head xs) (length xs) $ \i j ->
-    MV.read (xs !! j) i
+  unsafeFromColumns xs = unsafeGenerate (GV.length $ head xs) (length xs) $ \i j -> (xs !! j) GV.! i
 
   -- | @'usnafeCopy' target source@ copies the content of @source@ to @target@, without boundary check.
   unsafeCopy                :: PrimMonad m => mat (PrimState m) a -> mat (PrimState m) a -> m ()
@@ -60,25 +51,16 @@ class (MVector (MColumn mat) a, MVector (MRow mat) a) => MMatrix mat a where
   unsafeWrite               :: PrimMonad m => mat (PrimState m) a -> Index -> Index -> a -> m ()
   basicSet                  :: PrimMonad m => mat (PrimState m) a -> a -> m ()
   basicUnsafeIMapRowM       :: PrimMonad m => mat (PrimState m) a -> Index -> (Index -> a -> m a) -> m ()
-  basicUnsafeIMapColumnM    :: PrimMonad m => mat (PrimState m) a -> Index -> (Index -> a -> m a) -> m ()
   basicUnsafeIMapRow        :: PrimMonad m => mat (PrimState m) a -> Index -> (Index -> a -> a) -> m ()
   basicUnsafeIMapRow m i f  = basicUnsafeIMapRowM m i ((return .). f)
-  basicUnsafeIMapColumn     :: PrimMonad m => mat (PrimState m) a -> Index -> (Index -> a -> a) -> m ()
-  basicUnsafeIMapColumn m i f  = basicUnsafeIMapColumnM m i ((return .). f)
   basicUnsafeSwapRows       :: PrimMonad m => mat (PrimState m) a -> Index -> Index -> m ()
   basicUnsafeSwapRows m i i' = forM_ [0.. basicColumnCount m - 1] $ \j -> do
     x <- unsafeRead m i  j
     y <- unsafeRead m i' j
     unsafeWrite m i  j y
     unsafeWrite m i' j x
-  basicUnsafeSwapColumns       :: PrimMonad m => mat (PrimState m) a -> Index -> Index -> m ()
-  basicUnsafeSwapColumns m j j' = forM_ [0.. basicRowCount m - 1] $ \i -> do
-    x <- unsafeRead m i j
-    y <- unsafeRead m i j'
-    unsafeWrite m i j  y
-    unsafeWrite m i j' x
 
-  unsafeScaleRow :: (PrimMonad m, Commutative a, Multiplicative a) => mat (PrimState m) a -> Index -> a -> m ()
+  unsafeScaleRow :: (PrimMonad m, Commutative a) => mat (PrimState m) a -> Index -> a -> m ()
 
   unsafeGenerate :: (PrimMonad m) => Size -> Size -> (Index -> Index -> a) -> m (mat (PrimState m) a)
   unsafeGenerate w h f = do
@@ -97,10 +79,10 @@ class (MVector (MColumn mat) a, MVector (MRow mat) a) => MMatrix mat a where
       unsafeWrite m i j =<< f i j
     return m
 
-  toRows :: PrimMonad m => mat (PrimState m) a -> m [MRow mat (PrimState m) a]
+  toRows :: PrimMonad m => mat (PrimState m) a -> m [Row mat a]
   toRows mat = forM [0..rowCount mat-1] $ \i -> unsafeGetRow i mat
 
-  toColumns :: PrimMonad m => mat (PrimState m) a -> m [MColumn mat (PrimState m) a]
+  toColumns :: PrimMonad m => mat (PrimState m) a -> m [Column mat a]
   toColumns mat = forM [0..columnCount mat-1] $ \i -> unsafeGetColumn i mat
 
 columnCount :: MMatrix mat a => mat s a -> Size
@@ -130,13 +112,13 @@ checkBound i f m a | 0 <= i && i < f m = a
 -- | @'getRow' n mat@ retrieves @n@th row in @mat@
 --
 --   __N.B.__ Index is considered as /@0@-origin/, NOT @1@!
-getRow :: (MMatrix mat a, PrimMonad m) => Index -> mat (PrimState m) a -> m (MRow mat (PrimState m) a)
+getRow :: (MMatrix mat a, PrimMonad m) => Index -> mat (PrimState m) a -> m (Row mat a)
 getRow i m = checkBound i rowCount m $ unsafeGetRow i m
 
 -- | @'getColumn' n mat@ retrieves @n@th colun in @mat@
 --
 --   __N.B.__ Index is considered as /@0@-origin/, NOT @1@!
-getColumn :: (MMatrix mat a, PrimMonad m) => Index -> mat (PrimState m) a -> m (MColumn mat (PrimState m) a)
+getColumn :: (MMatrix mat a, PrimMonad m) => Index -> mat (PrimState m) a -> m (Column mat a)
 getColumn i m = checkBound i columnCount m $ unsafeGetColumn i m
 
 -- | @'imapRow' i f m@ mutates @i@th row in the matrix @m@ by applying @f@ with column index.
@@ -155,22 +137,6 @@ imapRow i f m = checkBound i rowCount m $ basicUnsafeIMapRow m i f
 mapRow :: (PrimMonad m, MMatrix mat a) => Index -> (a -> a) -> mat (PrimState m) a -> m ()
 mapRow i f m = checkBound i rowCount m $ basicUnsafeIMapRow m i (const f)
 
--- | @'imapColumn' j f m@ mutates @j@th column in the matrix @m@ by applying @f@ with row index.
---
---   See also: @'imapRow'@, @'mapRow'@, @'mapColumn'@.
---
---   __N.B.__ Index is considered as /@0@-origin/, NOT @1@!
-imapColumn :: (PrimMonad m, MMatrix mat a) => Index -> (Index -> a -> a) -> mat (PrimState m) a -> m ()
-imapColumn i f m = checkBound i columnCount m $ basicUnsafeIMapColumn m i f
-
--- | @'mapColumn' j f m@ mutates @j@th column in the matrix @m@ by applying @f@.
---
---   See also: @'imapRow'@, @'mapRow'@, @'imapColumn'@.
---
---   __N.B.__ Index is considered as /@0@-origin/, NOT @1@!
-mapColumn :: (PrimMonad m, MMatrix mat a) => Index -> (a -> a) -> mat (PrimState m) a -> m ()
-mapColumn i f m = checkBound i columnCount m $ basicUnsafeIMapColumn m i (const f)
-
 -- | @'scaleRowL' i c m@ multiplies every element in @i@th row in @m@ by @c@, from right.
 --
 --   See also: @'scaleRowL'@ and @'scaleRow'@
@@ -178,28 +144,6 @@ scaleRow :: (Multiplicative a, Commutative a, MMatrix mat a, PrimMonad m)
          => Index -> a -> mat (PrimState m) a -> m ()
 scaleRow i c m = checkBound i rowCount m $ unsafeScaleRow m i c
 {-# INLINE scaleRow #-}
-
--- | @'scaleColumnL' i c m@ multiplies every element in @i@th column in @m@ by @c@, from left.
---
---   See also: @'scaleColumnR'@ and @'scaleColumn'@
-scaleColumnL :: (Multiplicative a, MMatrix mat a, PrimMonad m) => Index -> a -> mat (PrimState m) a -> m ()
-scaleColumnL i c = mapColumn i (c *)
-{-# INLINE scaleColumnL #-}
-
--- | @'scaleColumnL' i c m@ multiplies every element in @i@th column in @m@ by @c@, from right.
---
---   See also: @'scaleColumnL'@ and @'scaleColumn'@
-scaleColumnR :: (Multiplicative a, MMatrix mat a, PrimMonad m) => Index -> a -> mat (PrimState m) a -> m ()
-scaleColumnR i c = mapColumn i (* c)
-{-# INLINE scaleColumnR #-}
-
--- | Commutative version of @'scaleColumnL'@ and @'scaleColumnR'@.
---
---   See also: @'scaleColumnL'@ and @'scaleColumnR'@.
-scaleColumn :: (PrimMonad m, MMatrix mat a, Commutative a, Multiplicative a)
-         => Index -> a -> mat (PrimState m) a -> m ()
-scaleColumn = scaleColumnL
-{-# INLINE scaleColumn #-}
 
 -- | @'fill' n m c@ creates a mutable constant matrix with @n@ rows and @m@ columns.
 --
@@ -232,28 +176,10 @@ unsafeSwapRows i j m = basicUnsafeSwapRows m i j
 swapRows :: (PrimMonad m, MMatrix mat a) => Index -> Index -> mat (PrimState m) a -> m ()
 swapRows i j m = checkBound i rowCount m $ checkBound j rowCount m $ unsafeSwapRows i j m
 
--- | @'unsafeSwapColumns' n m mat@ swaps @n@th and @m@th columns in @m@, without boundary check.
---
---   See also: @'swapColumns'@.
-unsafeSwapColumns :: (PrimMonad m, MMatrix mat a) => Index -> Index -> mat (PrimState m) a -> m ()
-unsafeSwapColumns i j m = basicUnsafeSwapColumns m i j
-
--- | @'swapColumns' n m mat@ swaps @n@th and @m@th columns in @m@.
---
---   See also: @'unsafeSwapColumns'@.
-swapColumns :: (PrimMonad m, MMatrix mat a) => Index -> Index -> mat (PrimState m) a -> m ()
-swapColumns i j m = checkBound i columnCount m $ checkBound j columnCount m $ unsafeSwapColumns i j m
-
 -- | @'combineRows' i c j mat@ adds scalar multiple of @j@th row by @c@ to @i@th.
 combineRows :: (Semiring a, Commutative a, PrimMonad m, MMatrix mat a) => Index -> a -> Index -> mat (PrimState m) a -> m ()
 combineRows i c j m = checkBound i rowCount m $ checkBound j rowCount m $
   basicUnsafeIMapRowM m i (\k a -> (a+) . (c*) <$> unsafeRead m j k)
-
--- | @'combineColumns' i c j mat@ adds scalar multiple of @j@th column by @c@ to @i@th.
-combineColumns :: (Semiring a, Commutative a, PrimMonad m, MMatrix mat a)
-               => Index -> a -> Index -> mat (PrimState m) a -> m ()
-combineColumns i c j m = checkBound i columnCount m $ checkBound j columnCount m $
-  basicUnsafeIMapColumnM m i (\k a -> (a+) . (c*) <$> unsafeRead m j k)
 
 copy :: (PrimMonad m, MMatrix mat a) => mat (PrimState m) a -> mat (PrimState m) a -> m ()
 copy targ src | rowCount targ == rowCount src
@@ -266,11 +192,11 @@ clone m = do
   unsafeCopy m' m
   return m'
 
-fromRow :: (PrimMonad m, MMatrix mat a) => MRow mat (PrimState m) a -> m (mat (PrimState m) a)
-fromRow = unsafeFromRow <=< MV.clone
+fromRow :: (PrimMonad m, MMatrix mat a) => Row mat a -> m (mat (PrimState m) a)
+fromRow = unsafeFromRow
 
-fromColumn :: (PrimMonad m, MMatrix mat a) => MColumn mat (PrimState m) a -> m (mat (PrimState m) a)
-fromColumn = unsafeFromColumn <=< MV.clone
+fromColumn :: (PrimMonad m, MMatrix mat a) => Column mat a -> m (mat (PrimState m) a)
+fromColumn = unsafeFromColumn
 
 generate :: (PrimMonad m, MMatrix mat a)
          => Int -> Int -> (Index -> Index -> a) -> m (mat (PrimState m) a)
