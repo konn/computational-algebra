@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6be2f0998993446ca29bd495685f4a35f411ae0dd47aeac0da54e8ee03cc124d
+-- hash: 281b445720db716422ae0b70dd322c18505487f9d12537802482fbb1855fb155
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -72,7 +72,7 @@ test-suite spec
   hs-source-dirs:
       test
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
-  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N -Odph -rtsopts
   build-depends:
       HUnit
     , MonadRandom
@@ -101,6 +101,7 @@ test-suite spec
     , type-natural
     , vector
   other-modules:
+      F4Spec
       ZeroDimSpec
       HomogeneousSpec
       Utils

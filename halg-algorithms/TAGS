@@ -86,6 +86,19 @@ data TestSet = TestSet { inputMat inputMat133,134
 linSet linSet138,139
 linSet linSet139,140
 
+./test/F4Spec.hs,408
+module F4Spec F4Spec5,6
+asGenListOf asGenListOf27,28
+asGenListOf asGenListOf28,29
+spec spec30,31
+spec spec31,32
+prop_passesSTest prop_passesSTest40,41
+prop_passesSTest prop_passesSTest42,43
+prop_groebnerDivsOrig prop_groebnerDivsOrig47,48
+prop_groebnerDivsOrig prop_groebnerDivsOrig49,50
+prop_groebnerIncluded prop_groebnerIncluded55,56
+prop_groebnerIncluded prop_groebnerIncluded57,58
+
 ./test/HomogeneousSpec.hs,474
 module HomogeneousSpec HomogeneousSpec4,5
 asGenListOf asGenListOf28,29
@@ -238,32 +251,32 @@ calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy351
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert356,357
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert359,360
 
-./src/Algebra/Algorithms/Groebner/F4.hs,798
-module Algebra.Algorithms.Groebner.F4Algebra.Algorithms.Groebner.F42,3
-type Strategy Strategy22,23
-type Strategy f f22,23
-normalStrategy normalStrategy24,25
+./src/Algebra/Algorithms/Groebner/F4.hs,799
+module Algebra.Algorithms.Groebner.F4Algebra.Algorithms.Groebner.F43,4
+type Strategy Strategy23,24
+type Strategy f f23,24
 normalStrategy normalStrategy25,26
-degPair degPair27,28
+normalStrategy normalStrategy26,27
 degPair degPair28,29
-lcmLeadingMonomial lcmLeadingMonomial30,31
-lcmLeadingMonomial lcmLeadingMonomial32,33
-viewMins viewMins34,35
+degPair degPair29,30
+lcmLeadingMonomial lcmLeadingMonomial31,32
+lcmLeadingMonomial lcmLeadingMonomial33,34
 viewMins viewMins35,36
-f4 f439,40
-f4 f442,43
-f4' f4'44,45
-f4' f4'49,50
-f4WithStrategy' f4WithStrategy'53,54
-f4WithStrategy' f4WithStrategy'58,59
-type OMonom OMonom97,98
-type OMonom poly poly97,98
-decodeMatrix decodeMatrix99,100
-decodeMatrix decodeMatrix103,104
-f4WithStrategy f4WithStrategy107,108
-f4WithStrategy f4WithStrategy112,113
-computeMatrix computeMatrix114,115
-computeMatrix computeMatrix120,121
+viewMins viewMins36,37
+f4 f440,41
+f4 f443,44
+f4' f4'45,46
+f4' f4'50,51
+f4WithStrategy' f4WithStrategy'54,55
+f4WithStrategy' f4WithStrategy'59,60
+type OMonom OMonom98,99
+type OMonom poly poly98,99
+decodeMatrix decodeMatrix100,101
+decodeMatrix decodeMatrix104,105
+f4WithStrategy f4WithStrategy110,111
+f4WithStrategy f4WithStrategy115,116
+computeMatrix computeMatrix117,118
+computeMatrix computeMatrix123,124
 
 ./src/Algebra/Field/RationalFunction.hs,683
 module Algebra.Field.RationalFunctionAlgebra.Field.RationalFunction2,3
