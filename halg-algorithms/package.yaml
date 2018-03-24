@@ -33,14 +33,14 @@ default-extensions:
 - UndecidableInstances  
 
 dependencies:
+- MonadRandom
+- algebra
 - base >= 4.7 && < 5
+- dlist
 - halg-core
 - halg-polynomials
-- algebra
-- MonadRandom
-- sized
 - semigroups
-- dlist
+- sized
 
 library:
   source-dirs: src
