@@ -1,21 +1,22 @@
-{-# LANGUAGE NoMonomorphismRestriction, PatternSynonyms, ScopedTypeVariables #-}
+{-# LANGUAGE NoMonomorphismRestriction, PartialTypeSignatures #-}
+{-# LANGUAGE PatternSynonyms, ScopedTypeVariables             #-}
 -- | Faugere's F4 algorithm
 module Algebra.Algorithms.Groebner.F4
   (f4', f4, f4WithStrategy', f4WithStrategy, normalStrategy) where
 import           Algebra.Matrix.Generic
-import           Algebra.Matrix.RepaIntMap (DRIMMatrix)
-import           Algebra.Prelude.Core      hiding (Min)
+import           Algebra.Matrix.IntMap  (IMMatrix)
+import           Algebra.Prelude.Core   hiding (Min)
 import           Control.Lens
 import           Control.Monad.Loops
 import           Control.Monad.ST
-import qualified Data.Foldable             as F
-import qualified Data.Heap                 as H
-import           Data.Monoid               (First (..))
-import qualified Data.Set                  as S
+import qualified Data.Foldable          as F
+import qualified Data.Heap              as H
+import           Data.Monoid            (First (..))
+import qualified Data.Set               as S
 import           Data.STRef
-import qualified Data.Vector               as V
-import qualified Data.Vector.Generic       as GV
-import qualified Data.Vector.Mutable       as MV
+import qualified Data.Vector            as V
+import qualified Data.Vector.Generic    as GV
+import qualified Data.Vector.Mutable    as MV
 
 -- | Selection strategy assigning each pair of polynomials of type @f@,
 --   to some @'Ord'@ered rank @w@. F_4 Algorithm will take care of pairs
@@ -40,7 +41,7 @@ viewMins h = do
 f4 :: (Field (Coefficient poly),
        IsOrderedPolynomial poly, Normed (Coefficient poly))
    => Ideal poly -> [poly]
-f4 = f4' (Proxy :: Proxy DRIMMatrix)
+f4 = f4' (Proxy :: Proxy IMMatrix)
 
 f4' ::(Normed (Coefficient poly),
        IsOrderedPolynomial poly,
@@ -82,7 +83,7 @@ f4WithStrategy' mrep select ideal = runST $ do
                         labs) $ toRows mat
         (red, _, _) = gaussReduction mat
         ps = filter (\f -> all (not . (`divs` leadingMonomial f)) ms) $
-             decodeMatrix labs red `asTypeOf` generators ideal
+             decodeMatrix labs red
     unless (null ps) $ do
       g0 <- readSTRef gs
       let len0 = MV.length g0
@@ -102,7 +103,9 @@ decodeMatrix :: (Matrix mat (Coefficient poly), IsOrderedPolynomial poly)
              -> mat (Coefficient poly)
              -> [poly]
 decodeMatrix labs mat =
-  map (GV.ifoldr (\j d c -> toPolynomial (d, labs V.! j) + c) zero) $ toRows mat
+  filter (not . isZero) $
+  map (GV.ifoldr (\j d c -> toPolynomial (d, labs V.! j) + c) zero) $
+  toRows mat
 
 -- | F_4 algorithm, using parallel array as an internal representation
 f4WithStrategy :: (Field (Coefficient poly),
@@ -110,7 +113,7 @@ f4WithStrategy :: (Field (Coefficient poly),
                    Normed (Coefficient poly),
                    Ord w)
    => Strategy poly w -> Ideal poly -> [poly]
-f4WithStrategy = f4WithStrategy' (Proxy :: Proxy DRIMMatrix)
+f4WithStrategy = f4WithStrategy' (Proxy :: Proxy IMMatrix)
 
 computeMatrix :: (IsOrderedPolynomial poly,
                   Field (Coefficient poly),
