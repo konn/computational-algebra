@@ -23,7 +23,7 @@ data STMatrix s a = STMat { stmRows :: !Int
                           , unwrapSTM :: LA.STMatrix s a
                           }
 
-instance (Num a, Monoidal a, LA.Container LA.Matrix a) => Matrix LA.Matrix a where
+instance (Num a, LA.Container LA.Matrix a) => Matrix LA.Matrix a where
   basicRowCount = LA.rows
   basicColumnCount = LA.cols
   unsafeFromRows = LA.fromRows
@@ -43,8 +43,8 @@ getRowLA i m = head $ LA.toRows $ m LA.? [i]
 getColLA :: LA.Element t => Int -> LA.Matrix t -> LA.Vector t
 getColLA i m = head $ LA.toColumns $ m LA.¿ [i]
 
-instance (Num a, Monoidal a, LA.Container LA.Matrix a) => MMatrix STMatrix a where
-  basicUnsafeNew n m = stToPrim $ STMat n m <$> LA.newMatrix zero n m
+instance (Num a, LA.Container LA.Matrix a) => MMatrix STMatrix a where
+  basicUnsafeNew n m = stToPrim $ STMat n m <$> LA.newMatrix 0 n m
   basicInitialise _ = return ()
   basicRowCount = stmRows
   basicColumnCount = stmCols
