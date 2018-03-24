@@ -238,24 +238,32 @@ calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy351
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert356,357
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert359,360
 
-./src/Algebra/Algorithms/Groebner/F4.hs,651
-module Algebra.Algorithms.Groebner.F4Algebra.Algorithms.Groebner.F43,4
-data MinTag MinTag12,13
-data MinTag w m = MinTag MinTag12,13
-data MinTag w m = MinTag { _getWeight _getWeight12,13
-                         , getMonoid getMonoid13,14
-                | NoMinNoMin15,16
-instance instance19,20
-degPair degPair29,30
-degPair degPair30,31
-normalStrategy normalStrategy32,33
-normalStrategy normalStrategy35,36
-f4WithStrategy' f4WithStrategy'40,41
-f4WithStrategy' f4WithStrategy'42,43
-f4WithStrategy f4WithStrategy45,46
-f4WithStrategy f4WithStrategy47,48
-computeMatrix computeMatrix49,50
-computeMatrix computeMatrix54,55
+./src/Algebra/Algorithms/Groebner/F4.hs,798
+module Algebra.Algorithms.Groebner.F4Algebra.Algorithms.Groebner.F42,3
+type Strategy Strategy22,23
+type Strategy f f22,23
+normalStrategy normalStrategy24,25
+normalStrategy normalStrategy25,26
+degPair degPair27,28
+degPair degPair28,29
+lcmLeadingMonomial lcmLeadingMonomial30,31
+lcmLeadingMonomial lcmLeadingMonomial32,33
+viewMins viewMins34,35
+viewMins viewMins35,36
+f4 f439,40
+f4 f442,43
+f4' f4'44,45
+f4' f4'49,50
+f4WithStrategy' f4WithStrategy'53,54
+f4WithStrategy' f4WithStrategy'58,59
+type OMonom OMonom97,98
+type OMonom poly poly97,98
+decodeMatrix decodeMatrix99,100
+decodeMatrix decodeMatrix103,104
+f4WithStrategy f4WithStrategy107,108
+f4WithStrategy f4WithStrategy112,113
+computeMatrix computeMatrix114,115
+computeMatrix computeMatrix120,121
 
 ./src/Algebra/Field/RationalFunction.hs,683
 module Algebra.Field.RationalFunctionAlgebra.Field.RationalFunction2,3
