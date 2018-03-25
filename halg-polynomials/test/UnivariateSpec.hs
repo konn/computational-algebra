@@ -30,7 +30,7 @@ liftMult f g =
   in injectVars (f' * g')
 
 spec :: Spec
-spec = do
+spec = parallel $ do
   describe "naiveMult" $ do
     prop "Works as expected" $ \f g ->
       (f `naiveMult` g) == (f `liftMult` g)
