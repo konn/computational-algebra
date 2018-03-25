@@ -30,7 +30,7 @@ asGenListOf :: Gen [a] -> a -> Gen [a]
 asGenListOf = const
 
 spec :: Spec
-spec = do
+spec = parallel $ do
   describe "calcHomogeneousGroebnerBasis" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
     prop "passes S-test" $
       checkForArity [2..3] $ prop_passesSTestWith homogenise unsafeCalcHomogeneousGroebnerBasis

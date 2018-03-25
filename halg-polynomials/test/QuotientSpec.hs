@@ -19,7 +19,7 @@ asGenListOf :: Gen [a] -> a -> Gen [a]
 asGenListOf = const
 
 spec :: Spec
-spec = do
+spec = parallel $ do
   return ()
 
 prop_passesSTest :: SNat n -> Property
