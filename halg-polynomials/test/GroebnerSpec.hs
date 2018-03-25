@@ -21,7 +21,7 @@ asGenListOf :: Gen [a] -> a -> Gen [a]
 asGenListOf = const
 
 spec :: Spec
-spec = do
+spec = parallel $ do
   describe "divModPolynomial" $ modifyMaxSize (const 25) $ modifyMaxSuccess (const 100) $ do
     prop "remainder cannot be diveided by any denoms (ternary)" $
       checkForArity [1..4] prop_indivisible
