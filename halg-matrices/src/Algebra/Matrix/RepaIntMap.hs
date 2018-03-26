@@ -165,6 +165,7 @@ updateAtRowIndex (RIM c m) i f = RIM c $
 {-# INLINE updateAtRowIndex #-}
 
 instance (DecidableZero a) => Matrix (RIMMatrix' D) a where
+  {-# SPECIALISE instance DecidableZero a => Matrix (RIMMatrix' D) a #-}
   basicRowCount = rowCount
   basicColumnCount = _rimColCount
   basicUnsafeIndexM (RIM _ m) i j =
