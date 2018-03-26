@@ -5,7 +5,7 @@
 {-# OPTIONS_GHC -funfolding-use-threshold1000                   #-}
 module Algebra.Matrix.RepaIntMap
   ( RIMMatrix', RIMMatrix, URIMMatrix, DRIMMatrix, fromRows
-  , delayMatrix
+  , delayMatrix, forceToVPar, forceToVSeq
   , gaussReductionD, gaussReductionP, gaussReductionS
   ) where
 import           Algebra.Matrix.Generic      (Column, Matrix, Mutable, Row,
@@ -49,6 +49,12 @@ deriving instance (Eq a, Source repr (IntMap a)) => Eq (RIMMatrix' repr a)
 
 instance (Monoidal a, Show a, Source repr (IntMap a)) => Show (RIMMatrix' repr a) where
   showsPrec d = showsPrec d . toRows
+
+forceToVPar :: DRIMMatrix a -> RIMMatrix a
+forceToVPar = withArray (runIdentity . computeP)
+
+forceToVSeq :: DRIMMatrix a -> RIMMatrix a
+forceToVSeq = withArray computeS
 
 toRows :: (Monoidal a, Source r (IntMap a)) => RIMMatrix' r a -> [Vector a]
 toRows (RIM c rs) = toList $ Repa.map (dicToRow c) rs
