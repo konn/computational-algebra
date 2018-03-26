@@ -1,6 +1,6 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs              #-}
-{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction        #-}
-{-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                  #-}
+{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction, PolyKinds #-}
+{-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances     #-}
 module Algebra.Field.Prime.Test where
 import Algebra.Field.Finite.Test
 
