@@ -2,24 +2,28 @@
 ./Setup.hs,15
 main main1,2
 
-./app/gauss-bench.hs,507
-module Main Main1,2
-sparseMatrixOf sparseMatrixOf25,26
-sparseMatrixOf sparseMatrixOf27,28
-newtype Sparse Sparse36,37
-newtype Sparse ratio n m a = Sparse Sparse36,37
-newtype Sparse ratio n m a = Sparse { runSparse runSparse36,37
-instance instance39,40
-main main47,48
-main main48,49
-decodeMat decodeMat53,54
-decodeMat decodeMat54,55
-encodeMat encodeMat62,63
-encodeMat encodeMat63,64
-getMatrix getMatrix70,71
-getMatrix getMatrix72,73
-mkCases mkCases82,83
-mkCases mkCases85,86
+./app/gauss-bench.hs,619
+module Main Main2,3
+sparseMatrixOf sparseMatrixOf33,34
+sparseMatrixOf sparseMatrixOf35,36
+newtype Sparse Sparse44,45
+newtype Sparse ratio n m a = Sparse Sparse44,45
+newtype Sparse ratio n m a = Sparse { runSparse runSparse44,45
+instance instance47,48
+main main55,56
+main main56,57
+decodeMat decodeMat91,92
+decodeMat decodeMat92,93
+encodeMat encodeMat111,112
+encodeMat encodeMat112,113
+toLabel toLabel119,120
+toLabel toLabel120,121
+getMatrix getMatrix125,126
+getMatrix getMatrix127,128
+mkCases mkCases137,138
+mkCases mkCases140,141
+toCases toCases160,161
+toCases toCases163,164
 
 ./test/Spec.hs,30
 main main0,1

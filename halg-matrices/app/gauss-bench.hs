@@ -1,27 +1,35 @@
 {-# LANGUAGE ScopedTypeVariables, TypeApplications #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 module Main where
-import           Algebra.Field.Fraction.Test ()
-import           Algebra.Field.Prime         (F)
-import           Algebra.Field.Prime.Test    ()
-import qualified Algebra.Matrix.DataMatrix   as DM
+import           Algebra.Field.Fraction.Test     ()
+import           Algebra.Field.Prime             (F)
+import           Algebra.Field.Prime.Test        ()
+import qualified Algebra.Matrix.DataMatrix       as DM
 import           Algebra.Matrix.Generic
-import qualified Algebra.Matrix.Generic      as Mat
-import qualified Algebra.Matrix.IntMap       as IM
-import qualified Algebra.Matrix.RepaIntMap   as RIM
+import qualified Algebra.Matrix.Generic          as Mat
+import qualified Algebra.Matrix.IntMap           as IM
+import qualified Algebra.Matrix.RepaIntMap       as RIM
 import           Algebra.Prelude.Core
+import           Control.Applicative             ((<|>))
 import           Control.DeepSeq
-import           Control.Lens                (ifoldMap, view, _1)
+import           Control.Lens                    (ifoldMap, view, (<&>), _1)
+import           Data.Char                       (isSpace)
 import           Data.List.Split
-import           Data.Reflection             ()
-import           Data.Vector                 (Vector)
-import qualified Data.Vector.Generic         as GV
+import qualified Data.Ratio                      as PRat
+import           Data.Reflection                 ()
+import           Data.Vector                     (Vector)
+import qualified Data.Vector.Generic             as GV
 import           Gauge.Main
 import           Gauge.Types
-import qualified Prelude                     as P
+import           GHC.Read
+import qualified Numeric.Field.Fraction          as NA
+import qualified Prelude                         as P
 import           System.Directory
-import           System.FilePath
 import           Test.QuickCheck
-import qualified Test.QuickCheck             as QC
+import qualified Test.QuickCheck                 as QC
+import           Text.ParserCombinators.ReadP
+import qualified Text.ParserCombinators.ReadP    as Read
+import qualified Text.ParserCombinators.ReadPrec as Read
 
 sparseMatrixOf :: (DecidableZero a)
                   => Gen a -> Double -> Int -> Int -> Gen [Vector a]
@@ -49,16 +57,57 @@ main :: IO ()
 main =
   defaultMainWith
   defaultConfig { reportFile = Just "bench-results/gauss.html"}
-  []
+  [ toCases "QQ" (Proxy :: Proxy Rational) 0.05 10 10
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.10 10 10
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.25 10 10
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.50 10 10
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.75 10 10
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.05 100 200
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.10 100 200
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.25 100 200
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.50 100 200
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.75 100 200
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.05 2000 1000
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.10 2000 1000
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.25 2000 1000
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.50 2000 1000
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.75 2000 1000
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.05 10 10
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.10 10 10
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.25 10 10
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.50 10 10
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.75 10 10
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.05 100 200
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.10 100 200
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.25 100 200
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.50 100 200
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.75 100 200
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.05 2000 1000
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.10 2000 1000
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.25 2000 1000
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.50 2000 1000
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.75 2000 1000
+  ]
 
 decodeMat :: (Field a, Read a) => Int -> Int -> FilePath -> IO [Vector a]
 decodeMat nr nc fp =
   toRows @IM.IMMatrix .
-  Mat.generate nr nc . foldr toIdx (const $ const zero) . map words . lines <$> readFile fp
+  Mat.generate nr nc . foldr toIdx (const $ const zero) . map (splitOn "\t") . lines <$> readFile fp
   where
     toIdx ~[rs, cs, val] f =
       let (r, c, coe) = (P.read rs, P.read cs, P.read val)
       in \ x y -> if x == r && y == c then coe else f x y
+
+instance Read Rational where
+  readPrec =
+    (readPrec <&> \r ->
+               PRat.numerator (P.toRational (r :: Double)) NA.% PRat.denominator (P.toRational r))
+   <|> (NA.%) <$> readPrec
+              <*  Read.lift (munch isSpace)
+              <*  Read.lift (Read.char '/')
+              <*  Read.lift (munch isSpace)
+              <*> readPrec
+
 
 encodeMat :: (DecidableZero a, Show a) => FilePath -> [Vector a] -> IO ()
 encodeMat fp = writeFile fp . unlines . enc
@@ -66,12 +115,18 @@ encodeMat fp = writeFile fp . unlines . enc
     enc = ifoldMap $ \i -> ifoldMap $ \j a ->
       if isZero a
       then []
-      else [ unwords [show i, show j, show a] ]
+      else [ intercalate "\t" [show i, show j, show a] ]
+
+toLabel :: String -> Double -> Int -> Int -> String
+toLabel lab r nr nc = concat [ lab, "-"
+                             , show (floor $ 100 * r :: Integer)
+                             , "%-", show nr, "-", show nc
+                             ]
 
 getMatrix :: (Show a, Read a, Field a, Arbitrary a)
           => String -> proxy a -> Double -> Int -> Int -> IO [Vector a]
 getMatrix lab _ r nr nc = do
-  let fp = "data" </> concat ["gauss", "-", lab, "-", show r, "-", show nr, "-", show nc] <.> "dat"
+  let fp = "data" </> concat ["gauss", "-", toLabel lab r nr nc] <.> "dat"
   there <- doesFileExist fp
   if there
     then decodeMat nr nc fp
@@ -82,11 +137,12 @@ getMatrix lab _ r nr nc = do
 
 mkCases :: (Normed a, Field a, NFData a, Eq a,
             Matrix DM.DMatrix a, Matrix IM.IMMatrix a, Matrix RIM.DRIMMatrix a)
-        => String -> [Vector a] -> Benchmark
-mkCases lab rows =
-  env (return $! (fromRows @DM.DMatrix rows,
+        => String -> IO [Vector a] -> Benchmark
+mkCases lab mrows =
+  env (do rows <- mrows
+          return (fromRows @DM.DMatrix rows,
                   fromRows @IM.IMMatrix rows,
-                  fromRows @RIM.DRIMMatrix rows)) $ \ (dm, im, drim) ->
+                  fromRows @RIM.DRIMMatrix rows)) $ \ ~(dm, im, drim) ->
   bgroup lab
   [ bench "matrix package" $ nf (view _1 . gaussReduction) dm
   , bench "IntMap sparse"  $ nf (view _1 . gaussReduction) im
@@ -101,3 +157,9 @@ mkCases lab rows =
       ]
     ]
   ]
+
+toCases :: (Normed a, Field a, NFData a, Eq a, Show a, Read a, Arbitrary a,
+            Matrix DM.DMatrix a, Matrix IM.IMMatrix a, Matrix RIM.DRIMMatrix a)
+        => String -> proxy a -> Double -> Int -> Int -> Benchmark
+toCases lab pxy rat col row =
+  mkCases (toLabel lab rat col row) (getMatrix lab pxy rat col row)
