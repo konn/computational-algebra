@@ -105,14 +105,14 @@ delayMatrix = withArray delay
 gaussReductionS :: ( Source repr (IntMap a), Target repr (IntMap a)
                    , Field a, DecidableZero a, Normed a
                    )
-                => RIMMatrix' repr a -> RIMMatrix' repr a
+                => RIMMatrix' repr a -> RIMMatrix a
 gaussReductionS = withArray computeS . gaussReductionD
 
 -- | Perofms row echelon reduction, parallelly
 gaussReductionP :: ( Source repr (IntMap a), Target repr (IntMap a)
                    , Field a, DecidableZero a, Normed a
                    )
-                => RIMMatrix' repr a -> RIMMatrix' repr a
+                => RIMMatrix' repr a -> RIMMatrix a
 gaussReductionP = withArray (runIdentity . computeP) . gaussReductionD
 
 rankG :: Normed a
