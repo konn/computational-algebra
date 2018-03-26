@@ -8,12 +8,12 @@ module Algebra.Matrix.RepaIntMap
   , delayMatrix
   , gaussReductionD, gaussReductionP, gaussReductionS
   ) where
-import           Algebra.Matrix.Generic (Column, Matrix, Mutable, Row,
-                                         WrapImmutable)
-import qualified Algebra.Matrix.Generic as GM
-import           Algebra.Prelude.Core   hiding (Max, Min, traverse)
-import           Control.Lens           (ifoldMap, imap, (%=), _1, _2)
-
+import           Algebra.Matrix.Generic      (Column, Matrix, Mutable, Row,
+                                              WrapImmutable)
+import qualified Algebra.Matrix.Generic      as GM
+import           Algebra.Prelude.Core        hiding (Max, Min, traverse)
+import           Control.DeepSeq             (NFData (..))
+import           Control.Lens                (ifoldMap, imap, (%=), _1, _2)
 import           Control.Monad.State
 import           Data.Array.Repa             as Repa
 import           Data.Array.Repa.Eval        as Repa hiding (zero)
@@ -33,6 +33,17 @@ type DRIMMatrix = RIMMatrix' D
 data RIMMatrix' repr a = RIM { _rimColCount :: Int
                              , _rimRows :: Array repr (Z :. Int) (IntMap a)
                              }
+
+instance (NFData a) => NFData (RIMMatrix' V a) where
+  rnf (RIM i arr) = rnf i `seq` rnf (Repa.toVector arr)
+
+instance (NFData a) => NFData (RIMMatrix' U a) where
+  rnf (RIM i arr) = rnf i `seq` rnf (Repa.toUnboxed arr)
+
+instance (NFData a) => NFData (RIMMatrix' D a) where
+  rnf (RIM i arr) =
+    let (Z :. j, fun) = toFunction arr
+    in rnf i `seq` rnf j `seq` rnf fun
 
 deriving instance (Eq a, Source repr (IntMap a)) => Eq (RIMMatrix' repr a)
 
