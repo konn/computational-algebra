@@ -251,6 +251,21 @@ calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy351
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert356,357
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert359,360
 
+./src/Algebra/Algorithms/Groebner/Signature.hs,618
+module Algebra.Algorithms.Groebner.Signature Algebra.Algorithms.Groebner.Signature2,3
+data Coordinate Coordinate11,12
+data Coordinate a = Coordinate Coordinate11,12
+data Coordinate a = Coordinate { position position11,12
+                               , factor factor12,13
+fromCoordinate fromCoordinate16,17
+fromCoordinate fromCoordinate17,18
+newtype WeightLatter WeightLatter19,20
+newtype WeightLatter a b = WeightLatter WeightLatter19,20
+newtype WeightLatter a b = WeightLatter { runWeightLatter runWeightLatter19,20
+instance instance21,22
+signature signature30,31
+signature signature33,34
+
 ./src/Algebra/Algorithms/Groebner/F4.hs,799
 module Algebra.Algorithms.Groebner.F4Algebra.Algorithms.Groebner.F43,4
 type Strategy Strategy23,24
