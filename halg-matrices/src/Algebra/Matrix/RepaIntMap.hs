@@ -102,17 +102,13 @@ delayMatrix :: Source rep (IntMap a) => RIMMatrix' rep a -> RIMMatrix' D a
 delayMatrix = withArray delay
 
 -- | Perofms row echelon reduction, sequentially
-gaussReductionS :: ( Source repr (IntMap a), Target repr (IntMap a)
-                   , Field a, DecidableZero a, Normed a
-                   )
-                => RIMMatrix' repr a -> RIMMatrix a
+gaussReductionS :: (Field a, DecidableZero a, Normed a)
+                => DRIMMatrix a -> RIMMatrix a
 gaussReductionS = withArray computeS . gaussReductionD
 
 -- | Perofms row echelon reduction, parallelly
-gaussReductionP :: ( Source repr (IntMap a), Target repr (IntMap a)
-                   , Field a, DecidableZero a, Normed a
-                   )
-                => RIMMatrix' repr a -> RIMMatrix a
+gaussReductionP :: (Field a, DecidableZero a, Normed a)
+                => DRIMMatrix a -> RIMMatrix a
 gaussReductionP = withArray (runIdentity . computeP) . gaussReductionD
 
 rankG :: Normed a
