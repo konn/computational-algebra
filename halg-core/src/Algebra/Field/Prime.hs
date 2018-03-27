@@ -23,6 +23,7 @@ import           Data.Maybe                   (fromMaybe)
 import           Data.Proxy                   (Proxy (..), asProxyTypeOf)
 import qualified Data.Ratio                   as R
 import           Data.Reflection              (Reifies (reflect), reifyNat)
+import           GHC.Read
 import           GHC.TypeLits                 (KnownNat)
 import           Numeric.Algebra              (char)
 import           Numeric.Algebra              (Natural)
@@ -35,6 +36,9 @@ import qualified Prelude                      as P
 newtype F (p :: k) = F { runF :: Integer }
                    deriving (NFData)
 
+
+instance Reifies p Integer => Read (F p) where
+  readPrec = fromInteger <$> readPrec
 
 modNat :: Reifies (p :: k) Integer => Integer -> F p
 modNat = modNat' Proxy
