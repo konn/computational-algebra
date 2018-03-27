@@ -62,31 +62,31 @@ main =
   , toCases "QQ" (Proxy :: Proxy Rational) 0.25 10 10
   , toCases "QQ" (Proxy :: Proxy Rational) 0.50 10 10
   , toCases "QQ" (Proxy :: Proxy Rational) 0.75 10 10
-  , toCases "QQ" (Proxy :: Proxy Rational) 0.05 100 200
-  , toCases "QQ" (Proxy :: Proxy Rational) 0.10 100 200
-  , toCases "QQ" (Proxy :: Proxy Rational) 0.25 100 200
-  , toCases "QQ" (Proxy :: Proxy Rational) 0.50 100 200
-  , toCases "QQ" (Proxy :: Proxy Rational) 0.75 100 200
-  , toCases "QQ" (Proxy :: Proxy Rational) 0.05 2000 1000
-  , toCases "QQ" (Proxy :: Proxy Rational) 0.10 2000 1000
-  , toCases "QQ" (Proxy :: Proxy Rational) 0.25 2000 1000
-  , toCases "QQ" (Proxy :: Proxy Rational) 0.50 2000 1000
-  , toCases "QQ" (Proxy :: Proxy Rational) 0.75 2000 1000
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.05 50 50
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.10 50 50
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.25 50 50
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.50 50 50
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.75 50 50
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.05 50 75
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.10 50 75
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.25 50 75
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.50 50 75
+  , toCases "QQ" (Proxy :: Proxy Rational) 0.75 50 75
   , toCases "F_5" (Proxy :: Proxy (F 5)) 0.05 10 10
   , toCases "F_5" (Proxy :: Proxy (F 5)) 0.10 10 10
   , toCases "F_5" (Proxy :: Proxy (F 5)) 0.25 10 10
   , toCases "F_5" (Proxy :: Proxy (F 5)) 0.50 10 10
   , toCases "F_5" (Proxy :: Proxy (F 5)) 0.75 10 10
-  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.05 100 200
-  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.10 100 200
-  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.25 100 200
-  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.50 100 200
-  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.75 100 200
-  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.05 2000 1000
-  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.10 2000 1000
-  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.25 2000 1000
-  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.50 2000 1000
-  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.75 2000 1000
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.05 50 50
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.10 50 50
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.25 50 50
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.50 50 50
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.75 50 50
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.05 50 75
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.10 50 75
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.25 50 75
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.50 50 75
+  , toCases "F_5" (Proxy :: Proxy (F 5)) 0.75 50 75
   ]
 
 decodeMat :: (Field a, Read a) => Int -> Int -> FilePath -> IO [Vector a]
