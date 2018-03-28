@@ -36,9 +36,6 @@ import qualified Test.SmallCheck.Series             as SC
 newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal :: Ideal (Polynomial (Fraction Integer) n)
                                       } deriving (Show)
 
-instance KnownNat n => Arbitrary (F n) where
-  arbitrary = QC.elements (F.elements Proxy)
-
 genUnipol :: (CoeffRing r, Arbitrary r) => Int -> IO (Unipol r)
 genUnipol len = QC.generate $ fromCoeffVec <$> QC.vectorOf len QC.arbitrary
     where
