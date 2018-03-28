@@ -31,6 +31,7 @@ f5 ideal =
 calcSignatureGB :: forall s poly.
                    (KnownNat s, Field (Coefficient poly), IsOrderedPolynomial poly)
                 => Vector s poly -> [(Vector s poly, poly)]
+calcSignatureGB side | null side = []
 calcSignatureGB (fmap monoize -> sideal) = runST $ do
   gs <- newSTRef []
   ps <- newSTRef $ H.fromList [ mkEntry $ basis i | i <- [0..]]
@@ -42,7 +43,7 @@ calcSignatureGB (fmap monoize -> sideal) = runST $ do
     writeSTRef ps ps'
     gs0 <- readSTRef gs
     ss0 <- readSTRef syzs
-    unless (standardCriterion gSig (map snd gs0 <> ss0)) $ do
+    unless (standardCriterion gSig ss0 || any ((== gSig) . priority . snd) gs0) $ do
       let h = reduceSignature sideal g gs0
           ph = phi h
           h' = fmap (* injectCoeff (recip $ leadingCoeff ph)) h
@@ -50,7 +51,7 @@ calcSignatureGB (fmap monoize -> sideal) = runST $ do
         then modifySTRef' syzs (mkEntry h : )
         else do
         modifySTRef' ps $ H.union $ H.fromList $
-          mapMaybe (fmap mkEntry . regularSVector (monoize ph, h') . second payload) gs0
+          mapMaybe (fmap mkEntry . flip regularSVector (monoize ph, h') . second payload) gs0
         modifySTRef' gs ((monoize ph, mkEntry h') :)
 
   map (\ (p, Entry _ a) -> (a, p)) <$> readSTRef gs
