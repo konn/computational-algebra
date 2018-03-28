@@ -24,45 +24,58 @@ module Main Main0,1
 main main4,5
 main main5,6
 
-./test/Utils.hs,1322
+./test/F5Spec.hs,408
+module F5Spec F5Spec5,6
+asGenListOf asGenListOf28,29
+asGenListOf asGenListOf29,30
+spec spec31,32
+spec spec32,33
+prop_passesSTest prop_passesSTest41,42
+prop_passesSTest prop_passesSTest43,44
+prop_groebnerDivsOrig prop_groebnerDivsOrig48,49
+prop_groebnerDivsOrig prop_groebnerDivsOrig50,51
+prop_groebnerIncluded prop_groebnerIncluded56,57
+prop_groebnerIncluded prop_groebnerIncluded58,59
+
+./test/Utils.hs,1321
 module Utils Utils7,8
 newtype ZeroDimIdeal ZeroDimIdeal35,36
 newtype ZeroDimIdeal n = ZeroDimIdeal ZeroDimIdeal35,36
 newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal getIdeal35,36
-instance instance38,39
-genUnipol genUnipol41,42
-genUnipol genUnipol42,43
-appendLM appendLM46,47
-appendLM appendLM47,48
-xPoly xPoly49,50
-xPoly xPoly50,51
-yPoly yPoly56,57
-yPoly yPoly57,58
-genLM genLM78,79
-genLM genLM79,80
-zeroDimOf zeroDimOf90,91
-zeroDimOf zeroDimOf91,92
-zeroDimG zeroDimG96,97
-zeroDimG zeroDimG97,98
-isNonTrivial isNonTrivial102,103
-isNonTrivial isNonTrivial103,104
-data Equation Equation105,106
-data Equation = Equation Equation105,106
-data Equation = Equation { coefficients coefficients105,106
-                         , answers answers106,107
-newtype MatrixCase MatrixCase109,110
-newtype MatrixCase a = MatrixCase MatrixCase109,110
-newtype MatrixCase a = MatrixCase { getMatrix getMatrix109,110
-arbitrarySolvable arbitrarySolvable124,125
-arbitrarySolvable arbitrarySolvable125,126
-unaryPoly unaryPoly130,131
-unaryPoly unaryPoly131,132
-stdReduced stdReduced136,137
-stdReduced stdReduced138,139
-idealOfArity idealOfArity149,150
-idealOfArity idealOfArity150,151
-polynomialOfArity polynomialOfArity153,154
-polynomialOfArity polynomialOfArity155,156
+genUnipol genUnipol38,39
+genUnipol genUnipol39,40
+appendLM appendLM43,44
+appendLM appendLM44,45
+xPoly xPoly46,47
+xPoly xPoly47,48
+yPoly yPoly53,54
+yPoly yPoly54,55
+instance instance60,61
+genLM genLM75,76
+genLM genLM76,77
+zeroDimOf zeroDimOf87,88
+zeroDimOf zeroDimOf88,89
+zeroDimG zeroDimG93,94
+zeroDimG zeroDimG94,95
+isNonTrivial isNonTrivial99,100
+isNonTrivial isNonTrivial100,101
+data Equation Equation102,103
+data Equation = Equation Equation102,103
+data Equation = Equation { coefficients coefficients102,103
+                         , answers answers103,104
+newtype MatrixCase MatrixCase106,107
+newtype MatrixCase a = MatrixCase MatrixCase106,107
+newtype MatrixCase a = MatrixCase { getMatrix getMatrix106,107
+arbitrarySolvable arbitrarySolvable121,122
+arbitrarySolvable arbitrarySolvable122,123
+unaryPoly unaryPoly127,128
+unaryPoly unaryPoly128,129
+stdReduced stdReduced133,134
+stdReduced stdReduced135,136
+idealOfArity idealOfArity146,147
+idealOfArity idealOfArity147,148
+polynomialOfArity polynomialOfArity150,151
+polynomialOfArity polynomialOfArity152,153
 
 ./test/ZeroDimSpec.hs,692
 module ZeroDimSpec ZeroDimSpec2,3
@@ -238,7 +251,7 @@ calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy351
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert356,357
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert359,360
 
-./src/Algebra/Algorithms/Groebner/Signature.hs,1112
+./src/Algebra/Algorithms/Groebner/Signature.hs,1113
 module Algebra.Algorithms.Groebner.Signature Algebra.Algorithms.Groebner.Signature3,4
 mkEntry mkEntry20,21
 mkEntry mkEntry22,23
@@ -246,33 +259,33 @@ f5 f524,25
 f5 f526,27
 calcSignatureGB calcSignatureGB30,31
 calcSignatureGB calcSignatureGB33,34
-regularSVector regularSVector59,60
-regularSVector regularSVector63,64
-standardCriterion standardCriterion71,72
-standardCriterion standardCriterion74,75
-divSig divSig76,77
+regularSVector regularSVector60,61
+regularSVector regularSVector64,65
+standardCriterion standardCriterion72,73
+standardCriterion standardCriterion75,76
 divSig divSig77,78
-data Signature Signature80,81
-  Signature Signature81,82
-  Signature { _position _position81,82
-            , _sigCoeff _sigCoeff82,83
-            , _sigMonom _sigMonom83,84
-instance instance86,87
-(%!!)%!!96,97
-Vector Vector97,98
-signature signature99,100
-signature signature102,103
-newtype Vector Vector109,110
-newtype Vector n a = Vector Vector109,110
-newtype Vector n a = Vector { runVector runVector109,110
-type instance instance117,118
-type instance GV.Mutable GV.Mutable117,118
-basis basis147,148
+divSig divSig78,79
+data Signature Signature81,82
+  Signature Signature82,83
+  Signature { _position _position82,83
+            , _sigCoeff _sigCoeff83,84
+            , _sigMonom _sigMonom84,85
+instance instance87,88
+(%!!)%!!97,98
+Vector Vector98,99
+signature signature100,101
+signature signature103,104
+newtype Vector Vector110,111
+newtype Vector n a = Vector Vector110,111
+newtype Vector n a = Vector { runVector runVector110,111
+type instance instance118,119
+type instance GV.Mutable GV.Mutable118,119
 basis basis148,149
-reduceSignature reduceSignature150,151
-reduceSignature reduceSignature154,155
-dot dot167,168
+basis basis149,150
+reduceSignature reduceSignature151,152
+reduceSignature reduceSignature155,156
 dot dot168,169
+dot dot169,170
 
 ./src/Algebra/Field/RationalFunction.hs,683
 module Algebra.Field.RationalFunctionAlgebra.Field.RationalFunction2,3
