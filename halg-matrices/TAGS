@@ -380,26 +380,38 @@ lookCoe lookCoe155,156
 updateAtRowIndex updateAtRowIndex157,158
 updateAtRowIndex updateAtRowIndex158,159
 
-./src/Algebra/Matrix/HMatrix.hs,660
-module Algebra.Matrix.HMatrix Algebra.Matrix.HMatrix3,4
-type instance instance13,14
-type instance Mutable Mutable13,14
-type instance instance14,15
-type instance Row Row14,15
+./src/Algebra/Matrix/HMatrix.hs,1204
+module Algebra.Matrix.HMatrix Algebra.Matrix.HMatrix4,5
 type instance instance15,16
-type instance Column Column15,16
+type instance Mutable Mutable15,16
 type instance instance16,17
+type instance Row Row16,17
 type instance instance17,18
-data STMatrix STMatrix20,21
-data STMatrix s a = STMat STMat20,21
-data STMatrix s a = STMat { stmRows stmRows20,21
-                          , stmCols stmCols21,22
-                          , unwrapSTM unwrapSTM22,23
-instance instance25,26
-getRowLA getRowLA40,41
-getRowLA getRowLA41,42
-getColLA getColLA42,43
-getColLA getColLA43,44
+type instance Column Column17,18
+type instance instance18,19
+type instance instance19,20
+data STMatrix STMatrix22,23
+data STMatrix s a = STMat STMat22,23
+data STMatrix s a = STMat { stmRows stmRows22,23
+                          , stmCols stmCols23,24
+                          , unwrapSTM unwrapSTM24,25
+instance instance27,28
+getRowLA getRowLA81,82
+getRowLA getRowLA82,83
+getColLA getColLA83,84
+getColLA getColLA84,85
+unwrapSTMNum unwrapSTMNum86,87
+unwrapSTMNum unwrapSTMNum87,88
+castSTMatrixNum castSTMatrixNum90,91
+castSTMatrixNum castSTMatrixNum91,92
+unwrapSTMFractional unwrapSTMFractional128,129
+unwrapSTMFractional unwrapSTMFractional129,130
+castSTMatrixFractional castSTMatrixFractional132,133
+castSTMatrixFractional castSTMatrixFractional133,134
+unwrapSTMIntegral unwrapSTMIntegral170,171
+unwrapSTMIntegral unwrapSTMIntegral171,172
+castSTMatrixIntegral castSTMatrixIntegral174,175
+castSTMatrixIntegral castSTMatrixIntegral175,176
 
 ./src/Algebra/Matrix/Generic/Base.hs,158
 module Algebra.Matrix.Generic.Base Algebra.Matrix.Generic.Base0,1
