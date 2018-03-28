@@ -10,10 +10,10 @@ main main5,6
 ./test/Utils.hs,201
 module Utils Utils5,6
 instance instance13,14
-idealOfArity idealOfArity24,25
-idealOfArity idealOfArity25,26
-polynomialOfArity polynomialOfArity28,29
-polynomialOfArity polynomialOfArity30,31
+idealOfArity idealOfArity21,22
+idealOfArity idealOfArity22,23
+polynomialOfArity polynomialOfArity25,26
+polynomialOfArity polynomialOfArity27,28
 
 ./test/PolynomialSpec.hs,586
 module PolynomialSpec PolynomialSpec2,3

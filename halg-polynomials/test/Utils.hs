@@ -4,15 +4,12 @@
 {-# LANGUAGE UndecidableInstances                                         #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Utils (module Utils, module Algebra.TestUtils) where
-import Algebra.Prelude.Core
 import Algebra.Field.Prime
+import Algebra.Prelude.Core
 import Algebra.Ring.Polynomial.Univariate
 import Algebra.TestUtils
 import AlgebraicPrelude                   ()
 import Test.QuickCheck
-
-instance Arbitrary (F 5) where
-  arbitrary = arbitraryFiniteField []
 
 instance (Arbitrary k, KnownNat n, CoeffRing k, IsMonomialOrder n o)
       => Arbitrary (OrderedPolynomial k o n) where
