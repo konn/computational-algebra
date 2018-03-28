@@ -3,20 +3,20 @@
 -- | Faugere's F4 algorithm
 module Algebra.Algorithms.Groebner.F4
   (f4', f4, f4WithStrategy', f4WithStrategy, normalStrategy) where
+import           Algebra.Matrix.DataMatrix (DMatrix)
 import           Algebra.Matrix.Generic
-import           Algebra.Matrix.IntMap  (IMMatrix)
-import           Algebra.Prelude.Core   hiding (Min)
+import           Algebra.Prelude.Core      hiding (Min)
 import           Control.Lens
 import           Control.Monad.Loops
 import           Control.Monad.ST
-import qualified Data.Foldable          as F
-import qualified Data.Heap              as H
-import           Data.Monoid            (First (..))
-import qualified Data.Set               as S
+import qualified Data.Foldable             as F
+import qualified Data.Heap                 as H
+import           Data.Monoid               (First (..))
+import qualified Data.Set                  as S
 import           Data.STRef
-import qualified Data.Vector            as V
-import qualified Data.Vector.Generic    as GV
-import qualified Data.Vector.Mutable    as MV
+import qualified Data.Vector               as V
+import qualified Data.Vector.Generic       as GV
+import qualified Data.Vector.Mutable       as MV
 
 -- | Selection strategy assigning each pair of polynomials of type @f@,
 --   to some @'Ord'@ered rank @w@. F_4 Algorithm will take care of pairs
@@ -38,10 +38,10 @@ viewMins h = do
   (a, _) <- H.viewMin h
   return $ H.span (== a) h
 
-f4 :: (Field (Coefficient poly),
+f4 :: (Field (Coefficient poly), Num (Coefficient poly),
        IsOrderedPolynomial poly, Normed (Coefficient poly))
    => Ideal poly -> [poly]
-f4 = f4' (Proxy :: Proxy IMMatrix)
+f4 = f4' (Proxy :: Proxy DMatrix)
 
 f4' ::(Normed (Coefficient poly),
        IsOrderedPolynomial poly,
@@ -111,9 +111,10 @@ decodeMatrix labs mat =
 f4WithStrategy :: (Field (Coefficient poly),
                    IsOrderedPolynomial poly,
                    Normed (Coefficient poly),
+                   Num (Coefficient poly),
                    Ord w)
    => Strategy poly w -> Ideal poly -> [poly]
-f4WithStrategy = f4WithStrategy' (Proxy :: Proxy IMMatrix)
+f4WithStrategy = f4WithStrategy' (Proxy :: Proxy DMatrix)
 
 computeMatrix :: (IsOrderedPolynomial poly,
                   Field (Coefficient poly),
