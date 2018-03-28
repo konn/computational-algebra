@@ -527,16 +527,16 @@ type instance instance95,96
 type instance instance96,97
 
 ./src/Algebra/Matrix/DataMatrix.hs,338
-module Algebra.Matrix.DataMatrix Algebra.Matrix.DataMatrix6,7
-type WIMatrix WIMatrix12,13
-type DMatrix DMatrix13,14
-type instance instance15,16
-type instance Mutable Mutable15,16
-type instance instance16,17
-type instance Row Row16,17
+module Algebra.Matrix.DataMatrix Algebra.Matrix.DataMatrix7,8
+type WIMatrix WIMatrix14,15
+type DMatrix DMatrix15,16
 type instance instance17,18
-type instance Column Column17,18
-instance instance19,20
+type instance Mutable Mutable17,18
+type instance instance18,19
+type instance Row Row18,19
+type instance instance19,20
+type instance Column Column19,20
+instance instance21,22
 
 ./src/Algebra/Matrix/Generic.hs,2678
 module Algebra.Matrix.GenericAlgebra.Matrix.Generic2,3
