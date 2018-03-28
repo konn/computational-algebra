@@ -49,7 +49,7 @@ prop_passesSTest calc sdim = withKnownNat sdim $
 prop_groebnerDivsOrig :: (Ideal (Polynomial Rational n) -> [Polynomial Rational n])
                       -> SNat n -> Property
 prop_groebnerDivsOrig calc sdim =withKnownNat sdim $
-  forAll (elements [3..15]) $ \count ->
+  forAll (elements [3..5]) $ \count ->
   forAll (vectorOf count (polynomialOfArity sdim)) $ \ideal ->
   let gs = calc $ toIdeal ideal
   in all (isZero . (`modPolynomial` gs)) ideal
@@ -57,7 +57,7 @@ prop_groebnerDivsOrig calc sdim =withKnownNat sdim $
 prop_groebnerIncluded :: (Ideal (Polynomial Rational n) -> [Polynomial Rational n])
                       -> SNat n -> Property
 prop_groebnerIncluded calc sdim = withKnownNat sdim $
-  forAll (elements [3..15]) $ \count ->
+  forAll (elements [3..5]) $ \count ->
   forAll (vectorOf count (polynomialOfArity sdim)) $ \ideal -> do
   let gs = calc $ toIdeal ideal
   is <- evalSingularIdealWith [] [] $
