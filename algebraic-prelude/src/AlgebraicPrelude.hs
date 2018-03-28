@@ -89,6 +89,7 @@ import           BasicPrelude                          as AlgebraicPrelude hidin
 import qualified Control.Lens.TH                       as L
 import qualified Data.Ratio                            as P
 import qualified Data.Semigroup                        as Semi
+import           Foreign.Storable                      (Storable)
 import           GHC.OverloadedLabels                  as AlgebraicPrelude
 import           Numeric.Algebra                       as AlgebraicPrelude hiding
                                                                             (Order (..),
@@ -188,7 +189,7 @@ ifThenElse p t f = if p then t else f
 --           with @'Num'@ instance, but it doesn't support @'negate'@,
 --           so it cannot be @'Group'@.
 newtype WrapNum a = WrapNum { unwrapNum :: a }
-                      deriving (Read, Show, Eq, Ord, P.Num)
+                      deriving (Read, Show, Eq, Ord, P.Num, Storable)
 
 instance (P.Num a) => Additive (WrapNum a) where
   WrapNum a + WrapNum b = WrapNum (a P.+ b)
@@ -260,7 +261,7 @@ instance (P.Num a, Eq a) => DecidableZero (WrapNum a) where
 --
 --   See also: @'WrapIntegral'@ and @'WrapNum'@.
 newtype WrapFractional a = WrapFractional { unwrapFractional :: a }
-  deriving (Read, Show, Eq, Ord, Num, Enum, P.Real, P.Fractional)
+  deriving (Read, Show, Eq, Ord, Num, Enum, P.Real, P.Fractional, Storable)
 
 instance (P.Num a) => Additive (WrapFractional a) where
   WrapFractional a + WrapFractional b = WrapFractional (a P.+ b)
@@ -490,7 +491,7 @@ newtype WrapAlgebra a = WrapAlgebra { unwrapAlgebra :: a }
                                , DecidableZero, Euclidean, Division
                                , PID , UFD, DecidableAssociates
                                , IntegralDomain, GCDDomain
-                               , ZeroProductSemiring)
+                               , ZeroProductSemiring, Storable)
 
 deriving instance LeftModule Natural a => LeftModule Natural (WrapAlgebra a)
 deriving instance RightModule Natural a => RightModule Natural (WrapAlgebra a)
@@ -543,7 +544,7 @@ instance Euclidean d => P.Fractional (Fraction d) where
 --   N.B. Unlike @'WrapNum'@, @'P.Num'@ instance is
 --   just inhereted from the unwrapped data.
 newtype Add a = Add { runAdd :: a }
-              deriving (Read, Show, Eq, Ord, P.Num, Additive, Abelian)
+              deriving (Read, Show, Eq, Ord, P.Num, Additive, Abelian, Storable)
 
 deriving instance LeftModule Natural a => LeftModule Natural (Add a)
 deriving instance RightModule Natural a => RightModule Natural (Add a)
@@ -574,7 +575,8 @@ instance Monoidal a => Monoid (Add a) where
 --   N.B. Unlike @'WrapNum'@, @'P.Num'@ instance is
 --   just inhereted from the unwrapped data.
 newtype Mult a = Mult { runMult :: a }
-              deriving (Read, Show, Eq, Ord, P.Num, Multiplicative, Unital, Commutative)
+              deriving (Read, Show, Eq, Ord, P.Num,
+                        Multiplicative, Unital, Commutative, Storable)
 
 instance Multiplicative a => Semi.Semigroup (Mult a) where
   Mult a <> Mult b = Mult (a NA.* b)
