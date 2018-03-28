@@ -209,3 +209,12 @@ instance (Integral a, LA.Container LA.Matrix a) => MMatrix STMatrix (WrapIntegra
     stToPrim $ DC.coerce . LA.toRows <$> LA.unsafeFreezeMatrix (castSTMatrixIntegral m)
   toColumns (STMat _ _ m) =
     stToPrim $ DC.coerce . LA.toColumns <$> LA.unsafeFreezeMatrix (castSTMatrixIntegral m)
+
+instance {-# OVERLAPPING #-} (LA.Container LA.Matrix a, Show a) => Show (LA.Matrix (WrapNum a)) where
+  showsPrec d = showsPrec d . (DC.coerce :: LA.Matrix (WrapNum a) -> LA.Matrix a)
+
+instance {-# OVERLAPPING #-} (LA.Container LA.Matrix a, Show a) => Show (LA.Matrix (WrapIntegral a)) where
+  showsPrec d = showsPrec d . (DC.coerce :: LA.Matrix (WrapIntegral a) -> LA.Matrix a)
+
+instance {-# OVERLAPPING #-} (LA.Container LA.Matrix a, Show a) => Show (LA.Matrix (WrapFractional a)) where
+  showsPrec d = showsPrec d . (DC.coerce :: LA.Matrix (WrapFractional a) -> LA.Matrix a)
