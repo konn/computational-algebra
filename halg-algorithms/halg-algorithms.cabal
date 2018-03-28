@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3fca2908fb84e1f86341bc755e9f57a9eb8b1121dd7105e045d9122446487357
+-- hash: 13eef6c53d3d4fa225cea5d59937d4875b8831fb4d0fc230144fac57ff59b76e
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -57,7 +57,6 @@ library
     , sized
     , vector
   exposed-modules:
-      Algebra.Algorithms.Groebner.F4
       Algebra.Algorithms.Groebner.Homogeneous
       Algebra.Algorithms.Groebner.Signature
       Algebra.Algorithms.ZeroDim
