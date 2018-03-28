@@ -483,9 +483,9 @@ instance (Eq a, P.Integral a) => UFD (WrapIntegral a)
 --        we won't provide the inverse of @'WrapIntegral'@ and
 --        provide @'Fractional'@ instance only.
 newtype WrapAlgebra a = WrapAlgebra { unwrapAlgebra :: a }
-                      deriving ( Read, Show, Eq, Ord, Additive, Monoidal
+                      deriving ( Read, Show, Eq, Ord, Additive
                                , Unital, Multiplicative, Abelian
-                               , Commutative, Semiring,Group, Rig
+                               , Commutative, Semiring, Rig
                                , Ring, DecidableUnits, UnitNormalForm
                                , DecidableZero, Euclidean, Division
                                , PID , UFD, DecidableAssociates
@@ -496,6 +496,8 @@ deriving instance LeftModule Natural a => LeftModule Natural (WrapAlgebra a)
 deriving instance RightModule Natural a => RightModule Natural (WrapAlgebra a)
 deriving instance LeftModule Integer a => LeftModule Integer (WrapAlgebra a)
 deriving instance RightModule Integer a => RightModule Integer (WrapAlgebra a)
+deriving instance Monoidal a => Monoidal (WrapAlgebra a)
+deriving instance Group    a => Group    (WrapAlgebra a)
 
 instance (Ring a, UnitNormalForm a) => P.Num (WrapAlgebra a) where
   WrapAlgebra a + WrapAlgebra b = WrapAlgebra $ a NA.+ b
@@ -541,12 +543,14 @@ instance Euclidean d => P.Fractional (Fraction d) where
 --   N.B. Unlike @'WrapNum'@, @'P.Num'@ instance is
 --   just inhereted from the unwrapped data.
 newtype Add a = Add { runAdd :: a }
-              deriving (Read, Show, Eq, Ord, P.Num, Additive, Monoidal, Abelian)
+              deriving (Read, Show, Eq, Ord, P.Num, Additive, Abelian)
 
 deriving instance LeftModule Natural a => LeftModule Natural (Add a)
 deriving instance RightModule Natural a => RightModule Natural (Add a)
 deriving instance LeftModule Integer a => LeftModule Integer (Add a)
 deriving instance RightModule Integer a => RightModule Integer (Add a)
+deriving instance Monoidal a => Monoidal (Add a)
+
 
 instance Additive a => Semi.Semigroup (Add a) where
   Add a <> Add b = Add (a NA.+ b)
