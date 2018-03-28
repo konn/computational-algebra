@@ -11,14 +11,14 @@ main main5,6
 main main0,1
 main main1,2
 
-./src/Algebra/Normed.hs,216
-module Algebra.Normed Algebra.Normed0,1
-class (Ord (Norm a)) => Normed Normed4,5
-class (Ord (Norm a)) => Normed Normed4,5
-  type Norm Norm5,6
-  norm norm6,7
-  liftNorm liftNorm7,8
-instance instance9,10
+./src/Algebra/Normed.hs,218
+module Algebra.Normed Algebra.Normed2,3
+class (Ord (Norm a)) => Normed Normed6,7
+class (Ord (Norm a)) => Normed Normed6,7
+  type Norm Norm7,8
+  norm norm8,9
+  liftNorm liftNorm9,10
+instance instance19,20
 
 ./src/Algebra/Field/Prime.hs,643
 module Algebra.Field.PrimeAlgebra.Field.Prime5,6
