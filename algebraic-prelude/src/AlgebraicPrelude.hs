@@ -366,7 +366,7 @@ instance (Eq a, P.Fractional a) => UFD (WrapFractional a)
 --
 --   See also: @'WrapFractional'@ and @'WrapNum'@.
 newtype WrapIntegral a = WrapIntegral { unwrapIntegral :: a }
-  deriving (Read, Show, Eq, Ord, P.Num, P.Real, P.Enum, P.Integral)
+  deriving (Read, Show, Eq, Ord, P.Num, P.Real, P.Enum, P.Integral, Storable)
 
 instance (P.Num a) => Additive (WrapIntegral a) where
   WrapIntegral a + WrapIntegral b = WrapIntegral (a P.+ b)
