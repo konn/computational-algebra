@@ -75,26 +75,26 @@ main main66,67
 main main67,68
 
 ./bench/sugar.hs,372
-x, y, z, w, s, a, b, c c12,13
-x, y, z, w, s, a, b,b12,13
-x, y, z, w, s, a,a12,13
-x, y, z, w, s,s12,13
-x, y, z, w,w12,13
-x, y, z,z12,13
-x, y,y12,13
-x,x12,13
-[x,[x13,14
-instance instance15,16
-i1, i2, i3, i4 i421,22
-i1, i2, i3,i321,22
-i1, i2,i221,22
-i1,i121,22
-i1 i122,23
-i2 i223,24
-i3 i324,25
-i4 i426,27
+x, y, z, w, s, a, b, c c11,12
+x, y, z, w, s, a, b,b11,12
+x, y, z, w, s, a,a11,12
+x, y, z, w, s,s11,12
+x, y, z, w,w11,12
+x, y, z,z11,12
+x, y,y11,12
+x,x11,12
+[x,[x12,13
+instance instance14,15
+i1, i2, i3, i4 i420,21
+i1, i2, i3,i320,21
+i1, i2,i220,21
+i1,i120,21
+i1 i121,22
+i2 i222,23
+i3 i323,24
+i4 i425,26
+main main27,28
 main main28,29
-main main29,30
 
 ./bench/bench.hs,122
 i1, i2, i4 i410,11

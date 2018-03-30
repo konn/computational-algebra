@@ -159,6 +159,7 @@ _bench-common: &bench-common
     - -O2
     - -threaded
     - -rtsopts
+    - -with-rtsopts=-N
 
 benchmarks:
   unipol-bench:
