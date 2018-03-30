@@ -18,7 +18,7 @@ import           Data.Text                 (Text)
 import qualified Data.Text                 as T
 import           Data.Time.Format
 import           Data.Time.LocalTime
-import           Filesystem.Path           hiding ((</>))
+import           Filesystem.Path
 import qualified Filesystem.Path.CurrentOS as FS
 import           Hakyll                    hiding (renderTags)
 import           Prelude                   hiding (FilePath)
@@ -136,17 +136,9 @@ deploy cnf = shelly $ handleany_sh (const $ return $ ExitFailure 1) $ do
   dest <- canonicalize $ fromText $ T.pack $ destinationDirectory cnf
   mkdir_p dest
   cd dest
-  isGit <- test_d ".git"
   timeStamp <- formatTime defaultTimeLocale "%c" <$> liftIO getZonedTime
   let msg = "Updated (" ++ timeStamp ++  ")"
       msgOpt = "-m" <> T.pack msg
-  unless isGit $ withTmpDir $ \tdir -> do
-    cd tdir
-    run_ "git" ["init"]
-    run_ "git" ["remote", "add", "origin", "git@github.com:konn/computational-algebra.git"]
-    run_ "git" ["fetch", "origin", "gh-pages", "--depth=1"]
-    run_ "git" ["checkout", "gh-pages"]
-    mv (tdir </> ".git") dest
   cd dest
   run_ "git" ["add", "."]
   run_ "git" ["commit", "-a", msgOpt, "--edit"]
