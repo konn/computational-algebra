@@ -5,15 +5,15 @@
 {-# OPTIONS_GHC -funfolding-use-threshold1000                   #-}
 module Algebra.Matrix.RepaIntMap
   ( RIMMatrix', RIMMatrix, URIMMatrix, DRIMMatrix, fromRows
-  , delayMatrix
+  , delayMatrix, forceToVPar, forceToVSeq
   , gaussReductionD, gaussReductionP, gaussReductionS
   ) where
-import           Algebra.Matrix.Generic (Column, Matrix, Mutable, Row,
-                                         WrapImmutable)
-import qualified Algebra.Matrix.Generic as GM
-import           Algebra.Prelude.Core   hiding (Max, Min, traverse)
-import           Control.Lens           (ifoldMap, imap, (%=), _1, _2)
-
+import           Algebra.Matrix.Generic      (Column, Matrix, Mutable, Row,
+                                              WrapImmutable)
+import qualified Algebra.Matrix.Generic      as GM
+import           Algebra.Prelude.Core        hiding (Max, Min, traverse)
+import           Control.DeepSeq             (NFData (..))
+import           Control.Lens                (ifoldMap, imap, (%=), _1, _2)
 import           Control.Monad.State
 import           Data.Array.Repa             as Repa
 import           Data.Array.Repa.Eval        as Repa hiding (zero)
@@ -34,10 +34,27 @@ data RIMMatrix' repr a = RIM { _rimColCount :: Int
                              , _rimRows :: Array repr (Z :. Int) (IntMap a)
                              }
 
+instance (NFData a) => NFData (RIMMatrix' V a) where
+  rnf (RIM i arr) = rnf i `seq` rnf (Repa.toVector arr)
+
+instance (NFData a) => NFData (RIMMatrix' U a) where
+  rnf (RIM i arr) = rnf i `seq` rnf (Repa.toUnboxed arr)
+
+instance (NFData a) => NFData (RIMMatrix' D a) where
+  rnf (RIM i arr) =
+    let (Z :. j, fun) = toFunction arr
+    in rnf i `seq` rnf j `seq` rnf fun
+
 deriving instance (Eq a, Source repr (IntMap a)) => Eq (RIMMatrix' repr a)
 
 instance (Monoidal a, Show a, Source repr (IntMap a)) => Show (RIMMatrix' repr a) where
   showsPrec d = showsPrec d . toRows
+
+forceToVPar :: DRIMMatrix a -> RIMMatrix a
+forceToVPar = withArray (runIdentity . computeP)
+
+forceToVSeq :: DRIMMatrix a -> RIMMatrix a
+forceToVSeq = withArray computeS
 
 toRows :: (Monoidal a, Source r (IntMap a)) => RIMMatrix' r a -> [Vector a]
 toRows (RIM c rs) = toList $ Repa.map (dicToRow c) rs
@@ -85,17 +102,13 @@ delayMatrix :: Source rep (IntMap a) => RIMMatrix' rep a -> RIMMatrix' D a
 delayMatrix = withArray delay
 
 -- | Perofms row echelon reduction, sequentially
-gaussReductionS :: ( Source repr (IntMap a), Target repr (IntMap a)
-                   , Field a, DecidableZero a, Normed a
-                   )
-                => RIMMatrix' repr a -> RIMMatrix' repr a
+gaussReductionS :: (Field a, DecidableZero a, Normed a)
+                => DRIMMatrix a -> RIMMatrix a
 gaussReductionS = withArray computeS . gaussReductionD
 
 -- | Perofms row echelon reduction, parallelly
-gaussReductionP :: ( Source repr (IntMap a), Target repr (IntMap a)
-                   , Field a, DecidableZero a, Normed a
-                   )
-                => RIMMatrix' repr a -> RIMMatrix' repr a
+gaussReductionP :: (Field a, DecidableZero a, Normed a)
+                => DRIMMatrix a -> RIMMatrix a
 gaussReductionP = withArray (runIdentity . computeP) . gaussReductionD
 
 rankG :: Normed a
@@ -152,6 +165,7 @@ updateAtRowIndex (RIM c m) i f = RIM c $
 {-# INLINE updateAtRowIndex #-}
 
 instance (DecidableZero a) => Matrix (RIMMatrix' D) a where
+  {-# SPECIALISE instance DecidableZero a => Matrix (RIMMatrix' D) a #-}
   basicRowCount = rowCount
   basicColumnCount = _rimColCount
   basicUnsafeIndexM (RIM _ m) i j =

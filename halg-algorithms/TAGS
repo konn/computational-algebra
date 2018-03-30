@@ -99,6 +99,19 @@ data TestSet = TestSet { inputMat inputMat133,134
 linSet linSet138,139
 linSet linSet139,140
 
+./test/F4Spec.hs,408
+module F4Spec F4Spec5,6
+asGenListOf asGenListOf27,28
+asGenListOf asGenListOf28,29
+spec spec30,31
+spec spec31,32
+prop_passesSTest prop_passesSTest40,41
+prop_passesSTest prop_passesSTest42,43
+prop_groebnerDivsOrig prop_groebnerDivsOrig47,48
+prop_groebnerDivsOrig prop_groebnerDivsOrig49,50
+prop_groebnerIncluded prop_groebnerIncluded55,56
+prop_groebnerIncluded prop_groebnerIncluded57,58
+
 ./test/HomogeneousSpec.hs,474
 module HomogeneousSpec HomogeneousSpec4,5
 asGenListOf asGenListOf28,29
@@ -371,6 +384,33 @@ calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy359
 calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy363,364
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert368,369
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert371,372
+
+./src/Algebra/Algorithms/Groebner/F4.hs,799
+module Algebra.Algorithms.Groebner.F4Algebra.Algorithms.Groebner.F43,4
+type Strategy Strategy23,24
+type Strategy f f23,24
+normalStrategy normalStrategy25,26
+normalStrategy normalStrategy26,27
+degPair degPair28,29
+degPair degPair29,30
+lcmLeadingMonomial lcmLeadingMonomial31,32
+lcmLeadingMonomial lcmLeadingMonomial33,34
+viewMins viewMins35,36
+viewMins viewMins36,37
+f4 f440,41
+f4 f443,44
+f4' f4'45,46
+f4' f4'50,51
+f4WithStrategy' f4WithStrategy'54,55
+f4WithStrategy' f4WithStrategy'59,60
+type OMonom OMonom98,99
+type OMonom poly poly98,99
+decodeMatrix decodeMatrix100,101
+decodeMatrix decodeMatrix104,105
+f4WithStrategy f4WithStrategy110,111
+f4WithStrategy f4WithStrategy116,117
+computeMatrix computeMatrix118,119
+computeMatrix computeMatrix124,125
 
 ./src/Algebra/Field/RationalFunction.hs,683
 module Algebra.Field.RationalFunctionAlgebra.Field.RationalFunction2,3

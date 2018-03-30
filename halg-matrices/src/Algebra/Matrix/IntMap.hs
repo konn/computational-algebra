@@ -3,6 +3,7 @@ import           Algebra.Matrix.Generic
 import           Algebra.Matrix.Generic.Mutable (MMatrix)
 import qualified Algebra.Matrix.Generic.Mutable as GM
 import           Algebra.Prelude.Core
+import           Control.DeepSeq
 import           Data.IntMap                    (IntMap)
 import qualified Data.IntMap                    as IM
 import           Data.Vector                    (MVector, Vector)
@@ -17,6 +18,9 @@ data IMMatrix a = IMM { imRows :: Vector (IntMap a)
                       , imColCount :: Int
                       }
                   deriving (Eq, Ord)
+
+instance NFData a => NFData (IMMatrix a) where
+  rnf (IMM vs i) = rnf vs `seq` rnf i `seq` ()
 
 instance (DecidableZero a, Show a) => Show (IMMatrix a) where
   showsPrec d = showsPrec d . toRows

@@ -2,10 +2,28 @@
 ./Setup.hs,15
 main main1,2
 
-./app/Main.hs,52
-module Main Main0,1
-main main4,5
-main main5,6
+./app/gauss-bench.hs,619
+module Main Main2,3
+sparseMatrixOf sparseMatrixOf33,34
+sparseMatrixOf sparseMatrixOf35,36
+newtype Sparse Sparse44,45
+newtype Sparse ratio n m a = Sparse Sparse44,45
+newtype Sparse ratio n m a = Sparse { runSparse runSparse44,45
+instance instance47,48
+main main55,56
+main main56,57
+decodeMat decodeMat91,92
+decodeMat decodeMat92,93
+encodeMat encodeMat111,112
+encodeMat encodeMat112,113
+toLabel toLabel119,120
+toLabel toLabel120,121
+getMatrix getMatrix125,126
+getMatrix getMatrix127,128
+mkCases mkCases137,138
+mkCases mkCases140,141
+toCases toCases160,161
+toCases toCases163,164
 
 ./test/Spec.hs,30
 main main0,1
@@ -304,9 +322,9 @@ henselLift henselLift821,822
 solveHensel solveHensel837,838
 solveHensel solveHensel841,842
 
-./src/Algebra/Matrix/RepaIntMap.hs,1742
+./src/Algebra/Matrix/RepaIntMap.hs,1878
 module Algebra.Matrix.RepaIntMapAlgebra.Matrix.RepaIntMap5,6
-import import14,15
+import import15,16
 type RIMMatrix RIMMatrix28,29
 type URIMMatrix URIMMatrix29,30
 type DRIMMatrix DRIMMatrix30,31
@@ -314,70 +332,86 @@ data RIMMatrix' RIMMatrix'32,33
 data RIMMatrix' repr a = RIM RIM32,33
 data RIMMatrix' repr a = RIM { _rimColCount _rimColCount32,33
                              , _rimRows _rimRows33,34
-instance instance38,39
-toRows toRows41,42
-toRows toRows42,43
-dicToRow dicToRow44,45
-dicToRow dicToRow45,46
-fromRows fromRows47,48
-fromRows fromRows48,49
-vecToIM vecToIM54,55
-vecToIM vecToIM55,56
-indexed indexed57,58
-indexed indexed59,60
-data Weighted Weighted61,62
-data Weighted w a = Weighted Weighted61,62
-data Weighted w a = Weighted { getWeight getWeight61,62
-                             , unWeight unWeight62,63
-type Trivial Trivial72,73
-type Trivial a a72,73
-guardZero guardZero74,75
-guardZero guardZero75,76
-withArray withArray79,80
-withArray withArray81,82
-delayMatrix delayMatrix83,84
-delayMatrix delayMatrix84,85
-gaussReductionS gaussReductionS87,88
-gaussReductionS gaussReductionS91,92
-gaussReductionP gaussReductionP94,95
-gaussReductionP gaussReductionP98,99
-rankG rankG100,101
-  | i `IS.notMember`IS.notMember104,105
-rowCount rowCount109,110
-rowCount rowCount110,111
-gaussReductionD gaussReductionD112,113
-gaussReductionD gaussReductionD114,115
-type instance instance137,138
-type instance Mutable Mutable137,138
-type instance instance138,139
-type instance Row Row138,139
-type instance instance139,140
-type instance Column Column139,140
-lookCoe lookCoe141,142
-lookCoe lookCoe142,143
-updateAtRowIndex updateAtRowIndex144,145
-updateAtRowIndex updateAtRowIndex145,146
+instance instance36,37
+forceToVPar forceToVPar52,53
+forceToVPar forceToVPar53,54
+forceToVSeq forceToVSeq55,56
+forceToVSeq forceToVSeq56,57
+toRows toRows58,59
+toRows toRows59,60
+dicToRow dicToRow61,62
+dicToRow dicToRow62,63
+fromRows fromRows64,65
+fromRows fromRows65,66
+vecToIM vecToIM71,72
+vecToIM vecToIM72,73
+indexed indexed74,75
+indexed indexed76,77
+data Weighted Weighted78,79
+data Weighted w a = Weighted Weighted78,79
+data Weighted w a = Weighted { getWeight getWeight78,79
+                             , unWeight unWeight79,80
+type Trivial Trivial89,90
+type Trivial a a89,90
+guardZero guardZero91,92
+guardZero guardZero92,93
+withArray withArray96,97
+withArray withArray98,99
+delayMatrix delayMatrix100,101
+delayMatrix delayMatrix101,102
+gaussReductionS gaussReductionS104,105
+gaussReductionS gaussReductionS106,107
+gaussReductionP gaussReductionP109,110
+gaussReductionP gaussReductionP111,112
+rankG rankG113,114
+  | i `IS.notMember`IS.notMember117,118
+rowCount rowCount122,123
+rowCount rowCount123,124
+gaussReductionD gaussReductionD125,126
+gaussReductionD gaussReductionD127,128
+type instance instance150,151
+type instance Mutable Mutable150,151
+type instance instance151,152
+type instance Row Row151,152
+type instance instance152,153
+type instance Column Column152,153
+lookCoe lookCoe154,155
+lookCoe lookCoe155,156
+updateAtRowIndex updateAtRowIndex157,158
+updateAtRowIndex updateAtRowIndex158,159
 
-./src/Algebra/Matrix/HMatrix.hs,660
-module Algebra.Matrix.HMatrix Algebra.Matrix.HMatrix3,4
-type instance instance13,14
-type instance Mutable Mutable13,14
-type instance instance14,15
-type instance Row Row14,15
+./src/Algebra/Matrix/HMatrix.hs,1204
+module Algebra.Matrix.HMatrix Algebra.Matrix.HMatrix4,5
 type instance instance15,16
-type instance Column Column15,16
+type instance Mutable Mutable15,16
 type instance instance16,17
+type instance Row Row16,17
 type instance instance17,18
-data STMatrix STMatrix20,21
-data STMatrix s a = STMat STMat20,21
-data STMatrix s a = STMat { stmRows stmRows20,21
-                          , stmCols stmCols21,22
-                          , unwrapSTM unwrapSTM22,23
-instance instance25,26
-getRowLA getRowLA40,41
-getRowLA getRowLA41,42
-getColLA getColLA42,43
-getColLA getColLA43,44
+type instance Column Column17,18
+type instance instance18,19
+type instance instance19,20
+data STMatrix STMatrix22,23
+data STMatrix s a = STMat STMat22,23
+data STMatrix s a = STMat { stmRows stmRows22,23
+                          , stmCols stmCols23,24
+                          , unwrapSTM unwrapSTM24,25
+instance instance27,28
+getRowLA getRowLA81,82
+getRowLA getRowLA82,83
+getColLA getColLA83,84
+getColLA getColLA84,85
+unwrapSTMNum unwrapSTMNum86,87
+unwrapSTMNum unwrapSTMNum87,88
+castSTMatrixNum castSTMatrixNum90,91
+castSTMatrixNum castSTMatrixNum91,92
+unwrapSTMFractional unwrapSTMFractional128,129
+unwrapSTMFractional unwrapSTMFractional129,130
+castSTMatrixFractional castSTMatrixFractional132,133
+castSTMatrixFractional castSTMatrixFractional133,134
+unwrapSTMIntegral unwrapSTMIntegral170,171
+unwrapSTMIntegral unwrapSTMIntegral171,172
+castSTMatrixIntegral castSTMatrixIntegral174,175
+castSTMatrixIntegral castSTMatrixIntegral175,176
 
 ./src/Algebra/Matrix/Generic/Base.hs,158
 module Algebra.Matrix.Generic.Base Algebra.Matrix.Generic.Base0,1
@@ -474,46 +508,47 @@ unsafeGaussReduction unsafeGaussReduction222,223
 
 ./src/Algebra/Matrix/IntMap.hs,981
 module Algebra.Matrix.IntMap Algebra.Matrix.IntMap0,1
-data IMMatrix IMMatrix15,16
-data IMMatrix a = IMM IMM15,16
-data IMMatrix a = IMM { imRows imRows15,16
-                      , imColCount imColCount16,17
-instance instance20,21
-lookCoe lookCoe23,24
-lookCoe lookCoe24,25
-data MIMMatrix MIMMatrix27,28
-data MIMMatrix s a = MIM MIM27,28
-data MIMMatrix s a = MIM { _mimRows _mimRows27,28
-                         , _mimColCount _mimColCount28,29
-guardZero guardZero31,32
-guardZero guardZero32,33
-cmpMatrixSizeMsg cmpMatrixSizeMsg36,37
-cmpMatrixSizeMsg cmpMatrixSizeMsg37,38
-dot dot54,55
-dot dot55,56
-type instance instance69,70
-type instance Mutable Mutable69,70
-type instance instance70,71
-type instance Row Row70,71
-type instance instance71,72
-type instance Column Column71,72
-mfromIM mfromIM83,84
-mfromIM mfromIM84,85
-mrowToIM mrowToIM86,87
-mrowToIM mrowToIM87,88
-type instance instance91,92
-type instance instance92,93
+data IMMatrix IMMatrix16,17
+data IMMatrix a = IMM IMM16,17
+data IMMatrix a = IMM { imRows imRows16,17
+                      , imColCount imColCount17,18
+instance instance21,22
+lookCoe lookCoe27,28
+lookCoe lookCoe28,29
+data MIMMatrix MIMMatrix31,32
+data MIMMatrix s a = MIM MIM31,32
+data MIMMatrix s a = MIM { _mimRows _mimRows31,32
+                         , _mimColCount _mimColCount32,33
+guardZero guardZero35,36
+guardZero guardZero36,37
+cmpMatrixSizeMsg cmpMatrixSizeMsg40,41
+cmpMatrixSizeMsg cmpMatrixSizeMsg41,42
+dot dot58,59
+dot dot59,60
+type instance instance73,74
+type instance Mutable Mutable73,74
+type instance instance74,75
+type instance Row Row74,75
+type instance instance75,76
+type instance Column Column75,76
+mfromIM mfromIM87,88
+mfromIM mfromIM88,89
+mrowToIM mrowToIM90,91
+mrowToIM mrowToIM91,92
+type instance instance95,96
+type instance instance96,97
 
-./src/Algebra/Matrix/DataMatrix.hs,310
-module Algebra.Matrix.DataMatrix Algebra.Matrix.DataMatrix6,7
-type WIMatrix WIMatrix12,13
-type instance instance14,15
-type instance Mutable Mutable14,15
-type instance instance15,16
-type instance Row Row15,16
-type instance instance16,17
-type instance Column Column16,17
-instance instance18,19
+./src/Algebra/Matrix/DataMatrix.hs,338
+module Algebra.Matrix.DataMatrix Algebra.Matrix.DataMatrix7,8
+type WIMatrix WIMatrix14,15
+type DMatrix DMatrix15,16
+type instance instance17,18
+type instance Mutable Mutable17,18
+type instance instance18,19
+type instance Row Row18,19
+type instance instance19,20
+type instance Column Column19,20
+instance instance21,22
 
 ./src/Algebra/Matrix/Generic.hs,2678
 module Algebra.Matrix.GenericAlgebra.Matrix.Generic2,3

@@ -1,3 +1,5 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving, StandaloneDeriving #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 module Algebra.Normed where
 import AlgebraicPrelude
 
@@ -7,9 +9,17 @@ class (Ord (Norm a)) => Normed a where
   norm :: a -> Norm a
   liftNorm :: Norm a -> a
 
+deriving instance Normed a => Normed (WrapNum a)
+deriving instance Normed a => Normed (WrapFractional a)
+deriving instance Normed a => Normed (WrapAlgebra a)
+deriving instance Normed a => Normed (WrapIntegral a)
+
+deriving instance Normed a => Normed (Add a)
+deriving instance Normed a => Normed (Mult a)
+
 instance Normed Double where
   type Norm Double = Double
-  norm a = abs a
+  norm = abs
   liftNorm = id
 
 instance Normed Int where

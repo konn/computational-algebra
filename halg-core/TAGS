@@ -11,39 +11,39 @@ main main5,6
 main main0,1
 main main1,2
 
-./src/Algebra/Normed.hs,216
-module Algebra.Normed Algebra.Normed0,1
-class (Ord (Norm a)) => Normed Normed4,5
-class (Ord (Norm a)) => Normed Normed4,5
-  type Norm Norm5,6
-  norm norm6,7
-  liftNorm liftNorm7,8
-instance instance9,10
+./src/Algebra/Normed.hs,218
+module Algebra.Normed Algebra.Normed2,3
+class (Ord (Norm a)) => Normed Normed6,7
+class (Ord (Norm a)) => Normed Normed6,7
+  type Norm Norm7,8
+  norm norm8,9
+  liftNorm liftNorm9,10
+instance instance19,20
 
 ./src/Algebra/Field/Prime.hs,643
 module Algebra.Field.PrimeAlgebra.Field.Prime5,6
-newtype F F34,35
-newtype F (p :: k) = F F34,35
-newtype F (p :: k) = F { runF runF34,35
-modNat modNat38,39
-modNat modNat39,40
-modNat' modNat'42,43
-modNat' modNat'43,44
-reifyPrimeField reifyPrimeField48,49
-reifyPrimeField reifyPrimeField49,50
-withPrimeField withPrimeField51,52
-withPrimeField withPrimeField52,53
-naturalRepr naturalRepr54,55
-naturalRepr naturalRepr55,56
-proxyF proxyF57,58
-proxyF proxyF58,59
-instance instance60,61
-pows pows88,89
-pows pows89,90
-modRat modRat225,226
-modRat modRat226,227
-modRat' modRat'229,230
-modRat' modRat'230,231
+newtype F F35,36
+newtype F (p :: k) = F F35,36
+newtype F (p :: k) = F { runF runF35,36
+instance instance39,40
+modNat modNat42,43
+modNat modNat43,44
+modNat' modNat'46,47
+modNat' modNat'47,48
+reifyPrimeField reifyPrimeField52,53
+reifyPrimeField reifyPrimeField53,54
+withPrimeField withPrimeField55,56
+withPrimeField withPrimeField56,57
+naturalRepr naturalRepr58,59
+naturalRepr naturalRepr59,60
+proxyF proxyF61,62
+proxyF proxyF62,63
+pows pows92,93
+pows pows93,94
+modRat modRat229,230
+modRat modRat230,231
+modRat' modRat'233,234
+modRat' modRat'234,235
 
 ./src/Algebra/Field/Finite.hs,276
 module Algebra.Field.Finite Algebra.Field.Finite4,5
