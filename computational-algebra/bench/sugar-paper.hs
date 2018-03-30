@@ -5,6 +5,7 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
 import Algebra.Algorithms.Groebner
+import Algebra.Algorithms.Groebner.F4
 import Algebra.Algorithms.Groebner.Homogeneous
 import Algebra.Algorithms.Groebner.Signature
 import Algebra.Internal
@@ -64,6 +65,7 @@ mkTC name jdeal =
               , bench "standard" $ nf calcGroebnerBasis ideal
               , bench "naive-homog" $ nf calcGroebnerBasisAfterHomogenising ideal
               , bench "hilb" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
+              , bench "F4" $ nf f4 ideal
               , bench "F5" $ nf f5 ideal
               ]
 
