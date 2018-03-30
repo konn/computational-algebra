@@ -69,7 +69,7 @@ mkTC name jdeal =
 
 main :: IO ()
 main = do
-  ideal1 <- return $! (toIdeal i1 `using` rdeepseq)
+  -- ideal1 <- return $! (toIdeal i1 `using` rdeepseq)
   ideal2 <- return $! (toIdeal i2 `using` rdeepseq)
   ideal3 <- return $! (toIdeal i3 `using` rdeepseq)
   ideal4 <- return $! (toIdeal i4 `using` rdeepseq)
@@ -77,4 +77,3 @@ main = do
        mkTestCases (Left 1) ideal2
     ++ mkTestCases (Right "Cyclic-4") ideal4
     ++ [mkTC "grevlex03" ideal3]
-
