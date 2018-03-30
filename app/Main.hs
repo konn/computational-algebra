@@ -67,7 +67,7 @@ main = hakyllWith conf $ do
   create ["stylesheets/syntax.css"] $ do
     route idRoute
     compile $ makeItem (styleToCss pygments)
-  match (algCopies .||. "**.js" .||. "**.css") $ do
+  match (algCopies .||. "**.js" .||. "**.css" .||. "**.json") $ do
     route idRoute
     compile copyFileCompiler
   match "index.md" $ do
