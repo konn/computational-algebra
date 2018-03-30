@@ -23,6 +23,8 @@ import qualified Numeric.LinearAlgebra       as LA
 import qualified Numeric.LinearAlgebra.Devel as LA
 import qualified Prelude                     as P
 
+{-# ANN module "HLint: ignore Redundant bang pattern" #-}
+
 class Matrix mat where
   type Elem mat a :: Constraint
   cmap  :: (Elem mat a, Elem mat b) => (a -> b) -> mat a -> mat b
@@ -95,7 +97,10 @@ instance Matrix DM.Matrix where
   (<-->) = (DM.<->)
 
 swapIJ :: Eq a => a -> a -> a -> a
-swapIJ i j k = if k == i then j else if k == j then i else k
+swapIJ i j k
+  | k == i = j
+  | k == j = i
+  | otherwise = k
 
 instance Matrix LA.Matrix where
   type Elem LA.Matrix a = (P.Num a, LA.Numeric  a, LA.Element a, LA.Container LA.Vector a)
@@ -175,11 +180,6 @@ companion odn poly =
   if 1 <= k && k <= deg - 1
   then delta j (k+1)
   else NA.negate $ coeff (NA.pow vx (fromIntegral $ j-1 :: NA.Natural)) poly
-
--- instance SM.Arrayed (Fraction Integer) where
---   type Arr (Fraction Integer) = V.Vector
-
--- instance SM.Eq0 (Fraction Integer)
 
 -- | @gaussReduction a = (a', p)@ where @a'@ is row echelon form and @p@ is pivoting matrix.
 gaussReduction :: (Matrix mat, Elem mat a, Normed a, Eq a, NA.Field a)

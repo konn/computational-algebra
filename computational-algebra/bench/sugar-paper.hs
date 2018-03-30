@@ -5,14 +5,16 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
 import Algebra.Algorithms.Groebner
+import Algebra.Algorithms.Groebner.Homogeneous
+import Algebra.Algorithms.Groebner.Signature
 import Algebra.Internal
 import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
 import Algebra.Scalar
-
 import Control.Parallel.Strategies
 import Gauge.Main
-import Numeric.Field.Fraction      (Fraction)
+import Gauge.Types
+import Numeric.Field.Fraction                  (Fraction)
 
 i1 :: [OrderedPolynomial (Fraction Integer) Grevlex 7]
 i1 = [y * w - (1 / 2) !* z * w + t*w
@@ -45,20 +47,25 @@ i3 = [ x^31 - x^6 - x- y, x^8 - z, x^10 -t]
     [t,x,y,z] = vars
 
 i4 :: [OrderedPolynomial (Fraction Integer) Grevlex 4]
-i4 = [ w+x+y+z, w*x+x*y+y*z+z*w, w*x*y + x*y*z + y*z*w + z*w*x, w*x*y*z]
+i4 = [ w+x+y+z, w*x+x*y+y*z+z*w, w*x*y + x*y*z + y*z*w + z*w*x, w*x*y*z - 1]
   where
     [x,y,z,w] = vars
 
-mkTestCases :: (Show a, KnownNat n) => a -> Ideal (Polynomial (Fraction Integer) n) -> [Benchmark]
-mkTestCases num ideal = [ mkTC ("lex0" ++ show num) (mapIdeal (changeOrder Lex) ideal)
-                        , mkTC ("grevlex0" ++ show num) (mapIdeal (changeOrder Grevlex) ideal)
+mkTestCases :: (KnownNat n) => Either Int String -> Ideal (Polynomial (Fraction Integer) n) -> [Benchmark]
+mkTestCases num ideal = [ mkTC ("lex0" ++ either show id num) (mapIdeal (changeOrder Lex) ideal)
+                        , mkTC ("grevlex0" ++ either show id num) (mapIdeal (changeOrder Grevlex) ideal)
                         ]
 
 mkTC :: (IsMonomialOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
-mkTC name ideal =
-    bgroup name [ bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy) ideal
-                , bench "syz+sugar" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)) ideal
-                ]
+mkTC name jdeal =
+  env (return jdeal) $ \ ideal ->
+  bgroup name [ bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy) ideal
+              , bench "syz+sugar" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)) ideal
+              , bench "standard" $ nf calcGroebnerBasis ideal
+              , bench "naive-homog" $ nf calcGroebnerBasisAfterHomogenising ideal
+              , bench "hilb" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
+              , bench "F5" $ nf f5 ideal
+              ]
 
 main :: IO ()
 main = do
@@ -66,8 +73,7 @@ main = do
   ideal2 <- return $! (toIdeal i2 `using` rdeepseq)
   ideal3 <- return $! (toIdeal i3 `using` rdeepseq)
   ideal4 <- return $! (toIdeal i4 `using` rdeepseq)
-  defaultMain $
-       mkTestCases 1 ideal2
-    ++ mkTestCases 2 ideal4
+  defaultMainWith defaultConfig { reportFile = Just "bench-results/sugar-paper.html"} $
+       mkTestCases (Left 1) ideal2
+    ++ mkTestCases (Right "Cyclic-4") ideal4
     ++ [mkTC "grevlex03" ideal3]
-

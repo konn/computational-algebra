@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ea4d6c2c5fb390721b827b8bd1f43b2e295c0788cb7412ff5f7ed6ed468cd06a
+-- hash: 4c70942e80c338fe43f4595b47ac65518788892d643e7134d9382dceb10c1c4f
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -40,6 +40,7 @@ library
     , containers
     , control-monad-loop
     , convertible
+    , dlist
     , equational-reasoning
     , ghc-typelits-knownnat
     , halg-core
@@ -52,10 +53,12 @@ library
     , monad-loops
     , mtl
     , reflection
+    , semigroups
     , sized
     , vector
   exposed-modules:
       Algebra.Algorithms.Groebner.Homogeneous
+      Algebra.Algorithms.Groebner.Signature
       Algebra.Algorithms.ZeroDim
       Algebra.Field.RationalFunction
       Algebra.Ring.Polynomial.Homogenised
@@ -69,7 +72,7 @@ test-suite spec
   hs-source-dirs:
       test
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
-  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N -Odph -rtsopts
   build-depends:
       HUnit
     , MonadRandom
@@ -78,6 +81,7 @@ test-suite spec
     , base >=4.7 && <5
     , containers
     , convertible
+    , dlist
     , equational-reasoning
     , ghc-typelits-knownnat
     , halg-algorithms
@@ -91,11 +95,13 @@ test-suite spec
     , matrix
     , quickcheck-instances
     , reflection
+    , semigroups
     , sized
     , smallcheck
     , type-natural
     , vector
   other-modules:
+      F5Spec
       ZeroDimSpec
       HomogeneousSpec
       Utils
@@ -113,10 +119,12 @@ benchmark homog-bench
       MonadRandom
     , algebra
     , base >=4.7 && <5
+    , dlist
     , gauge
     , halg-algorithms
     , halg-core
     , halg-polynomials
     , parallel
+    , semigroups
     , sized
   default-language: Haskell2010
