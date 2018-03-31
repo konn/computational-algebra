@@ -24,6 +24,13 @@ module Main Main0,1
 main main4,5
 main main5,6
 
+./app/f5-prof.hs,78
+module Main Main1,2
+i2 i26,7
+i2 i27,8
+main main12,13
+main main13,14
+
 ./test/F5Spec.hs,408
 module F5Spec F5Spec5,6
 asGenListOf asGenListOf28,29
@@ -268,7 +275,7 @@ calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy363
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert368,369
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert371,372
 
-./src/Algebra/Algorithms/Groebner/Signature.hs,1159
+./src/Algebra/Algorithms/Groebner/Signature.hs,1117
 module Algebra.Algorithms.Groebner.Signature Algebra.Algorithms.Groebner.Signature3,4
 mkEntry mkEntry20,21
 mkEntry mkEntry22,23
@@ -276,114 +283,33 @@ f5 f524,25
 f5 f526,27
 calcSignatureGB calcSignatureGB30,31
 calcSignatureGB calcSignatureGB33,34
-regularSVector regularSVector60,61
-regularSVector regularSVector64,65
-standardCriterion standardCriterion72,73
-standardCriterion standardCriterion75,76
-divSig divSig77,78
-divSig divSig78,79
-data Signature Signature81,82
-  Signature Signature82,83
-  Signature { _position _position82,83
-            , _sigCoeff _sigCoeff83,84
-            , _sigMonom _sigMonom84,85
-instance instance87,88
-(%!!)%!!97,98
-Vector Vector98,99
-signature signature100,101
+regularSVector regularSVector62,63
+regularSVector regularSVector66,67
+standardCriterion standardCriterion74,75
+standardCriterion standardCriterion77,78
+divSig divSig79,80
+divSig divSig80,81
+data Signature Signature84,85
+  Signature Signature85,86
+  Signature { _position _position85,86
+            , _sigCoeff _sigCoeff86,87
+            , _sigMonom _sigMonom87,88
+instance instance90,91
+(%!!)%!!100,101
+Vector Vector101,102
 signature signature103,104
-newtype Vector Vector110,111
-newtype Vector n a = Vector Vector110,111
-newtype Vector n a = Vector { runVector runVector110,111
-type instance instance118,119
-type instance GV.Mutable GV.Mutable118,119
-basis basis148,149
-basis basis149,150
-reduceSignature reduceSignature151,152
+signature signature106,107
+newtype Vector Vector114,115
+newtype Vector n a = Vector Vector114,115
+newtype Vector n a = Vector { runVector runVector114,115
+type instance instance122,123
+type instance GV.Mutable GV.Mutable122,123
+basis basis152,153
+basis basis153,154
 reduceSignature reduceSignature155,156
-dot dot168,169
-dot dot169,170
-cyclic cyclic171,172
-cyclic cyclic173,174
-
-./src/Algebra/Algorithms/Groebner/flycheck_Homogeneous.hs,3596
-module Algebra.Algorithms.Groebner.HomogeneousAlgebra.Algorithms.Groebner.Homogeneous3,4
-isHomogeneous isHomogeneous43,44
-isHomogeneous isHomogeneous45,46
-calcGroebnerBasisAfterHomogenisingWith calcGroebnerBasisAfterHomogenisingWith51,52
-calcGroebnerBasisAfterHomogenisingWith calcGroebnerBasisAfterHomogenisingWith55,56
-calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising59,60
-calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising61,62
-calcGroebnerBasisAfterHomogenisingHilb calcGroebnerBasisAfterHomogenisingHilb63,64
-calcGroebnerBasisAfterHomogenisingHilb calcGroebnerBasisAfterHomogenisingHilb65,66
-calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis72,73
-calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis74,75
-unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis83,84
-unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis85,86
-type Signatures Signatures101,102
-type Signatures weight weight101,102
-buildTable buildTable103,104
-buildTable buildTable105,106
-type RefVec RefVec112,113
-type RefVec s s112,113
-at at114,115
-at at115,116
-snoc snoc117,118
-snoc snoc118,119
-deg deg126,127
-deg deg127,128
-data ReversedEntry ReversedEntry134,135
-data ReversedEntry p a = ReversedEntry ReversedEntry134,135
-data ReversedEntry p a = ReversedEntry { rePriority rePriority134,135
-                                       , rePayload rePayload135,136
-instance instance138,139
-viewMax viewMax144,145
-viewMax viewMax145,146
-class (Foldable f) => Container Container147,148
-  insert    :: Element f a => a a150,151
-  type Element Element148,149
-  filter filter149,150
-  insert insert150,151
-  empty empty151,152
-head' head'167,168
-head' head'168,169
-divs' divs'170,171
-divs' divs'171,172
-minimalGenerators' minimalGenerators'173,174
-minimalGenerators' minimalGenerators'175,176
-minimalGenerators minimalGenerators187,188
-minimalGenerators minimalGenerators188,189
-hilbertPoincareSeriesBy hilbertPoincareSeriesBy195,196
-hilbertPoincareSeriesBy hilbertPoincareSeriesBy200,201
-hilbertPoincareSeries hilbertPoincareSeries207,208
-hilbertPoincareSeries hilbertPoincareSeries209,210
-data Compactified Compactified212,213
-data Compactified a = InfinityInfinity212,213
-                    | Finite Finite213,214
-data HPS HPS230,231
-data HPS n = HPS HPS230,231
-data HPS n = HPS { taylorHPS taylorHPS230,231
-                 , hpsNumerator hpsNumerator231,232
-convolute convolute263,264
-convolute convolute264,265
-binoms binoms271,272
-binoms binoms272,273
-binom binom278,279
-binom binom279,280
-toRationalFunction toRationalFunction282,283
-toRationalFunction toRationalFunction283,284
-hilbertPoincareSeriesForMonomials hilbertPoincareSeriesForMonomials286,287
-hilbertPoincareSeriesForMonomials hilbertPoincareSeriesForMonomials288,289
-buildHilbTable buildHilbTable308,309
-buildHilbTable buildHilbTable312,313
-whileForM_ whileForM_318,319
-whileForM_ whileForM_319,320
-calcHomogeneousGroebnerBasisHilbertWithSeries calcHomogeneousGroebnerBasisHilbertWithSeries323,324
-calcHomogeneousGroebnerBasisHilbertWithSeries calcHomogeneousGroebnerBasisHilbertWithSeries327,328
-calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy359,360
-calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy363,364
-calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert368,369
-calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert371,372
+reduceSignature reduceSignature159,160
+dot dot172,173
+dot dot173,174
 
 ./src/Algebra/Algorithms/Groebner/F4.hs,799
 module Algebra.Algorithms.Groebner.F4Algebra.Algorithms.Groebner.F43,4

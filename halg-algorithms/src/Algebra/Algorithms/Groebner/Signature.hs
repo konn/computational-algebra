@@ -1,5 +1,5 @@
-{-# LANGUAGE DeriveFunctor, DeriveTraversable, GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE ScopedTypeVariables, ViewPatterns                            #-}
+{-# LANGUAGE BangPatterns, DeriveFunctor, DeriveTraversable                #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, ScopedTypeVariables, ViewPatterns #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Algorithms.Groebner.Signature (f5) where
 import           Algebra.Prelude.Core hiding (Vector)
@@ -20,12 +20,12 @@ import qualified Data.Vector.Generic  as GV
 
 mkEntry :: (KnownNat s, IsOrderedPolynomial poly)
         => Vector s poly -> Entry (Signature s poly) (Vector s poly)
-mkEntry = Entry <$> signature <*> id
+mkEntry = {-# SCC "mkEntry" #-} Entry <$> signature <*> id
 
 f5 :: (IsOrderedPolynomial a, Field (Coefficient a))
    => Ideal a -> [a]
 f5 ideal =
-  case SV.toSomeSized $ V.fromList $ generators ideal of
+  case {-# SCC "toSomeSozied" #-} SV.toSomeSized $ V.fromList $ generators ideal of
     SV.SomeSized s sideal -> map snd $ withKnownNat s $ calcSignatureGB (Vector sideal)
 
 calcSignatureGB :: forall s poly.
@@ -35,18 +35,20 @@ calcSignatureGB side | null side = []
 calcSignatureGB (fmap monoize -> sideal) = runST $ do
   gs <- newSTRef []
   ps <- newSTRef $ H.fromList [ mkEntry $ basis i | i <- [0..]]
-  syzs <- newSTRef [ mkEntry (negate (sideal %!! j) .*. basis i + (sideal %!! i) .*. basis j)
-                   | j <- [0..]
-                   , i <- map toEnum [0..fromEnum j - 1]
-                   ]
+  syzs <- {-# SCC "initial_syzygy" #-}
+          newSTRef
+          [ mkEntry (negate (sideal %!! j) .*. basis i + (sideal %!! i) .*. basis j)
+          | j <- [0..]
+          , i <- map toEnum [0..fromEnum j - 1]
+          ]
   whileJust_ (H.viewMin <$> readSTRef ps) $ \(Entry gSig g, ps') -> do
     writeSTRef ps ps'
     gs0 <- readSTRef gs
     ss0 <- readSTRef syzs
-    unless (standardCriterion gSig ss0 || any ((== gSig) . priority . snd) gs0) $ do
-      let h = reduceSignature sideal g gs0
+    unless ({-# SCC "standardCr" #-}standardCriterion gSig ss0 || any ((== gSig) . priority . snd) gs0) $ do
+      let h = {-# SCC "reduction" #-} reduceSignature sideal g gs0
           ph = phi h
-          h' = fmap (* injectCoeff (recip $ leadingCoeff ph)) h
+          h' = {-# SCC "scaling" #-} fmap (* injectCoeff (recip $ leadingCoeff ph)) h
       if isZero ph
         then modifySTRef' syzs (mkEntry h : )
         else do
@@ -73,10 +75,11 @@ regularSVector (pg, g) (ph, h) =
 standardCriterion :: (KnownNat s, IsOrderedPolynomial poly, Foldable t)
                   => Signature s poly -> t (Entry (Signature s poly) (Vector s poly))
                   -> Bool
-standardCriterion g = any ((`divSig` g) . priority)
+standardCriterion g = {-# SCC "standardCriterion" #-} any ((`divSig` g) . priority)
 
 divSig :: Signature s poly -> Signature s poly -> Bool
 divSig (Signature i _ c) (Signature j _ d) =
+  {-# SCC "divSig" #-}
   i == j && c `divs` d
 
 data Signature (s :: Nat) poly =
@@ -101,7 +104,8 @@ Vector v %!! i = v SV.%!! i
 signature :: (KnownNat s, IsOrderedPolynomial poly)
           => Vector s poly
           -> Signature s poly
-signature = fromJust . DC.coerce
+signature = {-# SCC "signature" #-}
+            fromJust . DC.coerce
           . ifoldMap (\i v -> Option $ do
                          let lt =  leadingTerm v
                          guard $ not $ isZero $ fst lt
@@ -154,15 +158,15 @@ reduceSignature :: (KnownNat s, IsOrderedPolynomial poly, Field (Coefficient pol
                 -> t (poly, Entry (Signature s poly) (Vector s poly))
                 -> Vector s poly
 reduceSignature ideal g hs =
-  fst $ flip (until (\(u, r) -> phi u == r)) (g, zero) $ \(u, r) ->
-  let m = leadingTerm $ phi u - r
+  view _1 $ flip (until (\(_, phiu, r) -> phiu == r)) (g, phi g, zero) $ \(u, !phiu, r) ->
+  let m = leadingTerm $ phiu - r
       tryCancel (hi', Entry _ hi) = First $ do
         let quo = fmap (toPolynomial (m `tryDiv` leadingTerm hi') *) hi
         guard $ (leadingMonomial hi' `divs` snd m) && (signature quo < signature u)
         return quo
   in case getFirst $ foldMap tryCancel hs of
-    Nothing -> (u, r + toPolynomial m)
-    Just d  -> (u - d, r)
+    Nothing -> (u, phiu, r + toPolynomial m)
+    Just d  -> (u - d, phiu- phi d, r)
   where
     phi = dot ideal
 

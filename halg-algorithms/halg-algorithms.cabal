@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3c67033d0dc3a3c92d8c40fcba287ceffa1526fcb641e5d86f5ca99f63116a76
+-- hash: a927cbe74cfb68f37929377a30414f3d4eab71302821921d70260ec87e5f3545
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -65,6 +65,28 @@ library
       Algebra.Ring.Polynomial.Homogenised
   other-modules:
       Algebra.Algorithms.FGLM
+  default-language: Haskell2010
+
+executable f5-prof
+  main-is: f5-prof.hs
+  other-modules:
+      Main
+      Paths_halg_algorithms
+  hs-source-dirs:
+      app
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N -fprof-auto -fprof-cafs
+  build-depends:
+      MonadRandom
+    , algebra
+    , base >=4.7 && <5
+    , deepseq
+    , dlist
+    , halg-algorithms
+    , halg-core
+    , halg-polynomials
+    , semigroups
+    , sized
   default-language: Haskell2010
 
 test-suite spec

@@ -67,6 +67,23 @@ library:
   default-extensions:
   - NoImplicitPrelude
 
+executables:
+  f5-prof:
+    main:                f5-prof.hs
+    source-dirs:         app
+    ghc-options:
+    - -Wall
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -fprof-auto
+    - -fprof-cafs
+    dependencies:
+    - halg-core
+    - halg-polynomials
+    - halg-algorithms
+    - deepseq
+
 tests:
   spec:
     main:                Spec.hs
