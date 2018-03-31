@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a927cbe74cfb68f37929377a30414f3d4eab71302821921d70260ec87e5f3545
+-- hash: 89315fcc7edbd0a00cefbc44f4b61d1b08417ca6cb1ac49a7694c22263529959
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -70,7 +70,6 @@ library
 executable f5-prof
   main-is: f5-prof.hs
   other-modules:
-      Main
       Paths_halg_algorithms
   hs-source-dirs:
       app

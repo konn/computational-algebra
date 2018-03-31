@@ -19,17 +19,14 @@ main main67,68
 ./Setup.hs,15
 main main1,2
 
-./app/Main.hs,52
-module Main Main0,1
-main main4,5
-main main5,6
-
-./app/f5-prof.hs,78
+./app/f5-prof.hs,104
 module Main Main1,2
 i2 i26,7
 i2 i27,8
-main main12,13
-main main13,14
+i3 i312,13
+i3 i313,14
+main main17,18
+main main18,19
 
 ./test/F5Spec.hs,408
 module F5Spec F5Spec5,6
@@ -275,7 +272,7 @@ calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy363
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert368,369
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert371,372
 
-./src/Algebra/Algorithms/Groebner/Signature.hs,1117
+./src/Algebra/Algorithms/Groebner/Signature.hs,1112
 module Algebra.Algorithms.Groebner.Signature Algebra.Algorithms.Groebner.Signature3,4
 mkEntry mkEntry20,21
 mkEntry mkEntry22,23
@@ -283,33 +280,33 @@ f5 f524,25
 f5 f526,27
 calcSignatureGB calcSignatureGB30,31
 calcSignatureGB calcSignatureGB33,34
-regularSVector regularSVector62,63
-regularSVector regularSVector66,67
-standardCriterion standardCriterion74,75
-standardCriterion standardCriterion77,78
-divSig divSig79,80
-divSig divSig80,81
-data Signature Signature84,85
-  Signature Signature85,86
-  Signature { _position _position85,86
-            , _sigCoeff _sigCoeff86,87
-            , _sigMonom _sigMonom87,88
-instance instance90,91
-(%!!)%!!100,101
-Vector Vector101,102
-signature signature103,104
-signature signature106,107
-newtype Vector Vector114,115
-newtype Vector n a = Vector Vector114,115
-newtype Vector n a = Vector { runVector runVector114,115
-type instance instance122,123
-type instance GV.Mutable GV.Mutable122,123
-basis basis152,153
-basis basis153,154
+regularSVector regularSVector59,60
+regularSVector regularSVector63,64
+standardCriterion standardCriterion70,71
+standardCriterion standardCriterion73,74
+divSig divSig75,76
+divSig divSig76,77
+data Signature Signature80,81
+  Signature Signature81,82
+  Signature { _position _position81,82
+            , _sigCoeff _sigCoeff82,83
+            , _sigMonom _sigMonom83,84
+instance instance86,87
+(%!!)%!!96,97
+Vector Vector97,98
+signature signature99,100
+signature signature102,103
+newtype Vector Vector110,111
+newtype Vector n a = Vector Vector110,111
+newtype Vector n a = Vector { runVector runVector110,111
+type instance instance118,119
+type instance GV.Mutable GV.Mutable118,119
+basis basis148,149
+basis basis149,150
+reduceSignature reduceSignature151,152
 reduceSignature reduceSignature155,156
-reduceSignature reduceSignature159,160
-dot dot172,173
-dot dot173,174
+dot dot169,170
+dot dot170,171
 
 ./src/Algebra/Algorithms/Groebner/F4.hs,799
 module Algebra.Algorithms.Groebner.F4Algebra.Algorithms.Groebner.F43,4
