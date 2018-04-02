@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2b6696c9cd889e66fd3e44e80d92035e70ec2c1ee636ee568323fb8ae47cd5e8
+-- hash: b315fb5822708a1c48e3a337702160ea5944827faec08eb0eb03a11b5dac52a6
 
 name:           halg-polynomials
 version:        0.6.0.0
@@ -39,6 +39,7 @@ library
     , base >=4.7 && <5
     , containers
     , deepseq
+    , dlist
     , equational-reasoning
     , ghc-typelits-knownnat
     , halg-core
@@ -79,6 +80,7 @@ test-suite spec
     , algebraic-prelude
     , base
     , containers
+    , dlist
     , halg-core
     , halg-core-test
     , halg-polynomials

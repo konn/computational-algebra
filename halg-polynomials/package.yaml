@@ -21,6 +21,7 @@ category:            Math
 description:         Please see the project Web Site <https://konn.github.io/computational-algebra>
 
 dependencies:
+- dlist
 - algebraic-prelude
 - algebra
 - base
