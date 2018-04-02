@@ -1,6 +1,7 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, ExistentialQuantification        #-}
-{-# LANGUAGE ExplicitNamespaces, FlexibleContexts, FlexibleInstances      #-}
-{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, IncoherentInstances       #-}
+{-# LANGUAGE BangPatterns, ConstraintKinds, DataKinds                     #-}
+{-# LANGUAGE ExistentialQuantification, ExplicitNamespaces                #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                   #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, IncoherentInstances              #-}
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, ParallelListComp #-}
 {-# LANGUAGE PatternSynonyms, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
 {-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeApplications        #-}
@@ -38,6 +39,8 @@ import           Data.Kind                    (Type)
 import           Data.Maybe                   (catMaybes)
 import           Data.Monoid                  ((<>))
 import           Data.Ord                     (comparing)
+import           Data.Sequence                (Seq ((:|>), Empty))
+import qualified Data.Sequence                as Seq
 import           Data.Singletons.Prelude      (SList, Sing)
 import           Data.Singletons.Prelude      (SingKind (..))
 import           Data.Singletons.Prelude.List (Length, Replicate, sReplicate)
@@ -108,8 +111,20 @@ grlex = graded lex
 
 -- | Graded reversed lexicographical order. This *is* a monomial order.
 grevlex :: MonomialOrder n
-grevlex = graded revlex
+grevlex as bs = grevlexHW (V.unsized as) (V.unsized bs) 0 0 EQ
 {-# INLINE [2] grevlex #-}
+
+grevlexHW :: Seq Int -> Seq Int -> Int -> Int -> Ordering -> Ordering
+grevlexHW (as :|> a) (bs :|> b)  !accl !accr cmp =
+  let conti | cmp == EQ = case compare a b of
+                LT -> GT
+                GT -> LT
+                EQ -> EQ
+            | otherwise = cmp
+  in grevlexHW as bs (accl + a) (accr  + b) conti
+grevlexHW Empty _  !accl !accr cmp =
+  compare accl accr <> cmp
+grevlexHW as    bs !accl !accr cmp = compare (sum as + accl) (sum bs + accr) <> cmp
 
 deriving instance Hashable (Monomial n) => Hashable (OrderedMonomial ordering n)
 deriving instance (Eq (Monomial n)) => Eq (OrderedMonomial ordering n)
