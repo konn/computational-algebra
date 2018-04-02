@@ -1,4 +1,29 @@
 
+./bench/ordering-bench.hs,603
+module Main Main5,6
+type Comparer Comparer20,21
+gradeF gradeF22,23
+gradeF gradeF23,24
+revlexF revlexF26,27
+revlexF revlexF27,28
+data FoldlGrevlex FoldlGrevlex30,31
+data FoldlGrevlex = FoldlGrevlexFoldlGrevlex30,31
+instance instance32,33
+grevlexHW grevlexHW39,40
+grevlexHW grevlexHW40,41
+data HandWrittenGrevlex HandWrittenGrevlex51,52
+data HandWrittenGrevlex = HandWrittenGrevlexHandWrittenGrevlex51,52
+i2G i2G60,61
+i2G i2G61,62
+i2FlG i2FlG66,67
+i2FlG i2FlG67,68
+i2HWG i2HWG73,74
+i2HWG i2HWG74,75
+mkTC mkTC81,82
+mkTC mkTC82,83
+main main88,89
+main main89,90
+
 ./bench/homog-bench.hs,256
 module Main Main5,6
 i1 i118,19
@@ -18,6 +43,28 @@ main main67,68
 
 ./Setup.hs,15
 main main1,2
+
+./app/std-prof.hs,104
+module Main Main1,2
+i2 i26,7
+i2 i27,8
+i3 i312,13
+i3 i313,14
+main main17,18
+main main18,19
+
+./app/f4-prof.hs,156
+module Main Main1,2
+i2 i26,7
+i2 i27,8
+i3 i312,13
+i3 i313,14
+i4 i417,18
+i4 i418,19
+c3 c322,23
+c3 c323,24
+main main27,28
+main main28,29
 
 ./app/f5-prof.hs,104
 module Main Main1,2
