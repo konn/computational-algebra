@@ -5,7 +5,6 @@ module Algebra.Matrix.Generic.Mutable
   , fromRow, fromColumn, getRow, getColumn
   , imapRow, mapRow, fill, read, write
   , scaleRow, unsafeSwapRows, swapRows
-  , combineRows
   , gaussReduction, unsafeGaussReduction
   ) where
 import           Algebra.Matrix.Generic.Base
@@ -84,6 +83,12 @@ class (GV.Vector (Column mat) a, GV.Vector (Row mat) a) => MMatrix mat a where
 
   toColumns :: PrimMonad m => mat (PrimState m) a -> m [Column mat a]
   toColumns mat = forM [0..columnCount mat-1] $ \i -> unsafeGetColumn i mat
+
+  -- | @'combineRows' i c j mat@ adds scalar multiple of @j@th row by @c@ to @i@th.
+  combineRows :: (Semiring a, Commutative a, PrimMonad m) => Index -> a -> Index -> mat (PrimState m) a -> m ()
+  combineRows i c j m = checkBound i rowCount m $ checkBound j rowCount m $
+    basicUnsafeIMapRowM m i (\k a -> (a+) . (c*) <$> unsafeRead m j k)
+
 
 columnCount :: MMatrix mat a => mat s a -> Size
 columnCount = basicColumnCount
@@ -175,11 +180,6 @@ unsafeSwapRows i j m = basicUnsafeSwapRows m i j
 --   See also: @'unsafeSwapRows'@.
 swapRows :: (PrimMonad m, MMatrix mat a) => Index -> Index -> mat (PrimState m) a -> m ()
 swapRows i j m = checkBound i rowCount m $ checkBound j rowCount m $ unsafeSwapRows i j m
-
--- | @'combineRows' i c j mat@ adds scalar multiple of @j@th row by @c@ to @i@th.
-combineRows :: (Semiring a, Commutative a, PrimMonad m, MMatrix mat a) => Index -> a -> Index -> mat (PrimState m) a -> m ()
-combineRows i c j m = checkBound i rowCount m $ checkBound j rowCount m $
-  basicUnsafeIMapRowM m i (\k a -> (a+) . (c*) <$> unsafeRead m j k)
 
 copy :: (PrimMonad m, MMatrix mat a) => mat (PrimState m) a -> mat (PrimState m) a -> m ()
 copy targ src | rowCount targ == rowCount src

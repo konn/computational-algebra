@@ -83,6 +83,9 @@ class ( Vector (Column mat) a, Vector (Row mat) a
   unsafeIMapRow :: mat a -> Index -> (Index -> a -> a) -> mat a
   unsafeIMapRow mat i f = withMutable mat $ \n -> GM.basicUnsafeIMapRow n i f
 
+  combineRows :: (Commutative a, Semiring a) => Index -> a -> Index -> mat a -> mat a
+  combineRows i c j mat = withMutable mat $ GM.combineRows i c j
+
   gaussReduction :: (Eq a, Normed a, Field a) => mat a -> (mat a, mat a, a)
   gaussReduction mat = runST $ do
     (m', p, d) <- GM.gaussReduction =<< unsafeThaw mat
@@ -134,6 +137,7 @@ instance (Monoidal a, Matrix mat a) => MMatrix (WrapImmutable mat) a where
   basicUnsafeIMapRow im i f = withImmutable im $ \n -> unsafeIMapRow n i f
   basicUnsafeSwapRows im i j = withImmutable im $ \n -> swapRows n i j
   unsafeScaleRow im i c = withImmutable im $ \n -> scaleRow n i c
+  combineRows i c j m = withImmutable m $ \n -> combineRows i c j n
 
 withImmutable :: PrimMonad m => WrapImmutable mat (PrimState m) a ->  (mat a -> mat a) -> m ()
 withImmutable (WrapImmutable m _ _) mut =

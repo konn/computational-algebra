@@ -420,75 +420,75 @@ type family family5,6
 type Index Index7,8
 type Size Size8,9
 
-./src/Algebra/Matrix/Generic/Mutable.hs,2769
+./src/Algebra/Matrix/Generic/Mutable.hs,2808
 module Algebra.Matrix.Generic.MutableAlgebra.Matrix.Generic.Mutable1,2
-class (GV.Vector (Column mat) a, GV.Vector (Row mat) a) => MMatrix MMatrix16,17
-  toColumns :: PrimMonad m => mat mat84,85
-  basicUnsafeNew basicUnsafeNew20,21
-  basicInitialise basicInitialise21,22
-  basicRowCount basicRowCount22,23
-  basicColumnCount basicColumnCount23,24
-  unsafeGetRow unsafeGetRow24,25
-  unsafeGetColumn unsafeGetColumn25,26
+class (GV.Vector (Column mat) a, GV.Vector (Row mat) a) => MMatrix MMatrix15,16
+  combineRows :: (Semiring a, Commutative a, PrimMonad m) => Index Index87,88
+  basicUnsafeNew basicUnsafeNew19,20
+  basicInitialise basicInitialise20,21
+  basicRowCount basicRowCount21,22
+  basicColumnCount basicColumnCount22,23
+  unsafeGetRow unsafeGetRow23,24
+  unsafeGetColumn unsafeGetColumn24,25
+  unsafeFill unsafeFill25,26
   unsafeFill unsafeFill26,27
-  unsafeFill unsafeFill27,28
+  unsafeFromRow unsafeFromRow31,32
   unsafeFromRow unsafeFromRow32,33
-  unsafeFromRow unsafeFromRow33,34
-  unsafeFromRows unsafeFromRows35,36
+  unsafeFromRows unsafeFromRows34,35
+  unsafeFromColumn unsafeFromColumn37,38
   unsafeFromColumn unsafeFromColumn38,39
-  unsafeFromColumn unsafeFromColumn39,40
+  unsafeFromColumns unsafeFromColumns39,40
   unsafeFromColumns unsafeFromColumns40,41
-  unsafeFromColumns unsafeFromColumns41,42
-  unsafeCopy unsafeCopy45,46
-  unsafeRead unsafeRead49,50
-  unsafeWrite unsafeWrite50,51
-  basicSet basicSet51,52
-  basicUnsafeIMapRowM basicUnsafeIMapRowM52,53
+  unsafeCopy unsafeCopy44,45
+  unsafeRead unsafeRead48,49
+  unsafeWrite unsafeWrite49,50
+  basicSet basicSet50,51
+  basicUnsafeIMapRowM basicUnsafeIMapRowM51,52
+  basicUnsafeIMapRow basicUnsafeIMapRow52,53
   basicUnsafeIMapRow basicUnsafeIMapRow53,54
-  basicUnsafeIMapRow basicUnsafeIMapRow54,55
+  basicUnsafeSwapRows basicUnsafeSwapRows54,55
   basicUnsafeSwapRows basicUnsafeSwapRows55,56
-  basicUnsafeSwapRows basicUnsafeSwapRows56,57
-  unsafeScaleRow unsafeScaleRow62,63
+  unsafeScaleRow unsafeScaleRow61,62
+  unsafeGenerate unsafeGenerate63,64
   unsafeGenerate unsafeGenerate64,65
-  unsafeGenerate unsafeGenerate65,66
+  unsafeGenerateM unsafeGenerateM72,73
   unsafeGenerateM unsafeGenerateM73,74
-  unsafeGenerateM unsafeGenerateM74,75
+  toRows toRows80,81
   toRows toRows81,82
-  toRows toRows82,83
+  toColumns toColumns83,84
   toColumns toColumns84,85
-  toColumns toColumns85,86
-columnCount columnCount87,88
-columnCount columnCount88,89
-rowCount rowCount91,92
-rowCount rowCount92,93
-new new96,97
-new new97,98
-unsafeNew unsafeNew103,104
-unsafeNew unsafeNew104,105
-checkBound checkBound107,108
-checkBound checkBound108,109
-getRow getRow114,115
-getRow getRow115,116
-getColumn getColumn120,121
-getColumn getColumn121,122
-imapRow imapRow128,129
-imapRow imapRow129,130
-mapRow mapRow136,137
-mapRow mapRow137,138
-scaleRow scaleRow142,143
-scaleRow scaleRow144,145
-fill fill150,151
-fill fill151,152
-read read157,158
-read read158,159
-write write163,164
-write write164,165
-unsafeSwapRows unsafeSwapRows169,170
-unsafeSwapRows unsafeSwapRows170,171
-swapRows swapRows175,176
-swapRows swapRows176,177
-combineRows combineRows179,180
-combineRows combineRows180,181
+  combineRows combineRows87,88
+  combineRows combineRows88,89
+columnCount columnCount92,93
+columnCount columnCount93,94
+rowCount rowCount96,97
+rowCount rowCount97,98
+new new101,102
+new new102,103
+unsafeNew unsafeNew108,109
+unsafeNew unsafeNew109,110
+checkBound checkBound112,113
+checkBound checkBound113,114
+getRow getRow119,120
+getRow getRow120,121
+getColumn getColumn125,126
+getColumn getColumn126,127
+imapRow imapRow133,134
+imapRow imapRow134,135
+mapRow mapRow141,142
+mapRow mapRow142,143
+scaleRow scaleRow147,148
+scaleRow scaleRow149,150
+fill fill155,156
+fill fill156,157
+read read162,163
+read read163,164
+write write168,169
+write write169,170
+unsafeSwapRows unsafeSwapRows174,175
+unsafeSwapRows unsafeSwapRows175,176
+swapRows swapRows180,181
+swapRows swapRows181,182
 copy copy183,184
 copy copy184,185
 clone clone188,189
@@ -550,10 +550,10 @@ type instance instance19,20
 type instance Column Column19,20
 instance instance21,22
 
-./src/Algebra/Matrix/Generic.hs,2678
+./src/Algebra/Matrix/Generic.hs,2753
 module Algebra.Matrix.GenericAlgebra.Matrix.Generic2,3
    => Matrix Matrix25,26
-  gaussReduction :: (Eq a, Normed a, Field a) => mat mat85,86
+  gaussReduction :: (Eq a, Normed a, Field a) => mat mat88,89
   basicRowCount basicRowCount26,27
   basicColumnCount basicColumnCount27,28
   unsafeFreeze unsafeFreeze29,30
@@ -589,39 +589,41 @@ module Algebra.Matrix.GenericAlgebra.Matrix.Generic2,3
   unsafeIMapRowM_ unsafeIMapRowM_80,81
   unsafeIMapRow unsafeIMapRow82,83
   unsafeIMapRow unsafeIMapRow83,84
-  gaussReduction gaussReduction85,86
-  gaussReduction gaussReduction86,87
-data WrapImmutable WrapImmutable97,98
-data WrapImmutable mat s a = WrapImmutable WrapImmutable97,98
-data WrapImmutable mat s a = WrapImmutable { _getMutVar _getMutVar97,98
-                                           , _wiRowCount _wiRowCount98,99
-                                           , _wiColCount _wiColCount99,100
-type instance instance102,103
-type instance Column Column102,103
-type instance instance103,104
-type instance Row Row103,104
-wrapImmutable wrapImmutable105,106
-wrapImmutable wrapImmutable106,107
-instance instance110,111
-withImmutable withImmutable137,138
-withImmutable withImmutable138,139
-withMutable withMutable141,142
-withMutable withMutable142,143
-rowCount rowCount148,149
-rowCount rowCount149,150
-columnCount columnCount151,152
-columnCount columnCount152,153
-generate generate154,155
-generate generate155,156
-freeze freeze157,158
-freeze freeze158,159
-thaw thaw160,161
-thaw thaw161,162
-fromRows fromRows163,164
-fromRows fromRows164,165
-fromColumns fromColumns169,170
-fromColumns fromColumns170,171
-create create175,176
-create create176,177
-(!)!178,179
-(!(179,180
+  combineRows combineRows85,86
+  combineRows combineRows86,87
+  gaussReduction gaussReduction88,89
+  gaussReduction gaussReduction89,90
+data WrapImmutable WrapImmutable100,101
+data WrapImmutable mat s a = WrapImmutable WrapImmutable100,101
+data WrapImmutable mat s a = WrapImmutable { _getMutVar _getMutVar100,101
+                                           , _wiRowCount _wiRowCount101,102
+                                           , _wiColCount _wiColCount102,103
+type instance instance105,106
+type instance Column Column105,106
+type instance instance106,107
+type instance Row Row106,107
+wrapImmutable wrapImmutable108,109
+wrapImmutable wrapImmutable109,110
+instance instance113,114
+withImmutable withImmutable141,142
+withImmutable withImmutable142,143
+withMutable withMutable145,146
+withMutable withMutable146,147
+rowCount rowCount152,153
+rowCount rowCount153,154
+columnCount columnCount155,156
+columnCount columnCount156,157
+generate generate158,159
+generate generate159,160
+freeze freeze161,162
+freeze freeze162,163
+thaw thaw164,165
+thaw thaw165,166
+fromRows fromRows167,168
+fromRows fromRows168,169
+fromColumns fromColumns173,174
+fromColumns fromColumns174,175
+create create179,180
+create create180,181
+(!)!182,183
+(!(183,184

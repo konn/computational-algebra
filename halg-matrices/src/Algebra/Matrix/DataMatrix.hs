@@ -36,3 +36,4 @@ instance (UnitNormalForm a, Ring a) => Matrix DM.Matrix a where
   swapRows m i j = DM.switchRows (i+1) (j+1) m
   scaleRow m i c = DC.coerce $ DM.scaleRow (WrapAlgebra c) (i+1) (DC.coerce m :: DM.Matrix (WrapAlgebra a))
   unsafeIMapRow m i f = DM.mapRow (\k -> f (k - 1)) (i+1) m
+  combineRows i c j = DC.coerce $ DM.combineRows (i+1) (WrapAlgebra c) (j+1)
