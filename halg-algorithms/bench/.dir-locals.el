@@ -2,5 +2,6 @@
 ;;; For more information see (info "(emacs) Directory Variables")
 
 ((haskell-mode
-  (intero-targets "halg-algorithms:bench:homog-bench")))
+  (intero-targets "halg-algorithms:bench:ordering-bench")))
+
 

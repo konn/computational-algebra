@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 89315fcc7edbd0a00cefbc44f4b61d1b08417ca6cb1ac49a7694c22263529959
+-- hash: 5dd5c07c480ba6101e3c1195dd8ea3c36120433d9b62e86da4a0e8f66cb928eb
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -67,8 +67,50 @@ library
       Algebra.Algorithms.FGLM
   default-language: Haskell2010
 
+executable f4-prof
+  main-is: f4-prof.hs
+  other-modules:
+      Paths_halg_algorithms
+  hs-source-dirs:
+      app
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N -fprof-auto -fprof-cafs
+  build-depends:
+      MonadRandom
+    , algebra
+    , base >=4.7 && <5
+    , deepseq
+    , dlist
+    , halg-algorithms
+    , halg-core
+    , halg-polynomials
+    , semigroups
+    , sized
+  default-language: Haskell2010
+
 executable f5-prof
   main-is: f5-prof.hs
+  other-modules:
+      Paths_halg_algorithms
+  hs-source-dirs:
+      app
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N -fprof-auto -fprof-cafs
+  build-depends:
+      MonadRandom
+    , algebra
+    , base >=4.7 && <5
+    , deepseq
+    , dlist
+    , halg-algorithms
+    , halg-core
+    , halg-polynomials
+    , semigroups
+    , sized
+  default-language: Haskell2010
+
+executable std-prof
+  main-is: std-prof.hs
   other-modules:
       Paths_halg_algorithms
   hs-source-dirs:
@@ -138,6 +180,7 @@ benchmark homog-bench
   hs-source-dirs:
       bench
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  ghc-options: -Wall -O2 -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       MonadRandom
     , algebra
@@ -147,6 +190,32 @@ benchmark homog-bench
     , halg-algorithms
     , halg-core
     , halg-polynomials
+    , parallel
+    , semigroups
+    , sized
+  default-language: Haskell2010
+
+benchmark ordering-bench
+  type: exitcode-stdio-1.0
+  main-is: ordering-bench.hs
+  other-modules:
+      Paths_halg_algorithms
+  hs-source-dirs:
+      bench
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  ghc-options: -Wall -O2 -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MonadRandom
+    , algebra
+    , base >=4.7 && <5
+    , containers
+    , dlist
+    , foldl
+    , gauge
+    , halg-algorithms
+    , halg-core
+    , halg-polynomials
+    , lens
     , parallel
     , semigroups
     , sized

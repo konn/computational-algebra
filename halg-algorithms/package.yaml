@@ -67,22 +67,31 @@ library:
   default-extensions:
   - NoImplicitPrelude
 
+_prof-settings: &prof-settings
+  source-dirs:         app
+  ghc-options:
+  - -Wall
+  - -threaded
+  - -rtsopts
+  - -with-rtsopts=-N
+  - -fprof-auto
+  - -fprof-cafs
+  dependencies:
+  - halg-core
+  - halg-polynomials
+  - halg-algorithms
+  - deepseq
+
 executables:
   f5-prof:
     main:                f5-prof.hs
-    source-dirs:         app
-    ghc-options:
-    - -Wall
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    - -fprof-auto
-    - -fprof-cafs
-    dependencies:
-    - halg-core
-    - halg-polynomials
-    - halg-algorithms
-    - deepseq
+    <<: *prof-settings
+  f4-prof:
+    main:                f4-prof.hs
+    <<: *prof-settings
+  std-prof:
+    main:                std-prof.hs
+    <<: *prof-settings
 
 tests:
   spec:
@@ -130,3 +139,25 @@ benchmarks:
     - halg-algorithms
     - gauge
     - parallel
+    ghc-options:
+    - -Wall
+    - -O2
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+  ordering-bench:
+    source-dirs:  bench
+    main:         ordering-bench.hs
+    dependencies:
+    - halg-algorithms
+    - gauge
+    - parallel
+    - containers
+    - foldl
+    - lens
+    ghc-options:
+    - -Wall
+    - -O2
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
