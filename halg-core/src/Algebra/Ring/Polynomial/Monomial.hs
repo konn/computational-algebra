@@ -115,16 +115,9 @@ grevlex as bs = grevlexHW (V.unsized as) (V.unsized bs) 0 0 EQ
 {-# INLINE [2] grevlex #-}
 
 grevlexHW :: Seq Int -> Seq Int -> Int -> Int -> Ordering -> Ordering
-grevlexHW (as :|> a) (bs :|> b)  !accl !accr cmp =
-  let conti | cmp == EQ = case compare a b of
-                LT -> GT
-                GT -> LT
-                EQ -> EQ
-            | otherwise = cmp
-  in grevlexHW as bs (accl + a) (accr  + b) conti
-grevlexHW Empty _  !accl !accr cmp =
-  compare accl accr <> cmp
-grevlexHW as    bs !accl !accr cmp = compare (sum as + accl) (sum bs + accr) <> cmp
+grevlexHW (as :|> a) (bs :|> b)  !accl !accr EQ =
+  grevlexHW as bs (accl + a) (accr + b) $ compare b a
+grevlexHW as bs !accl !accr cmp = compare (sum as + accl) (sum bs + accr) <> cmp
 
 deriving instance Hashable (Monomial n) => Hashable (OrderedMonomial ordering n)
 deriving instance (Eq (Monomial n)) => Eq (OrderedMonomial ordering n)

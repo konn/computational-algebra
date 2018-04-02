@@ -297,84 +297,84 @@ grevlex grevlex112,113
 grevlex grevlex113,114
 grevlexHW grevlexHW116,117
 grevlexHW grevlexHW117,118
-class IsOrder IsOrder151,152
-class IsOrder IsOrder151,152
-  cmpMonomial cmpMonomial152,153
-data Lex Lex157,158
-data Lex = LexLex157,158
-data Revlex Revlex161,162
-data Revlex = RevlexRevlex161,162
-data Grevlex Grevlex165,166
-data Grevlex = GrevlexGrevlex165,166
-data Grlex Grlex169,170
-data Grlex = GrlexGrlex169,170
-newtype Graded Graded173,174
-newtype Graded ord = Graded Graded173,174
-data ProductOrder ProductOrder182,183
-data ProductOrder (n n182,183
-data ProductOrder (n :: Nat) (m m182,183
-data ProductOrder (n :: Nat) (m :: Nat) (a a182,183
-data ProductOrder (n :: Nat) (m :: Nat) (a :: Type) (b b182,183
-  ProductOrder ProductOrder183,184
-data ProductOrder (n n182,183
-productOrder productOrder185,186
-productOrder productOrder187,188
-productOrder' productOrder'198,199
-productOrder' productOrder'200,201
-type WeightProxy WeightProxy204,205
-type WeightProxy (v(204,205
-data WeightOrder WeightOrder206,207
-data WeightOrder (v v206,207
-data WeightOrder (v :: [Nat]) (ord ord206,207
-  WeightOrder WeightOrder207,208
-  WeightOrder :: SList (v v207,208
-data WeightOrder (v v206,207
-calcOrderWeight calcOrderWeight209,210
-calcOrderWeight calcOrderWeight211,212
-calcOrderWeight' calcOrderWeight'214,215
-calcOrderWeight' calcOrderWeight'215,216
-weightOrder weightOrder220,221
-weightOrder weightOrder222,223
-class IsOrder n name => IsMonomialOrder IsMonomialOrder255,256
-class IsOrder n name => IsMonomialOrder IsMonomialOrder255,256
-lcmMonomial lcmMonomial267,268
-lcmMonomial lcmMonomial268,269
-gcdMonomial gcdMonomial270,271
-gcdMonomial gcdMonomial271,272
-divs divs274,275
-(OrderedMonomial xs) `divs`divs275,276
-isPowerOf isPowerOf277,278
-OrderedMonomial n `isPowerOf`isPowerOf278,279
-tryDiv tryDiv283,284
-varMonom varMonom288,289
-varMonom varMonom289,290
-class (IsMonomialOrder n ord, KnownNat n) => EliminationType EliminationType294,295
-type EliminationOrder EliminationOrder302,303
-eliminationOrder eliminationOrder304,305
-eliminationOrder eliminationOrder305,306
-sOnes sOnes308,309
-sOnes sOnes309,310
-weightedEliminationOrder weightedEliminationOrder311,312
-weightedEliminationOrder weightedEliminationOrder312,313
-type WeightedEliminationOrder WeightedEliminationOrder315,316
-  OrderedMonomial m `compare`compare320,321
-castMonomial castMonomial326,327
-castMonomial castMonomial327,328
-scastMonomial scastMonomial329,330
-scastMonomial scastMonomial330,331
-changeMonomialOrder changeMonomialOrder332,333
-changeMonomialOrder changeMonomialOrder333,334
-changeMonomialOrderProxy changeMonomialOrderProxy335,336
-changeMonomialOrderProxy changeMonomialOrderProxy336,337
-class    (IsMonomialOrder n ord) => IsMonomialOrder' IsMonomialOrder'338,339
-type IsStrongMonomialOrder IsStrongMonomialOrder345,346
-type IsStrongMonomialOrder ord ord345,346
-withStrongMonomialOrder withStrongMonomialOrder347,348
-withStrongMonomialOrder withStrongMonomialOrder350,351
-cmpAnyMonomial cmpAnyMonomial359,360
-cmpAnyMonomial cmpAnyMonomial361,362
-orderMonomial orderMonomial365,366
-orderMonomial orderMonomial366,367
+class IsOrder IsOrder144,145
+class IsOrder IsOrder144,145
+  cmpMonomial cmpMonomial145,146
+data Lex Lex150,151
+data Lex = LexLex150,151
+data Revlex Revlex154,155
+data Revlex = RevlexRevlex154,155
+data Grevlex Grevlex158,159
+data Grevlex = GrevlexGrevlex158,159
+data Grlex Grlex162,163
+data Grlex = GrlexGrlex162,163
+newtype Graded Graded166,167
+newtype Graded ord = Graded Graded166,167
+data ProductOrder ProductOrder175,176
+data ProductOrder (n n175,176
+data ProductOrder (n :: Nat) (m m175,176
+data ProductOrder (n :: Nat) (m :: Nat) (a a175,176
+data ProductOrder (n :: Nat) (m :: Nat) (a :: Type) (b b175,176
+  ProductOrder ProductOrder176,177
+data ProductOrder (n n175,176
+productOrder productOrder178,179
+productOrder productOrder180,181
+productOrder' productOrder'191,192
+productOrder' productOrder'193,194
+type WeightProxy WeightProxy197,198
+type WeightProxy (v(197,198
+data WeightOrder WeightOrder199,200
+data WeightOrder (v v199,200
+data WeightOrder (v :: [Nat]) (ord ord199,200
+  WeightOrder WeightOrder200,201
+  WeightOrder :: SList (v v200,201
+data WeightOrder (v v199,200
+calcOrderWeight calcOrderWeight202,203
+calcOrderWeight calcOrderWeight204,205
+calcOrderWeight' calcOrderWeight'207,208
+calcOrderWeight' calcOrderWeight'208,209
+weightOrder weightOrder213,214
+weightOrder weightOrder215,216
+class IsOrder n name => IsMonomialOrder IsMonomialOrder248,249
+class IsOrder n name => IsMonomialOrder IsMonomialOrder248,249
+lcmMonomial lcmMonomial260,261
+lcmMonomial lcmMonomial261,262
+gcdMonomial gcdMonomial263,264
+gcdMonomial gcdMonomial264,265
+divs divs267,268
+(OrderedMonomial xs) `divs`divs268,269
+isPowerOf isPowerOf270,271
+OrderedMonomial n `isPowerOf`isPowerOf271,272
+tryDiv tryDiv276,277
+varMonom varMonom281,282
+varMonom varMonom282,283
+class (IsMonomialOrder n ord, KnownNat n) => EliminationType EliminationType287,288
+type EliminationOrder EliminationOrder295,296
+eliminationOrder eliminationOrder297,298
+eliminationOrder eliminationOrder298,299
+sOnes sOnes301,302
+sOnes sOnes302,303
+weightedEliminationOrder weightedEliminationOrder304,305
+weightedEliminationOrder weightedEliminationOrder305,306
+type WeightedEliminationOrder WeightedEliminationOrder308,309
+  OrderedMonomial m `compare`compare313,314
+castMonomial castMonomial319,320
+castMonomial castMonomial320,321
+scastMonomial scastMonomial322,323
+scastMonomial scastMonomial323,324
+changeMonomialOrder changeMonomialOrder325,326
+changeMonomialOrder changeMonomialOrder326,327
+changeMonomialOrderProxy changeMonomialOrderProxy328,329
+changeMonomialOrderProxy changeMonomialOrderProxy329,330
+class    (IsMonomialOrder n ord) => IsMonomialOrder' IsMonomialOrder'331,332
+type IsStrongMonomialOrder IsStrongMonomialOrder338,339
+type IsStrongMonomialOrder ord ord338,339
+withStrongMonomialOrder withStrongMonomialOrder340,341
+withStrongMonomialOrder withStrongMonomialOrder343,344
+cmpAnyMonomial cmpAnyMonomial352,353
+cmpAnyMonomial cmpAnyMonomial354,355
+orderMonomial orderMonomial358,359
+orderMonomial orderMonomial359,360
 
 ./src/Algebra/Scalar.hs,218
 module Algebra.Scalar Algebra.Scalar3,4

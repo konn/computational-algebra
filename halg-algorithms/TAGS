@@ -11,18 +11,18 @@ data FoldlGrevlex = FoldlGrevlexFoldlGrevlex30,31
 instance instance32,33
 grevlexHW grevlexHW39,40
 grevlexHW grevlexHW40,41
-data HandWrittenGrevlex HandWrittenGrevlex51,52
-data HandWrittenGrevlex = HandWrittenGrevlexHandWrittenGrevlex51,52
-i2G i2G60,61
-i2G i2G61,62
-i2FlG i2FlG66,67
-i2FlG i2FlG67,68
-i2HWG i2HWG73,74
-i2HWG i2HWG74,75
-mkTC mkTC81,82
-mkTC mkTC82,83
-main main88,89
-main main89,90
+data HandWrittenGrevlex HandWrittenGrevlex44,45
+data HandWrittenGrevlex = HandWrittenGrevlexHandWrittenGrevlex44,45
+i2G i2G53,54
+i2G i2G54,55
+i2FlG i2FlG59,60
+i2FlG i2FlG60,61
+i2HWG i2HWG66,67
+i2HWG i2HWG67,68
+mkTC mkTC74,75
+mkTC mkTC75,76
+main main81,82
+main main82,83
 
 ./bench/homog-bench.hs,256
 module Main Main5,6
