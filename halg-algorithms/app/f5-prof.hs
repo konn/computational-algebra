@@ -16,4 +16,4 @@ i3 = [ x^31 - x^6 - x- y, x^8 - z, x^10 -t]
     [t,x,y,z] = vars
 
 main :: IO ()
-main = f5 (toIdeal i3) `deepseq` return ()
+main = f5 (toIdeal i2) `deepseq` return ()
