@@ -65,7 +65,7 @@ mkTC name jdeal =
               , bench "standard" $ nf calcGroebnerBasis ideal
               , bench "naive-homog" $ nf calcGroebnerBasisAfterHomogenising ideal
               , bench "hilb" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
-              , bench "F4" $ nf f4 ideal
+              -- , bench "F4" $ nf f4 ideal
               , bench "F5" $ nf f5 ideal
               ]
 
