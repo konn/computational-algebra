@@ -214,8 +214,8 @@ class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrder
   {-# INLINE coeff #-}
 
   -- | The default implementation  is not enough efficient.
-  -- So it is strongly recomended to give explicit
-  -- definition to @'terms'@.
+  --   So it is strongly recomended to give explicit
+  --   definition to @'terms'@.
   terms :: poly -> M.Map (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
   terms = M.mapKeys OrderedMonomial . terms'
 
@@ -262,7 +262,7 @@ class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrder
 
   -- | A variant of @'(>|*)'@ which takes @'OrderedMonomial'@ as argument.
   (>*) :: OrderedMonomial (MOrder poly) (Arity poly) -> poly -> poly
-  m >* f = toPolynomial (one, m) * f
+  (>*) m = mapMonomialMonotonic (m *)
   {-# INLINE (>*) #-}
 
   -- | Flipped version of (>*)
@@ -297,6 +297,11 @@ class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrder
   mapMonomialMonotonic tr  =
     _Terms %~ M.mapKeysMonotonic tr
   {-# INLINE mapMonomialMonotonic #-}
+
+{-# RULES
+ "polynomial/terms" forall (f :: IsOrderedPolynomial poly => poly).
+   polynomial (terms f) = f
+ #-}
 
 liftMapCoeff :: IsPolynomial poly => (Ordinal (Arity poly) -> Coefficient poly) -> poly -> Coefficient poly
 liftMapCoeff l = runScalar . liftMap (Scalar . l)
