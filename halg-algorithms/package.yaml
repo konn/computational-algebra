@@ -153,6 +153,7 @@ benchmarks:
     - gauge
     - parallel
     - containers
+    - folds
     - foldl
     - lens
     ghc-options:

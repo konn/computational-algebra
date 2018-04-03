@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5dd5c07c480ba6101e3c1195dd8ea3c36120433d9b62e86da4a0e8f66cb928eb
+-- hash: e904fc4ae119d49dd5ee8ecfb4726b5ffbe75ca2c2a262f6af2d7a363e9e79b8
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -211,6 +211,7 @@ benchmark ordering-bench
     , containers
     , dlist
     , foldl
+    , folds
     , gauge
     , halg-algorithms
     , halg-core

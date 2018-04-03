@@ -1,45 +1,50 @@
-{-# LANGUAGE BangPatterns, DeriveFunctor, DeriveTraversable                #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, ScopedTypeVariables, ViewPatterns #-}
+{-# LANGUAGE BangPatterns, ScopedTypeVariables, ViewPatterns #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Algorithms.Groebner.Signature (f5) where
-import           Algebra.Prelude.Core hiding (Vector)
-import           Control.Arrow        (second)
+import           Algebra.Prelude.Core      hiding (Vector)
+import           Control.Arrow             (second)
 import           Control.Lens
 import           Control.Monad.Loops
 import           Control.Monad.ST
-import qualified Data.Coerce          as DC
-import           Data.Heap            (Entry (..))
-import qualified Data.Heap            as H
-import           Data.Maybe           (fromJust)
-import           Data.Monoid          (First (..))
-import           Data.Semigroup       hiding (First, getFirst, (<>))
-import qualified Data.Sized.Builtin   as SV
+import qualified Data.Coerce               as DC
+import           Data.Heap                 (Entry (..))
+import qualified Data.Heap                 as H
+import           Data.Maybe                (fromJust)
+import           Data.Monoid               (First (..))
+import           Data.Semigroup            hiding (First, getFirst, (<>))
 import           Data.STRef
-import qualified Data.Vector          as V
-import qualified Data.Vector.Generic  as GV
+import           Data.Vector               (Vector)
+import qualified Data.Vector               as V
+import qualified Data.Vector.Fusion.Bundle as Bundle
+import qualified Data.Vector.Generic       as GV
+import qualified Debug.Trace               as DT
 
-mkEntry :: (KnownNat s, IsOrderedPolynomial poly)
-        => Vector s poly -> Entry (Signature s poly) (Vector s poly)
+mkEntry :: (IsOrderedPolynomial poly)
+        => Vector poly -> Entry (Signature poly) (Vector poly)
 mkEntry = {-# SCC "mkEntry" #-} Entry <$> signature <*> id
 
 f5 :: (IsOrderedPolynomial a, Field (Coefficient a))
    => Ideal a -> [a]
 f5 ideal =
-  case {-# SCC "toSomeSozied" #-} SV.toSomeSized $ V.fromList $ generators ideal of
-    SV.SomeSized s sideal -> map snd $ withKnownNat s $ calcSignatureGB (Vector sideal)
+  let sideal = V.fromList $ generators ideal
+  in map snd $ calcSignatureGB sideal
 
-calcSignatureGB :: forall s poly.
-                   (KnownNat s, Field (Coefficient poly), IsOrderedPolynomial poly)
-                => Vector s poly -> [(Vector s poly, poly)]
+calcSignatureGB :: forall poly.
+                   (Field (Coefficient poly), IsOrderedPolynomial poly)
+                => V.Vector poly -> [(V.Vector poly, poly)]
 calcSignatureGB side | null side = []
-calcSignatureGB (fmap monoize -> sideal) = runST $ do
+calcSignatureGB (V.map monoize -> sideal) = runST $ do
+  let n = V.length sideal
   gs <- newSTRef []
-  ps <- newSTRef $ H.fromList [ mkEntry $ basis i | i <- [0..]]
+  ps <- newSTRef $ H.fromList [ mkEntry $ basis n i | i <- [0..n-1]]
   syzs <- {-# SCC "initial_syzygy" #-}
           newSTRef
-          [ mkEntry (negate (sideal %!! j) .*. basis i + (sideal %!! i) .*. basis j)
-          | j <- [0..]
-          , i <- map toEnum [0..fromEnum j - 1]
+          [ mkEntry $
+            V.zipWith (+)
+              (V.map (negate (sideal V.! j) *) (basis n i))
+              (V.map ((sideal V.! i) *) (basis n j))
+          | j <- [0..n-1]
+          , i <- [0..j-1]
           ]
   whileJust_ (H.viewMin <$> readSTRef ps) $ \(Entry gSig g, ps') -> do
     writeSTRef ps ps'
@@ -47,7 +52,7 @@ calcSignatureGB (fmap monoize -> sideal) = runST $ do
     ss0 <- readSTRef syzs
     unless ({-# SCC "standardCr" #-}standardCriterion gSig ss0 || any ((== gSig) . priority . snd) gs0) $ do
       let (h, ph) = reduceSignature sideal g gs0
-          h' = {-# SCC "scaling" #-} fmap (* injectCoeff (recip $ leadingCoeff ph)) h
+          h' = {-# SCC "scaling" #-} V.map (* injectCoeff (recip $ leadingCoeff ph)) h
       if isZero ph
         then modifySTRef' syzs (mkEntry h : )
         else do
@@ -57,49 +62,46 @@ calcSignatureGB (fmap monoize -> sideal) = runST $ do
 
   map (\ (p, Entry _ a) -> (a, p)) <$> readSTRef gs
 
-regularSVector :: (KnownNat s, IsOrderedPolynomial poly)
-               => (poly, Vector s poly)
-               -> (poly, Vector s poly)
-               -> Maybe (Vector s poly)
+regularSVector :: (IsOrderedPolynomial poly)
+               => (poly, Vector poly)
+               -> (poly, Vector poly)
+               -> Maybe (Vector poly)
 regularSVector (pg, g) (ph, h) = do
   let l = lcmMonomial (leadingMonomial pg) (leadingMonomial ph)
-      vl = fmap (l / leadingMonomial pg >*) g
-      vr = fmap (l / leadingMonomial ph >*) h
+      vl = V.map (l / leadingMonomial pg >*) g
+      vr = V.map (l / leadingMonomial ph >*) h
   guard $ signature vl /= signature vr
-  return $ vl - vr
+  return $ V.zipWith (-) vl vr
 
-standardCriterion :: (KnownNat s, IsOrderedPolynomial poly, Foldable t)
-                  => Signature s poly -> t (Entry (Signature s poly) (Vector s poly))
+standardCriterion :: (IsOrderedPolynomial poly, Foldable t)
+                  => Signature poly -> t (Entry (Signature poly) (Vector poly))
                   -> Bool
 standardCriterion g = {-# SCC "standardCriterion" #-} any ((`divSig` g) . priority)
 
-divSig :: Signature s poly -> Signature s poly -> Bool
+divSig :: Signature poly -> Signature poly -> Bool
 divSig (Signature i _ c) (Signature j _ d) =
   {-# SCC "divSig" #-}
   i == j && c `divs` d
 
-data Signature (s :: Nat) poly =
+data Signature poly =
   Signature { _position :: {-# UNPACK #-} !Int
             , _sigCoeff :: Coefficient poly
             , _sigMonom :: OrderedMonomial (MOrder poly) (Arity poly)
             }
 
-instance (Show (Coefficient poly), KnownNat (Arity poly), KnownNat s) => Show (Signature s poly) where
+instance (Show (Coefficient poly), KnownNat (Arity poly)) => Show (Signature poly) where
   showsPrec _ (Signature pos coe m) =
     showChar '('  . shows coe . showChar ' ' . shows m . showChar ')' . showChar 'e' . shows pos
 
-instance Eq (Signature s poly) where
+instance Eq (Signature poly) where
   Signature i _ m == Signature j _ n = i == j && n == m
 
-instance IsOrderedPolynomial poly => Ord (Signature s poly) where
+instance IsOrderedPolynomial poly => Ord (Signature poly) where
   compare (Signature i _ m) (Signature j _ n) = compare i j <> compare m n
 
-(%!!) :: Vector n c -> Ordinal n -> c
-Vector v %!! i = v SV.%!! i
-
-signature :: (KnownNat s, IsOrderedPolynomial poly)
-          => Vector s poly
-          -> Signature s poly
+signature :: (IsOrderedPolynomial poly)
+          => Vector poly
+          -> Signature poly
 signature = {-# SCC "signature" #-}
             fromJust . DC.coerce
           . ifoldMap (\i v -> Option $ do
@@ -108,64 +110,26 @@ signature = {-# SCC "signature" #-}
                          return $ Max $ uncurry (Signature i) lt
                      )
 
-newtype Vector n a = Vector { runVector :: Sized n a }
-                   deriving ( Show, Eq, Ord
-                            , Functor, Traversable, Foldable
-                            )
+basis :: (Monoidal a, Unital a) => Int -> Int -> Vector a
+basis len i = V.generate len $ \j -> if i == j then one else zero
 
-instance FoldableWithIndex Int (Vector n) where
-  ifoldMap f = ifoldMap f . SV.unsized . runVector
-
-type instance GV.Mutable (Vector n) = GV.Mutable V.Vector
-
-instance Additive a => Additive (Vector n a) where
-  Vector a + Vector b = Vector $ zipWithSame (+) a b
-
-instance LeftModule Natural a => LeftModule Natural (Vector n a) where
-  n .* Vector a = Vector $ fmap (n.*) a
-
-instance RightModule Natural a => RightModule Natural (Vector n a) where
-  Vector a *. n = Vector $ fmap (*.n) a
-
-instance LeftModule Integer a => LeftModule Integer (Vector n a) where
-  n .* Vector a = Vector $ fmap (n.*) a
-
-instance RightModule Integer a => RightModule Integer (Vector n a) where
-  Vector a *. n = Vector $ fmap (*.n) a
-
-instance (KnownNat n, Monoidal a) => Monoidal (Vector n a) where
-  zero = Vector $ SV.replicate' zero
-
-instance (KnownNat n, Group a) => Group (Vector n a) where
-  negate = Vector . fmap negate . runVector
-  Vector v - Vector u = Vector $ zipWithSame (-) v u
-
-instance (Semiring a, Multiplicative a) => LeftModule (Scalar a) (Vector n a) where
-  Scalar r .* Vector v = Vector $ fmap (r*) v
-
-instance (Semiring a, Multiplicative a) => RightModule (Scalar a) (Vector n a) where
-  Vector v *. Scalar r = Vector $ fmap (*r) v
-
-basis :: (Monoidal a, Unital a, KnownNat n) => Ordinal n -> Vector n a
-basis i = Vector $ SV.generate sing $ \j -> if i == j then one else zero
-
-reduceSignature :: (KnownNat s, IsOrderedPolynomial poly, Field (Coefficient poly), Foldable t)
-                => Vector s poly -> Vector s poly
-                -> t (poly, Entry (Signature s poly) (Vector s poly))
-                -> (Vector s poly, poly)
+reduceSignature :: (IsOrderedPolynomial poly, Field (Coefficient poly), Foldable t)
+                => Vector poly -> Vector poly
+                -> t (poly, Entry (Signature poly) (Vector poly))
+                -> (Vector poly, poly)
 reduceSignature ideal g hs =
   fst $ flip (until (\((_, phiu), r) -> phiu == r)) ((g, phi g), zero) $ \((u, !phiu), r) ->
   let m = leadingTerm $ phiu - r
       tryCancel (hi', Entry _ hi) = First $ do
         let fac = toPolynomial (m `tryDiv` leadingTerm hi')
-            quo = fmap (fac *) hi
+            quo = V.map (fac *) hi
         guard $ (leadingMonomial hi' `divs` snd m) && (signature quo < signature u)
-        return (quo, fac * hi') 
+        return (quo, fac * hi')
   in case getFirst $ foldMap tryCancel hs of
     Nothing -> ((u, phiu), r + toPolynomial m)
-    Just (d, phid)  -> ((u - d, phiu - phid), r)
+    Just (d, phid)  -> ((V.zipWith (-) u d, phiu - phid), r)
   where
-    phi = dot ideal
+    phi = sumA . V.zipWith (*) ideal
 
-dot :: (Multiplicative c, Monoidal c) => Vector n c -> Vector n c -> c
-dot xs = sum . zipWithSame (*) (runVector xs) . runVector
+sumA :: Monoidal c => Vector c -> c
+sumA = Bundle.foldl' (+) zero . GV.stream
