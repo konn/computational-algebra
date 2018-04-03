@@ -220,6 +220,9 @@ instance (IsOrderedPolynomial poly, Wraps vars poly) => IsOrderedPolynomial (Lab
   fromOrderedMonomial m = LabelPolynomial (fromOrderedMonomial m :: poly)
   {-# INLINE fromOrderedMonomial #-}
 
+  orderedMonomials = orderedMonomials . unLabelPolynomial
+  {-# INLINE orderedMonomials #-}
+
   toPolynomial (r, deg) = LabelPolynomial (toPolynomial (r, deg) :: poly)
   {-# INLINE toPolynomial #-}
 
@@ -231,6 +234,18 @@ instance (IsOrderedPolynomial poly, Wraps vars poly) => IsOrderedPolynomial (Lab
 
   coeff m = coeff m . unLabelPolynomial
   {-# INLINE coeff #-}
+
+  m >* LabelPolynomial f = LabelPolynomial (m >* f)
+  {-# INLINE (>*) #-}
+
+  LabelPolynomial f *< m = LabelPolynomial (f *< m)
+  {-# INLINE (*<) #-}
+
+  diff n (LabelPolynomial f) = LabelPolynomial (diff n f)
+  {-# INLINE diff #-}
+
+  mapMonomialMonotonic f (LabelPolynomial g) = LabelPolynomial $ mapMonomialMonotonic  f g
+  {-# INLINE mapMonomialMonotonic #-}
 
 class    (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf (xs :: [a]) (ys :: [a]) where
   _suppress :: proxy xs -> proxy ys -> x -> x
