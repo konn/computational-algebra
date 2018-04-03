@@ -112,6 +112,9 @@ instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
   polynomial = normalize . C.coerce
   {-# INLINE polynomial #-}
 
+  (>*) m = Polynomial . M.mapKeysMonotonic (m *) . C.coerce
+  {-# INLINE (>*) #-}
+
   leadingTerm (Polynomial d) =
     case M.maxViewWithKey d of
       Just ((deg, c), _) -> (c, deg)
@@ -123,6 +126,9 @@ instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
 
   leadingCoeff = fst . leadingTerm
   {-# INLINE leadingCoeff #-}
+
+  mapMonomialMonotonic f = Polynomial . M.mapKeysMonotonic f . C.coerce
+  {-# INLINE mapMonomialMonotonic #-}
 
 instance (KnownNat n, CoeffRing r, IsMonomialOrder n order)
          => Wrapped (OrderedPolynomial r order n) where
