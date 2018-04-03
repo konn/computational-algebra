@@ -336,12 +336,12 @@ instance CoeffRing r => IsPolynomial (Unipol r) where
     let n = SV.head m
     in if n == 0
        then Unipol dic
-       else Unipol $ IM.mapKeys (n +) dic
+       else Unipol $ IM.mapKeysMonotonic (n +) dic
   {-# INLINE (>|*) #-}
 
 instance CoeffRing r => IsOrderedPolynomial (Unipol r) where
   type MOrder (Unipol r) = Grevlex
-  terms = M.mapKeys (orderMonomial (Nothing :: Maybe Grevlex)) . terms'
+  terms = M.mapKeysMonotonic (orderMonomial (Nothing :: Maybe Grevlex)) . terms'
   leadingTerm =
     maybe (zero, one)
           (\((a, b),_) -> (b, OrderedMonomial $ SV.singleton a))
