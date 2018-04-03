@@ -6,6 +6,7 @@
 {-# LANGUAGE PatternSynonyms, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
 {-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeApplications        #-}
 {-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances            #-}
+{-# LANGUAGE ViewPatterns                                                 #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Ring.Polynomial.Monomial
        ( Monomial, OrderedMonomial(..),
@@ -23,7 +24,7 @@ module Algebra.Ring.Polynomial.Monomial
          changeMonomialOrder, changeMonomialOrderProxy, sOnes,
          withStrongMonomialOrder, cmpAnyMonomial, orderMonomial
        ) where
-import Algebra.Internal
+import Algebra.Internal hiding ((:>))
 
 import           AlgebraicPrelude             hiding (lex)
 import           Control.DeepSeq              (NFData (..))
@@ -39,18 +40,14 @@ import           Data.Kind                    (Type)
 import           Data.Maybe                   (catMaybes)
 import           Data.Monoid                  ((<>))
 import           Data.Ord                     (comparing)
-import           Data.Sequence                (Seq ((:|>), Empty))
-import qualified Data.Sequence                as Seq
+import           Data.Sequence                (ViewR ((:>)), viewr)
 import           Data.Singletons.Prelude      (SList, Sing)
 import           Data.Singletons.Prelude      (SingKind (..))
 import           Data.Singletons.Prelude.List (Length, Replicate, sReplicate)
 import           Data.Singletons.TypeLits     (withKnownNat)
 import qualified Data.Sized.Builtin           as V
 import           Data.Type.Natural.Class      (IsPeano (..), PeanoOrder (..))
--- import           Prelude                         hiding (Fractional (..),
---                                                   Integral (..), Num (..),
---                                                   Real (..), lex, product, sum)
-import qualified Prelude as P
+import qualified Prelude                      as P
 
 -- | N-ary Monomial. IntMap contains degrees for each x_i- type Monomial (n :: Nat) = Sized n Int
 type Monomial n = Sized' n Int
@@ -115,7 +112,7 @@ grevlex as bs = grevlexHW (V.unsized as) (V.unsized bs) 0 0 EQ
 {-# INLINE [2] grevlex #-}
 
 grevlexHW :: Seq Int -> Seq Int -> Int -> Int -> Ordering -> Ordering
-grevlexHW (as :|> a) (bs :|> b)  !accl !accr EQ =
+grevlexHW (viewr -> as :> a) (viewr -> bs :> b)  !accl !accr EQ =
   grevlexHW as bs (accl + a) (accr + b) $ compare b a
 grevlexHW as bs !accl !accr cmp = compare (sum as + accl) (sum bs + accr) <> cmp
 
