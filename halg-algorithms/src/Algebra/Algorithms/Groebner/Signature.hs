@@ -17,7 +17,6 @@ import           Data.Vector               (Vector)
 import qualified Data.Vector               as V
 import qualified Data.Vector.Fusion.Bundle as Bundle
 import qualified Data.Vector.Generic       as GV
-import qualified Debug.Trace               as DT
 
 mkEntry :: (IsOrderedPolynomial poly)
         => Vector poly -> Entry (Signature poly) (Vector poly)

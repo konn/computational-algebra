@@ -79,12 +79,12 @@ main main28,29
 
 ./app/f5-prof.hs,104
 module Main Main1,2
-i2 i26,7
 i2 i27,8
-i3 i312,13
+i2 i28,9
 i3 i313,14
-main main17,18
+i3 i314,15
 main main18,19
+main main19,20
 
 ./test/F5Spec.hs,408
 module F5Spec F5Spec5,6
@@ -332,32 +332,32 @@ calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert371,372
 
 ./src/Algebra/Algorithms/Groebner/Signature.hs,869
 module Algebra.Algorithms.Groebner.Signature Algebra.Algorithms.Groebner.Signature2,3
-mkEntry mkEntry21,22
-mkEntry mkEntry23,24
-f5 f525,26
-f5 f527,28
-calcSignatureGB calcSignatureGB31,32
-calcSignatureGB calcSignatureGB34,35
-regularSVector regularSVector64,65
-regularSVector regularSVector68,69
-standardCriterion standardCriterion75,76
-standardCriterion standardCriterion78,79
+mkEntry mkEntry20,21
+mkEntry mkEntry22,23
+f5 f524,25
+f5 f526,27
+calcSignatureGB calcSignatureGB30,31
+calcSignatureGB calcSignatureGB33,34
+regularSVector regularSVector63,64
+regularSVector regularSVector67,68
+standardCriterion standardCriterion74,75
+standardCriterion standardCriterion77,78
+divSig divSig79,80
 divSig divSig80,81
-divSig divSig81,82
-data Signature Signature85,86
-  Signature Signature86,87
-  Signature { _position _position86,87
-            , _sigCoeff _sigCoeff87,88
-            , _sigMonom _sigMonom88,89
-instance instance91,92
-signature signature101,102
-signature signature104,105
+data Signature Signature84,85
+  Signature Signature85,86
+  Signature { _position _position85,86
+            , _sigCoeff _sigCoeff86,87
+            , _sigMonom _sigMonom87,88
+instance instance90,91
+signature signature100,101
+signature signature103,104
+basis basis111,112
 basis basis112,113
-basis basis113,114
-reduceSignature reduceSignature115,116
-reduceSignature reduceSignature119,120
+reduceSignature reduceSignature114,115
+reduceSignature reduceSignature118,119
+sumA sumA132,133
 sumA sumA133,134
-sumA sumA134,135
 
 ./src/Algebra/Algorithms/Groebner/F4.hs,799
 module Algebra.Algorithms.Groebner.F4Algebra.Algorithms.Groebner.F43,4
