@@ -35,6 +35,7 @@ import           Control.Lens
 import qualified Data.Coerce                           as C
 import qualified Data.HashSet                          as HS
 import           Data.Map                              (Map)
+import qualified Data.Map.Merge.Strict                 as MM
 import qualified Data.Map.Strict                       as M
 import qualified Data.Set                              as Set
 import           Data.Singletons.Prelude.List          (Replicate)
@@ -212,11 +213,15 @@ instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Unital (OrderedPo
   {-# INLINE one #-}
 
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Multiplicative (OrderedPolynomial r order n) where
-  Polynomial (M.toList -> d1) *  Polynomial (M.toList -> d2) =
-    let dic = (one, zero) : [ (a * b, r * r') | (a, r) <- d1, (b, r') <- d2, not $ isZero (r * r')
-              ]
-    in polynomial $ M.fromListWith (+) dic
+  Polynomial (M.toList -> d1) *  Polynomial d2 =
+    let ds = [ M.map (c*) $ M.mapKeysMonotonic (k *) d2 | (k, c) <- d1 ]
+        fuse = MM.zipWithMaybeMatched $ \_ x y -> guardZero $ x + y
+    in Polynomial $ foldr (MM.merge MM.preserveMissing MM.preserveMissing fuse) M.empty ds
   {-# INLINE (*) #-}
+
+guardZero :: DecidableZero a => a -> Maybe a
+guardZero x = if isZero x then Nothing else Just x
+{-# INLINE guardZero #-}
 
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Semiring (OrderedPolynomial r order n) where
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Commutative (OrderedPolynomial r order n) where
