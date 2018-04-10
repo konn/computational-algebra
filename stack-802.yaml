@@ -1,4 +1,4 @@
-resolver: lts-10.8
+resolver: lts-11.4
 skip-ghc-check: true
 packages:
 - 'computational-algebra'
@@ -25,6 +25,7 @@ extra-deps:
 - ghc-typelits-presburger-0.2.0.0
 - unamb-0.2.5
 - hspec-smallcheck-0.5.0
+- control-monad-loop-0.1
 
 - git: https://github.com/cartazio/arithmoi.git
   commit: a3e189cca4c2961796c7ca74eccb29ff89f0e3d3
