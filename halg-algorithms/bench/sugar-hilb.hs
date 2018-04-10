@@ -52,7 +52,7 @@ i4 = [ w+x+y+z, w*x+x*y+y*z+z*w, w*x*y + x*y*z + y*z*w + z*w*x, w*x*y*z - 1]
     [x,y,z,w] = vars
 
 mkTestCases :: (KnownNat n) => Either Int String -> Ideal (OrderedPolynomial (Fraction Integer) Lex n) -> [Benchmark]
-mkTestCases num ideal = [ mkTC ("lex-" ++ either show ('0':) num) (mapIdeal (changeOrder Lex) ideal)
+mkTestCases num ideal = [ mkTC ("lex-" ++ either show id num) (mapIdeal (changeOrder Lex) ideal)
                         ]
 
 mkTC :: (IsMonomialOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
