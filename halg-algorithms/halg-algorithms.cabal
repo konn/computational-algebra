@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f970014f27e970353d5b5436e6b43541b7444cdefe4eb4d2401c6486feb2bb75
+-- hash: 0cec6038c1f72f788117163a22f43045e960f67e2cf1cd22fd9c4f1e38d198c5
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -64,6 +64,7 @@ library
       Algebra.Algorithms.ZeroDim
       Algebra.Field.RationalFunction
       Algebra.Ring.Polynomial.Homogenised
+      Control.Monad.ST.Combinators
   other-modules:
       Algebra.Algorithms.FGLM
   default-language: Haskell2010

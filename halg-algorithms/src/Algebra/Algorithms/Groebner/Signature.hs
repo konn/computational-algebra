@@ -1,22 +1,21 @@
 {-# LANGUAGE BangPatterns, ScopedTypeVariables, ViewPatterns #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Algorithms.Groebner.Signature (f5) where
-import           Algebra.Prelude.Core      hiding (Vector)
-import           Control.Arrow             (second)
-import           Control.Lens
+import           Algebra.Prelude.Core         hiding (Vector)
+import           Control.Arrow                (second)
+import           Control.Lens                 hiding ((.=))
 import           Control.Monad.Loops
-import           Control.Monad.ST
-import qualified Data.Coerce               as DC
-import           Data.Heap                 (Entry (..))
-import qualified Data.Heap                 as H
-import           Data.Maybe                (fromJust)
-import           Data.Monoid               (First (..))
-import           Data.Semigroup            hiding (First, getFirst, (<>))
-import           Data.STRef
-import           Data.Vector               (Vector)
-import qualified Data.Vector               as V
-import qualified Data.Vector.Fusion.Bundle as Bundle
-import qualified Data.Vector.Generic       as GV
+import           Control.Monad.ST.Combinators
+import qualified Data.Coerce                  as DC
+import           Data.Heap                    (Entry (..))
+import qualified Data.Heap                    as H
+import           Data.Maybe                   (fromJust)
+import           Data.Monoid                  (First (..))
+import           Data.Semigroup               hiding (First, getFirst, (<>))
+import           Data.Vector                  (Vector)
+import qualified Data.Vector                  as V
+import qualified Data.Vector.Fusion.Bundle    as Bundle
+import qualified Data.Vector.Generic          as GV
 
 mkEntry :: (IsOrderedPolynomial poly)
         => Vector poly -> Entry (Signature poly) (Vector poly)
@@ -46,18 +45,20 @@ calcSignatureGB (V.map monoize -> sideal) = runST $ do
           , i <- [0..j-1]
           ]
   whileJust_ (H.viewMin <$> readSTRef ps) $ \(Entry gSig g, ps') -> do
-    writeSTRef ps ps'
+    ps .= ps'
     gs0 <- readSTRef gs
     ss0 <- readSTRef syzs
     unless ({-# SCC "standardCr" #-}standardCriterion gSig ss0 || any ((== gSig) . priority . snd) gs0) $ do
       let (h, ph) = reduceSignature sideal g gs0
           h' = {-# SCC "scaling" #-} V.map (* injectCoeff (recip $ leadingCoeff ph)) h
       if isZero ph
-        then modifySTRef' syzs (mkEntry h : )
+        then syzs .%= (mkEntry h : )
         else do
-        modifySTRef' ps $ H.union $ H.fromList $
-          mapMaybe (fmap mkEntry . flip regularSVector (monoize ph, h') . second payload) gs0
-        modifySTRef' gs ((monoize ph, mkEntry h') :)
+        let adds = H.fromList $
+                   mapMaybe
+                   (fmap mkEntry . flip regularSVector (monoize ph, h') . second payload) gs0
+        ps .%= H.union adds
+        gs .%= ((monoize ph, mkEntry h') :)
 
   map (\ (p, Entry _ a) -> (a, p)) <$> readSTRef gs
 
