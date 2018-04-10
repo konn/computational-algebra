@@ -60,7 +60,7 @@ mkTestCases num ideal = [ mkTC ("lex-" ++ either show id num) (mapIdeal (changeO
 mkTC :: (IsMonomialOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
 mkTC name jdeal =
   env (return jdeal) $ \ ideal ->
-  bgroup name [ bench "hilb/std+par" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
+  bgroup name [ bench "hilb/std-seq" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
               ]
 
 main :: IO ()

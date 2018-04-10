@@ -15,32 +15,32 @@ module Algebra.Algorithms.Groebner.Homogeneous
        , calcHomogeneousGroebnerBasisHilbertBy
        , calcHomogeneousGroebnerBasisHilbertWithSeries
        ) where
-import Algebra.Field.RationalFunction
-import Algebra.Prelude.Core                hiding (empty, filter, insert)
-import Algebra.Ring.Polynomial.Homogenised
-import Algebra.Ring.Polynomial.Univariate
-import Control.Lens                        (ix, (%~), (&))
-
-import           Control.Monad.Loops         (whileJust_)
+import           Algebra.Field.RationalFunction
+import           Algebra.Prelude.Core                hiding (empty, filter,
+                                                      insert)
+import           Algebra.Ring.Polynomial.Homogenised
+import           Algebra.Ring.Polynomial.Univariate
+import           Control.Lens                        (ix, (%~), (&))
+import           Control.Monad.Loops                 (whileJust_)
 import           Control.Monad.ST.Strict
-import           Control.Parallel.Strategies
-import qualified Data.Coerce                 as C
-import qualified Data.Foldable               as F
-import           Data.Function               (on)
+import qualified Data.Coerce                         as C
+import qualified Data.Foldable                       as F
+import           Data.Function                       (on)
 import           Data.Functor.Identity
-import           Data.Heap                   (Entry (..), Heap)
-import qualified Data.Heap                   as H
-import qualified Data.IntMap                 as IM
-import qualified Data.List                   as L
-import           Data.Maybe                  (fromJust)
-import qualified Data.Sized.Builtin          as SV
-import           Data.STRef                  (STRef, modifySTRef', newSTRef,
-                                              readSTRef, writeSTRef)
-import qualified Data.Vector                 as V
-import qualified Data.Vector.Mutable         as MV
-import           GHC.Conc                    (par)
-import           GHC.Exts                    (Constraint)
-import qualified Numeric.Field.Fraction      as NA
+import           Data.Heap                           (Entry (..), Heap)
+import qualified Data.Heap                           as H
+import qualified Data.IntMap                         as IM
+import qualified Data.List                           as L
+import           Data.Maybe                          (fromJust)
+import qualified Data.Sized.Builtin                  as SV
+import           Data.STRef                          (STRef, modifySTRef',
+                                                      newSTRef, readSTRef,
+                                                      writeSTRef)
+import qualified Data.Vector                         as V
+import qualified Data.Vector.Mutable                 as MV
+import           GHC.Conc                            (par)
+import           GHC.Exts                            (Constraint)
+import qualified Numeric.Field.Fraction              as NA
 
 isHomogeneous :: IsOrderedPolynomial poly
               => poly -> Bool

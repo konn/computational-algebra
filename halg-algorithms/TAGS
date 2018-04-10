@@ -52,18 +52,20 @@ mkTC mkTC59,60
 main main66,67
 main main67,68
 
-./bench/sugar-hilb.hs,256
+./bench/sugar-hilb.hs,282
 module Main Main5,6
-i1 i119,20
-i1 i120,21
-i2 i238,39
-i2 i239,40
-i3 i344,45
-i3 i345,46
-i4 i449,50
-i4 i450,51
-mkTestCases mkTestCases54,55
+i1 i115,16
+i1 i116,17
+i2 i234,35
+i2 i235,36
+i3 i340,41
+i3 i341,42
+i4 i445,46
+i4 i446,47
+i5 i550,51
+i5 i551,52
 mkTestCases mkTestCases55,56
+mkTestCases mkTestCases56,57
 mkTC mkTC59,60
 mkTC mkTC60,61
 main main65,66
@@ -206,6 +208,21 @@ prop_groebnerIncludedWith prop_groebnerIncludedWith83,84
 
 ./test/Spec.hs,0
 
+./src/Control/Monad/ST/Combinators.hs,319
+module Control.Monad.ST.CombinatorsControl.Monad.ST.Combinators0,1
+import import6,7
+type ArrayRef ArrayRef13,14
+type ArrayRef s s13,14
+newArray newArray15,16
+newArray newArray16,17
+arrayToList arrayToList18,19
+arrayToList arrayToList19,20
+(.(21,22
+(.=.=21,22
+(.%=.%=24,25
+(%!)%!27,28
+v v28,29
+
 ./src/Algebra/Algorithms/FGLM.hs,611
 module Algebra.Algorithms.FGLM Algebra.Algorithms.FGLM2,3
 data FGLMEnv FGLMEnv15,16
@@ -268,7 +285,7 @@ nextMonomial nextMonomial388,389
 beta beta399,400
 beta beta400,401
 
-./src/Algebra/Algorithms/Groebner/Homogeneous.hs,3634
+./src/Algebra/Algorithms/Groebner/Homogeneous.hs,3596
 module Algebra.Algorithms.Groebner.HomogeneousAlgebra.Algorithms.Groebner.Homogeneous3,4
 isHomogeneous isHomogeneous44,45
 isHomogeneous isHomogeneous46,47
@@ -328,58 +345,58 @@ data HPS n = HPS { taylorHPS taylorHPS231,232
                  , hpsNumerator hpsNumerator232,233
 convolute convolute264,265
 convolute convolute265,266
-mapB mapB269,270
-mapB mapB270,271
-binoms binoms276,277
-binoms binoms277,278
-binom binom283,284
-binom binom284,285
-toRationalFunction toRationalFunction287,288
-toRationalFunction toRationalFunction288,289
-hilbertPoincareSeriesForMonomials hilbertPoincareSeriesForMonomials291,292
-hilbertPoincareSeriesForMonomials hilbertPoincareSeriesForMonomials293,294
+binoms binoms272,273
+binoms binoms273,274
+binom binom279,280
+binom binom280,281
+toRationalFunction toRationalFunction283,284
+toRationalFunction toRationalFunction284,285
+hilbertPoincareSeriesForMonomials hilbertPoincareSeriesForMonomials287,288
+hilbertPoincareSeriesForMonomials hilbertPoincareSeriesForMonomials289,290
+buildHilbTable buildHilbTable309,310
 buildHilbTable buildHilbTable313,314
-buildHilbTable buildHilbTable317,318
-whileForM_ whileForM_323,324
-whileForM_ whileForM_324,325
+whileForM_ whileForM_319,320
+whileForM_ whileForM_320,321
+calcHomogeneousGroebnerBasisHilbertWithSeries calcHomogeneousGroebnerBasisHilbertWithSeries324,325
 calcHomogeneousGroebnerBasisHilbertWithSeries calcHomogeneousGroebnerBasisHilbertWithSeries328,329
-calcHomogeneousGroebnerBasisHilbertWithSeries calcHomogeneousGroebnerBasisHilbertWithSeries332,333
+calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy360,361
 calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy364,365
-calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy368,369
-calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert373,374
-calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert376,377
+calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert369,370
+calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert372,373
 
-./src/Algebra/Algorithms/Groebner/Signature.hs,869
+./src/Algebra/Algorithms/Groebner/Signature.hs,888
 module Algebra.Algorithms.Groebner.Signature Algebra.Algorithms.Groebner.Signature2,3
-mkEntry mkEntry20,21
-mkEntry mkEntry22,23
-f5 f524,25
-f5 f526,27
-calcSignatureGB calcSignatureGB30,31
-calcSignatureGB calcSignatureGB33,34
-regularSVector regularSVector63,64
-regularSVector regularSVector67,68
-standardCriterion standardCriterion74,75
-standardCriterion standardCriterion77,78
-divSig divSig79,80
+import import5,6
+mkEntry mkEntry19,20
+mkEntry mkEntry21,22
+f5 f523,24
+f5 f525,26
+calcSignatureGB calcSignatureGB29,30
+calcSignatureGB calcSignatureGB32,33
+regularSVector regularSVector64,65
+regularSVector regularSVector68,69
+standardCriterion standardCriterion75,76
+standardCriterion standardCriterion78,79
 divSig divSig80,81
-data Signature Signature84,85
-  Signature Signature85,86
-  Signature { _position _position85,86
-            , _sigCoeff _sigCoeff86,87
-            , _sigMonom _sigMonom87,88
-instance instance90,91
-signature signature100,101
-signature signature103,104
-basis basis111,112
+divSig divSig81,82
+data Signature Signature85,86
+  Signature Signature86,87
+  Signature { _position _position86,87
+            , _sigCoeff _sigCoeff87,88
+            , _sigMonom _sigMonom88,89
+instance instance91,92
+signature signature101,102
+signature signature104,105
 basis basis112,113
-reduceSignature reduceSignature114,115
-reduceSignature reduceSignature118,119
-sumA sumA132,133
+basis basis113,114
+reduceSignature reduceSignature115,116
+reduceSignature reduceSignature119,120
 sumA sumA133,134
+sumA sumA134,135
 
-./src/Algebra/Algorithms/Groebner/F4.hs,799
+./src/Algebra/Algorithms/Groebner/F4.hs,816
 module Algebra.Algorithms.Groebner.F4Algebra.Algorithms.Groebner.F43,4
+import import8,9
 type Strategy Strategy23,24
 type Strategy f f23,24
 normalStrategy normalStrategy25,26
@@ -396,14 +413,14 @@ f4' f4'45,46
 f4' f4'50,51
 f4WithStrategy' f4WithStrategy'54,55
 f4WithStrategy' f4WithStrategy'59,60
-type OMonom OMonom98,99
-type OMonom poly poly98,99
-decodeMatrix decodeMatrix100,101
-decodeMatrix decodeMatrix104,105
-f4WithStrategy f4WithStrategy110,111
-f4WithStrategy f4WithStrategy116,117
-computeMatrix computeMatrix118,119
-computeMatrix computeMatrix124,125
+type OMonom OMonom96,97
+type OMonom poly poly96,97
+decodeMatrix decodeMatrix98,99
+decodeMatrix decodeMatrix102,103
+f4WithStrategy f4WithStrategy108,109
+f4WithStrategy f4WithStrategy114,115
+computeMatrix computeMatrix116,117
+computeMatrix computeMatrix122,123
 
 ./src/Algebra/Field/RationalFunction.hs,683
 module Algebra.Field.RationalFunctionAlgebra.Field.RationalFunction2,3
