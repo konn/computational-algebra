@@ -163,3 +163,20 @@ benchmarks:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+  sugar-hilb-bench:
+    source-dirs:  bench
+    main:         sugar-hilb.hs
+    dependencies:
+    - halg-algorithms
+    - gauge
+    - parallel
+    - containers
+    - folds
+    - foldl
+    - lens
+    ghc-options:
+    - -Wall
+    - -O2
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N

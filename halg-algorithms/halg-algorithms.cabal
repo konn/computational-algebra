@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 84e4cc46f7c333f2c686c1ca997b576d6ac986deccd0429586adfb1df9cbee05
+-- hash: f970014f27e970353d5b5436e6b43541b7444cdefe4eb4d2401c6486feb2bb75
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -199,6 +199,33 @@ benchmark homog-bench
 benchmark ordering-bench
   type: exitcode-stdio-1.0
   main-is: ordering-bench.hs
+  other-modules:
+      Paths_halg_algorithms
+  hs-source-dirs:
+      bench
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  ghc-options: -Wall -O2 -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MonadRandom
+    , algebra
+    , base >=4.7 && <5
+    , containers
+    , dlist
+    , foldl
+    , folds
+    , gauge
+    , halg-algorithms
+    , halg-core
+    , halg-polynomials
+    , lens
+    , parallel
+    , semigroups
+    , sized
+  default-language: Haskell2010
+
+benchmark sugar-hilb-bench
+  type: exitcode-stdio-1.0
+  main-is: sugar-hilb.hs
   other-modules:
       Paths_halg_algorithms
   hs-source-dirs:
