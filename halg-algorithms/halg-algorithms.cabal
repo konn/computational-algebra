@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e904fc4ae119d49dd5ee8ecfb4726b5ffbe75ca2c2a262f6af2d7a363e9e79b8
+-- hash: 84e4cc46f7c333f2c686c1ca997b576d6ac986deccd0429586adfb1df9cbee05
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -52,6 +52,7 @@ library
     , matrix
     , monad-loops
     , mtl
+    , parallel
     , reflection
     , semigroups
     , sized

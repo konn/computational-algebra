@@ -20,7 +20,7 @@ import           Data.Reflection                 ()
 import           Data.Vector                     (Vector)
 import qualified Data.Vector.Generic             as GV
 import           Gauge.Main
-import           Gauge.Types
+import           Gauge.Main.Options
 import           GHC.Read
 import qualified Numeric.Field.Fraction          as NA
 import qualified Prelude                         as P

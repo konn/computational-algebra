@@ -61,6 +61,7 @@ library:
   - matrix
   - monad-loops
   - mtl
+  - parallel
   - reflection
   - sized
   - vector
