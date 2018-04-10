@@ -46,7 +46,12 @@ i3 = [ x^31 - x^6 - x- y, x^8 - z, x^10 -t]
 i4 :: [OrderedPolynomial (Fraction Integer) Lex 4]
 i4 = [ w+x+y+z, w*x+x*y+y*z+z*w, w*x*y + x*y*z + y*z*w + z*w*x, w*x*y*z - 1]
   where
-    [x,y,z,w] = vars
+    [w, x,y,z] = vars
+
+i5 :: [OrderedPolynomial (Fraction Integer) Lex 3]
+i5 = [ x+y+z, x*y + y*z + z*x, x*y*z - 1]
+  where
+    [x,y,z] = vars
 
 mkTestCases :: (KnownNat n) => Either Int String -> Ideal (OrderedPolynomial (Fraction Integer) Lex n) -> [Benchmark]
 mkTestCases num ideal = [ mkTC ("lex-" ++ either show id num) (mapIdeal (changeOrder Lex) ideal)
@@ -55,7 +60,7 @@ mkTestCases num ideal = [ mkTC ("lex-" ++ either show id num) (mapIdeal (changeO
 mkTC :: (IsMonomialOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
 mkTC name jdeal =
   env (return jdeal) $ \ ideal ->
-  bgroup name [ bench "hilb/par" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
+  bgroup name [ bench "hilb/std+par" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
               ]
 
 main :: IO ()
@@ -66,5 +71,5 @@ main = do
   ideal4 <- return $! (toIdeal i4 `using` rdeepseq)
   defaultMainWith defaultConfig { reportFile = Just "bench-results/sugar-paper.html"} $
        mkTestCases (Left 1) ideal2
+    ++ mkTestCases (Right "Cyclic-3") (toIdeal i5)
     ++ mkTestCases (Right "Cyclic-4") ideal4
-    ++ [mkTC "lex03" ideal3]
