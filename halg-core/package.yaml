@@ -44,6 +44,8 @@ dependencies:
 - convertible
 - deepseq
 - equational-reasoning
+- ghc-typelits-presburger
+- ghc-typelits-knownnat
 - hashable
 - lens
 - reflection

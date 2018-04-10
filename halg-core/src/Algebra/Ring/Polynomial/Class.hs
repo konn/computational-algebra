@@ -3,13 +3,14 @@
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, NoImplicitPrelude #-}
 {-# LANGUAGE ParallelListComp, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
 {-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances             #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 -- | This module provides abstract classes for finitary polynomial types.
 module Algebra.Ring.Polynomial.Class
        ( IsPolynomial(..), IsOrderedPolynomial(..)
        , substCoeff, liftMapCoeff
        , CoeffRing, oneNorm, maxNorm, monoize,
          sPolynomial, pDivModPoly, content, pp,
-         injectVars, vars,
+         injectVars, injectVarsAtEnd, injectVarsOffset, vars,
          PrettyCoeff(..), ShowSCoeff(..),
          showsCoeffAsTerm, showsCoeffWithOp,
          showsPolynomialWith, showsPolynomialWith',
@@ -217,7 +218,7 @@ class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrder
   --   So it is strongly recomended to give explicit
   --   definition to @'terms'@.
   terms :: poly -> M.Map (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
-  terms = M.mapKeys OrderedMonomial . terms'
+  terms = defaultTerms
 
   -- | Leading term with respect to its monomial ordering.
   leadingTerm :: poly -> (Coefficient poly, OrderedMonomial (MOrder poly) (Arity poly))
@@ -298,9 +299,14 @@ class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrder
     _Terms %~ M.mapKeysMonotonic tr
   {-# INLINE mapMonomialMonotonic #-}
 
+defaultTerms :: IsOrderedPolynomial poly
+             => poly -> Map (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
+defaultTerms = M.mapKeys OrderedMonomial . terms'
+{-# NOINLINE [1] defaultTerms #-}
+
 {-# RULES
  "polynomial/terms" forall (f :: IsOrderedPolynomial poly => poly).
-   polynomial (terms f) = f
+   polynomial (defaultTerms f) = f
  #-}
 
 liftMapCoeff :: IsPolynomial poly => (Ordinal (Arity poly) -> Coefficient poly) -> poly -> Coefficient poly
@@ -368,6 +374,7 @@ pp :: (Euclidean (Coefficient poly), IsPolynomial poly) => poly -> poly
 pp f = mapCoeff' (`quot` content f) f
 {-# INLINE pp #-}
 
+-- | See also @'injectVarsOffset'@ and @'injectVarsAtEnd'@.
 injectVars :: ((Arity r <= Arity r') ~ 'P.True,
                IsPolynomial r,
                IsPolynomial r',
@@ -375,6 +382,65 @@ injectVars :: ((Arity r <= Arity r') ~ 'P.True,
 injectVars = liftMap (var . inclusion)
 {-# INLINE [1] injectVars #-}
 {-# RULES "injectVars/identity" injectVars = P.id #-}
+
+-- | Similar to @'injectVars'@, but injects variables at the end of
+--   the target polynomial ring.
+--
+--   See also @'injectVars'@ and @'injectVarsOffset'@.
+injectVarsAtEnd :: forall r r'. ((Arity r <= Arity r') ~ 'P.True,
+                    IsPolynomial r,
+                    IsPolynomial r',
+                    Coefficient r ~ Coefficient r') => r -> r'
+injectVarsAtEnd =
+  let sn = sArity (Nothing :: Maybe r)
+      sm = sArity (Nothing :: Maybe r')
+  in withRefl (minusPlus sm sn Witness) $ injectVarsOffset (sm %- sn)
+{-# INLINE injectVarsAtEnd #-}
+
+shift :: forall n m k. ((n + m <= k) ~ 'True , KnownNat m, KnownNat k) => Sing n -> Ordinal m -> Ordinal k
+shift sn (OLt (sl :: Sing l)) =
+  let sm = sing :: Sing m
+      sk = sing :: Sing k
+  in withRefl (lneqToLT sl sm Witness) $
+     withWitness (lneqMonotoneR sn sl sm Witness) $
+     withWitness (lneqLeqTrans (sn %+ sl) (sn %+ sm) sk Witness Witness) $
+     OLt (sn %+ sl)
+shift _ _ = error "Could not happen!"
+{-# INLINE [1] shift #-}
+{-# RULES
+"shift/zero" forall (ns :: Sing 0).
+  shift ns = inclusion
+  #-}
+
+lneqLeqTrans :: Sing (n :: Nat) -> Sing m -> Sing l
+             -> IsTrue (n < m) -> IsTrue (m <= l) -> IsTrue (n < l)
+lneqLeqTrans sn sm sl nLTm mLEl =
+  withRefl (lneqSuccLeq sn sl) $
+  withRefl (lneqSuccLeq sn sm) $
+  leqTrans (sSucc sn) sm sl nLTm mLEl
+
+lneqMonotoneR :: forall n m l. Sing (n :: Nat) -> Sing m -> Sing l
+              -> IsTrue (m < l) -> IsTrue (n + m < n + l)
+lneqMonotoneR sn sm sl mLTl =
+  withRefl (lneqSuccLeq sm sl) $
+  withRefl (lneqSuccLeq (sn %+ sm) (sn %+ sl)) $
+  withRefl (plusSuccR sn sm) $
+  plusMonotoneR sn (sSucc sm) sl (mLTl :: IsTrue ((m + 1) <= l))
+
+-- | Similar to @'injectVars'@, but @'injectVarsOffset' n f@
+--   injects variables into the first but @n@ variables.
+--
+--   See also @'injectVars'@ and @'injectVarsAtEnd'@.
+injectVarsOffset :: forall n r r' . ((n + Arity r <= Arity r') ~ 'P.True,
+                  IsPolynomial r,
+                  IsPolynomial r',
+                  Coefficient r ~ Coefficient r') => Sing n -> r -> r'
+injectVarsOffset sn = liftMap (var . shift sn)
+{-# INLINE [1] injectVarsOffset #-}
+{-# RULES
+"injectVarsOffset eql" forall (sn :: Sing 0).
+ injectVarsOffset sn = injectVars
+ #-}
 
 vars :: forall poly. IsPolynomial poly => [poly]
 vars = map var $ enumOrdinal (sArity (Nothing :: Maybe poly))
