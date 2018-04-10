@@ -4,10 +4,7 @@
 {-# LANGUAGE UndecidableInstances                                  #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
-import Algebra.Algorithms.Groebner
-import Algebra.Algorithms.Groebner.F4
 import Algebra.Algorithms.Groebner.Homogeneous
-import Algebra.Algorithms.Groebner.Signature
 import Algebra.Internal
 import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
