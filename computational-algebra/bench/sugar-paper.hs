@@ -75,7 +75,7 @@ main = do
   ideal2 <- return $! (toIdeal i2 `using` rdeepseq)
   ideal3 <- return $! (toIdeal i3 `using` rdeepseq)
   ideal4 <- return $! (toIdeal i4 `using` rdeepseq)
-  defaultMainWith defaultConfig { reportFile = Just "bench-results/sugar-paper.html"} $
+  defaultMainWith defaultConfig $
        mkTestCases (Left 1) ideal2
     ++ mkTestCases (Right "Cyclic-4") ideal4
     ++ [mkTC "grevlex03" ideal3]
