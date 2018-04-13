@@ -78,7 +78,7 @@ standardCriterion :: (IsOrderedPolynomial poly, Foldable t)
                   -> Bool
 standardCriterion g = {-# SCC "standardCriterion" #-} any ((`divSig` g) . priority)
 
-divSig :: Signature poly -> Signature poly -> Bool
+divSig :: IsOrderedPolynomial poly => Signature poly -> Signature poly -> Bool
 divSig (Signature i _ c) (Signature j _ d) =
   {-# SCC "divSig" #-}
   i == j && c `divs` d

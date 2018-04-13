@@ -33,4 +33,4 @@ extra-deps:
 - hspec-smallcheck-0.5.0
 - type-natural-0.8.0.0
 - git: https://github.com/konn/sized.git
-  commit: 5ec86cd7e6f80016d20ace87cc67763ab1e77c68
+  commit: 48a4778329c8a7779e7f914126f8aa08f94551a2

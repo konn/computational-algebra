@@ -67,8 +67,12 @@ makeWrapped ''OrderedMonomial
 fromList :: SNat n -> [Int] -> Monomial n
 fromList len = V.fromListWithDefault len 0
 
-instance Multiplicative (Monomial n) where
-  (*) = zipWithSame (+)
+zws :: (KnownNat n, UV.Unbox a) => (Int -> Int -> a) -> Monomial n -> Monomial n -> USized n a
+zws f v u = V.unsafeToSized' $ UV.zipWith f (V.unsized v) (V.unsized u)
+{-# INLINE zws #-}
+
+instance KnownNat n => Multiplicative (Monomial n) where
+  (*) = zws (+)
 
 instance KnownNat n => Unital (Monomial n) where
   one = fromList sing []
@@ -79,7 +83,7 @@ instance KnownNat n => Unital (Monomial n) where
 -- (3) Non-negative: forall a, 0 <= a
 type MonomialOrder n = Monomial n -> Monomial n -> Ordering
 
-isRelativelyPrime :: OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
+isRelativelyPrime :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
 isRelativelyPrime n m = lcmMonomial n m == n * m
 
 totalDegree :: OrderedMonomial ord n -> Int
@@ -87,14 +91,14 @@ totalDegree = osum . getMonomial
 {-# INLINE totalDegree #-}
 
 -- | Lexicographical order. This *is* a monomial order.
-lex :: MonomialOrder n
+lex :: KnownNat n => MonomialOrder n
 lex m n = ofoldMap (uncurry compare) $ V.zipSame m n
 {-# INLINE [2] lex #-}
 
 -- | Reversed lexicographical order. This is *not* a monomial order.
-revlex :: MonomialOrder n
+revlex :: KnownNat n => MonomialOrder n
 revlex xs ys =
-  unWrapOrdering . ofoldl' (flip (<>)) (WrapOrdering EQ) $ V.zipWithSame ((WrapOrdering .) .flip compare) xs ys
+  unWrapOrdering . ofoldl' (flip (<>)) (WrapOrdering EQ) $ zws ((WrapOrdering .) .flip compare) xs ys
 {-# INLINE [2] revlex #-}
 
 -- | Convert ordering into graded one.
@@ -106,7 +110,7 @@ graded cmp xs ys = comparing osum xs ys <> cmp xs ys
   #-}
 
 -- | Graded lexicographical order. This *is* a monomial order.
-grlex :: MonomialOrder n
+grlex :: KnownNat n => MonomialOrder n
 grlex = graded lex
 {-# INLINE [2] grlex #-}
 
@@ -196,12 +200,12 @@ instance KnownNat n => Show (OrderedMonomial ord n) where
             $ V.toList $ getMonomial xs
     in if null vs then "1" else unwords vs
 
-instance Multiplicative (OrderedMonomial ord n) where
-  OrderedMonomial n * OrderedMonomial m = OrderedMonomial $ V.zipWithSame (+) n m
+instance KnownNat n => Multiplicative (OrderedMonomial ord n) where
+  OrderedMonomial n * OrderedMonomial m = OrderedMonomial $ zws (+) n m
 
 instance KnownNat n => Division (OrderedMonomial ord n) where
   recip = _Wrapped %~ V.map P.negate
-  OrderedMonomial n / OrderedMonomial m = OrderedMonomial $ V.zipWithSame (-) n m
+  OrderedMonomial n / OrderedMonomial m = OrderedMonomial $ zws (-) n m
 
 instance KnownNat n => Unital (OrderedMonomial ord n) where
   one = OrderedMonomial $ fromList sing []
@@ -273,7 +277,7 @@ calcOrderWeight Proxy = calcOrderWeight' (sing :: SList vs)
 calcOrderWeight' :: forall vs n. KnownNat n => SList (vs :: [Nat]) -> Monomial n -> Int
 calcOrderWeight' slst m =
   let cfs = V.fromListWithDefault' (0 :: Int) $ map P.fromIntegral $ fromSing slst
-  in osum $ V.zipWithSame (*) cfs m
+  in osum $ zws (*) cfs m
 {-# INLINE [2] calcOrderWeight' #-}
 
 weightOrder :: forall n ns ord. (KnownNat n, IsOrder n ord, SingI ns)
@@ -294,19 +298,19 @@ instance (IsOrder n ord, IsOrder m ord', KnownNat m, KnownNat n, k ~ (n + m))
   {-# INLINE [1] cmpMonomial #-}
 
 -- They're all total orderings.
-instance IsOrder n Grevlex where
+instance KnownNat n => IsOrder n Grevlex where
   cmpMonomial _ = grevlex
   {-# INLINE [1] cmpMonomial #-}
 
-instance IsOrder n Revlex where
+instance KnownNat n => IsOrder n Revlex where
   cmpMonomial _ = revlex
   {-# INLINE [1] cmpMonomial #-}
 
-instance IsOrder n Lex where
+instance KnownNat n => IsOrder n Lex where
   cmpMonomial _ = lex
   {-# INLINE [1] cmpMonomial #-}
 
-instance IsOrder n Grlex where
+instance KnownNat n => IsOrder n Grlex where
   cmpMonomial _ = grlex
   {-# INLINE [1] cmpMonomial #-}
 
@@ -315,23 +319,23 @@ class IsOrder n name => IsMonomialOrder n name where
 
 -- Note that Revlex is not a monomial order.
 -- This distinction is important when we calculate a quotient or Groebner basis.
-instance IsMonomialOrder n Grlex
-instance IsMonomialOrder n Grevlex
-instance IsMonomialOrder n Lex
+instance KnownNat n => IsMonomialOrder n Grlex
+instance KnownNat n => IsMonomialOrder n Grevlex
+instance KnownNat n => IsMonomialOrder n Lex
 instance (KnownNat n, KnownNat m, IsMonomialOrder n o, IsMonomialOrder m o', k ~ (n + m))
       => IsMonomialOrder k (ProductOrder n m o o')
 instance (KnownNat k, SingI ws, IsMonomialOrder k ord)
       => IsMonomialOrder k (WeightOrder ws ord)
 
-lcmMonomial :: OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
-lcmMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWithSame max m n
+lcmMonomial :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
+lcmMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ zws max m n
 
-gcdMonomial :: OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
-gcdMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWithSame P.min m n
+gcdMonomial :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
+gcdMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ zws P.min m n
 
 
-divs :: OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
-(OrderedMonomial xs) `divs` (OrderedMonomial ys) = and $ V.toList $ V.zipWith (<=) xs ys
+divs :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
+(OrderedMonomial xs) `divs` (OrderedMonomial ys) = and $ V.toList $ zws (<=) xs ys
 
 isPowerOf :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
 OrderedMonomial n `isPowerOf` OrderedMonomial m =
@@ -339,9 +343,9 @@ OrderedMonomial n `isPowerOf` OrderedMonomial m =
     [ind] -> osum n == V.sIndex ind n
     _     -> False
 
-tryDiv :: Field r => (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n)
+tryDiv :: (KnownNat n, Field r) => (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n)
 tryDiv (a, f) (b, g)
-    | g `divs` f = (a * recip b, OrderedMonomial $ V.zipWithSame (-) (getMonomial f) (getMonomial g))
+    | g `divs` f = (a * recip b, OrderedMonomial $ zws (-) (getMonomial f) (getMonomial g))
     | otherwise  = error "cannot divide."
 
 varMonom :: SNat n -> Ordinal n -> Monomial n

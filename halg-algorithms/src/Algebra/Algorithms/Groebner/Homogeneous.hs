@@ -170,7 +170,7 @@ instance Container [] where
 head' :: Foldable t => t a -> a
 head' = fromJust . F.find (const True)
 
-divs' :: Foldable t => t (Monomial n) -> t (Monomial n) -> Bool
+divs' :: (KnownNat n, Foldable t) => t (Monomial n) -> t (Monomial n) -> Bool
 divs' = divs `on` orderMonomial (Just Lex) . head'
 
 minimalGenerators' :: forall t f n. (Container t, KnownNat n, Element t (f (Monomial n)), Foldable f)

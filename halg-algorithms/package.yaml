@@ -46,7 +46,7 @@ library:
   source-dirs: src
   other-modules:
   - Algebra.Algorithms.FGLM
-  ghc-options:  -Wall
+  ghc-options: ["-Wall", "-O2"]
   dependencies:
   - algebraic-prelude
   - containers
@@ -75,6 +75,7 @@ _prof-settings: &prof-settings
   - -Wall
   - -threaded
   - -rtsopts
+  - -O2
   - -with-rtsopts=-N
   - -fprof-auto
   - -fprof-cafs

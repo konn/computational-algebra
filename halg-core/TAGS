@@ -283,7 +283,7 @@ convertPolynomial' convertPolynomial'703,704
 mapPolynomial mapPolynomial709,710
 mapPolynomial mapPolynomial712,713
 
-./src/Algebra/Ring/Polynomial/Monomial.hs,4618
+./src/Algebra/Ring/Polynomial/Monomial.hs,4649
 module Algebra.Ring.Polynomial.MonomialAlgebra.Ring.Polynomial.Monomial10,11
 type Monomial Monomial55,56
 type Monomial n n55,56
@@ -292,115 +292,117 @@ newtype OrderedMonomial OrderedMonomial58,59
   OrderedMonomial { getMonomial getMonomial59,60
 fromList fromList66,67
 fromList fromList67,68
-instance instance69,70
-type MonomialOrder MonomialOrder79,80
-isRelativelyPrime isRelativelyPrime81,82
-isRelativelyPrime isRelativelyPrime82,83
-totalDegree totalDegree84,85
-totalDegree totalDegree85,86
-lex lex89,90
-lex lex90,91
-revlex revlex94,95
-revlex revlex95,96
-graded graded100,101
-graded graded101,102
-grlex grlex108,109
-grlex grlex109,110
-newtype WrapOrdering WrapOrdering112,113
-newtype WrapOrdering  = WrapOrdering WrapOrdering112,113
-newtype WrapOrdering  = WrapOrdering { unWrapOrdering unWrapOrdering112,113
-newtype instance instance114,115
-newtype instance UV.Vector    WrapOrdering = V_WrapOrdering V_WrapOrdering114,115
-newtype instance instance115,116
-newtype instance UV.MVector s WrapOrdering = MV_WrapOrdering MV_WrapOrdering115,116
-fromWrapOrdering fromWrapOrdering160,161
-fromWrapOrdering fromWrapOrdering162,163
-toWrapOrdering toWrapOrdering166,167
-toWrapOrdering toWrapOrdering168,169
-grevlex grevlex173,174
-grevlex grevlex174,175
-grevlexHW grevlexHW177,178
-grevlexHW grevlexHW178,179
-class IsOrder IsOrder209,210
-class IsOrder IsOrder209,210
-  cmpMonomial cmpMonomial210,211
-data Lex Lex215,216
-data Lex = LexLex215,216
-data Revlex Revlex219,220
-data Revlex = RevlexRevlex219,220
-data Grevlex Grevlex223,224
-data Grevlex = GrevlexGrevlex223,224
-data Grlex Grlex227,228
-data Grlex = GrlexGrlex227,228
-newtype Graded Graded231,232
-newtype Graded ord = Graded Graded231,232
-data ProductOrder ProductOrder240,241
-data ProductOrder (n n240,241
-data ProductOrder (n :: Nat) (m m240,241
-data ProductOrder (n :: Nat) (m :: Nat) (a a240,241
-data ProductOrder (n :: Nat) (m :: Nat) (a :: Type) (b b240,241
-  ProductOrder ProductOrder241,242
-data ProductOrder (n n240,241
-productOrder productOrder243,244
-productOrder productOrder245,246
-productOrder' productOrder'256,257
-productOrder' productOrder'258,259
-type WeightProxy WeightProxy262,263
-type WeightProxy (v(262,263
-data WeightOrder WeightOrder264,265
-data WeightOrder (v v264,265
-data WeightOrder (v :: [Nat]) (ord ord264,265
-  WeightOrder WeightOrder265,266
-  WeightOrder :: SList (v v265,266
-data WeightOrder (v v264,265
-calcOrderWeight calcOrderWeight267,268
-calcOrderWeight calcOrderWeight269,270
-calcOrderWeight' calcOrderWeight'272,273
-calcOrderWeight' calcOrderWeight'273,274
-weightOrder weightOrder278,279
-weightOrder weightOrder280,281
-class IsOrder n name => IsMonomialOrder IsMonomialOrder313,314
-class IsOrder n name => IsMonomialOrder IsMonomialOrder313,314
-lcmMonomial lcmMonomial325,326
-lcmMonomial lcmMonomial326,327
-gcdMonomial gcdMonomial328,329
-gcdMonomial gcdMonomial329,330
-divs divs332,333
-(OrderedMonomial xs) `divs`divs333,334
-isPowerOf isPowerOf335,336
-OrderedMonomial n `isPowerOf`isPowerOf336,337
-tryDiv tryDiv341,342
-varMonom varMonom346,347
-varMonom varMonom347,348
-class (IsMonomialOrder n ord, KnownNat n) => EliminationType EliminationType352,353
-type EliminationOrder EliminationOrder360,361
-eliminationOrder eliminationOrder362,363
-eliminationOrder eliminationOrder363,364
-sOnes sOnes366,367
-sOnes sOnes367,368
-weightedEliminationOrder weightedEliminationOrder369,370
-weightedEliminationOrder weightedEliminationOrder370,371
-type WeightedEliminationOrder WeightedEliminationOrder373,374
-  OrderedMonomial m `compare`compare378,379
-castMonomial castMonomial384,385
-castMonomial castMonomial385,386
-scastMonomial scastMonomial387,388
-scastMonomial scastMonomial388,389
-changeMonomialOrder changeMonomialOrder390,391
-changeMonomialOrder changeMonomialOrder391,392
-changeMonomialOrderProxy changeMonomialOrderProxy393,394
-changeMonomialOrderProxy changeMonomialOrderProxy394,395
-class    (IsMonomialOrder n ord) => IsMonomialOrder' IsMonomialOrder'396,397
-type IsStrongMonomialOrder IsStrongMonomialOrder403,404
-type IsStrongMonomialOrder ord ord403,404
-withStrongMonomialOrder withStrongMonomialOrder405,406
-withStrongMonomialOrder withStrongMonomialOrder408,409
-cmpAnyMonomial cmpAnyMonomial417,418
-cmpAnyMonomial cmpAnyMonomial419,420
-orderMonomial orderMonomial423,424
-orderMonomial orderMonomial424,425
-ifoldMapMonom ifoldMapMonom427,428
-ifoldMapMonom ifoldMapMonom428,429
+zws zws69,70
+zws zws70,71
+instance instance73,74
+type MonomialOrder MonomialOrder83,84
+isRelativelyPrime isRelativelyPrime85,86
+isRelativelyPrime isRelativelyPrime86,87
+totalDegree totalDegree88,89
+totalDegree totalDegree89,90
+lex lex93,94
+lex lex94,95
+revlex revlex98,99
+revlex revlex99,100
+graded graded104,105
+graded graded105,106
+grlex grlex112,113
+grlex grlex113,114
+newtype WrapOrdering WrapOrdering116,117
+newtype WrapOrdering  = WrapOrdering WrapOrdering116,117
+newtype WrapOrdering  = WrapOrdering { unWrapOrdering unWrapOrdering116,117
+newtype instance instance118,119
+newtype instance UV.Vector    WrapOrdering = V_WrapOrdering V_WrapOrdering118,119
+newtype instance instance119,120
+newtype instance UV.MVector s WrapOrdering = MV_WrapOrdering MV_WrapOrdering119,120
+fromWrapOrdering fromWrapOrdering164,165
+fromWrapOrdering fromWrapOrdering166,167
+toWrapOrdering toWrapOrdering170,171
+toWrapOrdering toWrapOrdering172,173
+grevlex grevlex177,178
+grevlex grevlex178,179
+grevlexHW grevlexHW181,182
+grevlexHW grevlexHW182,183
+class IsOrder IsOrder213,214
+class IsOrder IsOrder213,214
+  cmpMonomial cmpMonomial214,215
+data Lex Lex219,220
+data Lex = LexLex219,220
+data Revlex Revlex223,224
+data Revlex = RevlexRevlex223,224
+data Grevlex Grevlex227,228
+data Grevlex = GrevlexGrevlex227,228
+data Grlex Grlex231,232
+data Grlex = GrlexGrlex231,232
+newtype Graded Graded235,236
+newtype Graded ord = Graded Graded235,236
+data ProductOrder ProductOrder244,245
+data ProductOrder (n n244,245
+data ProductOrder (n :: Nat) (m m244,245
+data ProductOrder (n :: Nat) (m :: Nat) (a a244,245
+data ProductOrder (n :: Nat) (m :: Nat) (a :: Type) (b b244,245
+  ProductOrder ProductOrder245,246
+data ProductOrder (n n244,245
+productOrder productOrder247,248
+productOrder productOrder249,250
+productOrder' productOrder'260,261
+productOrder' productOrder'262,263
+type WeightProxy WeightProxy266,267
+type WeightProxy (v(266,267
+data WeightOrder WeightOrder268,269
+data WeightOrder (v v268,269
+data WeightOrder (v :: [Nat]) (ord ord268,269
+  WeightOrder WeightOrder269,270
+  WeightOrder :: SList (v v269,270
+data WeightOrder (v v268,269
+calcOrderWeight calcOrderWeight271,272
+calcOrderWeight calcOrderWeight273,274
+calcOrderWeight' calcOrderWeight'276,277
+calcOrderWeight' calcOrderWeight'277,278
+weightOrder weightOrder282,283
+weightOrder weightOrder284,285
+class IsOrder n name => IsMonomialOrder IsMonomialOrder317,318
+class IsOrder n name => IsMonomialOrder IsMonomialOrder317,318
+lcmMonomial lcmMonomial329,330
+lcmMonomial lcmMonomial330,331
+gcdMonomial gcdMonomial332,333
+gcdMonomial gcdMonomial333,334
+divs divs336,337
+(OrderedMonomial xs) `divs`divs337,338
+isPowerOf isPowerOf339,340
+OrderedMonomial n `isPowerOf`isPowerOf340,341
+tryDiv tryDiv345,346
+varMonom varMonom350,351
+varMonom varMonom351,352
+class (IsMonomialOrder n ord, KnownNat n) => EliminationType EliminationType356,357
+type EliminationOrder EliminationOrder364,365
+eliminationOrder eliminationOrder366,367
+eliminationOrder eliminationOrder367,368
+sOnes sOnes370,371
+sOnes sOnes371,372
+weightedEliminationOrder weightedEliminationOrder373,374
+weightedEliminationOrder weightedEliminationOrder374,375
+type WeightedEliminationOrder WeightedEliminationOrder377,378
+  OrderedMonomial m `compare`compare382,383
+castMonomial castMonomial388,389
+castMonomial castMonomial389,390
+scastMonomial scastMonomial391,392
+scastMonomial scastMonomial392,393
+changeMonomialOrder changeMonomialOrder394,395
+changeMonomialOrder changeMonomialOrder395,396
+changeMonomialOrderProxy changeMonomialOrderProxy397,398
+changeMonomialOrderProxy changeMonomialOrderProxy398,399
+class    (IsMonomialOrder n ord) => IsMonomialOrder' IsMonomialOrder'400,401
+type IsStrongMonomialOrder IsStrongMonomialOrder407,408
+type IsStrongMonomialOrder ord ord407,408
+withStrongMonomialOrder withStrongMonomialOrder409,410
+withStrongMonomialOrder withStrongMonomialOrder412,413
+cmpAnyMonomial cmpAnyMonomial421,422
+cmpAnyMonomial cmpAnyMonomial423,424
+orderMonomial orderMonomial427,428
+orderMonomial orderMonomial428,429
+ifoldMapMonom ifoldMapMonom431,432
+ifoldMapMonom ifoldMapMonom432,433
 
 ./src/Algebra/Scalar.hs,218
 module Algebra.Scalar Algebra.Scalar3,4
