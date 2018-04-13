@@ -425,7 +425,7 @@ lneqLeqTrans sn sm sl nLTm mLEl =
   leqTrans (sSucc sn) sm sl nLTm mLEl
 
 lneqMonotoneR :: forall n m l. Sing (n :: Nat) -> Sing m -> Sing l
-              -> IsTrue (m < l) -> IsTrue (n + m < n + l)
+              -> IsTrue (m < l) -> IsTrue ((n + m) < (n + l))
 lneqMonotoneR sn sm sl mLTl =
   withRefl (lneqSuccLeq sm sl) $
   withRefl (lneqSuccLeq (sn %+ sm) (sn %+ sl)) $
