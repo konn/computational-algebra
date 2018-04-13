@@ -31,18 +31,6 @@ extra-deps:
 - ghc-typelits-presburger-0.2.0.0
 - unamb-0.2.5
 - hspec-smallcheck-0.5.0
-
-- git: https://github.com/cartazio/arithmoi.git
-  commit: a3e189cca4c2961796c7ca74eccb29ff89f0e3d3
-
-- git: https://github.com/konn/ghc-typelits-knownnat.git
-  commit: d296ffd02eb74cb7338058ee609f170bf0cdf606
-
-- git: https://github.com/clash-lang/ghc-typelits-natnormalise.git
-  commit: 1178631cc6b78ea9b92fcf29e2944d1a148f2d71
-
+- type-natural-0.8.0.0
 - git: https://github.com/konn/sized.git
-  commit: 086fa341c564dcc96e4154b948e93de0208c118a 
-
-- git: https://github.com/konn/type-natural.git
-  commit: 15b929cb78f30abe9e6531936d15e6d6d8f30f3c
+  commit: 5ec86cd7e6f80016d20ace87cc67763ab1e77c68
