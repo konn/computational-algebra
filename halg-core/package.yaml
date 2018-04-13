@@ -44,16 +44,18 @@ dependencies:
 - convertible
 - deepseq
 - equational-reasoning
-- ghc-typelits-presburger
 - ghc-typelits-knownnat
+- ghc-typelits-presburger
 - hashable
 - lens
+- mono-traversable
 - reflection
 - singletons
 - sized
 - type-natural
 - unordered-containers
 - vector
+- vector-instances
 
 default-extensions:
 - CPP

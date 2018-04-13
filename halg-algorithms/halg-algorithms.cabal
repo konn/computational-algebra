@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0cec6038c1f72f788117163a22f43045e960f67e2cf1cd22fd9c4f1e38d198c5
+-- hash: fd0cd3f854f2bb27453a884fd038968e98907c9fea9b704b0623e502a6dcf830
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -51,6 +51,7 @@ library
     , lens
     , matrix
     , monad-loops
+    , mono-traversable
     , mtl
     , parallel
     , reflection

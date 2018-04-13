@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts, NoImplicitPrelude, NoMonomorphismRestriction #-}
 module Algebra.Prelude.Core
-       ((%),Scalar(..),(.*.), od,Ordinal, enumOrdinal,
+       ((%),Scalar(..),(.*.),
         logBase2,ceilingLogBase2,
         module AlgebraicPrelude,
         module Algebra.Ring.Polynomial.Internal,

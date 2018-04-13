@@ -23,38 +23,42 @@ module Algebra.Ring.Polynomial.Class
          isUnitDefault, recipUnitDefault, isAssociateDefault
        , splitUnitDefault
        ) where
-import Algebra.Internal
-import Algebra.Normed
-import Algebra.Ring.Polynomial.Monomial
-import Algebra.Scalar
-
+import           Algebra.Internal
+import           Algebra.Normed
+import           Algebra.Ring.Polynomial.Monomial
+import           Algebra.Scalar
 import           AlgebraicPrelude
-import           Control.Arrow            ((***))
-import           Control.Lens             (Iso', folded, ifoldMap, iso, ix,
-                                           maximumOf, (%~), _Wrapped)
-import           Data.Foldable            (foldr, maximum)
-import qualified Data.Foldable            as F
-import qualified Data.HashSet             as HS
+import           Control.Arrow                    ((***))
+import           Control.Lens                     (Iso', folded, ifoldMap, iso,
+                                                   ix, maximumOf, (%~),
+                                                   _Wrapped)
+import           Data.Foldable                    (foldr, maximum)
+import qualified Data.Foldable                    as F
+import qualified Data.HashSet                     as HS
 import           Data.Int
-import           Data.Kind                (Type)
-import qualified Data.List                as L
-import qualified Data.Map.Strict          as M
-import           Data.Maybe               (catMaybes, fromJust, fromMaybe)
-import qualified Data.Ratio               as R
-import qualified Data.Set                 as S
-import           Data.Singletons.Prelude  (SingKind (..))
-import qualified Data.Sized.Builtin       as V
+import           Data.Kind                        (Type)
+import qualified Data.List                        as L
+import qualified Data.Map.Strict                  as M
+import           Data.Maybe                       (catMaybes, fromJust,
+                                                   fromMaybe)
+import           Data.MonoTraversable
+import qualified Data.Ratio                       as R
+import qualified Data.Set                         as S
+import           Data.Singletons.Prelude          (SingKind (..))
+import qualified Data.Sized.Builtin               as V
+import           Data.Vector.Instances            ()
+import qualified Data.Vector.Unboxed              as UV
 import           Data.Word
-import           GHC.TypeLits             (KnownNat, Nat)
-import qualified Numeric.Algebra.Complex  as NA
-import           Numeric.Decidable.Zero   (DecidableZero (..))
-import           Numeric.Domain.Euclidean (Euclidean, quot)
-import           Numeric.Domain.GCD       (gcd)
-import           Numeric.Field.Fraction   (Fraction)
-import qualified Numeric.Field.Fraction   as NA
-import           Numeric.Natural          (Natural)
-import qualified Numeric.Ring.Class       as NA
-import qualified Prelude                  as P
+import           GHC.TypeLits                     (KnownNat, Nat)
+import qualified Numeric.Algebra.Complex          as NA
+import           Numeric.Decidable.Zero           (DecidableZero (..))
+import           Numeric.Domain.Euclidean         (Euclidean, quot)
+import           Numeric.Domain.GCD               (gcd)
+import           Numeric.Field.Fraction           (Fraction)
+import qualified Numeric.Field.Fraction           as NA
+import           Numeric.Natural                  (Natural)
+import qualified Numeric.Ring.Class               as NA
+import qualified Prelude                          as P
 
 infixl 7 *<, >*, *|<, >|*, !*
 
@@ -97,12 +101,13 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
   --   it is encouraged to override this method.
   --
   --   Since 0.6.0.0
-  substWith :: (Ring m)
+  substWith :: forall m. (Ring m)
             => (Coefficient poly -> m -> m) -> Sized (Arity poly) m -> poly -> m
   substWith o pt poly =
     runAdd $ ifoldMap ((Add .) . flip o . extractPower) $ terms' poly
     where
-      extractPower = runMult . ifoldMap (\k -> Mult . pow (pt V.%!! k) . P.fromIntegral)
+      extractPower :: Monomial (Arity poly) -> m
+      extractPower = runMult . ifoldMapMonom (\k n -> Mult (pow (pt V.%!! k) (P.fromIntegral n)))
   {-# INLINE substWith #-}
 
   -- | Arity of given polynomial.
@@ -172,7 +177,7 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
 
   -- | Returns total degree.
   totalDegree' :: poly -> Natural
-  totalDegree' = maybe 0 fromIntegral . maximumOf folded . HS.map P.sum . monomials
+  totalDegree' = maybe 0 fromIntegral . maximumOf folded . HS.map (UV.sum . V.unsized) . monomials
   {-# INLINE totalDegree' #-}
 
   -- | @'var' n@ returns a polynomial representing n-th variable.
@@ -612,7 +617,7 @@ showsPolynomialWith' showMult showsCoe vsVec d f = P.showParen (d P.> 10) $
     multSymb | showMult  = '*'
              | otherwise = ' '
     showMonom m =
-      let fs = catMaybes $ P.zipWith showFactor vs $ F.toList m
+      let fs = catMaybes $ P.zipWith showFactor vs $ otoList m
       in if P.null fs
          then Nothing
          else Just $ foldr (.) P.id $ L.intersperse (P.showChar multSymb) (map P.showString fs)

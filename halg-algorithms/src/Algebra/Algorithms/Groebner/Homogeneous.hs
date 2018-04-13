@@ -32,6 +32,7 @@ import qualified Data.Heap                           as H
 import qualified Data.IntMap                         as IM
 import qualified Data.List                           as L
 import           Data.Maybe                          (fromJust)
+import           Data.MonoTraversable                (oall, osum)
 import qualified Data.Sized.Builtin                  as SV
 import           Data.STRef                          (STRef, modifySTRef',
                                                       newSTRef, readSTRef,
@@ -45,7 +46,7 @@ import qualified Numeric.Field.Fraction              as NA
 isHomogeneous :: IsOrderedPolynomial poly
               => poly -> Bool
 isHomogeneous poly =
-  let degs = map F.sum $ F.toList $ monomials poly
+  let degs = map osum $ F.toList $ monomials poly
   in and $ zipWith (==) degs (tail degs)
 
 -- | Calculates Groebner basis once homogenise, apply @'unsafeCalcHomogeneousGroebnerBasis'@,
@@ -175,7 +176,7 @@ divs' = divs `on` orderMonomial (Just Lex) . head'
 minimalGenerators' :: forall t f n. (Container t, KnownNat n, Element t (f (Monomial n)), Foldable f)
                   => t (f (Monomial n)) -> t (f (Monomial n))
 minimalGenerators' bs
-  | any (all (== 0) . head') bs = empty
+  | any (oall (== 0) . head') bs = empty
   | otherwise = F.foldr check empty bs
   where
     check a acc =
@@ -288,7 +289,7 @@ toRationalFunction s@(HPS _ f) =
 hilbertPoincareSeriesForMonomials :: forall t n. (KnownNat n, Foldable t)
                                   => t (Monomial n) -> HPS n
 hilbertPoincareSeriesForMonomials ms0 =
-  go $ H.fromList [ ReversedEntry (F.sum m) m
+  go $ H.fromList [ ReversedEntry (osum m) m
                   | m <- minimalGenerators $ F.toList ms0 ]
   where
     go ms =
@@ -302,7 +303,7 @@ hilbertPoincareSeriesForMonomials ms0 =
               xi = varMonom sing i
               upd (ReversedEntry _ xs) =
                    let xs' = (xs & ix i %~ max 0 . pred)
-                   in ReversedEntry (F.sum xs') xs'
+                   in ReversedEntry (osum xs') xs'
               added = minimalGenerators' $ insert (ReversedEntry 1 xi) ms
               quo = minimalGenerators' $ H.map upd ms
           in go added + (#x :: Unipol Integer) .* go quo

@@ -54,28 +54,29 @@ class (Field k, Characteristic k) => FiniteField FiniteField10,11
 order order14,15
 order order15,16
 
-./src/Algebra/Internal.hs,576
+./src/Algebra/Internal.hs,603
 module Algebra.InternalAlgebra.Internal5,6
-import import49,50
-toProxy toProxy62,63
+import import50,51
 toProxy toProxy63,64
-type Sized Sized65,66
-type Sized n n65,66
-type Sized' Sized'66,67
-coerceLength coerceLength68,69
-coerceLength coerceLength69,70
-type SNat SNat71,72
-type SNat (n(71,72
-sizedLength sizedLength73,74
-sizedLength sizedLength74,75
-padVecs padVecs76,77
+toProxy toProxy64,65
+type USized USized66,67
+type USized n n66,67
+type Sized Sized67,68
+type Sized' Sized'68,69
+coerceLength coerceLength70,71
+coerceLength coerceLength71,72
+type SNat SNat73,74
+type SNat (n(73,74
+sizedLength sizedLength75,76
+sizedLength sizedLength76,77
 padVecs padVecs78,79
-type family family103,104
-type family Flipped Flipped103,104
-pattern pattern107,108
-sNatToInt sNatToInt109,110
-sNatToInt sNatToInt110,111
-instance instance112,113
+padVecs padVecs80,81
+type family family105,106
+type family Flipped Flipped105,106
+pattern pattern109,110
+sNatToInt sNatToInt111,112
+sNatToInt sNatToInt112,113
+instance instance114,115
 
 ./src/Algebra/Arithmetic.hs,610
 module Algebra.ArithmeticAlgebra.Arithmetic1,2
@@ -120,273 +121,286 @@ mapIdeal mapIdeal53,54
 someSizedIdeal someSizedIdeal56,57
 someSizedIdeal someSizedIdeal57,58
 
-./src/Algebra/Ring/Polynomial/Class.hs,5741
+./src/Algebra/Ring/Polynomial/Class.hs,5742
 module Algebra.Ring.Polynomial.ClassAlgebra.Ring.Polynomial.Class7,8
-class    (DecidableZero r, Ring r, Commutative r, Eq r) => CoeffRing CoeffRing61,62
-   => IsPolynomial IsPolynomial70,71
-            => (Coefficient Coefficient100,101
-  type Coefficient Coefficient73,74
-  type Coefficient poly poly73,74
-  type Arity Arity75,76
-  type Arity poly poly75,76
-  liftMap liftMap79,80
-  liftMap liftMap81,82
-  subst subst89,90
-  subst subst91,92
-  substWith substWith99,100
-  substWith substWith101,102
-  sArity' sArity'108,109
-  sArity' sArity'109,110
-  sArity sArity112,113
-  sArity sArity113,114
-  arity arity117,118
-  arity arity118,119
-  injectCoeff injectCoeff122,123
-  injectCoeff injectCoeff123,124
-  injectCoeff' injectCoeff'127,128
-  injectCoeff' injectCoeff'128,129
-  monomials monomials132,133
-  monomials monomials133,134
-  terms' terms'138,139
-  terms' terms'139,140
-  coeff' coeff'147,148
-  coeff' coeff'148,149
-  constantTerm constantTerm152,153
-  constantTerm constantTerm153,154
-  fromMonomial fromMonomial157,158
-  fromMonomial fromMonomial158,159
-  toPolynomial' toPolynomial'162,163
-  toPolynomial' toPolynomial'163,164
-  polynomial' polynomial'167,168
-  polynomial' polynomial'168,169
-  totalDegree' totalDegree'173,174
-  totalDegree' totalDegree'174,175
-  var var178,179
-  var var179,180
-  mapCoeff' mapCoeff'182,183
-  mapCoeff' mapCoeff'183,184
-  (>|*)>|*186,187
-  m m187,188
-  (*|<)*|<190,191
-  (*(191,192
-  (!*)!*193,194
-  _Terms' _Terms'197,198
-  _Terms' _Terms'198,199
-  mapMonomial mapMonomial201,202
-  mapMonomial mapMonomial202,203
-class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrderedPolynomial IsOrderedPolynomial207,208
-class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrderedPolynomial IsOrderedPolynomial207,208
-  type MOrder MOrder208,209
-  type MOrder poly poly208,209
-  coeff coeff212,213
-  coeff coeff213,214
-  terms terms219,220
-  terms terms220,221
-  leadingTerm leadingTerm223,224
-  leadingTerm leadingTerm224,225
-  leadingMonomial leadingMonomial228,229
-  leadingMonomial leadingMonomial229,230
-  leadingCoeff leadingCoeff233,234
-  leadingCoeff leadingCoeff234,235
-  orderedMonomials orderedMonomials239,240
-  orderedMonomials orderedMonomials240,241
-  fromOrderedMonomial fromOrderedMonomial244,245
-  fromOrderedMonomial fromOrderedMonomial245,246
-  toPolynomial toPolynomial249,250
-  toPolynomial toPolynomial250,251
-  polynomial polynomial258,259
-  polynomial polynomial260,261
-  (>*)>*264,265
-  (*<)*<269,270
-  _Terms _Terms273,274
-  _Terms _Terms274,275
-  diff diff280,281
-  diff diff281,282
-  mapMonomialMonotonic mapMonomialMonotonic297,298
-defaultTerms defaultTerms301,302
-defaultTerms defaultTerms303,304
-liftMapCoeff liftMapCoeff311,312
-liftMapCoeff liftMapCoeff312,313
-substCoeff substCoeff315,316
-substCoeff substCoeff316,317
-oneNorm oneNorm320,321
-oneNorm oneNorm322,323
-maxNorm maxNorm326,327
-maxNorm maxNorm327,328
-monoize monoize332,333
-monoize monoize334,335
-sPolynomial sPolynomial339,340
-sPolynomial sPolynomial342,343
-pDivModPoly pDivModPoly347,348
-f0 `pDivModPoly`pDivModPoly350,351
-content content366,367
-content content367,368
-pp pp372,373
-pp pp373,374
-injectVars injectVars377,378
-injectVars injectVars377,378
-injectVarsAtEnd injectVarsAtEnd389,390
-injectVarsAtEnd injectVarsAtEnd389,390
-shift shift399,400
-shift shift399,400
-lneqLeqTrans lneqLeqTrans414,415
-lneqLeqTrans lneqLeqTrans414,415
-lneqMonotoneR lneqMonotoneR421,422
-lneqMonotoneR lneqMonotoneR423,424
-injectVarsOffset injectVarsOffset433,434
-injectVarsOffset injectVarsOffset433,434
-vars vars444,445
-vars vars445,446
-class (P.Show r) => PrettyCoeff PrettyCoeff448,449
-class (P.Show r) => PrettyCoeff PrettyCoeff448,449
-  showsCoeff showsCoeff449,450
-  showsCoeff showsCoeff450,451
-defaultShowsOrdCoeff defaultShowsOrdCoeff452,453
-defaultShowsOrdCoeff defaultShowsOrdCoeff454,455
-instance instance461,462
-data ShowSCoeff ShowSCoeff526,527
-data ShowSCoeff = Negative Negative526,527
-                | VanishedVanished527,528
-                | OneCoeffOneCoeff528,529
-                | Positive Positive529,530
-showsCoeffAsTerm showsCoeffAsTerm538,539
-showsCoeffAsTerm showsCoeffAsTerm539,540
-showsCoeffWithOp showsCoeffWithOp551,552
-showsCoeffWithOp showsCoeffWithOp552,553
-showPolynomialWith showPolynomialWith557,558
+class    (DecidableZero r, Ring r, Commutative r, Eq r) => CoeffRing CoeffRing65,66
+   => IsPolynomial IsPolynomial74,75
+            => (Coefficient Coefficient104,105
+  type Coefficient Coefficient77,78
+  type Coefficient poly poly77,78
+  type Arity Arity79,80
+  type Arity poly poly79,80
+  liftMap liftMap83,84
+  liftMap liftMap85,86
+  subst subst93,94
+  subst subst95,96
+  substWith substWith103,104
+  substWith substWith105,106
+  sArity' sArity'113,114
+  sArity' sArity'114,115
+  sArity sArity117,118
+  sArity sArity118,119
+  arity arity122,123
+  arity arity123,124
+  injectCoeff injectCoeff127,128
+  injectCoeff injectCoeff128,129
+  injectCoeff' injectCoeff'132,133
+  injectCoeff' injectCoeff'133,134
+  monomials monomials137,138
+  monomials monomials138,139
+  terms' terms'143,144
+  terms' terms'144,145
+  coeff' coeff'152,153
+  coeff' coeff'153,154
+  constantTerm constantTerm157,158
+  constantTerm constantTerm158,159
+  fromMonomial fromMonomial162,163
+  fromMonomial fromMonomial163,164
+  toPolynomial' toPolynomial'167,168
+  toPolynomial' toPolynomial'168,169
+  polynomial' polynomial'172,173
+  polynomial' polynomial'173,174
+  totalDegree' totalDegree'178,179
+  totalDegree' totalDegree'179,180
+  var var183,184
+  var var184,185
+  mapCoeff' mapCoeff'187,188
+  mapCoeff' mapCoeff'188,189
+  (>|*)>|*191,192
+  m m192,193
+  (*|<)*|<195,196
+  (*(196,197
+  (!*)!*198,199
+  _Terms' _Terms'202,203
+  _Terms' _Terms'203,204
+  mapMonomial mapMonomial206,207
+  mapMonomial mapMonomial207,208
+class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrderedPolynomial IsOrderedPolynomial212,213
+class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrderedPolynomial IsOrderedPolynomial212,213
+  type MOrder MOrder213,214
+  type MOrder poly poly213,214
+  coeff coeff217,218
+  coeff coeff218,219
+  terms terms224,225
+  terms terms225,226
+  leadingTerm leadingTerm228,229
+  leadingTerm leadingTerm229,230
+  leadingMonomial leadingMonomial233,234
+  leadingMonomial leadingMonomial234,235
+  leadingCoeff leadingCoeff238,239
+  leadingCoeff leadingCoeff239,240
+  orderedMonomials orderedMonomials244,245
+  orderedMonomials orderedMonomials245,246
+  fromOrderedMonomial fromOrderedMonomial249,250
+  fromOrderedMonomial fromOrderedMonomial250,251
+  toPolynomial toPolynomial254,255
+  toPolynomial toPolynomial255,256
+  polynomial polynomial263,264
+  polynomial polynomial265,266
+  (>*)>*269,270
+  (*<)*<274,275
+  _Terms _Terms278,279
+  _Terms _Terms279,280
+  diff diff285,286
+  diff diff286,287
+  mapMonomialMonotonic mapMonomialMonotonic302,303
+defaultTerms defaultTerms306,307
+defaultTerms defaultTerms308,309
+liftMapCoeff liftMapCoeff316,317
+liftMapCoeff liftMapCoeff317,318
+substCoeff substCoeff320,321
+substCoeff substCoeff321,322
+oneNorm oneNorm325,326
+oneNorm oneNorm327,328
+maxNorm maxNorm331,332
+maxNorm maxNorm332,333
+monoize monoize337,338
+monoize monoize339,340
+sPolynomial sPolynomial344,345
+sPolynomial sPolynomial347,348
+pDivModPoly pDivModPoly352,353
+f0 `pDivModPoly`pDivModPoly355,356
+content content371,372
+content content372,373
+pp pp377,378
+pp pp378,379
+injectVars injectVars382,383
+injectVars injectVars382,383
+injectVarsAtEnd injectVarsAtEnd394,395
+injectVarsAtEnd injectVarsAtEnd394,395
+shift shift404,405
+shift shift404,405
+lneqLeqTrans lneqLeqTrans419,420
+lneqLeqTrans lneqLeqTrans419,420
+lneqMonotoneR lneqMonotoneR426,427
+lneqMonotoneR lneqMonotoneR428,429
+injectVarsOffset injectVarsOffset438,439
+injectVarsOffset injectVarsOffset438,439
+vars vars449,450
+vars vars450,451
+class (P.Show r) => PrettyCoeff PrettyCoeff453,454
+class (P.Show r) => PrettyCoeff PrettyCoeff453,454
+  showsCoeff showsCoeff454,455
+  showsCoeff showsCoeff455,456
+defaultShowsOrdCoeff defaultShowsOrdCoeff457,458
+defaultShowsOrdCoeff defaultShowsOrdCoeff459,460
+instance instance466,467
+data ShowSCoeff ShowSCoeff531,532
+data ShowSCoeff = Negative Negative531,532
+                | VanishedVanished532,533
+                | OneCoeffOneCoeff533,534
+                | Positive Positive534,535
+showsCoeffAsTerm showsCoeffAsTerm543,544
+showsCoeffAsTerm showsCoeffAsTerm544,545
+showsCoeffWithOp showsCoeffWithOp556,557
+showsCoeffWithOp showsCoeffWithOp557,558
 showPolynomialWith showPolynomialWith562,563
-showPolynomialWith' showPolynomialWith'564,565
-showPolynomialWith' showPolynomialWith'571,572
-showsPolynomialWith showsPolynomialWith573,574
+showPolynomialWith showPolynomialWith567,568
+showPolynomialWith' showPolynomialWith'569,570
+showPolynomialWith' showPolynomialWith'576,577
 showsPolynomialWith showsPolynomialWith578,579
-showsPolynomialWith' showsPolynomialWith'580,581
-showsPolynomialWith' showsPolynomialWith'592,593
-divModPolynomial divModPolynomial623,624
-divModPolynomial divModPolynomial626,627
-modPolynomial modPolynomial641,642
-modPolynomial modPolynomial643,644
-divPolynomial divPolynomial646,647
-divPolynomial divPolynomial648,649
-isUnitDefault isUnitDefault654,655
-isUnitDefault isUnitDefault656,657
-recipUnitDefault recipUnitDefault658,659
-recipUnitDefault recipUnitDefault660,661
-isAssociateDefault isAssociateDefault664,665
-isAssociateDefault isAssociateDefault666,667
-splitUnitDefault splitUnitDefault671,672
-splitUnitDefault splitUnitDefault673,674
-convertPolynomial convertPolynomial681,682
+showsPolynomialWith showsPolynomialWith583,584
+showsPolynomialWith' showsPolynomialWith'585,586
+showsPolynomialWith' showsPolynomialWith'597,598
+divModPolynomial divModPolynomial628,629
+divModPolynomial divModPolynomial631,632
+modPolynomial modPolynomial646,647
+modPolynomial modPolynomial648,649
+divPolynomial divPolynomial651,652
+divPolynomial divPolynomial653,654
+isUnitDefault isUnitDefault659,660
+isUnitDefault isUnitDefault661,662
+recipUnitDefault recipUnitDefault663,664
+recipUnitDefault recipUnitDefault665,666
+isAssociateDefault isAssociateDefault669,670
+isAssociateDefault isAssociateDefault671,672
+splitUnitDefault splitUnitDefault676,677
+splitUnitDefault splitUnitDefault678,679
 convertPolynomial convertPolynomial686,687
-convertPolynomial' convertPolynomial'693,694
+convertPolynomial convertPolynomial691,692
 convertPolynomial' convertPolynomial'698,699
-mapPolynomial mapPolynomial704,705
-mapPolynomial mapPolynomial707,708
+convertPolynomial' convertPolynomial'703,704
+mapPolynomial mapPolynomial709,710
+mapPolynomial mapPolynomial712,713
 
-./src/Algebra/Ring/Polynomial/Monomial.hs,3956
+./src/Algebra/Ring/Polynomial/Monomial.hs,4618
 module Algebra.Ring.Polynomial.MonomialAlgebra.Ring.Polynomial.Monomial10,11
-type Monomial Monomial52,53
-type Monomial n n52,53
-newtype OrderedMonomial OrderedMonomial55,56
-  OrderedMonomial OrderedMonomial56,57
-  OrderedMonomial { getMonomial getMonomial56,57
-fromList fromList63,64
-fromList fromList64,65
-instance instance66,67
-type MonomialOrder MonomialOrder76,77
-isRelativelyPrime isRelativelyPrime78,79
-isRelativelyPrime isRelativelyPrime79,80
-totalDegree totalDegree81,82
-totalDegree totalDegree82,83
-lex lex86,87
-lex lex87,88
-revlex revlex91,92
-revlex revlex92,93
-graded graded96,97
-graded graded97,98
-grlex grlex104,105
-grlex grlex105,106
-grevlex grevlex109,110
-grevlex grevlex110,111
-grevlexHW grevlexHW113,114
-grevlexHW grevlexHW114,115
-class IsOrder IsOrder141,142
-class IsOrder IsOrder141,142
-  cmpMonomial cmpMonomial142,143
-data Lex Lex147,148
-data Lex = LexLex147,148
-data Revlex Revlex151,152
-data Revlex = RevlexRevlex151,152
-data Grevlex Grevlex155,156
-data Grevlex = GrevlexGrevlex155,156
-data Grlex Grlex159,160
-data Grlex = GrlexGrlex159,160
-newtype Graded Graded163,164
-newtype Graded ord = Graded Graded163,164
-data ProductOrder ProductOrder172,173
-data ProductOrder (n n172,173
-data ProductOrder (n :: Nat) (m m172,173
-data ProductOrder (n :: Nat) (m :: Nat) (a a172,173
-data ProductOrder (n :: Nat) (m :: Nat) (a :: Type) (b b172,173
-  ProductOrder ProductOrder173,174
-data ProductOrder (n n172,173
-productOrder productOrder175,176
-productOrder productOrder177,178
-productOrder' productOrder'188,189
-productOrder' productOrder'190,191
-type WeightProxy WeightProxy194,195
-type WeightProxy (v(194,195
-data WeightOrder WeightOrder196,197
-data WeightOrder (v v196,197
-data WeightOrder (v :: [Nat]) (ord ord196,197
-  WeightOrder WeightOrder197,198
-  WeightOrder :: SList (v v197,198
-data WeightOrder (v v196,197
-calcOrderWeight calcOrderWeight199,200
-calcOrderWeight calcOrderWeight201,202
-calcOrderWeight' calcOrderWeight'204,205
-calcOrderWeight' calcOrderWeight'205,206
-weightOrder weightOrder210,211
-weightOrder weightOrder212,213
-class IsOrder n name => IsMonomialOrder IsMonomialOrder245,246
-class IsOrder n name => IsMonomialOrder IsMonomialOrder245,246
-lcmMonomial lcmMonomial257,258
-lcmMonomial lcmMonomial258,259
-gcdMonomial gcdMonomial260,261
-gcdMonomial gcdMonomial261,262
-divs divs264,265
-(OrderedMonomial xs) `divs`divs265,266
-isPowerOf isPowerOf267,268
-OrderedMonomial n `isPowerOf`isPowerOf268,269
-tryDiv tryDiv273,274
-varMonom varMonom278,279
-varMonom varMonom279,280
-class (IsMonomialOrder n ord, KnownNat n) => EliminationType EliminationType284,285
-type EliminationOrder EliminationOrder292,293
-eliminationOrder eliminationOrder294,295
-eliminationOrder eliminationOrder295,296
-sOnes sOnes298,299
-sOnes sOnes299,300
-weightedEliminationOrder weightedEliminationOrder301,302
-weightedEliminationOrder weightedEliminationOrder302,303
-type WeightedEliminationOrder WeightedEliminationOrder305,306
-  OrderedMonomial m `compare`compare310,311
-castMonomial castMonomial316,317
-castMonomial castMonomial317,318
-scastMonomial scastMonomial319,320
-scastMonomial scastMonomial320,321
-changeMonomialOrder changeMonomialOrder322,323
-changeMonomialOrder changeMonomialOrder323,324
-changeMonomialOrderProxy changeMonomialOrderProxy325,326
-changeMonomialOrderProxy changeMonomialOrderProxy326,327
-class    (IsMonomialOrder n ord) => IsMonomialOrder' IsMonomialOrder'328,329
-type IsStrongMonomialOrder IsStrongMonomialOrder335,336
-type IsStrongMonomialOrder ord ord335,336
-withStrongMonomialOrder withStrongMonomialOrder337,338
-withStrongMonomialOrder withStrongMonomialOrder340,341
-cmpAnyMonomial cmpAnyMonomial349,350
-cmpAnyMonomial cmpAnyMonomial351,352
-orderMonomial orderMonomial355,356
-orderMonomial orderMonomial356,357
+type Monomial Monomial55,56
+type Monomial n n55,56
+newtype OrderedMonomial OrderedMonomial58,59
+  OrderedMonomial OrderedMonomial59,60
+  OrderedMonomial { getMonomial getMonomial59,60
+fromList fromList66,67
+fromList fromList67,68
+instance instance69,70
+type MonomialOrder MonomialOrder79,80
+isRelativelyPrime isRelativelyPrime81,82
+isRelativelyPrime isRelativelyPrime82,83
+totalDegree totalDegree84,85
+totalDegree totalDegree85,86
+lex lex89,90
+lex lex90,91
+revlex revlex94,95
+revlex revlex95,96
+graded graded100,101
+graded graded101,102
+grlex grlex108,109
+grlex grlex109,110
+newtype WrapOrdering WrapOrdering112,113
+newtype WrapOrdering  = WrapOrdering WrapOrdering112,113
+newtype WrapOrdering  = WrapOrdering { unWrapOrdering unWrapOrdering112,113
+newtype instance instance114,115
+newtype instance UV.Vector    WrapOrdering = V_WrapOrdering V_WrapOrdering114,115
+newtype instance instance115,116
+newtype instance UV.MVector s WrapOrdering = MV_WrapOrdering MV_WrapOrdering115,116
+fromWrapOrdering fromWrapOrdering160,161
+fromWrapOrdering fromWrapOrdering162,163
+toWrapOrdering toWrapOrdering166,167
+toWrapOrdering toWrapOrdering168,169
+grevlex grevlex173,174
+grevlex grevlex174,175
+grevlexHW grevlexHW177,178
+grevlexHW grevlexHW178,179
+class IsOrder IsOrder209,210
+class IsOrder IsOrder209,210
+  cmpMonomial cmpMonomial210,211
+data Lex Lex215,216
+data Lex = LexLex215,216
+data Revlex Revlex219,220
+data Revlex = RevlexRevlex219,220
+data Grevlex Grevlex223,224
+data Grevlex = GrevlexGrevlex223,224
+data Grlex Grlex227,228
+data Grlex = GrlexGrlex227,228
+newtype Graded Graded231,232
+newtype Graded ord = Graded Graded231,232
+data ProductOrder ProductOrder240,241
+data ProductOrder (n n240,241
+data ProductOrder (n :: Nat) (m m240,241
+data ProductOrder (n :: Nat) (m :: Nat) (a a240,241
+data ProductOrder (n :: Nat) (m :: Nat) (a :: Type) (b b240,241
+  ProductOrder ProductOrder241,242
+data ProductOrder (n n240,241
+productOrder productOrder243,244
+productOrder productOrder245,246
+productOrder' productOrder'256,257
+productOrder' productOrder'258,259
+type WeightProxy WeightProxy262,263
+type WeightProxy (v(262,263
+data WeightOrder WeightOrder264,265
+data WeightOrder (v v264,265
+data WeightOrder (v :: [Nat]) (ord ord264,265
+  WeightOrder WeightOrder265,266
+  WeightOrder :: SList (v v265,266
+data WeightOrder (v v264,265
+calcOrderWeight calcOrderWeight267,268
+calcOrderWeight calcOrderWeight269,270
+calcOrderWeight' calcOrderWeight'272,273
+calcOrderWeight' calcOrderWeight'273,274
+weightOrder weightOrder278,279
+weightOrder weightOrder280,281
+class IsOrder n name => IsMonomialOrder IsMonomialOrder313,314
+class IsOrder n name => IsMonomialOrder IsMonomialOrder313,314
+lcmMonomial lcmMonomial325,326
+lcmMonomial lcmMonomial326,327
+gcdMonomial gcdMonomial328,329
+gcdMonomial gcdMonomial329,330
+divs divs332,333
+(OrderedMonomial xs) `divs`divs333,334
+isPowerOf isPowerOf335,336
+OrderedMonomial n `isPowerOf`isPowerOf336,337
+tryDiv tryDiv341,342
+varMonom varMonom346,347
+varMonom varMonom347,348
+class (IsMonomialOrder n ord, KnownNat n) => EliminationType EliminationType352,353
+type EliminationOrder EliminationOrder360,361
+eliminationOrder eliminationOrder362,363
+eliminationOrder eliminationOrder363,364
+sOnes sOnes366,367
+sOnes sOnes367,368
+weightedEliminationOrder weightedEliminationOrder369,370
+weightedEliminationOrder weightedEliminationOrder370,371
+type WeightedEliminationOrder WeightedEliminationOrder373,374
+  OrderedMonomial m `compare`compare378,379
+castMonomial castMonomial384,385
+castMonomial castMonomial385,386
+scastMonomial scastMonomial387,388
+scastMonomial scastMonomial388,389
+changeMonomialOrder changeMonomialOrder390,391
+changeMonomialOrder changeMonomialOrder391,392
+changeMonomialOrderProxy changeMonomialOrderProxy393,394
+changeMonomialOrderProxy changeMonomialOrderProxy394,395
+class    (IsMonomialOrder n ord) => IsMonomialOrder' IsMonomialOrder'396,397
+type IsStrongMonomialOrder IsStrongMonomialOrder403,404
+type IsStrongMonomialOrder ord ord403,404
+withStrongMonomialOrder withStrongMonomialOrder405,406
+withStrongMonomialOrder withStrongMonomialOrder408,409
+cmpAnyMonomial cmpAnyMonomial417,418
+cmpAnyMonomial cmpAnyMonomial419,420
+orderMonomial orderMonomial423,424
+orderMonomial orderMonomial424,425
+ifoldMapMonom ifoldMapMonom427,428
+ifoldMapMonom ifoldMapMonom428,429
 
 ./src/Algebra/Scalar.hs,218
 module Algebra.Scalar Algebra.Scalar3,4

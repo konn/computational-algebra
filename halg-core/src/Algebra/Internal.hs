@@ -47,6 +47,7 @@ import           Data.Type.Natural.Class      as Algebra.Internal hiding
                                                                    (fromNatural)
 import           Data.Type.Ordinal.Builtin
 import qualified Data.Vector                  as DV
+import qualified Data.Vector.Unboxed          as UV
 import           GHC.TypeLits                 as Algebra.Internal hiding
                                                                    (type (*),
                                                                    type (+),
@@ -63,6 +64,7 @@ import           Proof.Propositional          as Algebra.Internal (IsTrue (..),
 toProxy :: a -> Proxy a
 toProxy _ = Proxy
 
+type USized n a = S.Sized UV.Vector n a
 type Sized n a = S.Sized DV.Vector n a
 type Sized' n a = S.Sized Seq.Seq n a
 
@@ -74,8 +76,8 @@ type SNat (n :: Nat) = Sing n
 sizedLength :: ListLike (f a) a => S.Sized f n a -> Sing n
 sizedLength = S.sLength
 
-padVecs :: forall a n m. a -> Sized' n a -> Sized' m a
-        -> (SNat (Max n m), Sized' (Max n m) a, Sized' (Max n m) a)
+padVecs :: forall a n m. (Unbox a) => a -> USized n a -> USized m a
+        -> (SNat (Max n m), USized (Max n m) a, USized (Max n m) a)
 padVecs d xs ys
   = let (n, m) = (S.sLength xs, S.sLength ys)
         l = sMax n m

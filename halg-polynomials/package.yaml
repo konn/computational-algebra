@@ -56,6 +56,7 @@ library:
   - lens
   - matrix
   - monad-loops
+  - mono-traversable
   - reflection
   - singletons
   - text

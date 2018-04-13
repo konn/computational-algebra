@@ -287,82 +287,82 @@ beta beta400,401
 
 ./src/Algebra/Algorithms/Groebner/Homogeneous.hs,3596
 module Algebra.Algorithms.Groebner.HomogeneousAlgebra.Algorithms.Groebner.Homogeneous3,4
-isHomogeneous isHomogeneous44,45
-isHomogeneous isHomogeneous46,47
-calcGroebnerBasisAfterHomogenisingWith calcGroebnerBasisAfterHomogenisingWith52,53
-calcGroebnerBasisAfterHomogenisingWith calcGroebnerBasisAfterHomogenisingWith56,57
-calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising60,61
-calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising62,63
-calcGroebnerBasisAfterHomogenisingHilb calcGroebnerBasisAfterHomogenisingHilb64,65
-calcGroebnerBasisAfterHomogenisingHilb calcGroebnerBasisAfterHomogenisingHilb66,67
-calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis73,74
-calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis75,76
-unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis84,85
-unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis86,87
-type Signatures Signatures102,103
-type Signatures weight weight102,103
-buildTable buildTable104,105
-buildTable buildTable106,107
-type RefVec RefVec113,114
-type RefVec s s113,114
-at at115,116
+isHomogeneous isHomogeneous45,46
+isHomogeneous isHomogeneous47,48
+calcGroebnerBasisAfterHomogenisingWith calcGroebnerBasisAfterHomogenisingWith53,54
+calcGroebnerBasisAfterHomogenisingWith calcGroebnerBasisAfterHomogenisingWith57,58
+calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising61,62
+calcGroebnerBasisAfterHomogenising calcGroebnerBasisAfterHomogenising63,64
+calcGroebnerBasisAfterHomogenisingHilb calcGroebnerBasisAfterHomogenisingHilb65,66
+calcGroebnerBasisAfterHomogenisingHilb calcGroebnerBasisAfterHomogenisingHilb67,68
+calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis74,75
+calcHomogeneousGroebnerBasis calcHomogeneousGroebnerBasis76,77
+unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis85,86
+unsafeCalcHomogeneousGroebnerBasis unsafeCalcHomogeneousGroebnerBasis87,88
+type Signatures Signatures103,104
+type Signatures weight weight103,104
+buildTable buildTable105,106
+buildTable buildTable107,108
+type RefVec RefVec114,115
+type RefVec s s114,115
 at at116,117
-snoc snoc118,119
+at at117,118
 snoc snoc119,120
-deg deg127,128
+snoc snoc120,121
 deg deg128,129
-data ReversedEntry ReversedEntry135,136
-data ReversedEntry p a = ReversedEntry ReversedEntry135,136
-data ReversedEntry p a = ReversedEntry { rePriority rePriority135,136
-                                       , rePayload rePayload136,137
-instance instance139,140
-viewMax viewMax145,146
+deg deg129,130
+data ReversedEntry ReversedEntry136,137
+data ReversedEntry p a = ReversedEntry ReversedEntry136,137
+data ReversedEntry p a = ReversedEntry { rePriority rePriority136,137
+                                       , rePayload rePayload137,138
+instance instance140,141
 viewMax viewMax146,147
-class (Foldable f) => Container Container148,149
-  insert    :: Element f a => a a151,152
-  type Element Element149,150
-  filter filter150,151
-  insert insert151,152
-  empty empty152,153
-head' head'168,169
+viewMax viewMax147,148
+class (Foldable f) => Container Container149,150
+  insert    :: Element f a => a a152,153
+  type Element Element150,151
+  filter filter151,152
+  insert insert152,153
+  empty empty153,154
 head' head'169,170
-divs' divs'171,172
+head' head'170,171
 divs' divs'172,173
-minimalGenerators' minimalGenerators'174,175
-minimalGenerators' minimalGenerators'176,177
-minimalGenerators minimalGenerators188,189
+divs' divs'173,174
+minimalGenerators' minimalGenerators'175,176
+minimalGenerators' minimalGenerators'177,178
 minimalGenerators minimalGenerators189,190
-hilbertPoincareSeriesBy hilbertPoincareSeriesBy196,197
-hilbertPoincareSeriesBy hilbertPoincareSeriesBy201,202
-hilbertPoincareSeries hilbertPoincareSeries208,209
-hilbertPoincareSeries hilbertPoincareSeries210,211
-data Compactified Compactified213,214
-data Compactified a = InfinityInfinity213,214
-                    | Finite Finite214,215
-data HPS HPS231,232
-data HPS n = HPS HPS231,232
-data HPS n = HPS { taylorHPS taylorHPS231,232
-                 , hpsNumerator hpsNumerator232,233
-convolute convolute264,265
+minimalGenerators minimalGenerators190,191
+hilbertPoincareSeriesBy hilbertPoincareSeriesBy197,198
+hilbertPoincareSeriesBy hilbertPoincareSeriesBy202,203
+hilbertPoincareSeries hilbertPoincareSeries209,210
+hilbertPoincareSeries hilbertPoincareSeries211,212
+data Compactified Compactified214,215
+data Compactified a = InfinityInfinity214,215
+                    | Finite Finite215,216
+data HPS HPS232,233
+data HPS n = HPS HPS232,233
+data HPS n = HPS { taylorHPS taylorHPS232,233
+                 , hpsNumerator hpsNumerator233,234
 convolute convolute265,266
-binoms binoms272,273
+convolute convolute266,267
 binoms binoms273,274
-binom binom279,280
+binoms binoms274,275
 binom binom280,281
-toRationalFunction toRationalFunction283,284
+binom binom281,282
 toRationalFunction toRationalFunction284,285
-hilbertPoincareSeriesForMonomials hilbertPoincareSeriesForMonomials287,288
-hilbertPoincareSeriesForMonomials hilbertPoincareSeriesForMonomials289,290
-buildHilbTable buildHilbTable309,310
-buildHilbTable buildHilbTable313,314
-whileForM_ whileForM_319,320
+toRationalFunction toRationalFunction285,286
+hilbertPoincareSeriesForMonomials hilbertPoincareSeriesForMonomials288,289
+hilbertPoincareSeriesForMonomials hilbertPoincareSeriesForMonomials290,291
+buildHilbTable buildHilbTable310,311
+buildHilbTable buildHilbTable314,315
 whileForM_ whileForM_320,321
-calcHomogeneousGroebnerBasisHilbertWithSeries calcHomogeneousGroebnerBasisHilbertWithSeries324,325
-calcHomogeneousGroebnerBasisHilbertWithSeries calcHomogeneousGroebnerBasisHilbertWithSeries328,329
-calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy360,361
-calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy364,365
-calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert369,370
-calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert372,373
+whileForM_ whileForM_321,322
+calcHomogeneousGroebnerBasisHilbertWithSeries calcHomogeneousGroebnerBasisHilbertWithSeries325,326
+calcHomogeneousGroebnerBasisHilbertWithSeries calcHomogeneousGroebnerBasisHilbertWithSeries329,330
+calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy361,362
+calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy365,366
+calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert370,371
+calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert373,374
 
 ./src/Algebra/Algorithms/Groebner/Signature.hs,888
 module Algebra.Algorithms.Groebner.Signature Algebra.Algorithms.Groebner.Signature2,3

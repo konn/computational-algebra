@@ -37,6 +37,7 @@ import qualified Data.HashSet                          as HS
 import           Data.Map                              (Map)
 import qualified Data.Map.Merge.Strict                 as MM
 import qualified Data.Map.Strict                       as M
+import           Data.MonoTraversable                  (osum)
 import qualified Data.Set                              as Set
 import           Data.Singletons.Prelude.List          (Replicate)
 import qualified Data.Sized.Builtin                    as S
@@ -88,7 +89,7 @@ instance (KnownNat n, IsMonomialOrder n ord, CoeffRing r) => IsPolynomial (Order
 
   liftMap mor poly = sum $ map (uncurry (.*) . (Scalar *** extractPower)) $ getTerms poly
     where
-      extractPower = runMult . ifoldMap (\ o -> Mult . pow (mor o) . fromIntegral) . getMonomial
+      extractPower = runMult . ifoldMapMonom (\ o -> Mult . pow (mor o) . fromIntegral) . getMonomial
   {-# INLINE liftMap #-}
 
 instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
@@ -409,7 +410,7 @@ homogenize f =
   withKnownNat (sSucc (sing :: SNat n)) $
   let g = substWith (.*.) (S.init allVars) f
       d = fromIntegral (totalDegree' g)
-  in mapMonomialMonotonic (\m -> m & _Wrapped.ix maxBound .~ d - P.sum (m^._Wrapped)) g
+  in mapMonomialMonotonic (\m -> m & _Wrapped.ix maxBound .~ d - osum (m^._Wrapped)) g
 
 unhomogenize :: forall k ord n.
                 (CoeffRing k, KnownNat n, IsMonomialOrder n ord,
@@ -542,9 +543,8 @@ mapOrderedPolynomial :: forall r r' n n' ord' ord.
                      -> OrderedPolynomial r ord n -> OrderedPolynomial r' ord' n'
 mapOrderedPolynomial mapCoe mapVar (Polynomial dic) =
   let toGenerator = OrderedMonomial
-                  . generate sing
-                  . ifoldMapBy (+) (const 0)
-                       (\o l j -> if j == mapVar o then l else 0)
+                  . generate sing . (runAdd .)
+                  . ifoldMapMonom (\o l j -> Add $ if j == mapVar o then l else 0)
                   . getMonomial
   in Polynomial $ M.mapKeys toGenerator $
      M.mapMaybe (\i -> let c = mapCoe i in if isZero c then Nothing else Just c) dic

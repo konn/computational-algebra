@@ -60,6 +60,7 @@ library:
   - lens
   - matrix
   - monad-loops
+  - mono-traversable
   - mtl
   - parallel
   - reflection

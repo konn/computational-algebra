@@ -257,127 +257,127 @@ coeffList coeffList382,383
 
 ./src/Algebra/Ring/Polynomial/Internal.hs,2201
 module Algebra.Ring.Polynomial.InternalAlgebra.Ring.Polynomial.Internal10,11
-instance instance49,50
-newtype OrderedPolynomial OrderedPolynomial55,56
-newtype OrderedPolynomial r order n = Polynomial Polynomial55,56
-newtype OrderedPolynomial r order n = Polynomial { _terms _terms55,56
-type Polynomial Polynomial57,58
-type Polynomial r r57,58
-castPolynomial castPolynomial141,142
-castPolynomial castPolynomial145,146
-scastPolynomial scastPolynomial148,149
-scastPolynomial scastPolynomial151,152
-mapCoeff mapCoeff154,155
-mapCoeff mapCoeff156,157
-normalize normalize159,160
-normalize normalize161,162
-decZero decZero176,177
+instance instance50,51
+newtype OrderedPolynomial OrderedPolynomial56,57
+newtype OrderedPolynomial r order n = Polynomial Polynomial56,57
+newtype OrderedPolynomial r order n = Polynomial { _terms _terms56,57
+type Polynomial Polynomial58,59
+type Polynomial r r58,59
+castPolynomial castPolynomial142,143
+castPolynomial castPolynomial146,147
+scastPolynomial scastPolynomial149,150
+scastPolynomial scastPolynomial152,153
+mapCoeff mapCoeff155,156
+mapCoeff mapCoeff157,158
+normalize normalize160,161
+normalize normalize162,163
 decZero decZero177,178
-guardZero guardZero221,222
+decZero decZero178,179
 guardZero guardZero222,223
-  f0 `divide`divide295,296
-  p `divides`divides320,321
-varX varX334,335
-varX varX336,337
-substUnivariate substUnivariate339,340
-substUnivariate substUnivariate341,342
-evalUnivariate evalUnivariate347,348
+guardZero guardZero223,224
+  f0 `divide`divide296,297
+  p `divides`divides321,322
+varX varX335,336
+varX varX337,338
+substUnivariate substUnivariate340,341
+substUnivariate substUnivariate342,343
 evalUnivariate evalUnivariate348,349
-eval eval355,356
-eval eval357,358
-substVar substVar365,366
-substVar substVar365,366
-allVars allVars373,374
-allVars allVars375,376
-changeOrder changeOrder377,378
-changeOrder changeOrder379,380
-changeOrderProxy changeOrderProxy381,382
-changeOrderProxy changeOrderProxy384,385
-getTerms getTerms386,387
+evalUnivariate evalUnivariate349,350
+eval eval356,357
+eval eval358,359
+substVar substVar366,367
+substVar substVar366,367
+allVars allVars374,375
+allVars allVars376,377
+changeOrder changeOrder378,379
+changeOrder changeOrder380,381
+changeOrderProxy changeOrderProxy382,383
+changeOrderProxy changeOrderProxy385,386
 getTerms getTerms387,388
-transformMonomial transformMonomial389,390
-transformMonomial transformMonomial391,392
-orderedBy orderedBy394,395
-p `orderedBy`orderedBy395,396
-shiftR shiftR397,398
-shiftR shiftR400,401
-homogenize homogenize404,405
-homogenize homogenize407,408
-unhomogenize unhomogenize413,414
-unhomogenize unhomogenize417,418
-reversal reversal424,425
-reversal reversal426,427
-padeApprox padeApprox428,429
-padeApprox padeApprox432,433
-minpolRecurrent minpolRecurrent437,438
-minpolRecurrent minpolRecurrent439,440
-newtype PadPolyL PadPolyL446,447
-newtype PadPolyL n ord poly = PadPolyL PadPolyL446,447
-newtype PadPolyL n ord poly = PadPolyL { runPadPolyL runPadPolyL446,447
-padLeftPoly padLeftPoly529,530
-padLeftPoly padLeftPoly531,532
-mapOrderedPolynomial mapOrderedPolynomial538,539
-mapOrderedPolynomial mapOrderedPolynomial542,543
+getTerms getTerms388,389
+transformMonomial transformMonomial390,391
+transformMonomial transformMonomial392,393
+orderedBy orderedBy395,396
+p `orderedBy`orderedBy396,397
+shiftR shiftR398,399
+shiftR shiftR401,402
+homogenize homogenize405,406
+homogenize homogenize408,409
+unhomogenize unhomogenize414,415
+unhomogenize unhomogenize418,419
+reversal reversal425,426
+reversal reversal427,428
+padeApprox padeApprox429,430
+padeApprox padeApprox433,434
+minpolRecurrent minpolRecurrent438,439
+minpolRecurrent minpolRecurrent440,441
+newtype PadPolyL PadPolyL447,448
+newtype PadPolyL n ord poly = PadPolyL PadPolyL447,448
+newtype PadPolyL n ord poly = PadPolyL { runPadPolyL runPadPolyL447,448
+padLeftPoly padLeftPoly530,531
+padLeftPoly padLeftPoly532,533
+mapOrderedPolynomial mapOrderedPolynomial539,540
+mapOrderedPolynomial mapOrderedPolynomial543,544
 
 ./src/Algebra/Ring/Polynomial/Quotient.hs,2050
 module Algebra.Ring.Polynomial.QuotientAlgebra.Ring.Polynomial.Quotient6,7
-newtype Quotient Quotient34,35
-newtype Quotient poly ideal = Quotient Quotient34,35
-newtype Quotient poly ideal = Quotient { quotRepr_ quotRepr_34,35
-quotRepr quotRepr38,39
+newtype Quotient Quotient35,36
+newtype Quotient poly ideal = Quotient Quotient35,36
+newtype Quotient poly ideal = Quotient { quotRepr_ quotRepr_35,36
 quotRepr quotRepr39,40
-data QIdeal QIdeal41,42
-data QIdeal poly = ZeroDimIdeal ZeroDimIdeal41,42
-data QIdeal poly = ZeroDimIdeal { _gBasis _gBasis41,42
-                                , _vBasis _vBasis42,43
-                                , multTable multTable43,44
-                 | QIdeal QIdeal45,46
-                 | QIdeal { _gBasis _gBasis45,46
-instance instance48,49
-type Table Table51,52
-type Table poly poly51,52
-vectorRep vectorRep56,57
-vectorRep vectorRep59,60
-matRepr' matRepr'83,84
-matRepr' matRepr'87,88
-matRep0 matRep0114,115
-matRep0 matRep0117,118
-multUnamb multUnamb142,143
-multUnamb multUnamb146,147
-multWithTable multWithTable175,176
-multWithTable multWithTable178,179
-buildMultTable buildMultTable205,206
-buildMultTable buildMultTable207,208
-stdMonoms stdMonoms223,224
-stdMonoms stdMonoms226,227
-diag diag253,254
+quotRepr quotRepr40,41
+data QIdeal QIdeal42,43
+data QIdeal poly = ZeroDimIdeal ZeroDimIdeal42,43
+data QIdeal poly = ZeroDimIdeal { _gBasis _gBasis42,43
+                                , _vBasis _vBasis43,44
+                                , multTable multTable44,45
+                 | QIdeal QIdeal46,47
+                 | QIdeal { _gBasis _gBasis46,47
+instance instance49,50
+type Table Table52,53
+type Table poly poly52,53
+vectorRep vectorRep57,58
+vectorRep vectorRep60,61
+matRepr' matRepr'84,85
+matRepr' matRepr'88,89
+matRep0 matRep0115,116
+matRep0 matRep0118,119
+multUnamb multUnamb143,144
+multUnamb multUnamb147,148
+multWithTable multWithTable176,177
+multWithTable multWithTable179,180
+buildMultTable buildMultTable206,207
+buildMultTable buildMultTable208,209
+stdMonoms stdMonoms224,225
+stdMonoms stdMonoms227,228
 diag diag254,255
-standardMonomials' standardMonomials'261,262
-standardMonomials' standardMonomials'264,265
-standardMonomials standardMonomials279,280
-standardMonomials standardMonomials283,284
-genQuotVars' genQuotVars'295,296
-genQuotVars' genQuotVars'299,300
-genQuotVars genQuotVars311,312
-genQuotVars genQuotVars314,315
-modIdeal modIdeal328,329
-modIdeal modIdeal332,333
-gBasis' gBasis'334,335
-gBasis' gBasis'336,337
-modIdeal' modIdeal'348,349
-modIdeal' modIdeal'351,352
-buildQIdeal buildQIdeal366,367
-buildQIdeal buildQIdeal368,369
-reifyQuotient reifyQuotient386,387
-reifyQuotient reifyQuotient390,391
-withQuotient withQuotient394,395
-withQuotient withQuotient398,399
-asProxyOf asProxyOf401,402
+diag diag255,256
+standardMonomials' standardMonomials'262,263
+standardMonomials' standardMonomials'265,266
+standardMonomials standardMonomials280,281
+standardMonomials standardMonomials284,285
+genQuotVars' genQuotVars'296,297
+genQuotVars' genQuotVars'300,301
+genQuotVars genQuotVars312,313
+genQuotVars genQuotVars315,316
+modIdeal modIdeal329,330
+modIdeal modIdeal333,334
+gBasis' gBasis'335,336
+gBasis' gBasis'337,338
+modIdeal' modIdeal'349,350
+modIdeal' modIdeal'352,353
+buildQIdeal buildQIdeal367,368
+buildQIdeal buildQIdeal369,370
+reifyQuotient reifyQuotient387,388
+reifyQuotient reifyQuotient391,392
+withQuotient withQuotient395,396
+withQuotient withQuotient399,400
 asProxyOf asProxyOf402,403
-reduce reduce459,460
-reduce reduce461,462
-isZeroDimensional isZeroDimensional476,477
-isZeroDimensional isZeroDimensional478,479
+asProxyOf asProxyOf403,404
+reduce reduce460,461
+reduce reduce462,463
+isZeroDimensional isZeroDimensional477,478
+isZeroDimensional isZeroDimensional479,480
 
 ./src/Algebra/Prelude/Core.hs,204
 module Algebra.Prelude.CoreAlgebra.Prelude.Core1,2

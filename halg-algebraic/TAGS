@@ -1,0 +1,140 @@
+
+./Setup.hs,15
+main main1,2
+
+./app/Main.hs,52
+module Main Main0,1
+main main4,5
+main main5,6
+
+./test/Spec.hs,30
+main main0,1
+main main1,2
+
+./src/Algebra/Field/AlgebraicReal.hs,4091
+module Algebra.Field.AlgebraicRealAlgebra.Field.AlgebraicReal6,7
+stdGenFromEntropy stdGenFromEntropy49,50
+stdGenFromEntropy stdGenFromEntropy50,51
+factors factors53,54
+factors factors54,55
+data Algebraic Algebraic63,64
+data Algebraic = Algebraic Algebraic63,64
+data Algebraic = Algebraic { eqn eqn63,64
+                           , _strumseq _strumseq64,65
+                           , _interval _interval65,66
+               | Rational Rational67,68
+viewNthRoot viewNthRoot74,75
+viewNthRoot viewNthRoot75,76
+showsNthRoot showsNthRoot82,83
+showsNthRoot showsNthRoot83,84
+instance instance88,89
+negateA negateA102,103
+negateA negateA103,104
+minusA minusA106,107
+minusA minusA107,108
+intersect intersect173,174
+intersect intersect174,175
+disjoint disjoint199,200
+disjoint disjoint200,201
+scale scale274,275
+scale scale275,276
+includes includes280,281
+Interval i j `includes`includes281,282
+plusInt plusInt288,289
+plusInt plusInt289,290
+rootSumPoly rootSumPoly291,292
+rootSumPoly rootSumPoly292,293
+sqFreePart sqFreePart299,300
+sqFreePart sqFreePart301,302
+plusA plusA314,315
+plusA plusA315,316
+isIn isIn326,327
+x `isIn`isIn327,328
+algebraic algebraic334,335
+algebraic algebraic335,336
+algebraic' algebraic'349,350
+algebraic' algebraic'350,351
+catcher catcher355,356
+catcher catcher357,358
+normalize normalize365,366
+normalize normalize366,367
+stabilize stabilize368,369
+stabilize stabilize369,370
+nthRoot' nthRoot'378,379
+nthRoot' nthRoot'379,380
+nthRoot nthRoot386,387
+nthRoot nthRoot387,388
+nthRootRat nthRootRat402,403
+nthRootRat nthRootRat403,404
+nthRootRatCeil nthRootRatCeil437,438
+nthRootRatCeil nthRootRatCeil438,439
+nthRootRatFloor nthRootRatFloor456,457
+nthRootRatFloor nthRootRatFloor457,458
+nthRootInterval nthRootInterval475,476
+nthRootInterval nthRootInterval476,477
+rootMultPoly rootMultPoly482,483
+rootMultPoly rootMultPoly483,484
+multInt multInt500,501
+multInt multInt501,502
+multA multA509,510
+multA multA510,511
+improveNonzero improveNonzero523,524
+improveNonzero improveNonzero524,525
+recipInt recipInt533,534
+recipInt recipInt534,535
+recipA recipA537,538
+recipA recipA538,539
+rootRecipPoly rootRecipPoly547,548
+rootRecipPoly rootRecipPoly548,549
+strum strum554,555
+strum strum555,556
+data Interval Interval559,560
+data Interval r = Interval Interval559,560
+data Interval r = Interval { lower lower559,560
+data Interval r = Interval { lower :: !r, upper upper559,560
+size size561,562
+size size562,563
+bisect bisect567,568
+bisect bisect568,569
+signChange signChange572,573
+signChange signChange573,574
+countRootsIn countRootsIn577,578
+countRootsIn countRootsIn578,579
+countChangeIn countChangeIn582,583
+countChangeIn countChangeIn584,585
+signChangeAt signChangeAt587,588
+signChangeAt signChangeAt588,589
+rootBound rootBound590,591
+rootBound rootBound592,593
+isolateRoots isolateRoots598,599
+isolateRoots isolateRoots599,600
+improve improve615,616
+improve improve616,617
+improveWith improveWith619,620
+improveWith improveWith621,622
+powA powA625,626
+powA powA626,627
+iterateImproveStrum iterateImproveStrum631,632
+iterateImproveStrum iterateImproveStrum632,633
+fromFraction fromFraction635,636
+fromFraction fromFraction636,637
+presultant presultant639,640
+presultant presultant641,642
+realRoots realRoots656,657
+realRoots realRoots657,658
+realRootsIrreducible realRootsIrreducible661,662
+realRootsIrreducible realRootsIrreducible662,663
+complexRoots complexRoots676,677
+complexRoots complexRoots677,678
+complexRoots' complexRoots'679,680
+complexRoots' complexRoots'680,681
+realPartPoly realPartPoly690,691
+realPartPoly realPartPoly691,692
+imagPartPoly imagPartPoly694,695
+imagPartPoly imagPartPoly695,696
+representative representative703,704
+representative representative704,705
+approximate approximate708,709
+approximate approximate709,710
+approxFractional approxFractional714,715
+approxFractional approxFractional715,716
