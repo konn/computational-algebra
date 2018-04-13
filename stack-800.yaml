@@ -23,6 +23,7 @@ flags:
 extra-deps:
 - algebra-4.3
 - equational-reasoning-0.5.1.0
+- containers-0.5.10.2
 - unamb-0.2.5
 - ghc-typelits-presburger-0.2.0.0
 - repa-3.4.1.3
