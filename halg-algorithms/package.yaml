@@ -137,6 +137,24 @@ tests:
     - vector
     - hspec-discover
 
+_heavy_bench: &heavy_bench
+  source-dirs:  bench
+  other-modules: Heavy
+  dependencies:
+  - halg-algorithms
+  - gauge
+  - parallel
+  - containers
+  - folds
+  - foldl
+  - lens
+  ghc-options:
+  - -Wall
+  - -O2
+  - -threaded
+  - -rtsopts
+  - -with-rtsopts=-N  
+
 benchmarks:
   homog-bench:
     source-dirs:  bench
@@ -187,37 +205,5 @@ benchmarks:
     - -with-rtsopts=-N
 
   heavy-bench:
-    source-dirs:  bench
     main:         heavy-bench.hs
-    dependencies:
-    - halg-algorithms
-    - gauge
-    - parallel
-    - containers
-    - folds
-    - foldl
-    - lens
-    ghc-options:
-    - -Wall
-    - -O2
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-
-  heavy-bench-f4:
-    source-dirs:  bench
-    main:         heavy-bench-f4.hs
-    dependencies:
-    - halg-algorithms
-    - gauge
-    - parallel
-    - containers
-    - folds
-    - foldl
-    - lens
-    ghc-options:
-    - -Wall
-    - -O2
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+    <<: *heavy_bench

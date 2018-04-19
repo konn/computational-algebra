@@ -35,6 +35,28 @@ mkTC mkTC115,116
 main main121,122
 main main122,123
 
+./bench/Heavy.hs,444
+module Heavy Heavy6,7
+newtype CalcPoly CalcPoly14,15
+makeCase makeCase17,18
+makeCase makeCase20,21
+type FPol FPol31,32
+type FPol p p31,32
+mkTC mkTC34,35
+mkTC mkTC38,39
+ratToF ratToF58,59
+ratToF ratToF59,60
+i3 i362,63
+i3 i363,64
+cyclic cyclic67,68
+cyclic cyclic69,70
+mkCyclic mkCyclic74,75
+mkCyclic mkCyclic75,76
+katsura8 katsura877,78
+katsura8 katsura878,79
+katsura9 katsura990,91
+katsura9 katsura991,92
+
 ./bench/homog-bench.hs,256
 module Main Main5,6
 i1 i118,19
@@ -51,19 +73,6 @@ mkTC mkTC58,59
 mkTC mkTC59,60
 main main66,67
 main main67,68
-
-./bench/heavy-bench-f4.hs,224
-module Main Main5,6
-ratToF ratToF13,14
-ratToF ratToF14,15
-mkTC mkTC16,17
-mkTC mkTC17,18
-main main34,35
-main main35,36
-cyclic cyclic42,43
-cyclic cyclic44,45
-mkCyclic mkCyclic49,50
-mkCyclic mkCyclic50,51
 
 ./bench/sugar-hilb.hs,282
 module Main Main5,6
@@ -84,22 +93,12 @@ mkTC mkTC60,61
 main main65,66
 main main66,67
 
-./bench/heavy-bench.hs,324
-module Main Main5,6
-ratToF ratToF15,16
-ratToF ratToF16,17
-mkTC mkTC18,19
-mkTC mkTC19,20
-main main54,55
-main main55,56
-cyclic cyclic64,65
-cyclic cyclic66,67
-mkCyclic mkCyclic71,72
-mkCyclic mkCyclic72,73
-katsura8 katsura874,75
-katsura8 katsura875,76
-katsura9 katsura987,88
-katsura9 katsura988,89
+./bench/heavy-bench.hs,86
+module Main Main6,7
+dic dic17,18
+dic dic18,19
+main main25,26
+main main26,27
 
 ./Setup.hs,15
 main main1,2

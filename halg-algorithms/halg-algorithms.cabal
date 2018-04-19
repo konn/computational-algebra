@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 948c922c7072e2aa99b30c844de97d3bda0324380f22f3070fd559198c039291
+-- hash: 5455b3ce7fcd54b105dce9310125a87f0565dd3d2ecbd2cba99c629bfe9b55d6
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -200,34 +200,7 @@ benchmark heavy-bench
   type: exitcode-stdio-1.0
   main-is: heavy-bench.hs
   other-modules:
-      Paths_halg_algorithms
-  hs-source-dirs:
-      bench
-  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
-  ghc-options: -Wall -O2 -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      MonadRandom
-    , algebra
-    , base >=4.7 && <5
-    , containers
-    , dlist
-    , foldl
-    , folds
-    , gauge
-    , halg-algorithms
-    , halg-core
-    , halg-polynomials
-    , lens
-    , parallel
-    , semigroups
-    , sized
-  default-language: Haskell2010
-
-benchmark heavy-bench-f4
-  type: exitcode-stdio-1.0
-  main-is: heavy-bench-f4.hs
-  other-modules:
-      Paths_halg_algorithms
+      Heavy
   hs-source-dirs:
       bench
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
@@ -254,6 +227,7 @@ benchmark homog-bench
   type: exitcode-stdio-1.0
   main-is: homog-bench.hs
   other-modules:
+      Heavy
       Paths_halg_algorithms
   hs-source-dirs:
       bench
@@ -277,6 +251,7 @@ benchmark ordering-bench
   type: exitcode-stdio-1.0
   main-is: ordering-bench.hs
   other-modules:
+      Heavy
       Paths_halg_algorithms
   hs-source-dirs:
       bench
@@ -304,6 +279,7 @@ benchmark sugar-hilb-bench
   type: exitcode-stdio-1.0
   main-is: sugar-hilb.hs
   other-modules:
+      Heavy
       Paths_halg_algorithms
   hs-source-dirs:
       bench
