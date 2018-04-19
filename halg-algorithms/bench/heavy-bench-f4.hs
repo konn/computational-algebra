@@ -38,7 +38,13 @@ main =
     [mkTC "Cyclic 4" $ cyclic (sing :: Sing 4)
     ,mkTC "Cyclic 7" $ cyclic (sing :: Sing 7)
     ,mkTC "Cyclic 8" $ cyclic (sing :: Sing 8)
+    ,mkTC "I3" i3
     ]
+
+i3 :: Ideal (Polynomial (Fraction Integer) 4)
+i3 = toIdeal [ x^31 - x^6 - x- y, x^8 - z, x^10 -t]
+  where
+    [t,x,y,z] = vars
 
 cyclic :: forall n. Sing n
        -> Ideal (OrderedPolynomial Rational Grevlex n)

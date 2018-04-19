@@ -60,7 +60,13 @@ main =
     ,mkTC "Cyclic 8" $ cyclic (sing :: Sing 8)
     ,mkTC "Katsura 8" katsura8
     ,mkTC "Katsura 9" katsura9
+    ,mkTC "I3" i3
     ]
+
+i3 :: Ideal (Polynomial (Fraction Integer) 4)
+i3 = toIdeal [ x^31 - x^6 - x- y, x^8 - z, x^10 -t]
+  where
+    [t,x,y,z] = vars
 
 cyclic :: forall n. Sing n
        -> Ideal (OrderedPolynomial Rational Grevlex n)
