@@ -95,6 +95,9 @@ executables:
   std-prof:
     main:                std-prof.hs
     <<: *prof-settings
+  katsura-prof:
+    main:                katsura-prof.hs
+    <<: *prof-settings
 
 tests:
   spec:
@@ -168,6 +171,24 @@ benchmarks:
   sugar-hilb-bench:
     source-dirs:  bench
     main:         sugar-hilb.hs
+    dependencies:
+    - halg-algorithms
+    - gauge
+    - parallel
+    - containers
+    - folds
+    - foldl
+    - lens
+    ghc-options:
+    - -Wall
+    - -O2
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+
+  heavy-bench:
+    source-dirs:  bench
+    main:         heavy-bench.hs
     dependencies:
     - halg-algorithms
     - gauge

@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b1508bb9e612ac7b7fe11656aa697f33da7a2ce9fa6c723940b813549cd430a4
+-- hash: 23b85af1f464894d7394a2e438806342229e6ca65486c7936188f411e19b7833
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -112,6 +112,27 @@ executable f5-prof
     , sized
   default-language: Haskell2010
 
+executable katsura-prof
+  main-is: katsura-prof.hs
+  other-modules:
+      Paths_halg_algorithms
+  hs-source-dirs:
+      app
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  ghc-options: -Wall -threaded -rtsopts -O2 -with-rtsopts=-N -fprof-auto -fprof-cafs
+  build-depends:
+      MonadRandom
+    , algebra
+    , base >=4.7 && <5
+    , deepseq
+    , dlist
+    , halg-algorithms
+    , halg-core
+    , halg-polynomials
+    , semigroups
+    , sized
+  default-language: Haskell2010
+
 executable std-prof
   main-is: std-prof.hs
   other-modules:
@@ -173,6 +194,33 @@ test-suite spec
       ZeroDimSpec
       HomogeneousSpec
       Utils
+  default-language: Haskell2010
+
+benchmark heavy-bench
+  type: exitcode-stdio-1.0
+  main-is: heavy-bench.hs
+  other-modules:
+      Paths_halg_algorithms
+  hs-source-dirs:
+      bench
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  ghc-options: -Wall -O2 -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MonadRandom
+    , algebra
+    , base >=4.7 && <5
+    , containers
+    , dlist
+    , foldl
+    , folds
+    , gauge
+    , halg-algorithms
+    , halg-core
+    , halg-polynomials
+    , lens
+    , parallel
+    , semigroups
+    , sized
   default-language: Haskell2010
 
 benchmark homog-bench
