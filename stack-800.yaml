@@ -22,7 +22,6 @@ flags:
 
 extra-deps:
 - algebra-4.3
-- equational-reasoning-0.5.1.0
 - containers-0.5.10.2
 - unamb-0.2.5
 - ghc-typelits-presburger-0.2.0.0
@@ -32,7 +31,7 @@ extra-deps:
 - hspec-smallcheck-0.5.0
 - megaparsec-6.3.0
 - gauge-0.2.1
-- type-natural-0.8.0.0
+- type-natural-0.8.0.1
 
 - git: https://github.com/konn/sized.git
   commit: 48a4778329c8a7779e7f914126f8aa08f94551a2
