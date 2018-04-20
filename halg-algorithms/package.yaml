@@ -70,7 +70,11 @@ library:
   - NoImplicitPrelude
 
 _prof-settings: &prof-settings
-  source-dirs:         app
+  source-dirs:
+  - app
+  - shared
+  other-modules:
+  - Cases
   ghc-options:
   - -Wall
   - -threaded
@@ -138,8 +142,10 @@ tests:
     - hspec-discover
 
 _heavy_bench: &heavy_bench
-  source-dirs:  bench
-  other-modules: Heavy
+  source-dirs:
+  - bench
+  - shared
+  other-modules: Cases
   dependencies:
   - halg-algorithms
   - gauge

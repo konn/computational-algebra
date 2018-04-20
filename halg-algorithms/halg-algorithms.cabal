@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5455b3ce7fcd54b105dce9310125a87f0565dd3d2ecbd2cba99c629bfe9b55d6
+-- hash: f811a5d030301bfde12e8824dad4835d01615c8439e5d8e8701bcc92e4603088
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -28,6 +28,16 @@ source-repository head
   location: https://github.com/konn/halg-groebner
 
 library
+  exposed-modules:
+      Algebra.Algorithms.Groebner.F4
+      Algebra.Algorithms.Groebner.Homogeneous
+      Algebra.Algorithms.Groebner.Signature
+      Algebra.Algorithms.ZeroDim
+      Algebra.Field.RationalFunction
+      Algebra.Ring.Polynomial.Homogenised
+      Control.Monad.ST.Combinators
+  other-modules:
+      Algebra.Algorithms.FGLM
   hs-source-dirs:
       src
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances NoImplicitPrelude
@@ -58,24 +68,15 @@ library
     , semigroups
     , sized
     , vector
-  exposed-modules:
-      Algebra.Algorithms.Groebner.F4
-      Algebra.Algorithms.Groebner.Homogeneous
-      Algebra.Algorithms.Groebner.Signature
-      Algebra.Algorithms.ZeroDim
-      Algebra.Field.RationalFunction
-      Algebra.Ring.Polynomial.Homogenised
-      Control.Monad.ST.Combinators
-  other-modules:
-      Algebra.Algorithms.FGLM
   default-language: Haskell2010
 
 executable f4-prof
   main-is: f4-prof.hs
   other-modules:
-      Paths_halg_algorithms
+      Cases
   hs-source-dirs:
       app
+      shared
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
   ghc-options: -Wall -threaded -rtsopts -O2 -with-rtsopts=-N -fprof-auto -fprof-cafs
   build-depends:
@@ -94,9 +95,10 @@ executable f4-prof
 executable f5-prof
   main-is: f5-prof.hs
   other-modules:
-      Paths_halg_algorithms
+      Cases
   hs-source-dirs:
       app
+      shared
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
   ghc-options: -Wall -threaded -rtsopts -O2 -with-rtsopts=-N -fprof-auto -fprof-cafs
   build-depends:
@@ -115,9 +117,10 @@ executable f5-prof
 executable katsura-prof
   main-is: katsura-prof.hs
   other-modules:
-      Paths_halg_algorithms
+      Cases
   hs-source-dirs:
       app
+      shared
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
   ghc-options: -Wall -threaded -rtsopts -O2 -with-rtsopts=-N -fprof-auto -fprof-cafs
   build-depends:
@@ -136,9 +139,10 @@ executable katsura-prof
 executable std-prof
   main-is: std-prof.hs
   other-modules:
-      Paths_halg_algorithms
+      Cases
   hs-source-dirs:
       app
+      shared
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
   ghc-options: -Wall -threaded -rtsopts -O2 -with-rtsopts=-N -fprof-auto -fprof-cafs
   build-depends:
@@ -157,6 +161,12 @@ executable std-prof
 test-suite spec
   type: exitcode-stdio-1.0
   main-is: Spec.hs
+  other-modules:
+      F5Spec
+      F4Spec
+      ZeroDimSpec
+      HomogeneousSpec
+      Utils
   hs-source-dirs:
       test
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
@@ -188,21 +198,16 @@ test-suite spec
     , smallcheck
     , type-natural
     , vector
-  other-modules:
-      F5Spec
-      F4Spec
-      ZeroDimSpec
-      HomogeneousSpec
-      Utils
   default-language: Haskell2010
 
 benchmark heavy-bench
   type: exitcode-stdio-1.0
   main-is: heavy-bench.hs
   other-modules:
-      Heavy
+      Cases
   hs-source-dirs:
       bench
+      shared
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
   ghc-options: -Wall -O2 -threaded -rtsopts -with-rtsopts=-N
   build-depends:
@@ -227,7 +232,6 @@ benchmark homog-bench
   type: exitcode-stdio-1.0
   main-is: homog-bench.hs
   other-modules:
-      Heavy
       Paths_halg_algorithms
   hs-source-dirs:
       bench
@@ -251,7 +255,6 @@ benchmark ordering-bench
   type: exitcode-stdio-1.0
   main-is: ordering-bench.hs
   other-modules:
-      Heavy
       Paths_halg_algorithms
   hs-source-dirs:
       bench
@@ -279,7 +282,6 @@ benchmark sugar-hilb-bench
   type: exitcode-stdio-1.0
   main-is: sugar-hilb.hs
   other-modules:
-      Heavy
       Paths_halg_algorithms
   hs-source-dirs:
       bench

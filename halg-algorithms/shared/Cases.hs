@@ -4,60 +4,13 @@
 {-# LANGUAGE OverloadedStrings, PolyKinds, Rank2Types, RankNTypes    #-}
 {-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
-module Heavy (makeCase, FPol, CalcPoly(..)) where
-import Algebra.Field.Prime
+module Cases (FPol, cyclic, katsura8, katsura9, i3) where
 import Algebra.Normed
 import Algebra.Prelude.Core
 import Data.List            (tails)
-import Gauge.Main
-
-
-newtype CalcPoly where
-  CalcPoly :: (forall poly. FPol poly => Ideal poly -> [poly]) -> CalcPoly
-
-makeCase :: String
-         -> CalcPoly
-         -> [Benchmark]
-makeCase name calc =
-  [   bgroup name
-      [mkTC calc "Cyclic 4"  $ cyclic (sing :: Sing 4)
-      ,mkTC calc "Cyclic 7"  $ cyclic (sing :: Sing 7)
-      ,mkTC calc "Cyclic 8"  $ cyclic (sing :: Sing 8)
-      ,mkTC calc "Katsura 8" katsura8
-      ,mkTC calc "Katsura 9" katsura9
-      ,mkTC calc "I3"        i3
-      ]
-  ]
 
 type FPol p = (IsOrderedPolynomial p, Num (Coefficient p),
                Normed (Coefficient p), Field (Coefficient p))
-
-mkTC :: (KnownNat n)
-     => CalcPoly
-     -> String
-     -> Ideal (Polynomial Rational n) -> Benchmark
-mkTC (CalcPoly calc) name jdeal =
-  env (return
-       ( map (changeOrder Grevlex) jdeal
-        , map (changeOrder Lex) jdeal
-        , map (mapCoeff ratToF . changeOrder Grevlex) jdeal
-        , map (mapCoeff ratToF . changeOrder Lex) jdeal
-        , calc
-        , calc
-        , calc
-        , calc
-        )
-      ) $ \ ~(grjQ, lxjQ, grjF, lxjF, calcGF, calcLF, calcGQ, calcLQ) ->
-  bgroup name
-    [bench "Q,Grevlex"       $ nf calcGQ grjQ
-    ,bench "Q,Lex"           $ nf calcLQ lxjQ
-    ,bench "F_65521,Grevlex" $ nf calcGF grjF
-    ,bench "F_65521,Lex"     $ nf calcLF lxjF
-    ]
-
-
-ratToF :: Rational -> F 65521
-ratToF = modRat'
 
 
 i3 :: Ideal (Polynomial (Fraction Integer) 4)

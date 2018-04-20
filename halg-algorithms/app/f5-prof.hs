@@ -3,6 +3,7 @@ module Main where
 import Algebra.Algorithms.Groebner.Signature
 import Algebra.Field.Prime
 import Algebra.Prelude.Core
+import Cases
 import Control.DeepSeq
 
 i2 :: [OrderedPolynomial (Fraction Integer) Grevlex 5]
@@ -17,4 +18,4 @@ i3 = [ x^31 - x^6 - x- y, x^8 - z, x^10 -t]
     [t,x,y,z] = vars
 
 main :: IO ()
-main = f5 (toIdeal i3) `deepseq` return ()
+main = f5 (mapCoeff (modRat (Proxy :: Proxy (F 65521))) <$> cyclic (sing :: Sing 7)) `deepseq` return ()
