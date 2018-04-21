@@ -40,11 +40,11 @@ f5 ideal =
   let sideal = V.fromList $ generators ideal
   in map snd $ calcSignatureGB sideal
 
-data P a b c = P { get1 :: a, get2 :: b, get3 :: c }
+data P a b = P { get1 :: !a, get2 :: !b }
 
-third :: (c -> c') -> P a b c -> P a b c'
-third f (P a b c) = P a b (f c)
-{-# INLINE third #-}
+sec :: (b -> b') -> P a b -> P a b'
+sec f (P a b) = P a (f b)
+{-# INLINE sec #-}
 
 {-# INLINE parMapMaybe #-}
 parMapMaybe :: (a -> Maybe b) -> [a] -> [b]
@@ -71,7 +71,7 @@ calcSignatureGB (V.map monoize -> sideal) = runST $ do
     ps .= ps'
     gs0 <- readSTRef gs
     ss0 <- readSTRef syzs
-    unless ({-# SCC "standardCr" #-}standardCriterion gSig ss0 || any ((== gSig) . priority . get3) gs0) $ do
+    unless ({-# SCC "standardCr" #-}standardCriterion gSig ss0 || any ((== gSig) . priority . get2) gs0) $ do
       let (h, ph) = reduceSignature sideal g gs0
           h' = {-# SCC "scaling" #-} V.map (* injectCoeff (recip $ leadingCoeff ph)) h
       if isZero ph
@@ -81,11 +81,11 @@ calcSignatureGB (V.map monoize -> sideal) = runST $ do
             lt  = leadTerm ph'
             adds = H.fromList $
                    parMapMaybe
-                   (fmap mkEntry . flip regularSVector (P ph' lt  h') . third payload) gs0
+                   (fmap mkEntry . flip regularSVector (P ph' h') . sec payload) gs0
         ps .%= H.union adds
-        gs .%= (P ph' lt (mkEntry h') :)
+        gs .%= (P ph' (mkEntry h') :)
 
-  map (\(P p _ (Entry _ a)) -> (a, p)) <$> readSTRef gs
+  map (\(P p (Entry _ a)) -> (a, p)) <$> readSTRef gs
 
 
 leadTerm :: IsOrderedPolynomial poly => poly -> Term poly
@@ -96,11 +96,13 @@ data Term poly = Term { leadMonom :: !(OrderedMonomial (MOrder poly) (Arity poly
                       }
 
 regularSVector :: (IsOrderedPolynomial poly)
-               => P poly (Term poly) (Vector poly)
-               -> P poly (Term poly) (Vector poly)
+               => P poly (Vector poly)
+               -> P poly (Vector poly)
                -> Maybe (Vector poly)
-regularSVector (P _ ltg g) (P _ lth h) =
-  let l = lcmMonomial (leadMonom ltg) (leadMonom lth)
+regularSVector (P pg g) (P ph h) =
+  let ltg = leadTerm pg
+      lth = leadTerm ph
+      l = lcmMonomial (leadMonom ltg) (leadMonom lth)
       vl = V.map (l / leadMonom ltg >*) g
       vr = V.map (l / leadMonom lth >*) h
       ans = V.zipWith (-) vl vr
@@ -150,13 +152,13 @@ basis len i = V.generate len $ \j -> if i == j then one else zero
 
 reduceSignature :: (IsOrderedPolynomial poly, Field (Coefficient poly), Foldable t)
                 => Vector poly -> Vector poly
-                -> t (P poly (Term poly) (Entry (Signature poly) (Vector poly)))
+                -> t (P poly (Entry (Signature poly) (Vector poly)))
                 -> (Vector poly, poly)
 reduceSignature ideal g hs =
   fst $ flip (until (\((_, phiu), r) -> phiu == r)) ((g, phi g), zero) $ \((u, !phiu), r) ->
   let m = leadingTerm $ phiu - r
-      tryCancel (P hi' hlt (Entry _ hi)) = First $ do
-        let fac = toPolynomial (m `tryDiv` toPair hlt)
+      tryCancel (P hi' (Entry _ hi)) = First $ do
+        let fac = toPolynomial (m `tryDiv` leadingTerm hi')
             quo = V.map (fac *) hi
         guard $ (leadingMonomial hi' `divs` snd m) && (signature quo < signature u)
         return (quo, fac * hi')
