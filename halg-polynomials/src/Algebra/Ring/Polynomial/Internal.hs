@@ -389,7 +389,7 @@ getTerms :: OrderedPolynomial k order n -> [(k, OrderedMonomial order n)]
 getTerms = map (snd &&& fst) . M.toDescList . _terms
 
 transformMonomial :: (IsMonomialOrder m o, CoeffRing k, KnownNat m)
-                  => (Monomial n -> Monomial m) -> OrderedPolynomial k o n -> OrderedPolynomial k o m
+                  => (USized n Int -> USized m Int) -> OrderedPolynomial k o n -> OrderedPolynomial k o m
 transformMonomial tr (Polynomial d) =
   polynomial $ M.mapKeys (OrderedMonomial . tr . getMonomial) d
 
@@ -400,7 +400,7 @@ shiftR :: forall k r n ord. (CoeffRing r, KnownNat n, IsMonomialOrder n ord,
                              IsMonomialOrder (k + n) ord)
        => SNat k -> OrderedPolynomial r ord n -> OrderedPolynomial r ord (k + n)
 shiftR k = withKnownNat (k %+ (sing :: SNat n)) $
-  withKnownNat k $ transformMonomial (S.append (fromList k []))
+  withKnownNat k $ transformMonomial (S.append (S.replicate' 0))
 
 -- | Calculate the homogenized polynomial of given one, with additional variable is the last variable.
 homogenize :: forall k ord n.

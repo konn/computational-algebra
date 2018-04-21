@@ -47,7 +47,6 @@ import qualified Data.Set                         as S
 import           Data.Singletons.Prelude          (SingKind (..))
 import qualified Data.Sized.Builtin               as V
 import           Data.Vector.Instances            ()
-import qualified Data.Vector.Unboxed              as UV
 import           Data.Word
 import           GHC.TypeLits                     (KnownNat, Nat)
 import qualified Numeric.Algebra.Complex          as NA
@@ -85,7 +84,7 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
            => (Ordinal (Arity poly) -> alg) -> poly -> alg
   liftMap mor f =
     sum [ Scalar r .* sum [ Scalar (fromInteger' (P.fromIntegral i) :: Coefficient poly) .* mor o
-                          | i <- V.toList (m :: Monomial (Arity poly)) :: [Int]
+                          | i <- otoList (m :: Monomial (Arity poly)) :: [Int]
                           | o <- enumOrdinal (sArity (Nothing :: Maybe poly)) ]
         | (m, r) <- M.toList (terms' f) ]
   {-# INLINE liftMap #-}
@@ -177,7 +176,7 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
 
   -- | Returns total degree.
   totalDegree' :: poly -> Natural
-  totalDegree' = maybe 0 fromIntegral . maximumOf folded . HS.map (UV.sum . V.unsized) . monomials
+  totalDegree' = maybe 0 fromIntegral . maximumOf folded . HS.map osum . monomials
   {-# INLINE totalDegree' #-}
 
   -- | @'var' n@ returns a polynomial representing n-th variable.
