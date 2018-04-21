@@ -134,6 +134,7 @@ tests:
     - hspec
     - lens
     - matrix
+    - ghc-typelits-knownnat
     - quickcheck-instances
     - reflection
     - smallcheck

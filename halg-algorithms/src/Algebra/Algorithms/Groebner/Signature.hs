@@ -78,11 +78,12 @@ calcSignatureGB (V.map monoize -> sideal) = runST $ do
         then syzs .%= (mkEntry h : )
         else do
         let ph' = monoize ph
+            lt  = leadTerm ph'
             adds = H.fromList $
                    parMapMaybe
-                   (fmap mkEntry . flip regularSVector (P (monoize ph') (leadTerm ph') h') . third payload) gs0
+                   (fmap mkEntry . flip regularSVector (P ph' lt  h') . third payload) gs0
         ps .%= H.union adds
-        gs .%= (P (monoize ph) (leadTerm ph) (mkEntry h') :)
+        gs .%= (P ph' lt (mkEntry h') :)
 
   map (\(P p _ (Entry _ a)) -> (a, p)) <$> readSTRef gs
 
@@ -98,7 +99,7 @@ regularSVector :: (IsOrderedPolynomial poly)
                => P poly (Term poly) (Vector poly)
                -> P poly (Term poly) (Vector poly)
                -> Maybe (Vector poly)
-regularSVector (P pg ltg g) (P ph lth h) =
+regularSVector (P _ ltg g) (P _ lth h) =
   let l = lcmMonomial (leadMonom ltg) (leadMonom lth)
       vl = V.map (l / leadMonom ltg >*) g
       vr = V.map (l / leadMonom lth >*) h
