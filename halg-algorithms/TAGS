@@ -251,13 +251,13 @@ type ArrayRef ArrayRef13,14
 type ArrayRef s s13,14
 newArray newArray15,16
 newArray newArray16,17
-arrayToList arrayToList18,19
 arrayToList arrayToList19,20
-(.(21,22
-(.=.=21,22
-(.%=.%=24,25
-(%!)%!27,28
-v v28,29
+arrayToList arrayToList20,21
+(.(23,24
+(.=.=23,24
+(.%=.%=27,28
+(%!)%!31,32
+v v32,33
 
 ./src/Algebra/Algorithms/FGLM.hs,611
 module Algebra.Algorithms.FGLM Algebra.Algorithms.FGLM2,3
@@ -400,35 +400,107 @@ calcHomogeneousGroebnerBasisHilbertBy calcHomogeneousGroebnerBasisHilbertBy365
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert370,371
 calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert373,374
 
-./src/Algebra/Algorithms/Groebner/Signature.hs,888
+./src/Algebra/Algorithms/Groebner/Signature.hs,1606
 module Algebra.Algorithms.Groebner.Signature Algebra.Algorithms.Groebner.Signature2,3
-import import5,6
-mkEntry mkEntry19,20
-mkEntry mkEntry21,22
-f5 f523,24
-f5 f525,26
-calcSignatureGB calcSignatureGB29,30
-calcSignatureGB calcSignatureGB32,33
-regularSVector regularSVector64,65
-regularSVector regularSVector68,69
-standardCriterion standardCriterion75,76
-standardCriterion standardCriterion78,79
-divSig divSig80,81
-divSig divSig81,82
-data Signature Signature85,86
-  Signature Signature86,87
-  Signature { _position _position86,87
-            , _sigCoeff _sigCoeff87,88
-            , _sigMonom _sigMonom88,89
-instance instance91,92
-signature signature101,102
-signature signature104,105
-basis basis112,113
-basis basis113,114
-reduceSignature reduceSignature115,116
-reduceSignature reduceSignature119,120
-sumA sumA133,134
-sumA sumA134,135
+import import4,5
+data Entry Entry19,20
+data Entry a b = Entry Entry19,20
+data Entry a b = Entry { priority priority19,20
+                       , payload payload20,21
+instance instance23,24
+mkEntry mkEntry32,33
+mkEntry mkEntry34,35
+f5 f536,37
+f5 f538,39
+data P P42,43
+data P a b c = P P42,43
+data P a b c = P { get1 get142,43
+data P a b c = P { get1 :: !a, get2 get242,43
+data P a b c = P { get1 :: !a, get2 :: !b, get3 get342,43
+third third44,45
+third third45,46
+parMapMaybe parMapMaybe49,50
+parMapMaybe parMapMaybe50,51
+calcSignatureGB calcSignatureGB52,53
+calcSignatureGB calcSignatureGB55,56
+leadTerm leadTerm89,90
+leadTerm leadTerm90,91
+data Term Term92,93
+data Term poly = Term Term92,93
+data Term poly = Term { leadMonom leadMonom92,93
+                      , leadCoeff leadCoeff93,94
+regularSVector regularSVector96,97
+regularSVector regularSVector100,101
+standardCriterion standardCriterion109,110
+standardCriterion standardCriterion112,113
+divSig divSig114,115
+divSig divSig115,116
+data Signature Signature119,120
+  Signature Signature120,121
+  Signature { _position _position120,121
+            , _sigCoeff _sigCoeff121,122
+            , _sigMonom _sigMonom122,123
+signature signature135,136
+signature signature138,139
+basis basis146,147
+basis basis147,148
+reduceSignature reduceSignature149,150
+reduceSignature reduceSignature153,154
+toPair toPair167,168
+toPair toPair168,169
+sumA sumA171,172
+sumA sumA172,173
+
+./src/Algebra/Algorithms/Groebner/flycheck_Signature.hs,1606
+module Algebra.Algorithms.Groebner.Signature Algebra.Algorithms.Groebner.Signature2,3
+import import4,5
+data Entry Entry19,20
+data Entry a b = Entry Entry19,20
+data Entry a b = Entry { priority priority19,20
+                       , payload payload20,21
+instance instance23,24
+mkEntry mkEntry32,33
+mkEntry mkEntry34,35
+f5 f536,37
+f5 f538,39
+data P P42,43
+data P a b c = P P42,43
+data P a b c = P { get1 get142,43
+data P a b c = P { get1 :: !a, get2 get242,43
+data P a b c = P { get1 :: !a, get2 :: !b, get3 get342,43
+third third44,45
+third third45,46
+parMapMaybe parMapMaybe49,50
+parMapMaybe parMapMaybe50,51
+calcSignatureGB calcSignatureGB52,53
+calcSignatureGB calcSignatureGB55,56
+leadTerm leadTerm89,90
+leadTerm leadTerm90,91
+data Term Term92,93
+data Term poly = Term Term92,93
+data Term poly = Term { leadMonom leadMonom92,93
+                      , leadCoeff leadCoeff93,94
+regularSVector regularSVector96,97
+regularSVector regularSVector100,101
+standardCriterion standardCriterion109,110
+standardCriterion standardCriterion112,113
+divSig divSig114,115
+divSig divSig115,116
+data Signature Signature119,120
+  Signature Signature120,121
+  Signature { _position _position120,121
+            , _sigCoeff _sigCoeff121,122
+            , _sigMonom _sigMonom122,123
+signature signature135,136
+signature signature138,139
+basis basis146,147
+basis basis147,148
+reduceSignature reduceSignature149,150
+reduceSignature reduceSignature153,154
+toPair toPair167,168
+toPair toPair168,169
+sumA sumA171,172
+sumA sumA172,173
 
 ./src/Algebra/Algorithms/Groebner/F4.hs,816
 module Algebra.Algorithms.Groebner.F4Algebra.Algorithms.Groebner.F43,4

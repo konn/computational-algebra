@@ -2,20 +2,33 @@
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Algorithms.Groebner.Signature (f5) where
 import           Algebra.Prelude.Core         hiding (Vector)
-import           Control.Arrow                (second)
 import           Control.Lens                 hiding ((.=))
 import           Control.Monad.Loops
 import           Control.Monad.ST.Combinators
+import           Control.Parallel.Strategies
 import qualified Data.Coerce                  as DC
-import           Data.Heap                    (Entry (..))
 import qualified Data.Heap                    as H
 import           Data.Maybe                   (fromJust)
 import           Data.Monoid                  (First (..))
 import           Data.Semigroup               hiding (First, getFirst, (<>))
+import           Data.Tuple                   (swap)
 import           Data.Vector                  (Vector)
 import qualified Data.Vector                  as V
 import qualified Data.Vector.Fusion.Bundle    as Bundle
 import qualified Data.Vector.Generic          as GV
+
+data Entry a b = Entry { priority :: !a
+                       , payload :: !b
+                       } deriving (Show)
+
+instance Eq a => Eq (Entry a b) where
+  (==) = (==) `on` priority
+  {-# INLINE (==) #-}
+  (/=) = (/=) `on` priority
+  {-# INLINE (/=) #-}
+
+instance Ord a => Ord (Entry a b) where
+  compare = comparing priority
 
 mkEntry :: (IsOrderedPolynomial poly)
         => Vector poly -> Entry (Signature poly) (Vector poly)
@@ -26,6 +39,16 @@ f5 :: (IsOrderedPolynomial a, Field (Coefficient a))
 f5 ideal =
   let sideal = V.fromList $ generators ideal
   in map snd $ calcSignatureGB sideal
+
+data P a b c = P { get1 :: !a, get2 :: !b, get3 :: !c }
+
+third :: (c -> c') -> P a b c -> P a b c'
+third f (P a b c) = P a b (f c)
+{-# INLINE third #-}
+
+{-# INLINE parMapMaybe #-}
+parMapMaybe :: (a -> Maybe b) -> [a] -> [b]
+parMapMaybe f = catMaybes . parMap rseq f
 
 calcSignatureGB :: forall poly.
                    (Field (Coefficient poly), IsOrderedPolynomial poly)
@@ -48,31 +71,41 @@ calcSignatureGB (V.map monoize -> sideal) = runST $ do
     ps .= ps'
     gs0 <- readSTRef gs
     ss0 <- readSTRef syzs
-    unless ({-# SCC "standardCr" #-}standardCriterion gSig ss0 || any ((== gSig) . priority . snd) gs0) $ do
+    unless ({-# SCC "standardCr" #-}standardCriterion gSig ss0 || any ((== gSig) . priority . get3) gs0) $ do
       let (h, ph) = reduceSignature sideal g gs0
           h' = {-# SCC "scaling" #-} V.map (* injectCoeff (recip $ leadingCoeff ph)) h
       if isZero ph
         then syzs .%= (mkEntry h : )
         else do
-        let adds = H.fromList $
-                   mapMaybe
-                   (fmap mkEntry . flip regularSVector (monoize ph, h') . second payload) gs0
+        let ph' = monoize ph
+            adds = H.fromList $
+                   parMapMaybe
+                   (fmap mkEntry . flip regularSVector (P (monoize ph') (leadTerm ph') h') . third payload) gs0
         ps .%= H.union adds
-        gs .%= ((monoize ph, mkEntry h') :)
+        gs .%= (P (monoize ph) (leadTerm ph) (mkEntry h') :)
 
-  map (\ (p, Entry _ a) -> (a, p)) <$> readSTRef gs
+  map (\(P p _ (Entry _ a)) -> (a, p)) <$> readSTRef gs
+
+
+leadTerm :: IsOrderedPolynomial poly => poly -> Term poly
+leadTerm = uncurry Term . swap . leadingTerm
+
+data Term poly = Term { leadMonom :: !(OrderedMonomial (MOrder poly) (Arity poly))
+                      , leadCoeff :: !(Coefficient poly)
+                      }
 
 regularSVector :: (IsOrderedPolynomial poly)
-               => (poly, Vector poly)
-               -> (poly, Vector poly)
+               => P poly (Term poly) (Vector poly)
+               -> P poly (Term poly) (Vector poly)
                -> Maybe (Vector poly)
-regularSVector (pg, g) (ph, h) = do
-  let l = lcmMonomial (leadingMonomial pg) (leadingMonomial ph)
-      vl = V.map (l / leadingMonomial pg >*) g
-      vr = V.map (l / leadingMonomial ph >*) h
+regularSVector (P _ ltg g) (P _ lth h) =
+  let l = lcmMonomial (leadMonom ltg) (leadMonom lth)
+      vl = V.map (l / leadMonom ltg >*) g
+      vr = V.map (l / leadMonom lth >*) h
       ans = V.zipWith (-) vl vr
-  guard $ signature vl /= signature vr
-  return ans
+  in if signature vl /= signature vr
+     then Just ans
+     else Nothing
 
 standardCriterion :: (IsOrderedPolynomial poly, Foldable t)
                   => Signature poly -> t (Entry (Signature poly) (Vector poly))
@@ -116,13 +149,13 @@ basis len i = V.generate len $ \j -> if i == j then one else zero
 
 reduceSignature :: (IsOrderedPolynomial poly, Field (Coefficient poly), Foldable t)
                 => Vector poly -> Vector poly
-                -> t (poly, Entry (Signature poly) (Vector poly))
+                -> t (P poly (Term poly) (Entry (Signature poly) (Vector poly)))
                 -> (Vector poly, poly)
 reduceSignature ideal g hs =
   fst $ flip (until (\((_, phiu), r) -> phiu == r)) ((g, phi g), zero) $ \((u, !phiu), r) ->
   let m = leadingTerm $ phiu - r
-      tryCancel (hi', Entry _ hi) = First $ do
-        let fac = toPolynomial (m `tryDiv` leadingTerm hi')
+      tryCancel (P hi' hlt (Entry _ hi)) = First $ do
+        let fac = toPolynomial (m `tryDiv` toPair hlt)
             quo = V.map (fac *) hi
         guard $ (leadingMonomial hi' `divs` snd m) && (signature quo < signature u)
         return (quo, fac * hi')
@@ -131,6 +164,10 @@ reduceSignature ideal g hs =
     Just (d, phid)  -> ((V.zipWith (-) u d, phiu - phid), r)
   where
     phi = sumA . V.zipWith (*) ideal
+
+toPair :: Term poly -> (Coefficient poly, OrderedMonomial (MOrder poly) (Arity poly))
+toPair (Term m c) = (c, m)
+{-# INLINE toPair #-}
 
 sumA :: Monoidal c => Vector c -> c
 sumA = Bundle.foldl' (+) zero . GV.stream
