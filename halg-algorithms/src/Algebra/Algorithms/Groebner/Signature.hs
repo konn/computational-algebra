@@ -40,7 +40,7 @@ f5 ideal =
   let sideal = V.fromList $ generators ideal
   in map snd $ calcSignatureGB sideal
 
-data P a b c = P { get1 :: !a, get2 :: !b, get3 :: !c }
+data P a b c = P { get1 :: a, get2 :: b, get3 :: c }
 
 third :: (c -> c') -> P a b c -> P a b c'
 third f (P a b c) = P a b (f c)
