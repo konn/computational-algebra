@@ -2,7 +2,6 @@
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Algorithms.Groebner.Signature (f5) where
 import           Algebra.Prelude.Core         hiding (Vector)
-import           Control.Arrow                (second)
 import           Control.Lens                 hiding ((.=))
 import           Control.Monad.Loops
 import           Control.Monad.ST.Combinators
@@ -19,13 +18,18 @@ import qualified Data.Vector.Generic          as GV
 
 mkEntry :: (IsOrderedPolynomial poly)
         => Vector poly -> Entry (Signature poly) (Vector poly)
-mkEntry = {-# SCC "mkEntry" #-} Entry <$> signature <*> id
+mkEntry v = {-# SCC "mkEntry" #-} (Entry $! signature v) $! v
 
 f5 :: (IsOrderedPolynomial a, Field (Coefficient a))
    => Ideal a -> [a]
 f5 ideal =
   let sideal = V.fromList $ generators ideal
   in map snd $ calcSignatureGB sideal
+
+data P a b = P { get1 :: !a, get2 :: !b }
+
+sec :: (t -> b) -> P a t -> P a b
+sec f (P a b) = P a (f b)
 
 calcSignatureGB :: forall poly.
                    (Field (Coefficient poly), IsOrderedPolynomial poly)
@@ -48,7 +52,7 @@ calcSignatureGB (V.map monoize -> sideal) = runST $ do
     ps .= ps'
     gs0 <- readSTRef gs
     ss0 <- readSTRef syzs
-    unless ({-# SCC "standardCr" #-}standardCriterion gSig ss0 || any ((== gSig) . priority . snd) gs0) $ do
+    unless ({-# SCC "standardCr" #-}standardCriterion gSig ss0 || any ((== gSig) . priority . get2) gs0) $ do
       let (h, ph) = reduceSignature sideal g gs0
           h' = {-# SCC "scaling" #-} V.map (* injectCoeff (recip $ leadingCoeff ph)) h
       if isZero ph
@@ -56,17 +60,17 @@ calcSignatureGB (V.map monoize -> sideal) = runST $ do
         else do
         let adds = H.fromList $
                    mapMaybe
-                   (fmap mkEntry . flip regularSVector (monoize ph, h') . second payload) gs0
+                   (fmap mkEntry . flip regularSVector (P (monoize ph) h') . sec payload) gs0
         ps .%= H.union adds
-        gs .%= ((monoize ph, mkEntry h') :)
+        gs .%= (P (monoize ph) (mkEntry h') :)
 
-  map (\ (p, Entry _ a) -> (a, p)) <$> readSTRef gs
+  map (\(P p (Entry _ a)) -> (a, p)) <$> readSTRef gs
 
 regularSVector :: (IsOrderedPolynomial poly)
-               => (poly, Vector poly)
-               -> (poly, Vector poly)
+               => P poly (Vector poly)
+               -> P poly (Vector poly)
                -> Maybe (Vector poly)
-regularSVector (pg, g) (ph, h) =
+regularSVector (P pg g) (P ph h) =
   let l = lcmMonomial (leadingMonomial pg) (leadingMonomial ph)
       vl = V.map (l / leadingMonomial pg >*) g
       vr = V.map (l / leadingMonomial ph >*) h
@@ -117,12 +121,12 @@ basis len i = V.generate len $ \j -> if i == j then one else zero
 
 reduceSignature :: (IsOrderedPolynomial poly, Field (Coefficient poly), Foldable t)
                 => Vector poly -> Vector poly
-                -> t (poly, Entry (Signature poly) (Vector poly))
+                -> t (P poly (Entry (Signature poly) (Vector poly)))
                 -> (Vector poly, poly)
 reduceSignature ideal g hs =
   fst $ flip (until (\((_, phiu), r) -> phiu == r)) ((g, phi g), zero) $ \((u, !phiu), r) ->
   let m = leadingTerm $ phiu - r
-      tryCancel (hi', Entry _ hi) = First $ do
+      tryCancel (P hi' (Entry _ hi)) = First $ do
         let fac = toPolynomial (m `tryDiv` leadingTerm hi')
             quo = V.map (fac *) hi
         guard $ (leadingMonomial hi' `divs` snd m) && (signature quo < signature u)
