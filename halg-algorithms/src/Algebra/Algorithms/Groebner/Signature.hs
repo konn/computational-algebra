@@ -6,7 +6,6 @@ import           Control.Lens                 hiding ((.=))
 import           Control.Monad.Loops
 import           Control.Monad.ST.Combinators
 import qualified Data.Coerce                  as DC
-import           Data.Heap                    (Entry (..))
 import qualified Data.Heap                    as H
 import           Data.Maybe                   (fromJust)
 import           Data.Monoid                  (First (..))
@@ -16,9 +15,22 @@ import qualified Data.Vector                  as V
 import qualified Data.Vector.Fusion.Bundle    as Bundle
 import qualified Data.Vector.Generic          as GV
 
+data Entry a b = Entry { priority :: !a
+                       , payload :: !b
+                       } deriving (Show)
+
+instance Eq a => Eq (Entry a b) where
+  (==) = (==) `on` priority
+  {-# INLINE (==) #-}
+  (/=) = (/=) `on` priority
+  {-# INLINE (/=) #-}
+
+instance Ord a => Ord (Entry a b) where
+  compare = comparing priority
+
 mkEntry :: (IsOrderedPolynomial poly)
         => Vector poly -> Entry (Signature poly) (Vector poly)
-mkEntry v = {-# SCC "mkEntry" #-} (Entry $! signature v) $! v
+mkEntry = {-# SCC "mkEntry" #-} Entry <$> signature <*> id
 
 f5 :: (IsOrderedPolynomial a, Field (Coefficient a))
    => Ideal a -> [a]
