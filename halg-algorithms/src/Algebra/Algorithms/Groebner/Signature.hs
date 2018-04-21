@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns, ScopedTypeVariables, ViewPatterns #-}
+{-# LANGUAGE BangPatterns, ScopedTypeVariables, Strict, ViewPatterns #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Algorithms.Groebner.Signature (f5) where
 import           Algebra.Prelude.Core         hiding (Vector)
@@ -11,7 +11,6 @@ import qualified Data.Heap                    as H
 import           Data.Maybe                   (fromJust)
 import           Data.Monoid                  (First (..))
 import           Data.Semigroup               hiding (First, getFirst, (<>))
-import           Data.Tuple                   (swap)
 import           Data.Vector                  (Vector)
 import qualified Data.Vector                  as V
 import qualified Data.Vector.Fusion.Bundle    as Bundle
