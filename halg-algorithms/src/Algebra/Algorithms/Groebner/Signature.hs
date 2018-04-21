@@ -66,13 +66,14 @@ regularSVector :: (IsOrderedPolynomial poly)
                => (poly, Vector poly)
                -> (poly, Vector poly)
                -> Maybe (Vector poly)
-regularSVector (pg, g) (ph, h) = do
+regularSVector (pg, g) (ph, h) =
   let l = lcmMonomial (leadingMonomial pg) (leadingMonomial ph)
       vl = V.map (l / leadingMonomial pg >*) g
       vr = V.map (l / leadingMonomial ph >*) h
       ans = V.zipWith (-) vl vr
-  guard $ signature vl /= signature vr
-  return ans
+  in if signature vl /= signature vr
+     then Just ans
+     else Nothing
 
 standardCriterion :: (IsOrderedPolynomial poly, Foldable t)
                   => Signature poly -> t (Entry (Signature poly) (Vector poly))
