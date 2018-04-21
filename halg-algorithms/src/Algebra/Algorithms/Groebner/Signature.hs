@@ -12,10 +12,12 @@ import           Data.Maybe                   (fromJust)
 import           Data.Monoid                  (First (..))
 import           Data.Semigroup               hiding (First, getFirst, (<>))
 import           Data.Tuple                   (swap)
-import           Data.Vector                  (Vector)
-import qualified Data.Vector                  as V
-import qualified Data.Vector.Fusion.Bundle    as Bundle
-import qualified Data.Vector.Generic          as GV
+-- import           Data.Vector                  (Vector)
+import qualified Data.Vector               as V
+import qualified Data.Vector.Fusion.Bundle as Bundle
+import qualified Data.Vector.Generic       as GV
+
+type Vector = []
 
 data Entry a b = Entry { priority :: !a
                        , payload :: !b
@@ -37,7 +39,7 @@ mkEntry = {-# SCC "mkEntry" #-} Entry <$> signature <*> id
 f5 :: (IsOrderedPolynomial a, Field (Coefficient a))
    => Ideal a -> [a]
 f5 ideal =
-  let sideal = V.fromList $ generators ideal
+  let sideal = generators ideal
   in map snd $ calcSignatureGB sideal
 
 data P a b = P { get1 :: !a, get2 :: !b }
@@ -52,18 +54,18 @@ parMapMaybe f = catMaybes . parMap rseq f
 
 calcSignatureGB :: forall poly.
                    (Field (Coefficient poly), IsOrderedPolynomial poly)
-                => V.Vector poly -> [(V.Vector poly, poly)]
+                => Vector poly -> [(Vector poly, poly)]
 calcSignatureGB side | null side = []
-calcSignatureGB (V.map monoize -> sideal) = runST $ do
-  let n = V.length sideal
+calcSignatureGB (parMap rseq monoize -> sideal) = runST $ do
+  let n = length sideal
   gs <- newSTRef []
   ps <- newSTRef $ H.fromList [ mkEntry $ basis n i | i <- [0..n-1]]
   syzs <- {-# SCC "initial_syzygy" #-}
           newSTRef
           [ mkEntry $
-            V.zipWith (+)
-              (V.map (negate (sideal V.! j) *) (basis n i))
-              (V.map ((sideal V.! i) *) (basis n j))
+            zipWith (+)
+              (parMap rseq (negate (sideal !! j) *) (basis n i))
+              (parMap rseq ((sideal !! i) *) (basis n j))
           | j <- [0..n-1]
           , i <- [0..j-1]
           ]
@@ -73,7 +75,7 @@ calcSignatureGB (V.map monoize -> sideal) = runST $ do
     ss0 <- readSTRef syzs
     unless ({-# SCC "standardCr" #-}standardCriterion gSig ss0 || any ((== gSig) . priority . get2) gs0) $ do
       let (h, ph) = reduceSignature sideal g gs0
-          h' = {-# SCC "scaling" #-} V.map (* injectCoeff (recip $ leadingCoeff ph)) h
+          h' = {-# SCC "scaling" #-} parMap rpar (* injectCoeff (recip $ leadingCoeff ph)) h
       if isZero ph
         then syzs .%= (mkEntry h : )
         else do
@@ -103,9 +105,9 @@ regularSVector (P pg g) (P ph h) =
   let ltg = leadTerm pg
       lth = leadTerm ph
       l = lcmMonomial (leadMonom ltg) (leadMonom lth)
-      vl = V.map (l / leadMonom ltg >*) g
-      vr = V.map (l / leadMonom lth >*) h
-      ans = V.zipWith (-) vl vr
+      vl = parMap rseq (l / leadMonom ltg >*) g
+      vr = parMap rseq (l / leadMonom lth >*) h
+      ans = zipWith (-) vl vr
   in if signature vl /= signature vr
      then Just ans
      else Nothing
@@ -148,7 +150,7 @@ signature = {-# SCC "signature" #-}
                      )
 
 basis :: (Monoidal a, Unital a) => Int -> Int -> Vector a
-basis len i = V.generate len $ \j -> if i == j then one else zero
+basis len i = [ if i == j then one else zero | j <- [0..len - 1] ]
 
 reduceSignature :: (IsOrderedPolynomial poly, Field (Coefficient poly), Foldable t)
                 => Vector poly -> Vector poly
@@ -159,18 +161,18 @@ reduceSignature ideal g hs =
   let m = leadingTerm $ phiu - r
       tryCancel (P hi' (Entry _ hi)) = First $ do
         let fac = toPolynomial (m `tryDiv` leadingTerm hi')
-            quo = V.map (fac *) hi
+            quo = map (fac *) hi
         guard $ (leadingMonomial hi' `divs` snd m) && (signature quo < signature u)
         return (quo, fac * hi')
   in case getFirst $ foldMap tryCancel hs of
     Nothing -> ((u, phiu), r + toPolynomial m)
-    Just (d, phid)  -> ((V.zipWith (-) u d, phiu - phid), r)
+    Just (d, phid)  -> ((zipWith (-) u d, phiu - phid), r)
   where
-    phi = sumA . V.zipWith (*) ideal
+    phi = sum . zipWith (*) ideal
 
-toPair :: Term poly -> (Coefficient poly, OrderedMonomial (MOrder poly) (Arity poly))
-toPair (Term m c) = (c, m)
-{-# INLINE toPair #-}
+-- toPair :: Term poly -> (Coefficient poly, OrderedMonomial (MOrder poly) (Arity poly))
+-- toPair (Term m c) = (c, m)
+-- {-# INLINE toPair #-}
 
-sumA :: Monoidal c => Vector c -> c
-sumA = Bundle.foldl' (+) zero . GV.stream
+-- sumA :: Monoidal c => Vector c -> c
+-- sumA = Bundle.foldl' (+) zero . GV.stream
