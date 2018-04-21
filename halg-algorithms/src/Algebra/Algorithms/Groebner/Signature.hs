@@ -5,6 +5,7 @@ import           Algebra.Prelude.Core         hiding (Vector)
 import           Control.Lens                 hiding ((.=))
 import           Control.Monad.Loops
 import           Control.Monad.ST.Combinators
+import           Control.Parallel.Strategies
 import qualified Data.Coerce                  as DC
 import qualified Data.Heap                    as H
 import           Data.Maybe                   (fromJust)
@@ -43,6 +44,10 @@ data P a b = P { get1 :: !a, get2 :: !b }
 sec :: (t -> b) -> P a t -> P a b
 sec f (P a b) = P a (f b)
 
+{-# INLINE parMapMaybe #-}
+parMapMaybe :: (a -> Maybe b) -> [a] -> [b]
+parMapMaybe f = catMaybes . parMap rseq f
+
 calcSignatureGB :: forall poly.
                    (Field (Coefficient poly), IsOrderedPolynomial poly)
                 => V.Vector poly -> [(V.Vector poly, poly)]
@@ -71,7 +76,7 @@ calcSignatureGB (V.map monoize -> sideal) = runST $ do
         then syzs .%= (mkEntry h : )
         else do
         let adds = H.fromList $
-                   mapMaybe
+                   parMapMaybe
                    (fmap mkEntry . flip regularSVector (P (monoize ph) h') . sec payload) gs0
         ps .%= H.union adds
         gs .%= (P (monoize ph) (mkEntry h') :)
