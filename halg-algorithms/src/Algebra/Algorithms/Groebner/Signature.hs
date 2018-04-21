@@ -44,7 +44,7 @@ calcSignatureGB (V.map monoize -> sideal) = runST $ do
           | j <- [0..n-1]
           , i <- [0..j-1]
           ]
-  whileJust_ (H.viewMin <$> readSTRef ps) $ \(Entry gSig g, ps') -> do
+  whileJust_ (H.viewMin <$!> readSTRef ps) $ \(Entry gSig g, ps') -> do
     ps .= ps'
     gs0 <- readSTRef gs
     ss0 <- readSTRef syzs
@@ -70,8 +70,9 @@ regularSVector (pg, g) (ph, h) = do
   let l = lcmMonomial (leadingMonomial pg) (leadingMonomial ph)
       vl = V.map (l / leadingMonomial pg >*) g
       vr = V.map (l / leadingMonomial ph >*) h
+      ans = V.zipWith (-) vl vr
   guard $ signature vl /= signature vr
-  return $ V.zipWith (-) vl vr
+  return ans
 
 standardCriterion :: (IsOrderedPolynomial poly, Foldable t)
                   => Signature poly -> t (Entry (Signature poly) (Vector poly))
