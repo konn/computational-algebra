@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns, ScopedTypeVariables, Strict, ViewPatterns #-}
+{-# LANGUAGE BangPatterns, ScopedTypeVariables, ViewPatterns #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Algorithms.Groebner.Signature (f5) where
 import           Algebra.Prelude.Core         hiding (Vector)

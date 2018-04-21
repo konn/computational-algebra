@@ -1,8 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.27.0.
+-- This file has been generated from package.yaml by hpack version 0.28.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 27fb3df31515a0628f2b2276566bfca4aafc1bc92c88d4f088bcf1e268599aa3
+-- hash: b3d61b711d601e9313ecd1dfeb09f7cd49171dc0ef0146766b6a532558385054
 
 name:           halg-galois-fields
 version:        0.6.0.0
@@ -18,11 +18,9 @@ license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
 cabal-version:  >= 1.10
-
 extra-source-files:
     ChangeLog.md
     README.md
-
 data-files:
     data/conway.txt
 
