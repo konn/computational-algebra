@@ -78,7 +78,6 @@ calcSignatureGB (V.map monoize -> sideal) = runST $ do
         then syzs .%= (mkEntry h : )
         else do
         let ph' = monoize ph
-            lt  = leadTerm ph'
             adds = H.fromList $
                    parMapMaybe
                    (fmap mkEntry . flip regularSVector (P ph' h') . sec payload) gs0
@@ -87,24 +86,16 @@ calcSignatureGB (V.map monoize -> sideal) = runST $ do
 
   map (\(P p (Entry _ a)) -> (a, p)) <$> readSTRef gs
 
-
-leadTerm :: IsOrderedPolynomial poly => poly -> Term poly
-leadTerm = uncurry Term . swap . leadingTerm
-
-data Term poly = Term { leadMonom :: !(OrderedMonomial (MOrder poly) (Arity poly))
-                      , leadCoeff :: !(Coefficient poly)
-                      }
-
 regularSVector :: (IsOrderedPolynomial poly)
                => P poly (Vector poly)
                -> P poly (Vector poly)
                -> Maybe (Vector poly)
 regularSVector (P pg g) (P ph h) =
-  let ltg = leadTerm pg
-      lth = leadTerm ph
-      l = lcmMonomial (leadMonom ltg) (leadMonom lth)
-      vl = V.map (l / leadMonom ltg >*) g
-      vr = V.map (l / leadMonom lth >*) h
+  let lmg = leadingMonomial pg
+      lmh = leadingMonomial ph
+      l = lcmMonomial lmg lmh
+      vl = V.map (l / lmg >*) g
+      vr = V.map (l / lmh >*) h
       ans = V.zipWith (-) vl vr
   in if signature vl /= signature vr
      then Just ans
@@ -167,10 +158,6 @@ reduceSignature ideal g hs =
     Just (d, phid)  -> ((V.zipWith (-) u d, phiu - phid), r)
   where
     phi = sumA . V.zipWith (*) ideal
-
-toPair :: Term poly -> (Coefficient poly, OrderedMonomial (MOrder poly) (Arity poly))
-toPair (Term m c) = (c, m)
-{-# INLINE toPair #-}
 
 sumA :: Monoidal c => Vector c -> c
 sumA = Bundle.foldl' (+) zero . GV.stream
