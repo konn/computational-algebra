@@ -139,45 +139,45 @@ prop_groebnerDivsOrig prop_groebnerDivsOrig50,51
 prop_groebnerIncluded prop_groebnerIncluded56,57
 prop_groebnerIncluded prop_groebnerIncluded58,59
 
-./test/Utils.hs,1321
-module Utils Utils7,8
-newtype ZeroDimIdeal ZeroDimIdeal35,36
-newtype ZeroDimIdeal n = ZeroDimIdeal ZeroDimIdeal35,36
-newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal getIdeal35,36
-genUnipol genUnipol38,39
+./test/Utils.hs,1322
+module Utils Utils8,9
+newtype ZeroDimIdeal ZeroDimIdeal36,37
+newtype ZeroDimIdeal n = ZeroDimIdeal ZeroDimIdeal36,37
+newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal getIdeal36,37
 genUnipol genUnipol39,40
-appendLM appendLM43,44
+genUnipol genUnipol40,41
 appendLM appendLM44,45
-xPoly xPoly46,47
+appendLM appendLM45,46
 xPoly xPoly47,48
-yPoly yPoly53,54
+xPoly xPoly48,49
 yPoly yPoly54,55
-instance instance60,61
-genLM genLM75,76
+yPoly yPoly55,56
+instance instance61,62
 genLM genLM76,77
-zeroDimOf zeroDimOf87,88
+genLM genLM77,78
 zeroDimOf zeroDimOf88,89
-zeroDimG zeroDimG93,94
+zeroDimOf zeroDimOf89,90
 zeroDimG zeroDimG94,95
-isNonTrivial isNonTrivial99,100
+zeroDimG zeroDimG95,96
 isNonTrivial isNonTrivial100,101
-data Equation Equation102,103
-data Equation = Equation Equation102,103
-data Equation = Equation { coefficients coefficients102,103
-                         , answers answers103,104
-newtype MatrixCase MatrixCase106,107
-newtype MatrixCase a = MatrixCase MatrixCase106,107
-newtype MatrixCase a = MatrixCase { getMatrix getMatrix106,107
-arbitrarySolvable arbitrarySolvable121,122
+isNonTrivial isNonTrivial101,102
+data Equation Equation103,104
+data Equation = Equation Equation103,104
+data Equation = Equation { coefficients coefficients103,104
+                         , answers answers104,105
+newtype MatrixCase MatrixCase107,108
+newtype MatrixCase a = MatrixCase MatrixCase107,108
+newtype MatrixCase a = MatrixCase { getMatrix getMatrix107,108
 arbitrarySolvable arbitrarySolvable122,123
-unaryPoly unaryPoly127,128
+arbitrarySolvable arbitrarySolvable123,124
 unaryPoly unaryPoly128,129
-stdReduced stdReduced133,134
-stdReduced stdReduced135,136
-idealOfArity idealOfArity146,147
+unaryPoly unaryPoly129,130
+stdReduced stdReduced134,135
+stdReduced stdReduced136,137
 idealOfArity idealOfArity147,148
-polynomialOfArity polynomialOfArity150,151
-polynomialOfArity polynomialOfArity152,153
+idealOfArity idealOfArity148,149
+polynomialOfArity polynomialOfArity151,152
+polynomialOfArity polynomialOfArity153,154
 
 ./test/ZeroDimSpec.hs,692
 module ZeroDimSpec ZeroDimSpec2,3
@@ -423,84 +423,33 @@ parMapMaybe parMapMaybe49,50
 parMapMaybe parMapMaybe50,51
 calcSignatureGB calcSignatureGB52,53
 calcSignatureGB calcSignatureGB55,56
-leadTerm leadTerm89,90
 leadTerm leadTerm90,91
-data Term Term92,93
-data Term poly = Term Term92,93
-data Term poly = Term { leadMonom leadMonom92,93
-                      , leadCoeff leadCoeff93,94
-regularSVector regularSVector96,97
-regularSVector regularSVector100,101
-standardCriterion standardCriterion109,110
-standardCriterion standardCriterion112,113
-divSig divSig114,115
+leadTerm leadTerm91,92
+data Term Term93,94
+data Term poly = Term Term93,94
+data Term poly = Term { leadMonom leadMonom93,94
+                      , leadCoeff leadCoeff94,95
+regularSVector regularSVector97,98
+regularSVector regularSVector101,102
+standardCriterion standardCriterion110,111
+standardCriterion standardCriterion113,114
 divSig divSig115,116
-data Signature Signature119,120
-  Signature Signature120,121
-  Signature { _position _position120,121
-            , _sigCoeff _sigCoeff121,122
-            , _sigMonom _sigMonom122,123
-signature signature135,136
-signature signature138,139
-basis basis146,147
+divSig divSig116,117
+data Signature Signature120,121
+  Signature Signature121,122
+  Signature { _position _position121,122
+            , _sigCoeff _sigCoeff122,123
+            , _sigMonom _sigMonom123,124
+signature signature136,137
+signature signature139,140
 basis basis147,148
-reduceSignature reduceSignature149,150
-reduceSignature reduceSignature153,154
-toPair toPair167,168
+basis basis148,149
+reduceSignature reduceSignature150,151
+reduceSignature reduceSignature154,155
 toPair toPair168,169
-sumA sumA171,172
+toPair toPair169,170
 sumA sumA172,173
-
-./src/Algebra/Algorithms/Groebner/flycheck_Signature.hs,1606
-module Algebra.Algorithms.Groebner.Signature Algebra.Algorithms.Groebner.Signature2,3
-import import4,5
-data Entry Entry19,20
-data Entry a b = Entry Entry19,20
-data Entry a b = Entry { priority priority19,20
-                       , payload payload20,21
-instance instance23,24
-mkEntry mkEntry32,33
-mkEntry mkEntry34,35
-f5 f536,37
-f5 f538,39
-data P P42,43
-data P a b c = P P42,43
-data P a b c = P { get1 get142,43
-data P a b c = P { get1 :: !a, get2 get242,43
-data P a b c = P { get1 :: !a, get2 :: !b, get3 get342,43
-third third44,45
-third third45,46
-parMapMaybe parMapMaybe49,50
-parMapMaybe parMapMaybe50,51
-calcSignatureGB calcSignatureGB52,53
-calcSignatureGB calcSignatureGB55,56
-leadTerm leadTerm89,90
-leadTerm leadTerm90,91
-data Term Term92,93
-data Term poly = Term Term92,93
-data Term poly = Term { leadMonom leadMonom92,93
-                      , leadCoeff leadCoeff93,94
-regularSVector regularSVector96,97
-regularSVector regularSVector100,101
-standardCriterion standardCriterion109,110
-standardCriterion standardCriterion112,113
-divSig divSig114,115
-divSig divSig115,116
-data Signature Signature119,120
-  Signature Signature120,121
-  Signature { _position _position120,121
-            , _sigCoeff _sigCoeff121,122
-            , _sigMonom _sigMonom122,123
-signature signature135,136
-signature signature138,139
-basis basis146,147
-basis basis147,148
-reduceSignature reduceSignature149,150
-reduceSignature reduceSignature153,154
-toPair toPair167,168
-toPair toPair168,169
-sumA sumA171,172
-sumA sumA172,173
+sumA sumA173,174
 
 ./src/Algebra/Algorithms/Groebner/F4.hs,816
 module Algebra.Algorithms.Groebner.F4Algebra.Algorithms.Groebner.F43,4

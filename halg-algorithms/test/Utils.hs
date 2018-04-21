@@ -4,6 +4,7 @@
 {-# LANGUAGE NoMonomorphismRestriction, RankNTypes, ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving, TypeFamilies, TypeOperators            #-}
 {-# LANGUAGE UndecidableInstances                                       #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Utils (module Utils, module Algebra.TestUtils) where
 import           Algebra.Field.Prime
