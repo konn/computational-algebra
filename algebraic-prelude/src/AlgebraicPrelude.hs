@@ -136,6 +136,9 @@ type Rational = Fraction Integer
 
 infixr 8 ^, ^^
 
+instance Hashable a => Hashable (Fraction a) where
+  hashWithSalt s q = s `hashWithSalt` numerator q `hashWithSalt` denominator q
+
 -- | To work with Num literals.
 fromInteger :: P.Num r => Integer -> r
 fromInteger = P.fromInteger

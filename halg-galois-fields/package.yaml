@@ -39,6 +39,7 @@ dependencies:
 - halg-polynomials
 - algebraic-prelude
 - algebra
+- hashable
 
 data-files:
 - data/*

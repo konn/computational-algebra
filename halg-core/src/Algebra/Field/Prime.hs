@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, StandaloneDeriving #-}
 -- | Prime fields
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances          #-}
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes            #-}
@@ -19,6 +19,7 @@ import           Control.Monad.Random         (uniform)
 import           Control.Monad.Random         (runRand)
 import           Control.Monad.Random         (Random (..))
 import qualified Data.Coerce                  as C
+import           Data.Hashable                (Hashable)
 import           Data.Maybe                   (fromMaybe)
 import           Data.Proxy                   (Proxy (..), asProxyTypeOf)
 import qualified Data.Ratio                   as R
@@ -34,8 +35,7 @@ import qualified Prelude                      as P
 -- | Prime field of characteristic @p@.
 --   @p@ should be prime, and not statically checked.
 newtype F (p :: k) = F { runF :: Integer }
-                   deriving (NFData)
-
+                   deriving (NFData, Hashable)
 
 instance Reifies p Integer => Read (F p) where
   readPrec = fromInteger <$> readPrec

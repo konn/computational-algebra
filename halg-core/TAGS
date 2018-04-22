@@ -22,9 +22,9 @@ instance instance21,22
 
 ./src/Algebra/Field/Prime.hs,643
 module Algebra.Field.PrimeAlgebra.Field.Prime5,6
-newtype F F35,36
-newtype F (p :: k) = F F35,36
-newtype F (p :: k) = F { runF runF35,36
+newtype F F36,37
+newtype F (p :: k) = F F36,37
+newtype F (p :: k) = F { runF runF36,37
 instance instance39,40
 modNat modNat42,43
 modNat modNat43,44
