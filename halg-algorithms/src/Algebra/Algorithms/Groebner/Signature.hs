@@ -1,20 +1,21 @@
 {-# LANGUAGE BangPatterns, ScopedTypeVariables, ViewPatterns #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Algorithms.Groebner.Signature (f5) where
-import           Algebra.Prelude.Core         hiding (Vector)
-import           Control.Lens                 hiding ((.=))
+import           Algebra.Prelude.Core             hiding (Vector)
+import           Algebra.Ring.Polynomial.Interned
+import           Control.Lens                     hiding ((.=))
 import           Control.Monad.Loops
 import           Control.Monad.ST.Combinators
 import           Control.Parallel.Strategies
-import qualified Data.Coerce                  as DC
-import qualified Data.Heap                    as H
-import           Data.Maybe                   (fromJust)
-import           Data.Monoid                  (First (..))
-import           Data.Semigroup               hiding (First, getFirst, (<>))
-import           Data.Vector                  (Vector)
-import qualified Data.Vector                  as V
-import qualified Data.Vector.Fusion.Bundle    as Bundle
-import qualified Data.Vector.Generic          as GV
+import qualified Data.Coerce                      as DC
+import qualified Data.Heap                        as H
+import           Data.Maybe                       (fromJust)
+import           Data.Monoid                      (First (..))
+import           Data.Semigroup                   hiding (First, getFirst, (<>))
+import           Data.Vector                      (Vector)
+import qualified Data.Vector                      as V
+import qualified Data.Vector.Fusion.Bundle        as Bundle
+import qualified Data.Vector.Generic              as GV
 
 data Entry a b = Entry { priority :: !a
                        , payload :: !b
@@ -33,11 +34,11 @@ mkEntry :: (IsOrderedPolynomial poly)
         => Vector poly -> Entry (Signature poly) (Vector poly)
 mkEntry = {-# SCC "mkEntry" #-} Entry <$> signature <*> id
 
-f5 :: (IsOrderedPolynomial a, Field (Coefficient a))
+f5 :: (IsOrderedPolynomial a, Field (Coefficient a), Hashable a)
    => Ideal a -> [a]
 f5 ideal =
-  let sideal = V.fromList $ generators ideal
-  in map snd $ calcSignatureGB sideal
+  let sideal = V.fromList $ map internPolynomial $ generators ideal
+  in map (uninternPolynomial . snd) $ calcSignatureGB sideal
 
 data P a b = P { get1 :: !a, get2 :: !b }
 
