@@ -185,6 +185,18 @@ gcdPolynomial gcdPolynomial505,506
 module Algebra.Ring.PolynomialAlgebra.Ring.Polynomial8,9
 instance instance35,36
 
+./src/Algebra/Ring/Polynomial/Interned.hs,476
+module Algebra.Ring.Polynomial.Interned Algebra.Ring.Polynomial.Interned2,3
+data InternedPolynomial InternedPolynomial9,10
+data InternedPolynomial poly = IP IP9,10
+data InternedPolynomial poly = IP { polynomialId polynomialId9,10
+                                  , uninternPolynomial uninternPolynomial10,11
+internPolynomial internPolynomial13,14
+internPolynomial internPolynomial14,15
+instance instance17,18
+ipCache ipCache179,180
+ipCache ipCache180,181
+
 ./src/Algebra/Ring/Polynomial/Labeled.hs,1159
 module Algebra.Ring.Polynomial.LabeledAlgebra.Ring.Polynomial.Labeled7,8
 type family family36,37

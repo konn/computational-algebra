@@ -26,6 +26,7 @@ dependencies:
 - base
 - halg-core
 - sized
+- intern
 
 default-extensions:
 - CPP

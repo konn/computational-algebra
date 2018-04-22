@@ -1,22 +1,21 @@
-{-# LANGUAGE ScopedTypeVariables, ViewPatterns #-}
+{-# LANGUAGE BangPatterns, ScopedTypeVariables, ViewPatterns #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Algorithms.Groebner.Signature (f5) where
-import           Algebra.Prelude.Core         hiding (Vector)
-import           Control.Lens                 hiding ((.=))
+import           Algebra.Prelude.Core             hiding (Vector)
+import           Algebra.Ring.Polynomial.Interned
+import           Control.Lens                     hiding ((.=))
 import           Control.Monad.Loops
 import           Control.Monad.ST.Combinators
 import           Control.Parallel.Strategies
-import qualified Data.Coerce                  as DC
-import qualified Data.HashMap.Strict          as HM
-import qualified Data.Heap                    as H
-import           Data.Maybe                   (fromJust)
-import           Data.Monoid                  (First (..))
-import           Data.Reflection
-import           Data.Semigroup               hiding (First, getFirst, (<>))
-import           Data.Vector                  (Vector)
-import qualified Data.Vector                  as V
-import qualified Data.Vector.Fusion.Bundle    as Bundle
-import qualified Data.Vector.Generic          as GV
+import qualified Data.Coerce                      as DC
+import qualified Data.Heap                        as H
+import           Data.Maybe                       (fromJust)
+import           Data.Monoid                      (First (..))
+import           Data.Semigroup                   hiding (First, getFirst, (<>))
+import           Data.Vector                      (Vector)
+import qualified Data.Vector                      as V
+import qualified Data.Vector.Fusion.Bundle        as Bundle
+import qualified Data.Vector.Generic              as GV
 
 data Entry a b = Entry { priority :: !a
                        , payload :: !b
@@ -35,11 +34,11 @@ mkEntry :: (IsOrderedPolynomial poly)
         => Vector poly -> Entry (Signature poly) (Vector poly)
 mkEntry = {-# SCC "mkEntry" #-} Entry <$> signature <*> id
 
-f5 :: (IsOrderedPolynomial a, Hashable a, Field (Coefficient a))
+f5 :: (IsOrderedPolynomial a, Field (Coefficient a), Hashable a)
    => Ideal a -> [a]
 f5 ideal =
-  let sideal = V.fromList $ generators ideal
-  in map snd $ calcSignatureGB sideal
+  let sideal = V.fromList $ map internPolynomial $ generators ideal
+  in map (uninternPolynomial . snd) $ calcSignatureGB sideal
 
 data P a b = P { get1 :: !a, get2 :: !b }
 
@@ -52,7 +51,7 @@ parMapMaybe :: (a -> Maybe b) -> [a] -> [b]
 parMapMaybe f = catMaybes . parMap rseq f
 
 calcSignatureGB :: forall poly.
-                   (Hashable poly, Field (Coefficient poly), IsOrderedPolynomial poly)
+                   (Field (Coefficient poly), IsOrderedPolynomial poly)
                 => V.Vector poly -> [(V.Vector poly, poly)]
 calcSignatureGB side | null side = []
 calcSignatureGB (V.map monoize -> sideal) = runST $ do
@@ -68,14 +67,13 @@ calcSignatureGB (V.map monoize -> sideal) = runST $ do
           | j <- [0..n-1]
           , i <- [0..j-1]
           ]
-  phiDic <- newSTRef (HM.empty :: HM.HashMap (Vector poly) poly)
   whileJust_ (H.viewMin <$!> readSTRef ps) $ \(Entry gSig g, ps') -> do
     ps .= ps'
     gs0 <- readSTRef gs
     ss0 <- readSTRef syzs
     unless ({-# SCC "standardCr" #-}standardCriterion gSig ss0 || any ((== gSig) . priority . get2) gs0) $ do
-      (h, ph) <- give phiDic $ reduceSignature sideal g gs0
-      let h' = {-# SCC "scaling" #-} V.map (* injectCoeff (recip $ leadingCoeff ph)) h
+      let (h, ph) = reduceSignature sideal g gs0
+          h' = {-# SCC "scaling" #-} V.map (* injectCoeff (recip $ leadingCoeff ph)) h
       if isZero ph
         then syzs .%= (mkEntry h : )
         else do
@@ -143,39 +141,23 @@ signature = {-# SCC "signature" #-}
 basis :: (Monoidal a, Unital a) => Int -> Int -> Vector a
 basis len i = V.generate len $ \j -> if i == j then one else zero
 
-reduceSignature :: (IsOrderedPolynomial poly, Hashable poly,
-                    Field (Coefficient poly), Foldable t, Given (STRef s (HM.HashMap (Vector poly) poly )))
+reduceSignature :: (IsOrderedPolynomial poly, Field (Coefficient poly), Foldable t)
                 => Vector poly -> Vector poly
                 -> t (P poly (Entry (Signature poly) (Vector poly)))
-                -> ST s (Vector poly, poly)
-reduceSignature ideal g hs = do
-  uRef <- newSTRef g
-  phiu <- newSTRef =<< phi g
-  rRef <- newSTRef zero
-  flip untilM_ ((==) <$> readSTRef rRef <*> readSTRef phiu) $ do
-    u <- readSTRef uRef
-    m <- (leadingTerm .) . (-) <$> readSTRef phiu <*> readSTRef rRef
-    let tryCancel (P hi' (Entry _ hi)) = First $ do
-          let fac = toPolynomial (m `tryDiv` leadingTerm hi')
-              quo = V.map (fac *) hi
-          guard $ (leadingMonomial hi' `divs` snd m) && (signature quo < signature u)
-          return (quo, fac * hi')
-    case getFirst $ foldMap tryCancel hs of
-      Nothing -> rRef .%= (+ toPolynomial m)
-      Just (d, phid)  -> do
-        uRef .%= V.zipWith subtract d
-        phiu .%= subtract phid
-  (,) <$> readSTRef uRef <*> readSTRef phiu
+                -> (Vector poly, poly)
+reduceSignature ideal g hs =
+  fst $ flip (until (\((_, phiu), r) -> phiu == r)) ((g, phi g), zero) $ \((u, !phiu), r) ->
+  let m = leadingTerm $ phiu - r
+      tryCancel (P hi' (Entry _ hi)) = First $ do
+        let fac = toPolynomial (m `tryDiv` leadingTerm hi')
+            quo = V.map (fac *) hi
+        guard $ (leadingMonomial hi' `divs` snd m) && (signature quo < signature u)
+        return (quo, fac * hi')
+  in case getFirst $ foldMap tryCancel hs of
+    Nothing -> ((u, phiu), r + toPolynomial m)
+    Just (d, phid)  -> ((V.zipWith (-) u d, phiu - phid), r)
   where
-    phi v = do
-      dic <- readSTRef given
-      case HM.lookup v dic of
-        Just u -> return u
-        Nothing -> do
-          let ans = sumA $ V.zipWith (*) ideal v
-          writeSTRef given $ HM.insert v ans dic
-          return ans
-
+    phi = sumA . V.zipWith (*) ideal
 
 sumA :: Monoidal c => Vector c -> c
 sumA = Bundle.foldl' (+) zero . GV.stream
