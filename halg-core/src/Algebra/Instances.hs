@@ -13,6 +13,7 @@ import           Data.Complex          (Complex (..))
 import           Data.Convertible.Base (Convertible (..))
 import qualified Data.Ratio            as P
 import qualified Data.Vector           as DV
+import           Data.Vector.Instances ()
 import qualified Numeric.Algebra       as NA
 import qualified Prelude               as P
 
@@ -170,6 +171,3 @@ instance (Random (Fraction Integer)) where
         ub = g * numerator b `quot` denominator b
     i <- getRandomR (lb, ub)
     return $ i % g
-
-instance Hashable a => Hashable (DV.Vector a) where
-  hashWithSalt s = hashWithSalt s . DV.toList

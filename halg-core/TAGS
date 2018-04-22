@@ -430,4 +430,4 @@ instance instance20,21
 
 ./src/Algebra/Instances.hs,73
 module Algebra.Instances Algebra.Instances4,5
-instance instance18,19
+instance instance19,20
