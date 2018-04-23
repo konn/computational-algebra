@@ -174,10 +174,6 @@ benchmarks:
     <<: *bench-common
     main: quotient-bench-randomized.hs
     other-modules: []
-  sugar-paper-bench:
-    <<: *bench-common
-    main: sugar-paper.hs
-    other-modules: []
   solve-bench:
     <<: *bench-common
     main: solve.hs
