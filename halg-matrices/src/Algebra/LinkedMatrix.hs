@@ -547,8 +547,7 @@ structuredGauss' = evalState go . newGaussianState
           prevCol .= pivCol
           let trav b _ ent = do
                 if (ent ^. coordL Row) < destRow
-                  then do
-                  return b
+                  then return b
                   else do
                   let lc = countLight heavys (ent ^. coordL Row) old
                   return $ case b of
@@ -564,13 +563,12 @@ structuredGauss' = evalState go . newGaussianState
                   pivCoe = pivot ^. value
                   sgn    = if pivRow == destRow then one else negate one
               p0 <- use output
-              let elim (m, p) _ ent = do
+              let elim (m, p) _ ent =
                     if ent^.coordL Row /= pivRow
                       then do
                         let coe = negate (ent ^. value) / pivCoe
                         return $ (m, p) & both %~ combineRows coe pivRow (ent ^. coordL Row)
-                      else do
-                        return (m, p)
+                      else return (m, p)
               (input', output') <- traverseDirM (old, p0) elim Column pivCol old
                     <&> both %~ scaleRow (recip pivCoe) destRow . switchRows destRow pivRow
               input .= input'
@@ -683,7 +681,7 @@ toSquare _ = Square
 (<.>) :: (Multiplicative m, Monoidal m) => Vector m -> Vector m -> m
 v <.> u = sum $ V.zipWith (*) v u
 
-krylovMinpol :: (Eq a, Ring a, DecidableZero a, DecidableUnits a,
+krylovMinpol :: (Eq a, Ring a, CoeffRing a, DecidableUnits a,
                  Field a, ZeroProductSemiring a,
                  Random a, MonadRandom m)
              => Matrix a -> Vector a -> m (Polynomial a 1)
@@ -699,7 +697,7 @@ krylovMinpol m b
       n = ncols m
 
 -- | Solving linear equation using linearly recurrent sequence (Wiedemann algorithm).
-solveWiedemann :: (Eq a, Field a, DecidableZero a, DecidableUnits a,
+solveWiedemann :: (Eq a, Field a, CoeffRing a, DecidableUnits a,
                 ZeroProductSemiring a, Random a, MonadRandom m)
             => Matrix a -> Vector a -> m (Either (Vector a) (Vector a))
 solveWiedemann a b = do

@@ -22,6 +22,7 @@ module Algebra.Ring.Polynomial.Class
          -- * Default instances
          isUnitDefault, recipUnitDefault, isAssociateDefault
        , splitUnitDefault
+       , defaultHashWithSalt
        ) where
 import           Algebra.Internal
 import           Algebra.Normed
@@ -34,6 +35,7 @@ import           Control.Lens                     (Iso', folded, ifoldMap, iso,
                                                    _Wrapped)
 import           Data.Foldable                    (foldr, maximum)
 import qualified Data.Foldable                    as F
+import           Data.Hashable                    (Hashable)
 import qualified Data.HashSet                     as HS
 import           Data.Int
 import           Data.Kind                        (Type)
@@ -62,14 +64,14 @@ import qualified Prelude                          as P
 infixl 7 *<, >*, *|<, >|*, !*
 
 -- | Constraint synonym for rings that can be used as polynomial coefficient.
-class    (DecidableZero r, Ring r, Commutative r, Eq r) => CoeffRing r
-instance (DecidableZero r, Ring r, Commutative r, Eq r) => CoeffRing r
+class    (DecidableZero r, Ring r, Commutative r, Eq r, Hashable r) => CoeffRing r
+instance (DecidableZero r, Ring r, Commutative r, Eq r, Hashable r) => CoeffRing r
 
 -- | Polynomial in terms of free associative commutative algebra generated
 --   by n-elements.
 --   To effectively compute all terms, we need @'monomials'@ in addition to
 --   universality of free object.
-class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arity poly),
+class (CoeffRing (Coefficient poly), Hashable poly, Eq poly, DecidableZero poly, KnownNat (Arity poly),
        Module (Scalar (Coefficient poly)) poly, Ring poly, Commutative poly)
    => IsPolynomial poly where
   {-# MINIMAL ((liftMap , monomials) | terms'), (sArity | sArity') , (fromMonomial | toPolynomial' | polynomial') #-}
@@ -302,6 +304,9 @@ class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrder
   mapMonomialMonotonic tr  =
     _Terms %~ M.mapKeysMonotonic tr
   {-# INLINE mapMonomialMonotonic #-}
+
+defaultHashWithSalt :: IsOrderedPolynomial poly => Int -> poly -> Int
+defaultHashWithSalt s = hashWithSalt s . M.toList . terms
 
 defaultTerms :: IsOrderedPolynomial poly
              => poly -> Map (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)

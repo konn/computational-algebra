@@ -67,7 +67,7 @@ divModUnipol f g =
               Unipol $ IM.insert deg coe $ runUnipol acc
 {-# INLINE divModUnipol #-}
 
-divModUnipolByMult :: (Eq r, Field r) => Unipol r -> Unipol r -> (Unipol r, Unipol r)
+divModUnipolByMult :: (Eq r, Hashable r, Field r) => Unipol r -> Unipol r -> (Unipol r, Unipol r)
 divModUnipolByMult f g =
   if isZero g then error "Divided by zero!" else
   let ((n,_), (m,_)) = (leadingTermIM f, leadingTermIM g)
@@ -82,7 +82,7 @@ divModUnipolByMult f g =
      else (zero, f)
 {-# INLINE divModUnipolByMult #-}
 
-recipBinPow :: (Eq r, Field r)
+recipBinPow :: (Eq r, Field r, Hashable r)
             => Int -> Unipol r -> Unipol r
 recipBinPow i f =
   let g 0 = Unipol $ IM.singleton 0 $ recip (constantTerm f)
@@ -105,26 +105,26 @@ reversalIMWith d = Unipol . IM.mapKeys (d -) . runUnipol
 
 
 
-instance (Eq r, Field r) => DecidableUnits (Unipol r) where
+instance (Eq r, Field r, Hashable r) => DecidableUnits (Unipol r) where
   isUnit f =
     let (lc, lm) = leadingTerm f
     in lm == one && isUnit lc
   recipUnit f | isUnit f  = injectCoeff <$> recipUnit (leadingCoeff f)
               | otherwise = Nothing
-instance (Eq r, Field r) => DecidableAssociates (Unipol r) where
+instance (Eq r, Field r, Hashable r) => DecidableAssociates (Unipol r) where
   isAssociate = (==) `on` normaliseUnit
 
-instance (Eq r, Field r) => UnitNormalForm (Unipol r) where
+instance (Eq r, Field r, Hashable r) => UnitNormalForm (Unipol r) where
   splitUnit f
       | isZero f = (zero, f)
       | otherwise = let lc = leadingCoeff f
                     in (injectCoeff lc, injectCoeff (recip lc) * f)
-instance (Eq r, Field r) => GCDDomain (Unipol r)
-instance (Eq r, Field r) => ZeroProductSemiring (Unipol r)
-instance (Eq r, Field r) => IntegralDomain (Unipol r)
-instance (Eq r, Field r) => UFD (Unipol r)
-instance (Eq r, Field r) => PID (Unipol r)
-instance (Eq r, Field r) => Euclidean (Unipol r) where
+instance (Eq r, Field r, Hashable r) => GCDDomain (Unipol r)
+instance (Eq r, Field r, Hashable r) => ZeroProductSemiring (Unipol r)
+instance (Eq r, Field r, Hashable r) => IntegralDomain (Unipol r)
+instance (Eq r, Field r, Hashable r) => UFD (Unipol r)
+instance (Eq r, Field r, Hashable r) => PID (Unipol r)
+instance (Eq r, Field r, Hashable r) => Euclidean (Unipol r) where
   divide f g =
     if totalDegree' f `min` totalDegree' g < 50
     then divModUnipol f g

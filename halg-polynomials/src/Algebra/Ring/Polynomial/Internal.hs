@@ -18,7 +18,7 @@ module Algebra.Ring.Polynomial.Internal
       allVars, substVar, homogenize, unhomogenize,
       normalize, varX, getTerms, shiftR, orderedBy,
       mapCoeff, reversal, padeApprox,
-      eval, evalUnivariate,
+      eval, evalUnivariate, mapOrderedMonomial,
       substUnivariate, minpolRecurrent,
       IsOrder(..),
       PadPolyL(..),
@@ -29,14 +29,16 @@ import Algebra.Ring.Polynomial.Class
 import Algebra.Ring.Polynomial.Monomial
 import Algebra.Scalar
 
-import           AlgebraicPrelude
+import           AlgebraicPrelude                      hiding (Map)
 import           Control.DeepSeq                       (NFData)
 import           Control.Lens
 import qualified Data.Coerce                           as C
 import qualified Data.HashSet                          as HS
-import           Data.Map                              (Map)
-import qualified Data.Map.Merge.Strict                 as MM
-import qualified Data.Map.Strict                       as M
+import           Data.Map.Interned                     (Map)
+import qualified Data.Map.Interned                     as M
+import qualified Data.Map.Interned                     as MM
+import qualified Data.Map.Interned.Conversion          as MC
+import qualified Data.Map.Strict                       as CM
 import           Data.MonoTraversable                  (osum)
 import qualified Data.Set                              as Set
 import           Data.Singletons.Prelude.List          (Replicate)
@@ -78,13 +80,14 @@ instance (KnownNat n, IsMonomialOrder n ord, CoeffRing r) => IsPolynomial (Order
   fromMonomial m = Polynomial $ M.singleton (OrderedMonomial m) one
   {-# INLINE fromMonomial #-}
 
-  toPolynomial' (r, m) = Polynomial $ M.singleton (OrderedMonomial m) r
+  toPolynomial' (r, m) | isZero r  = Polynomial M.empty
+                       | otherwise = Polynomial $ M.singleton (OrderedMonomial m) r
   {-# INLINE toPolynomial' #-}
 
-  polynomial' dic = normalize $ Polynomial $ M.mapKeys OrderedMonomial dic
+  polynomial' dic = normalize $ Polynomial $ M.mapKeys OrderedMonomial $ MC.fromContainers dic
   {-# INLINE polynomial' #-}
 
-  terms'    = M.mapKeys getMonomial . terms
+  terms'    = CM.fromList . map (first getMonomial) . M.toList . _terms
   {-# INLINE terms' #-}
 
   liftMap mor poly = sum $ map (uncurry (.*) . (Scalar *** extractPower)) $ getTerms poly
@@ -96,13 +99,13 @@ instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
       => IsOrderedPolynomial (OrderedPolynomial r ord n) where
   -- | coefficient for a degree.
   type MOrder (OrderedPolynomial r ord n) = ord
-  coeff d = M.findWithDefault zero d . terms
+  coeff d = fromMaybe zero . M.lookup d . _terms
   {-# INLINE coeff #-}
 
-  terms = C.coerce
+  terms = MC.toContainers . _terms
   {-# INLINE terms #-}
 
-  orderedMonomials = M.keysSet . terms
+  orderedMonomials = Set.fromList . M.keys . _terms
   {-# INLINE orderedMonomials #-}
 
   toPolynomial (c, deg) =
@@ -111,10 +114,10 @@ instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
     else Polynomial $ M.singleton deg c
   {-# INLINE toPolynomial #-}
 
-  polynomial = normalize . C.coerce
+  polynomial = Polynomial . M.filter (not . isZero) . MC.fromContainers
   {-# INLINE polynomial #-}
 
-  (>*) m = Polynomial . M.mapKeysMonotonic (m *) . C.coerce
+  (>*) m = Polynomial . M.mapKeysMonotonic (m *) . _terms
   {-# INLINE (>*) #-}
 
   leadingTerm (Polynomial d) =
@@ -135,7 +138,7 @@ instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
 instance (KnownNat n, CoeffRing r, IsMonomialOrder n order)
          => Wrapped (OrderedPolynomial r order n) where
   type Unwrapped (OrderedPolynomial r order n) = Map (OrderedMonomial order n) r
-  _Wrapped' = iso terms polynomial
+  _Wrapped' = iso _terms (normalize . Polynomial)
 
 instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord, t ~ OrderedPolynomial q ord' m)
          => Rewrapped (OrderedPolynomial r ord n) t
@@ -155,10 +158,10 @@ scastPolynomial _ = castPolynomial
 
 mapCoeff :: (KnownNat n, CoeffRing b, IsMonomialOrder n ord)
          => (a -> b) -> OrderedPolynomial a ord n -> OrderedPolynomial b ord n
-mapCoeff f (Polynomial dic) = polynomial $ M.map f dic
+mapCoeff f (Polynomial dic) = Polynomial $ M.mapSparse f dic
 {-# INLINE mapCoeff #-}
 
-normalize :: (DecidableZero r)
+normalize :: (DecidableZero r, CoeffRing r, IsMonomialOrder n order)
           => OrderedPolynomial r order n -> OrderedPolynomial r order n
 normalize (Polynomial dic) =
   Polynomial $ M.filter (not . isZero) dic
@@ -182,28 +185,38 @@ decZero n | isZero n = Nothing
 
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Rig (OrderedPolynomial r order n)
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Group (OrderedPolynomial r order n) where
-  negate (Polynomial dic) = Polynomial $ fmap negate dic
+  negate (Polynomial dic) = Polynomial $ M.map negate dic
   {-# INLINE negate #-}
 
-  Polynomial f - Polynomial g = Polynomial $ M.mergeWithKey (\_ i j -> decZero (i - j)) id (fmap negate) f g
+  Polynomial f - Polynomial g =
+    Polynomial $
+    M.merge M.preserveMissing
+      (const $ Just . negate)
+      (\_ i j -> decZero (i - j)) f g
   {-# INLINE (-) #-}
 
+decZero2 :: DecidableZero c => (a -> b -> c) -> a -> b -> Maybe c
+decZero2 f a b = decZero (f a b)
+{-# INLINE decZero2 #-}
 
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => LeftModule Integer (OrderedPolynomial r order n) where
-  n .* Polynomial dic = polynomial $ fmap (n .*) dic
+  0 .* _ = Polynomial M.empty
+  n .* Polynomial dic = Polynomial $ M.mapSparse (n .*) dic
   {-# INLINE (.*) #-}
 
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => RightModule Integer (OrderedPolynomial r order n) where
   (*.) = flip (.*)
   {-# INLINE (*.) #-}
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Additive (OrderedPolynomial r order n) where
-  (Polynomial f) + (Polynomial g) = polynomial $ M.unionWith (+) f g
+  (Polynomial f) + (Polynomial g) =
+    Polynomial $ M.merge M.preserveMissing M.preserveMissing (M.zipWithMaybeMatched $ const $ decZero2 (+)) f g
   {-# INLINE (+) #-}
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Monoidal (OrderedPolynomial r order n) where
   zero = Polynomial M.empty
   {-# INLINE zero #-}
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => LeftModule Natural (OrderedPolynomial r order n) where
-  n .* Polynomial dic = polynomial $ fmap (n .*) dic
+  0 .* _ = Polynomial M.empty
+  n .* Polynomial dic = Polynomial $ M.mapSparse (n .*) dic
   {-# INLINE (.*) #-}
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => RightModule Natural (OrderedPolynomial r order n) where
   (*.) = flip (.*)
@@ -228,11 +241,11 @@ instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Semiring (Ordered
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Commutative (OrderedPolynomial r order n) where
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Abelian (OrderedPolynomial r order n) where
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => LeftModule (Scalar r) (OrderedPolynomial r order n) where
-  Scalar r .* Polynomial dic = polynomial $ fmap (r*) dic
+  Scalar r .* Polynomial dic = Polynomial $ M.mapSparse (r*) dic
   {-# INLINE (.*) #-}
 
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => RightModule (Scalar r) (OrderedPolynomial r order n) where
-  Polynomial dic *. Scalar r = polynomial $ fmap (r*) dic
+  Polynomial dic *. Scalar r = Polynomial $ M.mapSparse (r*) dic
   {-# INLINE (*.) #-}
 
 
@@ -271,29 +284,29 @@ instance (CoeffRing r, KnownNat n, IsMonomialOrder n ord) => DecidableZero (Orde
   isZero (Polynomial d) = M.null d
   {-# INLINE isZero #-}
 
-instance (Eq r, KnownNat n, Euclidean r, IsMonomialOrder n ord)
+instance (CoeffRing r, KnownNat n, Euclidean r, IsMonomialOrder n ord)
       => DecidableAssociates (OrderedPolynomial r ord n) where
   isAssociate = isAssociateDefault
   {-# INLINE isAssociate #-}
 
-instance (Eq r, Euclidean r, KnownNat n,
+instance (CoeffRing r, Euclidean r, KnownNat n,
           IsMonomialOrder n ord)
       => UnitNormalForm (OrderedPolynomial r ord n) where
   splitUnit = splitUnitDefault
   {-# INLINE splitUnit #-}
 
 instance {-# OVERLAPPING #-}
-         (Eq r, DecidableUnits r, DecidableZero r, Field r,
+         (CoeffRing r, DecidableUnits r, Field r,
           IsMonomialOrder 1 ord, ZeroProductSemiring r)
          => GCDDomain (OrderedPolynomial r ord 1)
 instance {-# OVERLAPPING #-}
-         (Eq r, DecidableUnits r, DecidableZero r, Field r,
+         (CoeffRing r, DecidableUnits r, Field r,
           IsMonomialOrder 1 ord, ZeroProductSemiring r)
          => UFD (OrderedPolynomial r ord 1)
-instance (Eq r, DecidableUnits r, DecidableZero r, Field r,
+instance (CoeffRing r, DecidableUnits r, Field r,
           IsMonomialOrder 1 ord, ZeroProductSemiring r)
       => PID (OrderedPolynomial r ord 1)
-instance (Eq r, DecidableUnits r, DecidableZero r, Field r, IsMonomialOrder 1 ord, ZeroProductSemiring r) => Euclidean (OrderedPolynomial r ord 1) where
+instance (CoeffRing r, DecidableUnits r, Field r, IsMonomialOrder 1 ord, ZeroProductSemiring r) => Euclidean (OrderedPolynomial r ord 1) where
   f0 `divide` g = step f0 zero
     where
       lm = leadingMonomial g
@@ -307,16 +320,16 @@ instance (Eq r, DecidableUnits r, DecidableZero r, Field r, IsMonomialOrder 1 or
            | otherwise = Just $ P.fromIntegral $ totalDegree' f
 
 
-instance (Eq r, DecidableUnits r, DecidableZero r, KnownNat n,
+instance (CoeffRing r, DecidableUnits r, KnownNat n,
           Field r, IsMonomialOrder n ord, ZeroProductSemiring r)
        => ZeroProductSemiring (OrderedPolynomial r ord n)
 
 instance {-# OVERLAPPING #-}
-         (Eq r, DecidableUnits r, DecidableZero r,
+         (CoeffRing r, DecidableUnits r,
           Field r, IsMonomialOrder 1 ord, ZeroProductSemiring r)
        => IntegralDomain (OrderedPolynomial r ord 1)
 
-instance (Eq r, DecidableUnits r, DecidableZero r, KnownNat n,
+instance (CoeffRing r, DecidableUnits r, KnownNat n,
           Field r, IsMonomialOrder n ord, ZeroProductSemiring r)
        => IntegralDomain (OrderedPolynomial r ord n) where
   p `divides` q = isZero $ p `modPolynomial` [q]
@@ -391,7 +404,7 @@ getTerms = map (snd &&& fst) . M.toDescList . _terms
 transformMonomial :: (IsMonomialOrder m o, CoeffRing k, KnownNat m)
                   => (USized n Int -> USized m Int) -> OrderedPolynomial k o n -> OrderedPolynomial k o m
 transformMonomial tr (Polynomial d) =
-  polynomial $ M.mapKeys (OrderedMonomial . tr . getMonomial) d
+  Polynomial $ M.mapKeys (OrderedMonomial . tr . getMonomial) d
 
 orderedBy :: OrderedPolynomial k o n -> o -> OrderedPolynomial k o n
 p `orderedBy` _ = p
@@ -436,7 +449,7 @@ padeApprox k nmk g =
   in (r, t)
 
 
-minpolRecurrent :: forall k. (Eq k, ZeroProductSemiring k, DecidableUnits k, DecidableZero k, Field k)
+minpolRecurrent :: forall k. (CoeffRing k, ZeroProductSemiring k, DecidableUnits k, Field k)
                 => Natural -> [k] -> Polynomial k 1
 minpolRecurrent n xs =
   let h = sum $ zipWith (\a b -> injectCoeff a * b) xs [pow varX i | i <- [0.. pred (2 * n)]]
@@ -446,6 +459,7 @@ minpolRecurrent n xs =
   in reversal d (recip (coeff one t) .*. t)
 
 newtype PadPolyL n ord poly = PadPolyL { runPadPolyL :: OrderedPolynomial poly (Graded ord) n }
+  deriving (Hashable)
 deriving instance (KnownNat n, IsMonomialOrder n ord, IsPolynomial poly)
                => Additive (PadPolyL n ord poly)
 deriving instance (KnownNat n, IsMonomialOrder n ord, IsPolynomial poly)
@@ -513,13 +527,14 @@ instance (KnownNat n, IsMonomialOrder n ord, IsPolynomial poly)
        case S.splitAt sn m of
          (ls, rs) -> PadPolyL $ fromMonomial ls * injectCoeff (fromMonomial rs)
   terms' (PadPolyL m) =
-    M.fromList
+    CM.fromList
     [ (ls S.++ rs, k)
-    | (ls, pol) <- M.toList $ terms' m
-    , (rs, k)   <- M.toList $ terms' pol
+    | (ls, pol) <- CM.toList $ terms' m
+    , (rs, k)   <- CM.toList $ terms' pol
     ]
 
-instance (SingI (Replicate n 1), KnownNat n, IsMonomialOrder n ord, IsOrderedPolynomial poly)
+instance (SingI (Replicate n 1),
+          KnownNat n, IsMonomialOrder n ord, IsOrderedPolynomial poly)
      =>  IsOrderedPolynomial (PadPolyL n ord poly) where
   type MOrder (PadPolyL n ord poly) =
     ProductOrder n (Arity poly) (Graded ord) (MOrder poly)
@@ -528,17 +543,23 @@ instance (SingI (Replicate n 1), KnownNat n, IsMonomialOrder n ord, IsOrderedPol
         (k, OrderedMonomial rs) = leadingTerm p
     in (k, OrderedMonomial $ ls S.++ rs)
 
-padLeftPoly :: (IsMonomialOrder n ord, IsPolynomial poly)
+padLeftPoly :: (IsMonomialOrder n ord, IsPolynomial poly, Hashable poly)
             => Sing n -> ord -> poly -> PadPolyL n ord poly
 padLeftPoly n _ = withKnownNat n $ PadPolyL . injectCoeff
 
-instance (r ~ Coefficient poly, IsPolynomial poly,
+instance (r ~ Coefficient poly, IsPolynomial poly, Hashable poly,
           KnownNat n, CoeffRing r, IsMonomialOrder n order, PrettyCoeff r)
        => Show (PadPolyL n order poly) where
   showsPrec = showsPolynomialWith $ generate sing (\i -> "X_" ++ show (fromEnum i))
 
+mapOrderedMonomial :: (Hashable r, IsMonomialOrder n' ord', Eq r)
+            => (OrderedMonomial ord n -> OrderedMonomial ord' n')
+            -> OrderedPolynomial r ord n -> OrderedPolynomial r ord' n'
+mapOrderedMonomial f (Polynomial r) = Polynomial $ M.mapKeys f r
+
 mapOrderedPolynomial :: forall r r' n n' ord' ord.
-                        (KnownNat n, KnownNat n', CoeffRing r', IsMonomialOrder n' ord')
+                        (KnownNat n, KnownNat n', CoeffRing r', IsMonomialOrder n ord,
+                         IsMonomialOrder n' ord')
                      => (r -> r') -> (Ordinal n -> Ordinal n')
                      -> OrderedPolynomial r ord n -> OrderedPolynomial r' ord' n'
 mapOrderedPolynomial mapCoe mapVar (Polynomial dic) =
@@ -546,8 +567,7 @@ mapOrderedPolynomial mapCoe mapVar (Polynomial dic) =
                   . generate sing . (runAdd .)
                   . ifoldMapMonom (\o l j -> Add $ if j == mapVar o then l else 0)
                   . getMonomial
-  in Polynomial $ M.mapKeys toGenerator $
-     M.mapMaybe (\i -> let c = mapCoe i in if isZero c then Nothing else Just c) dic
+  in Polynomial $ M.mapKeys toGenerator $ M.mapSparse mapCoe dic
 -- Orphan Rules
 {-# RULES
 "convertPolynomial/OrderedPolynomial" [~2]

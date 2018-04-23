@@ -25,6 +25,7 @@ dependencies:
 - algebra
 - base
 - halg-core
+- halg-containers
 - sized
 
 default-extensions:

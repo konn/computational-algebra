@@ -30,7 +30,7 @@ import Algebra.Internal
 import Algebra.Prelude.Core
 import Algebra.Ring.Polynomial.Univariate (Unipol)
 
-import           Control.Lens                 ((%~), (&), _Wrapped)
+import           Control.Lens                 ((%~), (&))
 import           Control.Monad.Loops          (whileM_)
 import           Control.Monad.ST             (ST, runST)
 import qualified Data.Foldable                as F
@@ -371,7 +371,7 @@ unsafeThEliminationIdealWith :: ( IsOrderedPolynomial poly,
                              -> Ideal poly
                              -> Ideal (OrderedPolynomial k Grevlex (m -. n))
 unsafeThEliminationIdealWith ord n ideal =
-  withKnownNat n $ toIdeal [ f & _Wrapped %~ M.mapKeys (orderMonomial Nothing . V.drop n . getMonomial)
+  withKnownNat n $ toIdeal [ f & mapOrderedMonomial (orderMonomial Nothing . V.drop n . getMonomial)
                            | f <- calcGroebnerBasisWith ord ideal
                            , all (oall (== 0) . V.takeAtMost n . getMonomial . snd) $ getTerms f
                            ]
@@ -392,7 +392,7 @@ eliminatePadding ideal =
 
 -- | An intersection ideal of given ideals (using 'WeightedEliminationOrder').
 intersection :: forall poly.
-                ( Field (Coefficient poly), IsOrderedPolynomial poly)
+                (Field (Coefficient poly), IsOrderedPolynomial poly)
              => [Ideal poly]
              -> Ideal poly
 intersection ideals

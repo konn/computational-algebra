@@ -1,0 +1,142 @@
+
+./Setup.hs,15
+main main1,2
+
+./app/Main.hs,52
+module Main Main0,1
+main main4,5
+main main5,6
+
+./test/Spec.hs,30
+main main0,1
+main main1,2
+
+./src/Data/Map/Interned.hs,2968
+module Data.Map.InternedData.Map.Interned2,3
+null null16,17
+null null17,18
+size size21,22
+size size22,23
+keys keys26,27
+keys keys27,28
+map map29,30
+map map30,31
+mapWithKey mapWithKey33,34
+mapWithKey mapWithKey34,35
+toList, toAscList, toDescList toDescList36,37
+toList, toAscList,toAscList36,37
+toList,toList36,37
+toList toList40,41
+toAscList toAscList41,42
+toDescList toDescList42,43
+foldlWithKey foldlWithKey44,45
+foldlWithKey foldlWithKey45,46
+foldrWithKey foldrWithKey51,52
+foldrWithKey foldrWithKey52,53
+data a a58,59
+data a :*: b = !a !a58,59
+toPair toPair60,61
+toPair toPair61,62
+delta,ratio ratio63,64
+delta,delta63,64
+delta delta64,65
+ratio ratio65,66
+bin bin67,68
+bin bin68,69
+balanceL balanceL71,72
+balanceL balanceL72,73
+balanceR balanceR96,97
+balanceR balanceR97,98
+link link119,120
+link link120,121
+insertMax insertMax128,129
+insertMax insertMax129,130
+insertMin insertMin135,136
+insertMin insertMin136,137
+split split142,143
+split split143,144
+insertWith insertWith154,155
+insertWith insertWith155,156
+insertSparse insertSparse171,172
+insertSparse insertSparse173,174
+mapKeysMonotonic mapKeysMonotonic187,188
+mapKeysMonotonic mapKeysMonotonic189,190
+mapKeysAntitonic mapKeysAntitonic192,193
+mapKeysAntitonic mapKeysAntitonic193,194
+singleton singleton196,197
+singleton singleton197,198
+empty empty199,200
+empty empty200,201
+lookup lookup202,203
+lookup lookup203,204
+maxViewWithKey maxViewWithKey213,214
+maxViewWithKey maxViewWithKey215,216
+data MinView MinView221,222
+data MinView k a = MinView MinView221,222
+data MaxView MaxView222,223
+data MaxView k a = MaxView MaxView222,223
+maxViewSure maxViewSure223,224
+maxViewSure maxViewSure224,225
+minViewSure minViewSure232,233
+minViewSure minViewSure233,234
+glue glue241,242
+glue glue242,243
+filter filter249,250
+filter filter250,251
+filterWithKey filterWithKey256,257
+filterWithKey filterWithKey257,258
+link2 link2266,267
+link2 link2267,268
+mapSparse mapSparse274,275
+mapSparse mapSparse275,276
+type WhenMissing WhenMissing282,283
+type WhenMissing k k282,283
+type WhenMatched WhenMatched283,284
+merge merge293,294
+data StrictTriple StrictTriple306,307
+data StrictTriple a b c = StrictTriple StrictTriple306,307
+splitLookup splitLookup307,308
+splitLookup splitLookup308,309
+mapMaybeWithKey mapMaybeWithKey324,325
+mapMaybeWithKey mapMaybeWithKey325,326
+mapMaybe mapMaybe330,331
+mapMaybe mapMaybe332,333
+preserveMissing preserveMissing335,336
+preserveMissing preserveMissing336,337
+zipWithMaybeMatched zipWithMaybeMatched338,339
+zipWithMaybeMatched zipWithMaybeMatched340,341
+zipWithMatched zipWithMatched343,344
+zipWithMatched zipWithMatched345,346
+mapKeys mapKeys348,349
+mapKeys mapKeys349,350
+foldlStrict foldlStrict352,353
+foldlStrict foldlStrict353,354
+fromList fromList359,360
+fromList fromList360,361
+
+./src/Data/Map/Interned/Internal.hs,448
+module Data.Map.Interned.Internal Data.Map.Interned.Internal4,5
+type Size Size10,11
+type Flipped Flipped11,12
+data MapF MapF13,14
+data MapF tag k v a = BinF BinF13,14
+                    | TipFTipF14,15
+newtype Map Map18,19
+  Map Map19,20
+instance instance22,23
+newtype UMap UMap32,33
+newtype UMap k v = UMap UMap32,33
+pattern pattern36,37
+idEq idEq53,54
+idEq idEq54,55
+mapCache mapCache77,78
+mapCache mapCache78,79
+
+./src/Data/Map/Interned/Conversion.hs,251
+module Data.Map.Interned.Conversion Data.Map.Interned.Conversion3,4
+type IMap IMap8,9
+type CMap CMap9,10
+toContainers toContainers11,12
+toContainers toContainers12,13
+fromContainers fromContainers20,21
+fromContainers fromContainers21,22

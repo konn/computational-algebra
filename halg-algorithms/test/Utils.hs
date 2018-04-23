@@ -19,7 +19,8 @@ import           Control.Lens                       hiding ((:<))
 import           Control.Monad
 import           Data.List                          (sortBy)
 import qualified Data.List                          as L
-import qualified Data.Map                           as M
+import qualified Data.Map.Interned                  as M
+import qualified Data.Map.Strict                    as CM
 import qualified Data.Matrix                        as M hiding (fromList)
 import           Data.Ord
 import           Data.Reflection
@@ -40,10 +41,10 @@ newtype ZeroDimIdeal n = ZeroDimIdeal { getIdeal :: Ideal (Polynomial (Fraction 
 genUnipol :: (CoeffRing r, Arbitrary r) => Int -> IO (Unipol r)
 genUnipol len = QC.generate $ fromCoeffVec <$> QC.vectorOf len QC.arbitrary
     where
-      fromCoeffVec = polynomial' . M.fromList . L.zip [singleton n | n <- [0..]]
+      fromCoeffVec = polynomial' . CM.fromList . L.zip [singleton n | n <- [0..]]
 
 appendLM :: (Fraction Integer) -> Monomial 2 -> Polynomial (Fraction Integer) 2 -> Polynomial (Fraction Integer) 2
-appendLM coef lm = _Wrapped %~ M.insert (OrderedMonomial lm) coef
+appendLM coef lm = _Wrapped %~ M.insertWith const (OrderedMonomial lm) coef
 
 xPoly :: Monad m => SC.Series m (Polynomial (Fraction Integer) 2)
 xPoly = do
@@ -83,7 +84,7 @@ genLM m = withKnownNat m $ case zeroOrSucc m of
     coef <- arbitraryRational `suchThat` (/= 0)
     xf <- arbitrary :: QC.Gen (Polynomial (Fraction Integer) n)
     let xlm = OrderedMonomial $ fromListWithDefault (sSucc n) 0 [deg + 1]
-        f = xf & _Wrapped %~ M.insert xlm coef . M.filterWithKey (\k _ -> k < xlm)
+        f = xf & _Wrapped %~ M.insertWith const xlm coef . M.filterWithKey (\k _ -> k < xlm)
     return $ f : fs
 
 zeroDimOf :: SNat n -> QC.Gen (ZeroDimIdeal n)

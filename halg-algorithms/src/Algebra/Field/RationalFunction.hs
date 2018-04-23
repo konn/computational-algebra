@@ -30,7 +30,7 @@ instance (CoeffRing k, PrettyCoeff k) => Show (RationalFunction k) where
   showsPrec d (RF r) = showParen (d > 10) $
     showsPrec 11 (numerator r) . showString " / " . showsPrec 11 (denominator r)
 
-instance (Field k, Eq k) => IsLabel "x" (RationalFunction k) where
+instance (Field k, CoeffRing k) => IsLabel "x" (RationalFunction k) where
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 802
   fromLabel 
 #else
@@ -38,7 +38,7 @@ instance (Field k, Eq k) => IsLabel "x" (RationalFunction k) where
 #endif
     = RF (#x NA.% one)
 
-evalRationalFunctionOnField :: (Eq k, Field k) => RationalFunction k -> k -> k
+evalRationalFunctionOnField :: (CoeffRing k, Field k) => RationalFunction k -> k -> k
 evalRationalFunctionOnField rat k =
   let d = evalRationalFunction rat k
   in numerator d / denominator d
@@ -47,7 +47,7 @@ fromPolynomial :: (IsOrderedPolynomial poly, Arity poly ~ 1, Field (Coefficient 
                => poly -> RationalFunction (Coefficient poly)
 fromPolynomial = RF . (NA.% one) . polynomial' . terms'
 
-variable :: (Eq k, Field k) => RationalFunction k
+variable :: (CoeffRing k, Field k) => RationalFunction k
 variable = #x
 
 evalRationalFunction :: (GCDDomain r, CoeffRing r) => RationalFunction r -> r -> Fraction r
@@ -57,21 +57,21 @@ evalRationalFunction (RF rat) k =
   in p NA.% q
 
 -- | Formal differentiation
-diffRF :: (Eq k, Field k) => RationalFunction k -> RationalFunction k
+diffRF :: (Eq k, Field k, Hashable k) => RationalFunction k -> RationalFunction k
 diffRF (RF pq) =
   let f = numerator pq
       g = denominator pq
   in RF $ (g * diff 0 f - diff 0 g * f) NA.% (g ^ 2)
 
 -- | Formal Taylor expansion
-taylor :: (Eq k, Field k) => RationalFunction k -> [k]
+taylor :: (CoeffRing k, Field k) => RationalFunction k -> [k]
 taylor = go 0 one
   where
     go !n !acc f =
       let acc' = acc / fromInteger' (n + 1)
       in evalRationalFunctionOnField f zero * acc : go (n + 1) acc' (diffRF f)
 
-taylorCoeff :: (Eq k, Field k) => Int -> RationalFunction k -> k
+taylorCoeff :: (CoeffRing k, Field k) => Int -> RationalFunction k -> k
 taylorCoeff n rf =
     evalRationalFunctionOnField (foldr (.) id (replicate n diffRF) rf) zero
   / fromInteger' (product [1..toInteger n])

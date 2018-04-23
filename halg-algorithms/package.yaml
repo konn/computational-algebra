@@ -124,6 +124,7 @@ tests:
     - HUnit
     - ghc-typelits-knownnat
     - halg-core-test
+    - halg-containers
     - halg-polynomials
     - halg-algorithms
     - halg-bridge-singular

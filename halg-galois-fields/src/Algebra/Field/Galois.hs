@@ -39,6 +39,7 @@ import qualified Prelude                      as P
 -- | Galois field of order @p^n@.
 --   @f@ stands for the irreducible polynomial over @F_p@ of degree @n@.
 newtype GF' p (n :: TL.Nat) (f :: Type) = GF' { runGF' :: Sized n (F p) }
+  deriving (Hashable)
 deriving instance Reifies p Integer => Eq (GF' p n f)
 
 -- | Galois Field of order @p^n@. This uses conway polynomials
@@ -53,7 +54,7 @@ modPoly = GF' . polyToVec
 modVec :: Sized n (F p) -> GF' p n f
 modVec = GF'
 
-instance (Reifies p Integer, Show (F p)) => Show (GF' p n f)  where
+instance (Reifies (p :: k) Integer, Show (F p)) => Show (GF' p n f)  where
   showsPrec d (GF' (v :< vs)) =
     if F.all isZero vs
     then showsPrec d v

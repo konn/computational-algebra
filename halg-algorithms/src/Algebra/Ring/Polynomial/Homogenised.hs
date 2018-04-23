@@ -9,6 +9,7 @@ import qualified Data.Map                           as M
 import qualified Data.Sized.Builtin                 as SV
 
 newtype Homogenised poly = Homogenised (Unipol poly)
+  deriving (Hashable)
 
 deriving instance IsOrderedPolynomial poly => Additive (Homogenised poly)
 deriving instance IsOrderedPolynomial poly => Unital (Homogenised poly)

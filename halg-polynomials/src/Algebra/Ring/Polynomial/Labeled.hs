@@ -5,6 +5,7 @@
 {-# LANGUAGE OverloadedLabels, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
 {-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies, TypeInType #-}
 {-# LANGUAGE TypeOperators, UndecidableInstances, UndecidableSuperClasses  #-}
+{-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Ring.Polynomial.Labeled
        (IsUniqueList, LabPolynomial(..),
         LabPolynomial', LabUnipol,
@@ -32,7 +33,6 @@ import qualified Prelude                      as P
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 802
 import qualified Data.Text as T
 #endif
-
 
 type family UniqueList' (x :: Symbol) (xs :: [Symbol]) :: Constraint where
   UniqueList' x '[] = ()
@@ -67,7 +67,7 @@ instance (KnownSymbol symb,
 
 data LabPolynomial poly (vars :: [Symbol]) where
   LabelPolynomial :: (IsUniqueList vars, Length vars ~ Arity poly)
-                  => { unLabelPolynomial :: poly }
+                  => { unLabelPolynomial :: !poly }
                   -> LabPolynomial poly vars
 
 -- | Convenient type-synonym for @'LabPlynomial'@ wrapping @'OrderedPolynomial'@
@@ -246,6 +246,9 @@ instance (IsOrderedPolynomial poly, Wraps vars poly) => IsOrderedPolynomial (Lab
 
   mapMonomialMonotonic f (LabelPolynomial g) = LabelPolynomial $ mapMonomialMonotonic  f g
   {-# INLINE mapMonomialMonotonic #-}
+
+instance (IsPolynomial poly, Wraps vars poly) => Hashable (LabPolynomial poly vars) where
+  hashWithSalt s = hashWithSalt s . unLabelPolynomial
 
 class    (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf (xs :: [a]) (ys :: [a]) where
   _suppress :: proxy xs -> proxy ys -> x -> x

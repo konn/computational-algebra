@@ -16,38 +16,38 @@ module Algebra.Field.Galois Algebra.Field.Galois5,6
 newtype GF' GF'40,41
 newtype GF' p (n :: TL.Nat) (f :: Type) = GF' GF'40,41
 newtype GF' p (n :: TL.Nat) (f :: Type) = GF' { runGF' runGF'40,41
-type GF GF47,48
-type GF (p(47,48
-modPoly modPoly49,50
+type GF GF48,49
+type GF (p(48,49
 modPoly modPoly50,51
-modVec modVec52,53
+modPoly modPoly51,52
 modVec modVec53,54
-instance instance55,56
-varX varX64,65
+modVec modVec54,55
+instance instance56,57
 varX varX65,66
-vecToPoly vecToPoly67,68
-vecToPoly vecToPoly69,70
-polyToVec polyToVec71,72
+varX varX66,67
+vecToPoly vecToPoly68,69
+vecToPoly vecToPoly70,71
 polyToVec polyToVec72,73
-generateIrreducible generateIrreducible180,181
-generateIrreducible generateIrreducible182,183
-withIrreducible withIrreducible188,189
-withIrreducible withIrreducible192,193
-reifyGF' reifyGF'198,199
-reifyGF' reifyGF'202,203
-linearRepGF linearRepGF207,208
+polyToVec polyToVec73,74
+generateIrreducible generateIrreducible181,182
+generateIrreducible generateIrreducible183,184
+withIrreducible withIrreducible189,190
+withIrreducible withIrreducible193,194
+reifyGF' reifyGF'199,200
+reifyGF' reifyGF'203,204
 linearRepGF linearRepGF208,209
-linearRepGF' linearRepGF'210,211
+linearRepGF linearRepGF209,210
 linearRepGF' linearRepGF'211,212
-withGF' withGF'213,214
-withGF' withGF'218,219
-proxyGF' proxyGF'220,221
+linearRepGF' linearRepGF'212,213
+withGF' withGF'214,215
+withGF' withGF'219,220
 proxyGF' proxyGF'221,222
-class (KnownNat n, KnownNat p, Reifies f (Unipol (F p))) => IsGF' IsGF'224,225
-primitive primitive237,238
+proxyGF' proxyGF'222,223
+class (KnownNat n, KnownNat p, Reifies f (Unipol (F p))) => IsGF' IsGF'225,226
 primitive primitive238,239
-conway conway241,242
-conway conway243,244
+primitive primitive239,240
+conway conway242,243
+conway conway244,245
 
 ./src/Algebra/Field/Galois/Conway.hs,223
 module Algebra.Field.Galois.ConwayAlgebra.Field.Galois.Conway3,4

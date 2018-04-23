@@ -34,10 +34,9 @@ import qualified Prelude                      as P
 -- | Prime field of characteristic @p@.
 --   @p@ should be prime, and not statically checked.
 newtype F (p :: k) = F { runF :: Integer }
-                   deriving (NFData)
+                   deriving (NFData, Hashable)
 
-
-instance Reifies p Integer => Read (F p) where
+instance Reifies (p :: k) Integer => Read (F p) where
   readPrec = fromInteger <$> readPrec
 
 modNat :: Reifies (p :: k) Integer => Integer -> F p

@@ -27,6 +27,9 @@ instance DecidableZero r => DecidableZero (Complex r) where
 instance (NFData a) => NFData (Fraction a) where
   rnf a = rnf (numerator a) `seq` rnf (denominator a) `seq` ()
 
+instance Hashable a => Hashable (Fraction a) where
+  hashWithSalt s q = s `hashWithSalt` denominator q `hashWithSalt` numerator q
+
 instance Additive r => Additive (Complex r) where
   (a :+ b) + (c :+ d) = (a + c) :+ (b + d)
 instance Abelian r => Abelian (Complex r) where
