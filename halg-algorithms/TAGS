@@ -402,45 +402,45 @@ calcHomogeneousGroebnerBasisHilbert calcHomogeneousGroebnerBasisHilbert373,374
 
 ./src/Algebra/Algorithms/Groebner/Signature.hs,1276
 module Algebra.Algorithms.Groebner.Signature Algebra.Algorithms.Groebner.Signature2,3
-import import5,6
-data Entry Entry19,20
-data Entry a b = Entry Entry19,20
-data Entry a b = Entry { priority priority19,20
-                       , payload payload20,21
-instance instance23,24
-mkEntry mkEntry32,33
-mkEntry mkEntry34,35
-f5 f536,37
-f5 f538,39
-data P P42,43
-data P a b = P P42,43
-data P a b = P { get1 get142,43
-data P a b = P { get1 :: !a, get2 get242,43
+import import4,5
+data Entry Entry18,19
+data Entry a b = Entry Entry18,19
+data Entry a b = Entry { priority priority18,19
+                       , payload payload19,20
+instance instance22,23
+mkEntry mkEntry31,32
+mkEntry mkEntry33,34
+f5 f535,36
+f5 f537,38
+data P P41,42
+data P a b = P P41,42
+data P a b = P { get1 get141,42
+data P a b = P { get1 :: !a, get2 get241,42
+sec sec43,44
 sec sec44,45
-sec sec45,46
+parMapMaybe parMapMaybe48,49
 parMapMaybe parMapMaybe49,50
-parMapMaybe parMapMaybe50,51
-calcSignatureGB calcSignatureGB52,53
-calcSignatureGB calcSignatureGB55,56
-regularSVector regularSVector88,89
-regularSVector regularSVector92,93
-standardCriterion standardCriterion103,104
-standardCriterion standardCriterion106,107
+calcSignatureGB calcSignatureGB51,52
+calcSignatureGB calcSignatureGB54,55
+regularSVector regularSVector87,88
+regularSVector regularSVector91,92
+standardCriterion standardCriterion102,103
+standardCriterion standardCriterion105,106
+divSig divSig107,108
 divSig divSig108,109
-divSig divSig109,110
-data Signature Signature113,114
-  Signature Signature114,115
-  Signature { _position _position114,115
-            , _sigCoeff _sigCoeff115,116
-            , _sigMonom _sigMonom116,117
-signature signature129,130
-signature signature132,133
+data Signature Signature112,113
+  Signature Signature113,114
+  Signature { _position _position113,114
+            , _sigCoeff _sigCoeff114,115
+            , _sigMonom _sigMonom115,116
+signature signature128,129
+signature signature131,132
+basis basis139,140
 basis basis140,141
-basis basis141,142
-reduceSignature reduceSignature143,144
-reduceSignature reduceSignature147,148
+reduceSignature reduceSignature142,143
+reduceSignature reduceSignature146,147
+sumA sumA160,161
 sumA sumA161,162
-sumA sumA162,163
 
 ./src/Algebra/Algorithms/Groebner/F4.hs,816
 module Algebra.Algorithms.Groebner.F4Algebra.Algorithms.Groebner.F43,4
