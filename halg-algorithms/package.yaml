@@ -211,6 +211,30 @@ benchmarks:
     - -rtsopts
     - -with-rtsopts=-N
 
+  sugar-paper-bench:
+    main: sugar-paper.hs
+    other-modules: []
+    source-dirs:
+    - bench
+    dependencies:
+    - halg-core
+    - halg-core-test
+    - halg-algorithms
+    - constraints
+    - containers
+    - gauge
+    - deepseq
+    - matrix
+    - parallel
+    - process
+    - sized
+    - QuickCheck
+    ghc-options:
+    - -O2
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+
   heavy-bench:
     main:         heavy-bench.hs
     <<: *heavy_bench
