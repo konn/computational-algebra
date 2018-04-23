@@ -22,7 +22,7 @@ asGenListOf = const
 
 spec :: Spec
 spec = parallel $ do
-  describe "divModPolynomial" $ modifyMaxSize (const 25) $ modifyMaxSuccess (const 100) $ do
+  describe "divModPolynomial" $ modifyMaxSize (const 25) $ modifyMaxSuccess (const 25) $ do
     prop "remainder cannot be diveided by any denoms (ternary)" $
       checkForArity [1..4] prop_indivisible
     prop "satisfies a_i f_i /= 0 ==> deg(f) >= deg (a_i f_i)" $

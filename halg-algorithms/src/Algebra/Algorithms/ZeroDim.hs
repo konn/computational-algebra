@@ -178,7 +178,7 @@ solveViaCompanion err ideal =
 matToLists :: M.Matrix a -> [[a]]
 matToLists mat = [ V.toList $ M.getRow i mat | i <- [1.. M.nrows mat] ]
 
-matrixRep :: (DecidableZero t, Eq t, Field t, KnownNat n, IsMonomialOrder n order,
+matrixRep :: (CoeffRing t, Eq t, Field t, KnownNat n, IsMonomialOrder n order,
               Reifies ideal (QIdeal (OrderedPolynomial t order n)))
            => Quotient (OrderedPolynomial t order n) ideal -> [[t]]
 matrixRep f = {-# SCC "matrixRep" #-}
@@ -322,7 +322,7 @@ isRadical ideal =
 
 -- | Calculate the Groebner basis w.r.t. lex ordering of the zero-dimensional ideal using FGLM algorithm.
 --   If the given ideal is not zero-dimensional this function may diverge.
-fglm :: (Ord r, KnownNat n, Field r,
+fglm :: (Ord r, KnownNat n, Field r, CoeffRing r,
          IsMonomialOrder n ord, (0 < n) ~ 'True)
      => Ideal (OrderedPolynomial r ord n)
      -> ([OrderedPolynomial r Lex n], [OrderedPolynomial r Lex n])
@@ -330,7 +330,7 @@ fglm ideal = reifyQuotient ideal $ \pxy ->
   fglmMap (vectorRep . modIdeal' pxy)
 
 -- | Compute the kernel and image of the given linear map using generalized FGLM algorithm.
-fglmMap :: forall k ord n. (Ord k, Field k, (0 < n) ~ 'True,
+fglmMap :: forall k ord n. (Ord k, Field k, (0 < n) ~ 'True, CoeffRing k,
                             IsMonomialOrder n ord, CoeffRing k, KnownNat n)
         => (OrderedPolynomial k ord n -> V.Vector k)
         -- ^ Linear map from polynomial ring.
@@ -348,7 +348,7 @@ fglmMap l = runST $ do
     whileM_ toContinue $ nextMonomial >> mainLoop
     (,) <$> look gLex <*> (map (changeOrder Lex) <$> look bLex)
 
-mainLoop :: (DecidableZero r, Ord r,  KnownNat n, Field r, IsMonomialOrder n o)
+mainLoop :: (CoeffRing r, Ord r,  KnownNat n, Field r, IsMonomialOrder n o)
          => Machine s r o n ()
 mainLoop = do
   m <- look monomial
@@ -372,7 +372,7 @@ mainLoop = do
 
 toContinue :: forall s r o n.
               ((0 < n) ~ 'True, Ord r,
-               KnownNat n, Field r)
+               KnownNat n, Field r, Hashable r)
            => Machine s r o n Bool
 toContinue = do
   mans <- look proced
@@ -403,5 +403,5 @@ beta xs o@(OLt k) =
   in withRefl (lneqSuccLeq k n) $
      withRefl (plusComm (n %- sSucc k) (sSucc k)) $
      withRefl (minusPlus n (sSucc k) Witness) $
-     (SV.take (sSucc k) $ xs & ix o +~ 1) SV.++ SV.replicate (n %- sSucc k) 0
+     SV.take (sSucc k) (xs & ix o +~ 1) SV.++ SV.replicate (n %- sSucc k) 0
 beta _ _ = error "beta: Bug in ghc!"

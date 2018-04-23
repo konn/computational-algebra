@@ -29,12 +29,12 @@ import Algebra.Ring.Polynomial.Monomial
 import AlgebraicPrelude
 
 instance {-# OVERLAPPABLE #-}
-         (KnownNat n, Eq r, DecidableUnits r, DecidableZero r, Field r,
+         (KnownNat n, Eq r, DecidableUnits r, CoeffRing r, Field r,
           IsMonomialOrder n ord, ZeroProductSemiring r)
       => UFD (OrderedPolynomial r ord n)
 
 instance {-# OVERLAPPABLE #-}
-         (KnownNat n, Eq r, DecidableUnits r, DecidableZero r, Field r,
+         (KnownNat n, CoeffRing r, DecidableUnits r, Field r,
           IsMonomialOrder n ord, ZeroProductSemiring r)
       => GCDDomain (OrderedPolynomial r ord n) where
   gcd = gcdPolynomial

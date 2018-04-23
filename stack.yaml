@@ -13,6 +13,7 @@ packages:
 - 'halg-factor'
 - 'halg-algebraic'
 - 'halg-bridge-singular'
+- 'halg-containers'
 
 flags:
   computational-algebra:

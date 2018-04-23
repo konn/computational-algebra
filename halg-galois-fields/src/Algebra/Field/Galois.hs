@@ -1,9 +1,8 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs  #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses      #-}
-{-# LANGUAGE NoMonomorphismRestriction, ParallelListComp, PolyKinds #-}
-{-# LANGUAGE QuasiQuotes, RankNTypes, ScopedTypeVariables           #-}
-{-# LANGUAGE StandaloneDeriving, TypeFamilies, TypeOperators        #-}
-{-# LANGUAGE UndecidableInstances                                   #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction      #-}
+{-# LANGUAGE ParallelListComp, PolyKinds, QuasiQuotes, RankNTypes  #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeFamilies #-}
+{-# LANGUAGE TypeOperators, UndecidableInstances                   #-}
 module Algebra.Field.Galois (GF'(), IsGF', modPoly, modVec,
                              withIrreducible, linearRepGF, linearRepGF',
                              reifyGF', generateIrreducible,
@@ -22,7 +21,6 @@ import           Control.Monad.Loops          (iterateUntil)
 import           Control.Monad.Random         (MonadRandom)
 import           Control.Monad.Random         (uniform)
 import qualified Data.Foldable                as F
-import           Data.Hashable                (Hashable)
 import           Data.Kind                    (Type)
 import qualified Data.Ratio                   as Rat
 import           Data.Reflection              (Reifies (..), reify)
@@ -41,8 +39,8 @@ import qualified Prelude                      as P
 -- | Galois field of order @p^n@.
 --   @f@ stands for the irreducible polynomial over @F_p@ of degree @n@.
 newtype GF' p (n :: TL.Nat) (f :: Type) = GF' { runGF' :: Sized n (F p) }
-deriving instance Reifies (p :: k) Integer => Eq (GF' p n f)
-deriving instance Hashable p => Hashable (GF' p n f)
+  deriving (Hashable)
+deriving instance Reifies p Integer => Eq (GF' p n f)
 
 -- | Galois Field of order @p^n@. This uses conway polynomials
 --   as canonical minimal polynomial and it should be known at
@@ -56,7 +54,7 @@ modPoly = GF' . polyToVec
 modVec :: Sized n (F p) -> GF' p n f
 modVec = GF'
 
-instance (Reifies p Integer, Show (F p)) => Show (GF' p n f)  where
+instance (Reifies (p :: k) Integer, Show (F p)) => Show (GF' p n f)  where
   showsPrec d (GF' (v :< vs)) =
     if F.all isZero vs
     then showsPrec d v

@@ -282,45 +282,45 @@ structuredGauss structuredGauss524,525
 structuredGauss structuredGauss526,527
 structuredGauss' structuredGauss'528,529
 structuredGauss' structuredGauss'530,531
-nonZeroEntries nonZeroEntries586,587
-nonZeroEntries nonZeroEntries587,588
+nonZeroEntries nonZeroEntries584,585
+nonZeroEntries nonZeroEntries585,586
+multWithVector multWithVector587,588
 multWithVector multWithVector589,590
-multWithVector multWithVector591,592
-nonZeroDirs nonZeroDirs595,596
-nonZeroDirs nonZeroDirs596,597
-nonZeroRows nonZeroRows598,599
-nonZeroRows nonZeroRows599,600
-nonZeroCols nonZeroCols601,602
-nonZeroCols nonZeroCols602,603
-newtype Square Square615,616
-newtype Square n r = Square Square615,616
-newtype Square n r = Square { runSquare runSquare615,616
+nonZeroDirs nonZeroDirs593,594
+nonZeroDirs nonZeroDirs594,595
+nonZeroRows nonZeroRows596,597
+nonZeroRows nonZeroRows597,598
+nonZeroCols nonZeroCols599,600
+nonZeroCols nonZeroCols600,601
+newtype Square Square613,614
+newtype Square n r = Square Square613,614
+newtype Square n r = Square { runSquare runSquare613,614
+substMatrix substMatrix669,670
 substMatrix substMatrix671,672
-substMatrix substMatrix673,674
-toSquare toSquare679,680
-toSquare toSquare680,681
-(<.>)<.>682,683
-v v683,684
-krylovMinpol krylovMinpol685,686
-krylovMinpol krylovMinpol689,690
-solveWiedemann solveWiedemann701,702
-solveWiedemann solveWiedemann704,705
-rankLM rankLM714,715
-rankLM rankLM715,716
-splitIndependentDirs splitIndependentDirs719,720
-splitIndependentDirs splitIndependentDirs724,725
-intDet intDet740,741
-intDet intDet741,742
-shiftHalf shiftHalf758,759
-shiftHalf shiftHalf759,760
-triangulateModular triangulateModular763,764
-triangulateModular triangulateModular766,767
-lcm' lcm'818,819
-lcm' lcm'819,820
-henselLift henselLift821,822
-henselLift henselLift821,822
-solveHensel solveHensel837,838
-solveHensel solveHensel841,842
+toSquare toSquare677,678
+toSquare toSquare678,679
+(<.>)<.>680,681
+v v681,682
+krylovMinpol krylovMinpol683,684
+krylovMinpol krylovMinpol687,688
+solveWiedemann solveWiedemann699,700
+solveWiedemann solveWiedemann702,703
+rankLM rankLM712,713
+rankLM rankLM713,714
+splitIndependentDirs splitIndependentDirs717,718
+splitIndependentDirs splitIndependentDirs722,723
+intDet intDet738,739
+intDet intDet739,740
+shiftHalf shiftHalf756,757
+shiftHalf shiftHalf757,758
+triangulateModular triangulateModular761,762
+triangulateModular triangulateModular764,765
+lcm' lcm'816,817
+lcm' lcm'817,818
+henselLift henselLift819,820
+henselLift henselLift819,820
+solveHensel solveHensel835,836
+solveHensel solveHensel839,840
 
 ./src/Algebra/Matrix/RepaIntMap.hs,1878
 module Algebra.Matrix.RepaIntMapAlgebra.Matrix.RepaIntMap5,6
