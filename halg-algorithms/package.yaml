@@ -102,6 +102,25 @@ executables:
   katsura-prof:
     main:                katsura-prof.hs
     <<: *prof-settings
+  f5-subpol-bench:
+    main: f5-subpol-bench.hs
+    source-dirs:
+    - app
+    - shared
+    other-modules:
+    - Cases
+    ghc-options:
+    - -Wall
+    - -threaded
+    - -rtsopts
+    - -O2
+    - -with-rtsopts=-N
+    dependencies:
+    - halg-core
+    - halg-polynomials
+    - halg-algorithms
+    - deepseq
+    - singletons
 
 tests:
   spec:

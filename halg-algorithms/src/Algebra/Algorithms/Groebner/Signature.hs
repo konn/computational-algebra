@@ -1,6 +1,7 @@
 {-# LANGUAGE BangPatterns, ScopedTypeVariables, ViewPatterns #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
-module Algebra.Algorithms.Groebner.Signature (f5) where
+module Algebra.Algorithms.Groebner.Signature
+  (f5, f5WithHistory, PolyOccs, PolynHistory) where
 import           Algebra.Prelude.Core         hiding (Vector)
 import           Control.Lens                 hiding ((.=))
 import           Control.Monad.Loops
@@ -11,6 +12,7 @@ import qualified Data.Heap                    as H
 import           Data.Maybe                   (fromJust)
 import           Data.Monoid                  (First (..))
 import           Data.Semigroup               hiding (First, getFirst, (<>))
+import qualified Data.Sequence                as Seq
 import           Data.Vector                  (Vector)
 import qualified Data.Vector                  as V
 import qualified Data.Vector.Fusion.Bundle    as Bundle
@@ -26,6 +28,14 @@ instance Eq a => Eq (Entry a b) where
   (/=) = (/=) `on` priority
   {-# INLINE (/=) #-}
 
+type PolynHistory poly = Seq (PolyOccs poly)
+
+data PolyOccs poly = PolyOccs { occBasis :: [poly]
+                              , occSyzygy :: [Vector poly]
+                              , occSVectorComp :: [(Int, poly)]
+                              }
+                   deriving (Read, Show, Eq, Ord)
+
 instance Ord a => Ord (Entry a b) where
   compare = comparing priority
 
@@ -33,11 +43,16 @@ mkEntry :: (IsOrderedPolynomial poly)
         => Vector poly -> Entry (Signature poly) (Vector poly)
 mkEntry = {-# SCC "mkEntry" #-} Entry <$> signature <*> id
 
+
 f5 :: (IsOrderedPolynomial a, Field (Coefficient a))
    => Ideal a -> [a]
-f5 ideal =
+f5 = fst . f5WithHistory
+
+f5WithHistory :: (IsOrderedPolynomial a, Field (Coefficient a))
+              => Ideal a -> ([a], PolynHistory a)
+f5WithHistory ideal =
   let sideal = V.fromList $ generators ideal
-  in map snd $ calcSignatureGB sideal
+  in first (map snd) $ calcSignatureGB sideal
 
 data P a b = P { get1 :: !a, get2 :: !b }
 
@@ -51,10 +66,11 @@ parMapMaybe f = catMaybes . parMap rseq f
 
 calcSignatureGB :: forall poly.
                    (Field (Coefficient poly), IsOrderedPolynomial poly)
-                => V.Vector poly -> [(V.Vector poly, poly)]
-calcSignatureGB side | null side = []
+                => V.Vector poly -> ([(V.Vector poly, poly)], PolynHistory poly)
+calcSignatureGB side | null side = ([], Seq.empty)
 calcSignatureGB (V.map monoize -> sideal) = runST $ do
   let n = V.length sideal
+  hist <- newSTRef Seq.empty
   gs <- newSTRef []
   ps <- newSTRef $ H.fromList [ mkEntry $ basis n i | i <- [0..n-1]]
   syzs <- {-# SCC "initial_syzygy" #-}
@@ -73,17 +89,26 @@ calcSignatureGB (V.map monoize -> sideal) = runST $ do
     unless ({-# SCC "standardCr" #-}standardCriterion gSig ss0 || any ((== gSig) . priority . get2) gs0) $ do
       let (h, ph) = reduceSignature sideal g gs0
           h' = {-# SCC "scaling" #-} V.map (* injectCoeff (recip $ leadingCoeff ph)) h
-      if isZero ph
-        then syzs .%= (mkEntry h : )
+      occs <- if isZero ph
+        then do
+        syzs .%= (mkEntry h : )
+        return PolyOccs { occBasis = []
+                        , occSyzygy = [h]
+                        , occSVectorComp = []
+                        }
         else do
         let ph' = monoize ph
-            adds = H.fromList $
-                   parMapMaybe
-                   (fmap mkEntry . flip regularSVector (P ph' h') . sec payload) gs0
+            ss = parMapMaybe (flip regularSVector (P ph' h') . sec payload) gs0
+            adds = H.fromList $ map mkEntry ss
         ps .%= H.union adds
         gs .%= (P ph' (mkEntry h') :)
-
-  map (\(P p (Entry _ a)) -> (a, p)) <$> readSTRef gs
+        return PolyOccs{ occBasis = [ph']
+                       , occSyzygy = []
+                       , occSVectorComp = foldMap (ifoldMap $ \i v -> [(i, v)]) ss
+                       }
+      hist .%= (Seq.|> occs)
+  (,) <$> (map (\(P p (Entry _ a)) -> (a, p)) <$> readSTRef gs)
+      <*> readSTRef hist
 
 regularSVector :: (IsOrderedPolynomial poly)
                => P poly (Vector poly)
