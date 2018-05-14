@@ -84,3 +84,4 @@ Temporary Items
 _cache
 _site
 gh-pages-devel
+hash-consing/

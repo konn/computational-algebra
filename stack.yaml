@@ -7,6 +7,7 @@ packages:
 - 'halg-core-test'
 - 'halg-polynomials'
 - 'halg-galois-fields'
+- 'halg-heaps'
 - 'halg-matrices'
 - 'halg-algorithms'
 - 'halg-polyn-parser'

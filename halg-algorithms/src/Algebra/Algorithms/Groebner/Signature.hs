@@ -1,13 +1,14 @@
 {-# LANGUAGE BangPatterns, ScopedTypeVariables, ViewPatterns #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
-module Algebra.Algorithms.Groebner.Signature (f5) where
+module Algebra.Algorithms.Groebner.Signature (f5, f5With) where
 import           Algebra.Prelude.Core         hiding (Vector)
 import           Control.Lens                 hiding ((.=))
 import           Control.Monad.Loops
 import           Control.Monad.ST.Combinators
 import           Control.Parallel.Strategies
 import qualified Data.Coerce                  as DC
-import qualified Data.Heap                    as H
+import qualified Data.Heap.Class              as H
+import qualified Data.Heap.Ekmett             as HE
 import           Data.Maybe                   (fromJust)
 import           Data.Monoid                  (First (..))
 import           Data.Semigroup               hiding (First, getFirst, (<>))
@@ -35,9 +36,13 @@ mkEntry = {-# SCC "mkEntry" #-} Entry <$> signature <*> id
 
 f5 :: (IsOrderedPolynomial a, Field (Coefficient a))
    => Ideal a -> [a]
-f5 ideal =
+f5 = f5With (Proxy :: Proxy HE.Heap)
+
+f5With :: (H.Heap heap, IsOrderedPolynomial a, Field (Coefficient a))
+       => pxy heap -> Ideal a -> [a]
+f5With pxy ideal =
   let sideal = V.fromList $ generators ideal
-  in map snd $ calcSignatureGB sideal
+  in map snd $ calcSignatureGB  pxy sideal
 
 data P a b = P { get1 :: !a, get2 :: !b }
 
@@ -49,14 +54,14 @@ sec f (P a b) = P a (f b)
 parMapMaybe :: (a -> Maybe b) -> [a] -> [b]
 parMapMaybe f = catMaybes . parMap rseq f
 
-calcSignatureGB :: forall poly.
-                   (Field (Coefficient poly), IsOrderedPolynomial poly)
-                => V.Vector poly -> [(V.Vector poly, poly)]
-calcSignatureGB side | null side = []
-calcSignatureGB (V.map monoize -> sideal) = runST $ do
+calcSignatureGB :: forall pxy poly heap.
+                   (H.Heap heap, Field (Coefficient poly), IsOrderedPolynomial poly)
+                => pxy heap -> V.Vector poly -> [(V.Vector poly, poly)]
+calcSignatureGB _ side | null side = []
+calcSignatureGB _ (V.map monoize -> sideal) = runST $ do
   let n = V.length sideal
   gs <- newSTRef []
-  ps <- newSTRef $ H.fromList [ mkEntry $ basis n i | i <- [0..n-1]]
+  ps <- newSTRef (H.fromList [ mkEntry $ basis n i | i <- [0..n-1]] :: heap (Entry (Signature poly) (Vector poly)))
   syzs <- {-# SCC "initial_syzygy" #-}
           newSTRef
           [ mkEntry $

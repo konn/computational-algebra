@@ -39,6 +39,8 @@ dependencies:
 - dlist
 - halg-core
 - halg-polynomials
+- halg-heaps
+- heaps
 - semigroups
 - sized
 
@@ -55,7 +57,6 @@ library:
   - equational-reasoning
   - ghc-typelits-knownnat
   - halg-matrices
-  - heaps
   - hmatrix
   - lens
   - matrix
@@ -238,3 +239,30 @@ benchmarks:
   heavy-bench:
     main:         heavy-bench.hs
     <<: *heavy_bench
+
+  f5-heap-bench:
+    main: f5-heap-bench.hs
+    source-dirs:
+    - bench
+    - shared
+    other-modules: Cases
+    dependencies:
+    - QuickCheck
+    - constraints
+    - containers
+    - deepseq
+    - gauge
+    - halg-algorithms
+    - halg-core
+    - halg-core-test
+    - lens
+    - matrix
+    - parallel
+    - process
+    - sized
+    ghc-options:
+    - -Wall
+    - -O2
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N  
