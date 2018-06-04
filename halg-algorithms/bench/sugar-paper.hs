@@ -10,7 +10,6 @@ import Algebra.Algorithms.Groebner.Homogeneous
 import Algebra.Algorithms.Groebner.Signature
 import Algebra.Bridge.Singular
 import Algebra.Internal
-import Algebra.Prelude.Core
 import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
 import Algebra.Scalar
