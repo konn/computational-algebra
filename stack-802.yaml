@@ -3,16 +3,17 @@ skip-ghc-check: true
 packages:
 - 'computational-algebra'
 - 'algebraic-prelude'
+- 'halg-algebraic'
+- 'halg-algorithms'
+- 'halg-bridge-singular'
 - 'halg-core'
 - 'halg-core-test'
-- 'halg-polynomials'
-- 'halg-galois-fields'
-- 'halg-matrices'
-- 'halg-algorithms'
-- 'halg-polyn-parser'
 - 'halg-factor'
-- 'halg-algebraic'
-- 'halg-bridge-singular'
+- 'halg-galois-fields'
+- 'halg-heaps'
+- 'halg-matrices'
+- 'halg-polyn-parser'
+- 'halg-polynomials'
 
 flags:
   computational-algebra:

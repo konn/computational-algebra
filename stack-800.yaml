@@ -2,16 +2,17 @@ resolver: lts-9.5
 packages:
 - 'computational-algebra'
 - 'algebraic-prelude'
+- 'halg-algebraic'
+- 'halg-algorithms'
+- 'halg-bridge-singular'
 - 'halg-core'
 - 'halg-core-test'
+- 'halg-factor'
+- 'halg-galois-fields'
+- 'halg-heaps'
+- 'halg-matrices'
 - 'halg-polyn-parser'
 - 'halg-polynomials'
-- 'halg-galois-fields'
-- 'halg-matrices'
-- 'halg-algorithms'
-- 'halg-factor'
-- 'halg-algebraic'
-- 'halg-bridge-singular'
 
 flags:
   computational-algebra:
