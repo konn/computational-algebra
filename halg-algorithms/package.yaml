@@ -221,6 +221,7 @@ benchmarks:
     - halg-core
     - halg-core-test
     - halg-algorithms
+    - halg-bridge-singular
     - constraints
     - containers
     - gauge

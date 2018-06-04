@@ -8,6 +8,7 @@ import Algebra.Algorithms.Groebner
 import Algebra.Algorithms.Groebner.F4
 import Algebra.Algorithms.Groebner.Homogeneous
 import Algebra.Algorithms.Groebner.Signature
+import Algebra.Bridge.Singular
 import Algebra.Internal
 import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
@@ -57,7 +58,12 @@ mkTestCases num ideal = [ mkTC ("lex0" ++ either show id num) (mapIdeal (changeO
                         , mkTC ("grevlex0" ++ either show id num) (mapIdeal (changeOrder Grevlex) ideal)
                         ]
 
-mkTC :: (IsMonomialOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
+groebnerSingular :: IsSingularPolynomial r => Ideal r -> IO (Ideal r)
+groebnerSingular ideal =
+  evalSingularIdealWith [] [] $
+  funE "groebner" [idealE' ideal]
+
+mkTC :: (SingularOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
 mkTC name jdeal =
   env (return jdeal) $ \ ideal ->
   bgroup name [ bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy) ideal
@@ -67,6 +73,7 @@ mkTC name jdeal =
               , bench "hilb" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
               -- , bench "F4" $ nf f4 ideal
               , bench "F5" $ nf f5 ideal
+              , bench "Singular" $ nfIO $ groebnerSingular ideal
               ]
 
 main :: IO ()
