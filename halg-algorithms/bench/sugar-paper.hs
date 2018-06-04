@@ -63,6 +63,11 @@ groebnerSingular ideal =
   evalSingularIdealWith [] [] $
   funE "groebner" [idealE' ideal]
 
+sbaSingular :: IsSingularPolynomial r => Ideal r -> IO (Ideal r)
+sbaSingular ideal =
+  evalSingularIdealWith [] [] $
+  funE "sba" [idealE' ideal]
+
 mkTC :: (SingularOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
 mkTC name jdeal =
   env (return jdeal) $ \ ideal ->
@@ -73,7 +78,8 @@ mkTC name jdeal =
               , bench "hilb" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
               -- , bench "F4" $ nf f4 ideal
               , bench "F5" $ nf f5 ideal
-              , bench "Singular" $ nfIO $ groebnerSingular ideal
+              , bench "Sing-groebner" $ nfIO $ groebnerSingular ideal
+              , bench "Sing-sba" $ nfIO $ sbaSingular ideal
               ]
 
 main :: IO ()
