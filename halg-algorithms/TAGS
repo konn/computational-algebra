@@ -102,24 +102,26 @@ dic dic63,64
 main main70,71
 main main71,72
 
-./bench/sugar-paper.hs,338
+./bench/sugar-paper.hs,400
 module Main Main5,6
+i1 i120,21
 i1 i121,22
-i1 i122,23
+i2 i239,40
 i2 i240,41
-i2 i241,42
+i3 i345,46
 i3 i346,47
-i3 i347,48
+i4 i450,51
 i4 i451,52
-i4 i452,53
+mkTestCases mkTestCases55,56
 mkTestCases mkTestCases56,57
-mkTestCases mkTestCases57,58
+groebnerSingular groebnerSingular60,61
 groebnerSingular groebnerSingular61,62
-groebnerSingular groebnerSingular62,63
-mkTC mkTC66,67
-mkTC mkTC67,68
-main main79,80
-main main80,81
+sbaSingular sbaSingular65,66
+sbaSingular sbaSingular66,67
+mkTC mkTC70,71
+mkTC mkTC71,72
+main main84,85
+main main85,86
 
 ./Setup.hs,15
 main main1,2

@@ -78,8 +78,8 @@ mkTC name jdeal =
               , bench "hilb" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
               -- , bench "F4" $ nf f4 ideal
               , bench "F5" $ nf f5 ideal
-              , bench "Sing-groebner" $ nfIO $ groebnerSingular ideal
-              , bench "Sing-sba" $ nfIO $ sbaSingular ideal
+              , bench "Sing-groebner" $ whnfIO $ groebnerSingular ideal
+              , bench "Sing-sba" $ whnfIO $ sbaSingular ideal
               ]
 
 main :: IO ()
