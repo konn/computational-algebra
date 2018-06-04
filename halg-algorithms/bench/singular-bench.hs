@@ -55,7 +55,7 @@ toProg fun i =
 analyse :: (SingularOrder (Arity poly) (MOrder poly), SingularCoeff (Coefficient poly), IsOrderedPolynomial poly) => String -> Text -> Ideal poly -> IO ()
 analyse lab fun ideal = do
   gen <- Rand.create
-  i2Gr <- V.replicateM 1000 $ benchIdeal fun ideal
+  i2Gr <- V.replicateM 200 $ benchIdeal fun ideal
   res  <- resample gen [Mean, StdDev] 1000 i2Gr
   let [Estimate mn (ConfInt lbmn ubmn _) ,Estimate dv _]
         = bootstrapBCA cl95 i2Gr res
