@@ -45,9 +45,10 @@ toProg fun i =
   in prettySingular $ do
     directC "system(\"--ticks-per-sec\", 1000000)"
     void $ ringC "R" expr
+    declOnlyC IdealT "G"
     directC "timer=1"
     directC "int t=rtimer"
-    void $ idealC' "I" i
+    letC "G" expr
     directC "print(rtimer-t)"
     directC "exit"
 
