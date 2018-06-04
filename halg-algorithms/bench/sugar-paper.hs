@@ -10,6 +10,7 @@ import Algebra.Algorithms.Groebner.Homogeneous
 import Algebra.Algorithms.Groebner.Signature
 import Algebra.Bridge.Singular
 import Algebra.Internal
+import Algebra.Prelude.Core
 import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
 import Algebra.Scalar
@@ -66,9 +67,9 @@ groebnerSingular ideal =
 mkTC :: (SingularOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
 mkTC name jdeal =
   env (return jdeal) $ \ ideal ->
-  bgroup name [ bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy) ideal
-              , bench "syz+sugar" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)) ideal
-              , bench "standard" $ nf calcGroebnerBasis ideal
+  bgroup name [ {- bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy) ideal
+              , -} bench "syz+sugar" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)) ideal
+              -- , bench "standard" $ nf calcGroebnerBasis ideal
               , bench "naive-homog" $ nf calcGroebnerBasisAfterHomogenising ideal
               , bench "hilb" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
               -- , bench "F4" $ nf f4 ideal
