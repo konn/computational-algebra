@@ -67,7 +67,7 @@ buildIdealFunction fun i =
 
 mkTC :: (SingularOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
 mkTC name jdeal =
-  env (return (jdeal, buildIdealFunction "groebner" jdeal, buildIdealFunction "sba" jdeal)) $ \ (ideal, gr, sba) ->
+  env (return (jdeal, buildIdealFunction "groebner" jdeal, buildIdealFunction "sba" jdeal)) $ \ ~(ideal, gr, sba) ->
   bgroup name [ {- bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy) ideal
               , -} bench "syz+sugar" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)) ideal
               -- , bench "standard" $ nf calcGroebnerBasis ideal
