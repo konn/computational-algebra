@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-type-defaults #-}
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction      #-}
 {-# LANGUAGE OverloadedStrings, PolyKinds, TypeFamilies            #-}
@@ -5,14 +6,13 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
 import Algebra.Algorithms.Groebner
-import Algebra.Algorithms.Groebner.F4
 import Algebra.Algorithms.Groebner.Homogeneous
 import Algebra.Algorithms.Groebner.Signature
 import Algebra.Bridge.Singular
 import Algebra.Internal
 import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
-import Algebra.Scalar
+import Control.Monad                           (void)
 import Control.Parallel.Strategies
 import Gauge.Main
 import Gauge.Main.Options
@@ -58,19 +58,16 @@ mkTestCases num ideal = [ mkTC ("lex0" ++ either show id num) (mapIdeal (changeO
                         , mkTC ("grevlex0" ++ either show id num) (mapIdeal (changeOrder Grevlex) ideal)
                         ]
 
-groebnerSingular :: IsSingularPolynomial r => Ideal r -> IO (Ideal r)
-groebnerSingular ideal =
-  evalSingularIdealWith [] [] $
-  funE "groebner" [idealE' ideal]
-
-sbaSingular :: IsSingularPolynomial r => Ideal r -> IO (Ideal r)
-sbaSingular ideal =
-  evalSingularIdealWith [] [] $
-  funE "sba" [idealE' ideal]
+buildIdealFunction fun i =
+  let expr = funE fun [idealE' i]
+  in prettySingular $ do
+    void $ ringC "R" expr
+    printC expr
+    directC "exit"
 
 mkTC :: (SingularOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
 mkTC name jdeal =
-  env (return jdeal) $ \ ideal ->
+  env (return (jdeal, buildIdealFunction "groebner" jdeal, buildIdealFunction "sba" jdeal)) $ \ (ideal, gr, sba) ->
   bgroup name [ {- bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy) ideal
               , -} bench "syz+sugar" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)) ideal
               -- , bench "standard" $ nf calcGroebnerBasis ideal
@@ -78,8 +75,8 @@ mkTC name jdeal =
               , bench "hilb" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
               -- , bench "F4" $ nf f4 ideal
               , bench "F5" $ nf f5 ideal
-              , bench "Sing-groebner" $ whnfIO $ groebnerSingular ideal
-              , bench "Sing-sba" $ whnfIO $ sbaSingular ideal
+              , bench "Sing-groebner" $ whnfIO $ singular gr
+              , bench "Sing-sba" $ whnfIO $ singular sba
               ]
 
 main :: IO ()
