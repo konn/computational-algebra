@@ -8,8 +8,8 @@ module Main where
 import Algebra.Algorithms.Groebner
 import Algebra.Algorithms.Groebner.Homogeneous
 import Algebra.Algorithms.Groebner.Signature
-import Algebra.Bridge.Singular
 import Algebra.Internal
+import Algebra.Prelude.Core
 import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
 import Control.Monad                           (void)
@@ -58,14 +58,7 @@ mkTestCases num ideal = [ mkTC ("lex0" ++ either show id num) (mapIdeal (changeO
                         , mkTC ("grevlex0" ++ either show id num) (mapIdeal (changeOrder Grevlex) ideal)
                         ]
 
-buildIdealFunction fun i =
-  let expr = funE fun [idealE' i]
-  in prettySingular $ do
-    void $ ringC "R" expr
-    printC expr
-    directC "exit"
-
-mkTC :: (SingularOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
+mkTC :: (IsMonomialOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
 mkTC name jdeal =
   env (return (jdeal, buildIdealFunction "groebner" jdeal, buildIdealFunction "sba" jdeal)) $ \ ~(ideal, gr, sba) ->
   bgroup name [ {- bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy) ideal
@@ -75,8 +68,6 @@ mkTC name jdeal =
               , bench "hilb" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
               -- , bench "F4" $ nf f4 ideal
               , bench "F5" $ nf f5 ideal
-              , bench "Sing-groebner" $ whnfIO $ singular gr
-              , bench "Sing-sba" $ whnfIO $ singular sba
               ]
 
 main :: IO ()

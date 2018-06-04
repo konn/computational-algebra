@@ -221,7 +221,35 @@ benchmarks:
     - halg-core
     - halg-core-test
     - halg-algorithms
+    - constraints
+    - containers
+    - gauge
+    - deepseq
+    - matrix
+    - parallel
+    - process
+    - sized
+    - QuickCheck
+    ghc-options:
+    - -O2
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+
+  singular-bench:
+    main: singular-bench.hs
+    other-modules: []
+    source-dirs:
+    - bench
+    dependencies:
+    - text
+    - statistics
+    - vector
+    - halg-core
+    - halg-core-test
+    - halg-algorithms
     - halg-bridge-singular
+    - mwc-random
     - constraints
     - containers
     - gauge
