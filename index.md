@@ -461,6 +461,10 @@ Aside the basic field operations, we currently provide the following operations 
 * [`realRoots`{.haskell}](doc:Algebra-Field-AlgebraicReal.html#v:realRoots): for the univariate polynomial $f$, `realRoots f`{.haskell} computes all the *real* roots of $f$.
     * There is also [`complexRoots`{.haskell}](doc:Algebra-Field-AlgebraicReal.html#v:complexRoots) which computes all the *complex* roots of $f$, but it comes with really naive implementation and *not ready for the practical usage*.
 
+Links
+=====
+* [API Documents][apis]
+
 [^1]: One can also construct ordinals using integer literals of Haskell, like `3 :: Ordinal 4`{.haskell}, but it is unsafe and so highly unrecommended.
 For example, although `[od|3|] :: Ordinal 2`{.haskell} is rejected by compiler as expected, but `3 :: Ordinal 2`{.haskell} passes the compile-time typecheck and throws run-time error.
 This is due to the mechanism of Haskell's literal desugaring.
@@ -473,4 +477,7 @@ but it is too expensive for library writers compared to the result we gain,
 hence we haven't include such "proof requirement" to class.
 Another reason is that, it makes difficult to treat *dynamically generated orderings*,
 which occurs in some applications such as integer programming.
+
+[apis]: ./docs
+
 
