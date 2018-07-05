@@ -465,6 +465,10 @@ Links
 =====
 * [API Documents][apis]
 
+Publication
+-----------
+* Hiromi ISHII, "[A Purely Functional Computer Algebra System Embedded in Haskell][paper]", preprint (to appear in the Proceedings of The 20th International Workshop on Computer Algebra in Scientific Computing (CASC 2018)).
+
 [^1]: One can also construct ordinals using integer literals of Haskell, like `3 :: Ordinal 4`{.haskell}, but it is unsafe and so highly unrecommended.
 For example, although `[od|3|] :: Ordinal 2`{.haskell} is rejected by compiler as expected, but `3 :: Ordinal 2`{.haskell} passes the compile-time typecheck and throws run-time error.
 This is due to the mechanism of Haskell's literal desugaring.
@@ -479,5 +483,8 @@ Another reason is that, it makes difficult to treat *dynamically generated order
 which occurs in some applications such as integer programming.
 
 [apis]: ./docs
+
+[paper]: https://arxiv.org/abs/1807.01456
+
 
 
