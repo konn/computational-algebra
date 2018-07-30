@@ -16,7 +16,7 @@ packages:
 - 'halg-polyn-parser'
 - 'halg-polynomials'
 
-extra-deps: []
+extra-deps:
 - control-monad-loop-0.1
 - equational-reasoning-0.5.1.0
 - ghc-typelits-presburger-0.2.0.3
