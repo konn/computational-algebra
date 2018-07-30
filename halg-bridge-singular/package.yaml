@@ -10,6 +10,9 @@ extra-source-files:
 - README.md
 - ChangeLog.md
 
+tested-with: |
+  GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.3
+
 # Metadata used when publishing your package
 synopsis:            Bridge interface between Singular and halg computational algebra suite.
 category:            Math

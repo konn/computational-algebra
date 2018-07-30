@@ -27,7 +27,5 @@ extra-deps:
 - hspec-smallcheck-0.5.0
 - control-monad-loop-0.1
 - type-natural-0.8.0.1
-- git: https://github.com/konn/sized.git
-  commit: 48a4778329c8a7779e7f914126f8aa08f94551a2
-- git: https://github.com/konn/equational-reasoning-in-haskell.git
-  commit: 69bcb461fd8d497a99ca22daa150797f22d03ad4
+- equational-reasoning-0.5.1.0
+- sized-0.3.0.0
