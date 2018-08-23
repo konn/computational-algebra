@@ -44,6 +44,7 @@ build:ghc-8.0:
   - stack --version
   - stack setup
   - stack build --no-terminal --only-dependencies
+  - stack build --no-terminal
   - stack build --no-terminal --test --only-dependencies
   artifacts:
     paths:
@@ -68,6 +69,7 @@ build:ghc-8.2:
   - stack --version
   - stack setup
   - stack build --no-terminal --only-dependencies
+  - stack build --no-terminal
   - stack build --no-terminal --test --only-dependencies
   artifacts:
     paths:
@@ -91,7 +93,7 @@ build:ghc-8.4:
   - export PATH=$HOME/.local/bin:$PATH
   - export LD_LIBRARY_PATH=$STACK_ROOT/programs/x86_64-linux/ghc-8.4.3/lib/ghc-8.4.3/rts:$LD_LIBRARY_PATH
   - stack --version
-  - stack setup
+  - stack build --no-terminal
   - stack build --no-terminal --only-dependencies
   - stack build --no-terminal --test --only-dependencies
   artifacts:
