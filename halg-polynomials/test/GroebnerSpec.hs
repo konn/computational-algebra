@@ -15,7 +15,6 @@ import           Numeric.Field.Fraction (Fraction)
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
-import           Utils
 
 asGenListOf :: Gen [a] -> a -> Gen [a]
 asGenListOf = const
@@ -27,30 +26,30 @@ minutes n = n * seconds 60
 
 spec :: Spec
 spec = parallel $ do
-  describe "divModPolynomial" $ within (minutes 5) $ modifyMaxSize (const 25) $ modifyMaxSuccess (const 50) $ do
+  describe "divModPolynomial" $ modifyMaxSize (const 25) $ modifyMaxSuccess (const 50) $ do
     prop "remainder cannot be diveided by any denoms (ternary)" $
-      checkForArity [1..4] prop_indivisible
+      within (minutes 5) $ checkForArity [1..4] prop_indivisible
     prop "satisfies a_i f_i /= 0 ==> deg(f) >= deg (a_i f_i)" $
-      checkForArity [1..4] prop_degdecay
+      within (minutes 5) $ checkForArity [1..4] prop_degdecay
     prop "divides correctly" $
-      checkForArity [1..4] prop_divCorrect
-  describe "calcGroebnerBasis" $ within (minutes 5) $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
+      within (minutes 5) $ checkForArity [1..4] prop_divCorrect
+  describe "calcGroebnerBasis" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
     prop "passes S-test" $
-      checkForArity [2..3] prop_passesSTest
+      within (minutes 5) $ checkForArity [2..3] prop_passesSTest
     prop "divides all original generators" $ do
-      checkForArity [2..3] prop_groebnerDivsOrig
+      within (minutes 5) $ checkForArity [2..3] prop_groebnerDivsOrig
     it "generates the same ideal as original" $ do
       pendingWith "need example"
     it "produces minimal basis" $ do
-      checkForArity [2..3] prop_isMinimal
+      within (minutes 5) $ checkForArity [2..3] prop_isMinimal
     it "produces reduced basis" $ do
-      checkForArity [2..3] prop_isReduced
+      within (minutes 5) $ checkForArity [2..3] prop_isReduced
   describe "isIdealMember" $ do
     it "determins membership correctly" $ do
       pendingWith "need example"
-  describe "intersection" $ within (minutes 5) $ modifyMaxSize (const 3) $ modifyMaxSuccess (const 50) $ do
+  describe "intersection" $ modifyMaxSize (const 3) $ modifyMaxSuccess (const 50) $ do
     it "can calculate correctly" $ do
-      checkForArity [2..3] prop_intersection
+      within (minutes 5) $ checkForArity [2..3] prop_intersection
     it "can solve test-cases correctly" $ do
       forM_ ics_binary $ \(IC i j ans) ->
         F.toList (intersection [toIdeal i, toIdeal j]) `shouldBe` ans
