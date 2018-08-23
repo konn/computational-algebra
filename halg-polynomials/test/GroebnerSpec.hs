@@ -20,16 +20,21 @@ import           Utils
 asGenListOf :: Gen [a] -> a -> Gen [a]
 asGenListOf = const
 
+type Microsecs = Int
+minutes, seconds :: Int -> Microsecs
+seconds n = n * 1000000
+minutes n = n * seconds 60
+
 spec :: Spec
 spec = parallel $ do
-  describe "divModPolynomial" $ modifyMaxSize (const 25) $ modifyMaxSuccess (const 100) $ do
+  describe "divModPolynomial" $ within (minutes 5) $ modifyMaxSize (const 25) $ modifyMaxSuccess (const 50) $ do
     prop "remainder cannot be diveided by any denoms (ternary)" $
       checkForArity [1..4] prop_indivisible
     prop "satisfies a_i f_i /= 0 ==> deg(f) >= deg (a_i f_i)" $
       checkForArity [1..4] prop_degdecay
     prop "divides correctly" $
       checkForArity [1..4] prop_divCorrect
-  describe "calcGroebnerBasis" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
+  describe "calcGroebnerBasis" $ within (minutes 5) $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
     prop "passes S-test" $
       checkForArity [2..3] prop_passesSTest
     prop "divides all original generators" $ do
@@ -43,7 +48,7 @@ spec = parallel $ do
   describe "isIdealMember" $ do
     it "determins membership correctly" $ do
       pendingWith "need example"
-  describe "intersection" $ modifyMaxSize (const 3) $ modifyMaxSuccess (const 50) $ do
+  describe "intersection" $ within (minutes 5) $ modifyMaxSize (const 3) $ modifyMaxSuccess (const 50) $ do
     it "can calculate correctly" $ do
       checkForArity [2..3] prop_intersection
     it "can solve test-cases correctly" $ do
