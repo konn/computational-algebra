@@ -22,6 +22,10 @@ before_script:
 - apt-get update -y -qq
 - apt-get install -y singular41 libgmp3-dev libgsl0-dev liblapack-dev
 - stack upgrade
+- |
+  if [ ! -d ${STACK_ROOT} ]; then
+    cp -r /root/.stack $STACK_ROOT
+  fi
 
 stages:
 - build
