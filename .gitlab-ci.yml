@@ -1,11 +1,23 @@
 image: fpco/stack-build:lts-12.2
 
-cache:
+.cached_dirs: &cached-dirs
   paths:
   - .stack-work/
   - .stack-root/
   - .apt/
   - .hspec-failures
+
+cache:
+  key: ghc-8.0
+  <<: *cached-dirs
+
+cache:
+  key: ghc-8.2
+  <<: *cached-dirs
+
+cache:
+  key: ghc-8.4
+  <<: *cached-dirs
 
 before_script:
 - echo $CI_PROJECT_DIR
@@ -30,6 +42,8 @@ stages:
 build:ghc-8.0:
   image: fpco/stack-build:lts-9.5
   stage: build
+  cache:
+    key: ghc-8.0
   script:
   - |
     if [ -d ${STACK_ROOT} ]; then
@@ -54,6 +68,8 @@ build:ghc-8.0:
 
 build:ghc-8.2:
   image: fpco/stack-build:lts-11.4
+  cache:
+    key: ghc-8.2
   stage: build
   script:
   - |
@@ -79,6 +95,8 @@ build:ghc-8.2:
 
 build:ghc-8.4:
   image: fpco/stack-build:lts-12.2
+  cache:
+    key: ghc-8.4
   stage: build
   script:
   - |
@@ -105,6 +123,8 @@ build:ghc-8.4:
 test:ghc-8.0:
   image: fpco/stack-build:lts-9.5
   stage: test
+  cache:
+    key: ghc-8.0
   dependencies:
   - build:ghc-8.0
   script:
@@ -118,6 +138,8 @@ test:ghc-8.0:
 test:ghc-8.2:
   image: fpco/stack-build:lts-11.4
   stage: test
+  cache:
+    key: ghc-8.2
   dependencies:
   - build:ghc-8.2
   script:
@@ -131,6 +153,8 @@ test:ghc-8.2:
 test:ghc-8.4:
   image: fpco/stack-build:lts-12.2
   stage: test
+  cache:
+    key: ghc-8.4
   dependencies:
   - build:ghc-8.4
   script:
