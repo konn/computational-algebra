@@ -1,7 +1,7 @@
-{-# LANGUAGE BangPatterns, ConstraintKinds, DataKinds, DeriveAnyClass     #-}
-{-# LANGUAGE DerivingStrategies, ExistentialQuantification                #-}
-{-# LANGUAGE ExplicitNamespaces, FlexibleContexts, FlexibleInstances      #-}
-{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, IncoherentInstances       #-}
+{-# LANGUAGE BangPatterns, ConstraintKinds, DataKinds                     #-}
+{-# LANGUAGE ExistentialQuantification, ExplicitNamespaces                #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                   #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, IncoherentInstances              #-}
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, ParallelListComp #-}
 {-# LANGUAGE PatternSynonyms, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
 {-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeApplications        #-}
@@ -82,7 +82,7 @@ instance NFData (Monomial' n) where
 -- | A wrapper for monomials with a certain (monomial) order.
 newtype OrderedMonomial ordering n =
   OrderedMonomial' { getMonomial' :: Monomial' n }
-  deriving newtype (NFData, Eq, Hashable)
+  deriving (NFData, Eq, Hashable)
 
 getMonomial :: OrderedMonomial ord n -> Monomial n
 getMonomial = unintern . getMonomial'
@@ -160,7 +160,7 @@ instance MonoTraversable (Monomial' n) where
 instance Interned (Monomial' n) where
   type Uninterned (Monomial' n) = USized n Int
   newtype Description (Monomial' n) = DMon (USized n Int)
-    deriving newtype (Eq, Hashable)
+    deriving (Eq, Hashable)
   describe = DMon
   identify = Monomial'
   cache = monCache
@@ -234,8 +234,7 @@ grlex = graded lex
 {-# INLINE [2] grlex #-}
 
 newtype WrapOrdering  = WrapOrdering { unWrapOrdering :: Ordering }
-  deriving (Read, Show, Eq, Ord)
-  deriving newtype (Monoid, Semi.Semigroup)
+  deriving (Read, Show, Eq, Ord, Monoid, Semi.Semigroup)
 newtype instance UV.Vector    WrapOrdering = V_WrapOrdering (UV.Vector Word8)
 newtype instance UV.MVector s WrapOrdering = MV_WrapOrdering (UV.MVector s Word8)
 instance Unbox WrapOrdering
