@@ -7,15 +7,16 @@ image: fpco/stack-build:lts-12.2
   - .apt/
   - .hspec-failures
 
-cache:
-  key: ghc-8.0
-  <<: *cached-dirs
+.cache-ghc-80: &cache-ghc-80
+  cache: 
+    key: ghc-8.0
+    <<: *cached-dirs
 
-cache:
+.cache-ghc-82: &cache-ghc-82
   key: ghc-8.2
   <<: *cached-dirs
 
-cache:
+.cache-ghc-84: &cache-ghc-84
   key: ghc-8.4
   <<: *cached-dirs
 
@@ -42,8 +43,7 @@ stages:
 build:ghc-8.0:
   image: fpco/stack-build:lts-9.5
   stage: build
-  cache:
-    key: ghc-8.0
+  <<:    *cache-ghc-80
   script:
   - |
     if [ -d ${STACK_ROOT} ]; then
@@ -68,8 +68,7 @@ build:ghc-8.0:
 
 build:ghc-8.2:
   image: fpco/stack-build:lts-11.4
-  cache:
-    key: ghc-8.2
+  <<:    *cache-ghc-82
   stage: build
   script:
   - |
@@ -95,8 +94,7 @@ build:ghc-8.2:
 
 build:ghc-8.4:
   image: fpco/stack-build:lts-12.2
-  cache:
-    key: ghc-8.4
+  <<:    *cache-ghc-84
   stage: build
   script:
   - |
@@ -123,8 +121,7 @@ build:ghc-8.4:
 test:ghc-8.0:
   image: fpco/stack-build:lts-9.5
   stage: test
-  cache:
-    key: ghc-8.0
+  <<:    *cache-ghc-80
   dependencies:
   - build:ghc-8.0
   script:
@@ -132,14 +129,11 @@ test:ghc-8.0:
   - export STACK_ROOT=${CI_PROJECT_DIR}/.stack-root
   - export PATH=$HOME/.local/bin:$PATH
   - stack --no-terminal test --no-rerun-tests --coverage
-  cache:
-    key: build:ghc-8.0
 
 test:ghc-8.2:
   image: fpco/stack-build:lts-11.4
   stage: test
-  cache:
-    key: ghc-8.2
+  <<:    *cache-ghc-82
   dependencies:
   - build:ghc-8.2
   script:
@@ -147,14 +141,11 @@ test:ghc-8.2:
   - export STACK_ROOT=${CI_PROJECT_DIR}/.stack-root
   - export PATH=$HOME/.local/bin:$PATH
   - stack --no-terminal test --no-rerun-tests --coverage
-  cache:
-    key: build:ghc-8.2
 
 test:ghc-8.4:
   image: fpco/stack-build:lts-12.2
   stage: test
-  cache:
-    key: ghc-8.4
+  <<:    *cache-ghc-84
   dependencies:
   - build:ghc-8.4
   script:
@@ -163,5 +154,3 @@ test:ghc-8.4:
   - export PATH=$HOME/.local/bin:$PATH
   - export LD_LIBRARY_PATH=$STACK_ROOT/programs/x86_64-linux/ghc-8.4.3/lib/ghc-8.4.3/rts:$LD_LIBRARY_PATH
   - stack --no-terminal test --no-rerun-tests --coverage
-  cache:
-    key: build:ghc-8.4
