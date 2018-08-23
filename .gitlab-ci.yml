@@ -4,10 +4,6 @@ stages:
 - build
 - test
 
-variables:
-  STACK_ROOT: "${CI_PROJECT_DIR}/.stack-root"
-  PATH:       "$HOME/.local/bin:$PATH"
-
 .cached_dirs: &cached-dirs
   paths:
   - .stack-work/
@@ -38,6 +34,8 @@ variables:
 
 before_script:
 - echo $CI_PROJECT_DIR
+- export STACK_ROOT="${CI_PROJECT_DIR}/.stack-root"
+- export PATH="$HOME/.local/bin:$PATH"
 - export APT_DIR=$CI_PROJECT_DIR/.apt
 - export APT_STATE_LISTS=$APT_DIR/lists 
 - export APT_CACHE_ARCHIVES=$APT_DIR/archives
