@@ -21,6 +21,7 @@ before_script:
 - echo "deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu16 xenial main" >> /etc/apt/sources.list
 - apt-get update -y -qq
 - apt-get install -y singular41 libgmp3-dev libgsl0-dev liblapack-dev
+- stack upgrade
 
 stages:
 - build
@@ -34,6 +35,7 @@ build:ghc-8.0:
   - export STACK_ROOT=${CI_PROJECT_DIR}/.stack-root
   - export PATH=$HOME/.local/bin:$PATH
   - stack --version
+  - stack setup
   - stack build --no-terminal --only-dependencies
   - stack build --no-terminal --test --only-dependencies
   cache:
@@ -52,6 +54,7 @@ build:ghc-8.2:
   - export STACK_ROOT=${CI_PROJECT_DIR}/.stack-root
   - export PATH=$HOME/.local/bin:$PATH
   - stack --version
+  - stack setup
   - stack build --no-terminal --only-dependencies
   - stack build --no-terminal --test --only-dependencies
   cache:
@@ -71,6 +74,7 @@ build:ghc-8.4:
   - export PATH=$HOME/.local/bin:$PATH
   - export LD_LIBRARY_PATH=$STACK_ROOT/programs/x86_64-linux/ghc-8.4.3/lib/ghc-8.4.3/rts:$LD_LIBRARY_PATH
   - stack --version
+  - stack setup
   - stack build --no-terminal --only-dependencies
   - stack build --no-terminal --test --only-dependencies
   cache:
@@ -82,6 +86,7 @@ build:ghc-8.4:
     - .apt/
 
 test:ghc-8.0:
+  image: fpco/stack-build:lts-9.5
   stage: test
   dependencies:
   - build:ghc-8.0
@@ -94,6 +99,7 @@ test:ghc-8.0:
     key: build:ghc-8.0
 
 test:ghc-8.2:
+  image: fpco/stack-build:lts-11.4
   stage: test
   dependencies:
   - build:ghc-8.2
@@ -106,6 +112,7 @@ test:ghc-8.2:
     key: build:ghc-8.2
 
 test:ghc-8.4:
+  image: fpco/stack-build:lts-12.2
   stage: test
   dependencies:
   - build:ghc-8.4
