@@ -13,12 +13,14 @@ image: fpco/stack-build:lts-12.2
     <<: *cached-dirs
 
 .cache-ghc-82: &cache-ghc-82
-  key: ghc-8.2
-  <<: *cached-dirs
+  cache: 
+    key: ghc-8.2
+    <<: *cached-dirs
 
 .cache-ghc-84: &cache-ghc-84
-  key: ghc-8.4
-  <<: *cached-dirs
+  cache: 
+    key: ghc-8.4
+    <<: *cached-dirs
 
 before_script:
 - echo $CI_PROJECT_DIR
