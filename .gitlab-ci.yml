@@ -21,10 +21,6 @@ before_script:
 - echo "deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu16 xenial main" >> /etc/apt/sources.list
 - apt-get update -y -qq
 - apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev
-- |
-  if [ ! -d ${STACK_ROOT} ]; then
-    cp -r /root/.stack $STACK_ROOT
-  fi
 - stack upgrade
 
 stages:
@@ -35,6 +31,13 @@ build:ghc-8.0:
   image: fpco/stack-build:lts-9.5
   stage: build
   script:
+  - |
+    if [ -d ${STACK_ROOT} ]; then
+      echo "Already exists: ${STACK_ROOT}";
+      ls "$STACK_ROOT";
+    else 
+      cp -r /root/.stack $STACK_ROOT;
+    fi
   - export STACK_YAML=stack-800.yaml
   - export STACK_ROOT=${CI_PROJECT_DIR}/.stack-root
   - export PATH=$HOME/.local/bin:$PATH
@@ -42,18 +45,23 @@ build:ghc-8.0:
   - stack setup
   - stack build --no-terminal --only-dependencies
   - stack build --no-terminal --test --only-dependencies
-  cache:
-    key: build:ghc-8.0
+  artifacts:
     paths:
     - .stack-work/
     - .stack-root/
-    - .hspec-failures
     - .apt/
 
 build:ghc-8.2:
   image: fpco/stack-build:lts-11.4
   stage: build
   script:
+  - |
+    if [ -d ${STACK_ROOT} ]; then
+      echo "Already exists: ${STACK_ROOT}";
+      ls "$STACK_ROOT";
+    else 
+      cp -r /root/.stack $STACK_ROOT;
+    fi
   - export STACK_YAML=stack-802.yaml
   - export STACK_ROOT=${CI_PROJECT_DIR}/.stack-root
   - export PATH=$HOME/.local/bin:$PATH
@@ -61,18 +69,23 @@ build:ghc-8.2:
   - stack setup
   - stack build --no-terminal --only-dependencies
   - stack build --no-terminal --test --only-dependencies
-  cache:
-    key: build:ghc-8.2
+  artifacts:
     paths:
     - .stack-work/
     - .stack-root/
-    - .hspec-failures
     - .apt/
 
 build:ghc-8.4:
   image: fpco/stack-build:lts-12.2
   stage: build
   script:
+  - |
+    if [ -d ${STACK_ROOT} ]; then
+      echo "Already exists: ${STACK_ROOT}";
+      ls "$STACK_ROOT";
+    else 
+      cp -r /root/.stack $STACK_ROOT;
+    fi
   - export STACK_YAML=stack-804.yaml
   - export STACK_ROOT=${CI_PROJECT_DIR}/.stack-root
   - export PATH=$HOME/.local/bin:$PATH
@@ -81,12 +94,10 @@ build:ghc-8.4:
   - stack setup
   - stack build --no-terminal --only-dependencies
   - stack build --no-terminal --test --only-dependencies
-  cache:
-    key: build:ghc-8.4
+  artifacts:
     paths:
     - .stack-work/
     - .stack-root/
-    - .hspec-failures
     - .apt/
 
 test:ghc-8.0:
