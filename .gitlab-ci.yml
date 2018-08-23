@@ -16,16 +16,16 @@ before_script:
 - export LD_LIBRARY_PATH=$STACK_ROOT/programs/x86_64-linux/ghc-8.4.3/lib/ghc-8.4.3/rts:$LD_LIBRARY_PATH
 - printf "dir::state::lists    ${APT_STATE_LISTS};\ndir::cache::archives    ${APT_CACHE_ARCHIVES};\n" > /etc/apt/apt.conf
 - mkdir -p "${APT_STATE_LISTS}/partial" && mkdir -p "${APT_CACHE_ARCHIVES}/partial"
-- apt-get update -y -qq && apt-get install -y wget
+- apt-get update -y -qq && apt-get install -y -qq wget
 - wget ftp://jim.mathematik.uni-kl.de/repo/extra/gpg && apt-key add gpg && rm gpg
 - echo "deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu16 xenial main" >> /etc/apt/sources.list
 - apt-get update -y -qq
-- apt-get install -y singular41 libgmp3-dev libgsl0-dev liblapack-dev
-- stack upgrade
+- apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev
 - |
   if [ ! -d ${STACK_ROOT} ]; then
     cp -r /root/.stack $STACK_ROOT
   fi
+- stack upgrade
 
 stages:
 - build
