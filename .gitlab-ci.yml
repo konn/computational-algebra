@@ -1,0 +1,77 @@
+image: fpco/stack-build:lts-12.2
+
+cache:
+  paths:
+  - .stack-work/
+  - .stack-root/
+  - .apt/
+  - .hspec-failures
+
+before_script:
+- echo $CI_PROJECT_DIR
+- export STACK_ROOT=${CI_PROJECT_ROOT}/.stack-root
+- export APT_DIR=$CI_PROJECT_DIR/.apt
+- export APT_STATE_LISTS=$APT_DIR/lists 
+- export APT_CACHE_ARCHIVES=$APT_DIR/archives
+- export LD_LIBRARY_PATH=$STACK_ROOT/programs/x86_64-linux/ghc-8.4.3/lib/ghc-8.4.3/rts:$LD_LIBRARY_PATH
+- printf "dir::state::lists    ${APT_STATE_LISTS};\ndir::cache::archives    ${APT_CACHE_ARCHIVES};\n" > /etc/apt/apt.conf
+- mkdir -p "${APT_STATE_LISTS}/partial" && mkdir -p "${APT_CACHE_ARCHIVES}/partial"
+- apt-get update -y -qq && apt-get install -y wget
+- wget ftp://jim.mathematik.uni-kl.de/repo/extra/gpg && apt-key add gpg && rm gpg
+- echo "deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu16 xenial main" >> /etc/apt/sources.list
+- apt-get update -y -qq
+- apt-get install -y singular41 libgmp3-dev libgsl0-dev liblapack-dev
+
+stages:
+- build
+- test
+
+build:ghc-8.0:
+  script:
+  - export STACK_YAML=stack-800.yaml
+  - export STACK_ROOT=${CI_PROJECT_ROOT}/.stack-root
+  - export PATH=$HOME/.local/bin:$PATH
+  - stack --version
+  - stack build --no-terminal --only-dependencies
+  - stack build --no-terminal --test --only-dependencies
+
+build:ghc-8.2:
+  script:
+  - export STACK_YAML=stack-802.yaml
+  - export STACK_ROOT=${CI_PROJECT_ROOT}/.stack-root
+  - export PATH=$HOME/.local/bin:$PATH
+  - stack --version
+  - stack build --no-terminal --only-dependencies
+  - stack build --no-terminal --test --only-dependencies
+
+build:ghc-8.4:
+  script:
+  - export STACK_YAML=stack-804.yaml
+  - export STACK_ROOT=${CI_PROJECT_ROOT}/.stack-root
+  - export PATH=$HOME/.local/bin:$PATH
+  - export LD_LIBRARY_PATH=$STACK_ROOT/programs/x86_64-linux/ghc-8.4.3/lib/ghc-8.4.3/rts:$LD_LIBRARY_PATH
+  - stack --version
+  - stack build --no-terminal --only-dependencies
+  - stack build --no-terminal --test --only-dependencies
+
+test:ghc-8.0:
+  script:
+  - export STACK_YAML=stack-800.yaml
+  - export STACK_ROOT=${CI_PROJECT_ROOT}/.stack-root
+  - export PATH=$HOME/.local/bin:$PATH
+  - stack --no-terminal test --no-rerun-tests --coverage
+
+test:ghc-8.2:
+  script:
+  - export STACK_YAML=stack-802.yaml
+  - export STACK_ROOT=${CI_PROJECT_ROOT}/.stack-root
+  - export PATH=$HOME/.local/bin:$PATH
+  - stack --no-terminal test --no-rerun-tests --coverage
+
+test:ghc-8.4:
+  script:
+  - export STACK_YAML=stack-804.yaml
+  - export STACK_ROOT=${CI_PROJECT_ROOT}/.stack-root
+  - export PATH=$HOME/.local/bin:$PATH
+  - export LD_LIBRARY_PATH=$STACK_ROOT/programs/x86_64-linux/ghc-8.4.3/lib/ghc-8.4.3/rts:$LD_LIBRARY_PATH
+  - stack --no-terminal test --no-rerun-tests --coverage
