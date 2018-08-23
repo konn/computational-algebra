@@ -6,7 +6,7 @@ stages:
 
 variables:
   STACK_ROOT: "${CI_PROJECT_DIR}/.stack-root"
-  PATH:       "PATH=$HOME/.local/bin:$PATH"
+  PATH:       "$HOME/.local/bin:$PATH"
 
 .cached_dirs: &cached-dirs
   paths:
