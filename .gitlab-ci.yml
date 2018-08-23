@@ -1,5 +1,13 @@
 image: fpco/stack-build:lts-12.2
 
+stages:
+- build
+- test
+
+variables:
+  STACK_ROOT: "${CI_PROJECT_DIR}/.stack-root"
+  PATH:       "PATH=$HOME/.local/bin:$PATH"
+
 .cached_dirs: &cached-dirs
   paths:
   - .stack-work/
@@ -7,24 +15,29 @@ image: fpco/stack-build:lts-12.2
   - .apt/
   - .hspec-failures
 
-.cache-ghc-80: &cache-ghc-80
+.header-ghc-80: &header-ghc-80
+  variables:
+    STACK_YAML: "stack-800.yaml"
   cache: 
     key: ghc-8.0
     <<: *cached-dirs
 
-.cache-ghc-82: &cache-ghc-82
+.header-ghc-82: &header-ghc-82
+  variables:
+    STACK_YAML: "stack-802.yaml"
   cache: 
     key: ghc-8.2
     <<: *cached-dirs
 
-.cache-ghc-84: &cache-ghc-84
+.header-ghc-84: &header-ghc-84
+  variables:
+    STACK_YAML: "stack-804.yaml"
   cache: 
     key: ghc-8.4
     <<: *cached-dirs
 
 before_script:
 - echo $CI_PROJECT_DIR
-- export STACK_ROOT=${CI_PROJECT_DIR}/.stack-root
 - export APT_DIR=$CI_PROJECT_DIR/.apt
 - export APT_STATE_LISTS=$APT_DIR/lists 
 - export APT_CACHE_ARCHIVES=$APT_DIR/archives
@@ -38,121 +51,65 @@ before_script:
 - apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev
 - stack upgrade
 
-stages:
-- build
-- test
+.build-script: &build-script
+  stage:  build
+  script: 
+  - |
+    if [ -d ${STACK_ROOT} ]; then
+      echo "Already exists: ${STACK_ROOT}";
+      ls "$STACK_ROOT";
+    else
+      echo "No stack-root. copying fpco..."
+      cp -r /root/.stack $STACK_ROOT;
+    fi
+  - stack --version
+  - echo "$STACK_YAML"
+  - stack setup
+  - stack build --no-terminal --only-dependencies
+  - stack build --no-terminal
+  - stack build --no-terminal --test --only-dependencies
+  artifacts:
+    paths:
+    - .stack-work/
+    - .stack-root/
+    - .apt/
+
+.test-script: &test-script
+  stage:  test
+  script: stack --no-terminal test --no-rerun-tests --coverage
 
 build:ghc-8.0:
   image: fpco/stack-build:lts-9.5
-  stage: build
-  <<:    *cache-ghc-80
-  script:
-  - |
-    if [ -d ${STACK_ROOT} ]; then
-      echo "Already exists: ${STACK_ROOT}";
-      ls "$STACK_ROOT";
-    else 
-      cp -r /root/.stack $STACK_ROOT;
-    fi
-  - export STACK_YAML=stack-800.yaml
-  - export STACK_ROOT=${CI_PROJECT_DIR}/.stack-root
-  - export PATH=$HOME/.local/bin:$PATH
-  - stack --version
-  - stack setup
-  - stack build --no-terminal --only-dependencies
-  - stack build --no-terminal
-  - stack build --no-terminal --test --only-dependencies
-  artifacts:
-    paths:
-    - .stack-work/
-    - .stack-root/
-    - .apt/
+  <<:    *header-ghc-80
+  <<:    *build-script
 
 build:ghc-8.2:
   image: fpco/stack-build:lts-11.4
-  <<:    *cache-ghc-82
-  stage: build
-  script:
-  - |
-    if [ -d ${STACK_ROOT} ]; then
-      echo "Already exists: ${STACK_ROOT}";
-      ls "$STACK_ROOT";
-    else 
-      cp -r /root/.stack $STACK_ROOT;
-    fi
-  - export STACK_YAML=stack-802.yaml
-  - export STACK_ROOT=${CI_PROJECT_DIR}/.stack-root
-  - export PATH=$HOME/.local/bin:$PATH
-  - stack --version
-  - stack setup
-  - stack build --no-terminal --only-dependencies
-  - stack build --no-terminal
-  - stack build --no-terminal --test --only-dependencies
-  artifacts:
-    paths:
-    - .stack-work/
-    - .stack-root/
-    - .apt/
+  <<:    *header-ghc-82
+  <<:    *build-script
 
 build:ghc-8.4:
   image: fpco/stack-build:lts-12.2
-  <<:    *cache-ghc-84
-  stage: build
-  script:
-  - |
-    if [ -d ${STACK_ROOT} ]; then
-      echo "Already exists: ${STACK_ROOT}";
-      ls "$STACK_ROOT";
-    else 
-      cp -r /root/.stack $STACK_ROOT;
-    fi
-  - export STACK_YAML=stack-804.yaml
-  - export STACK_ROOT=${CI_PROJECT_DIR}/.stack-root
-  - export PATH=$HOME/.local/bin:$PATH
-  - export LD_LIBRARY_PATH=$STACK_ROOT/programs/x86_64-linux/ghc-8.4.3/lib/ghc-8.4.3/rts:$LD_LIBRARY_PATH
-  - stack --version
-  - stack build --no-terminal
-  - stack build --no-terminal --only-dependencies
-  - stack build --no-terminal --test --only-dependencies
-  artifacts:
-    paths:
-    - .stack-work/
-    - .stack-root/
-    - .apt/
+  <<:    *header-ghc-84
+  <<:    *build-script
 
 test:ghc-8.0:
   image: fpco/stack-build:lts-9.5
-  stage: test
-  <<:    *cache-ghc-80
   dependencies:
   - build:ghc-8.0
-  script:
-  - export STACK_YAML=stack-800.yaml
-  - export STACK_ROOT=${CI_PROJECT_DIR}/.stack-root
-  - export PATH=$HOME/.local/bin:$PATH
-  - stack --no-terminal test --no-rerun-tests --coverage
+  <<:    *header-ghc-80
+  <<:    *test-script
 
 test:ghc-8.2:
   image: fpco/stack-build:lts-11.4
-  stage: test
-  <<:    *cache-ghc-82
   dependencies:
   - build:ghc-8.2
-  script:
-  - export STACK_YAML=stack-802.yaml
-  - export STACK_ROOT=${CI_PROJECT_DIR}/.stack-root
-  - export PATH=$HOME/.local/bin:$PATH
-  - stack --no-terminal test --no-rerun-tests --coverage
+  <<:    *header-ghc-82
+  <<:    *test-script
 
 test:ghc-8.4:
   image: fpco/stack-build:lts-12.2
-  stage: test
-  <<:    *cache-ghc-84
   dependencies:
   - build:ghc-8.4
-  script:
-  - export STACK_YAML=stack-804.yaml
-  - export STACK_ROOT=${CI_PROJECT_DIR}/.stack-root
-  - export PATH=$HOME/.local/bin:$PATH
-  - export LD_LIBRARY_PATH=$STACK_ROOT/programs/x86_64-linux/ghc-8.4.3/lib/ghc-8.4.3/rts:$LD_LIBRARY_PATH
-  - stack --no-terminal test --no-rerun-tests --coverage
+  <<:    *header-ghc-84
+  <<:    *test-script
