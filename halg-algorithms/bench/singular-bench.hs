@@ -52,7 +52,7 @@ toProg fun i =
     directC "print(rtimer-t)"
     directC "exit"
 
-analyse :: (SingularOrder (Arity poly) (MOrder poly), SingularCoeff (Coefficient poly), IsOrderedPolynomial poly) => String -> Text -> Ideal poly -> IO ()
+analyse :: (IsSingularPolynomial poly) => String -> Text -> Ideal poly -> IO ()
 analyse lab fun ideal = do
   gen <- Rand.create
   i2Gr <- V.replicateM 200 $ benchIdeal fun ideal
