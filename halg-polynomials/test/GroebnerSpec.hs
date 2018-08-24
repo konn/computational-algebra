@@ -28,26 +28,26 @@ spec :: Spec
 spec = parallel $ do
   describe "divModPolynomial" $ modifyMaxSize (const 25) $ modifyMaxSuccess (const 50) $ do
     prop "remainder cannot be diveided by any denoms (ternary)" $
-      within (minutes 5) $ checkForArity [1..4] prop_indivisible
+      within (minutes 1) $ checkForArity [1..4] prop_indivisible
     prop "satisfies a_i f_i /= 0 ==> deg(f) >= deg (a_i f_i)" $
-      within (minutes 5) $ checkForArity [1..4] prop_degdecay
+      within (minutes 1) $ checkForArity [1..4] prop_degdecay
     prop "divides correctly" $
-      within (minutes 5) $ checkForArity [1..4] prop_divCorrect
-  describe "calcGroebnerBasis" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
+      within (minutes 1) $ checkForArity [1..4] prop_divCorrect
+  describe "calcGroebnerBasis" $ modifyMaxSize (const 10) $ modifyMaxSuccess (const 10) $ do
     prop "passes S-test" $
-      within (minutes 5) $ checkForArity [2..3] prop_passesSTest
+      within (minutes 1) $ checkForArity [2..3] prop_passesSTest
     prop "divides all original generators" $ do
-      within (minutes 5) $ checkForArity [2..3] prop_groebnerDivsOrig
+      within (minutes 1) $ checkForArity [2..3] prop_groebnerDivsOrig
     it "generates the same ideal as original" $ do
       pendingWith "need example"
     it "produces minimal basis" $ do
-      within (minutes 5) $ checkForArity [2..3] prop_isMinimal
+      within (minutes 1) $ checkForArity [2..3] prop_isMinimal
     it "produces reduced basis" $ do
-      within (minutes 5) $ checkForArity [2..3] prop_isReduced
+      within (minutes 1) $ checkForArity [2..3] prop_isReduced
   describe "isIdealMember" $ do
     it "determins membership correctly" $ do
       pendingWith "need example"
-  describe "intersection" $ modifyMaxSize (const 3) $ modifyMaxSuccess (const 50) $ do
+  describe "intersection" $ modifyMaxSize (const 10) $ modifyMaxSuccess (const 10) $ do
     it "can calculate correctly" $ do
       within (minutes 5) $ checkForArity [2..3] prop_intersection
     it "can solve test-cases correctly" $ do
