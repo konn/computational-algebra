@@ -58,7 +58,7 @@ eqn03 = toIdeal [x^^2 + y^^2 + z^^2 - 2*x
 eqn04 :: Ideal (Polynomial (Fraction Integer) 3)
 eqn04 = toIdeal [x*y + z - x*z, x^^2 - z, 2*x^^3 - x^^2 * y * z - 1]
 
-mkBench :: (KnownNat n, (0 :< n) ~ 'True) => Ideal (Polynomial (Fraction Integer) n) -> IO [Benchmark]
+mkBench :: (KnownNat n, (0 < n) ~ 'True) => Ideal (Polynomial (Fraction Integer) n) -> IO [Benchmark]
 mkBench is = do
   gen <- newStdGen
   return [ bench "naive" $ nf (solve' 1e-10) is
@@ -67,7 +67,7 @@ mkBench is = do
          -- , bench "power" $ nf (solve'' 1e-10) is
          ]
 
-randomCase :: (0 :< n) ~ 'True
+randomCase :: (0 < n) ~ 'True
            => Int -> SNat n -> IO [Ideal (Polynomial (Fraction Integer) n)]
 randomCase count sn = do
   as <- take count . P.map getIdeal <$> sample' (zeroDimOf sn)
