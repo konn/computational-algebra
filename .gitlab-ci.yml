@@ -50,7 +50,7 @@ before_script:
 - eval $(ssh-agent -s) # Run ssh-agent inside build env
 - mkdir -p ~/.ssh
 - chmod 700 ~/.ssh
-- echo "SSH_SECRET_KEY" | ssh-add - > /dev/null
+- echo "$SSH_SECRET_KEY" | ssh-add - > /dev/null
 - apt-get update -y -qq
 - apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev
 - stack upgrade
