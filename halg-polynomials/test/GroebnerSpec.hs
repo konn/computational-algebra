@@ -46,9 +46,9 @@ spec = parallel $ do
     it "generates the same ideal as original" $
       pendingWith "need example"
     it "produces minimal basis" $
-      within (minutes 1) $ checkForArity [2..3] prop_isMinimal
+      within (minutes 5) $ checkForArity [2..3] prop_isMinimal
     it "produces reduced basis" $
-      within (minutes 1) $ checkForArity [2..3] prop_isReduced
+      within (minutes 5) $ checkForArity [2..3] prop_isReduced
   describe "isIdealMember" $
     it "determins membership correctly" $
     pendingWith "need example"
