@@ -71,7 +71,7 @@ before_script:
   - stack setup
   - stack build --no-terminal --only-dependencies
   - stack build --no-terminal
-  - stack build --no-terminal --test --only-dependencies
+  - stack build --no-terminal --test --no-run-tests --only-dependencies --coverage
 
 .test-script: &test-script
   stage:  test
@@ -115,6 +115,8 @@ test:ghc-8.4:
   coverage: '/^\s*(\d+\s*%)\s*top-level declarations used/'
 
 deploy_documents:
+  only:
+  - master@konn/computational-algebra
   image: fpco/stack-build:lts-12.2
   stage: deploy
   allow_failure: true
