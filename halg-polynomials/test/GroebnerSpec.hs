@@ -9,7 +9,7 @@ import Utils
 
 import           Control.Monad
 import qualified Data.Foldable          as F
-import           Data.List              (delete)
+import           Data.List              (delete, tails)
 import qualified Data.Sized.Builtin     as SV
 import           Numeric.Field.Fraction (Fraction)
 import           Test.Hspec
@@ -26,15 +26,16 @@ minutes n = n * seconds 60
 
 spec :: Spec
 spec = parallel $ do
-  describe "divModPolynomial" $ modifyMaxSize (const 25) $ modifyMaxSuccess (const 50) $ do
+  describe "divModPolynomial" $ modifyMaxSize (const 10) $ modifyMaxSuccess (const 10) $ do
     prop "remainder cannot be diveided by any denoms (ternary)" $
       within (minutes 1) $ checkForArity [1..4] prop_indivisible
     prop "satisfies a_i f_i /= 0 ==> deg(f) >= deg (a_i f_i)" $
       within (minutes 1) $ checkForArity [1..4] prop_degdecay
     prop "divides correctly" $
       within (minutes 1) $ checkForArity [1..4] prop_divCorrect
-  describe "calcGroebnerBasis" $ modifyMaxSize (const 10) $ modifyMaxSuccess (const 10) $ do
+  describe "calcGroebnerBasis" $ modifyMaxSize (const 5) $ modifyMaxSuccess (const 10) $ do
     prop "passes S-test" $
+      mapSize (const 3) $ withMaxSuccess 10 $
       within (minutes 1) $ checkForArity [2..3] prop_passesSTest
     prop "divides all original generators" $ do
       within (minutes 1) $ checkForArity [2..3] prop_groebnerDivsOrig
@@ -47,9 +48,9 @@ spec = parallel $ do
   describe "isIdealMember" $ do
     it "determins membership correctly" $ do
       pendingWith "need example"
-  describe "intersection" $ modifyMaxSize (const 10) $ modifyMaxSuccess (const 10) $ do
+  describe "intersection" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
     it "can calculate correctly" $ do
-      within (minutes 5) $ checkForArity [2..3] prop_intersection
+      within (minutes 1) $ checkForArity [2..3] prop_intersection
     it "can solve test-cases correctly" $ do
       forM_ ics_binary $ \(IC i j ans) ->
         F.toList (intersection [toIdeal i, toIdeal j]) `shouldBe` ans
@@ -80,7 +81,7 @@ prop_passesSTest :: KnownNat n => SNat n -> Property
 prop_passesSTest sdim =
   forAll (sized $ \size -> vectorOf size (polynomialOfArity sdim)) $ \ideal ->
   let gs = calcGroebnerBasis $ toIdeal ideal
-  in all ((== 0) . (`modPolynomial` gs)) [sPolynomial f g | f <- gs, g <- gs, f /= g]
+  in all ((== 0) . (`modPolynomial` gs)) [sPolynomial f g | (f : gs) <- init $ tails gs, g <- gs]
 
 prop_groebnerDivsOrig :: KnownNat n => SNat n -> Property
 prop_groebnerDivsOrig sdim =

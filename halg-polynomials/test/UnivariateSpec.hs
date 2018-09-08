@@ -31,13 +31,13 @@ liftMult f g =
 
 spec :: Spec
 spec = parallel $ do
-  describe "naiveMult" $ do
+  describe "naiveMult" $ modifyMaxSize (const 5) $ modifyMaxSuccess (const 10) $ do
     prop "Works as expected" $ \f g ->
       (f `naiveMult` g) == (f `liftMult` g)
-  describe "karatsuba" $ do
+  describe "karatsuba"$ modifyMaxSize (const 5) $ modifyMaxSuccess (const 25)  $ do
     prop "Works as expected" $ \f g ->
       (karatsuba f g) == (f `liftMult` g)
-  describe "divModUnipolByMult" $ do
+  describe "divModUnipolByMult" $  modifyMaxSize (const 5) $ modifyMaxSuccess (const 25)  $ do
     prop "remainder has degree smaller than divisor" $ \f g ->
       (totalDegree' f > 0 && totalDegree' g > 0) ==>
       let (q, r) = divModUnipolByMult f (g :: Unipol (F 5))
@@ -49,7 +49,7 @@ spec = parallel $ do
     it "passes regression tests" $ do
       mapM_ (\((a,b),(c,d)) -> divModUnipolByMult a b `shouldBe` (c, d))
         divModUnipolCases
-  describe "divModUnipol" $ do
+  describe "divModUnipol" $  modifyMaxSize (const 5) $ modifyMaxSuccess (const 25)  $ do
     prop "remainder has degree smaller than divisor" $ \f g ->
       totalDegree' f > 0 && totalDegree' g > 0 ==>
       let (q, r) = divModUnipol f (g :: Unipol (F 5))
