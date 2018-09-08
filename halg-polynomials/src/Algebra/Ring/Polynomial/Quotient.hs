@@ -236,7 +236,7 @@ stdMonoms basis = do
                          ]
   degs <- mapM (minimumOf folded . mexp) tests
   return $ sort [ monom
-                | ds0 <- sequence $ map (enumFromTo 0) degs
+                | ds0 <- mapM (enumFromTo 0) degs
                 , let monom = OrderedMonomial $ fromList dim ds0
                 , let ds = toPolynomial (one, monom)
                 , ds `modPolynomial` basis == ds
@@ -368,7 +368,7 @@ modIdeal' pxy f = Quotient $ f `modPolynomial` _gBasis (reflect pxy)
 buildQIdeal :: (IsOrderedPolynomial poly, Field (Coefficient poly))
             => Ideal poly -> QIdeal poly
 buildQIdeal ideal =
-    let bs = sortBy (comparing leadingMonomial) $! calcGroebnerBasis ideal
+    let bs = sortOn leadingMonomial $! calcGroebnerBasis ideal
     in case stdMonoms bs of
          Nothing -> QIdeal bs
          Just ms -> ZeroDimIdeal bs ms (buildMultTable bs ms)
