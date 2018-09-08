@@ -3,6 +3,7 @@ image: fpco/stack-build:lts-12.2
 stages:
 - build
 - test
+- deploy
 
 .cached_dirs: &cached-dirs
   paths:
@@ -45,6 +46,11 @@ before_script:
 - apt-get update -y -qq && apt-get install -y -qq wget
 - wget ftp://jim.mathematik.uni-kl.de/repo/extra/gpg && apt-key add gpg && rm gpg
 - echo "deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu16 xenial main" >> /etc/apt/sources.list
+- 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+- eval $(ssh-agent -s) # Run ssh-agent inside build env
+- mkdir -p ~/.ssh
+- chmod 700 ~/.ssh
+- echo "SSH_SECRET_KEY" | ssh-add - > /dev/null
 - apt-get update -y -qq
 - apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev
 - stack upgrade
@@ -107,3 +113,22 @@ test:ghc-8.4:
   <<:    *header-ghc-84
   <<:    *test-script
   coverage: '/^\s*(\d+\s*%)\s*top-level declarations used/'
+
+deploy_documents:
+  image: fpco/stack-build:lts-12.2
+  stage: deploy
+  allow_failure: true
+  dependencies:
+  - test:ghc-8.4
+  cache: 
+    key: ghc-8.4
+    policy: pull
+    <<: *cached-dirs
+  script:
+  - stack build --haddock --fast --no-haddock-deps
+  - git remote add github git@github.com:konn/computational-algebra.git
+  - git worktree checkout github/gh-pages-devel gh-pages-devel
+  - ln -s $(stack path --local-doc-root) ./gh-pages-devel/docs
+  - cd gh-pages-devel
+  - stack build --fast && stack exec -- site build
+  - stack exec -- site deploy
