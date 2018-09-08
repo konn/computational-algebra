@@ -33,7 +33,7 @@ matrix:
         apt:
           <<: *apts
     - env: STACK_YAML=stack-804.yaml
-      compiler: ": #GHC 8.4.1"
+      compiler: ": #GHC 8.4.3"
       addons:
         apt:
           <<: *apts

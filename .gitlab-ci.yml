@@ -1,0 +1,134 @@
+image: fpco/stack-build:lts-12.2
+
+stages:
+- build
+- test
+- deploy
+
+.cached_dirs: &cached-dirs
+  paths:
+  - .stack-work/
+  - .stack-root/
+  - .apt/
+  - .hspec-failures
+
+.header-ghc-80: &header-ghc-80
+  variables:
+    STACK_YAML: "stack-800.yaml"
+  cache: 
+    key: ghc-8.0
+    <<: *cached-dirs
+
+.header-ghc-82: &header-ghc-82
+  variables:
+    STACK_YAML: "stack-802.yaml"
+  cache: 
+    key: ghc-8.2
+    <<: *cached-dirs
+
+.header-ghc-84: &header-ghc-84
+  variables:
+    STACK_YAML: "stack-804.yaml"
+  cache: 
+    key: ghc-8.4
+    <<: *cached-dirs
+
+before_script:
+- echo $CI_PROJECT_DIR
+- export STACK_ROOT="${CI_PROJECT_DIR}/.stack-root"
+- export PATH="$HOME/.local/bin:$PATH"
+- export APT_DIR=$CI_PROJECT_DIR/.apt
+- export APT_STATE_LISTS=$APT_DIR/lists 
+- export APT_CACHE_ARCHIVES=$APT_DIR/archives
+- export LD_LIBRARY_PATH=$STACK_ROOT/programs/x86_64-linux/ghc-8.4.3/lib/ghc-8.4.3/rts:$LD_LIBRARY_PATH
+- printf "dir::state::lists    ${APT_STATE_LISTS};\ndir::cache::archives    ${APT_CACHE_ARCHIVES};\n" > /etc/apt/apt.conf
+- mkdir -p "${APT_STATE_LISTS}/partial" && mkdir -p "${APT_CACHE_ARCHIVES}/partial"
+- apt-get update -y -qq && apt-get install -y -qq wget
+- wget ftp://jim.mathematik.uni-kl.de/repo/extra/gpg && apt-key add gpg && rm gpg
+- echo "deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu16 xenial main" >> /etc/apt/sources.list
+- 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+- eval $(ssh-agent -s) # Run ssh-agent inside build env
+- mkdir -p ~/.ssh
+- chmod 700 ~/.ssh
+- echo "$SSH_SECRET_KEY" | ssh-add - > /dev/null
+- apt-get update -y -qq
+- apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev
+- stack upgrade
+
+.build-script: &build-script
+  stage:  build
+  script: 
+  - |
+    if [ -d ${STACK_ROOT} ]; then
+      echo "Already exists: ${STACK_ROOT}";
+      ls "$STACK_ROOT";
+    else
+      echo "No stack-root. copying fpco..."
+      cp -r /root/.stack $STACK_ROOT;
+    fi
+  - stack --version
+  - echo "$STACK_YAML"
+  - stack setup
+  - stack build --no-terminal --only-dependencies
+  - stack build --no-terminal
+  - stack build --no-terminal --test --only-dependencies
+
+.test-script: &test-script
+  stage:  test
+  script: stack --no-terminal test --no-rerun-tests --coverage
+
+build:ghc-8.0:
+  image: fpco/stack-build:lts-9.5
+  <<:    *header-ghc-80
+  <<:    *build-script
+
+build:ghc-8.2:
+  image: fpco/stack-build:lts-11.4
+  <<:    *header-ghc-82
+  <<:    *build-script
+
+build:ghc-8.4:
+  image: fpco/stack-build:lts-12.2
+  <<:    *header-ghc-84
+  <<:    *build-script
+
+test:ghc-8.0:
+  image: fpco/stack-build:lts-9.5
+  dependencies:
+  - build:ghc-8.0
+  <<:    *header-ghc-80
+  <<:    *test-script
+
+test:ghc-8.2:
+  image: fpco/stack-build:lts-11.4
+  dependencies:
+  - build:ghc-8.2
+  <<:    *header-ghc-82
+  <<:    *test-script
+
+test:ghc-8.4:
+  image: fpco/stack-build:lts-12.2
+  dependencies:
+  - build:ghc-8.4
+  <<:    *header-ghc-84
+  <<:    *test-script
+  coverage: '/^\s*(\d+\s*%)\s*top-level declarations used/'
+
+deploy_documents:
+  image: fpco/stack-build:lts-12.2
+  stage: deploy
+  allow_failure: true
+  dependencies:
+  - test:ghc-8.4
+  cache: 
+    key: ghc-8.4
+    policy: pull
+    <<: *cached-dirs
+  script:
+  - stack build --haddock --fast --no-haddock-deps
+  - git remote add github git@github.com:konn/computational-algebra.git
+  - git worktree checkout github/gh-pages-devel gh-pages-devel
+  - ln -s $(stack path --local-doc-root) ./gh-pages-devel/docs
+  - cd gh-pages-devel
+  - stack build --fast && stack exec -- site build
+  - stack exec -- site deploy

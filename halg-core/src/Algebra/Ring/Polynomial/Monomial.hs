@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns, ConstraintKinds, DataKinds                     #-}
+{-# LANGUAGE BangPatterns, CPP, ConstraintKinds, DataKinds                #-}
 {-# LANGUAGE ExistentialQuantification, ExplicitNamespaces                #-}
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                   #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving, IncoherentInstances              #-}
@@ -148,10 +148,12 @@ instance MonoFoldable (Monomial' n) where
   {-# INLINE maximumByEx #-}
   minimumByEx f = minimumByEx f . unintern
   {-# INLINE minimumByEx #-}
+#if MIN_VERSION_mono_traversable(1,0,5)
   oelem a = oelem a . unintern
   {-# INLINE oelem #-}
   onotElem a = onotElem a . unintern
   {-# INLINE onotElem #-}
+#endif
 
 instance MonoTraversable (Monomial' n) where
   otraverse f = fmap intern . otraverse f . unintern

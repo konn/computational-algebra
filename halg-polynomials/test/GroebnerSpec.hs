@@ -8,47 +8,56 @@ import Algebra.Ring.Polynomial
 import Utils
 
 import           Control.Monad
-import qualified Data.Foldable          as F
-import           Data.List              (delete)
-import qualified Data.Sized.Builtin     as SV
-import           Numeric.Field.Fraction (Fraction)
+import qualified Data.Foldable            as F
+import           Data.List                (delete, tails)
+import qualified Data.Sized.Builtin       as SV
+import           Numeric.Field.Fraction   (Fraction)
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
-import           Utils
+import           Test.QuickCheck.Property
 
 asGenListOf :: Gen [a] -> a -> Gen [a]
 asGenListOf = const
 
+type Microsecs = Int
+minutes, seconds :: Int -> Microsecs
+seconds n = n * 1000000
+minutes n = n * seconds 60
+
+setSize :: Testable prop => Int -> prop -> Property
+setSize n p =  MkProperty (sized ((`resize` unProperty (property p)) . const n))
+
 spec :: Spec
 spec = parallel $ do
-  describe "divModPolynomial" $ modifyMaxSize (const 25) $ modifyMaxSuccess (const 100) $ do
+  describe "divModPolynomial" $ modifyMaxSize (const 10) $ modifyMaxSuccess (const 10) $ do
     prop "remainder cannot be diveided by any denoms (ternary)" $
-      checkForArity [1..4] prop_indivisible
+      within (minutes 1) $ checkForArity [1..4] prop_indivisible
     prop "satisfies a_i f_i /= 0 ==> deg(f) >= deg (a_i f_i)" $
-      checkForArity [1..4] prop_degdecay
+      within (minutes 1) $ checkForArity [1..4] prop_degdecay
     prop "divides correctly" $
-      checkForArity [1..4] prop_divCorrect
-  describe "calcGroebnerBasis" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
+      within (minutes 1) $ checkForArity [1..4] prop_divCorrect
+  describe "calcGroebnerBasis" $ modifyMaxSize (const 5) $ modifyMaxSuccess (const 10) $ do
     prop "passes S-test" $
-      checkForArity [2..3] prop_passesSTest
-    prop "divides all original generators" $ do
-      checkForArity [2..3] prop_groebnerDivsOrig
-    it "generates the same ideal as original" $ do
+      setSize 3 $
+      within (minutes 1) $ checkForArity [2..3] prop_passesSTest
+    prop "divides all original generators" $
+      within (minutes 1) $ checkForArity [2..3] prop_groebnerDivsOrig
+    it "generates the same ideal as original" $
       pendingWith "need example"
-    it "produces minimal basis" $ do
-      checkForArity [2..3] prop_isMinimal
-    it "produces reduced basis" $ do
-      checkForArity [2..3] prop_isReduced
-  describe "isIdealMember" $ do
-    it "determins membership correctly" $ do
-      pendingWith "need example"
-  describe "intersection" $ modifyMaxSize (const 3) $ modifyMaxSuccess (const 50) $ do
-    it "can calculate correctly" $ do
-      checkForArity [2..3] prop_intersection
-    it "can solve test-cases correctly" $ do
+    it "produces minimal basis" $
+      within (minutes 1) $ checkForArity [2..3] prop_isMinimal
+    it "produces reduced basis" $
+      within (minutes 1) $ checkForArity [2..3] prop_isReduced
+  describe "isIdealMember" $
+    it "determins membership correctly" $
+    pendingWith "need example"
+  describe "intersection" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
+    it "can calculate correctly" $
+      within (minutes 1) $ checkForArity [2..3] prop_intersection
+    it "can solve test-cases correctly" $
       forM_ ics_binary $ \(IC i j ans) ->
-        F.toList (intersection [toIdeal i, toIdeal j]) `shouldBe` ans
+      F.toList (intersection [toIdeal i, toIdeal j]) `shouldBe` ans
 
 prop_intersection :: KnownNat n => SNat n -> Property
 prop_intersection sdim =
@@ -76,7 +85,7 @@ prop_passesSTest :: KnownNat n => SNat n -> Property
 prop_passesSTest sdim =
   forAll (sized $ \size -> vectorOf size (polynomialOfArity sdim)) $ \ideal ->
   let gs = calcGroebnerBasis $ toIdeal ideal
-  in all ((== 0) . (`modPolynomial` gs)) [sPolynomial f g | f <- gs, g <- gs, f /= g]
+  in all ((== 0) . (`modPolynomial` gs)) [sPolynomial f g | (f : fs) <- init $ tails gs, g <- fs]
 
 prop_groebnerDivsOrig :: KnownNat n => SNat n -> Property
 prop_groebnerDivsOrig sdim =

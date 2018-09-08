@@ -1,59 +1,0 @@
-
-./Setup.hs,15
-main main1,2
-
-./src/Algebra/Field/Finite/Test.hs,477
-module Algebra.Field.Finite.TestAlgebra.Field.Finite.Test3,4
-newtype WrapFiniteField WrapFiniteField14,15
-newtype WrapFiniteField k = WrapFiniteField WrapFiniteField14,15
-newtype WrapFiniteField k = WrapFiniteField { runWrapFiniteField runWrapFiniteField14,15
-instance instance17,18
-arbitraryFiniteField arbitraryFiniteField20,21
-arbitraryFiniteField arbitraryFiniteField21,22
-seriesFiniteField seriesFiniteField27,28
-seriesFiniteField seriesFiniteField28,29
-
-./src/Algebra/Field/Fraction/Test.hs,178
-module Algebra.Field.Fraction.Test Algebra.Field.Fraction.Test2,3
-arbitraryRational arbitraryRational9,10
-arbitraryRational arbitraryRational10,11
-instance instance15,16
-
-./src/Algebra/Field/Prime/Test.hs,87
-module Algebra.Field.Prime.Test Algebra.Field.Prime.Test3,4
-instance instance12,13
-
-./src/Algebra/Ring/Ideal/Test.hs,85
-module Algebra.Ring.Ideal.Test Algebra.Ring.Ideal.Test2,3
-instance instance10,11
-
-./src/Algebra/Ring/Polynomial/Test.hs,711
-module Algebra.Ring.Polynomial.TestAlgebra.Ring.Polynomial.Test4,5
-newtype WrapPolynomial WrapPolynomial24,25
-  WrapPolynomial WrapPolynomial25,26
-  WrapPolynomial { runWrapPolynomial runWrapPolynomial25,26
-instance instance28,29
-arbitraryPolynomial arbitraryPolynomial37,38
-arbitraryPolynomial arbitraryPolynomial38,39
-seriesPolynomial seriesPolynomial40,41
-seriesPolynomial seriesPolynomial41,42
-newtype HomogPoly HomogPoly43,44
-newtype HomogPoly poly = HomogPoly HomogPoly43,44
-newtype HomogPoly poly = HomogPoly { getHomogPoly getHomogPoly43,44
-arbitraryHomogeneousPolynomial arbitraryHomogeneousPolynomial53,54
-arbitraryHomogeneousPolynomial arbitraryHomogeneousPolynomial54,55
-
-./src/Algebra/Ring/Polynomial/Monomial/Test.hs,304
-module Algebra.Ring.Polynomial.Monomial.TestAlgebra.Ring.Polynomial.Monomial.Test3,4
-instance instance21,22
-arbitraryMonomialOfSum arbitraryMonomialOfSum30,31
-arbitraryMonomialOfSum arbitraryMonomialOfSum31,32
-arbitraryMonomial arbitraryMonomial43,44
-arbitraryMonomial arbitraryMonomial44,45
-
-./src/Algebra/TestUtils.hs,167
-module Algebra.TestUtilsAlgebra.TestUtils3,4
-liftSNat liftSNat25,26
-liftSNat liftSNat26,27
-checkForArity checkForArity30,31
-checkForArity checkForArity31,32

@@ -10,6 +10,9 @@ extra-source-files:
 - README.md
 - ChangeLog.md
 
+tested-with: |
+  GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.3
+
 # Metadata used when publishing your package
 synopsis:            Core types and functions of halg computational algebra suite.
 category:            Math
@@ -45,7 +48,7 @@ dependencies:
 - deepseq
 - equational-reasoning
 - ghc-typelits-knownnat
-- ghc-typelits-presburger
+- ghc-typelits-presburger >= 0.2.0.5
 - hashable
 - intern
 - lens

@@ -2,9 +2,9 @@
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                  #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving, LiberalTypeSynonyms             #-}
 {-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction, PolyKinds #-}
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, StandaloneDeriving         #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, TypeSynonymInstances           #-}
-{-# LANGUAGE UndecidableInstances, ViewPatterns                          #-}
+{-# LANGUAGE RankNTypes, RoleAnnotations, ScopedTypeVariables            #-}
+{-# LANGUAGE StandaloneDeriving, TypeFamilies, TypeOperators             #-}
+{-# LANGUAGE TypeSynonymInstances, UndecidableInstances, ViewPatterns    #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
@@ -56,6 +56,8 @@ deriving instance (CoeffRing r, IsOrder n ord, Ord r) => Ord (OrderedPolynomial 
 -- | n-ary polynomial ring over some noetherian ring R.
 newtype OrderedPolynomial r order n = Polynomial { _terms :: Map (OrderedMonomial order n) r }
                                     deriving (NFData)
+type role OrderedPolynomial representational nominal nominal
+
 type Polynomial r = OrderedPolynomial r Grevlex
 
 instance (KnownNat n, IsMonomialOrder n ord, CoeffRing r) => IsPolynomial (OrderedPolynomial r ord n) where

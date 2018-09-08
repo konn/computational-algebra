@@ -1,8 +1,7 @@
-{-# LANGUAGE BangPatterns, CPP, ConstraintKinds, DataKinds                 #-}
-{-# LANGUAGE FlexibleContexts, GADTs, GeneralizedNewtypeDeriving           #-}
-{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, ScopedTypeVariables #-}
-{-# LANGUAGE StandaloneDeriving, TypeApplications, TypeFamilies            #-}
-{-# LANGUAGE UndecidableSuperClasses                                       #-}
+{-# LANGUAGE BangPatterns, CPP, ConstraintKinds, DataKinds              #-}
+{-# LANGUAGE FlexibleContexts, GADTs, GeneralizedNewtypeDeriving        #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, RoleAnnotations  #-}
+{-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableSuperClasses #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 -- | Polynomial type optimized to univariate polynomial.
 module Algebra.Ring.Polynomial.Univariate
@@ -38,6 +37,7 @@ import qualified Prelude                as P
 --   please consider using other represntation.
 newtype Unipol r = Unipol { runUnipol :: IM.IntMap r }
                  deriving (NFData)
+type role Unipol representational
 
 instance Hashable r => Hashable (Unipol r) where
   hashWithSalt p = hashWithSalt p . IM.toList . runUnipol
