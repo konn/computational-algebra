@@ -75,7 +75,9 @@ before_script:
 
 .test-script: &test-script
   stage:  test
-  script: stack --no-terminal test --no-rerun-tests --coverage
+  script:
+  - stack setup
+  - stack --no-terminal test --no-rerun-tests --coverage
 
 build:ghc-8.0:
   image: fpco/stack-build:lts-9.5
