@@ -8,13 +8,14 @@ import Algebra.Ring.Polynomial
 import Utils
 
 import           Control.Monad
-import qualified Data.Foldable          as F
-import           Data.List              (delete, tails)
-import qualified Data.Sized.Builtin     as SV
-import           Numeric.Field.Fraction (Fraction)
+import qualified Data.Foldable            as F
+import           Data.List                (delete, tails)
+import qualified Data.Sized.Builtin       as SV
+import           Numeric.Field.Fraction   (Fraction)
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
+import           Test.QuickCheck.Property
 
 asGenListOf :: Gen [a] -> a -> Gen [a]
 asGenListOf = const
@@ -23,6 +24,12 @@ type Microsecs = Int
 minutes, seconds :: Int -> Microsecs
 seconds n = n * 1000000
 minutes n = n * seconds 60
+
+setSize :: Testable prop => Int -> prop -> Property
+setSize n p =  MkProperty (sized ((`resize` unProperty (property p)) . const n))
+
+setMaxSuccess :: Testable prop => Int -> prop -> Property
+setMaxSuccess n = n `seq` mapTotalResult (\res -> res{ maybeNumTests = Just n })
 
 spec :: Spec
 spec = parallel $ do
@@ -35,7 +42,7 @@ spec = parallel $ do
       within (minutes 1) $ checkForArity [1..4] prop_divCorrect
   describe "calcGroebnerBasis" $ modifyMaxSize (const 5) $ modifyMaxSuccess (const 10) $ do
     prop "passes S-test" $
-      mapSize (const 3) $ withMaxSuccess 10 $
+      setSize 3 $ setMaxSuccess 10 $
       within (minutes 1) $ checkForArity [2..3] prop_passesSTest
     prop "divides all original generators" $ do
       within (minutes 1) $ checkForArity [2..3] prop_groebnerDivsOrig
