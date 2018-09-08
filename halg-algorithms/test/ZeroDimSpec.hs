@@ -105,7 +105,7 @@ isDescending xs = and $ zipWith (>=) xs (drop 1 xs)
 
 prop_isApproximateZero :: KnownNat n
                        => Double
-                       -> (forall m. ((0 :< m) ~ 'True, KnownNat m) =>
+                       -> (forall m. ((0 < m) ~ 'True, KnownNat m) =>
                            Ideal (Polynomial (Fraction Integer) m) -> [Sized m (Complex Double)])
                        -> SNat n -> Property
 prop_isApproximateZero err solver sn =
