@@ -129,7 +129,7 @@ arbitrarySolvable = do
 unaryPoly :: SNat n -> Ordinal n -> Gen (Polynomial (Fraction Integer) n)
 unaryPoly ar (OLt sm) = do
   f <- polynomialOfArity sOne
-  withKnownNat ar $ withKnownNat (sm %:+ sOne) $
+  withKnownNat ar $ withKnownNat (sm %+ sOne) $
     return $ scastPolynomial ar $ shiftR sm f
 
 stdReduced :: (CoeffRing r, KnownNat n, NA.Field r, IsMonomialOrder n order)
