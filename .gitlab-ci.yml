@@ -106,3 +106,4 @@ test:ghc-8.4:
   - build:ghc-8.4
   <<:    *header-ghc-84
   <<:    *test-script
+  coverage: '/^\s*(\d+\s*%)\s*top-level declarations used/'

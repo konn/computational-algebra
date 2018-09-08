@@ -1,6 +1,8 @@
 Computational Algebra Library
 ==============================
-[![Build Status](https://travis-ci.org/konn/computational-algebra.png?branch=master)](https://travis-ci.org/konn/computational-algebra)
+[![pipeline status](https://gitlab.com/konn/computational-algebra/badges/master/pipeline.svg)](https://gitlab.com/konn/computational-algebra/commits/master) 
+[![coverage report](https://gitlab.com/konn/computational-algebra/badges/master/coverage.svg)](https://gitlab.com/konn/computational-algebra/commits/master)
+
 
 **For more detail, please read [Official Project Site](http://konn.github.io/computational-algebra/)**.
 
