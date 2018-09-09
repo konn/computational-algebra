@@ -73,7 +73,7 @@ runTestCases lab i = do
   analyse (lab ++ " (Lex, Sing(gr))") "groebner" $ fmap (changeOrder Lex) i
   analyse (lab ++ " (Lex, Sing(sba))") "sba" $ fmap (changeOrder Lex) i
   analyse (lab ++ " (Grevlex, Sing(gr))") "groebner" $ fmap (changeOrder Grevlex) i
-  analyse (lab ++ " (Grevlex, Sing(sba))") "groebner" $ fmap (changeOrder Grevlex) i
+  analyse (lab ++ " (Grevlex, Sing(sba))") "sba" $ fmap (changeOrder Grevlex) i
 
 main :: IO ()
 main = do
