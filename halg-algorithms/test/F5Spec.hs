@@ -31,7 +31,7 @@ asGenListOf = const
 
 spec :: Spec
 spec = parallel $ do
-  describe "f5" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
+  describe "f5" $ modifyMaxSize (const 4) $ do
     prop "passes S-test" $
       checkForArity [2..3] $ prop_passesSTest f5
     prop "includes the original ideal" $
