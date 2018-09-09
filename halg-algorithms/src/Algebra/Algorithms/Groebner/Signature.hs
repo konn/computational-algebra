@@ -9,7 +9,6 @@ import           Control.Monad.ST.Combinators (ST, STRef, modifySTRef',
                                                newSTRef, readSTRef, runST,
                                                writeSTRef)
 import qualified Data.Coerce                  as DC
-import qualified Data.Foldable                as F
 import qualified Data.Heap                    as H
 import           Data.Maybe                   (fromJust)
 import           Data.Reflection              (Reifies (..), reify)
@@ -18,6 +17,7 @@ import qualified Data.Set                     as Set
 import           Data.Vector                  (Vector)
 import qualified Data.Vector                  as V
 import qualified Data.Vector.Mutable          as MV
+import           Debug.Trace
 
 data Entry a b = Entry { priority :: !a
                        , payload :: !b
@@ -32,7 +32,7 @@ instance Eq a => Eq (Entry a b) where
 instance Ord a => Ord (Entry a b) where
   compare = comparing priority
 
-f5 :: (IsOrderedPolynomial a, Field (Coefficient a))
+f5 :: (IsOrderedPolynomial a, Field (Coefficient a), Show (Coefficient a), Show a)
    => Ideal a -> [a]
 f5 ideal = let sideal = V.fromList $ generators ideal
   in V.toList $ V.map snd $ calcSignatureGB  sideal
@@ -156,7 +156,7 @@ newtype Syzygy n r = Syzygy { runSyzygy :: Vector r }
   deriving (Read, Show, Eq, Ord)
 
 calcSignatureGB :: forall poly.
-                   (Field (Coefficient poly), IsOrderedPolynomial poly)
+                   (Field (Coefficient poly), Show (Coefficient poly), IsOrderedPolynomial poly, Show poly)
                 => V.Vector poly -> V.Vector (Vector poly, poly)
 calcSignatureGB side | all isZero side = V.empty
 calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
@@ -173,7 +173,7 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
   let preDecode :: JPair poly -> ModuleElement n poly
       preDecode (JPair m i) = m .*! (preGs V.! i)
       {-# INLINE preDecode #-}
-  jprs <- newSTRef $ H.fromList $ nub
+  jprs <- newSTRef $ H.fromList
           [ Entry sig jpr
           | j <- [0..n - 1]
           , i <- [0..j  - 1]
@@ -181,25 +181,28 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
           , let qj = preGs V.! j
           , (sig, jpr) <- maybeToList $ jPair qi qj
           , let me = preDecode jpr
-          , all ((me /=) . (preGs V.!)) [0..n - 1]
+          , not $ any (`covers` me) preGs
           ]
-  whileJust_ (H.viewMin <$> readSTRef jprs) $ \(Entry _ me0, jprs') -> do
+  whileJust_ (H.viewMin <$> readSTRef jprs) $ \(Entry sig me0, jprs') -> do
     writeSTRef jprs jprs'
     curGs <- V.unsafeFreeze =<< readSTRef gs
+    hs0   <- readSTRef hs
     let decodeJpr :: JPair poly -> ModuleElement n poly
         decodeJpr (JPair m i) = m .*! (curGs V.! i)
         {-# INLINE decodeJpr #-}
         me = decodeJpr me0
-        next = me `elem` curGs
+        next = any (`covers` me) curGs || sig `elem` hs0
     unless next $ do
       let me'@(ME t v) = reduceModuleElement me curGs
       if isZero v
         then modifySTRef' hs $ Set.insert $ fromJust $ sign t
         else do
         let syzs = foldMap (\(ME tj vj) -> maybe Set.empty Set.singleton $ sign $ v *! tj - vj *! t) curGs
-            newJprs = V.filter (not . (`F.elem` jprs')) $ V.mapMaybe (fmap (uncurry Entry) .jPair me') curGs
-        modifySTRef' hs $ Set.union syzs
-        modifySTRef' jprs $ H.union $ H.fromList $ nub $ V.toList newJprs
+        modifySTRef' hs (`Set.union` syzs)
+        curHs <- readSTRef hs
+        let newJprs = V.filter (\(Entry sg jp) -> not $ any (`covers` decodeJpr jp) curGs || sg `elem` curHs) $
+                      V.mapMaybe (fmap (uncurry Entry) . flip jPair me') curGs
+        modifySTRef' jprs $ H.union $ H.fromList $ nubBy ((==) `on` priority) $ V.toList newJprs
         append gs me'
   V.map (\(ME (Syzygy u) v) -> (u, v)) <$> (V.unsafeFreeze =<< readSTRef gs)
 
@@ -288,3 +291,14 @@ regularTopReduce p1@(ME u1 v1) p2@(ME u2 v2) = do
   let p = p1 - (c, t) .*! p2
   guard $ sign (syzElem p) == sign (syzElem p1)
   return p
+
+sigDivs :: IsOrderedPolynomial poly => Signature n poly -> Signature n poly -> Bool
+sigDivs (Signature i n) (Signature j m) = i == j && n `divs` m
+
+covers :: (IsOrderedPolynomial poly , Reifies n Integer)
+       => ModuleElement n poly -> ModuleElement n poly -> Bool
+covers (ME u2 v2) (ME u1 v1) = fromMaybe False $ do
+  sig2@Signature{ _sigMonom = lm2 } <- sign u2
+  sig1@Signature{ _sigMonom = lm1 } <- sign u1
+  let t = lm1 / lm2
+  return $ sig2 `sigDivs` sig1 && t * leadingMonomial v2 < leadingMonomial v1
