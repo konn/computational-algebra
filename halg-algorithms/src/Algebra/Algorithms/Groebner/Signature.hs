@@ -181,29 +181,32 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
           , i <- [0..j  - 1]
           , let qi = preGs V.! i
           , let qj = preGs V.! j
-          , (sig, jpr) <- maybeToList $ jPair qi qj
+          , (sig, jpr) <- maybeToList $ jPair (i, qi) (j, qj)
           , let me = preDecode jpr
           , not $ any (`covers` me) preGs
           ]
-  whileJust_ (H.viewMin <$> readSTRef jprs) $ \(Entry sig me0, jprs') -> do
+  whileJust_ (H.viewMin <$> readSTRef jprs) $ \(Entry sig (JPair m0 i0), jprs') -> do
     writeSTRef jprs jprs'
     curGs <- V.unsafeFreeze =<< readSTRef gs
     hs0   <- readSTRef hs
-    let decodeJpr :: JPair poly -> ModuleElement n poly
-        decodeJpr (JPair m i) = m .*! (curGs V.! i)
-        {-# INLINE decodeJpr #-}
-        me = decodeJpr me0
-        next = any (`covers` me) curGs || sig `elem` hs0
+    let me = m0 .*! (curGs V.! i0)
+        next = -- trace ("Skip? " <> show (me, sig `elem` hs0, find (`covers` me) curGs)) $
+               any (`covers` me) curGs || sig `elem` hs0
     unless next $ do
       let me'@(ME t v) = reduceModuleElement me curGs
       if isZero v
         then modifySTRef' hs $ Set.insert $ fromJust $ sign t
         else do
-        let syzs = foldMap (\(ME tj vj) -> maybe Set.empty Set.singleton $ sign $ v *! tj - vj *! t) curGs
+        let k = V.length curGs
+            decodeJpr :: JPair poly -> ModuleElement n poly
+            decodeJpr (JPair m i) | i == k = m .*! me'
+                                  | otherwise = m .*! (curGs V.! i)
+            {-# INLINE decodeJpr #-}
+            syzs = foldMap (\(ME tj vj) -> maybe Set.empty Set.singleton $ sign $ v *! tj - vj *! t) curGs
         modifySTRef' hs (`Set.union` syzs)
         curHs <- readSTRef hs
         let newJprs = V.filter (\(Entry sg jp) -> not $ any (`covers` decodeJpr jp) curGs || sg `elem` curHs) $
-                      V.mapMaybe (fmap (uncurry Entry) . flip jPair me') curGs
+                      V.imapMaybe (\i q -> uncurry Entry <$> jPair (i, q) (n, me')) curGs
         modifySTRef' jprs $ H.union $ H.fromList $ nubBy ((==) `on` priority) $ V.toList newJprs
         append gs me'
   V.map (\(ME (Syzygy u) v) -> (u, v)) <$> (V.unsafeFreeze =<< readSTRef gs)
@@ -217,10 +220,10 @@ append mv a = do
   writeSTRef mv g'
 
 jPair :: (Reifies n Integer, IsOrderedPolynomial poly, Field (Coefficient poly))
-      => ModuleElement n poly
-      -> ModuleElement n poly
+      => (Int, ModuleElement n poly)
+      -> (Int, ModuleElement n poly)
       -> Maybe (Signature n poly, JPair poly)
-jPair (ME u1 v1) (ME u2 v2) = do
+jPair (i, ME u1 v1) (j, ME u2 v2) = do
   let (lc1, lm1) = leadingTerm v1
       (lc2, lm2) = leadingTerm v2
       t = lcmMonomial lm1 lm2
@@ -229,13 +232,13 @@ jPair (ME u1 v1) (ME u2 v2) = do
   jSig1 <- (t1 .*!) <$> sign u1
   jSig2 <- (t2 .*!) <$> sign u2
   if  jSig1 >= jSig2
-    then loop jSig1 t1 u1 (lc1 / lc2) t2 u2
-    else loop jSig2 t2 u2 (lc2 / lc1) t1 u1
+    then loop i jSig1 t1 u1 (lc1 / lc2) t2 u2
+    else loop j jSig2 t2 u2 (lc2 / lc1) t1 u1
   where
-    loop sig t1 w1 c t2 w2 = do
-      sgn <- sign (t1 .*! w1 -(c, t2) .*! w2)
+    loop k sig t1 w1 c t2 w2 = do
+      sgn <- sign (t1 .*! w1 - (c, t2) .*! w2)
       guard $ sig == sgn
-      return (sig, JPair t1 (_position sig))
+      return (sig, JPair t1 k)
 
 data Signature n poly =
   Signature { _position :: {-# UNPACK #-} !Int
