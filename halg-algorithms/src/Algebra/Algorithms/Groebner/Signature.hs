@@ -1,9 +1,10 @@
-{-# LANGUAGE ScopedTypeVariables, TypeApplications, ViewPatterns #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeApplications #-}
+{-# LANGUAGE ViewPatterns                                              #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Algorithms.Groebner.Signature (f5) where
 import           Algebra.Prelude.Core         hiding (Vector)
 import           Control.Lens                 hiding ((.=))
-import           Control.Monad.Loops          (iterateUntil, whileJust_)
+import           Control.Monad.Loops          (whileJust_)
 import           Control.Monad.ST.Combinators (ST, STRef, modifySTRef',
                                                newSTRef, readSTRef, runST,
                                                writeSTRef)
@@ -45,6 +46,8 @@ data ModuleElement n poly = ME { syzElem :: !(Syzygy n poly)
 data JPair poly = JPair { _jpTerm  :: !(OMonom poly)
                         , _jpIndex :: !Int
                         }
+deriving instance KnownNat (Arity poly) => Show (JPair poly)
+deriving instance KnownNat (Arity poly) => Eq (JPair poly)
 
 instance Monoidal a => Additive (Syzygy n a) where
   Syzygy u + Syzygy u' = Syzygy $ V.zipWith (+) u u'
@@ -159,12 +162,13 @@ calcSignatureGB side | all isZero side = V.empty
 calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
   let n = V.length sideal
   in reify (toInteger n) $ \(Proxy :: Proxy n) -> do
-  let mods0 = V.generate n $ basis n
+  let mods0 = V.generate n basis
       preGs = V.zipWith ME mods0 sideal
   gs :: STRef s (MV.MVector s (ModuleElement n poly)) <- newSTRef =<< V.unsafeThaw preGs
-  hs <- newSTRef $ Set.fromList [ Signature @n @poly j lm
+  hs <- newSTRef $ Set.fromList [ Signature j lm
                                 | j <- [0..n - 1]
-                                , let lm = leadingMonomial (sideal V.! j)
+                                , i <- [0..j - 1]
+                                , let lm = leadingMonomial (sideal V.! i)
                                 ]
   let preDecode :: JPair poly -> ModuleElement n poly
       preDecode (JPair m i) = m .*! (preGs V.! i)
@@ -173,8 +177,8 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
           [ Entry sig jpr
           | j <- [0..n - 1]
           , i <- [0..j  - 1]
-          , let qi = ME (mods0 V.! i) (sideal V.! i)
-          , let qj = ME (mods0 V.! j) (sideal V.! j)
+          , let qi = preGs V.! i
+          , let qj = preGs V.! j
           , (sig, jpr) <- maybeToList $ jPair qi qj
           , let me = preDecode jpr
           , all ((me /=) . (preGs V.!)) [0..n - 1]
@@ -255,21 +259,28 @@ sign = {-# SCC "sign" #-}
                      )
           . runSyzygy
 
-basis :: (Monoidal a, Unital a) => Int -> Int -> Syzygy n a
-basis len i = Syzygy $ V.generate len $ \j -> if i == j then one else zero
+basis :: forall a n. (Monoidal a, Unital a, Reifies n Integer) => Int -> Syzygy n a
+basis i =
+  let len = fromInteger $ reflect (Proxy :: Proxy n)
+  in Syzygy $ V.generate len $ \j -> if i == j then one else zero
 
 reduceModuleElement :: (Reifies n Integer, IsOrderedPolynomial poly,
                         Field (Coefficient poly), Functor t, Foldable t)
                     => ModuleElement n poly -> t (ModuleElement n poly)
                     -> ModuleElement n poly
-reduceModuleElement p qs =
-  fromMaybe p $ iterateUntil isNothing (\r -> asum $ fmap (regularTopReduce r) qs) p
+reduceModuleElement p qs = loop p
+  where
+    loop r =
+      case asum $ fmap (regularTopReduce r) qs of
+        Nothing -> r
+        Just r' -> loop r'
+{-# INLINE reduceModuleElement #-}
 
 regularTopReduce :: (Reifies n Integer, IsOrderedPolynomial poly, Field (Coefficient poly))
                  => ModuleElement n poly -> ModuleElement n poly
                  -> Maybe (ModuleElement n poly)
 regularTopReduce p1@(ME u1 v1) p2@(ME u2 v2) = do
-  guard $ not (isZero v1) && leadingMonomial v1 `divs` leadingMonomial v2
+  guard $ not (isZero v2) && not (isZero v1) && leadingMonomial v2 `divs` leadingMonomial v1
   let (c, t) = tryDiv (leadingTerm v1) (leadingTerm v2)
   l <- sign (t .*! u2)
   r <- sign u1
