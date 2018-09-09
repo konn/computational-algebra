@@ -17,7 +17,6 @@ import qualified Data.Set                     as Set
 import           Data.Vector                  (Vector)
 import qualified Data.Vector                  as V
 import qualified Data.Vector.Mutable          as MV
-import           Debug.Trace
 
 data Entry a b = Entry { priority :: !a
                        , payload :: !b
@@ -32,7 +31,7 @@ instance Eq a => Eq (Entry a b) where
 instance Ord a => Ord (Entry a b) where
   compare = comparing priority
 
-f5 :: (IsOrderedPolynomial a, Field (Coefficient a), Show (Coefficient a), Show a)
+f5 :: (IsOrderedPolynomial a, Field (Coefficient a))
    => Ideal a -> [a]
 f5 ideal = let sideal = V.fromList $ generators ideal
   in V.toList $ V.map snd $ calcSignatureGB  sideal
@@ -158,7 +157,7 @@ newtype Syzygy n r = Syzygy { runSyzygy :: Vector r }
   deriving (Read, Show, Eq, Ord)
 
 calcSignatureGB :: forall poly.
-                   (Field (Coefficient poly), Show (Coefficient poly), IsOrderedPolynomial poly, Show poly)
+                   (Field (Coefficient poly), IsOrderedPolynomial poly)
                 => V.Vector poly -> V.Vector (Vector poly, poly)
 calcSignatureGB side | all isZero side = V.empty
 calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
@@ -175,10 +174,11 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
   let preDecode :: JPair poly -> ModuleElement n poly
       preDecode (JPair m i) = m .*! (preGs V.! i)
       {-# INLINE preDecode #-}
-  jprs <- newSTRef $ H.fromList
+  jprs <- newSTRef $ H.fromList $
+          nubBy ((==) `on` priority)
           [ Entry sig jpr
           | j <- [0..n - 1]
-          , i <- [0..j  - 1]
+          , i <- [0..j - 1]
           , let qi = preGs V.! i
           , let qj = preGs V.! j
           , (sig, jpr) <- maybeToList $ jPair (i, qi) (j, qj)
@@ -190,8 +190,7 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
     curGs <- V.unsafeFreeze =<< readSTRef gs
     hs0   <- readSTRef hs
     let me = m0 .*! (curGs V.! i0)
-        next = -- trace ("Skip? " <> show (me, sig `elem` hs0, find (`covers` me) curGs)) $
-               any (`covers` me) curGs || sig `elem` hs0
+        next = any (`covers` me) curGs || sig `elem` hs0
     unless next $ do
       let me'@(ME t v) = reduceModuleElement me curGs
       if isZero v
@@ -206,7 +205,7 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
         modifySTRef' hs (`Set.union` syzs)
         curHs <- readSTRef hs
         let newJprs = V.filter (\(Entry sg jp) -> not $ any (`covers` decodeJpr jp) curGs || sg `elem` curHs) $
-                      V.imapMaybe (\i q -> uncurry Entry <$> jPair (i, q) (n, me')) curGs
+                      V.imapMaybe (curry $ fmap (uncurry Entry) . jPair (k, me')) curGs
         modifySTRef' jprs $ H.union $ H.fromList $ nubBy ((==) `on` priority) $ V.toList newJprs
         append gs me'
   V.map (\(ME (Syzygy u) v) -> (u, v)) <$> (V.unsafeFreeze =<< readSTRef gs)
