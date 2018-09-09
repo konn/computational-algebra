@@ -131,7 +131,7 @@ deploy_documents:
   script:
   - stack build --haddock --fast --no-haddock-deps
   - git remote add github git@github.com:konn/computational-algebra.git
-  - git worktree checkout github/gh-pages-devel gh-pages-devel
+  - git worktree add gh-pages-devel github/gh-pages-devel
   - ln -s $(stack path --local-doc-root) ./gh-pages-devel/docs
   - cd gh-pages-devel
   - stack build --fast && stack exec -- site build
