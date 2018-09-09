@@ -40,7 +40,6 @@ before_script:
 - export APT_DIR=$CI_PROJECT_DIR/.apt
 - export APT_STATE_LISTS=$APT_DIR/lists 
 - export APT_CACHE_ARCHIVES=$APT_DIR/archives
-- export LD_LIBRARY_PATH=$STACK_ROOT/programs/x86_64-linux/ghc-8.4.3/lib/ghc-8.4.3/rts:$LD_LIBRARY_PATH
 - printf "dir::state::lists    ${APT_STATE_LISTS};\ndir::cache::archives    ${APT_CACHE_ARCHIVES};\n" > /etc/apt/apt.conf
 - mkdir -p "${APT_STATE_LISTS}/partial" && mkdir -p "${APT_CACHE_ARCHIVES}/partial"
 - apt-get update -y -qq && apt-get install -y -qq wget
@@ -54,6 +53,8 @@ before_script:
 - apt-get update -y -qq
 - apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev
 - stack upgrade
+- stack setup
+- export LD_LIBRARY_PATH="$(dirname $(stack path --global-pkg-db))/rts:$LD_LIBRARY_PATH"
 
 .build-script: &build-script
   stage:  build
@@ -131,7 +132,7 @@ deploy_documents:
   script:
   - stack build --haddock --fast --no-haddock-deps
   - git remote add github git@github.com:konn/computational-algebra.git
-  - git worktree checkout github/gh-pages-devel gh-pages-devel
+  - git worktree add gh-pages-devel github/gh-pages-devel
   - ln -s $(stack path --local-doc-root) ./gh-pages-devel/docs
   - cd gh-pages-devel
   - stack build --fast && stack exec -- site build

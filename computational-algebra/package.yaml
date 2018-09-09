@@ -115,12 +115,6 @@ _profile-cond: &profile-cond
   - -fprof-auto-exported
   
 _examples: &examples
-  solve:
-    <<:   *example-cond
-    main: solve.hs
-  algebraic:
-    <<:   *example-cond
-    main: algebraic.hs
   algebraic:
     <<:   *example-cond
     main: algebraic.hs
