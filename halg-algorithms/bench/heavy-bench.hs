@@ -9,6 +9,7 @@ import Algebra.Algorithms.Groebner
 import Algebra.Algorithms.Groebner.F4
 import Algebra.Algorithms.Groebner.Homogeneous
 import Algebra.Algorithms.Groebner.Signature
+import Algebra.Field.Finite.Prime
 import Algebra.Prelude.Core
 import Cases
 import Gauge.Main
