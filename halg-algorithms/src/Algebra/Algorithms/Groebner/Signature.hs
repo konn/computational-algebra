@@ -74,8 +74,10 @@ instance {-# OVERLAPPING #-} Group a => RightModule Integer (Syzygy n a) where
   {-# INLINE (*.) #-}
 
 instance (Reifies n Integer, Group a) => Group (Syzygy n a) where
-  negate = Syzygy . V.map negate . runSyzygy
+  negate = DC.coerce @(Vector a -> Vector a) $ V.map negate
   {-# INLINE negate #-}
+  (-) = DC.coerce @(Vector a -> Vector a -> Vector a) $ V.zipWith (-)
+  {-# INLINE (-) #-}
 
 instance (Monoidal poly) => Additive (ModuleElement n poly) where
   ME u v + ME u' v' = ME (u + u') (v + v')
@@ -124,13 +126,13 @@ instance {-# OVERLAPPING #-} (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolyno
 instance {-# OVERLAPPING #-}
          (r ~ Coefficient poly, Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly)
          => Action (r, OrderedMonomial ord k) (Syzygy n poly) where
-  t .*! Syzygy u = Syzygy $ V.map (toPolynomial t *) u
+  (.*!) = DC.coerce @((r, OrderedMonomial ord k) -> Vector poly -> Vector poly) $ V.map . (*) . toPolynomial
   {-# INLINE (.*!) #-}
 
 instance {-# OVERLAPPING #-}
          (r ~ Coefficient poly, Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly)
          => Action (r, OrderedMonomial ord k) (ModuleElement n poly) where
-  (c, m) .*! ME u v = ME ((c, m) .*! u) (toPolynomial (c, m) * v)
+  t .*! ME u v = ME (t .*! u) (toPolynomial t * v)
   {-# INLINE (.*!) #-}
 
 instance {-# OVERLAPPING #-} (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly) =>
@@ -140,7 +142,7 @@ instance {-# OVERLAPPING #-} (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolyno
 
 instance {-# OVERLAPPING #-} (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly) =>
          Action (OrderedMonomial ord k) (Syzygy n poly) where
-  m .*! Syzygy u = Syzygy $ V.map (m >*) u
+  (.*!) = DC.coerce @(OrderedMonomial ord k -> Vector poly -> Vector poly) $ V.map . (>*)
   {-# INLINE (.*!) #-}
 
 instance {-# OVERLAPPABLE #-}  (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly) =>
