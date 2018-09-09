@@ -9,7 +9,7 @@ import Algebra.Algorithms.Groebner
 import Algebra.Algorithms.Groebner.Homogeneous
 import Algebra.Algorithms.Groebner.Signature
 import Algebra.Internal
-import Algebra.Prelude.Core
+import Algebra.Prelude.Core                    hiding ((++))
 import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
 import Control.Monad                           (void)
