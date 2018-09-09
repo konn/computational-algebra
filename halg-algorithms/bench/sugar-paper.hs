@@ -1,15 +1,15 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
-{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction      #-}
-{-# LANGUAGE OverloadedStrings, PolyKinds, TypeFamilies            #-}
-{-# LANGUAGE UndecidableInstances                                  #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs   #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude                #-}
+{-# LANGUAGE NoMonomorphismRestriction, OverloadedStrings, PolyKinds #-}
+{-# LANGUAGE TypeFamilies, UndecidableInstances                      #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
 import Algebra.Algorithms.Groebner
 import Algebra.Algorithms.Groebner.Homogeneous
 import Algebra.Algorithms.Groebner.Signature
 import Algebra.Internal
-import Algebra.Prelude.Core                    hiding ((++))
+import Algebra.Prelude.Core
 import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
 import Control.Monad                           (void)
@@ -60,7 +60,7 @@ mkTestCases num ideal = [ mkTC ("lex0" ++ either show id num) (mapIdeal (changeO
 
 mkTC :: (IsMonomialOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
 mkTC name jdeal =
-  env (return (jdeal, buildIdealFunction "groebner" jdeal, buildIdealFunction "sba" jdeal)) $ \ ~(ideal, gr, sba) ->
+  env (return jdeal) $ \ ~ideal ->
   bgroup name [ {- bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy) ideal
               , -} bench "syz+sugar" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)) ideal
               -- , bench "standard" $ nf calcGroebnerBasis ideal
