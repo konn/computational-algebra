@@ -61,11 +61,11 @@ ratToF :: Rational -> F 65521
 ratToF = modRat'
 
 dic :: [(String, CalcPoly)]
-dic = [("buchberger", CalcPoly $ syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy))
-      ,("dbd", CalcPoly calcGroebnerBasisAfterHomogenising)
-      ,("hilb", CalcPoly calcGroebnerBasisAfterHomogenisingHilb)
-      ,("f4", CalcPoly f4)
-      ,("f5", CalcPoly f5)
+dic = [ -- ("buchberger", CalcPoly $ syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy))
+      -- ,("dbd", CalcPoly calcGroebnerBasisAfterHomogenising)
+      -- ,("hilb", CalcPoly calcGroebnerBasisAfterHomogenisingHilb)
+      -- ,("f4", CalcPoly f4)
+       ("f5", CalcPoly f5)
       ]
 
 main :: IO ()
