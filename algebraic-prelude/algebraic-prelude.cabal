@@ -1,46 +1,61 @@
-name:                algebraic-prelude
-version:             0.1.1.0
-synopsis:            Algebraically structured Prelude
-description:         This package provides a drop-in replacement for Prelude module,
-                     based on algebraic hierarchy provided by <https://hackage.haskell.org/package/algebra algebra> package.
-homepage:            https://github.com/konn/algebraic-prelude#readme
-license:             BSD3
-license-file:        LICENSE
-author:              Hiromi ISHII
-maintainer:          konn.jinro _at_ gmail.com
-copyright:           2015 (c) Hiromi ISHII
-category:            Web
-build-type:          Simple
--- extra-source-files:
-cabal-version:       >=1.10
+-- This file has been generated from package.yaml by hpack version 0.28.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 39521c962942d771b7ff402626e04dfad525e4c6603fee759d4980ff67c18818
 
-library
-  hs-source-dirs:      src
-  exposed-modules:     AlgebraicPrelude
-  build-depends:       base    >= 4.7    && < 5
-                     , basic-prelude
-                     , lens    == 4.*
-                     , semigroups
-  if impl(ghc >= 8.4)
-     build-depends:    algebra >= 4.3.1
-  else
-     build-depends:    algebra >= 4.3
-
-  default-language:    Haskell2010
-  default-extensions:  NoImplicitPrelude
-  ghc-options:         -Wall
-  
-
-executable sandpit
-  hs-source-dirs:      examples
-  Main-is:             sandpit.hs
-  build-depends:       base
-                     , algebraic-prelude
-  default-language:    Haskell2010
-  ghc-options:         -Wall
-  default-extensions:  NoImplicitPrelude
-  buildable:           False
+name:           algebraic-prelude
+version:        0.1.1.0
+synopsis:       Algebraically structured Prelude
+description:    This package provides a drop-in replacement for Prelude module,
+                based on algebraic hierarchy provided by <https://hackage.haskell.org/package/algebra algebra> package.
+category:       Web
+homepage:       https://github.com/konn/computational-algebra#readme
+bug-reports:    https://github.com/konn/computational-algebra/issues
+author:         Hiromi ISHII
+maintainer:     konn.jinro _at_ gmail.com
+copyright:      2015 (c) Hiromi ISHII
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
 
 source-repository head
-  type:     git
+  type: git
   location: https://github.com/konn/computational-algebra
+
+library
+  exposed-modules:
+      AlgebraicPrelude
+  other-modules:
+      Paths_algebraic_prelude
+  hs-source-dirs:
+      src
+  default-extensions: NoImplicitPrelude
+  ghc-options: -Wall
+  build-depends:
+      base >=4.7 && <5
+    , basic-prelude
+    , lens ==4.*
+    , semigroups
+  if impl(ghc >=8.4)
+    build-depends:
+        algebra >=4.3.1
+  else
+    build-depends:
+        algebra >=4.3
+  default-language: Haskell2010
+
+executable sandpit
+  main-is: sandpit.hs
+  other-modules:
+      Paths_algebraic_prelude
+  hs-source-dirs:
+      examples
+  default-extensions: NoImplicitPrelude
+  ghc-options: -Wall
+  build-depends:
+      algebraic-prelude
+    , base
+  buildable: False
+  default-language: Haskell2010
