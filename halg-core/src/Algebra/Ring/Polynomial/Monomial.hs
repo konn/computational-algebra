@@ -31,11 +31,11 @@ import           Control.DeepSeq              (NFData (..))
 import           Control.Lens                 (Index, IxValue, Ixed (..), imap,
                                                makeLenses, makeWrapped, (%~),
                                                (&), (.~), _Wrapped)
+import qualified Data.Coerce                  as DC
 import           Data.Constraint              ((:=>) (..), Dict (..))
 import qualified Data.Constraint              as C
 import           Data.Constraint.Forall       (Forall, inst)
 import           Data.Hashable                (Hashable (..))
-import           Data.Interned
 import           Data.Kind                    (Type)
 import           Data.Maybe                   (catMaybes)
 import           Data.Monoid                  ((<>))
@@ -60,119 +60,119 @@ import qualified Prelude                      as P
 type Monomial n = USized n Int
 
 -- | N-ary monomial. IntMap contains degrees for each x_i- type Monomial' (n :: Nat) = USized n Int
-data Monomial' n = Monomial' { _internedMonomialId :: {-# UNPACK #-} !Id
-                           , uninternMonomial :: {-# UNPACK #-} !(USized n Int)
-                           }
-  deriving (Show)
+-- data Monomial' n = Monomial' { _internedMonomialId :: {-# UNPACK #-} !Id
+--                            , uninternMonomial :: {-# UNPACK #-} !(USized n Int)
+--                            }
+--   deriving (Show)
 
-type instance Index (Monomial' n) = V.Ordinal n
-type instance IxValue (Monomial' n) = Int
-instance Ixed (Monomial' n) where
-  ix n f = fmap intern . ix n f . unintern
+-- type instance Index (Monomial' n) = V.Ordinal n
+-- type instance IxValue (Monomial' n) = Int
+-- instance Ixed (Monomial' n) where
+--   ix n f = fmap intern . ix n f . unintern
 
-instance Hashable (Monomial' n) where
-  hashWithSalt s (Monomial' i _) = hashWithSalt s i
+-- instance Hashable (Monomial' n) where
+--   hashWithSalt s (Monomial' i _) = hashWithSalt s i
 
-instance Eq (Monomial' n) where
-  Monomial' i _ == Monomial' j _ = i == j
+-- instance Eq (Monomial' n) where
+--   Monomial' i _ == Monomial' j _ = i == j
 
-instance NFData (Monomial' n) where
-  rnf (Monomial' i u) = rnf i `seq` rnf u `seq` ()
+-- instance NFData (Monomial' n) where
+--   rnf (Monomial' i u) = rnf i `seq` rnf u `seq` ()
 
 -- | A wrapper for monomials with a certain (monomial) order.
 newtype OrderedMonomial ordering n =
-  OrderedMonomial' { getMonomial' :: Monomial' n }
+  OrderedMonomial { getMonomial :: Monomial n }
   deriving (NFData, Eq, Hashable)
 
-getMonomial :: OrderedMonomial ord n -> Monomial n
-getMonomial = unintern . getMonomial'
-{-# INLINE getMonomial #-}
+-- getMonomial :: OrderedMonomial ord n -> Monomial n
+-- getMonomial = unintern . getMonomial
+-- {-# INLINE getMonomial #-}
 
-pattern OrderedMonomial :: USized n Int -> OrderedMonomial ord n
-pattern OrderedMonomial m <- OrderedMonomial' (Monomial' _ m) where
-  OrderedMonomial m = OrderedMonomial' (intern m)
+-- pattern OrderedMonomial :: USized n Int -> OrderedMonomial ord n
+-- pattern OrderedMonomial m <- OrderedMonomial' (Monomial' _ m) where
+--   OrderedMonomial m = OrderedMonomial' (intern m)
 
-{-# COMPLETE OrderedMonomial #-}
+-- {-# COMPLETE OrderedMonomial #-}
 
-type instance Element (Monomial' n) = Int
-instance MonoFunctor (Monomial' n) where
-  omap f = intern . omap f . unintern
-  {-# INLINE omap #-}
+-- type instance Element (Monomial' n) = Int
+-- instance MonoFunctor (Monomial' n) where
+--   omap f = intern . omap f . unintern
+--   {-# INLINE omap #-}
 
-instance MonoFoldable (Monomial' n) where
-  ofoldMap f = ofoldMap f . unintern
-  {-# INLINE ofoldMap #-}
-  ofoldr f u = ofoldr f u . unintern
-  {-# INLINE ofoldr #-}
-  ofoldl' f u = ofoldl' f u . unintern
-  {-# INLINE ofoldl' #-}
-  otoList = otoList . unintern
-  {-# INLINE otoList #-}
-  oall f = oall f . unintern
-  {-# INLINE oall #-}
-  oany f = oany f . unintern
-  {-# INLINE oany #-}
-  onull = onull . unintern
-  {-# INLINE onull #-}
-  olength = olength . unintern
-  {-# INLINE olength #-}
-  olength64 = olength64 . unintern
-  {-# INLINE olength64 #-}
-  ocompareLength = ocompareLength . unintern
-  {-# INLINE ocompareLength #-}
-  otraverse_ f = otraverse_ f . unintern
-  {-# INLINE otraverse_ #-}
-  ofor_ = ofor_ . unintern
-  {-# INLINE ofor_ #-}
-  omapM_ f = omapM_ f . unintern
-  {-# INLINE omapM_ #-}
-  oforM_ = oforM_ . unintern
-  {-# INLINE oforM_ #-}
-  ofoldlM f u = ofoldlM f u . unintern
-  {-# INLINE ofoldlM #-}
-  ofoldMap1Ex f = ofoldMap1Ex f . unintern
-  {-# INLINE ofoldMap1Ex #-}
-  ofoldr1Ex f = ofoldr1Ex f . unintern
-  {-# INLINE ofoldr1Ex #-}
-  ofoldl1Ex' f = ofoldl1Ex' f . unintern
-  {-# INLINE ofoldl1Ex' #-}
-  headEx = headEx . unintern
-  {-# INLINE headEx #-}
-  lastEx = lastEx . unintern
-  {-# INLINE lastEx #-}
-  unsafeHead = unsafeHead . unintern
-  {-# INLINE unsafeHead #-}
-  unsafeLast = unsafeLast . unintern
-  {-# INLINE unsafeLast #-}
-  maximumByEx f = maximumByEx f . unintern
-  {-# INLINE maximumByEx #-}
-  minimumByEx f = minimumByEx f . unintern
-  {-# INLINE minimumByEx #-}
-#if MIN_VERSION_mono_traversable(1,0,5)
-  oelem a = oelem a . unintern
-  {-# INLINE oelem #-}
-  onotElem a = onotElem a . unintern
-  {-# INLINE onotElem #-}
-#endif
+-- instance MonoFoldable (Monomial' n) where
+--   ofoldMap f = ofoldMap f . unintern
+--   {-# INLINE ofoldMap #-}
+--   ofoldr f u = ofoldr f u . unintern
+--   {-# INLINE ofoldr #-}
+--   ofoldl' f u = ofoldl' f u . unintern
+--   {-# INLINE ofoldl' #-}
+--   otoList = otoList . unintern
+--   {-# INLINE otoList #-}
+--   oall f = oall f . unintern
+--   {-# INLINE oall #-}
+--   oany f = oany f . unintern
+--   {-# INLINE oany #-}
+--   onull = onull . unintern
+--   {-# INLINE onull #-}
+--   olength = olength . unintern
+--   {-# INLINE olength #-}
+--   olength64 = olength64 . unintern
+--   {-# INLINE olength64 #-}
+--   ocompareLength = ocompareLength . unintern
+--   {-# INLINE ocompareLength #-}
+--   otraverse_ f = otraverse_ f . unintern
+--   {-# INLINE otraverse_ #-}
+--   ofor_ = ofor_ . unintern
+--   {-# INLINE ofor_ #-}
+--   omapM_ f = omapM_ f . unintern
+--   {-# INLINE omapM_ #-}
+--   oforM_ = oforM_ . unintern
+--   {-# INLINE oforM_ #-}
+--   ofoldlM f u = ofoldlM f u . unintern
+--   {-# INLINE ofoldlM #-}
+--   ofoldMap1Ex f = ofoldMap1Ex f . unintern
+--   {-# INLINE ofoldMap1Ex #-}
+--   ofoldr1Ex f = ofoldr1Ex f . unintern
+--   {-# INLINE ofoldr1Ex #-}
+--   ofoldl1Ex' f = ofoldl1Ex' f . unintern
+--   {-# INLINE ofoldl1Ex' #-}
+--   headEx = headEx . unintern
+--   {-# INLINE headEx #-}
+--   lastEx = lastEx . unintern
+--   {-# INLINE lastEx #-}
+--   unsafeHead = unsafeHead . unintern
+--   {-# INLINE unsafeHead #-}
+--   unsafeLast = unsafeLast . unintern
+--   {-# INLINE unsafeLast #-}
+--   maximumByEx f = maximumByEx f . unintern
+--   {-# INLINE maximumByEx #-}
+--   minimumByEx f = minimumByEx f . unintern
+--   {-# INLINE minimumByEx #-}
+-- #if MIN_VERSION_mono_traversable(1,0,5)
+--   oelem a = oelem a . unintern
+--   {-# INLINE oelem #-}
+--   onotElem a = onotElem a . unintern
+--   {-# INLINE onotElem #-}
+-- #endif
 
-instance MonoTraversable (Monomial' n) where
-  otraverse f = fmap intern . otraverse f . unintern
-  omapM f = fmap intern . omapM f . unintern
+-- instance MonoTraversable (Monomial' n) where
+--   otraverse f = fmap intern . otraverse f . unintern
+--   omapM f = fmap intern . omapM f . unintern
 
-instance Interned (Monomial' n) where
-  type Uninterned (Monomial' n) = USized n Int
-  newtype Description (Monomial' n) = DMon (USized n Int)
-    deriving (Eq, Hashable)
-  describe = DMon
-  identify = Monomial'
-  cache = monCache
+-- instance Interned (Monomial' n) where
+--   type Uninterned (Monomial' n) = USized n Int
+--   newtype Description (Monomial' n) = DMon (USized n Int)
+--     deriving (Eq, Hashable)
+--   describe = DMon
+--   identify = Monomial'
+--   cache = monCache
 
-instance Uninternable (Monomial' n) where
-  unintern = uninternMonomial
+-- instance Uninternable (Monomial' n) where
+--   unintern = uninternMonomial
 
-monCache :: Cache (Monomial' n)
-monCache = mkCache
-{-# NOINLINE monCache #-}
+-- monCache :: Cache (Monomial' n)
+-- monCache = mkCache
+-- {-# NOINLINE monCache #-}
 
 makeLenses ''OrderedMonomial
 makeWrapped ''OrderedMonomial
@@ -181,22 +181,18 @@ makeWrapped ''OrderedMonomial
 fromList :: SNat n -> [Int] -> Monomial n
 fromList len = V.fromListWithDefault len 0
 
-zws :: (KnownNat n, UV.Unbox a) => (Int -> Int -> a) -> USized n Int -> USized n Int -> USized n a
-zws f v u = V.unsafeToSized' $ UV.zipWith f (V.unsized v) (V.unsized u)
-{-# INLINE zws #-}
-
 instance KnownNat n => Multiplicative (Monomial n) where
-  (*) = zws (+)
+  (*) = V.zipWithSame (+)
   {-# INLINE (*) #-}
 
 instance KnownNat n => Unital (Monomial n) where
   one = fromList sing []
 
-instance KnownNat n => Unital (Monomial' n) where
-  one = intern one
+-- instance KnownNat n => Unital (Monomial' n) where
+--   one = intern one
 
-instance KnownNat n => Multiplicative (Monomial' n) where
-  (*) = (intern .) . (zws (+) `on` unintern)
+-- instance KnownNat n => Multiplicative (Monomial' n) where
+--   (*) = (intern .) . (V.zipWithSame (+) `on` unintern)
 
 -- | Monomial' order (of degree n). This should satisfy following laws:
 -- (1) Totality: forall a, b (a < b || a == b || b < a)
@@ -208,7 +204,7 @@ isRelativelyPrime :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord 
 isRelativelyPrime n m = lcmMonomial n m == n * m
 
 totalDegree :: OrderedMonomial ord n -> Int
-totalDegree = osum . getMonomial'
+totalDegree = osum . getMonomial
 {-# INLINE totalDegree #-}
 
 -- | Lexicographical order. This *is* a monomial order.
@@ -219,7 +215,7 @@ lex m n = ofoldMap (uncurry compare) $ V.zipSame m n
 -- | Reversed lexicographical order. This is *not* a monomial order.
 revlex :: KnownNat n => MonomialOrder n
 revlex xs ys =
-  unWrapOrdering . ofoldl' (flip (<>)) (WrapOrdering EQ) $ zws ((WrapOrdering .) .flip compare) xs ys
+  unWrapOrdering . ofoldl' (flip (<>)) (WrapOrdering EQ) $ V.zipWithSame ((WrapOrdering .) .flip compare) xs ys
 {-# INLINE [2] revlex #-}
 
 -- | Convert ordering into graded one.
@@ -316,15 +312,15 @@ instance KnownNat n => Show (OrderedMonomial ord n) where
                    if i > 0
                    then Just ("X_" ++ show n ++ if i == 1 then "" else "^" ++ show i)
                    else Nothing)
-            $ otoList $ getMonomial' xs
+            $ otoList $ getMonomial xs
     in if null vs then "1" else unwords vs
 
 instance KnownNat n => Multiplicative (OrderedMonomial ord n) where
-  OrderedMonomial n * OrderedMonomial m = OrderedMonomial $ zws (+) n m
+  OrderedMonomial n * OrderedMonomial m = OrderedMonomial $ V.zipWithSame (+) n m
 
 instance KnownNat n => Division (OrderedMonomial ord n) where
   recip (OrderedMonomial n) = OrderedMonomial $ V.map P.negate n
-  OrderedMonomial n / OrderedMonomial m = OrderedMonomial $ zws (-) n m
+  OrderedMonomial n / OrderedMonomial m = OrderedMonomial $ V.zipWithSame (-) n m
 
 instance KnownNat n => Unital (OrderedMonomial ord n) where
   one = OrderedMonomial one
@@ -396,7 +392,7 @@ calcOrderWeight Proxy = calcOrderWeight' (sing :: SList vs)
 calcOrderWeight' :: forall vs n. KnownNat n => SList (vs :: [Nat]) -> Monomial n -> Int
 calcOrderWeight' slst m =
   let cfs = V.fromListWithDefault' (0 :: Int) $ map P.fromIntegral $ fromSing slst
-  in osum $ zws (*) cfs m
+  in osum $ V.zipWithSame (*) cfs m
 {-# INLINE [2] calcOrderWeight' #-}
 
 weightOrder :: forall n ns ord. (KnownNat n, IsOrder n ord, SingI ns)
@@ -447,15 +443,15 @@ instance (KnownNat k, SingI ws, IsMonomialOrder k ord)
       => IsMonomialOrder k (WeightOrder ws ord)
 
 lcmMonomial :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
-lcmMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ zws max m n
+lcmMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWithSame max m n
 {-# INLINE lcmMonomial #-}
 
 gcdMonomial :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
-gcdMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ zws P.min m n
+gcdMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWithSame P.min m n
 {-# INLINE gcdMonomial #-}
 
 divs :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
-(OrderedMonomial xs) `divs` (OrderedMonomial ys) = oand $ zws (<=) xs ys
+(OrderedMonomial xs) `divs` (OrderedMonomial ys) = oand $ V.zipWithSame (<=) xs ys
 
 isPowerOf :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
 OrderedMonomial n `isPowerOf` OrderedMonomial m =
@@ -465,7 +461,7 @@ OrderedMonomial n `isPowerOf` OrderedMonomial m =
 
 tryDiv :: (KnownNat n, Field r) => (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n)
 tryDiv (a, f) (b, g)
-    | g `divs` f = (a * recip b, OrderedMonomial $ zws (-) (getMonomial f) (getMonomial g))
+    | g `divs` f = (a * recip b, OrderedMonomial $ V.zipWithSame (-) (getMonomial f) (getMonomial g))
     | otherwise  = error "cannot divide."
 
 varMonom :: SNat n -> Ordinal n -> Monomial n
@@ -499,24 +495,26 @@ type WeightedEliminationOrder (n :: Nat) (ord :: Type) =
   WeightOrder (Replicate n 1) ord
 
 -- | Special ordering for ordered-monomials.
-instance (Eq (Monomial' n), IsOrder n name) => Ord (OrderedMonomial name n) where
+instance (Eq (Monomial n), IsOrder n name) => Ord (OrderedMonomial name n) where
   OrderedMonomial m `compare` OrderedMonomial n = cmpMonomial (Proxy :: Proxy name) m n
 
+{-
 -- | For simplicity, we choose grevlex for the default monomial ordering (for the sake of efficiency).
 instance {-# OVERLAPPING #-} Ord (Monomial' n) where
-  compare = grevlex `on` unintern
+  compare = grevlex
+-}
 
 castMonomial :: (KnownNat m) => OrderedMonomial o n -> OrderedMonomial o' m
-castMonomial = _Wrapped %~ intern .fromList sing . otoList
+castMonomial = _Wrapped %~ fromList sing . otoList
 
 scastMonomial :: SNat m -> OrderedMonomial o n -> OrderedMonomial o m
-scastMonomial sdim = _Wrapped %~ intern . fromList sdim . otoList
+scastMonomial sdim = _Wrapped %~ fromList sdim . otoList
 
 changeMonomialOrder :: o' -> OrderedMonomial ord n -> OrderedMonomial o' n
-changeMonomialOrder _ = OrderedMonomial' . getMonomial'
+changeMonomialOrder _ = DC.coerce
 
 changeMonomialOrderProxy :: Proxy o' -> OrderedMonomial ord n -> OrderedMonomial o' n
-changeMonomialOrderProxy _ = OrderedMonomial' . getMonomial'
+changeMonomialOrderProxy _ = DC.coerce
 
 class    (IsMonomialOrder n ord) => IsMonomialOrder' ord n
 instance (IsMonomialOrder n ord) => IsMonomialOrder' ord n
@@ -540,9 +538,9 @@ withStrongMonomialOrder _ _ r = r C.\\ dict
 --   padding with @0@ at bottom of the shorter monomial to
 --   make the length equal.
 cmpAnyMonomial :: IsStrongMonomialOrder ord
-               => Proxy ord -> Monomial' n -> Monomial' m -> Ordering
+               => Proxy ord -> Monomial n -> Monomial m -> Ordering
 cmpAnyMonomial pxy t t' =
-  let (l, u, u') = padVecs 0 (unintern t) (unintern t')
+  let (l, u, u') = padVecs 0 t t'
   in withStrongMonomialOrder pxy l $ cmpMonomial pxy u u'
 
 orderMonomial :: proxy ord -> Monomial n -> OrderedMonomial ord n
