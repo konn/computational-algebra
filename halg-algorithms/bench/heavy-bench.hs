@@ -26,8 +26,8 @@ makeCase :: String
 makeCase name calc =
   [   bgroup name
       [mkTC calc "Cyclic 4"  $ cyclic (sing :: Sing 4)
-      ,mkTC calc "Cyclic 7"  $ cyclic (sing :: Sing 7)
-      ,mkTC calc "Cyclic 8"  $ cyclic (sing :: Sing 8)
+      ,mkTC calc "Cyclic 5"  $ cyclic (sing :: Sing 5)
+      ,mkTC calc "Cyclic 6"  $ cyclic (sing :: Sing 6)
       ,mkTC calc "Katsura 8" katsura8
       ,mkTC calc "Katsura 9" katsura9
       ,mkTC calc "I3"        i3

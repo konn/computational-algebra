@@ -80,8 +80,8 @@ runTestCases lab i = do
 main :: IO ()
 main = do
   runTestCases "Cyclic4" $ cyclic (sing :: Sing 4)
-  runTestCases "Cyclic7" $ cyclic (sing :: Sing 7)
-  runTestCases "Cyclic8" $ cyclic (sing :: Sing 8)
+  runTestCases "Cyclic5" $ cyclic (sing :: Sing 5)
+  runTestCases "Cyclic6" $ cyclic (sing :: Sing 6)
   runTestCases "Katsura-8" katsura8
   runTestCases "Katsura-9" katsura9
   analyse "I3 (Grevlex, Sing(gr))" "groebner" i3
