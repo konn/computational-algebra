@@ -60,8 +60,6 @@ library:
   - equational-reasoning
   - ghc-typelits-knownnat
   - halg-matrices
-  - hashtables
-  - hashable
   - hmatrix
   - lens
   - matrix
