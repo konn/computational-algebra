@@ -33,8 +33,6 @@ library:
   dependencies:
   - halg-polynomials
   - halg-polyn-parser
-  - process
-  - binary
   - semigroups
   - megaparsec
   - process-extras

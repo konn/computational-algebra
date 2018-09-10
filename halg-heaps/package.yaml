@@ -25,9 +25,7 @@ description:         Please see the README on GitHub at <https://github.com/konn
 dependencies:
 - base >= 4.7 && < 5
 - heaps
-- integer-logarithms
 - reflection
-- split
 
 default-extensions:
 - BangPatterns
