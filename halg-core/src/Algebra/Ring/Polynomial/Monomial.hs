@@ -1,12 +1,10 @@
-{-# LANGUAGE BangPatterns, CPP, ConstraintKinds, DataKinds                #-}
-{-# LANGUAGE ExistentialQuantification, ExplicitNamespaces                #-}
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                   #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, IncoherentInstances              #-}
+{-# LANGUAGE CPP, ConstraintKinds, DataKinds, ExistentialQuantification   #-}
+{-# LANGUAGE ExplicitNamespaces, FlexibleContexts, FlexibleInstances      #-}
+{-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, IncoherentInstances       #-}
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, ParallelListComp #-}
 {-# LANGUAGE PatternSynonyms, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
 {-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeApplications        #-}
 {-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances            #-}
-{-# LANGUAGE ViewPatterns                                                 #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Ring.Polynomial.Monomial
        ( Monomial, OrderedMonomial(OrderedMonomial), getMonomial,
@@ -40,7 +38,7 @@ import           Data.Functor.Identity        (Identity (..))
 import           Data.Hashable                (Hashable (..))
 import           Data.Kind                    (Type)
 import           Data.Maybe                   (catMaybes)
-import           Data.Monoid                  (Dual (..), (<>))
+import           Data.Monoid                  (Dual (..), Sum (..), (<>))
 import           Data.MonoTraversable         (MonoFoldable (..), oand,
                                                ofoldMap, ofoldl', ofoldlUnwrap,
                                                osum)
@@ -183,23 +181,14 @@ toWrapOrdering _ = WrapOrdering GT
 
 -- | Graded reversed lexicographical order. This *is* a monomial order.
 grevlex :: MonomialOrder n
-grevlex = grevlexF -- grevlexHW (V.unsized as) (V.unsized bs) 0 0 EQ
+grevlex = grevlexF
 {-# INLINE [2] grevlex #-}
-
-grevlexHW :: UV.Vector Int -> UV.Vector Int -> Int -> Int -> Ordering -> Ordering
-grevlexHW as0 bs0  !accl !accr EQ
-  | let len = UV.length as0
-  , len > 0 =
-    let (as, UV.unsafeHead -> a) = UV.splitAt (len - 1) as0
-        (bs, UV.unsafeHead -> b) = UV.splitAt (len - 1) bs0
-    in grevlexHW as bs (accl + a) (accr + b) $ compare b a
-grevlexHW as bs !accl !accr cmp = compare (UV.sum as + accl) (UV.sum bs + accr) <> cmp
 
 grevlexF :: MonomialOrder n
 grevlexF = (Fl.purely ofoldlUnwrap body .) . (UV.zip `on` V.unsized)
   where
     body :: Fl.Fold (Int, Int) Ordering
-    body = (<>) <$> (compare <$> Fl.handles _1 Fl.sum <*> Fl.handles _2 Fl.sum)
+    body = (<>) <$> Fl.foldMap (DC.coerce @_ @(Sum Int, Sum Int)) (uncurry compare)
                 <*> Fl.foldMap (Dual . uncurry (flip compare)) getDual
 {-# INLINE grevlexF #-}
 
