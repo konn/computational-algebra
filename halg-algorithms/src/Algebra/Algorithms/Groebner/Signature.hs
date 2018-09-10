@@ -1,5 +1,5 @@
-{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeApplications #-}
-{-# LANGUAGE ViewPatterns                                              #-}
+{-# LANGUAGE BangPatterns, ScopedTypeVariables, StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications, ViewPatterns                        #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Algorithms.Groebner.Signature (f5) where
 import           Algebra.Prelude.Core         hiding (Vector)
@@ -11,6 +11,7 @@ import           Control.Monad.ST.Combinators (ST, STRef, modifySTRef',
 import qualified Data.Coerce                  as DC
 import qualified Data.Heap                    as H
 import           Data.Maybe                   (fromJust)
+import           Data.Monoid                  (First (..))
 import           Data.Reflection              (Reifies (..), reify)
 import           Data.Semigroup               hiding (First, getFirst, (<>))
 import qualified Data.Set                     as Set
@@ -277,8 +278,8 @@ reduceModuleElement :: (Reifies n Integer, IsOrderedPolynomial poly,
                     -> ModuleElement n poly
 reduceModuleElement p qs = loop p
   where
-    loop r =
-      case asum $ fmap (regularTopReduce r) qs of
+    loop !r =
+      case getFirst $ foldMap (First . regularTopReduce r) qs of
         Nothing -> r
         Just r' -> loop r'
 {-# INLINE reduceModuleElement #-}
@@ -287,7 +288,7 @@ regularTopReduce :: (Reifies n Integer, IsOrderedPolynomial poly, Field (Coeffic
                  => ModuleElement n poly -> ModuleElement n poly
                  -> Maybe (ModuleElement n poly)
 regularTopReduce p1@(ME u1 v1) p2@(ME u2 v2) = do
-  guard $ not (isZero v2) && not (isZero v1) && leadingMonomial v2 `divs` leadingMonomial v1
+  guard $ not (isZero v2 || isZero v1) && leadingMonomial v2 `divs` leadingMonomial v1
   let (c, t) = tryDiv (leadingTerm v1) (leadingTerm v2)
   l <- sign (t .*! u2)
   r <- sign u1
