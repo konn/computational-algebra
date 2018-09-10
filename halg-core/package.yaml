@@ -54,6 +54,7 @@ dependencies:
 - lens
 - mono-traversable
 - reflection
+- repa
 - singletons
 - sized
 - type-natural
