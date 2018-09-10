@@ -31,8 +31,6 @@ import           Control.DeepSeq              (NFData (..))
 import           Control.Lens                 (Ixed (..), imap, makeLenses,
                                                makeWrapped, (%~), (&), (.~),
                                                _Wrapped)
-import           Data.Array.Repa              ((:.) (..), Z (..))
-import qualified Data.Array.Repa              as Repa
 import qualified Data.Coerce                  as DC
 import           Data.Constraint              ((:=>) (..), Dict (..))
 import qualified Data.Constraint              as C
@@ -72,19 +70,8 @@ makeWrapped ''OrderedMonomial
 fromList :: SNat n -> [Int] -> Monomial n
 fromList len = V.fromListWithDefault len 0
 
-parZipWith :: (Unbox a, Unbox e, Unbox b) => (a -> b -> e) -> UV.Vector a -> UV.Vector b -> UV.Vector e
-parZipWith f u v =
-  let sh = Z :. UV.length u
-  in Repa.toUnboxed $ runIdentity $ Repa.computeP $
-     Repa.zipWith f (Repa.fromUnboxed sh u) (Repa.fromUnboxed sh v)
-{-# INLINE parZipWith #-}
-
-zws :: (UV.Unbox a, KnownNat n) => (Int -> Int -> a) -> USized n Int -> USized n Int -> USized n a
-zws = fmap (fmap V.unsafeToSized') . (`on` V.unsized) . parZipWith
-{-# INLINE zws #-}
-
 instance KnownNat n => Multiplicative (Monomial n) where
-  (*) = zws (+)
+  (*) = V.zipWithSame (+)
   {-# INLINE (*) #-}
 
 instance KnownNat n => Unital (Monomial n) where
@@ -111,7 +98,7 @@ lex m n = ofoldMap (uncurry compare) $ V.zipSame m n
 -- | Reversed lexicographical order. This is *not* a monomial order.
 revlex :: KnownNat n => MonomialOrder n
 revlex xs ys =
-  unWrapOrdering . ofoldl' (flip (<>)) (WrapOrdering EQ) $ zws ((WrapOrdering .) .flip compare) xs ys
+  unWrapOrdering . ofoldl' (flip (<>)) (WrapOrdering EQ) $ V.zipWithSame ((WrapOrdering .) .flip compare) xs ys
 {-# INLINE [2] revlex #-}
 
 -- | Convert ordering into graded one.
@@ -212,11 +199,11 @@ instance KnownNat n => Show (OrderedMonomial ord n) where
     in if null vs then "1" else unwords vs
 
 instance KnownNat n => Multiplicative (OrderedMonomial ord n) where
-  OrderedMonomial n * OrderedMonomial m = OrderedMonomial $ zws (+) n m
+  OrderedMonomial n * OrderedMonomial m = OrderedMonomial $ V.zipWithSame (+) n m
 
 instance KnownNat n => Division (OrderedMonomial ord n) where
   recip (OrderedMonomial n) = OrderedMonomial $ V.map P.negate n
-  OrderedMonomial n / OrderedMonomial m = OrderedMonomial $ zws (-) n m
+  OrderedMonomial n / OrderedMonomial m = OrderedMonomial $ V.zipWithSame (-) n m
 
 instance KnownNat n => Unital (OrderedMonomial ord n) where
   one = OrderedMonomial one
@@ -288,7 +275,7 @@ calcOrderWeight Proxy = calcOrderWeight' (sing :: SList vs)
 calcOrderWeight' :: forall vs n. KnownNat n => SList (vs :: [Nat]) -> Monomial n -> Int
 calcOrderWeight' slst m =
   let cfs = V.fromListWithDefault' (0 :: Int) $ map P.fromIntegral $ fromSing slst
-  in osum $ zws (*) cfs m
+  in osum $ V.zipWithSame (*) cfs m
 {-# INLINE [2] calcOrderWeight' #-}
 
 weightOrder :: forall n ns ord. (KnownNat n, IsOrder n ord, SingI ns)
@@ -339,15 +326,15 @@ instance (KnownNat k, SingI ws, IsMonomialOrder k ord)
       => IsMonomialOrder k (WeightOrder ws ord)
 
 lcmMonomial :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
-lcmMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ zws max m n
+lcmMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWithSame max m n
 {-# INLINE lcmMonomial #-}
 
 gcdMonomial :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
-gcdMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ zws P.min m n
+gcdMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWithSame P.min m n
 {-# INLINE gcdMonomial #-}
 
 divs :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
-(OrderedMonomial xs) `divs` (OrderedMonomial ys) = oand $ zws (<=) xs ys
+(OrderedMonomial xs) `divs` (OrderedMonomial ys) = oand $ V.zipWithSame (<=) xs ys
 
 isPowerOf :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
 OrderedMonomial n `isPowerOf` OrderedMonomial m =
@@ -357,7 +344,7 @@ OrderedMonomial n `isPowerOf` OrderedMonomial m =
 
 tryDiv :: (KnownNat n, Field r) => (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n)
 tryDiv (a, f) (b, g)
-    | g `divs` f = (a * recip b, OrderedMonomial $ zws (-) (getMonomial f) (getMonomial g))
+    | g `divs` f = (a * recip b, OrderedMonomial $ V.zipWithSame (-) (getMonomial f) (getMonomial g))
     | otherwise  = error "cannot divide."
 
 varMonom :: SNat n -> Ordinal n -> Monomial n
