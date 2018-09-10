@@ -42,7 +42,8 @@ instance KnownNat n => Arbitrary (Monomial n) where
   arbitrary = arbitraryMonomial
 
 arbitraryMonomial :: forall n. KnownNat n => Gen (Monomial n)
-arbitraryMonomial =  SV.unsafeFromList len . map abs <$> vectorOf (sNatToInt len) arbitrarySizedBoundedIntegral
+arbitraryMonomial =  SV.unsafeFromList len . map abs <$>
+  vectorOf (sNatToInt len) arbitrarySizedBoundedIntegral
     where
       len = sing :: SNat n
 

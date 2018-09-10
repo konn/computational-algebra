@@ -482,10 +482,13 @@ nthRootInterval n (Interval lb ub)
 
 rootMultPoly :: Unipol Rational -> Unipol Rational -> Unipol Rational
 rootMultPoly f g =
-  let ts = terms' g
+  let ts = terms g
       d = fromIntegral $ totalDegree' g
-      g' = runAdd $ ifoldMap (\m k -> Add $ toPolynomial (injectCoeff k * var 0^(P.fromIntegral $ sum m),
-                                                          (OrderedMonomial $ singleton $ d - sum m)) ) ts
+      g' = runAdd $ ifoldMap loop ts
+      loop m k =
+        let deg = totalDegree m
+        in Add $ toPolynomial (injectCoeff k * #x ^ P.fromIntegral deg,
+                                OrderedMonomial $ singleton $ d - deg)
   in presultant (liftP f) g'
   where
     liftP :: Unipol Rational -> Unipol (Unipol Rational)
@@ -544,10 +547,10 @@ recipA a@Algebraic{} =
 
 rootRecipPoly :: Unipol Rational -> Unipol Rational
 rootRecipPoly f =
-  let ts = terms' f
+  let ts = terms f
       d = fromIntegral $ totalDegree' f
   in runAdd $ ifoldMap (\m k -> Add $ toPolynomial
-                                (k, OrderedMonomial $ singleton $ d - sum m) ) ts
+                                (k, OrderedMonomial $ singleton $ d - totalDegree m) ) ts
 
 strum :: Unipol Rational -> [Unipol Rational]
 strum f = zipWith (*) (cycle [1,1,-1,-1]) $

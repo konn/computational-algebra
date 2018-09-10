@@ -3,6 +3,7 @@ import "hint" HLint.HLint
 ignore "Use >=>"
 ignore "Use const"
 ignore "Use fewer imports"
+ignore "Redundant fromInteger"
 
 infixl 7 %
 infixr 7 .*. 

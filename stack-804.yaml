@@ -1,32 +1,25 @@
-resolver: nightly-2018-03-17
-compiler: ghc-8.4.1
+resolver: lts-12.2
 
 flags: {}
 packages:
 - 'computational-algebra'
 - 'algebraic-prelude'
+- 'halg-algebraic'
+- 'halg-algorithms'
+- 'halg-bridge-singular'
 - 'halg-core'
 - 'halg-core-test'
+- 'halg-factor'
+- 'halg-galois-fields'
+- 'halg-heaps'
+- 'halg-matrices'
 - 'halg-polyn-parser'
 - 'halg-polynomials'
-- 'halg-galois-fields'
-- 'halg-matrices'
-- 'halg-algorithms'
-- 'halg-factor'
-- 'halg-algebraic'
-- 'halg-bridge-singular'
 
-extra-deps: 
-- MonadRandom-0.5.1
+extra-deps:
 - control-monad-loop-0.1
 - equational-reasoning-0.5.1.0
-- ghc-tcplugins-extra-0.2.4
-- ghc-typelits-knownnat-0.4.1
-- ghc-typelits-natnormalise-0.5.9
-- ghc-typelits-presburger-0.2.0.0
-- matrix-0.3.6.0
-- repa-3.4.1.3
-- transformers-compat-0.5.1.4
-- unamb-0.2.7
-- type-natural-0.8.0.0
+- ghc-typelits-presburger-0.2.0.5
 - sized-0.3.0.0
+- type-natural-0.8.1.0
+- unamb-0.2.7

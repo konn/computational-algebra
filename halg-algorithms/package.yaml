@@ -10,6 +10,9 @@ extra-source-files:
 - README.md
 - ChangeLog.md
 
+tested-with: |
+  GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.3
+
 # Metadata used when publishing your package
 synopsis:            Algorithms related to Gröbner basis, part of halg computational algebra suite.
 category:            Math
@@ -39,6 +42,8 @@ dependencies:
 - dlist
 - halg-core
 - halg-polynomials
+- halg-heaps
+- heaps
 - semigroups
 - sized
 
@@ -46,7 +51,7 @@ library:
   source-dirs: src
   other-modules:
   - Algebra.Algorithms.FGLM
-  ghc-options:  -Wall
+  ghc-options: ["-Wall", "-O2"]
   dependencies:
   - algebraic-prelude
   - containers
@@ -55,12 +60,13 @@ library:
   - equational-reasoning
   - ghc-typelits-knownnat
   - halg-matrices
-  - heaps
   - hmatrix
   - lens
   - matrix
   - monad-loops
+  - mono-traversable
   - mtl
+  - parallel
   - reflection
   - sized
   - vector
@@ -68,11 +74,16 @@ library:
   - NoImplicitPrelude
 
 _prof-settings: &prof-settings
-  source-dirs:         app
+  source-dirs:
+  - app
+  - shared
+  other-modules:
+  - Cases
   ghc-options:
   - -Wall
   - -threaded
   - -rtsopts
+  - -O2
   - -with-rtsopts=-N
   - -fprof-auto
   - -fprof-cafs
@@ -91,6 +102,9 @@ executables:
     <<: *prof-settings
   std-prof:
     main:                std-prof.hs
+    <<: *prof-settings
+  katsura-prof:
+    main:                katsura-prof.hs
     <<: *prof-settings
 
 tests:
@@ -124,12 +138,33 @@ tests:
     - hspec
     - lens
     - matrix
+    - ghc-typelits-knownnat
     - quickcheck-instances
     - reflection
     - smallcheck
     - type-natural
     - vector
     - hspec-discover
+
+_heavy_bench: &heavy_bench
+  source-dirs:
+  - bench
+  - shared
+  other-modules: Cases
+  dependencies:
+  - halg-algorithms
+  - gauge
+  - parallel
+  - containers
+  - folds
+  - foldl
+  - lens
+  ghc-options:
+  - -Wall
+  - -O2
+  - -threaded
+  - -rtsopts
+  - -with-rtsopts=-N  
 
 benchmarks:
   homog-bench:
@@ -153,6 +188,7 @@ benchmarks:
     - gauge
     - parallel
     - containers
+    - folds
     - foldl
     - lens
     ghc-options:
@@ -161,3 +197,134 @@ benchmarks:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+  sugar-hilb-bench:
+    source-dirs:  bench
+    main:         sugar-hilb.hs
+    dependencies:
+    - halg-algorithms
+    - gauge
+    - parallel
+    - containers
+    - folds
+    - foldl
+    - lens
+    ghc-options:
+    - -Wall
+    - -O2
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+
+  sugar-paper-bench:
+    main: sugar-paper.hs
+    other-modules: []
+    source-dirs:
+    - bench
+    dependencies:
+    - halg-core
+    - halg-core-test
+    - halg-algorithms
+    - constraints
+    - containers
+    - gauge
+    - deepseq
+    - matrix
+    - parallel
+    - process
+    - sized
+    - QuickCheck
+    ghc-options:
+    - -O2
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+
+  singular-bench:
+    main: singular-bench.hs
+    other-modules: []
+    source-dirs:
+    - bench
+    dependencies:
+    - text
+    - statistics
+    - vector
+    - halg-core
+    - halg-core-test
+    - halg-algorithms
+    - halg-bridge-singular
+    - mwc-random
+    - constraints
+    - containers
+    - gauge
+    - deepseq
+    - matrix
+    - parallel
+    - process
+    - sized
+    - QuickCheck
+    ghc-options:
+    - -O2
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+
+  singular-heavy-bench:
+    main: singular-heavy-bench.hs
+    other-modules: []
+    source-dirs:
+    - bench
+    - shared
+    dependencies:
+    - text
+    - statistics
+    - vector
+    - halg-core
+    - halg-core-test
+    - halg-algorithms
+    - halg-bridge-singular
+    - mwc-random
+    - constraints
+    - containers
+    - gauge
+    - deepseq
+    - matrix
+    - parallel
+    - process
+    - sized
+    - QuickCheck
+    ghc-options:
+    - -O2
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+
+  heavy-bench:
+    main:         heavy-bench.hs
+    <<: *heavy_bench
+
+  f5-heap-bench:
+    main: f5-heap-bench.hs
+    source-dirs:
+    - bench
+    - shared
+    other-modules: Cases
+    dependencies:
+    - QuickCheck
+    - constraints
+    - containers
+    - deepseq
+    - gauge
+    - halg-algorithms
+    - halg-core
+    - halg-core-test
+    - lens
+    - matrix
+    - parallel
+    - process
+    - sized
+    ghc-options:
+    - -Wall
+    - -O2
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N  

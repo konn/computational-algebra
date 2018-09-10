@@ -38,7 +38,7 @@ import qualified Data.Foldable                as H
 import qualified Data.Heap                    as H
 import           Data.Kind                    (Type)
 import qualified Data.Map                     as M
-import           Data.Singletons.Prelude      (POrd (..), SEq (..))
+import           Data.MonoTraversable         (oall)
 import           Data.Singletons.Prelude      (Sing (SFalse, STrue), withSingI)
 import           Data.Singletons.Prelude.List (Length, Replicate, Sing (SCons))
 import           Data.Singletons.Prelude.List (sLength, sReplicate)
@@ -373,7 +373,7 @@ unsafeThEliminationIdealWith :: ( IsOrderedPolynomial poly,
 unsafeThEliminationIdealWith ord n ideal =
   withKnownNat n $ toIdeal [ f & _Wrapped %~ M.mapKeys (orderMonomial Nothing . V.drop n . getMonomial)
                            | f <- calcGroebnerBasisWith ord ideal
-                           , all (all (== 0) . V.takeAtMost n . getMonomial . snd) $ getTerms f
+                           , all (oall (== 0) . V.takeAtMost n . getMonomial . snd) $ getTerms f
                            ]
 
 eliminatePadding :: (IsOrderedPolynomial poly,

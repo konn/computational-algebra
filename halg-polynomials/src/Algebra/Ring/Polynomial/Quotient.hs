@@ -18,18 +18,19 @@ import Algebra.Prelude.Core
 import Algebra.Ring.Polynomial.Univariate (Unipol)
 
 import           Control.DeepSeq
-import           Control.Lens      (folded, ifoldMap, minimumOf)
-import qualified Data.Coerce       as C
-import qualified Data.HashMap.Lazy as HM
-import           Data.Kind         (Type)
-import qualified Data.Map          as Map
-import qualified Data.Matrix       as M
-import           Data.Monoid       (Sum (..))
+import           Control.Lens         (folded, ifoldMap, minimumOf)
+import qualified Data.Coerce          as C
+import qualified Data.HashMap.Lazy    as HM
+import           Data.Kind            (Type)
+import qualified Data.Map             as Map
+import qualified Data.Matrix          as M
+import           Data.Monoid          (Sum (..))
+import           Data.MonoTraversable (osum)
 import           Data.Reflection
-import           Data.Unamb        (unamb)
-import qualified Data.Vector       as V
-import qualified Numeric.Algebra   as NA
-import qualified Prelude           as P
+import           Data.Unamb           (unamb)
+import qualified Data.Vector          as V
+import qualified Numeric.Algebra      as NA
+import qualified Prelude              as P
 
 -- | The polynomial modulo the ideal indexed at the last type-parameter.
 newtype Quotient poly ideal = Quotient { quotRepr_ :: poly }
@@ -228,14 +229,14 @@ stdMonoms basis = do
   let lms = map leadingTerm basis
       dim = sing :: SNat (Arity poly)
       tests = zip (diag 1 0 dim) (diag 0 1 dim)
-      mexp (val, test) = [ P.foldr (+) 0 $ zipWithSame (*) val $ getMonomial lm0
+      mexp (val, test) = [ osum $ zipWithSame (*) val $ getMonomial lm0
                          | (c, lm0) <- lms, c /= zero
-                         , let a = P.foldr (+) 0 $ zipWithSame (*) (getMonomial lm0) test
+                         , let a = osum $ zipWithSame (*) (getMonomial lm0) test
                          , a == 0
                          ]
   degs <- mapM (minimumOf folded . mexp) tests
   return $ sort [ monom
-                | ds0 <- sequence $ map (enumFromTo 0) degs
+                | ds0 <- mapM (enumFromTo 0) degs
                 , let monom = OrderedMonomial $ fromList dim ds0
                 , let ds = toPolynomial (one, monom)
                 , ds `modPolynomial` basis == ds
@@ -251,7 +252,7 @@ stdMonoms basis = do
             -> Maybe [OrderedMonomial Grevlex 1]
  #-}
 
-diag :: a -> a -> SNat n -> [Sized' n a]
+diag :: Unbox a => a -> a -> SNat n -> [USized n a]
 diag d z n = [ generate n (\j -> if i == j then d else z)
              | i <- enumOrdinal n
              ]
@@ -367,7 +368,7 @@ modIdeal' pxy f = Quotient $ f `modPolynomial` _gBasis (reflect pxy)
 buildQIdeal :: (IsOrderedPolynomial poly, Field (Coefficient poly))
             => Ideal poly -> QIdeal poly
 buildQIdeal ideal =
-    let bs = sortBy (comparing leadingMonomial) $! calcGroebnerBasis ideal
+    let bs = sortOn leadingMonomial $! calcGroebnerBasis ideal
     in case stdMonoms bs of
          Nothing -> QIdeal bs
          Just ms -> ZeroDimIdeal bs ms (buildMultTable bs ms)

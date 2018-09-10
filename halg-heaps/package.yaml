@@ -1,0 +1,65 @@
+name:                halg-heaps
+version:             0.1.0.0
+github:              "konn/halg-heaps"
+license:             BSD3
+author:              "Hiromi ISHII"
+maintainer:          "konn.jinro _at_ gmail.com"
+copyright:           "2018 (c) Hiromi ISHII"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+tested-with: |
+  GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.3
+
+# Metadata used when publishing your package
+synopsis:            Various heap structures
+category:            Data
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/konn/halg-heaps#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- heaps
+- integer-logarithms
+- reflection
+- split
+
+default-extensions:
+- BangPatterns
+- ConstraintKinds
+- GADTs
+- MultiParamTypeClasses
+- TypeFamilies
+
+library:
+  source-dirs: src
+  ghc-options:
+  - -O2
+  - -Wall
+
+# executables:
+#   halg-heaps-exe:
+#     main:                Main.hs
+#     source-dirs:         app
+#     ghc-options:
+#     - -threaded
+#     - -rtsopts
+#     - -with-rtsopts=-N
+#     dependencies:
+#     - halg-heaps
+
+# tests:
+#   halg-heaps-test:
+#     main:                Spec.hs
+#     source-dirs:         test
+#     ghc-options:
+#     - -threaded
+#     - -rtsopts
+#     - -with-rtsopts=-N
+#     dependencies:
+#     - halg-heaps

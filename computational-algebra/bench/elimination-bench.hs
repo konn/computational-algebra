@@ -9,7 +9,7 @@ import           Control.DeepSeq
 import           Control.Parallel.Strategies
 import           Data.Type.Natural
 import           Gauge.Main
-import           Gauge.Types
+import           Gauge.Main.Options
 import           Numeric.Algebra                         (LeftModule (..))
 import qualified Numeric.Algebra                         as NA
 

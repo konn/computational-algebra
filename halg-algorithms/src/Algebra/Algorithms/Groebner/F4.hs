@@ -3,20 +3,20 @@
 -- | Faugere's F4 algorithm
 module Algebra.Algorithms.Groebner.F4
   (f4', f4, f4WithStrategy', f4WithStrategy, normalStrategy) where
-import           Algebra.Matrix.DataMatrix (DMatrix)
+import           Algebra.Matrix.DataMatrix    (DMatrix)
 import           Algebra.Matrix.Generic
-import           Algebra.Prelude.Core      hiding (Min)
-import           Control.Lens
+import           Algebra.Prelude.Core         hiding (Min)
+import           Control.Lens                 hiding ((.=))
 import           Control.Monad.Loops
 import           Control.Monad.ST
-import qualified Data.Foldable             as F
-import qualified Data.Heap                 as H
-import           Data.Monoid               (First (..))
-import qualified Data.Set                  as S
-import           Data.STRef
-import qualified Data.Vector               as V
-import qualified Data.Vector.Generic       as GV
-import qualified Data.Vector.Mutable       as MV
+import           Control.Monad.ST.Combinators
+import qualified Data.Foldable                as F
+import qualified Data.Heap                    as H
+import           Data.Monoid                  (First (..))
+import qualified Data.Set                     as S
+import qualified Data.Vector                  as V
+import qualified Data.Vector.Generic          as GV
+import qualified Data.Vector.Mutable          as MV
 
 -- | Selection strategy assigning each pair of polynomials of type @f@,
 --   to some @'Ord'@ered rank @w@. F_4 Algorithm will take care of pairs
@@ -63,17 +63,15 @@ f4WithStrategy' mrep select ideal = runST $ do
         H.fromList [ H.Entry (select (fs V.! i) (fs V.! j)) (i, j)
                    | j <- is, i <- [0..j-1]
                    ]
-  v <- V.unsafeThaw is0
-  gs <- newSTRef v
+  gs <- newSTRef =<< V.unsafeThaw is0
   bs <- newSTRef $ buildHeap is0 [0.. V.length is0 - 1]
   let cancel i j = do
-        vec <- readSTRef gs
-        (fi, fj) <- (,) <$> MV.read vec i <*> MV.read vec j
+        (fi, fj) <- (,) <$> gs %! i <*> gs %! j
         let l = lcmLeadingMonomial fi fj
         return $ map (\g -> monoize $ l / leadingMonomial g >* g) [fi, fj]
   whileJust_ (viewMins <$> readSTRef bs) $ \(cur, bs') -> do
-    writeSTRef bs bs'
-    g <- V.toList <$> (V.unsafeFreeze =<< readSTRef gs)
+    bs .= bs'
+    g <- arrayToList gs
     ls <- concat <$> mapM (uncurry cancel . H.payload) (F.toList cur)
     let (labs, mat) = computeMatrix mrep ls g
         ms = mapMaybe (\xs -> getFirst $ ifoldMap (\i m -> First $
@@ -90,11 +88,11 @@ f4WithStrategy' mrep select ideal = runST $ do
           ps'  = V.fromList ps
           size  = V.length ps'
       mv' <- MV.unsafeGrow g0 size
-      writeSTRef gs mv'
+      gs .= mv'
       MV.copy (MV.slice len0 size mv') =<< V.unsafeThaw ps'
       fs <- V.unsafeFreeze mv'
-      modifySTRef' bs $ H.union $ buildHeap fs [len0..len0 + size - 1]
-  V.toList <$> (V.unsafeFreeze =<< readSTRef gs)
+      bs .%= H.union (buildHeap fs [len0..len0 + size - 1])
+  arrayToList gs
 
 type OMonom poly = OrderedMonomial (MOrder poly) (Arity poly)
 
@@ -133,8 +131,8 @@ computeMatrix _ ls gs = runST $ do
         let ms = orderedMonomials f S.\\ del
         modifySTRef' monHs $ H.union $ H.fromList $ map Down $ S.toList ms
   whileJust_ (H.viewMin <$> readSTRef monHs) $ \(Down m, mHS') -> do
-    writeSTRef monHs mHS'
-    modifySTRef' done $ S.insert m
+    monHs  .= mHS'
+    done  .%= S.insert m
     forM_ (find ((`divs` m). leadingMonomial) gs) $ \g ->
       ins $ m / leadingMonomial g >* g
   labs <- V.fromList . S.toDescList <$> readSTRef done

@@ -1,1 +1,32 @@
-stack-802.yaml
+resolver: lts-12.2
+packages:
+- 'computational-algebra'
+- 'algebraic-prelude'
+- 'halg-core'
+- 'halg-core-test'
+- 'halg-polynomials'
+- 'halg-galois-fields'
+- 'halg-heaps'
+- 'halg-matrices'
+- 'halg-algorithms'
+- 'halg-polyn-parser'
+- 'halg-factor'
+- 'halg-algebraic'
+- 'halg-bridge-singular'
+
+flags:
+  computational-algebra:
+    examples: true
+    profile:  false
+
+build:
+  library-profiling: true
+  executable-profiling: false
+
+extra-deps:
+- control-monad-loop-0.1
+- equational-reasoning-0.5.1.0
+- ghc-typelits-presburger-0.2.0.5
+- sized-0.3.0.0
+- type-natural-0.8.1.0
+- unamb-0.2.7

@@ -1,15 +1,15 @@
-{-# LANGUAGE CPP, ConstraintKinds, DataKinds, EmptyCase, FlexibleContexts  #-}
-{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving          #-}
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE IncoherentInstances, KindSignatures, MultiParamTypeClasses    #-}
-{-# LANGUAGE OverloadedLabels, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
-{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies, TypeInType #-}
-{-# LANGUAGE TypeOperators, UndecidableInstances, UndecidableSuperClasses  #-}
+{-# LANGUAGE CPP, ConstraintKinds, DataKinds, FlexibleContexts             #-}
+{-# LANGUAGE FlexibleInstances, GADTs, IncoherentInstances, KindSignatures #-}
+{-# LANGUAGE MultiParamTypeClasses, OverloadedLabels, PatternSynonyms      #-}
+{-# LANGUAGE PolyKinds, RankNTypes, RoleAnnotations, ScopedTypeVariables   #-}
+{-# LANGUAGE TypeFamilies, TypeInType, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE UndecidableSuperClasses                                       #-}
 module Algebra.Ring.Polynomial.Labeled
-       (IsUniqueList, LabPolynomial(..),
-        LabPolynomial', LabUnipol,
+       (IsUniqueList, LabPolynomial(LabelPolynomial, unLabelPolynomial),
+        LabPolynomial', LabUnipol, Wraps,
         canonicalMap,
         canonicalMap',
+        renameVars, renameVars',
         IsSubsetOf) where
 import Algebra.Internal
 import Algebra.Ring.Polynomial
@@ -18,6 +18,7 @@ import Algebra.Scalar
 
 import           AlgebraicPrelude
 import           Control.Lens                 (each, (%~), (&))
+import qualified Data.Coerce                  as DC
 import           Data.Function                (on)
 import qualified Data.List                    as L
 import           Data.Singletons.Prelude
@@ -56,7 +57,7 @@ instance (KnownSymbol symb,
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 802
   fromLabel =
     let vs = map T.unpack $ fromSing (sing :: Sing vars)
-        v  = symbolVal @symb Proxy
+        v  = symbolVal (Proxy :: Proxy symb)
     in maybe (error "impossible!") (var . toEnum) $ L.elemIndex v vs
 #else
   fromLabel k =
@@ -65,10 +66,16 @@ instance (KnownSymbol symb,
     in maybe (error "impossible!") (var . toEnum) $ L.elemIndex v vs
 #endif
 
-data LabPolynomial poly (vars :: [Symbol]) where
-  LabelPolynomial :: (IsUniqueList vars, Length vars ~ Arity poly)
-                  => { unLabelPolynomial :: poly }
-                  -> LabPolynomial poly vars
+newtype LabPolynomial poly (vars :: [Symbol]) =
+  LabelPolynomial_ { _unLabelPolynomial :: poly }
+type role LabPolynomial representational nominal
+
+{-# COMPLETE LabelPolynomial #-}
+pattern LabelPolynomial :: Wraps vars poly => Wraps vars poly
+                        => poly -> LabPolynomial poly vars
+pattern LabelPolynomial { unLabelPolynomial } =
+  LabelPolynomial_ unLabelPolynomial
+
 
 -- | Convenient type-synonym for @'LabPlynomial'@ wrapping @'OrderedPolynomial'@
 --   and @'Unipol'@.
@@ -81,113 +88,113 @@ type LabUnipol r sym = LabPolynomial (Unipol r) '[sym]
 
 type Wraps vars poly = (IsUniqueList vars, Arity poly ~ Length vars)
 
-instance (PrettyCoeff (Coefficient poly), IsOrderedPolynomial poly, SingI vars)
+instance (PrettyCoeff (Coefficient poly), IsOrderedPolynomial poly, Wraps vars poly, SingI vars)
       => Show (LabPolynomial poly vars) where
-  showsPrec d (LabelPolynomial f) =
+  showsPrec d (LabelPolynomial_ f) =
     let svs   = sing :: Sing vars
         vs    =
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 802
-          map T.unpack $ 
+          map T.unpack $
 #endif
 
           fromSing svs
         vsVec = generate sing $ \i -> vs !! fromEnum i
     in showsPolynomialWith vsVec d f
 
-instance (UniqueList vars, Arity poly ~ Length vars, P.Num poly)
+instance (Wraps vars poly, P.Num poly)
       => P.Num (LabPolynomial poly vars) where
-  fromInteger = LabelPolynomial . P.fromInteger
-  LabelPolynomial f + LabelPolynomial g = LabelPolynomial $ f P.+ g
-  LabelPolynomial f * LabelPolynomial g = LabelPolynomial $ f P.* g
-  abs = LabelPolynomial . P.abs . unLabelPolynomial
-  LabelPolynomial f - LabelPolynomial g = LabelPolynomial $ f P.- g
-  negate = LabelPolynomial . P.negate . unLabelPolynomial
-  signum = LabelPolynomial . P.signum . unLabelPolynomial
+  fromInteger = LabelPolynomial_ . P.fromInteger
+  LabelPolynomial_ f + LabelPolynomial_ g = LabelPolynomial_ $ f P.+ g
+  LabelPolynomial_ f * LabelPolynomial_ g = LabelPolynomial_ $ f P.* g
+  abs = LabelPolynomial_ . P.abs . _unLabelPolynomial
+  LabelPolynomial_ f - LabelPolynomial_ g = LabelPolynomial_ $ f P.- g
+  negate = LabelPolynomial_ . P.negate . _unLabelPolynomial
+  signum = LabelPolynomial_ . P.signum . _unLabelPolynomial
 
 instance (Wraps vars poly, Additive poly) => Additive (LabPolynomial poly vars) where
-  LabelPolynomial f + LabelPolynomial g = LabelPolynomial $ f + g
+  LabelPolynomial_ f + LabelPolynomial_ g = LabelPolynomial_ $ f + g
   {-# INLINE (+) #-}
 
 instance (Wraps vars poly, Multiplicative poly) => Multiplicative (LabPolynomial poly vars) where
-  LabelPolynomial f * LabelPolynomial g =
-    LabelPolynomial $ f * g
+  LabelPolynomial_ f * LabelPolynomial_ g =
+    LabelPolynomial_ $ f * g
   {-# INLINE (*) #-}
 
 instance (Wraps vars poly, Abelian poly)     => Abelian (LabPolynomial poly vars)
 instance (Wraps vars poly, Commutative poly) => Commutative (LabPolynomial poly vars)
 instance (Wraps vars poly, Unital poly) => Unital (LabPolynomial poly vars) where
-  one = LabelPolynomial one
+  one = LabelPolynomial_ one
   {-# INLINE one #-}
 
 instance (Wraps vars poly, Group poly) => Group (LabPolynomial poly vars) where
-  negate (LabelPolynomial f) = LabelPolynomial (negate f)
+  negate (LabelPolynomial_ f) = LabelPolynomial_ (negate f)
   {-# INLINE negate #-}
 
 instance (Wraps vars poly, RightModule Natural poly) => RightModule Natural (LabPolynomial poly vars) where
-  LabelPolynomial f *. a = LabelPolynomial $  f *. a
+  LabelPolynomial_ f *. a = LabelPolynomial_ $  f *. a
   {-# INLINE (*.) #-}
 
 instance (Wraps vars poly, LeftModule Natural poly) => LeftModule Natural (LabPolynomial poly vars) where
-  a .* LabelPolynomial f = LabelPolynomial $ a .* f
+  a .* LabelPolynomial_ f = LabelPolynomial_ $ a .* f
   {-# INLINE (.*) #-}
 
 instance (Wraps vars poly, RightModule Integer poly) => RightModule Integer (LabPolynomial poly vars) where
-  LabelPolynomial f *. a = LabelPolynomial $  f *. a
+  LabelPolynomial_ f *. a = LabelPolynomial_ $  f *. a
   {-# INLINE (*.) #-}
 
 instance (Wraps vars poly, LeftModule Integer poly) => LeftModule Integer (LabPolynomial poly vars) where
-  a .* LabelPolynomial f = LabelPolynomial $ a .* f
+  a .* LabelPolynomial_ f = LabelPolynomial_ $ a .* f
   {-# INLINE (.*) #-}
 
 instance (Wraps vars poly, Monoidal poly) => Monoidal (LabPolynomial poly vars) where
-  zero = LabelPolynomial zero
+  zero = LabelPolynomial_ zero
   {-# INLINE zero #-}
 
 instance (Wraps vars poly, Semiring poly) => Semiring (LabPolynomial poly vars)
 instance (Wraps vars poly, Rig poly) => Rig (LabPolynomial poly vars)
 instance (Wraps vars poly, Ring poly) => Ring (LabPolynomial poly vars) where
-  fromInteger n = LabelPolynomial (NA.fromInteger n :: poly)
+  fromInteger n = LabelPolynomial_ (NA.fromInteger n :: poly)
   {-# INLINE fromInteger #-}
 
 instance (Wraps vars poly, LeftModule (Scalar r) poly)  => LeftModule  (Scalar r) (LabPolynomial poly vars) where
-  a .* LabelPolynomial f = LabelPolynomial $ a .* f
+  a .* LabelPolynomial_ f = LabelPolynomial_ $ a .* f
   {-# INLINE (.*) #-}
 
 instance (Wraps vars poly, RightModule (Scalar r) poly) => RightModule (Scalar r) (LabPolynomial poly vars) where
-  LabelPolynomial f *. a = LabelPolynomial $ f *. a
+  LabelPolynomial_ f *. a = LabelPolynomial_ $ f *. a
   {-# INLINE (*.) #-}
 
 instance (Wraps vars poly, DecidableZero poly) => DecidableZero (LabPolynomial poly vars) where
-  isZero = isZero . unLabelPolynomial
+  isZero = isZero . _unLabelPolynomial
 
 instance (Wraps vars poly, Eq poly) => Eq (LabPolynomial poly vars) where
-  (==) = (==) `on` unLabelPolynomial
-  (/=) = (/=) `on` unLabelPolynomial
+  (==) = (==) `on` _unLabelPolynomial
+  (/=) = (/=) `on` _unLabelPolynomial
 
 instance (Wraps vars poly, Ord poly) => Ord (LabPolynomial poly vars) where
-  compare = compare `on` unLabelPolynomial
-  (<=) = (<=) `on` unLabelPolynomial
-  (>=) = (>=) `on` unLabelPolynomial
-  (<)  = (<) `on` unLabelPolynomial
-  (>)  = (>) `on` unLabelPolynomial
+  compare = compare `on` _unLabelPolynomial
+  (<=) = (<=) `on` _unLabelPolynomial
+  (>=) = (>=) `on` _unLabelPolynomial
+  (<)  = (<) `on` _unLabelPolynomial
+  (>)  = (>) `on` _unLabelPolynomial
 
 instance (IsPolynomial poly, Wraps vars poly) => IsPolynomial (LabPolynomial poly vars) where
   type Coefficient (LabPolynomial poly vars) = Coefficient poly
   type Arity (LabPolynomial poly vars) = Arity poly
 
-  liftMap mor = liftMap mor . unLabelPolynomial
+  liftMap mor = liftMap mor . _unLabelPolynomial
   {-# INLINE liftMap #-}
 
-  terms' = terms' . unLabelPolynomial
+  terms' = terms' . _unLabelPolynomial
   {-# INLINE terms' #-}
 
-  monomials = monomials . unLabelPolynomial
+  monomials = monomials . _unLabelPolynomial
   {-# INLINE monomials #-}
 
-  coeff' m = coeff' m . unLabelPolynomial
+  coeff' m = coeff' m . _unLabelPolynomial
   {-# INLINE coeff' #-}
 
-  constantTerm = constantTerm . unLabelPolynomial
+  constantTerm = constantTerm . _unLabelPolynomial
   {-# INLINE constantTerm #-}
 
   sArity _ = sArity (Proxy :: Proxy poly)
@@ -196,41 +203,56 @@ instance (IsPolynomial poly, Wraps vars poly) => IsPolynomial (LabPolynomial pol
   arity _ = arity (Proxy :: Proxy poly)
   {-# INLINE arity #-}
 
-  fromMonomial m = LabelPolynomial (fromMonomial m :: poly)
+  fromMonomial m = LabelPolynomial_ (fromMonomial m :: poly)
   {-# INLINE fromMonomial #-}
 
-  toPolynomial' (r, deg) = LabelPolynomial (toPolynomial' (r, deg) :: poly)
+  toPolynomial' (r, deg) = LabelPolynomial_ (toPolynomial' (r, deg) :: poly)
   {-# INLINE toPolynomial' #-}
 
-  polynomial' dic = LabelPolynomial (polynomial' dic :: poly)
+  polynomial' dic = LabelPolynomial_ (polynomial' dic :: poly)
   {-# INLINE polynomial' #-}
 
-  totalDegree' = totalDegree' . unLabelPolynomial
+  totalDegree' = totalDegree' . _unLabelPolynomial
   {-# INLINE totalDegree' #-}
 
 instance (IsOrderedPolynomial poly, Wraps vars poly) => IsOrderedPolynomial (LabPolynomial poly vars) where
   type MOrder (LabPolynomial poly vars) = MOrder poly
 
-  leadingTerm = leadingTerm . unLabelPolynomial
+  leadingTerm = leadingTerm . _unLabelPolynomial
   {-# INLINE leadingTerm #-}
 
-  leadingCoeff = leadingCoeff . unLabelPolynomial
+  leadingCoeff = leadingCoeff . _unLabelPolynomial
   {-# INLINE leadingCoeff #-}
 
-  fromOrderedMonomial m = LabelPolynomial (fromOrderedMonomial m :: poly)
+  fromOrderedMonomial m = LabelPolynomial_ (fromOrderedMonomial m :: poly)
   {-# INLINE fromOrderedMonomial #-}
 
-  toPolynomial (r, deg) = LabelPolynomial (toPolynomial (r, deg) :: poly)
+  orderedMonomials = orderedMonomials . _unLabelPolynomial
+  {-# INLINE orderedMonomials #-}
+
+  toPolynomial (r, deg) = LabelPolynomial_ (toPolynomial (r, deg) :: poly)
   {-# INLINE toPolynomial #-}
 
-  polynomial dic = LabelPolynomial (polynomial dic :: poly)
+  polynomial dic = LabelPolynomial_ (polynomial dic :: poly)
   {-# INLINE polynomial #-}
 
-  terms = terms . unLabelPolynomial
+  terms = terms . _unLabelPolynomial
   {-# INLINE terms #-}
 
-  coeff m = coeff m . unLabelPolynomial
+  coeff m = coeff m . _unLabelPolynomial
   {-# INLINE coeff #-}
+
+  m >* LabelPolynomial_ f = LabelPolynomial_ (m >* f)
+  {-# INLINE (>*) #-}
+
+  LabelPolynomial_ f *< m = LabelPolynomial_ (f *< m)
+  {-# INLINE (*<) #-}
+
+  diff n (LabelPolynomial_ f) = LabelPolynomial_ (diff n f)
+  {-# INLINE diff #-}
+
+  mapMonomialMonotonic f (LabelPolynomial_ g) = LabelPolynomial_ $ mapMonomialMonotonic  f g
+  {-# INLINE mapMonomialMonotonic #-}
 
 class    (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf (xs :: [a]) (ys :: [a]) where
   _suppress :: proxy xs -> proxy ys -> x -> x
@@ -239,36 +261,36 @@ instance (All (FlipSym0 @@ ElemSym0 @@ ys) xs ~ 'True) => IsSubsetOf (xs :: [a])
 
 instance (ZeroProductSemiring poly , Wraps vars poly) => ZeroProductSemiring (LabPolynomial poly vars)
 instance (IntegralDomain poly , Wraps vars poly) => IntegralDomain (LabPolynomial poly vars) where
-  divides = divides `on` unLabelPolynomial
-  maybeQuot f g = LabelPolynomial <$> maybeQuot (unLabelPolynomial f) (unLabelPolynomial g)
+  divides = divides `on` _unLabelPolynomial
+  maybeQuot f g = LabelPolynomial_ <$> maybeQuot (_unLabelPolynomial f) (_unLabelPolynomial g)
 instance (UFD poly , Wraps vars poly) => UFD (LabPolynomial poly vars)
 instance (PID poly , Wraps vars poly) => PID (LabPolynomial poly vars) where
-  egcd (LabelPolynomial f) (LabelPolynomial g) =
-    egcd f g & each %~ LabelPolynomial
+  egcd (LabelPolynomial_ f) (LabelPolynomial_ g) =
+    egcd f g & each %~ LabelPolynomial_
 instance (GCDDomain poly , Wraps vars poly) => GCDDomain (LabPolynomial poly vars) where
-  gcd f g = LabelPolynomial $ gcd (unLabelPolynomial f) (unLabelPolynomial g)
+  gcd f g = LabelPolynomial_ $ gcd (_unLabelPolynomial f) (_unLabelPolynomial g)
   reduceFraction f g =
-    reduceFraction (unLabelPolynomial f) (unLabelPolynomial g)
-    & each %~ LabelPolynomial
-  lcm f g = LabelPolynomial $ lcm (unLabelPolynomial f) (unLabelPolynomial g)
+    reduceFraction (_unLabelPolynomial f) (_unLabelPolynomial g)
+    & each %~ LabelPolynomial_
+  lcm f g = LabelPolynomial_ $ lcm (_unLabelPolynomial f) (_unLabelPolynomial g)
 instance (UnitNormalForm poly , Wraps vars poly) => UnitNormalForm (LabPolynomial poly vars) where
-  splitUnit = (each %~ LabelPolynomial) . splitUnit . unLabelPolynomial
+  splitUnit = (each %~ LabelPolynomial_) . splitUnit . _unLabelPolynomial
 instance (DecidableUnits poly , Wraps vars poly) => DecidableUnits (LabPolynomial poly vars) where
-  isUnit = isUnit . unLabelPolynomial
-  recipUnit = fmap LabelPolynomial . recipUnit . unLabelPolynomial
-  LabelPolynomial f ^? n = LabelPolynomial <$> (f ^? n)
+  isUnit = isUnit . _unLabelPolynomial
+  recipUnit = fmap LabelPolynomial_ . recipUnit . _unLabelPolynomial
+  LabelPolynomial_ f ^? n = LabelPolynomial_ <$> (f ^? n)
 
 instance (DecidableAssociates poly , Wraps vars poly)
       => DecidableAssociates (LabPolynomial poly vars) where
-  isAssociate = isAssociate `on` unLabelPolynomial
+  isAssociate = isAssociate `on` _unLabelPolynomial
 
 instance (Euclidean poly , Wraps vars poly)
       => Euclidean (LabPolynomial poly vars) where
-  degree = degree . unLabelPolynomial
-  divide (LabelPolynomial f) (LabelPolynomial g) =
-    divide f g & each %~ LabelPolynomial
-  quot f g = LabelPolynomial $ quot (unLabelPolynomial f) (unLabelPolynomial g)
-  rem f g = LabelPolynomial $ rem (unLabelPolynomial f) (unLabelPolynomial g)
+  degree = degree . _unLabelPolynomial
+  divide (LabelPolynomial_ f) (LabelPolynomial_ g) =
+    divide f g & each %~ LabelPolynomial_
+  quot f g = LabelPolynomial_ $ quot (_unLabelPolynomial f) (_unLabelPolynomial g)
+  rem f g = LabelPolynomial_ $ rem (_unLabelPolynomial f) (_unLabelPolynomial g)
 
 -- | So unsafe! Don't expose it!
 permute0 :: (SEq k) => SList (xs :: [k]) -> SList (ys :: [k]) -> Sized (Length xs) Integer
@@ -278,7 +300,7 @@ permute0 (SCons x xs) ys =
     SJust n  ->
       let k = sLength xs
       in coerceLength (plusComm k sOne) $ withKnownNat (sSucc k) $
-         withKnownNat k $ (fromIntegral (toNatural n) S.:< permute0 xs ys)
+         withKnownNat k (fromIntegral (toNatural n) S.:< permute0 xs ys)
     SNothing -> error "oops, you called permute0 for non-subset..."
 
 permute :: forall (xs :: [k])  ys. (IsSubsetOf xs ys , SEq k)
@@ -291,14 +313,14 @@ canonicalMap :: forall xs ys poly poly'.
                  IsPolynomial poly, IsPolynomial poly',
                  Coefficient poly ~ Coefficient poly')
              => LabPolynomial poly xs -> LabPolynomial poly' ys
-canonicalMap (LabelPolynomial f) =
+canonicalMap (LabelPolynomial_ f) =
   let sxs  = sing :: Sing xs
       sys  = sing :: Sing ys
       dics = permute sxs sys
       ords = enumOrdinal (sArity $ Just ans)
       mor o = var (ords !! fromInteger (dics S.%!! o)) :: poly'
       ans   = liftMap mor f
-  in LabelPolynomial ans
+  in LabelPolynomial_ ans
 {-# INLINE canonicalMap #-}
 
 canonicalMap' :: (SingI xs, SingI ys, IsSubsetOf xs ys,
@@ -308,3 +330,13 @@ canonicalMap' :: (SingI xs, SingI ys, IsSubsetOf xs ys,
               => proxy poly' -> proxy' ys -> LabPolynomial poly xs -> LabPolynomial poly' ys
 canonicalMap' _ _ = canonicalMap
 {-# INLINE canonicalMap' #-}
+
+renameVars :: (SingI ys, SingI xs, Length xs ~ Length ys, IsPolynomial poly)
+           => LabPolynomial poly xs -> LabPolynomial poly ys
+renameVars = DC.coerce
+{-# INLINE renameVars #-}
+
+renameVars' :: (SingI ys, SingI xs, Length xs ~ Length ys, IsPolynomial poly)
+           => proxy ys -> LabPolynomial poly xs -> LabPolynomial poly ys
+renameVars' _ = DC.coerce
+{-# INLINE renameVars' #-}

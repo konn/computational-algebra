@@ -10,6 +10,9 @@ extra-source-files:
 - README.md
 - ChangeLog.md
 
+tested-with: |
+  GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.3
+
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
 category:            Math
@@ -112,12 +115,6 @@ _profile-cond: &profile-cond
   - -fprof-auto-exported
   
 _examples: &examples
-  solve:
-    <<:   *example-cond
-    main: solve.hs
-  algebraic:
-    <<:   *example-cond
-    main: algebraic.hs
   algebraic:
     <<:   *example-cond
     main: algebraic.hs
@@ -173,10 +170,6 @@ benchmarks:
   quotient-bench-randomized:
     <<: *bench-common
     main: quotient-bench-randomized.hs
-    other-modules: []
-  sugar-paper-bench:
-    <<: *bench-common
-    main: sugar-paper.hs
     other-modules: []
   solve-bench:
     <<: *bench-common

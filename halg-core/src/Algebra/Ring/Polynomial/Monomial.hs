@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns, ConstraintKinds, DataKinds                     #-}
+{-# LANGUAGE BangPatterns, CPP, ConstraintKinds, DataKinds                #-}
 {-# LANGUAGE ExistentialQuantification, ExplicitNamespaces                #-}
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                   #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving, IncoherentInstances              #-}
@@ -6,9 +6,10 @@
 {-# LANGUAGE PatternSynonyms, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
 {-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeApplications        #-}
 {-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances            #-}
+{-# LANGUAGE ViewPatterns                                                 #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Algebra.Ring.Polynomial.Monomial
-       ( Monomial, OrderedMonomial(..),
+       ( Monomial, OrderedMonomial(OrderedMonomial), getMonomial,
          IsOrder(..), IsMonomialOrder, MonomialOrder,
          IsStrongMonomialOrder,
          isRelativelyPrime, totalDegree, ProductOrder(..),
@@ -21,125 +22,206 @@ module Algebra.Ring.Polynomial.Monomial
          Revlex(..), Grlex(..), Graded(..),
          castMonomial, scastMonomial, varMonom,
          changeMonomialOrder, changeMonomialOrderProxy, sOnes,
-         withStrongMonomialOrder, cmpAnyMonomial, orderMonomial
+         withStrongMonomialOrder, cmpAnyMonomial, orderMonomial,
+         ifoldMapMonom
        ) where
-import Algebra.Internal
-
+import           Algebra.Internal             hiding ((:>))
 import           AlgebraicPrelude             hiding (lex)
 import           Control.DeepSeq              (NFData (..))
+import qualified Control.Foldl                as Fl
 import           Control.Lens                 (Ixed (..), imap, makeLenses,
-                                               makeWrapped, (%~), (&), (.~),
-                                               _Wrapped)
+                                               makeWrapped, (%~), (&), (.~), _1,
+                                               _2, _Wrapped)
+import qualified Data.Coerce                  as DC
 import           Data.Constraint              ((:=>) (..), Dict (..))
 import qualified Data.Constraint              as C
-import           Data.Constraint.Forall
-import qualified Data.Foldable                as F
+import           Data.Constraint.Forall       (Forall, inst)
+import           Data.Functor.Identity        (Identity (..))
 import           Data.Hashable                (Hashable (..))
 import           Data.Kind                    (Type)
 import           Data.Maybe                   (catMaybes)
-import           Data.Monoid                  ((<>))
+import           Data.Monoid                  (Dual (..), (<>))
+import           Data.MonoTraversable         (MonoFoldable (..), oand,
+                                               ofoldMap, ofoldl', ofoldlUnwrap,
+                                               osum)
 import           Data.Ord                     (comparing)
-import           Data.Sequence                (Seq ((:|>), Empty))
-import qualified Data.Sequence                as Seq
+import qualified Data.Semigroup               as Semi
 import           Data.Singletons.Prelude      (SList, Sing)
 import           Data.Singletons.Prelude      (SingKind (..))
 import           Data.Singletons.Prelude.List (Length, Replicate, sReplicate)
 import           Data.Singletons.TypeLits     (withKnownNat)
 import qualified Data.Sized.Builtin           as V
 import           Data.Type.Natural.Class      (IsPeano (..), PeanoOrder (..))
--- import           Prelude                         hiding (Fractional (..),
---                                                   Integral (..), Num (..),
---                                                   Real (..), lex, product, sum)
-import qualified Prelude as P
+import qualified Data.Vector.Generic          as G
+import qualified Data.Vector.Generic.Mutable  as M
+import           Data.Vector.Instances        ()
+import qualified Data.Vector.Unboxed          as UV
+import qualified Prelude                      as P
 
--- | N-ary Monomial. IntMap contains degrees for each x_i- type Monomial (n :: Nat) = Sized n Int
-type Monomial n = Sized' n Int
+type Monomial n = USized n Int
 
 -- | A wrapper for monomials with a certain (monomial) order.
 newtype OrderedMonomial ordering n =
   OrderedMonomial { getMonomial :: Monomial n }
-  deriving (NFData)
+  deriving (NFData, Eq, Hashable)
 
 makeLenses ''OrderedMonomial
 makeWrapped ''OrderedMonomial
 
--- | convert NAry list into Monomial.
+-- | convert NAry list into Monomial'.
 fromList :: SNat n -> [Int] -> Monomial n
 fromList len = V.fromListWithDefault len 0
 
-instance Multiplicative (Monomial n) where
-  (*) = zipWithSame (+)
+-- We don't call Sized.zipWithSame here; it doesn't uses UV.zipWith at all!
+zws :: (KnownNat n, Unbox a) => (Int -> Int -> a) -> USized n Int -> USized n Int -> USized n a
+zws = ((V.unsafeToSized' .) .) . (`on` V.unsized) . UV.zipWith
+{-# INLINE zws #-}
+
+instance KnownNat n => Multiplicative (Monomial n) where
+  (*) = zws (+)
+  {-# INLINE (*) #-}
 
 instance KnownNat n => Unital (Monomial n) where
   one = fromList sing []
 
--- | Monomial order (of degree n). This should satisfy following laws:
+-- | Monomial' order (of degree n). This should satisfy following laws:
 -- (1) Totality: forall a, b (a < b || a == b || b < a)
 -- (2) Additivity: a <= b ==> a + c <= b + c
 -- (3) Non-negative: forall a, 0 <= a
 type MonomialOrder n = Monomial n -> Monomial n -> Ordering
 
-isRelativelyPrime :: OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
+isRelativelyPrime :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
 isRelativelyPrime n m = lcmMonomial n m == n * m
 
 totalDegree :: OrderedMonomial ord n -> Int
-totalDegree = P.sum . getMonomial
+totalDegree = osum . getMonomial
 {-# INLINE totalDegree #-}
 
 -- | Lexicographical order. This *is* a monomial order.
-lex :: MonomialOrder n
-lex m n = P.foldMap (uncurry compare) $ V.zipSame m n
+lex :: KnownNat n => MonomialOrder n
+lex m n = ofoldMap (uncurry compare) $ V.zipSame m n
 {-# INLINE [2] lex #-}
 
 -- | Reversed lexicographical order. This is *not* a monomial order.
-revlex :: MonomialOrder n
-revlex xs ys = foldl (flip (<>)) EQ $ V.zipWithSame (flip compare) xs ys
+revlex :: KnownNat n => MonomialOrder n
+revlex xs ys =
+  unWrapOrdering . ofoldl' (flip (<>)) (WrapOrdering EQ) $ zws ((WrapOrdering .) .flip compare) xs ys
 {-# INLINE [2] revlex #-}
 
 -- | Convert ordering into graded one.
 graded :: MonomialOrder n -> MonomialOrder n
-graded cmp xs ys = comparing F.sum xs ys <> cmp xs ys
+graded cmp xs ys = comparing osum xs ys <> cmp xs ys
 {-# INLINE[2] graded #-}
 {-# RULES
 "graded/graded"  [~1] forall x. graded (graded x) = graded x
   #-}
 
 -- | Graded lexicographical order. This *is* a monomial order.
-grlex :: MonomialOrder n
+grlex :: KnownNat n => MonomialOrder n
 grlex = graded lex
 {-# INLINE [2] grlex #-}
 
+newtype WrapOrdering  = WrapOrdering { unWrapOrdering :: Ordering }
+  deriving (Read, Show, Eq, Ord, Monoid, Semi.Semigroup)
+newtype instance UV.Vector    WrapOrdering = V_WrapOrdering (UV.Vector Word8)
+newtype instance UV.MVector s WrapOrdering = MV_WrapOrdering (UV.MVector s Word8)
+instance Unbox WrapOrdering
+instance M.MVector UV.MVector WrapOrdering where
+  {-# INLINE basicLength #-}
+  {-# INLINE basicUnsafeSlice #-}
+  {-# INLINE basicOverlaps #-}
+  {-# INLINE basicUnsafeNew #-}
+  {-# INLINE basicInitialize #-}
+  {-# INLINE basicUnsafeReplicate #-}
+  {-# INLINE basicUnsafeRead #-}
+  {-# INLINE basicUnsafeWrite #-}
+  {-# INLINE basicClear #-}
+  {-# INLINE basicSet #-}
+  {-# INLINE basicUnsafeCopy #-}
+  {-# INLINE basicUnsafeGrow #-}
+  basicLength (MV_WrapOrdering v) = M.basicLength v
+  basicUnsafeSlice i n (MV_WrapOrdering v) = MV_WrapOrdering $ M.basicUnsafeSlice i n v
+  basicOverlaps (MV_WrapOrdering v1) (MV_WrapOrdering v2) = M.basicOverlaps v1 v2
+  basicUnsafeNew n = MV_WrapOrdering `liftM` M.basicUnsafeNew n
+  basicInitialize (MV_WrapOrdering v) = M.basicInitialize v
+  basicUnsafeReplicate n x = MV_WrapOrdering `liftM` M.basicUnsafeReplicate n (fromWrapOrdering x)
+  basicUnsafeRead (MV_WrapOrdering v) i = toWrapOrdering `liftM` M.basicUnsafeRead v i
+  basicUnsafeWrite (MV_WrapOrdering v) i x = M.basicUnsafeWrite v i (fromWrapOrdering x)
+  basicClear (MV_WrapOrdering v) = M.basicClear v
+  basicSet (MV_WrapOrdering v) x = M.basicSet v (fromWrapOrdering x)
+  basicUnsafeCopy (MV_WrapOrdering v1) (MV_WrapOrdering v2) = M.basicUnsafeCopy v1 v2
+  basicUnsafeMove (MV_WrapOrdering v1) (MV_WrapOrdering v2) = M.basicUnsafeMove v1 v2
+  basicUnsafeGrow (MV_WrapOrdering v) n = MV_WrapOrdering `liftM` M.basicUnsafeGrow v n
+
+instance G.Vector UV.Vector WrapOrdering where
+  {-# INLINE basicUnsafeFreeze #-}
+  {-# INLINE basicUnsafeThaw #-}
+  {-# INLINE basicLength #-}
+  {-# INLINE basicUnsafeSlice #-}
+  {-# INLINE basicUnsafeIndexM #-}
+  {-# INLINE elemseq #-}
+  basicUnsafeFreeze (MV_WrapOrdering v) = V_WrapOrdering `liftM` G.basicUnsafeFreeze v
+  basicUnsafeThaw (V_WrapOrdering v) = MV_WrapOrdering `liftM` G.basicUnsafeThaw v
+  basicLength (V_WrapOrdering v) = G.basicLength v
+  basicUnsafeSlice i n (V_WrapOrdering v) = V_WrapOrdering $ G.basicUnsafeSlice i n v
+  basicUnsafeIndexM (V_WrapOrdering v) i = toWrapOrdering `liftM` G.basicUnsafeIndexM v i
+  basicUnsafeCopy (MV_WrapOrdering mv) (V_WrapOrdering v) = G.basicUnsafeCopy mv v
+  elemseq _ = seq
+
+
+fromWrapOrdering :: WrapOrdering -> Word8
+{-# INLINE fromWrapOrdering #-}
+fromWrapOrdering (WrapOrdering LT) = 0
+fromWrapOrdering (WrapOrdering EQ) = 1
+fromWrapOrdering (WrapOrdering GT) = 2
+
+toWrapOrdering :: Word8 -> WrapOrdering
+{-# INLINE toWrapOrdering #-}
+toWrapOrdering 0 = WrapOrdering LT
+toWrapOrdering 1 = WrapOrdering EQ
+toWrapOrdering _ = WrapOrdering GT
+
 -- | Graded reversed lexicographical order. This *is* a monomial order.
 grevlex :: MonomialOrder n
-grevlex as bs = grevlexHW (V.unsized as) (V.unsized bs) 0 0 EQ
+grevlex = grevlexF -- grevlexHW (V.unsized as) (V.unsized bs) 0 0 EQ
 {-# INLINE [2] grevlex #-}
 
-grevlexHW :: Seq Int -> Seq Int -> Int -> Int -> Ordering -> Ordering
-grevlexHW (as :|> a) (bs :|> b)  !accl !accr EQ =
-  grevlexHW as bs (accl + a) (accr + b) $ compare b a
-grevlexHW as bs !accl !accr cmp = compare (sum as + accl) (sum bs + accr) <> cmp
+grevlexHW :: UV.Vector Int -> UV.Vector Int -> Int -> Int -> Ordering -> Ordering
+grevlexHW as0 bs0  !accl !accr EQ
+  | let len = UV.length as0
+  , len > 0 =
+    let (as, UV.unsafeHead -> a) = UV.splitAt (len - 1) as0
+        (bs, UV.unsafeHead -> b) = UV.splitAt (len - 1) bs0
+    in grevlexHW as bs (accl + a) (accr + b) $ compare b a
+grevlexHW as bs !accl !accr cmp = compare (UV.sum as + accl) (UV.sum bs + accr) <> cmp
 
-deriving instance Hashable (Monomial n) => Hashable (OrderedMonomial ordering n)
-deriving instance (Eq (Monomial n)) => Eq (OrderedMonomial ordering n)
+grevlexF :: MonomialOrder n
+grevlexF = (Fl.purely ofoldlUnwrap body .) . (UV.zip `on` V.unsized)
+  where
+    body :: Fl.Fold (Int, Int) Ordering
+    body = (<>) <$> (compare <$> Fl.handles _1 Fl.sum <*> Fl.handles _2 Fl.sum)
+                <*> Fl.foldMap (Dual . uncurry (flip compare)) getDual
+{-# INLINE grevlexF #-}
+
 instance KnownNat n => Show (OrderedMonomial ord n) where
   show xs =
-    let vs = catMaybes $ V.toList $
+    let vs = catMaybes $
             imap (\n i ->
                    if i > 0
-                   then Just ("X_" ++ show (ordToNatural n) ++ if i == 1 then "" else "^" ++ show i)
+                   then Just ("X_" ++ show n ++ if i == 1 then "" else "^" ++ show i)
                    else Nothing)
-            $ getMonomial xs
+            $ otoList $ getMonomial xs
     in if null vs then "1" else unwords vs
 
-instance Multiplicative (OrderedMonomial ord n) where
-  OrderedMonomial n * OrderedMonomial m = OrderedMonomial $ V.zipWithSame (+) n m
+instance KnownNat n => Multiplicative (OrderedMonomial ord n) where
+  OrderedMonomial n * OrderedMonomial m = OrderedMonomial $ zws (+) n m
 
 instance KnownNat n => Division (OrderedMonomial ord n) where
-  recip = _Wrapped %~ V.map P.negate
-  OrderedMonomial n / OrderedMonomial m = OrderedMonomial $ V.zipWithSame (-) n m
+  recip (OrderedMonomial n) = OrderedMonomial $ V.map P.negate n
+  OrderedMonomial n / OrderedMonomial m = OrderedMonomial $ zws (-) n m
 
 instance KnownNat n => Unital (OrderedMonomial ord n) where
-  one = OrderedMonomial $ fromList sing []
+  one = OrderedMonomial one
 
 -- | Class to lookup ordering from its (type-level) name.
 class IsOrder (n :: Nat) (ordering :: Type) where
@@ -208,7 +290,7 @@ calcOrderWeight Proxy = calcOrderWeight' (sing :: SList vs)
 calcOrderWeight' :: forall vs n. KnownNat n => SList (vs :: [Nat]) -> Monomial n -> Int
 calcOrderWeight' slst m =
   let cfs = V.fromListWithDefault' (0 :: Int) $ map P.fromIntegral $ fromSing slst
-  in P.sum $ V.zipWithSame (*) cfs m
+  in osum $ zws (*) cfs m
 {-# INLINE [2] calcOrderWeight' #-}
 
 weightOrder :: forall n ns ord. (KnownNat n, IsOrder n ord, SingI ns)
@@ -229,61 +311,62 @@ instance (IsOrder n ord, IsOrder m ord', KnownNat m, KnownNat n, k ~ (n + m))
   {-# INLINE [1] cmpMonomial #-}
 
 -- They're all total orderings.
-instance IsOrder n Grevlex where
+instance KnownNat n => IsOrder n Grevlex where
   cmpMonomial _ = grevlex
   {-# INLINE [1] cmpMonomial #-}
 
-instance IsOrder n Revlex where
+instance KnownNat n => IsOrder n Revlex where
   cmpMonomial _ = revlex
   {-# INLINE [1] cmpMonomial #-}
 
-instance IsOrder n Lex where
+instance KnownNat n => IsOrder n Lex where
   cmpMonomial _ = lex
   {-# INLINE [1] cmpMonomial #-}
 
-instance IsOrder n Grlex where
+instance KnownNat n => IsOrder n Grlex where
   cmpMonomial _ = grlex
   {-# INLINE [1] cmpMonomial #-}
 
--- | Class for Monomial orders.
+-- | Class for Monomial' orders.
 class IsOrder n name => IsMonomialOrder n name where
 
 -- Note that Revlex is not a monomial order.
 -- This distinction is important when we calculate a quotient or Groebner basis.
-instance IsMonomialOrder n Grlex
-instance IsMonomialOrder n Grevlex
-instance IsMonomialOrder n Lex
+instance KnownNat n => IsMonomialOrder n Grlex
+instance KnownNat n => IsMonomialOrder n Grevlex
+instance KnownNat n => IsMonomialOrder n Lex
 instance (KnownNat n, KnownNat m, IsMonomialOrder n o, IsMonomialOrder m o', k ~ (n + m))
       => IsMonomialOrder k (ProductOrder n m o o')
 instance (KnownNat k, SingI ws, IsMonomialOrder k ord)
       => IsMonomialOrder k (WeightOrder ws ord)
 
-lcmMonomial :: OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
-lcmMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWithSame max m n
+lcmMonomial :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
+lcmMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ zws max m n
+{-# INLINE lcmMonomial #-}
 
-gcdMonomial :: OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
-gcdMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ V.zipWithSame P.min m n
+gcdMonomial :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> OrderedMonomial ord n
+gcdMonomial (OrderedMonomial m) (OrderedMonomial n) = OrderedMonomial $ zws P.min m n
+{-# INLINE gcdMonomial #-}
 
-
-divs :: OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
-(OrderedMonomial xs) `divs` (OrderedMonomial ys) = and $ V.toList $ V.zipWith (<=) xs ys
+divs :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
+(OrderedMonomial xs) `divs` (OrderedMonomial ys) = oand $ zws (<=) xs ys
 
 isPowerOf :: KnownNat n => OrderedMonomial ord n -> OrderedMonomial ord n -> Bool
 OrderedMonomial n `isPowerOf` OrderedMonomial m =
   case V.sFindIndices (> 0) m of
-    [ind] -> F.sum n == V.sIndex ind n
+    [ind] -> osum n == V.sIndex ind n
     _     -> False
 
-tryDiv :: Field r => (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n)
+tryDiv :: (KnownNat n, Field r) => (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n) -> (r, OrderedMonomial ord n)
 tryDiv (a, f) (b, g)
-    | g `divs` f = (a * recip b, OrderedMonomial $ V.zipWithSame (-) (getMonomial f) (getMonomial g))
+    | g `divs` f = (a * recip b, OrderedMonomial $ zws (-) (getMonomial f) (getMonomial g))
     | otherwise  = error "cannot divide."
 
 varMonom :: SNat n -> Ordinal n -> Monomial n
 varMonom len o = V.replicate len 0 & ix o .~ 1
 {-# INLINE varMonom #-}
 
--- | Monomial order which can be use to calculate n-th elimination ideal of m-ary polynomial.
+-- | Monomial' order which can be use to calculate n-th elimination ideal of m-ary polynomial.
 -- This should judge monomial to be bigger if it contains variables to eliminate.
 class (IsMonomialOrder n ord, KnownNat n) => EliminationType n m ord
 instance KnownNat n => EliminationType n m Lex
@@ -313,21 +396,17 @@ type WeightedEliminationOrder (n :: Nat) (ord :: Type) =
 instance (Eq (Monomial n), IsOrder n name) => Ord (OrderedMonomial name n) where
   OrderedMonomial m `compare` OrderedMonomial n = cmpMonomial (Proxy :: Proxy name) m n
 
--- | For simplicity, we choose grevlex for the default monomial ordering (for the sake of efficiency).
-instance {-# OVERLAPPING #-} Ord (Monomial n) where
-  compare = grevlex
-
 castMonomial :: (KnownNat m) => OrderedMonomial o n -> OrderedMonomial o' m
-castMonomial = _Wrapped %~ fromList sing . V.toList
+castMonomial = _Wrapped %~ fromList sing . otoList
 
 scastMonomial :: SNat m -> OrderedMonomial o n -> OrderedMonomial o m
-scastMonomial sdim = _Wrapped %~ fromList sdim . V.toList
+scastMonomial sdim = _Wrapped %~ fromList sdim . otoList
 
 changeMonomialOrder :: o' -> OrderedMonomial ord n -> OrderedMonomial o' n
-changeMonomialOrder _ = OrderedMonomial . getMonomial
+changeMonomialOrder _ = DC.coerce
 
 changeMonomialOrderProxy :: Proxy o' -> OrderedMonomial ord n -> OrderedMonomial o' n
-changeMonomialOrderProxy _ = OrderedMonomial . getMonomial
+changeMonomialOrderProxy _ = DC.coerce
 
 class    (IsMonomialOrder n ord) => IsMonomialOrder' ord n
 instance (IsMonomialOrder n ord) => IsMonomialOrder' ord n
@@ -335,7 +414,7 @@ instance (IsMonomialOrder n ord) => IsMonomialOrder' ord n
 instance IsMonomialOrder' ord n :=> IsMonomialOrder n ord where
   ins = C.Sub Dict
 
--- | Monomial ordering which can do with monomials of arbitrary large arity.
+-- | Monomial' ordering which can do with monomials of arbitrary large arity.
 type IsStrongMonomialOrder ord = Forall (IsMonomialOrder' ord)
 
 withStrongMonomialOrder :: forall ord n r proxy (proxy' :: Nat -> Type).
@@ -359,3 +438,7 @@ cmpAnyMonomial pxy t t' =
 orderMonomial :: proxy ord -> Monomial n -> OrderedMonomial ord n
 orderMonomial _ = OrderedMonomial
 {-# INLINE orderMonomial #-}
+
+ifoldMapMonom :: (KnownNat n, Monoid m) => (Ordinal n -> Int -> m) -> Monomial n -> m
+ifoldMapMonom f =
+  UV.ifoldr (\i -> mappend . f (unsafeNaturalToOrd $ fromIntegral i)) mempty . V.unsized

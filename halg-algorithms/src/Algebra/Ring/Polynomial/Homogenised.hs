@@ -39,7 +39,7 @@ instance IsOrderedPolynomial poly => IsPolynomial (Homogenised poly) where
   type Arity (Homogenised poly) = Succ (Arity poly)
   sArity _ = sing
   injectCoeff = Homogenised . injectCoeff . injectCoeff
-  fromMonomial ((os :: Sized' k Int) :> o) =
+  fromMonomial ((os :: USized k Int) :> o) =
     let sn = sizedLength os
         sm = sing :: Sing (Arity poly)
     in withRefl (succInj' sn sm (Refl :: Succ k :~: Succ (Arity poly))) $

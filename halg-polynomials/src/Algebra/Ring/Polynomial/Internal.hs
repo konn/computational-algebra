@@ -2,9 +2,9 @@
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                  #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving, LiberalTypeSynonyms             #-}
 {-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction, PolyKinds #-}
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, StandaloneDeriving         #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, TypeSynonymInstances           #-}
-{-# LANGUAGE UndecidableInstances                                        #-}
+{-# LANGUAGE RankNTypes, RoleAnnotations, ScopedTypeVariables            #-}
+{-# LANGUAGE StandaloneDeriving, TypeFamilies, TypeOperators             #-}
+{-# LANGUAGE TypeSynonymInstances, UndecidableInstances                  #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
@@ -54,6 +54,8 @@ deriving instance (CoeffRing r, IsOrder n ord, Ord r) => Ord (OrderedPolynomial 
 -- | n-ary polynomial ring over some noetherian ring R.
 newtype OrderedPolynomial r order n = Polynomial { _terms :: [(OrderedMonomial order n, r)] }
                                     deriving (NFData)
+type role OrderedPolynomial representational nominal nominal
+
 type Polynomial r = OrderedPolynomial r Grevlex
 
 instance (KnownNat n, IsMonomialOrder n ord, CoeffRing r) => IsPolynomial (OrderedPolynomial r ord n) where
@@ -87,7 +89,7 @@ instance (KnownNat n, IsMonomialOrder n ord, CoeffRing r) => IsPolynomial (Order
 
   liftMap mor poly = sum $ map (uncurry (.*) . (Scalar *** extractPower)) $ getTerms poly
     where
-      extractPower = runMult . ifoldMap (\ o -> Mult . pow (mor o) . fromIntegral) . getMonomial
+      extractPower = runMult . ifoldMapMonom (\ o -> Mult . pow (mor o) . fromIntegral) . getMonomial
   {-# INLINE liftMap #-}
 
 instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
@@ -121,6 +123,9 @@ instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
 
   leadingCoeff = fst . leadingTerm
   {-# INLINE leadingCoeff #-}
+
+  mapMonomialMonotonic f = Polynomial . M.mapKeysMonotonic f . C.coerce
+  {-# INLINE mapMonomialMonotonic #-}
 
 instance (KnownNat n, CoeffRing r, IsMonomialOrder n order)
          => Wrapped (OrderedPolynomial r order n) where
@@ -240,13 +245,18 @@ instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Unital (OrderedPo
 
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Multiplicative (OrderedPolynomial r order n) where
   Polynomial d1 *  Polynomial d2 =
-    let factor (m, c) = mapMaybe $ \(a, b) -> let c' = c * b
-                                              in if isZero c'
-                                                 then Nothing else Just (a*m, c')
+    let factor (m, c) = mapMaybe $ \(a, b) ->
+          let c' = c * b
+          in if isZero c'
+             then Nothing else Just (a*m, c')
     in Polynomial $
        foldr (mergeByWith (comparing fst) (\(a, b) (_, d) -> (a, b + d))) [] $
        map (`factor` d2) d1
   {-# INLINE (*) #-}
+
+guardZero :: DecidableZero a => a -> Maybe a
+guardZero x = if isZero x then Nothing else Just x
+{-# INLINE guardZero #-}
 
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Semiring (OrderedPolynomial r order n) where
 instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Commutative (OrderedPolynomial r order n) where
@@ -417,7 +427,7 @@ getTerms :: OrderedPolynomial k order n -> [(k, OrderedMonomial order n)]
 getTerms = map (snd &&& fst) . _terms
 
 transformMonomial :: (IsMonomialOrder m o, CoeffRing k, KnownNat m)
-                  => (Monomial n -> Monomial m) -> OrderedPolynomial k o n -> OrderedPolynomial k o m
+                  => (USized n Int -> USized m Int) -> OrderedPolynomial k o n -> OrderedPolynomial k o m
 transformMonomial tr (Polynomial d) =
   Polynomial $ sortBy (comparing fst) $ map (first $ OrderedMonomial . tr . getMonomial) d
 
@@ -428,7 +438,7 @@ shiftR :: forall k r n ord. (CoeffRing r, KnownNat n, IsMonomialOrder n ord,
                              IsMonomialOrder (k + n) ord)
        => SNat k -> OrderedPolynomial r ord n -> OrderedPolynomial r ord (k + n)
 shiftR k = withKnownNat (k %+ (sing :: SNat n)) $
-  withKnownNat k $ transformMonomial (S.append (fromList k []))
+  withKnownNat k $ transformMonomial (S.append (S.replicate' 0))
 
 -- | Calculate the homogenized polynomial of given one, with additional variable is the last variable.
 homogenize :: forall k ord n.
@@ -438,7 +448,7 @@ homogenize f =
   withKnownNat (sSucc (sing :: SNat n)) $
   let g = substWith (.*.) (S.init allVars) f
       d = fromIntegral (totalDegree' g)
-  in mapMonomialMonotonic (\m -> m & _Wrapped.ix maxBound .~ d - P.sum (m^._Wrapped)) g
+  in mapMonomialMonotonic (\m -> m & _Wrapped.ix maxBound .~ d - osum (m^._Wrapped)) g
 
 unhomogenize :: forall k ord n.
                 (CoeffRing k, KnownNat n, IsMonomialOrder n ord,
@@ -571,9 +581,8 @@ mapOrderedPolynomial :: forall r r' n n' ord' ord.
                      -> OrderedPolynomial r ord n -> OrderedPolynomial r' ord' n'
 mapOrderedPolynomial mapCoe mapVar (Polynomial dic) =
   let toGenerator = OrderedMonomial
-                  . generate sing
-                  . ifoldMapBy (+) (const 0)
-                       (\o l j -> if j == mapVar o then l else 0)
+                  . generate sing . (runAdd .)
+                  . ifoldMapMonom (\o l j -> Add $ if j == mapVar o then l else 0)
                   . getMonomial
   in Polynomial $
      mapMaybe (\(m, i) -> let c = mapCoe i in if isZero c then Nothing else Just (toGenerator m, c)) dic

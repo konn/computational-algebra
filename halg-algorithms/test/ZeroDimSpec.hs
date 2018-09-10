@@ -88,13 +88,13 @@ spec = parallel $ do
               isDescending (map leadingMonomial $ fst $ fglm ideal)
   describe "solve'" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
     it "solves equation with admissible error" $ do
-      checkForArity [2..4] $ prop_isApproximateZero 1e-10 (solve' 1e-10)
+      checkForArity [2..4] $ prop_isApproximateZero 1e-5 (solve' 1e-5)
   -- describe "solve''" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
   --   it "solves equation with admissible error" $ do
   --     checkForArity [2..4] $ prop_isApproximateZero 1e-5 (solve'' 1e-10)
   describe "solveViaCompanion" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
     it "solves equation with admissible error" $ do
-      checkForArity [2..4] $ prop_isApproximateZero 1e-5 (solveViaCompanion 1e-10)
+      checkForArity [2..4] $ prop_isApproximateZero 1e-5 (solveViaCompanion 1e-5)
   describe "solveM" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
     prop "solves equation with admissible error" $ \seed ->
       let gen = mkStdGen seed
@@ -105,7 +105,7 @@ isDescending xs = and $ zipWith (>=) xs (drop 1 xs)
 
 prop_isApproximateZero :: KnownNat n
                        => Double
-                       -> (forall m. ((0 :< m) ~ 'True, KnownNat m) =>
+                       -> (forall m. ((0 < m) ~ 'True, KnownNat m) =>
                            Ideal (Polynomial (Fraction Integer) m) -> [Sized m (Complex Double)])
                        -> SNat n -> Property
 prop_isApproximateZero err solver sn =

@@ -1,0 +1,204 @@
+benchmarked lex01/syzygy
+time                 2.411 ms   (2.234 ms .. 2.550 ms)
+                     0.944 R²   (0.890 R² .. 0.977 R²)
+mean                 3.481 ms   (3.071 ms .. 4.702 ms)
+std dev              2.160 ms   (900.1 μs .. 4.225 ms)
+variance introduced by outliers: 98% (severely inflated)
+
+benchmarked lex01/syz+sugar
+time                 2.754 ms   (2.693 ms .. 2.818 ms)
+                     0.995 R²   (0.993 R² .. 0.998 R²)
+mean                 2.618 ms   (2.574 ms .. 2.662 ms)
+std dev              152.2 μs   (129.2 μs .. 182.1 μs)
+variance introduced by outliers: 41% (moderately inflated)
+
+benchmarked lex01/standard
+time                 3.183 ms   (3.134 ms .. 3.256 ms)
+                     0.996 R²   (0.993 R² .. 0.999 R²)
+mean                 3.247 ms   (3.190 ms .. 3.294 ms)
+std dev              162.1 μs   (129.8 μs .. 200.1 μs)
+variance introduced by outliers: 32% (moderately inflated)
+
+benchmarked lex01/naive-homog
+time                 74.49 ms   (73.16 ms .. 75.36 ms)
+                     0.999 R²   (0.995 R² .. 1.000 R²)
+mean                 75.19 ms   (74.53 ms .. 77.08 ms)
+std dev              1.853 ms   (298.9 μs .. 3.077 ms)
+
+benchmarked lex01/hilb
+time                 190.4 ms   (182.7 ms .. 197.6 ms)
+                     0.999 R²   (0.996 R² .. 1.000 R²)
+mean                 190.6 ms   (188.5 ms .. 192.4 ms)
+std dev              2.702 ms   (1.647 ms .. 3.369 ms)
+variance introduced by outliers: 14% (moderately inflated)
+
+benchmarked lex01/F5
+time                 1.832 ms   (1.823 ms .. 1.846 ms)
+                     0.998 R²   (0.997 R² .. 0.999 R²)
+mean                 1.838 ms   (1.812 ms .. 1.866 ms)
+std dev              94.95 μs   (76.78 μs .. 116.1 μs)
+variance introduced by outliers: 37% (moderately inflated)
+
+benchmarked grevlex01/syzygy
+time                 18.90 ms   (18.03 ms .. 19.35 ms)
+                     0.989 R²   (0.973 R² .. 0.999 R²)
+mean                 19.66 ms   (19.18 ms .. 20.59 ms)
+std dev              1.522 ms   (660.3 μs .. 2.294 ms)
+variance introduced by outliers: 35% (moderately inflated)
+
+benchmarked grevlex01/syz+sugar
+time                 18.21 ms   (17.98 ms .. 18.41 ms)
+                     0.999 R²   (0.998 R² .. 1.000 R²)
+mean                 18.54 ms   (18.37 ms .. 18.78 ms)
+std dev              456.1 μs   (301.4 μs .. 602.9 μs)
+
+benchmarked grevlex01/standard
+time                 21.78 ms   (21.64 ms .. 21.89 ms)
+                     1.000 R²   (1.000 R² .. 1.000 R²)
+mean                 21.82 ms   (21.76 ms .. 21.86 ms)
+std dev              118.1 μs   (93.35 μs .. 162.6 μs)
+
+benchmarked grevlex01/naive-homog
+time                 538.3 ms   (125.1 ms .. NaN s)
+                     0.938 R²   (0.861 R² .. 1.000 R²)
+mean                 564.1 ms   (506.5 ms .. 606.5 ms)
+std dev              64.42 ms   (0.0 s .. 73.40 ms)
+variance introduced by outliers: 23% (moderately inflated)
+
+benchmarked grevlex01/hilb
+time                 267.1 ms   (246.0 ms .. 286.8 ms)
+                     0.997 R²   (0.985 R² .. 1.000 R²)
+mean                 249.5 ms   (232.9 ms .. 258.4 ms)
+std dev              16.01 ms   (2.533 ms .. 20.68 ms)
+variance introduced by outliers: 17% (moderately inflated)
+
+benchmarked grevlex01/F5
+time                 586.7 ms   (513.4 ms .. NaN s)
+                     0.997 R²   (0.997 R² .. 1.000 R²)
+mean                 574.5 ms   (561.4 ms .. 584.8 ms)
+std dev              16.13 ms   (0.0 s .. 17.94 ms)
+variance introduced by outliers: 19% (moderately inflated)
+
+benchmarked lex0Cyclic-4/syzygy
+time                 80.57 ms   (73.54 ms .. 87.12 ms)
+                     0.985 R²   (0.955 R² .. 0.998 R²)
+mean                 82.94 ms   (80.18 ms .. 89.06 ms)
+std dev              6.493 ms   (3.633 ms .. 10.04 ms)
+variance introduced by outliers: 19% (moderately inflated)
+
+benchmarked lex0Cyclic-4/syz+sugar
+time                 15.33 ms   (14.33 ms .. 16.78 ms)
+                     0.964 R²   (0.915 R² .. 0.997 R²)
+mean                 14.64 ms   (14.29 ms .. 15.46 ms)
+std dev              1.323 ms   (708.8 μs .. 2.285 ms)
+variance introduced by outliers: 46% (moderately inflated)
+
+benchmarked lex0Cyclic-4/standard
+time                 15.18 ms   (14.27 ms .. 16.40 ms)
+                     0.966 R²   (0.918 R² .. 0.995 R²)
+mean                 15.78 ms   (15.22 ms .. 17.05 ms)
+std dev              2.027 ms   (756.9 μs .. 3.338 ms)
+variance introduced by outliers: 61% (severely inflated)
+
+benchmarked lex0Cyclic-4/naive-homog
+time                 87.06 ms   (83.04 ms .. 92.33 ms)
+                     0.995 R²   (0.988 R² .. 0.999 R²)
+mean                 88.52 ms   (86.81 ms .. 90.75 ms)
+std dev              3.242 ms   (2.557 ms .. 4.416 ms)
+
+benchmarked lex0Cyclic-4/hilb
+time                 43.30 ms   (43.18 ms .. 43.44 ms)
+                     1.000 R²   (1.000 R² .. 1.000 R²)
+mean                 43.45 ms   (43.38 ms .. 43.54 ms)
+std dev              155.4 μs   (120.8 μs .. 204.6 μs)
+
+benchmarked lex0Cyclic-4/F5
+time                 10.45 ms   (9.003 ms .. 12.45 ms)
+                     0.832 R²   (0.727 R² .. 0.983 R²)
+mean                 9.385 ms   (8.915 ms .. 10.70 ms)
+std dev              1.969 ms   (1.024 ms .. 3.311 ms)
+variance introduced by outliers: 86% (severely inflated)
+
+benchmarked grevlex0Cyclic-4/syzygy
+time                 8.583 ms   (6.365 ms .. 11.09 ms)
+                     0.792 R²   (0.719 R² .. 0.995 R²)
+mean                 6.636 ms   (6.277 ms .. 7.546 ms)
+std dev              1.572 ms   (495.5 μs .. 3.247 ms)
+variance introduced by outliers: 91% (severely inflated)
+
+benchmarked grevlex0Cyclic-4/syz+sugar
+time                 5.620 ms   (5.447 ms .. 5.832 ms)
+                     0.977 R²   (0.931 R² .. 0.999 R²)
+mean                 5.779 ms   (5.687 ms .. 6.040 ms)
+std dev              458.1 μs   (171.9 μs .. 899.8 μs)
+variance introduced by outliers: 48% (moderately inflated)
+
+benchmarked grevlex0Cyclic-4/standard
+time                 6.293 ms   (5.892 ms .. 6.954 ms)
+                     0.970 R²   (0.939 R² .. 0.997 R²)
+mean                 6.410 ms   (6.204 ms .. 6.611 ms)
+std dev              645.3 μs   (479.9 μs .. 834.3 μs)
+variance introduced by outliers: 58% (severely inflated)
+
+benchmarked grevlex0Cyclic-4/naive-homog
+time                 35.01 ms   (31.90 ms .. 38.17 ms)
+                     0.980 R²   (0.959 R² .. 0.998 R²)
+mean                 33.28 ms   (32.55 ms .. 34.64 ms)
+std dev              2.000 ms   (1.074 ms .. 3.338 ms)
+variance introduced by outliers: 18% (moderately inflated)
+
+benchmarked grevlex0Cyclic-4/hilb
+time                 30.49 ms   (29.14 ms .. 32.41 ms)
+                     0.992 R²   (0.982 R² .. 1.000 R²)
+mean                 29.75 ms   (29.37 ms .. 30.50 ms)
+std dev              1.089 ms   (462.3 μs .. 1.816 ms)
+variance introduced by outliers: 11% (moderately inflated)
+
+benchmarked grevlex0Cyclic-4/F5
+time                 3.317 ms   (3.211 ms .. 3.399 ms)
+                     0.980 R²   (0.943 R² .. 0.998 R²)
+mean                 3.474 ms   (3.361 ms .. 3.915 ms)
+std dev              586.4 μs   (193.4 μs .. 1.254 ms)
+variance introduced by outliers: 84% (severely inflated)
+
+benchmarked grevlex03/syzygy
+time                 1.197 s    (1.136 s .. 1.308 s)
+                     0.999 R²   (0.998 R² .. 1.000 R²)
+mean                 1.165 s    (1.149 s .. 1.189 s)
+std dev              21.30 ms   (0.0 s .. 22.98 ms)
+variance introduced by outliers: 19% (moderately inflated)
+
+benchmarked grevlex03/syz+sugar
+time                 855.3 ms   (794.5 ms .. NaN s)
+                     0.999 R²   (0.997 R² .. 1.000 R²)
+mean                 884.2 ms   (868.1 ms .. 898.8 ms)
+std dev              24.04 ms   (0.0 s .. 25.27 ms)
+variance introduced by outliers: 19% (moderately inflated)
+
+benchmarked grevlex03/standard
+time                 889.0 ms   (822.4 ms .. 962.6 ms)
+                     0.999 R²   (0.997 R² .. 1.000 R²)
+mean                 879.3 ms   (864.1 ms .. 887.5 ms)
+std dev              13.26 ms   (0.0 s .. 14.22 ms)
+variance introduced by outliers: 19% (moderately inflated)
+
+benchmarked grevlex03/naive-homog
+time                 222.1 ms   (221.5 ms .. 223.0 ms)
+                     1.000 R²   (1.000 R² .. 1.000 R²)
+mean                 222.3 ms   (221.8 ms .. 222.7 ms)
+std dev              566.5 μs   (312.9 μs .. 864.9 μs)
+variance introduced by outliers: 14% (moderately inflated)
+
+benchmarked grevlex03/hilb
+time                 7.949 s    (7.831 s .. NaN s)
+                     1.000 R²   (1.000 R² .. 1.000 R²)
+mean                 7.899 s    (7.870 s .. 7.923 s)
+std dev              37.00 ms   (0.0 s .. 40.93 ms)
+variance introduced by outliers: 19% (moderately inflated)
+
+benchmarked grevlex03/F5
+time                 6.454 s    (5.598 s .. 8.176 s)
+                     0.992 R²   (0.983 R² .. 1.000 R²)
+mean                 6.999 s    (6.621 s .. 7.295 s)
+std dev              456.7 ms   (0.0 s .. 511.4 ms)
+variance introduced by outliers: 19% (moderately inflated)

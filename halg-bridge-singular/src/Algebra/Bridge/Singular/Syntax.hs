@@ -44,10 +44,10 @@ type SingularLibrary = Text
 class IsMonomialOrder n ord => SingularOrder n ord where
   singularOrder :: q n -> p ord -> Text
 
-instance SingularOrder n Lex where
+instance KnownNat n => SingularOrder n Lex where
   singularOrder _ _ = "lp"
 
-instance SingularOrder n Grevlex where
+instance KnownNat n => SingularOrder n Grevlex where
   singularOrder _ _ = "dp"
 
 instance (SingularOrder n o1, SingularOrder m o2, KnownNat m, KnownNat n, (n + m) ~ k)

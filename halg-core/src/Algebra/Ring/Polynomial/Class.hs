@@ -3,13 +3,14 @@
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, NoImplicitPrelude #-}
 {-# LANGUAGE ParallelListComp, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
 {-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances             #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 -- | This module provides abstract classes for finitary polynomial types.
 module Algebra.Ring.Polynomial.Class
        ( IsPolynomial(..), IsOrderedPolynomial(..)
        , substCoeff, liftMapCoeff
        , CoeffRing, oneNorm, maxNorm, monoize,
          sPolynomial, pDivModPoly, content, pp,
-         injectVars, vars,
+         injectVars, injectVarsAtEnd, injectVarsOffset, vars,
          PrettyCoeff(..), ShowSCoeff(..),
          showsCoeffAsTerm, showsCoeffWithOp,
          showsPolynomialWith, showsPolynomialWith',
@@ -22,38 +23,41 @@ module Algebra.Ring.Polynomial.Class
          isUnitDefault, recipUnitDefault, isAssociateDefault
        , splitUnitDefault
        ) where
-import Algebra.Internal
-import Algebra.Normed
-import Algebra.Ring.Polynomial.Monomial
-import Algebra.Scalar
-
+import           Algebra.Internal
+import           Algebra.Normed
+import           Algebra.Ring.Polynomial.Monomial
+import           Algebra.Scalar
 import           AlgebraicPrelude
-import           Control.Arrow            ((***))
-import           Control.Lens             (Iso', folded, ifoldMap, iso, ix,
-                                           maximumOf, (%~), _Wrapped)
-import           Data.Foldable            (foldr, maximum)
-import qualified Data.Foldable            as F
-import qualified Data.HashSet             as HS
+import           Control.Arrow                    ((***))
+import           Control.Lens                     (Iso', folded, ifoldMap, iso,
+                                                   ix, maximumOf, (%~),
+                                                   _Wrapped)
+import           Data.Foldable                    (foldr, maximum)
+import qualified Data.Foldable                    as F
+import qualified Data.HashSet                     as HS
 import           Data.Int
-import           Data.Kind                (Type)
-import qualified Data.List                as L
-import qualified Data.Map.Strict          as M
-import           Data.Maybe               (catMaybes, fromJust, fromMaybe)
-import qualified Data.Ratio               as R
-import qualified Data.Set                 as S
-import           Data.Singletons.Prelude  (SingKind (..))
-import qualified Data.Sized.Builtin       as V
+import           Data.Kind                        (Type)
+import qualified Data.List                        as L
+import qualified Data.Map.Strict                  as M
+import           Data.Maybe                       (catMaybes, fromJust,
+                                                   fromMaybe)
+import           Data.MonoTraversable
+import qualified Data.Ratio                       as R
+import qualified Data.Set                         as S
+import           Data.Singletons.Prelude          (SingKind (..))
+import qualified Data.Sized.Builtin               as V
+import           Data.Vector.Instances            ()
 import           Data.Word
-import           GHC.TypeLits             (KnownNat, Nat)
-import qualified Numeric.Algebra.Complex  as NA
-import           Numeric.Decidable.Zero   (DecidableZero (..))
-import           Numeric.Domain.Euclidean (Euclidean, quot)
-import           Numeric.Domain.GCD       (gcd)
-import           Numeric.Field.Fraction   (Fraction)
-import qualified Numeric.Field.Fraction   as NA
-import           Numeric.Natural          (Natural)
-import qualified Numeric.Ring.Class       as NA
-import qualified Prelude                  as P
+import           GHC.TypeLits                     (KnownNat, Nat)
+import qualified Numeric.Algebra.Complex          as NA
+import           Numeric.Decidable.Zero           (DecidableZero (..))
+import           Numeric.Domain.Euclidean         (Euclidean, quot)
+import           Numeric.Domain.GCD               (gcd)
+import           Numeric.Field.Fraction           (Fraction)
+import qualified Numeric.Field.Fraction           as NA
+import           Numeric.Natural                  (Natural)
+import qualified Numeric.Ring.Class               as NA
+import qualified Prelude                          as P
 
 infixl 7 *<, >*, *|<, >|*, !*
 
@@ -80,7 +84,7 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
            => (Ordinal (Arity poly) -> alg) -> poly -> alg
   liftMap mor f =
     sum [ Scalar r .* sum [ Scalar (fromInteger' (P.fromIntegral i) :: Coefficient poly) .* mor o
-                          | i <- V.toList (m :: Monomial (Arity poly)) :: [Int]
+                          | i <- otoList (m :: Monomial (Arity poly)) :: [Int]
                           | o <- enumOrdinal (sArity (Nothing :: Maybe poly)) ]
         | (m, r) <- M.toList (terms' f) ]
   {-# INLINE liftMap #-}
@@ -96,12 +100,13 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
   --   it is encouraged to override this method.
   --
   --   Since 0.6.0.0
-  substWith :: (Ring m)
+  substWith :: forall m. (Ring m)
             => (Coefficient poly -> m -> m) -> Sized (Arity poly) m -> poly -> m
   substWith o pt poly =
     runAdd $ ifoldMap ((Add .) . flip o . extractPower) $ terms' poly
     where
-      extractPower = runMult . ifoldMap (\k -> Mult . pow (pt V.%!! k) . P.fromIntegral)
+      extractPower :: Monomial (Arity poly) -> m
+      extractPower = runMult . ifoldMapMonom (\k n -> Mult (pow (pt V.%!! k) (P.fromIntegral n)))
   {-# INLINE substWith #-}
 
   -- | Arity of given polynomial.
@@ -171,7 +176,7 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
 
   -- | Returns total degree.
   totalDegree' :: poly -> Natural
-  totalDegree' = maybe 0 fromIntegral . maximumOf folded . HS.map P.sum . monomials
+  totalDegree' = maybe 0 fromIntegral . maximumOf folded . HS.map osum . monomials
   {-# INLINE totalDegree' #-}
 
   -- | @'var' n@ returns a polynomial representing n-th variable.
@@ -214,10 +219,10 @@ class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrder
   {-# INLINE coeff #-}
 
   -- | The default implementation  is not enough efficient.
-  -- So it is strongly recomended to give explicit
-  -- definition to @'terms'@.
+  --   So it is strongly recomended to give explicit
+  --   definition to @'terms'@.
   terms :: poly -> M.Map (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
-  terms = M.mapKeys OrderedMonomial . terms'
+  terms = defaultTerms
 
   -- | Leading term with respect to its monomial ordering.
   leadingTerm :: poly -> (Coefficient poly, OrderedMonomial (MOrder poly) (Arity poly))
@@ -262,7 +267,7 @@ class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrder
 
   -- | A variant of @'(>|*)'@ which takes @'OrderedMonomial'@ as argument.
   (>*) :: OrderedMonomial (MOrder poly) (Arity poly) -> poly -> poly
-  m >* f = toPolynomial (one, m) * f
+  (>*) m = mapMonomialMonotonic (m *)
   {-# INLINE (>*) #-}
 
   -- | Flipped version of (>*)
@@ -297,6 +302,16 @@ class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrder
   mapMonomialMonotonic tr  =
     _Terms %~ M.mapKeysMonotonic tr
   {-# INLINE mapMonomialMonotonic #-}
+
+defaultTerms :: IsOrderedPolynomial poly
+             => poly -> Map (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
+defaultTerms = M.mapKeys OrderedMonomial . terms'
+{-# NOINLINE [1] defaultTerms #-}
+
+{-# RULES
+ "polynomial/terms" forall (f :: IsOrderedPolynomial poly => poly).
+   polynomial (defaultTerms f) = f
+ #-}
 
 liftMapCoeff :: IsPolynomial poly => (Ordinal (Arity poly) -> Coefficient poly) -> poly -> Coefficient poly
 liftMapCoeff l = runScalar . liftMap (Scalar . l)
@@ -363,6 +378,7 @@ pp :: (Euclidean (Coefficient poly), IsPolynomial poly) => poly -> poly
 pp f = mapCoeff' (`quot` content f) f
 {-# INLINE pp #-}
 
+-- | See also @'injectVarsOffset'@ and @'injectVarsAtEnd'@.
 injectVars :: ((Arity r <= Arity r') ~ 'P.True,
                IsPolynomial r,
                IsPolynomial r',
@@ -370,6 +386,65 @@ injectVars :: ((Arity r <= Arity r') ~ 'P.True,
 injectVars = liftMap (var . inclusion)
 {-# INLINE [1] injectVars #-}
 {-# RULES "injectVars/identity" injectVars = P.id #-}
+
+-- | Similar to @'injectVars'@, but injects variables at the end of
+--   the target polynomial ring.
+--
+--   See also @'injectVars'@ and @'injectVarsOffset'@.
+injectVarsAtEnd :: forall r r'. ((Arity r <= Arity r') ~ 'P.True,
+                    IsPolynomial r,
+                    IsPolynomial r',
+                    Coefficient r ~ Coefficient r') => r -> r'
+injectVarsAtEnd =
+  let sn = sArity (Nothing :: Maybe r)
+      sm = sArity (Nothing :: Maybe r')
+  in withRefl (minusPlus sm sn Witness) $ injectVarsOffset (sm %- sn)
+{-# INLINE injectVarsAtEnd #-}
+
+shift :: forall n m k. ((n + m <= k) ~ 'True , KnownNat m, KnownNat k) => Sing n -> Ordinal m -> Ordinal k
+shift sn (OLt (sl :: Sing l)) =
+  let sm = sing :: Sing m
+      sk = sing :: Sing k
+  in withRefl (lneqToLT sl sm Witness) $
+     withWitness (lneqMonotoneR sn sl sm Witness) $
+     withWitness (lneqLeqTrans (sn %+ sl) (sn %+ sm) sk Witness Witness) $
+     OLt (sn %+ sl)
+shift _ _ = error "Could not happen!"
+{-# INLINE [1] shift #-}
+{-# RULES
+"shift/zero" forall (ns :: Sing 0).
+  shift ns = inclusion
+  #-}
+
+lneqLeqTrans :: Sing (n :: Nat) -> Sing m -> Sing l
+             -> IsTrue (n < m) -> IsTrue (m <= l) -> IsTrue (n < l)
+lneqLeqTrans sn sm sl nLTm mLEl =
+  withRefl (lneqSuccLeq sn sl) $
+  withRefl (lneqSuccLeq sn sm) $
+  leqTrans (sSucc sn) sm sl nLTm mLEl
+
+lneqMonotoneR :: forall n m l. Sing (n :: Nat) -> Sing m -> Sing l
+              -> IsTrue (m < l) -> IsTrue ((n + m) < (n + l))
+lneqMonotoneR sn sm sl mLTl =
+  withRefl (lneqSuccLeq sm sl) $
+  withRefl (lneqSuccLeq (sn %+ sm) (sn %+ sl)) $
+  withRefl (plusSuccR sn sm) $
+  plusMonotoneR sn (sSucc sm) sl (mLTl :: IsTrue ((m + 1) <= l))
+
+-- | Similar to @'injectVars'@, but @'injectVarsOffset' n f@
+--   injects variables into the first but @n@ variables.
+--
+--   See also @'injectVars'@ and @'injectVarsAtEnd'@.
+injectVarsOffset :: forall n r r' . ((n + Arity r <= Arity r') ~ 'P.True,
+                  IsPolynomial r,
+                  IsPolynomial r',
+                  Coefficient r ~ Coefficient r') => Sing n -> r -> r'
+injectVarsOffset sn = liftMap (var . shift sn)
+{-# INLINE [1] injectVarsOffset #-}
+{-# RULES
+"injectVarsOffset eql" forall (sn :: Sing 0).
+ injectVarsOffset sn = injectVars
+ #-}
 
 vars :: forall poly. IsPolynomial poly => [poly]
 vars = map var $ enumOrdinal (sArity (Nothing :: Maybe poly))
@@ -541,7 +616,7 @@ showsPolynomialWith' showMult showsCoe vsVec d f = P.showParen (d P.> 10) $
     multSymb | showMult  = '*'
              | otherwise = ' '
     showMonom m =
-      let fs = catMaybes $ P.zipWith showFactor vs $ F.toList m
+      let fs = catMaybes $ P.zipWith showFactor vs $ otoList m
       in if P.null fs
          then Nothing
          else Just $ foldr (.) P.id $ L.intersperse (P.showChar multSymb) (map P.showString fs)

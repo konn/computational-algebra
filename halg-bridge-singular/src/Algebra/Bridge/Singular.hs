@@ -45,7 +45,7 @@ readProcess exe args input = do
     _ -> fail $ "Process failed: " ++ unwords (exe : args)
 
 singular :: Text -> IO Text
-singular = readProcess "singular" ["-q"]
+singular = readProcess "Singular" ["-q"]
 
 readSingularIdeal :: (IsSingularPolynomial poly)
                   => proxy poly

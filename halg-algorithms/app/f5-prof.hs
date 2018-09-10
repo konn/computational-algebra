@@ -1,7 +1,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 module Main where
 import Algebra.Algorithms.Groebner.Signature
+import Algebra.Field.Prime
 import Algebra.Prelude.Core
+import Cases
 import Control.DeepSeq
 
 i2 :: [OrderedPolynomial (Fraction Integer) Grevlex 5]
@@ -10,10 +12,10 @@ i2 =  [35 * y^4 - 30*x*y^2 - 210*y^2*z + 3*x^2 + 30*x*z - 105*z^2 +140*y*t - 21*
       ]
      where [t,u,x,y,z] = vars
 
-i3 :: [OrderedPolynomial (Fraction Integer) Grevlex 4]
+i3 :: [OrderedPolynomial Rational Grevlex 4]
 i3 = [ x^31 - x^6 - x- y, x^8 - z, x^10 -t]
   where
     [t,x,y,z] = vars
 
 main :: IO ()
-main = f5 (toIdeal i2) `deepseq` return ()
+main = f5 (mapCoeff (modRat (Proxy :: Proxy (F 65521))) <$> cyclic (sing :: Sing 5)) `deepseq` return ()

@@ -1,0 +1,59 @@
+I1 (Lex, Sing(gr))
+        Mean:   2.299755(ms)
+        MeanLB: 5.775500000000022e-2
+        MeanUB: 7.027499999999964e-2
+        StdDev: 0.5063730971751101
+
+I1 (Lex, Sing(sba))
+        Mean:   0.22793499999999997(ms)
+        MeanLB: 5.989999999999968e-3
+        MeanUB: 1.2045000000000028e-2
+        StdDev: 5.634362247823482e-2
+
+I1 (Grevlex, Sing(gr))
+        Mean:   0.84925(ms)
+        MeanLB: 2.0889999999999964e-2
+        MeanUB: 5.698000000000014e-2
+        StdDev: 0.22409096658842062
+
+I1 (Grevlex, Sing(sba))
+        Mean:   0.87105(ms)
+        MeanLB: 4.400000000000004e-2
+        MeanUB: 5.1960000000000006e-2
+        StdDev: 0.3297540540780424
+
+Cyclic4 (Lex, Sing(gr))
+        Mean:   2.6513600000000004(ms)
+        MeanLB: 9.321000000000046e-2
+        MeanUB: 0.11872999999999978
+        StdDev: 0.8071253789136061
+
+Cyclic4 (Lex, Sing(sba))
+        Mean:   0.234295(ms)
+        MeanLB: 5.604999999999999e-3
+        MeanUB: 1.1310000000000014e-2
+        StdDev: 5.7010163732831194e-2
+
+Cyclic4 (Grevlex, Sing(gr))
+        Mean:   0.82104(ms)
+        MeanLB: 2.4959999999999982e-2
+        MeanUB: 3.476000000000001e-2
+        StdDev: 0.2030270383260744
+
+Cyclic4 (Grevlex, Sing(sba))
+        Mean:   0.79582(ms)
+        MeanLB: 2.2405000000000008e-2
+        MeanUB: 2.6249999999999996e-2
+        StdDev: 0.18174933757387596
+
+I3 (Grevlex, Sing(gr))
+        Mean:   0.9510850000000001(ms)
+        MeanLB: 3.208500000000003e-2
+        MeanUB: 3.8594999999999935e-2
+        StdDev: 0.2522917426154883
+
+I3 (Grevlex, Sing(sba))
+        Mean:   0.468845(ms)
+        MeanLB: 2.1350000000000036e-2
+        MeanUB: 2.1394999999999997e-2
+        StdDev: 0.15411107061281204

@@ -32,19 +32,21 @@ import qualified Data.Heap                           as H
 import qualified Data.IntMap                         as IM
 import qualified Data.List                           as L
 import           Data.Maybe                          (fromJust)
+import           Data.MonoTraversable                (oall, osum)
 import qualified Data.Sized.Builtin                  as SV
 import           Data.STRef                          (STRef, modifySTRef',
                                                       newSTRef, readSTRef,
                                                       writeSTRef)
 import qualified Data.Vector                         as V
 import qualified Data.Vector.Mutable                 as MV
+import           GHC.Conc                            (par)
 import           GHC.Exts                            (Constraint)
 import qualified Numeric.Field.Fraction              as NA
 
 isHomogeneous :: IsOrderedPolynomial poly
               => poly -> Bool
 isHomogeneous poly =
-  let degs = map F.sum $ F.toList $ monomials poly
+  let degs = map osum $ F.toList $ monomials poly
   in and $ zipWith (==) degs (tail degs)
 
 -- | Calculates Groebner basis once homogenise, apply @'unsafeCalcHomogeneousGroebnerBasis'@,
@@ -168,13 +170,13 @@ instance Container [] where
 head' :: Foldable t => t a -> a
 head' = fromJust . F.find (const True)
 
-divs' :: Foldable t => t (Monomial n) -> t (Monomial n) -> Bool
+divs' :: (KnownNat n, Foldable t) => t (Monomial n) -> t (Monomial n) -> Bool
 divs' = divs `on` orderMonomial (Just Lex) . head'
 
 minimalGenerators' :: forall t f n. (Container t, KnownNat n, Element t (f (Monomial n)), Foldable f)
                   => t (f (Monomial n)) -> t (f (Monomial n))
 minimalGenerators' bs
-  | any (all (== 0) . head') bs = empty
+  | any (oall (== 0) . head') bs = empty
   | otherwise = F.foldr check empty bs
   where
     check a acc =
@@ -263,7 +265,7 @@ instance Abelian (HPS n)
 
 convolute :: [Integer] -> [Integer] -> [Integer]
 convolute ~(x : xs) ~(y : ys) =
-  x * y : zipWith3 (\a b c -> a + b + c) (map (x*) ys) (map (y*) xs) (0 : convolute xs ys)
+  x * y : zipWith3 (\a b c -> a `par` b `par` c `seq` (a + b + c)) (map (x*) ys) (map (y*) xs) (0 : convolute xs ys)
 {-# INLINE convolute #-}
 
 instance LeftModule (Unipol Integer) (HPS n) where
@@ -287,7 +289,7 @@ toRationalFunction s@(HPS _ f) =
 hilbertPoincareSeriesForMonomials :: forall t n. (KnownNat n, Foldable t)
                                   => t (Monomial n) -> HPS n
 hilbertPoincareSeriesForMonomials ms0 =
-  go $ H.fromList [ ReversedEntry (F.sum m) m
+  go $ H.fromList [ ReversedEntry (osum m) m
                   | m <- minimalGenerators $ F.toList ms0 ]
   where
     go ms =
@@ -299,9 +301,9 @@ hilbertPoincareSeriesForMonomials ms0 =
         Just (ReversedEntry _ m, _) ->
           let Just i = SV.sFindIndex (> 0) m
               xi = varMonom sing i
-              upd (ReversedEntry d xs) =
+              upd (ReversedEntry _ xs) =
                    let xs' = (xs & ix i %~ max 0 . pred)
-                   in ReversedEntry (F.sum xs') xs'
+                   in ReversedEntry (osum xs') xs'
               added = minimalGenerators' $ insert (ReversedEntry 1 xi) ms
               quo = minimalGenerators' $ H.map upd ms
           in go added + (#x :: Unipol Integer) .* go quo
