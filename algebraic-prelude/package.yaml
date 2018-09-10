@@ -1,0 +1,42 @@
+name: algebraic-prelude
+version: '0.1.1.0'
+synopsis: Algebraically structured Prelude
+description: ! 'This package provides a drop-in replacement for Prelude module,
+
+  based on algebraic hierarchy provided by <https://hackage.haskell.org/package/algebra
+  algebra> package.'
+category: Web
+author: Hiromi ISHII
+maintainer: konn.jinro _at_ gmail.com
+copyright: 2015 (c) Hiromi ISHII
+license: BSD3
+github: konn/computational-algebra
+default-extensions:
+- NoImplicitPrelude
+library:
+  source-dirs: src
+  ghc-options: -Wall
+  exposed-modules:
+  - AlgebraicPrelude
+  dependencies:
+  - base >=4.7 && <5
+  - basic-prelude
+  - lens ==4.*
+  - semigroups
+  when:
+  - condition: impl(ghc >=8.4)
+    then:
+      dependencies:
+      - algebra >=4.3.1
+    else:
+      dependencies:
+      - algebra >=4.3
+executables:
+  sandpit:
+    main: sandpit.hs
+    source-dirs: examples
+    ghc-options: -Wall
+    dependencies:
+    - base
+    - algebraic-prelude
+    buildable: false
