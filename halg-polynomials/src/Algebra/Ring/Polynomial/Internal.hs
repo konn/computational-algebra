@@ -3,8 +3,8 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving, LiberalTypeSynonyms             #-}
 {-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction, PolyKinds #-}
 {-# LANGUAGE RankNTypes, RoleAnnotations, ScopedTypeVariables            #-}
-{-# LANGUAGE StandaloneDeriving, TypeFamilies, TypeOperators             #-}
-{-# LANGUAGE TypeSynonymInstances, UndecidableInstances                  #-}
+{-# LANGUAGE StandaloneDeriving, TypeApplications, TypeFamilies          #-}
+{-# LANGUAGE TypeOperators, TypeSynonymInstances, UndecidableInstances   #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
@@ -32,10 +32,12 @@ import           AlgebraicPrelude
 import           Control.Arrow                         (first, second)
 import           Control.DeepSeq                       (NFData)
 import           Control.Lens
+import qualified Data.Coerce                           as C
 import qualified Data.DList                            as DL
 import qualified Data.HashSet                          as HS
 import           Data.List                             (sortBy)
 import qualified Data.Map                              as M
+import           Data.MonoTraversable                  (osum)
 import qualified Data.Set                              as Set
 import           Data.Singletons.Prelude.List          (Replicate)
 import qualified Data.Sized.Builtin                    as S
@@ -92,6 +94,9 @@ instance (KnownNat n, IsMonomialOrder n ord, CoeffRing r) => IsPolynomial (Order
       extractPower = runMult . ifoldMapMonom (\ o -> Mult . pow (mor o) . fromIntegral) . getMonomial
   {-# INLINE liftMap #-}
 
+  (>|*) = C.coerce @(Monomial n -> [(Monomial n, r)] -> [(Monomial n, r)]) (map . first . (*))
+  {-# INLINE (>|*) #-}
+
 instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
       => IsOrderedPolynomial (OrderedPolynomial r ord n) where
   -- | coefficient for a degree.
@@ -124,8 +129,11 @@ instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
   leadingCoeff = fst . leadingTerm
   {-# INLINE leadingCoeff #-}
 
-  mapMonomialMonotonic f = Polynomial . M.mapKeysMonotonic f . C.coerce
+  mapMonomialMonotonic f = Polynomial . map (first f) . C.coerce
   {-# INLINE mapMonomialMonotonic #-}
+
+  (>*) = C.coerce @(Monomial n -> [(Monomial n, r)] -> [(Monomial n, r)]) (map . first . (*))
+  {-# INLINE (>*) #-}
 
 instance (KnownNat n, CoeffRing r, IsMonomialOrder n order)
          => Wrapped (OrderedPolynomial r order n) where
