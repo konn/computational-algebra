@@ -1,5 +1,6 @@
-{-# LANGUAGE BangPatterns, ScopedTypeVariables, StandaloneDeriving #-}
-{-# LANGUAGE TypeApplications, ViewPatterns                        #-}
+{-# LANGUAGE BangPatterns, DeriveAnyClass, DeriveGeneric, LambdaCase   #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeApplications #-}
+{-# LANGUAGE ViewPatterns                                              #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Algorithms.Groebner.Signature (f5) where
 import           Algebra.Prelude.Core         hiding (Vector)
@@ -9,6 +10,8 @@ import           Control.Monad.ST.Combinators (ST, STRef, modifySTRef',
                                                newSTRef, readSTRef, runST,
                                                writeSTRef)
 import qualified Data.Coerce                  as DC
+import           Data.Hashable                (Hashable)
+import qualified Data.HashTable.ST.Cuckoo     as HT
 import qualified Data.Heap                    as H
 import           Data.Maybe                   (fromJust)
 import           Data.Monoid                  (First (..))
@@ -18,6 +21,7 @@ import qualified Data.Set                     as Set
 import           Data.Vector                  (Vector)
 import qualified Data.Vector                  as V
 import qualified Data.Vector.Mutable          as MV
+import           GHC.Generics                 (Generic)
 
 data Entry a b = Entry { priority :: !a
                        , payload :: !b
@@ -46,6 +50,7 @@ data ModuleElement n poly = ME { syzElem :: !(Syzygy n poly)
 data JPair poly = JPair { _jpTerm  :: !(OMonom poly)
                         , _jpIndex :: !Int
                         }
+                deriving (Generic, Hashable)
 deriving instance KnownNat (Arity poly) => Show (JPair poly)
 deriving instance KnownNat (Arity poly) => Eq (JPair poly)
 
@@ -164,8 +169,16 @@ calcSignatureGB side | all isZero side = V.empty
 calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
   let n = V.length sideal
   in reify (toInteger n) $ \(Proxy :: Proxy n) -> do
+  jpTable <- HT.new
   let mods0 = V.generate n basis
       preGs = V.zipWith ME mods0 sideal
+      jprWithDefault calc jp = HT.lookup jpTable jp >>= \case
+        Just v -> return v
+        Nothing -> do
+          let ans = calc jp
+          HT.insert jpTable jp ans
+          return ans
+
   gs :: STRef s (MV.MVector s (ModuleElement n poly)) <- newSTRef =<< V.unsafeThaw preGs
   hs <- newSTRef $ Set.fromList [ Signature j lm
                                 | j <- [0..n - 1]
@@ -175,16 +188,14 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
   let preDecode :: JPair poly -> ModuleElement n poly
       preDecode (JPair m i) = m .*! (preGs V.! i)
       {-# INLINE preDecode #-}
-  jprs <- newSTRef $ H.fromList $
-          nubBy ((==) `on` priority)
+  jprs <- newSTRef . H.fromList . nubBy ((==) `on` priority) =<<
+          filterM (\ (Entry _ pr) -> not . flip any preGs . flip covers <$> jprWithDefault preDecode pr)
           [ Entry sig jpr
           | j <- [0..n - 1]
           , i <- [0..j - 1]
           , let qi = preGs V.! i
           , let qj = preGs V.! j
           , (sig, jpr) <- maybeToList $ jPair (i, qi) (j, qj)
-          , let me = preDecode jpr
-          , not $ any (`covers` me) preGs
           ]
   whileJust_ (H.viewMin <$> readSTRef jprs) $ \(Entry sig (JPair m0 i0), jprs') -> do
     writeSTRef jprs jprs'
@@ -205,7 +216,9 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
             syzs = foldMap (\(ME tj vj) -> maybe Set.empty Set.singleton $ sign $ v *! tj - vj *! t) curGs
         modifySTRef' hs (`Set.union` syzs)
         curHs <- readSTRef hs
-        let newJprs = V.filter (\(Entry sg jp) -> not $ any (`covers` decodeJpr jp) curGs || sg `elem` curHs) $
+        newJprs <- V.filterM (\(Entry sg jp) -> do
+                                 pr <- jprWithDefault decodeJpr jp
+                                 return $ not $ any (`covers` pr) curGs || sg `elem` curHs) $
                       V.imapMaybe (curry $ fmap (uncurry Entry) . jPair (k, me')) curGs
         modifySTRef' jprs $ H.union $ H.fromList $ nubBy ((==) `on` priority) $ V.toList newJprs
         append gs me'
