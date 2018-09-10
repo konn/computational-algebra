@@ -1,21 +1,23 @@
-{-# LANGUAGE BangPatterns, ScopedTypeVariables, ViewPatterns #-}
+{-# LANGUAGE BangPatterns, ScopedTypeVariables, StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications, ViewPatterns                        #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
-module Algebra.Algorithms.Groebner.Signature (f5, f5With) where
+module Algebra.Algorithms.Groebner.Signature (f5) where
 import           Algebra.Prelude.Core         hiding (Vector)
 import           Control.Lens                 hiding ((.=))
-import           Control.Monad.Loops
-import           Control.Monad.ST.Combinators
-import           Control.Parallel.Strategies
+import           Control.Monad.Loops          (whileJust_)
+import           Control.Monad.ST.Combinators (ST, STRef, modifySTRef',
+                                               newSTRef, readSTRef, runST,
+                                               writeSTRef)
 import qualified Data.Coerce                  as DC
-import qualified Data.Heap.Class              as H
-import qualified Data.Heap.Ekmett             as HE
+import qualified Data.Heap                    as H
 import           Data.Maybe                   (fromJust)
 import           Data.Monoid                  (First (..))
+import           Data.Reflection              (Reifies (..), reify)
 import           Data.Semigroup               hiding (First, getFirst, (<>))
+import qualified Data.Set                     as Set
 import           Data.Vector                  (Vector)
 import qualified Data.Vector                  as V
-import qualified Data.Vector.Fusion.Bundle    as Bundle
-import qualified Data.Vector.Generic          as GV
+import qualified Data.Vector.Mutable          as MV
 
 data Entry a b = Entry { priority :: !a
                        , payload :: !b
@@ -30,138 +32,278 @@ instance Eq a => Eq (Entry a b) where
 instance Ord a => Ord (Entry a b) where
   compare = comparing priority
 
-mkEntry :: (IsOrderedPolynomial poly)
-        => Vector poly -> Entry (Signature poly) (Vector poly)
-mkEntry = {-# SCC "mkEntry" #-} Entry <$> signature <*> id
-
 f5 :: (IsOrderedPolynomial a, Field (Coefficient a))
    => Ideal a -> [a]
-f5 = f5With (Proxy :: Proxy HE.Heap)
+f5 ideal = let sideal = V.fromList $ generators ideal
+  in V.toList $ V.map snd $ calcSignatureGB  sideal
 
-f5With :: (H.Heap heap, IsOrderedPolynomial a, Field (Coefficient a))
-       => pxy heap -> Ideal a -> [a]
-f5With pxy ideal =
-  let sideal = V.fromList $ generators ideal
-  in map snd $ calcSignatureGB  pxy sideal
+data ModuleElement n poly = ME { syzElem :: !(Syzygy n poly)
+                               , polElem :: !poly
+                               }
+                          deriving (Read, Show, Eq, Ord)
 
-data P a b = P { get1 :: !a, get2 :: !b }
 
-sec :: (b -> b') -> P a b -> P a b'
-sec f (P a b) = P a (f b)
-{-# INLINE sec #-}
+data JPair poly = JPair { _jpTerm  :: !(OMonom poly)
+                        , _jpIndex :: !Int
+                        }
+deriving instance KnownNat (Arity poly) => Show (JPair poly)
+deriving instance KnownNat (Arity poly) => Eq (JPair poly)
 
-{-# INLINE parMapMaybe #-}
-parMapMaybe :: (a -> Maybe b) -> [a] -> [b]
-parMapMaybe f = catMaybes . parMap rseq f
+instance Monoidal a => Additive (Syzygy n a) where
+  Syzygy u + Syzygy u' = Syzygy $ V.zipWith (+) u u'
+  {-# INLINE (+) #-}
 
-calcSignatureGB :: forall pxy poly heap.
-                   (H.Heap heap, Field (Coefficient poly), IsOrderedPolynomial poly)
-                => pxy heap -> V.Vector poly -> [(V.Vector poly, poly)]
-calcSignatureGB _ side | null side = []
-calcSignatureGB _ (V.map monoize -> sideal) = runST $ do
+instance {-# OVERLAPPING #-}  Monoidal a => LeftModule Natural (Syzygy n a) where
+  n .* Syzygy u = Syzygy $ V.map (n .*) u
+  {-# INLINE (.*) #-}
+
+instance {-# OVERLAPPING #-} Monoidal a => RightModule Natural (Syzygy n a) where
+  Syzygy u *. n = Syzygy $ V.map (*. n) u
+  {-# INLINE (*.) #-}
+
+instance (Reifies n Integer, Monoidal a) => Monoidal (Syzygy n a) where
+  zero = Syzygy $ V.replicate (fromInteger $ reflect @n Proxy) zero
+  {-# INLINE zero #-}
+
+instance {-# OVERLAPPING #-} Group a => LeftModule Integer (Syzygy n a) where
+  n .* Syzygy u = Syzygy $ V.map (n .*) u
+  {-# INLINE (.*) #-}
+
+instance {-# OVERLAPPING #-} Group a => RightModule Integer (Syzygy n a) where
+  Syzygy u *. n = Syzygy $ V.map (*. n) u
+  {-# INLINE (*.) #-}
+
+instance (Reifies n Integer, Group a) => Group (Syzygy n a) where
+  negate = DC.coerce @(Vector a -> Vector a) $ V.map negate
+  {-# INLINE negate #-}
+  (-) = DC.coerce @(Vector a -> Vector a -> Vector a) $ V.zipWith (-)
+  {-# INLINE (-) #-}
+
+instance (Monoidal poly) => Additive (ModuleElement n poly) where
+  ME u v + ME u' v' = ME (u + u') (v + v')
+  {-# INLINE (+) #-}
+
+instance (Reifies n Integer, Monoidal poly) => Monoidal (ModuleElement n poly) where
+  zero = ME zero zero
+  {-# INLINE zero #-}
+
+instance (Reifies n Integer, Group poly) => Group (ModuleElement n poly) where
+  ME u1 v1 - ME u2 v2 = ME (u1 - u2) (v1 - v2)
+  {-# INLINE (-) #-}
+
+instance {-# OVERLAPPABLE #-} (Group poly)
+      => LeftModule Integer (ModuleElement n poly) where
+  c .* ME u v = ME (c .* u) (c .* v)
+  {-# INLINE (.*) #-}
+
+instance {-# OVERLAPPABLE #-} (Group poly)
+      => RightModule Integer (ModuleElement n poly) where
+  ME u v *. c = ME (u *. c) (v *. c)
+  {-# INLINE (*.) #-}
+
+instance {-# OVERLAPPABLE #-} (Monoidal poly)
+      => LeftModule Natural (ModuleElement n poly) where
+  c .* ME u v = ME (c .* u) (c .* v)
+  {-# INLINE (.*) #-}
+
+instance {-# OVERLAPPABLE #-} (Monoidal poly)
+      => RightModule Natural (ModuleElement n poly) where
+  ME u v *. c = ME (u *. c) (v *. c)
+  {-# INLINE (*.) #-}
+
+type OMonom p = OrderedMonomial (MOrder p) (Arity p)
+
+class Multiplicative c => Action c a where
+  (.*!) :: c -> a -> a
+
+infixl 7 .*!
+
+instance {-# OVERLAPPING #-} (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly) =>
+         Action (OrderedMonomial ord k) (ModuleElement n poly) where
+  m .*! ME u v = ME (m .*! u) (m .*! v)
+  {-# INLINE (.*!) #-}
+
+instance {-# OVERLAPPING #-}
+         (r ~ Coefficient poly, Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly)
+         => Action (r, OrderedMonomial ord k) (Syzygy n poly) where
+  (.*!) = DC.coerce @((r, OrderedMonomial ord k) -> Vector poly -> Vector poly) $ V.map . (*) . toPolynomial
+  {-# INLINE (.*!) #-}
+
+instance {-# OVERLAPPING #-}
+         (r ~ Coefficient poly, Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly)
+         => Action (r, OrderedMonomial ord k) (ModuleElement n poly) where
+  t .*! ME u v = ME (t .*! u) (toPolynomial t * v)
+  {-# INLINE (.*!) #-}
+
+instance {-# OVERLAPPING #-} (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly) =>
+         Action (OrderedMonomial ord k) (Signature n poly) where
+  m .*! Signature i f = Signature i (m * f)
+  {-# INLINE (.*!) #-}
+
+instance {-# OVERLAPPING #-} (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly) =>
+         Action (OrderedMonomial ord k) (Syzygy n poly) where
+  (.*!) = DC.coerce @(OrderedMonomial ord k -> Vector poly -> Vector poly) $ V.map . (>*)
+  {-# INLINE (.*!) #-}
+
+instance {-# OVERLAPPABLE #-}  (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly) =>
+         Action (OrderedMonomial ord k) poly where
+  (.*!) = (>*)
+  {-# INLINE (.*!) #-}
+
+(*!) :: Multiplicative r => r -> Syzygy n r -> Syzygy n r
+p *! Syzygy u = Syzygy $ V.map (p *) u
+{-# INLINE (*!) #-}
+
+newtype Syzygy n r = Syzygy { runSyzygy :: Vector r }
+  deriving (Read, Show, Eq, Ord)
+
+calcSignatureGB :: forall poly.
+                   (Field (Coefficient poly), IsOrderedPolynomial poly)
+                => V.Vector poly -> V.Vector (Vector poly, poly)
+calcSignatureGB side | all isZero side = V.empty
+calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
   let n = V.length sideal
-  gs <- newSTRef []
-  ps <- newSTRef (H.fromList [ mkEntry $ basis n i | i <- [0..n-1]] :: heap (Entry (Signature poly) (Vector poly)))
-  syzs <- {-# SCC "initial_syzygy" #-}
-          newSTRef
-          [ mkEntry $
-            V.zipWith (+)
-              (V.map (negate (sideal V.! j) *) (basis n i))
-              (V.map ((sideal V.! i) *) (basis n j))
-          | j <- [0..n-1]
-          , i <- [0..j-1]
+  in reify (toInteger n) $ \(Proxy :: Proxy n) -> do
+  let mods0 = V.generate n basis
+      preGs = V.zipWith ME mods0 sideal
+  gs :: STRef s (MV.MVector s (ModuleElement n poly)) <- newSTRef =<< V.unsafeThaw preGs
+  hs <- newSTRef $ Set.fromList [ Signature j lm
+                                | j <- [0..n - 1]
+                                , i <- [0..j - 1]
+                                , let lm = leadingMonomial (sideal V.! i)
+                                ]
+  let preDecode :: JPair poly -> ModuleElement n poly
+      preDecode (JPair m i) = m .*! (preGs V.! i)
+      {-# INLINE preDecode #-}
+  jprs <- newSTRef $ H.fromList $
+          nubBy ((==) `on` priority)
+          [ Entry sig jpr
+          | j <- [0..n - 1]
+          , i <- [0..j - 1]
+          , let qi = preGs V.! i
+          , let qj = preGs V.! j
+          , (sig, jpr) <- maybeToList $ jPair (i, qi) (j, qj)
+          , let me = preDecode jpr
+          , not $ any (`covers` me) preGs
           ]
-  whileJust_ (H.viewMin <$!> readSTRef ps) $ \(Entry gSig g, ps') -> do
-    ps .= ps'
-    gs0 <- readSTRef gs
-    ss0 <- readSTRef syzs
-    unless ({-# SCC "standardCr" #-}standardCriterion gSig ss0 || any ((== gSig) . priority . get2) gs0) $ do
-      let (h, ph) = reduceSignature sideal g gs0
-          h' = {-# SCC "scaling" #-} V.map (* injectCoeff (recip $ leadingCoeff ph)) h
-      if isZero ph
-        then syzs .%= (mkEntry h : )
+  whileJust_ (H.viewMin <$> readSTRef jprs) $ \(Entry sig (JPair m0 i0), jprs') -> do
+    writeSTRef jprs jprs'
+    curGs <- V.unsafeFreeze =<< readSTRef gs
+    hs0   <- readSTRef hs
+    let me = m0 .*! (curGs V.! i0)
+        next = any (`covers` me) curGs || sig `elem` hs0
+    unless next $ do
+      let me'@(ME t v) = reduceModuleElement me curGs
+      if isZero v
+        then modifySTRef' hs $ Set.insert $ fromJust $ sign t
         else do
-        let ph' = monoize ph
-            adds = H.fromList $
-                   parMapMaybe
-                   (fmap mkEntry . flip regularSVector (P ph' h') . sec payload) gs0
-        ps .%= H.union adds
-        gs .%= (P ph' (mkEntry h') :)
+        let k = V.length curGs
+            decodeJpr :: JPair poly -> ModuleElement n poly
+            decodeJpr (JPair m i) | i == k = m .*! me'
+                                  | otherwise = m .*! (curGs V.! i)
+            {-# INLINE decodeJpr #-}
+            syzs = foldMap (\(ME tj vj) -> maybe Set.empty Set.singleton $ sign $ v *! tj - vj *! t) curGs
+        modifySTRef' hs (`Set.union` syzs)
+        curHs <- readSTRef hs
+        let newJprs = V.filter (\(Entry sg jp) -> not $ any (`covers` decodeJpr jp) curGs || sg `elem` curHs) $
+                      V.imapMaybe (curry $ fmap (uncurry Entry) . jPair (k, me')) curGs
+        modifySTRef' jprs $ H.union $ H.fromList $ nubBy ((==) `on` priority) $ V.toList newJprs
+        append gs me'
+  V.map (\(ME (Syzygy u) v) -> (u, v)) <$> (V.unsafeFreeze =<< readSTRef gs)
 
-  map (\(P p (Entry _ a)) -> (a, p)) <$> readSTRef gs
+append :: STRef s (MV.MVector s a) -> a -> ST s ()
+append mv a = do
+  g <- readSTRef mv
+  let n = MV.length g
+  g' <- MV.unsafeGrow g 1
+  MV.write g' n a
+  writeSTRef mv g'
 
-regularSVector :: (IsOrderedPolynomial poly)
-               => P poly (Vector poly)
-               -> P poly (Vector poly)
-               -> Maybe (Vector poly)
-regularSVector (P pg g) (P ph h) =
-  let lmg = leadingMonomial pg
-      lmh = leadingMonomial ph
-      l = lcmMonomial lmg lmh
-      vl = V.map (l / lmg >*) g
-      vr = V.map (l / lmh >*) h
-      ans = V.zipWith (-) vl vr
-  in if signature vl /= signature vr
-     then Just ans
-     else Nothing
+jPair :: (Reifies n Integer, IsOrderedPolynomial poly, Field (Coefficient poly))
+      => (Int, ModuleElement n poly)
+      -> (Int, ModuleElement n poly)
+      -> Maybe (Signature n poly, JPair poly)
+jPair (i, ME u1 v1) (j, ME u2 v2) = do
+  let (lc1, lm1) = leadingTerm v1
+      (lc2, lm2) = leadingTerm v2
+      t = lcmMonomial lm1 lm2
+      t1 = t / lm1
+      t2 = t / lm2
+  jSig1 <- (t1 .*!) <$> sign u1
+  jSig2 <- (t2 .*!) <$> sign u2
+  if  jSig1 >= jSig2
+    then loop i jSig1 t1 u1 (lc1 / lc2) t2 u2
+    else loop j jSig2 t2 u2 (lc2 / lc1) t1 u1
+  where
+    loop k sig t1 w1 c t2 w2 = do
+      sgn <- sign (t1 .*! w1 - (c, t2) .*! w2)
+      guard $ sig == sgn
+      return (sig, JPair t1 k)
 
-standardCriterion :: (IsOrderedPolynomial poly, Foldable t)
-                  => Signature poly -> t (Entry (Signature poly) (Vector poly))
-                  -> Bool
-standardCriterion g = {-# SCC "standardCriterion" #-} any ((`divSig` g) . priority)
-
-divSig :: IsOrderedPolynomial poly => Signature poly -> Signature poly -> Bool
-divSig (Signature i _ c) (Signature j _ d) =
-  {-# SCC "divSig" #-}
-  i == j && c `divs` d
-
-data Signature poly =
+data Signature n poly =
   Signature { _position :: {-# UNPACK #-} !Int
-            , _sigCoeff :: Coefficient poly
             , _sigMonom :: OrderedMonomial (MOrder poly) (Arity poly)
             }
 
-instance (Show (Coefficient poly), KnownNat (Arity poly)) => Show (Signature poly) where
-  showsPrec _ (Signature pos coe m) =
-    showChar '('  . shows coe . showChar ' ' . shows m . showChar ')' . showChar 'e' . shows pos
+instance (Show (Coefficient poly), KnownNat (Arity poly)) => Show (Signature n poly) where
+  showsPrec _ (Signature pos m) =
+    showChar '('  . showChar ' ' . shows m . showChar ')' . showChar 'e' . shows pos
 
-instance Eq (Signature poly) where
-  Signature i _ m == Signature j _ n = i == j && n == m
+instance Eq (Signature n poly) where
+  Signature i m == Signature j n = i == j && n == m
 
-instance IsOrderedPolynomial poly => Ord (Signature poly) where
-  compare (Signature i _ m) (Signature j _ n) = compare i j <> compare m n
+instance IsOrderedPolynomial poly => Ord (Signature n poly) where
+  compare (Signature i m) (Signature j n) = compare i j <> compare m n
 
-signature :: (IsOrderedPolynomial poly)
-          => Vector poly
-          -> Signature poly
-signature = {-# SCC "signature" #-}
-            fromJust . DC.coerce
+sign :: forall poly n . (Reifies n Integer, IsOrderedPolynomial poly)
+     => Syzygy n poly
+     -> Maybe (Signature n poly)
+sign = {-# SCC "sign" #-}
+            DC.coerce
           . ifoldMap (\i v -> Option $ do
-                         let lt =  leadingTerm v
-                         guard $ not $ isZero $ fst lt
-                         return $ Max $ uncurry (Signature i) lt
+                         let (lc, lm) = leadingTerm v
+                         guard $ not $ isZero lc
+                         return $ Max $ Signature @n @poly i lm
                      )
+          . runSyzygy
 
-basis :: (Monoidal a, Unital a) => Int -> Int -> Vector a
-basis len i = V.generate len $ \j -> if i == j then one else zero
+basis :: forall a n. (Monoidal a, Unital a, Reifies n Integer) => Int -> Syzygy n a
+basis i =
+  let len = fromInteger $ reflect (Proxy :: Proxy n)
+  in Syzygy $ V.generate len $ \j -> if i == j then one else zero
 
-reduceSignature :: (IsOrderedPolynomial poly, Field (Coefficient poly), Foldable t)
-                => Vector poly -> Vector poly
-                -> t (P poly (Entry (Signature poly) (Vector poly)))
-                -> (Vector poly, poly)
-reduceSignature ideal g hs =
-  fst $ flip (until (\((_, phiu), r) -> phiu == r)) ((g, phi g), zero) $ \((u, !phiu), r) ->
-  let m = leadingTerm $ phiu - r
-      tryCancel (P hi' (Entry _ hi)) = First $ do
-        let fac = toPolynomial (m `tryDiv` leadingTerm hi')
-            quo = V.map (fac *) hi
-        guard $ (leadingMonomial hi' `divs` snd m) && (signature quo < signature u)
-        return (quo, fac * hi')
-  in case getFirst $ foldMap tryCancel hs of
-    Nothing -> ((u, phiu), r + toPolynomial m)
-    Just (d, phid)  -> ((V.zipWith (-) u d, phiu - phid), r)
+reduceModuleElement :: (Reifies n Integer, IsOrderedPolynomial poly,
+                        Field (Coefficient poly), Functor t, Foldable t)
+                    => ModuleElement n poly -> t (ModuleElement n poly)
+                    -> ModuleElement n poly
+reduceModuleElement p qs = loop p
   where
-    phi = sumA . V.zipWith (*) ideal
+    loop !r =
+      case getFirst $ foldMap (First . regularTopReduce r) qs of
+        Nothing -> r
+        Just r' -> loop r'
+{-# INLINE reduceModuleElement #-}
 
-sumA :: Monoidal c => Vector c -> c
-sumA = Bundle.foldl' (+) zero . GV.stream
+regularTopReduce :: (Reifies n Integer, IsOrderedPolynomial poly, Field (Coefficient poly))
+                 => ModuleElement n poly -> ModuleElement n poly
+                 -> Maybe (ModuleElement n poly)
+regularTopReduce p1@(ME u1 v1) p2@(ME u2 v2) = do
+  guard $ not (isZero v2 || isZero v1) && leadingMonomial v2 `divs` leadingMonomial v1
+  let (c, t) = tryDiv (leadingTerm v1) (leadingTerm v2)
+  l <- sign (t .*! u2)
+  r <- sign u1
+  guard $ l <= r
+  let p = p1 - (c, t) .*! p2
+  guard $ sign (syzElem p) == sign (syzElem p1)
+  return p
+
+sigDivs :: IsOrderedPolynomial poly => Signature n poly -> Signature n poly -> Bool
+sigDivs (Signature i n) (Signature j m) = i == j && n `divs` m
+
+covers :: (IsOrderedPolynomial poly , Reifies n Integer)
+       => ModuleElement n poly -> ModuleElement n poly -> Bool
+covers (ME u2 v2) (ME u1 v1) = fromMaybe False $ do
+  sig2@Signature{ _sigMonom = lm2 } <- sign u2
+  sig1@Signature{ _sigMonom = lm1 } <- sign u1
+  let t = lm1 / lm2
+  return $ sig2 `sigDivs` sig1 && t * leadingMonomial v2 < leadingMonomial v1

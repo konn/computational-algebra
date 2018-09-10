@@ -22,7 +22,6 @@ flags:
 build:
   library-profiling: true
   executable-profiling: false
-  haddock: true
 
 extra-deps:
 - control-monad-loop-0.1
