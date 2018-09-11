@@ -68,12 +68,13 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $ do
   let n = V.length sideal
       mods0 = V.generate n basis
       preGs = V.zipWith ME mods0 sideal
-  gs :: STRef s (MV.MVector s (ModuleElement poly)) <- newSTRef =<< V.unsafeThaw preGs
-  hs <- newSTRef $ Set.fromList [ Signature j lm
-                                | j <- [0..n - 1]
-                                , i <- [0..j - 1]
-                                , let lm = leadingMonomial (sideal V.! i)
+      preHs = Set.fromList [ Signature j lm
+                           | j <- [0..n - 1]
+                           , i <- [0..j - 1]
+                           , let lm = leadingMonomial (sideal V.! i)
                                 ]
+  gs <- newSTRef =<< V.unsafeThaw preGs
+  hs <- newSTRef preHs
   let preDecode :: JPair poly -> ModuleElement poly
       preDecode (JPair m i) = m .*! (preGs V.! i)
       {-# INLINE preDecode #-}
@@ -86,7 +87,7 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $ do
           , let qj = preGs V.! j
           , (sig, jpr) <- maybeToList $ jPair (i, qi) (j, qj)
           , let me = preDecode jpr
-          , not $ any (`covers` me) preGs
+          , not $ any (`covers` me) preGs || any ((`covers` me) . sigToElem) preHs
           ]
   whileJust_ (H.viewMin <$> readSTRef jprs) $ \(Entry sig (JPair m0 i0), jprs') -> do
     writeSTRef jprs jprs'
@@ -108,9 +109,11 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $ do
                    V.mapMaybe (syzME me') curGs
         modifySTRef' hs (`Set.union` syzs)
         curHs <- readSTRef hs
-        let newJprs = V.filter (\(Entry sg jp) -> not $ any (`covers` decodeJpr jp) curGs || any (`sigDivs` sg) curHs) $
+        let newJprs = Fl.fold Fl.nub $
+                      V.filter (\(Entry sg jp) ->
+                                   not $ any (`covers` decodeJpr jp) curGs || any (`sigDivs` sg) curHs) $
                       V.imapMaybe (curry $ fmap (uncurry Entry) . jPair (k, me')) curGs
-        modifySTRef' jprs $ H.union $ H.fromList $ nubBy ((==) `on` priority) $ V.toList newJprs
+        modifySTRef' jprs $ flip H.union $ H.fromList newJprs
         append gs me'
   V.map (\(ME u v) -> (u, v)) <$> (V.unsafeFreeze =<< readSTRef gs)
 
@@ -226,3 +229,7 @@ covers (ME sig2 v2) (ME sig1 v1) = fromMaybe False $ do
   let t = sigMonom sig1 / sigMonom sig2
   return $ sig2 `sigDivs` sig1 && (isZero v2 || t * leadingMonomial v2 < leadingMonomial v1)
 {-# INLINE covers #-}
+
+sigToElem :: IsOrderedPolynomial poly => Signature poly -> ModuleElement poly
+sigToElem sig = ME sig (fromOrderedMonomial $ sigMonom sig)
+{-# INLINE sigToElem #-}
