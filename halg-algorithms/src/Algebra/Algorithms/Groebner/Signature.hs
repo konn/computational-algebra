@@ -108,7 +108,7 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $ do
                    V.mapMaybe (syzME me') curGs
         modifySTRef' hs (`Set.union` syzs)
         curHs <- readSTRef hs
-        let newJprs = V.filter (\(Entry sg jp) -> not $ any (`covers` decodeJpr jp) curGs || sg `elem` curHs) $
+        let newJprs = V.filter (\(Entry sg jp) -> not $ any (`covers` decodeJpr jp) curGs || any (`sigDivs` sg) curHs) $
                       V.imapMaybe (curry $ fmap (uncurry Entry) . jPair (k, me')) curGs
         modifySTRef' jprs $ H.union $ H.fromList $ nubBy ((==) `on` priority) $ V.toList newJprs
         append gs me'
@@ -139,10 +139,12 @@ jPair (i, p1@(ME u1 v1)) (j, p2@(ME u2 v2)) = do
     then loop i jSig1 (lc1 / lc2) t1 p1 t2 p2
     else loop j jSig2 (lc2 / lc1) t2 p2 t1 p1
   where
+    {-# INLINE loop #-}
     loop k sig c t1 w1 t2 w2 = do
       sgn <- cancelModuleElement (t1 .*! w1) (Just c) (t2 .*! w2)
       guard $ sig == syzSign sgn
       return (sig, JPair t1 k)
+{-# INLINE jPair #-}
 
 data Signature poly =
   Signature { position :: {-# UNPACK #-} !Int
