@@ -58,6 +58,7 @@ library:
   - control-monad-loop
   - convertible
   - equational-reasoning
+  - foldl
   - ghc-typelits-knownnat
   - halg-matrices
   - hmatrix

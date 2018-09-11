@@ -3,6 +3,7 @@
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 module Algebra.Algorithms.Groebner.Signature (f5) where
 import           Algebra.Prelude.Core         hiding (Vector)
+import qualified Control.Foldl                as Fl
 import           Control.Lens                 hiding ((.=))
 import           Control.Monad.Loops          (whileJust_)
 import           Control.Monad.ST.Combinators (ST, STRef, modifySTRef',
@@ -176,7 +177,7 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
       preDecode (JPair m i) = m .*! (preGs V.! i)
       {-# INLINE preDecode #-}
   jprs <- newSTRef $ H.fromList $
-          nubBy ((==) `on` priority)
+          Fl.fold Fl.nub
           [ Entry sig jpr
           | j <- [0..n - 1]
           , i <- [0..j - 1]
@@ -202,7 +203,7 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $
             decodeJpr (JPair m i) | i == k = m .*! me'
                                   | otherwise = m .*! (curGs V.! i)
             {-# INLINE decodeJpr #-}
-            syzs = foldMap (\(ME tj vj) -> maybe Set.empty Set.singleton $ sign $ v *! tj - vj *! t) curGs
+            syzs = V.foldl' (flip Set.insert) Set.empty $ V.mapMaybe (\(ME tj vj) -> sign $ v *! tj - vj *! t) curGs
         modifySTRef' hs (`Set.union` syzs)
         curHs <- readSTRef hs
         let newJprs = V.filter (\(Entry sg jp) -> not $ any (`covers` decodeJpr jp) curGs || sg `elem` curHs) $
@@ -242,7 +243,7 @@ jPair (i, ME u1 v1) (j, ME u2 v2) = do
 
 data Signature n poly =
   Signature { _position :: {-# UNPACK #-} !Int
-            , _sigMonom :: OrderedMonomial (MOrder poly) (Arity poly)
+            , _sigMonom :: !(OrderedMonomial (MOrder poly) (Arity poly))
             }
 
 instance (Show (Coefficient poly), KnownNat (Arity poly)) => Show (Signature n poly) where
@@ -271,6 +272,7 @@ basis :: forall a n. (Monoidal a, Unital a, Reifies n Integer) => Int -> Syzygy 
 basis i =
   let len = fromInteger $ reflect (Proxy :: Proxy n)
   in Syzygy $ V.generate len $ \j -> if i == j then one else zero
+{-# INLINE basis #-}
 
 reduceModuleElement :: (Reifies n Integer, IsOrderedPolynomial poly,
                         Field (Coefficient poly), Functor t, Foldable t)
