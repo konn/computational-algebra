@@ -38,6 +38,7 @@ default-extensions:
 
 dependencies:
 - ListLike
+- MemoTrie
 - MonadRandom
 - algebra
 - algebraic-prelude

@@ -28,16 +28,16 @@ import           AlgebraicPrelude             hiding (lex)
 import           Control.DeepSeq              (NFData (..))
 import qualified Control.Foldl                as Fl
 import           Control.Lens                 (Ixed (..), imap, makeLenses,
-                                               makeWrapped, (%~), (&), (.~), _1,
-                                               _2, _Wrapped)
+                                               makeWrapped, (%~), (&), (.~),
+                                               _Wrapped)
 import qualified Data.Coerce                  as DC
 import           Data.Constraint              ((:=>) (..), Dict (..))
 import qualified Data.Constraint              as C
 import           Data.Constraint.Forall       (Forall, inst)
-import           Data.Functor.Identity        (Identity (..))
 import           Data.Hashable                (Hashable (..))
 import           Data.Kind                    (Type)
 import           Data.Maybe                   (catMaybes)
+import           Data.MemoTrie                (HasTrie (..), memo2)
 import           Data.Monoid                  (Dual (..), Sum (..), (<>))
 import           Data.MonoTraversable         (MonoFoldable (..), oand,
                                                ofoldMap, ofoldl', ofoldlUnwrap,
@@ -58,6 +58,42 @@ import qualified Prelude                      as P
 
 type Monomial n = USized n Int
 
+type family IntTuple (n :: Nat) where
+  IntTuple 0 = ()
+  IntTuple n = (Int, IntTuple (n - 1))
+
+newtype UVecInt = UVecInt { runUVecInt :: UV.Vector Int }
+
+instance KnownNat n => HasTrie (Monomial n) where
+  newtype Monomial n :->: a = MonomTrie (UVecInt :->: a)
+  trie f = MonomTrie $ trie $ f . V.unsafeToSized' . runUVecInt
+  {-# INLINE trie #-}
+  untrie (MonomTrie tr) = untrie tr . UVecInt . V.unsized
+  {-# INLINE untrie #-}
+  enumerate (MonomTrie tr) = map (first (V.unsafeToSized' . runUVecInt)) $ enumerate tr
+  {-# INLINE enumerate #-}
+
+instance HasTrie UVecInt where
+  newtype UVecInt :->: a = UVecIntTrie (Either () (Int, UVecInt) :->: a)
+  trie f = UVecIntTrie (trie $ f . consMonom)
+  {-# INLINE trie #-}
+  untrie (UVecIntTrie t) = untrie t . unconsMonom
+  {-# INLINE untrie #-}
+  enumerate (UVecIntTrie t) = map (first consMonom) $ enumerate t
+  {-# INLINE enumerate #-}
+
+unconsMonom :: UVecInt -> Either () (Int, UVecInt)
+unconsMonom (UVecInt v) =
+  if UV.null v
+  then Left ()
+  else Right (UV.head v, UVecInt $ UV.tail v)
+{-# INLINE unconsMonom #-}
+
+consMonom :: Either () (Int, UVecInt) -> UVecInt
+consMonom (Left ()) = UVecInt UV.empty
+consMonom (Right (i, m)) = UVecInt $ UV.cons i (runUVecInt m)
+{-# INLINE consMonom #-}
+
 -- | A wrapper for monomials with a certain (monomial) order.
 newtype OrderedMonomial ordering n =
   OrderedMonomial { getMonomial :: Monomial n }
@@ -75,9 +111,13 @@ zws :: (KnownNat n, Unbox a) => (Int -> Int -> a) -> USized n Int -> USized n In
 zws = ((V.unsafeToSized' .) .) . (`on` V.unsized) . UV.zipWith
 {-# INLINE zws #-}
 
+mul :: KnownNat n => Monomial n -> Monomial n -> Monomial n
+mul = zws (+)
+{-# INLINE mul #-}
+
 instance KnownNat n => Multiplicative (Monomial n) where
-  (*) = zws (+)
-  {-# INLINE (*) #-}
+  (*) = memo2 mul
+  {-# NOINLINE (*) #-}
 
 instance KnownNat n => Unital (Monomial n) where
   one = fromList sing []
@@ -181,16 +221,16 @@ toWrapOrdering _ = WrapOrdering GT
 
 -- | Graded reversed lexicographical order. This *is* a monomial order.
 grevlex :: MonomialOrder n
-grevlex = grevlexF
-{-# INLINE [2] grevlex #-}
-
-grevlexF :: MonomialOrder n
-grevlexF = (Fl.purely ofoldlUnwrap body .) . (UV.zip `on` V.unsized)
+grevlex = (Fl.purely ofoldlUnwrap body .) . (UV.zip `on` V.unsized)
   where
     body :: Fl.Fold (Int, Int) Ordering
     body = (<>) <$> Fl.foldMap (DC.coerce @_ @(Sum Int, Sum Int)) (uncurry compare)
-                <*> Fl.foldMap (Dual . uncurry (flip compare)) getDual
-{-# INLINE grevlexF #-}
+                <*> revlexF
+{-# INLINE grevlex #-}
+
+revlexF :: Fl.Fold (Int, Int) Ordering
+revlexF = Fl.foldMap (Dual . uncurry (flip compare)) getDual
+{-# INLINE revlexF #-}
 
 instance KnownNat n => Show (OrderedMonomial ord n) where
   show xs =
