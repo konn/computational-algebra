@@ -43,13 +43,6 @@ data JPair poly = JPair { _jpTerm  :: !(OMonom poly)
 deriving instance KnownNat (Arity poly) => Show (JPair poly)
 deriving instance KnownNat (Arity poly) => Eq (JPair poly)
 
-instance (IsOrderedPolynomial poly) => Additive (Signature poly) where
-  (+) = max
-
-instance (IsOrderedPolynomial poly) => Additive (ModuleElement poly) where
-  ME u v + ME u' v' = ME (u + u') (v + v')
-  {-# INLINE (+) #-}
-
 type OMonom p = OrderedMonomial (MOrder p) (Arity p)
 
 class Multiplicative c => Action c a where
@@ -59,17 +52,12 @@ infixl 7 .*!
 
 instance {-# OVERLAPPING #-} (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly) =>
          Action (OrderedMonomial ord k) (ModuleElement poly) where
-  m .*! ME u v = ME (m .*! u) (m .*! v)
+  m .*! ME u v = ME (m .*! u) (m >* v)
   {-# INLINE (.*!) #-}
 
 instance {-# OVERLAPPING #-} (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly) =>
          Action (OrderedMonomial ord k) (Signature poly) where
   m .*! Signature i f = Signature i (m * f)
-  {-# INLINE (.*!) #-}
-
-instance {-# OVERLAPPABLE #-}  (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly) =>
-         Action (OrderedMonomial ord k) poly where
-  (.*!) = (>*)
   {-# INLINE (.*!) #-}
 
 calcSignatureGB :: forall poly.
@@ -120,7 +108,7 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $ do
                    V.mapMaybe (syzME me') curGs
         modifySTRef' hs (`Set.union` syzs)
         curHs <- readSTRef hs
-        let newJprs = V.filter (\(Entry sg jp) -> not $ any (`covers` decodeJpr jp) curGs || any (`sigDivs` sg) curHs) $
+        let newJprs = V.filter (\(Entry sg jp) -> not $ any (`covers` decodeJpr jp) curGs || sg `elem` curHs) $
                       V.imapMaybe (curry $ fmap (uncurry Entry) . jPair (k, me')) curGs
         modifySTRef' jprs $ H.union $ H.fromList $ nubBy ((==) `on` priority) $ V.toList newJprs
         append gs me'
@@ -140,19 +128,19 @@ jPair :: (IsOrderedPolynomial poly, Field (Coefficient poly))
       -> (Int, ModuleElement poly)
       -> Maybe (Signature poly, JPair poly)
 jPair (i, p1@(ME u1 v1)) (j, p2@(ME u2 v2)) = do
-  let lm1 = leadingMonomial v1
-      lm2 = leadingMonomial v2
+  let (lc1, lm1) = leadingTerm v1
+      (lc2, lm2) = leadingTerm v2
       t = lcmMonomial lm1 lm2
       t1 = t / lm1
       t2 = t / lm2
   let jSig1 = t1 .*! u1
   let jSig2 = t2 .*! u2
   if  jSig1 >= jSig2
-    then loop i jSig1 t1 p1 t2 p2
-    else loop j jSig2 t2 p2 t1 p1
+    then loop i jSig1 (lc1 / lc2) t1 p1 t2 p2
+    else loop j jSig2 (lc2 / lc1) t2 p2 t1 p1
   where
-    loop k sig t1 w1 t2 w2 = do
-      sgn <- cancelModuleElement (t1 .*! w1) (t2 .*! w2)
+    loop k sig c t1 w1 t2 w2 = do
+      sgn <- cancelModuleElement (t1 .*! w1) (Just c) (t2 .*! w2)
       guard $ sig == syzSign sgn
       return (sig, JPair t1 k)
 
@@ -192,31 +180,35 @@ regularTopReduce :: (IsOrderedPolynomial poly, Field (Coefficient poly))
                  -> Maybe (ModuleElement poly)
 regularTopReduce p1@(ME u1 v1) p2@(ME u2 v2) = do
   guard $ not (isZero v2 || isZero v1) && leadingMonomial v2 `divs` leadingMonomial v1
-  let t = leadingMonomial v1 / leadingMonomial v2
+  let (c, t) = tryDiv (leadingTerm v1) (leadingTerm v2)
   guard $ (t .*! u2) <= u1
-  p <- cancelModuleElement p1 (t .*! p2)
+  p <- cancelModuleElement p1 (Just c) (t .*! p2)
   guard $ syzSign p == syzSign p1
   return p
 
 cancelModuleElement :: (Field (Coefficient poly), IsOrderedPolynomial poly)
-                    => ModuleElement poly -> ModuleElement poly -> Maybe (ModuleElement poly)
-cancelModuleElement (ME u1 v1) (ME u2 v2) =
-  let c  = leadingCoeff v1 / leadingCoeff v2
+                    => ModuleElement poly
+                    -> Maybe (Coefficient poly)
+                    -> ModuleElement poly -> Maybe (ModuleElement poly)
+cancelModuleElement (ME u1 v1) mc (ME u2 v2) =
+  let c = fromMaybe one mc
       v' = v1 - c .*. v2
   in case compare u1 u2 of
-    LT -> return $ ME u2 v'
+    LT -> do
+      guard $ not $ isZero c
+      return $ ME u2 (recip c .*. v')
     GT -> return $ ME u1 v'
     EQ -> do
       guard $ c /= one
-      return $ ME u1 v'
+      return $ ME u1 (recip (one - c) .*. v')
 {-# INLINE cancelModuleElement #-}
 
 syzME :: (Field (Coefficient poly), IsOrderedPolynomial poly)
       => ModuleElement poly -> ModuleElement poly -> Maybe (Signature poly)
 syzME (ME u1 v1) (ME u2 v2) =
   case comparing position u1 u2 of
-    LT -> Just u2
-    GT -> Just u1
+    LT -> Just (leadingMonomial v1 .*! u2)
+    GT -> Just (leadingMonomial v2 .*! u1)
     EQ -> do
       let f = sigMonom u1 >* v2 - sigMonom u2 >* v1
       guard $ not $ isZero f
