@@ -39,11 +39,14 @@ import qualified Data.Heap                    as H
 import           Data.Kind                    (Type)
 import qualified Data.Map                     as M
 import           Data.MonoTraversable         (oall)
+import           Data.Set                     (Set)
+import qualified Data.Set                     as Set
 import           Data.Singletons.Prelude      (Sing (SFalse, STrue), withSingI)
 import           Data.Singletons.Prelude.List (Length, Replicate, Sing (SCons))
 import           Data.Singletons.Prelude.List (sLength, sReplicate)
 import qualified Data.Sized.Builtin           as V
-import           Data.STRef                   (STRef, modifySTRef, newSTRef)
+import           Data.STRef                   (STRef, modifySTRef, modifySTRef',
+                                               newSTRef)
 import           Data.STRef                   (readSTRef, writeSTRef)
 import qualified Prelude                      as P
 import           Proof.Equational
@@ -223,20 +226,37 @@ instance SelectionStrategy n s => SelectionStrategy n (SugarStrategy s) where
       sugar = max (tsgr f) (tsgr g) + totalDegree (lcmMonomial (leadingMonomial f) (leadingMonomial g))
   {-# INLINE calcWeight #-}
 
+data PolyEntry p = PE { leadMon :: !(OrderedMonomial (MOrder p) (Arity p))
+                      , poly :: p
+                      }
 
-minimizeGroebnerBasis :: (Field (Coefficient poly), IsOrderedPolynomial poly)
-                      => [poly] -> [poly]
-minimizeGroebnerBasis bs = runST $ do
-  left  <- newSTRef $ map monoize $ filter (/= zero) bs
-  right <- newSTRef []
-  whileM_ (not . null <$> readSTRef left) $ do
-    f : xs <- readSTRef left
-    writeSTRef left xs
-    ys     <- readSTRef right
-    unless (any (\g -> leadingMonomial g `divs` leadingMonomial f) xs
-         || any (\g -> leadingMonomial g `divs` leadingMonomial f) ys) $
-      writeSTRef right (f : ys)
-  readSTRef right
+instance IsOrderedPolynomial p => Eq (PolyEntry p) where
+  (==) = (==) `on` leadMon
+  {-# INLINE (==) #-}
+
+instance IsOrderedPolynomial p => Ord (PolyEntry p) where
+  compare = comparing leadMon
+  {-# INLINE compare #-}
+
+toPE :: IsOrderedPolynomial p => p -> PolyEntry p
+toPE p = PE (leadingMonomial p) p
+{-# INLINE toPE #-}
+
+divsPE :: IsOrderedPolynomial p => PolyEntry p -> PolyEntry p -> Bool
+divsPE = divs `on` leadMon
+{-# INLINE divsPE #-}
+
+insPE :: IsOrderedPolynomial p => p -> Set (PolyEntry p) -> Set (PolyEntry p)
+insPE p s =
+  let pe = toPE p
+      (l, there, r) = Set.splitMember pe s -- log(k)
+  in if there || F.any (`divsPE` pe) l     -- k
+  then s
+  else Set.union l (Set.insert pe $ Set.filter (not . (pe `divsPE`)) r) -- log(k) + k
+
+minimizeGroebnerBasis :: (Foldable t, Field (Coefficient poly), IsOrderedPolynomial poly)
+                      => t poly -> [poly]
+minimizeGroebnerBasis = map poly . Set.toList . F.foldr insPE Set.empty
 
 -- | Reduce minimum Groebner basis into reduced Groebner basis.
 reduceMinimalGroebnerBasis :: (Field (Coefficient poly), IsOrderedPolynomial poly)
@@ -249,7 +269,7 @@ reduceMinimalGroebnerBasis bs = runST $ do
     writeSTRef left xs
     ys     <- readSTRef right
     let q = f `modPolynomial` (xs ++ ys)
-    if q == zero then writeSTRef right ys else writeSTRef right (q : ys)
+    unless (isZero q) $ modifySTRef' right (q :)
   readSTRef right
 
 -- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
