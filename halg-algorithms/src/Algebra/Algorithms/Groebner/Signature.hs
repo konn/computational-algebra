@@ -17,7 +17,7 @@ import qualified Control.Foldl                as Fl
 import           Control.Monad.Loops          (whileJust_)
 import           Control.Monad.ST.Combinators (ST, STRef, modifySTRef',
                                                newSTRef, readSTRef, runST,
-                                               writeSTRef)
+                                               writeSTRef, (.%=))
 import qualified Data.Heap                    as H
 import           Data.Monoid                  (First (..))
 import qualified Data.Set                     as Set
@@ -123,13 +123,13 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $ do
             {-# INLINE decodeJpr #-}
             syzs = V.foldl' (flip Set.insert) Set.empty $
                    V.mapMaybe (syzME me') curGs
-        modifySTRef' hs (`Set.union` syzs)
+        hs .%= (`Set.union` syzs)
         curHs <- readSTRef hs
         let newJprs = Fl.fold Fl.nub $
                       V.filter (\(Entry sg jp) ->
                                    not $ any (`covers` decodeJpr jp) curGs || any (`sigDivs` sg) curHs) $
                       V.imapMaybe (curry $ fmap (uncurry Entry) . jPair (k, me')) curGs
-        modifySTRef' jprs $ flip H.union $ H.fromList newJprs
+        jprs .%= flip H.union (H.fromList newJprs)
         append gs me'
   V.map (\(ME u v) -> (u, v)) <$> (V.unsafeFreeze =<< readSTRef gs)
 
