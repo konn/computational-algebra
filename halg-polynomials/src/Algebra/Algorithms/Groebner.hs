@@ -39,6 +39,8 @@ import qualified Data.Heap                    as H
 import           Data.Kind                    (Type)
 import qualified Data.Map                     as M
 import           Data.MonoTraversable         (oall)
+import           Data.Sequence                (Seq ((:<|)))
+import qualified Data.Sequence                as Seq
 import           Data.Set                     (Set)
 import qualified Data.Set                     as Set
 import           Data.Singletons.Prelude      (Sing (SFalse, STrue), withSingI)
@@ -238,39 +240,44 @@ instance IsOrderedPolynomial p => Ord (PolyEntry p) where
   compare = comparing leadMon
   {-# INLINE compare #-}
 
-toPE :: IsOrderedPolynomial p => p -> PolyEntry p
-toPE p = PE (leadingMonomial p) p
+toPE :: (Field (Coefficient p), IsOrderedPolynomial p) => p -> PolyEntry p
+toPE p = PE (leadingMonomial p) $ monoize p
 {-# INLINE toPE #-}
 
 divsPE :: IsOrderedPolynomial p => PolyEntry p -> PolyEntry p -> Bool
 divsPE = divs `on` leadMon
 {-# INLINE divsPE #-}
 
-insPE :: IsOrderedPolynomial p => p -> Set (PolyEntry p) -> Set (PolyEntry p)
-insPE p s =
-  let pe = toPE p
-      (l, there, r) = Set.splitMember pe s -- log(k)
-  in if there || F.any (`divsPE` pe) l     -- k
-  then s
-  else Set.union l (Set.insert pe $ Set.filter (not . (pe `divsPE`)) r) -- log(k) + k
+insPE :: (Field (Coefficient p), IsOrderedPolynomial p) => p -> Set (PolyEntry p) -> Set (PolyEntry p)
+insPE p s
+  | Set.null s = Set.singleton $ toPE p
+  | otherwise =
+    let pe = toPE p
+        (l, there, r) = Set.splitMember pe s -- log(k)
+    in if there || F.any (`divsPE` pe) l     -- k
+    then s
+    else Set.union l (Set.insert pe $ Set.filter (not . (pe `divsPE`)) r) -- log(k) + k
+{-# INLINE insPE #-}
 
+-- | Minimises a Groebner basis
 minimizeGroebnerBasis :: (Foldable t, Field (Coefficient poly), IsOrderedPolynomial poly)
                       => t poly -> [poly]
 minimizeGroebnerBasis = map poly . Set.toList . F.foldr insPE Set.empty
+{-# INLINE minimizeGroebnerBasis #-}
 
--- | Reduce minimum Groebner basis into reduced Groebner basis.
-reduceMinimalGroebnerBasis :: (Field (Coefficient poly), IsOrderedPolynomial poly)
-                           => [poly] -> [poly]
+-- | Reduce minimum Groebner basis into the reduced Groebner basis.
+reduceMinimalGroebnerBasis :: (Foldable t, Field (Coefficient poly), IsOrderedPolynomial poly)
+                           => t poly -> [poly]
 reduceMinimalGroebnerBasis bs = runST $ do
-  left  <- newSTRef bs
-  right <- newSTRef []
-  whileM_ (not . null <$> readSTRef left) $ do
-    f : xs <- readSTRef left
+  left  <- newSTRef $ Seq.fromList $ F.toList bs
+  right <- newSTRef   Seq.empty
+  whileM_ (not . Seq.null <$> readSTRef left) $ do
+    f :<| xs <- readSTRef left
     writeSTRef left xs
     ys     <- readSTRef right
-    let q = f `modPolynomial` (xs ++ ys)
-    unless (isZero q) $ modifySTRef' right (q :)
-  readSTRef right
+    let q = f `modPolynomial` (xs Seq.>< ys)
+    unless (isZero q) $ modifySTRef' right (q :<|)
+  F.toList <$> readSTRef right
 
 -- | Caliculating reduced Groebner basis of the given ideal w.r.t. the specified monomial order.
 calcGroebnerBasisWith :: (IsOrderedPolynomial poly,
