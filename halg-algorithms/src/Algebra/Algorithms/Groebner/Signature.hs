@@ -1,5 +1,6 @@
-{-# LANGUAGE BangPatterns, ScopedTypeVariables, StandaloneDeriving #-}
-{-# LANGUAGE ViewPatterns                                          #-}
+{-# LANGUAGE BangPatterns, DataKinds, KindSignatures, PolyKinds        #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeApplications #-}
+{-# LANGUAGE TypeInType, ViewPatterns                                  #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 -- | Signature-based Groebner basis algorithms, such as Faugère's \(F_5\).
 --
@@ -8,7 +9,12 @@
 --   but its effect is pervasive, you should not import in the /library-site/.
 module Algebra.Algorithms.Groebner.Signature
   ( -- * Algorithms
-    f5, calcSignatureGB,
+    f5, f5With, calcSignatureGB, calcSignatureGBWith,
+    -- * Classes
+    ModuleOrdering(..), POT(..), TOP(..),
+    DegreeWeighted(..), TermWeighted(..),
+    DegreeWeightedPOT,DegreeWeightedTOP,
+    TermWeightedPOT, TermWeightedTOP,
     -- * References
     -- $refs
   ) where
@@ -18,8 +24,11 @@ import           Control.Monad.Loops          (whileJust_)
 import           Control.Monad.ST.Combinators (ST, STRef, modifySTRef',
                                                newSTRef, readSTRef, runST,
                                                writeSTRef, (.%=))
+import qualified Data.Coerce                  as DC
 import qualified Data.Heap                    as H
+import           Data.Kind                    (Type)
 import           Data.Monoid                  (First (..))
+import           Data.Reflection              (Reifies (..), reify)
 import qualified Data.Set                     as Set
 import qualified Data.Vector                  as V
 import qualified Data.Vector.Mutable          as MV
@@ -44,12 +53,72 @@ instance Ord a => Ord (Entry a b) where
 f5 :: (IsOrderedPolynomial a, Field (Coefficient a))
    => Ideal a -> [a]
 f5 ideal = let sideal = V.fromList $ generators ideal
-  in V.toList $ V.map snd $ calcSignatureGB  sideal
+  in V.toList $ V.map snd $ calcSignatureGB sideal
+{-# INLINE f5 #-}
 
-data ModuleElement poly = ME { syzSign :: !(Signature poly)
-                             , _polElem :: !poly
-                             }
-                        deriving (Eq, Ord)
+f5With :: forall ord a pxy. (IsOrderedPolynomial a, Field (Coefficient a), ModuleOrdering a ord)
+       => pxy ord -> Ideal a -> [a]
+f5With pxy ideal = let sideal = V.fromList $ generators ideal
+  in V.toList $ V.map snd $ calcSignatureGBWith pxy sideal
+{-# INLINE f5With #-}
+
+calcSignatureGB :: forall poly.
+                   (Field (Coefficient poly), IsOrderedPolynomial poly)
+                => V.Vector poly -> V.Vector (Signature poly, poly)
+calcSignatureGB gs =
+  reify gs $ \(_ :: Proxy (gs :: Type)) -> calcSignatureGBWith (Proxy @(TermWeightedPOT gs)) gs
+{-# INLINE CONLIKE calcSignatureGB #-}
+
+class ModuleOrdering poly ord where
+  cmpModule :: proxy ord -> Signature poly -> Signature poly -> Ordering
+
+data POT = POT deriving (Read, Show, Eq, Ord)
+
+instance IsOrderedPolynomial poly => ModuleOrdering poly POT where
+  cmpModule _ (Signature i m) (Signature j n) = compare i j <> compare m n
+  {-# INLINE cmpModule #-}
+
+data TOP = TOP deriving (Read, Show, Eq, Ord)
+
+instance IsOrderedPolynomial poly => ModuleOrdering poly TOP where
+  cmpModule _ (Signature i m) (Signature j n) = compare m n <> compare i j
+  {-# INLINE cmpModule #-}
+
+data WeightedPOT (gs :: k) = WeightedPOT
+  deriving (Read, Show, Eq, Ord)
+
+type DegreeWeightedPOT gs = DegreeWeighted gs POT
+type DegreeWeightedTOP gs = DegreeWeighted gs TOP
+type TermWeightedPOT gs   = TermWeighted gs POT
+type TermWeightedTOP gs   = TermWeighted gs TOP
+
+newtype DegreeWeighted (gs :: k) ord = DegreeWeighted ord
+newtype TermWeighted (gs :: k) ord = TermWeighted ord
+
+instance (ModuleOrdering poly ord, IsOrderedPolynomial poly, Reifies (gs :: k) (V.Vector poly))
+      => ModuleOrdering poly (DegreeWeighted gs ord) where
+  cmpModule _ l@(Signature i t) r@(Signature j u) =
+    let gs = reflect (Proxy :: Proxy gs) :: V.Vector poly
+    in compare
+         (totalDegree t + fromIntegral (totalDegree' (gs V.! i)))
+         (totalDegree u + fromIntegral (totalDegree' (gs V.! j)))
+      <> cmpModule (Proxy @ord) l r
+  {-# INLINE cmpModule #-}
+
+instance (ModuleOrdering poly ord, IsOrderedPolynomial poly, Reifies (gs :: k) (V.Vector poly))
+      => ModuleOrdering poly (TermWeighted gs ord) where
+  cmpModule _ l@(Signature i t) r@(Signature j u) =
+    let gs = reflect (Proxy :: Proxy gs) :: V.Vector poly
+    in compare
+         (t * leadingMonomial (gs V.! i))
+         (u * leadingMonomial (gs V.! j))
+       <> cmpModule (Proxy @ord) l r
+  {-# INLINE cmpModule #-}
+
+data ModuleElement ord poly = ME { syzSign :: !(WithModOrd ord poly)
+                                 , _polElem :: !poly
+                                 }
+                            deriving (Eq)
 
 data JPair poly = JPair { _jpTerm  :: !(OMonom poly)
                         , _jpIndex :: !Int
@@ -65,8 +134,8 @@ class Multiplicative c => Action c a where
 infixl 7 .*!
 
 instance {-# OVERLAPPING #-} (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly) =>
-         Action (OrderedMonomial ord k) (ModuleElement poly) where
-  m .*! ME u v = ME (m .*! u) (m >* v)
+         Action (OrderedMonomial ord k) (ModuleElement mord poly) where
+  m .*! ME u v = ME (WithModOrd $ m .*! runWithModOrd u) (m >* v)
   {-# INLINE (.*!) #-}
 
 instance {-# OVERLAPPING #-} (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly) =>
@@ -74,24 +143,29 @@ instance {-# OVERLAPPING #-} (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolyno
   m .*! Signature i f = Signature i (m * f)
   {-# INLINE (.*!) #-}
 
+instance {-# OVERLAPPING #-} (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolynomial poly) =>
+         Action (OrderedMonomial ord k) (WithModOrd mord poly) where
+  (.*!) = DC.coerce @(OrderedMonomial ord k -> Signature poly -> Signature poly) (.*!)
+  {-# INLINE (.*!) #-}
+
 -- | Calculates a Groebner basis for a given ideal, and a set of leading monomials of
 --   Groebner basis of the associated syzygy module, as described in [Gao-Iv-Wang](#gao-iv-wang).
-calcSignatureGB :: forall poly.
-                   (Field (Coefficient poly), IsOrderedPolynomial poly)
-                => V.Vector poly -> V.Vector (Signature poly, poly)
-calcSignatureGB side | all isZero side = V.empty
-calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $ do
+calcSignatureGBWith :: forall pxy ord poly.
+                       (Field (Coefficient poly), ModuleOrdering poly ord, IsOrderedPolynomial poly)
+                    => pxy ord -> V.Vector poly -> V.Vector (Signature poly, poly)
+calcSignatureGBWith _ side | all isZero side = V.empty
+calcSignatureGBWith _ (V.map monoize . V.filter (not . isZero) -> sideal) = runST $ do
   let n = V.length sideal
       mods0 = V.generate n basis
       preGs = V.zipWith ME mods0 sideal
-      preHs = Set.fromList [ Signature j lm
+      preHs = Set.fromList [ WithModOrd @ord (Signature @poly j lm)
                            | j <- [0..n - 1]
                            , i <- [0..j - 1]
                            , let lm = leadingMonomial (sideal V.! i)
-                                ]
+                           ]
   gs <- newSTRef =<< V.unsafeThaw preGs
   hs <- newSTRef preHs
-  let preDecode :: JPair poly -> ModuleElement poly
+  let preDecode :: JPair poly -> ModuleElement ord poly
       preDecode (JPair m i) = m .*! (preGs V.! i)
       {-# INLINE preDecode #-}
   jprs <- newSTRef $ H.fromList $
@@ -103,35 +177,37 @@ calcSignatureGB (V.map monoize . V.filter (not . isZero) -> sideal) = runST $ do
           , let qj = preGs V.! j
           , (sig, jpr) <- maybeToList $ jPair (i, qi) (j, qj)
           , let me = preDecode jpr
-          , not $ any (`covers` me) preGs || any ((`covers` me) . sigToElem) preHs
+          , not $ any (`covers` me) preGs || any ((`covers` me) . sigToElem . runWithModOrd) preHs
           ]
-  whileJust_ (H.viewMin <$> readSTRef jprs) $ \(Entry sig (JPair m0 i0), jprs') -> do
+  whileJust_ (H.viewMin <$> readSTRef jprs) $ \(Entry (WithModOrd sig) (JPair m0 i0), jprs') -> do
     writeSTRef jprs jprs'
     curGs <- V.unsafeFreeze =<< readSTRef gs
     hs0   <- readSTRef hs
     let me = m0 .*! (curGs V.! i0)
-        next = any (`covers` me) curGs || any (`sigDivs` sig) hs0
+        next = any (`covers` me) curGs || any ((`sigDivs` sig) . runWithModOrd) hs0
     unless next $ do
       let me'@(ME t v) = reduceModuleElement me curGs
       if isZero v
         then modifySTRef' hs $ Set.insert t
         else do
         let k = V.length curGs
-            decodeJpr :: JPair poly -> ModuleElement poly
+            decodeJpr :: JPair poly -> ModuleElement ord poly
             decodeJpr (JPair m i) | i == k = m .*! me'
                                   | otherwise = m .*! (curGs V.! i)
             {-# INLINE decodeJpr #-}
             syzs = V.foldl' (flip Set.insert) Set.empty $
-                   V.mapMaybe (syzME me') curGs
+                   V.mapMaybe (DC.coerce . syzME me') curGs
         hs .%= (`Set.union` syzs)
         curHs <- readSTRef hs
         let newJprs = Fl.fold Fl.nub $
                       V.filter (\(Entry sg jp) ->
-                                   not $ any (`covers` decodeJpr jp) curGs || any (`sigDivs` sg) curHs) $
+                                   not $
+                                   any (`covers` decodeJpr jp) curGs ||
+                                   any ((`sigDivs` runWithModOrd sg) . runWithModOrd) curHs) $
                       V.imapMaybe (curry $ fmap (uncurry Entry) . jPair (k, me')) curGs
         jprs .%= flip H.union (H.fromList newJprs)
         append gs me'
-  V.map (\(ME u v) -> (u, v)) <$> (V.unsafeFreeze =<< readSTRef gs)
+  V.map (\(ME u v) -> (runWithModOrd u, v)) <$> (V.unsafeFreeze =<< readSTRef gs)
 
 append :: STRef s (MV.MVector s a) -> a -> ST s ()
 append mv a = do
@@ -142,10 +218,18 @@ append mv a = do
   writeSTRef mv g'
 {-# INLINE append #-}
 
-jPair :: (IsOrderedPolynomial poly, Field (Coefficient poly))
-      => (Int, ModuleElement poly)
-      -> (Int, ModuleElement poly)
-      -> Maybe (Signature poly, JPair poly)
+newtype WithModOrd ord poly = WithModOrd { runWithModOrd :: Signature poly }
+  deriving (Eq)
+
+instance ModuleOrdering poly ord => Ord (WithModOrd ord poly) where
+  compare = DC.coerce $ cmpModule @poly @ord Proxy
+  {-# INLINE compare #-}
+
+jPair :: forall ord poly.
+         (IsOrderedPolynomial poly, Field (Coefficient poly), ModuleOrdering poly ord)
+      => (Int, ModuleElement ord poly)
+      -> (Int, ModuleElement ord poly)
+      -> Maybe (WithModOrd ord poly, JPair poly)
 jPair (i, p1@(ME u1 v1)) (j, p2@(ME u2 v2)) = do
   let (lc1, lm1) = leadingTerm v1
       (lc2, lm2) = leadingTerm v2
@@ -154,7 +238,7 @@ jPair (i, p1@(ME u1 v1)) (j, p2@(ME u2 v2)) = do
       t2 = t / lm2
   let jSig1 = t1 .*! u1
   let jSig2 = t2 .*! u2
-  if  jSig1 >= jSig2
+  if jSig1 >= jSig2
     then loop i jSig1 (lc1 / lc2) t1 p1 t2 p2
     else loop j jSig2 (lc2 / lc1) t2 p2 t1 p1
   where
@@ -166,7 +250,7 @@ jPair (i, p1@(ME u1 v1)) (j, p2@(ME u2 v2)) = do
 {-# INLINE jPair #-}
 
 data Signature poly =
-  Signature { position :: {-# UNPACK #-} !Int
+  Signature { _sigPos :: {-# UNPACK #-} !Int
             , sigMonom :: !(OrderedMonomial (MOrder poly) (Arity poly))
             }
 
@@ -177,17 +261,17 @@ instance (Show (Coefficient poly), KnownNat (Arity poly)) => Show (Signature pol
 instance Eq (Signature poly) where
   Signature i m == Signature j n = i == j && n == m
 
-instance IsOrderedPolynomial poly => Ord (Signature poly) where
-  compare (Signature i m) (Signature j n) = compare i j <> compare m n
+-- instance (IsOrderedPolynomial poly, ModuleOrdering (Arity poly) ord) => Ord (Signature poly) where
+--   compare (Signature i m) (Signature j n) = cmpModule (Proxy @ord) (i,m) (j,n)
 
-basis :: IsOrderedPolynomial a => Int -> Signature a
-basis i = Signature i one
+basis :: IsOrderedPolynomial a => Int -> WithModOrd ord a
+basis i = WithModOrd $ Signature i one
 {-# INLINE basis #-}
 
-reduceModuleElement :: (IsOrderedPolynomial poly,
+reduceModuleElement :: (IsOrderedPolynomial poly, ModuleOrdering poly ord,
                         Field (Coefficient poly), Functor t, Foldable t)
-                    => ModuleElement poly -> t (ModuleElement poly)
-                    -> ModuleElement poly
+                    => ModuleElement ord poly -> t (ModuleElement ord poly)
+                    -> ModuleElement ord poly
 reduceModuleElement p qs = loop p
   where
     loop !r =
@@ -196,9 +280,10 @@ reduceModuleElement p qs = loop p
         Just r' -> loop r'
 {-# INLINE reduceModuleElement #-}
 
-regularTopReduce :: (IsOrderedPolynomial poly, Field (Coefficient poly))
-                 => ModuleElement poly -> ModuleElement poly
-                 -> Maybe (ModuleElement poly)
+regularTopReduce :: forall poly ord.
+                    (IsOrderedPolynomial poly, Field (Coefficient poly), ModuleOrdering poly ord)
+                 => ModuleElement ord poly -> ModuleElement ord poly
+                 -> Maybe (ModuleElement ord poly)
 regularTopReduce p1@(ME u1 v1) p2@(ME u2 v2) = do
   guard $ not (isZero v2 || isZero v1) && leadingMonomial v2 `divs` leadingMonomial v1
   let (c, t) = tryDiv (leadingTerm v1) (leadingTerm v2)
@@ -207,10 +292,12 @@ regularTopReduce p1@(ME u1 v1) p2@(ME u2 v2) = do
   guard $ syzSign p == syzSign p1
   return p
 
-cancelModuleElement :: (Field (Coefficient poly), IsOrderedPolynomial poly)
-                    => ModuleElement poly
+cancelModuleElement :: forall ord poly.
+                       (ModuleOrdering poly ord,
+                        Field (Coefficient poly), IsOrderedPolynomial poly)
+                    => ModuleElement ord poly
                     -> Maybe (Coefficient poly)
-                    -> ModuleElement poly -> Maybe (ModuleElement poly)
+                    -> ModuleElement ord poly -> Maybe (ModuleElement ord poly)
 cancelModuleElement (ME u1 v1) mc (ME u2 v2) =
   let c = fromMaybe one mc
       v' = v1 - c .*. v2
@@ -224,30 +311,31 @@ cancelModuleElement (ME u1 v1) mc (ME u2 v2) =
       return $ ME u1 (recip (one - c) .*. v')
 {-# INLINE cancelModuleElement #-}
 
-syzME :: (Field (Coefficient poly), IsOrderedPolynomial poly)
-      => ModuleElement poly -> ModuleElement poly -> Maybe (Signature poly)
+syzME :: (Field (Coefficient poly), IsOrderedPolynomial poly, ModuleOrdering poly ord)
+      => ModuleElement ord poly -> ModuleElement ord poly -> Maybe (WithModOrd ord poly)
 syzME (ME u1 v1) (ME u2 v2) =
-  case comparing position u1 u2 of
-    LT -> Just (leadingMonomial v1 .*! u2)
-    GT -> Just (leadingMonomial v2 .*! u1)
+  let (u1', u2') = (leadingMonomial v2 .*! u1, leadingMonomial v1 .*! u2)
+  in case compare u1' u2' of
+    LT -> Just u2'
+    GT -> Just u1'
     EQ -> do
-      let f = sigMonom u1 >* v2 - sigMonom u2 >* v1
-      guard $ not $ isZero f
-      return $ Signature (position u1) $ leadingMonomial f
+      guard $ leadingCoeff v1 /= leadingCoeff v2
+      return u1'
+{-# INLINE syzME #-}
 
 sigDivs :: IsOrderedPolynomial poly => Signature poly -> Signature poly -> Bool
 sigDivs (Signature i n) (Signature j m) = i == j && n `divs` m
 {-# INLINE sigDivs #-}
 
 covers :: (IsOrderedPolynomial poly)
-       => ModuleElement poly -> ModuleElement poly -> Bool
-covers (ME sig2 v2) (ME sig1 v1) = fromMaybe False $ do
+       => ModuleElement ord poly -> ModuleElement ord poly -> Bool
+covers (ME (WithModOrd sig2) v2) (ME (WithModOrd sig1) v1) = fromMaybe False $ do
   let t = sigMonom sig1 / sigMonom sig2
   return $ sig2 `sigDivs` sig1 && (isZero v2 || t * leadingMonomial v2 < leadingMonomial v1)
 {-# INLINE covers #-}
 
-sigToElem :: IsOrderedPolynomial poly => Signature poly -> ModuleElement poly
-sigToElem sig = ME sig (fromOrderedMonomial $ sigMonom sig)
+sigToElem :: IsOrderedPolynomial poly => Signature poly -> ModuleElement ord poly
+sigToElem sig = ME (WithModOrd sig) (fromOrderedMonomial $ sigMonom sig)
 {-# INLINE sigToElem #-}
 
 {- $refs

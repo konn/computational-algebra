@@ -1,22 +1,25 @@
-{-# OPTIONS_GHC -fno-warn-type-defaults #-}
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs   #-}
 {-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude                #-}
 {-# LANGUAGE NoMonomorphismRestriction, OverloadedStrings, PolyKinds #-}
-{-# LANGUAGE TypeFamilies, UndecidableInstances                      #-}
+{-# LANGUAGE ScopedTypeVariables, TypeApplications, TypeFamilies     #-}
+{-# LANGUAGE UndecidableInstances                                    #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
-import Algebra.Algorithms.Groebner
-import Algebra.Algorithms.Groebner.Homogeneous
-import Algebra.Algorithms.Groebner.Signature
-import Algebra.Internal
-import Algebra.Prelude.Core
-import Algebra.Ring.Ideal
-import Algebra.Ring.Polynomial
-import Control.Monad                           (void)
-import Control.Parallel.Strategies
-import Gauge.Main
-import Gauge.Main.Options
-import Numeric.Field.Fraction                  (Fraction)
+import           Algebra.Algorithms.Groebner
+import           Algebra.Algorithms.Groebner.Homogeneous
+import           Algebra.Algorithms.Groebner.Signature
+import           Algebra.Internal
+import           Algebra.Prelude.Core
+import           Algebra.Ring.Ideal
+import           Algebra.Ring.Polynomial
+import           Control.Monad                           (void)
+import           Control.Parallel.Strategies
+import           Data.Foldable                           (toList)
+import           Data.Reflection                         (reify)
+import qualified Data.Vector                             as V
+import           Gauge.Main
+import           Gauge.Main.Options
+import           Numeric.Field.Fraction                  (Fraction)
 
 i1 :: [OrderedPolynomial (Fraction Integer) Grevlex 7]
 i1 = [y * w - (1 / 2) !* z * w + t*w
@@ -60,14 +63,23 @@ mkTestCases num ideal = [ mkTC ("lex0" ++ either show id num) (mapIdeal (changeO
 
 mkTC :: (IsMonomialOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
 mkTC name jdeal =
-  env (return jdeal) $ \ ~ideal ->
+  env (return (jdeal, V.fromList $ toList jdeal)) $ \ ~(ideal, vec) ->
   bgroup name [ {- bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy) ideal
               , -} bench "syz+sugar" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)) ideal
               -- , bench "standard" $ nf calcGroebnerBasis ideal
               , bench "naive-homog" $ nf calcGroebnerBasisAfterHomogenising ideal
               , bench "hilb" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
               -- , bench "F4" $ nf f4 ideal
-              , bench "F5" $ nf f5 ideal
+              , bench "F5+pot"  $ nf (f5With (Proxy @POT)) ideal
+              , bench "F5+top"  $ nf (f5With (Proxy @TOP)) ideal
+              , bench "F5+term-w-pot" $ reify vec $ \(Proxy :: Proxy gs) ->
+                  nf (f5With (Proxy @(TermWeightedPOT gs))) ideal
+              , bench "F5+term-w-top" $ reify vec $ \(Proxy :: Proxy gs) ->
+                  nf (f5With (Proxy @(TermWeightedTOP gs))) ideal
+              , bench "F5+deg-w-pot" $ reify vec $ \(Proxy :: Proxy gs) ->
+                  nf (f5With (Proxy @(DegreeWeightedPOT gs))) ideal
+              , bench "F5+deg-w-top" $ reify vec $ \(Proxy :: Proxy gs) ->
+                  nf (f5With (Proxy @(DegreeWeightedTOP gs))) ideal
               ]
 
 main :: IO ()
