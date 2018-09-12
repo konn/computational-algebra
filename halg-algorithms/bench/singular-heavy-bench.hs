@@ -11,27 +11,13 @@ import           Algebra.Bridge.Singular
 import           Algebra.Field.Prime
 import           Algebra.Prelude.Core
 import           Control.Monad                   (void)
-import           Control.Parallel.Strategies
 import qualified Data.Text                       as T
 import qualified Data.Vector.Unboxed             as V
-import           Numeric.Field.Fraction          (Fraction)
 import           Prelude                         (read)
 import           Statistics.Resampling
 import           Statistics.Resampling.Bootstrap
 import           Statistics.Types
 import qualified System.Random.MWC               as Rand
-
-
-i2 :: [OrderedPolynomial (Fraction Integer) Grevlex 5]
-i2 =  [35 * y^4 - 30*x*y^2 - 210*y^2*z + 3*x^2 + 30*x*z - 105*z^2 +140*y*t - 21*u
-      ,5*x*y^3 - 140*y^3*z - 3*x^2*y + 45*x*y*z - 420*y*z^2 + 210*y^2*t -25*x*t + 70*z*t + 126*y*u
-      ]
-     where [t,u,x,y,z] = vars
-
-i4 :: [OrderedPolynomial (Fraction Integer) Grevlex 4]
-i4 = [ w+x+y+z, w*x+x*y+y*z+z*w, w*x*y + x*y*z + y*z*w + z*w*x, w*x*y*z - 1]
-  where
-    [x,y,z,w] = vars
 
 benchIdeal :: IsSingularPolynomial poly => Text -> Ideal poly -> IO Double
 benchIdeal fun i = fmap ((/1000) . read . T.unpack) $ singular $
@@ -85,8 +71,6 @@ main = do
   runTestCases "Katsura-5" $ katsura (sing :: Sing 5)
   runTestCases "Katsura-6" $ katsura (sing :: Sing 6)
   runTestCases "Katsura-7" $ katsura (sing :: Sing 7)
-  analyse "I3 (Grevlex, Sing(gr))" "groebner" i3
-  analyse "I3 (Grevlex, Sing(sba))" "sba" i3
 
 ratToF :: Rational -> F 65521
 ratToF = modRat'

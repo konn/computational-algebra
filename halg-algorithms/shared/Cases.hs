@@ -4,7 +4,6 @@
 {-# LANGUAGE Rank2Types, RankNTypes, ScopedTypeVariables, TypeFamilies #-}
 {-# LANGUAGE TypeOperators, UndecidableInstances                       #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 module Cases (FPol, cyclic, katsura, katsura8, katsura9, i3, quotPair) where
 import           Algebra.Normed
 import           Algebra.Prelude.Core
@@ -38,7 +37,7 @@ katsura9 :: Ideal (Polynomial Rational 10)
 katsura9 = katsura sing
 
 katsura :: SNat n -> Ideal (Polynomial Rational (n + 1))
-katsura sn = withKnownNat sn $
+katsura sn = withKnownNat (sn %+ sOne) $ withKnownNat sn $
   let vs = V.fromList vars
       n  = fromIntegral (toNatural sn)
       u k | k >= n + 1 = zero

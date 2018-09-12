@@ -1,8 +1,8 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs      #-}
-{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude                   #-}
-{-# LANGUAGE NoMonomorphismRestriction, OverloadedStrings, PolyKinds    #-}
-{-# LANGUAGE Rank2Types, RankNTypes, ScopedTypeVariables, TupleSections #-}
-{-# LANGUAGE TypeApplications, TypeFamilies, UndecidableInstances       #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs   #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude                #-}
+{-# LANGUAGE NoMonomorphismRestriction, OverloadedStrings, PolyKinds #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications       #-}
+{-# LANGUAGE TypeFamilies, UndecidableInstances                      #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
 import           Algebra.Algorithms.Groebner.Signature
@@ -23,13 +23,26 @@ makeCase :: String
          -> [Benchmark]
 makeCase name calc =
   [   bgroup name
-      [mkTC calc "Cyclic 4"  $ cyclic (sing :: Sing 4)
-      ,mkTC calc "Cyclic 5"  $ cyclic (sing :: Sing 5)
-      ,mkTC calc "Cyclic 6"  $ cyclic (sing :: Sing 6)
-      ,mkTC calc "Katsura 5" $ katsura (sing :: Sing 5)
-      ,mkTC calc "Katsura 6" $ katsura (sing :: Sing 6)
-      ,mkTC calc "Katsura 7" $ katsura (sing :: Sing 7)
+      [mkTC calc "Cyclic-4"  $ cyclic (sing :: Sing 4)
+      ,mkTC calc "Cyclic-5"  $ cyclic (sing :: Sing 5)
+      ,mkTC calc "Cyclic-6"  $ cyclic (sing :: Sing 6)
+      ,mkTC calc "Katsura-5" $ katsura (sing :: Sing 5)
+      ,mkTC calc "Katsura-6" $ katsura (sing :: Sing 6)
+      ,mkTC calc "Katsura-7" $ katsura (sing :: Sing 7)
       ]
+  ]
+
+data SomeIdeal k where
+  SomeIdeal :: KnownNat n => Ideal (Polynomial k n) -> SomeIdeal k
+
+inputs :: [(String, SomeIdeal Rational)]
+inputs =
+  [ ("Cyclic-4"  , SomeIdeal $ cyclic (sing :: Sing 4))
+  , ("Cyclic-5"  , SomeIdeal $ cyclic (sing :: Sing 5))
+  , ("Cyclic-6"  , SomeIdeal $ cyclic (sing :: Sing 6))
+  , ("Katsura-5" , SomeIdeal $ katsura (sing :: Sing 5))
+  , ("Katsura-6" , SomeIdeal $ katsura (sing :: Sing 6))
+  , ("Katsura-7" , SomeIdeal $ katsura (sing :: Sing 7))
   ]
 
 mkTC :: forall n. (KnownNat n)
@@ -81,5 +94,7 @@ dic = [ ("f5+pot", CalcPoly $ const $ f5With (Proxy :: Proxy POT))
       ]
 
 main :: IO ()
-main = defaultMainWith defaultConfig {csvFile = Just "heavy-f5.csv"} $
-    concat [ makeCase nam calc | (nam, calc) <- dic ]
+main = defaultMainWith defaultConfig {csvFile = Just "heavy-f5.csv"}
+     [ bgroup iname [ mkTC calc nam jdeal | (nam, calc) <- dic ]
+     | (iname, SomeIdeal jdeal) <- inputs
+     ]
