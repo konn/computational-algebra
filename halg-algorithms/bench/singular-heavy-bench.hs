@@ -58,7 +58,7 @@ analyse lab fun ideal = do
   let [Estimate mn (ConfInt lbmn ubmn _) ,Estimate dv _]
         = bootstrapBCA cl95 i2Gr res
   putStrLn lab
-  putStrLn $ unlines $ map ('\t':)
+  mapM_ (putStrLn . ('\t':))
     ["Mean:\t" ++ show mn ++ "(ms)"
     ,"MeanLB:\t" ++ show lbmn
     ,"MeanUB:\t" ++ show ubmn
