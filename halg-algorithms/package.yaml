@@ -218,8 +218,6 @@ benchmarks:
 
   sugar-paper-bench:
     main: sugar-paper.hs
-    other-modules:
-    - Cases
     source-dirs:
     - bench
     dependencies:
