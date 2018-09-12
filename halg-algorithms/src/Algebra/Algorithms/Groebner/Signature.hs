@@ -1,7 +1,17 @@
 {-# LANGUAGE BangPatterns, ScopedTypeVariables, StandaloneDeriving #-}
 {-# LANGUAGE ViewPatterns                                          #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
-module Algebra.Algorithms.Groebner.Signature (f5) where
+-- | Signature-based Groebner basis algorithms, such as Faugère's \(F_5\).
+--
+--   You can import "Algebra.Algorithms.Groebner.Signature.Rules" to
+--   replace every occurence of @'Algebra.Algorithms.Groebner.calcGroebnerBasis'@ with @'f5'@;
+--   but its effect is pervasive, you should not import in the /library-site/.
+module Algebra.Algorithms.Groebner.Signature
+  ( -- * Algorithms
+    f5, calcSignatureGB,
+    -- * References
+    -- $refs
+  ) where
 import           Algebra.Prelude.Core         hiding (Vector)
 import qualified Control.Foldl                as Fl
 import           Control.Monad.Loops          (whileJust_)
@@ -27,6 +37,10 @@ instance Eq a => Eq (Entry a b) where
 instance Ord a => Ord (Entry a b) where
   compare = comparing priority
 
+-- | Calculates a Gröbner basis of a given ideal using
+--   the signature-based algorithm as described in [Gao-Iv-Wang](#gao-iv-wang).
+--
+--   This is the fastest implementation in this library so far.
 f5 :: (IsOrderedPolynomial a, Field (Coefficient a))
    => Ideal a -> [a]
 f5 ideal = let sideal = V.fromList $ generators ideal
@@ -60,6 +74,8 @@ instance {-# OVERLAPPING #-} (Arity poly ~ k, MOrder poly ~ ord, IsOrderedPolyno
   m .*! Signature i f = Signature i (m * f)
   {-# INLINE (.*!) #-}
 
+-- | Calculates a Groebner basis for a given ideal, and a set of leading monomials of
+--   Groebner basis of the associated syzygy module, as described in [Gao-Iv-Wang](#gao-iv-wang).
 calcSignatureGB :: forall poly.
                    (Field (Coefficient poly), IsOrderedPolynomial poly)
                 => V.Vector poly -> V.Vector (Signature poly, poly)
@@ -233,3 +249,13 @@ covers (ME sig2 v2) (ME sig1 v1) = fromMaybe False $ do
 sigToElem :: IsOrderedPolynomial poly => Signature poly -> ModuleElement poly
 sigToElem sig = ME sig (fromOrderedMonomial $ sigMonom sig)
 {-# INLINE sigToElem #-}
+
+{- $refs
+  * J.-C. Faugère, __A new efficient algorithm for computing Gröbner bases without reduction to zero ( \(F_5\) )__, 2014. DOI: [10.1145/780506.780516](https://doi.org/10.1145/780506.780516).
+
+  * C. Eder and J.-C. Faugère, __A survey on signature-based Gröbner basis computations__, 2015. arXiv: <https://arxiv.org/abs/1404.1774>.
+
+  * D. Cox, J. Little, and D. O'Shea, __Additional Gröbner Basis Algorithms__, Chapter 10 in /Ideals, Variaeties and Algorithms/, 4th ed, Springer, 2015.
+
+  * #gao-iv-wang#S. Gao, F. V. Iv, and M. Wang, __A new framework for computing Gröbner bases__, 2016. DOI: [10.1090/mcom/2969](https://dx.doi.org/10.1090/mcom/2969).
+-}
