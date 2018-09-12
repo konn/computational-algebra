@@ -405,11 +405,6 @@ intersection ideals
             inj = padLeftPoly sk Grevlex
             tis = zipWith (\ideal t -> mapIdeal ((t *) . inj) ideal) (F.toList ideals) ts
             j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
-    -- in withRefl (plusMinus' sk sn) $
-    --    withWitness (plusLeqL sk sn) $
-    --    mapIdeal injectVars $
-    --    coerce (cong Proxy $ minusCongL (plusComm sk sn) sk `trans` plusMinus sn sk) $
-    --    thEliminationIdeal sk j
         in eliminatePadding j
 
 -- | Ideal quotient by a principal ideals.
