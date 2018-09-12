@@ -1,13 +1,14 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts            #-}
-{-# LANGUAGE FlexibleInstances, GADTs, MultiParamTypeClasses         #-}
-{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction            #-}
-{-# LANGUAGE OverloadedStrings, PolyKinds, Rank2Types, RankNTypes    #-}
-{-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts              #-}
+{-# LANGUAGE FlexibleInstances, GADTs, MultiParamTypeClasses           #-}
+{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction, PolyKinds   #-}
+{-# LANGUAGE Rank2Types, RankNTypes, ScopedTypeVariables, TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances                                      #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
-module Cases (FPol, cyclic, katsura8, katsura9, i3) where
+module Cases (FPol, cyclic, katsura8, katsura9, i3, quotPair) where
 import Algebra.Normed
 import Algebra.Prelude.Core
-import Data.List            (tails)
+import Algebra.Ring.Polynomial.Labeled
+import Data.List                       (tails)
 
 type FPol p = (IsOrderedPolynomial p, Num (Coefficient p),
                Normed (Coefficient p), Field (Coefficient p))
@@ -53,3 +54,9 @@ katsura9 =
      , x3^2+2*x2 *x4 +2*x1 *x5 +2*x0 *x6+ 2*x1 *x7 +2*x2 *x8 -x6
      , 2*x3 *x4 +2*x2 *x5 +2*x1 *x6 +2*x0 *x7+ 2*x1 *x8 -x7
      ]
+
+type QXYZ = LabPolynomial' Rational Grevlex '["x", "y", "z"]
+quotPair :: (Ideal QXYZ, Ideal QXYZ)
+quotPair = ( toIdeal [ (#x + #y)^2 * (#x - #y) * (#x + #z^2)]
+           , toIdeal [ (#x + #z^2)^3 * (#x - #y) * (#z + #y)]
+           )
