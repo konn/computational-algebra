@@ -9,8 +9,6 @@ import Cases
 
 import Algebra.Algorithms.Groebner
 import Algebra.Prelude.Core
-import Algebra.Ring.Polynomial.Labeled
-import Control.Monad                   (void)
 import Gauge.Main
 import Gauge.Main.Options
 
@@ -18,7 +16,7 @@ import Gauge.Main.Options
 main :: IO ()
 main =
   defaultMainWith defaultConfig
-    [ env (return quotPair) $ \ ~args ->
+    [ env (return quotPair) $ \ args ->
         bgroup "non-rewrite"
         [ bench "quot" $ nf (uncurry quotIdeal) args
         ]

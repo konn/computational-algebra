@@ -218,7 +218,8 @@ benchmarks:
 
   sugar-paper-bench:
     main: sugar-paper.hs
-    other-modules: []
+    other-modules:
+    - Cases
     source-dirs:
     - bench
     dependencies:
@@ -242,7 +243,8 @@ benchmarks:
 
   quot-non-rewrite-bench:
     main: quot-non-rewrite-bench.hs
-    other-modules: []
+    other-modules:
+    - Cases
     source-dirs:
     - bench
     - shared
@@ -267,7 +269,8 @@ benchmarks:
 
   quot-rewrite-bench:
     main: quot-rewrite-bench.hs
-    other-modules: []
+    other-modules:
+    - Cases
     source-dirs:
     - bench
     - shared
@@ -292,7 +295,8 @@ benchmarks:
 
   singular-bench:
     main: singular-bench.hs
-    other-modules: []
+    other-modules:
+    - Cases
     source-dirs:
     - bench
     dependencies:
@@ -321,7 +325,8 @@ benchmarks:
 
   singular-heavy-bench:
     main: singular-heavy-bench.hs
-    other-modules: []
+    other-modules:
+    - Cases
     source-dirs:
     - bench
     - shared

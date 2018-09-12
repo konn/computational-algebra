@@ -259,9 +259,9 @@ calcGroebnerBasisWith :: (IsOrderedPolynomial poly,
                       => order -> Ideal poly
                       -> [OrderedPolynomial (Coefficient poly) order (Arity poly)]
 calcGroebnerBasisWith _ord = calcGroebnerBasis . mapIdeal injectVars
-{-# INLINE [1] calcGroebnerBasisWith #-}
+{-# INLINE [2] calcGroebnerBasisWith #-}
 {-# RULES
-"calcGroebnerBasisWith/sameOrderPolyn" [~1] forall x.
+"calcGroebnerBasisWith/sameOrderPolyn" [~2] forall x.
   calcGroebnerBasisWith x = calcGroebnerBasis
   #-}
 
@@ -277,21 +277,22 @@ calcGroebnerBasisWithStrategy strategy =
 calcGroebnerBasis :: (Field (Coefficient poly), IsOrderedPolynomial poly)
                   => Ideal poly -> [poly]
 calcGroebnerBasis = reduceMinimalGroebnerBasis . minimizeGroebnerBasis . syzygyBuchberger
-{-# SPECIALISE INLINE [0]
+{-# SPECIALISE INLINE [2]
     calcGroebnerBasis :: (CoeffRing r, Field r, IsMonomialOrder n ord, KnownNat n)
                       => Ideal (OrderedPolynomial r ord n) -> [OrderedPolynomial r ord n]
  #-}
-{-# SPECIALISE INLINE [0]
+{-# SPECIALISE INLINE [2]
     calcGroebnerBasis :: (CoeffRing r, Field r)
                       => Ideal (Unipol r) -> [Unipol r]
  #-}
-{-# INLINE [0] calcGroebnerBasis #-}
+{-# INLINE [2] calcGroebnerBasis #-}
 
 
 -- | Test if the given polynomial is the member of the ideal.
 isIdealMember :: (Field (Coefficient poly), IsOrderedPolynomial poly)
               => poly -> Ideal poly -> Bool
 isIdealMember f ideal = groebnerTest f (calcGroebnerBasis ideal)
+{-# INLINE isIdealMember #-}
 
 -- | Test if the given polynomial can be divided by the given polynomials.
 groebnerTest :: (Field (Coefficient poly), IsOrderedPolynomial poly)
@@ -344,6 +345,7 @@ thEliminationIdeal n = withSingI (sOnes n) $
   withKnownNat n $
   withKnownNat ((sing :: SNat (Arity poly)) %-. n) $
   mapIdeal (changeOrderProxy Proxy) . thEliminationIdealWith (weightedEliminationOrder n) n
+{-# INLINE CONLIKE thEliminationIdeal #-}
 
 -- | Calculate n-th elimination ideal using the specified n-th elimination type order.
 thEliminationIdealWith :: ( IsOrderedPolynomial poly,
@@ -375,6 +377,7 @@ unsafeThEliminationIdealWith ord n ideal =
                            | f <- calcGroebnerBasisWith ord ideal
                            , all (oall (== 0) . V.takeAtMost n . getMonomial . snd) $ getTerms f
                            ]
+{-# INLINE CONLIKE unsafeThEliminationIdealWith #-}
 
 eliminatePadding :: (IsOrderedPolynomial poly,
                      IsMonomialOrder n ord,
@@ -389,6 +392,7 @@ eliminatePadding ideal =
           , let (c, m) = leadingTerm $ runPadPolyL f0
           , m == one
           ]
+{-# INLINE CONLIKE eliminatePadding #-}
 
 -- | An intersection ideal of given ideals (using 'WeightedEliminationOrder').
 intersection :: forall poly.
@@ -406,6 +410,7 @@ intersection ideals
             tis = zipWith (\ideal t -> mapIdeal ((t *) . inj) ideal) (F.toList ideals) ts
             j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
         in eliminatePadding j
+{-# INLINE CONLIKE intersection #-}
 
 -- | Ideal quotient by a principal ideals.
 quotByPrincipalIdeal :: (Field (Coefficient poly), IsOrderedPolynomial poly)
@@ -414,6 +419,7 @@ quotByPrincipalIdeal :: (Field (Coefficient poly), IsOrderedPolynomial poly)
                      -> Ideal poly
 quotByPrincipalIdeal i g =
   fmap (snd . head . (`divPolynomial` [g])) $ intersection [i, principalIdeal g]
+{-# INLINE CONLIKE quotByPrincipalIdeal #-}
 
 -- | Ideal quotient by the given ideal.
 quotIdeal :: forall poly.
@@ -423,6 +429,7 @@ quotIdeal :: forall poly.
           -> Ideal poly
 quotIdeal i g =
   intersection $ map (i `quotByPrincipalIdeal`) $ F.toList g
+{-# INLINE CONLIKE quotIdeal #-}
 
 -- | Saturation by a principal ideal.
 saturationByPrincipalIdeal :: forall poly.
@@ -440,6 +447,7 @@ saturationByPrincipalIdeal is g =
      eliminatePadding $
      addToIdeal (one - (padLeftPoly sOne Grevlex g * var 0)) $
      mapIdeal (padLeftPoly sOne Grevlex) is
+{-# INLINE CONLIKE saturationByPrincipalIdeal #-}
 
 -- | Saturation ideal
 saturationIdeal :: forall poly.
@@ -450,6 +458,7 @@ saturationIdeal :: forall poly.
                 -> Ideal poly
 saturationIdeal i g =
   intersection $ map (i `saturationByPrincipalIdeal`) $ F.toList g
+{-# INLINE CONLIKE saturationIdeal #-}
 
 -- | Calculate resultant for given two unary polynomimals.
 resultant :: forall poly.
@@ -491,6 +500,7 @@ lcmPolynomial :: forall poly.
               -> poly
               -> poly
 lcmPolynomial f g = head $ generators $ intersection [principalIdeal f,  principalIdeal g]
+{-# INLINE lcmPolynomial #-}
 
 -- | Calculates the Greatest Common Divisor of the given pair of polynomials.
 gcdPolynomial :: (Field (Coefficient poly),
@@ -499,3 +509,4 @@ gcdPolynomial :: (Field (Coefficient poly),
               -> poly
               -> poly
 gcdPolynomial f g = snd $ head $ f * g `divPolynomial` [lcmPolynomial f g]
+{-# INLINE CONLIKE gcdPolynomial #-}
