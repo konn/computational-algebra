@@ -2,7 +2,7 @@
 {-|
 This module provides a series of rewriting rules, replacing invocations on
 @'Algebra.Algorithms.Groebner.calcGroebnerBasis'@ and
-@'Algebra.Algorithms.Groebner.calcGroebnerBasisWith'@ with @'f5'@ followed with minimisation and reduction of basis.
+@'Algebra.Algorithms.Groebner.calcGroebnerBasisWith'@ with @'f5'@ followed by minimisation and reduction of basis.
 Since @'f5'@ is the fastest implementation for general Gröbner basis computation in this package,
 it is expected that doing this improves the performance.
 
@@ -17,9 +17,11 @@ In addition, we __DO NOT__ rewrite other Buchberger-specific functions such as
 @'Algebra.Algorithms.Groebner.calcGroebnerBasisWithStrategy'@ or @'Algebra.Algorithms.Groebner.syzygyBuchberger'@.
 -}
 module Algebra.Algorithms.Groebner.Signature.Rules () where
-import Algebra.Prelude.Core (convertPolynomial', mapIdeal, (.), const)
-import qualified Algebra.Algorithms.Groebner as GB
-import Algebra.Algorithms.Groebner.Signature (f5)
+import qualified Algebra.Algorithms.Groebner           as GB
+import           Algebra.Algorithms.Groebner.Signature (f5)
+import           Algebra.Prelude.Core                  (const)
+import           Algebra.Prelude.Core                  (convertPolynomial')
+import           Algebra.Prelude.Core                  (mapIdeal, (.))
 
 {-# RULES
 "calcGroebnerBasis/f5"
@@ -30,4 +32,4 @@ import Algebra.Algorithms.Groebner.Signature (f5)
 
 "calcGroebnerBasisWith/f5 . convertPolynomial"
   GB.calcGroebnerBasisWith = const (GB.reduceMinimalGroebnerBasis . GB.minimizeGroebnerBasis . f5 . mapIdeal convertPolynomial')
-#-}
+ #-}
