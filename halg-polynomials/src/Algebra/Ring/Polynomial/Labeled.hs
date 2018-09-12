@@ -1,9 +1,10 @@
-{-# LANGUAGE CPP, ConstraintKinds, DataKinds, FlexibleContexts             #-}
-{-# LANGUAGE FlexibleInstances, GADTs, IncoherentInstances, KindSignatures #-}
-{-# LANGUAGE MultiParamTypeClasses, OverloadedLabels, PatternSynonyms      #-}
-{-# LANGUAGE PolyKinds, RankNTypes, RoleAnnotations, ScopedTypeVariables   #-}
-{-# LANGUAGE TypeFamilies, TypeInType, TypeOperators, UndecidableInstances #-}
-{-# LANGUAGE UndecidableSuperClasses                                       #-}
+{-# LANGUAGE CPP, ConstraintKinds, DataKinds, FlexibleContexts          #-}
+{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving       #-}
+{-# LANGUAGE IncoherentInstances, KindSignatures, MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedLabels, PatternSynonyms, PolyKinds, RankNTypes   #-}
+{-# LANGUAGE RoleAnnotations, ScopedTypeVariables, TypeFamilies         #-}
+{-# LANGUAGE TypeInType, TypeOperators, UndecidableInstances            #-}
+{-# LANGUAGE UndecidableSuperClasses                                    #-}
 module Algebra.Ring.Polynomial.Labeled
        (IsUniqueList, LabPolynomial(LabelPolynomial, unLabelPolynomial),
         LabPolynomial', LabUnipol, Wraps,
@@ -17,6 +18,7 @@ import Algebra.Ring.Polynomial.Univariate
 import Algebra.Scalar
 
 import           AlgebraicPrelude
+import           Control.DeepSeq              (NFData)
 import           Control.Lens                 (each, (%~), (&))
 import qualified Data.Coerce                  as DC
 import           Data.Function                (on)
@@ -68,6 +70,7 @@ instance (KnownSymbol symb,
 
 newtype LabPolynomial poly (vars :: [Symbol]) =
   LabelPolynomial_ { _unLabelPolynomial :: poly }
+  deriving (NFData)
 type role LabPolynomial representational nominal
 
 {-# COMPLETE LabelPolynomial #-}
