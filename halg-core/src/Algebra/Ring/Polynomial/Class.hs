@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, ExplicitNamespaces                #-}
+{-# LANGUAGE BangPatterns, ConstraintKinds, DataKinds, ExplicitNamespaces  #-}
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                    #-}
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, NoImplicitPrelude #-}
 {-# LANGUAGE ParallelListComp, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
@@ -41,6 +41,7 @@ import qualified Data.List                        as L
 import qualified Data.Map.Strict                  as M
 import           Data.Maybe                       (catMaybes, fromJust,
                                                    fromMaybe)
+import           Data.Monoid                      (First (..))
 import           Data.MonoTraversable
 import qualified Data.Ratio                       as R
 import qualified Data.Set                         as S
@@ -640,12 +641,40 @@ divModPolynomial f0 fs = loop f0 zero (P.zip (L.nub fs) (P.repeat zero))
                      let q = toPolynomial $ leadingTerm p `tryDiv` leadingTerm g
                          dic' = xs P.++ (g, old + q) : ys
                      in loop (p - (q * g)) r dic'
-{-# INLINABLE divModPolynomial #-}
+{-# INLINABLE [2] divModPolynomial #-}
 
 -- | Remainder of given polynomial w.r.t. the second argument.
-modPolynomial :: (IsOrderedPolynomial poly, Field (Coefficient poly))
-              => poly -> [poly] -> poly
-modPolynomial = (snd .) . divModPolynomial
+modPolynomial :: (IsOrderedPolynomial poly, Field (Coefficient poly), Foldable t)
+              => poly -> t poly -> poly
+modPolynomial p rs = loop p zero
+  where
+    step r q =  do
+      let ltR = leadingTerm r
+          ltQ = leadingTerm q
+          lt  = ltR `tryDiv` ltQ
+      guard $ not (isZero r || isZero q) && snd ltQ `divs` snd ltR
+      return $ r - toPolynomial lt * q
+    loop !q !r
+      | isZero q = r
+      | otherwise =
+          case getFirst $ foldMap (First . step q) rs of
+            Just q' -> loop q' r
+            Nothing ->
+              let lt = toPolynomial $ leadingTerm q
+              in loop (q - lt) (r + lt)
+{-# SPECIALISE
+ modPolynomial :: (IsOrderedPolynomial poly, Field (Coefficient poly))
+                => poly -> [poly] -> poly
+ #-}
+
+{-# RULES
+"snd . divModPolynomial"
+  (snd .) . divModPolynomial = modPolynomial
+"snd . divModPolynomial p" forall p.
+  snd . divModPolynomial p = modPolynomial p
+"snd (divModPolynomial p qs)" forall p qs.
+  snd (divModPolynomial p qs) = modPolynomial p qs
+ #-}
 
 -- | A Quotient of given polynomial w.r.t. the second argument.
 divPolynomial :: (IsOrderedPolynomial poly, Field (Coefficient poly))

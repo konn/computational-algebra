@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds, ExplicitNamespaces, GADTs, PatternSynonyms #-}
+{-# LANGUAGE ScopedTypeVariables                                   #-}
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 module GroebnerSpec where
 import Algebra.Algorithms.Groebner
@@ -37,6 +38,13 @@ spec = parallel $ do
       within (minutes 5) $ checkForArity [1..4] prop_degdecay
     prop "divides correctly" $
       within (minutes 5) $ checkForArity [1..4] prop_divCorrect
+  describe "modPolynomial" $ modifyMaxSize (const 10) $ modifyMaxSuccess (const 10) $ do
+    prop "Generates the same remainder as divModPolynomial" $
+      within (minutes 5) $ checkForArity [1..4] $ \(sdim :: SNat n) ->
+      forAll (polynomialOfArity sdim) $ \poly ->
+      forAll (idealOfArity sdim) $ \ideal ->
+        let gs = F.toList ideal
+        in (poly `modPolynomial` gs) === snd (divModPolynomial poly gs)
   describe "calcGroebnerBasis" $ modifyMaxSize (const 5) $ modifyMaxSuccess (const 10) $ do
     prop "passes S-test" $
       setSize 3 $
