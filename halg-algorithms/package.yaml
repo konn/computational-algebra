@@ -221,18 +221,20 @@ benchmarks:
     source-dirs:
     - bench
     dependencies:
-    - halg-core
-    - halg-core-test
-    - halg-algorithms
+    - QuickCheck
     - constraints
     - containers
-    - gauge
     - deepseq
+    - gauge
+    - halg-algorithms
+    - halg-core
+    - halg-core-test
     - matrix
     - parallel
     - process
+    - reflection
     - sized
-    - QuickCheck
+    - vector
     ghc-options:
     - -O2
     - -threaded
@@ -293,8 +295,6 @@ benchmarks:
 
   singular-bench:
     main: singular-bench.hs
-    other-modules:
-    - Cases
     source-dirs:
     - bench
     dependencies:
