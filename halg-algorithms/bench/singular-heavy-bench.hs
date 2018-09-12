@@ -82,8 +82,9 @@ main = do
   runTestCases "Cyclic4" $ cyclic (sing :: Sing 4)
   runTestCases "Cyclic5" $ cyclic (sing :: Sing 5)
   runTestCases "Cyclic6" $ cyclic (sing :: Sing 6)
-  runTestCases "Katsura-8" katsura8
-  runTestCases "Katsura-9" katsura9
+  runTestCases "Katsura-5" $ katsura (sing :: Sing 5)
+  runTestCases "Katsura-6" $ katsura (sing :: Sing 6)
+  runTestCases "Katsura-7" $ katsura (sing :: Sing 7)
   analyse "I3 (Grevlex, Sing(gr))" "groebner" i3
   analyse "I3 (Grevlex, Sing(sba))" "sba" i3
 

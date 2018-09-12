@@ -93,6 +93,9 @@ _prof-settings: &prof-settings
   - halg-polynomials
   - halg-algorithms
   - deepseq
+  - ghc-typelits-knownnat
+  - reflection
+  - vector
 
 executables:
   f5-prof:
@@ -160,6 +163,9 @@ _heavy_bench: &heavy_bench
   - folds
   - foldl
   - lens
+  - reflection
+  - vector
+  - ghc-typelits-knownnat
   ghc-options:
   - -Wall
   - -O2
@@ -249,12 +255,15 @@ benchmarks:
     - bench
     - shared
     dependencies:
+    - ghc-typelits-knownnat
     - halg-core
     - halg-core-test
     - halg-algorithms
     - constraints
     - containers
+    - vector
     - gauge
+    - reflection
     - deepseq
     - matrix
     - parallel
@@ -275,14 +284,17 @@ benchmarks:
     - bench
     - shared
     dependencies:
+    - ghc-typelits-knownnat
     - halg-core
     - halg-core-test
     - halg-algorithms
     - constraints
     - containers
+    - vector
     - gauge
     - deepseq
     - matrix
+    - reflection
     - parallel
     - process
     - sized
@@ -329,6 +341,7 @@ benchmarks:
     - bench
     - shared
     dependencies:
+    - ghc-typelits-knownnat
     - text
     - statistics
     - vector
@@ -336,7 +349,9 @@ benchmarks:
     - halg-core-test
     - halg-algorithms
     - halg-bridge-singular
+    - vector
     - mwc-random
+    - reflection
     - constraints
     - containers
     - gauge
@@ -364,6 +379,7 @@ benchmarks:
     other-modules: Cases
     dependencies:
     - QuickCheck
+    - ghc-typelits-knownnat
     - constraints
     - containers
     - deepseq
@@ -371,9 +387,11 @@ benchmarks:
     - halg-algorithms
     - halg-core
     - halg-core-test
+    - vector
     - lens
     - matrix
     - parallel
+    - reflection
     - process
     - sized
     ghc-options:
