@@ -1,6 +1,6 @@
-{-# LANGUAGE BangPatterns, DataKinds, KindSignatures, PolyKinds        #-}
-{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeApplications #-}
-{-# LANGUAGE TypeInType, ViewPatterns                                  #-}
+{-# LANGUAGE BangPatterns, DataKinds, KindSignatures, PolyKinds, RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeApplications      #-}
+{-# LANGUAGE TypeInType, ViewPatterns                                       #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 -- | Signature-based Groebner basis algorithms, such as Faugère's \(F_5\).
 --
@@ -10,6 +10,7 @@
 module Algebra.Algorithms.Groebner.Signature
   ( -- * Algorithms
     f5, f5With, calcSignatureGB, calcSignatureGBWith,
+    withDegreeWeights, withTermWeights,
     -- * Classes
     ModuleOrdering(..), POT(..), TOP(..),
     DegreeWeighted(..), TermWeighted(..),
@@ -26,7 +27,6 @@ import           Control.Monad.ST.Combinators (ST, STRef, modifySTRef',
                                                writeSTRef, (.%=))
 import qualified Data.Coerce                  as DC
 import qualified Data.Heap                    as H
-import           Data.Kind                    (Type)
 import           Data.Monoid                  (First (..))
 import           Data.Reflection              (Reifies (..), reify)
 import qualified Data.Set                     as Set
@@ -65,8 +65,7 @@ f5With pxy ideal = let sideal = V.fromList $ generators ideal
 calcSignatureGB :: forall poly.
                    (Field (Coefficient poly), IsOrderedPolynomial poly)
                 => V.Vector poly -> V.Vector (Signature poly, poly)
-calcSignatureGB gs =
-  reify gs $ \(_ :: Proxy (gs :: Type)) -> calcSignatureGBWith (Proxy @(TermWeightedPOT gs)) gs
+calcSignatureGB = withTermWeights (Proxy @POT) $ \pxy gs -> calcSignatureGBWith pxy gs
 {-# INLINE CONLIKE calcSignatureGB #-}
 
 class ModuleOrdering poly ord where
@@ -95,23 +94,42 @@ type TermWeightedTOP gs   = TermWeighted gs TOP
 newtype DegreeWeighted (gs :: k) ord = DegreeWeighted ord
 newtype TermWeighted (gs :: k) ord = TermWeighted ord
 
-instance (ModuleOrdering poly ord, IsOrderedPolynomial poly, Reifies (gs :: k) (V.Vector poly))
-      => ModuleOrdering poly (DegreeWeighted gs ord) where
+withDegreeWeights :: forall ord poly proxy a. (IsOrderedPolynomial poly, ModuleOrdering poly ord)
+                  => proxy ord
+                  -> (forall k (gs :: k). Reifies gs (V.Vector Int) => Proxy (DegreeWeighted gs ord) -> V.Vector poly -> a)
+                  -> V.Vector poly -> a
+withDegreeWeights _ bdy vs =
+  reify (V.map (fromIntegral . totalDegree') vs) $ \(_ :: Proxy gs) ->
+    bdy (Proxy :: Proxy (DegreeWeighted gs ord)) vs
+
+withTermWeights :: forall ord poly proxy a. (IsOrderedPolynomial poly, ModuleOrdering poly ord)
+                  => proxy ord
+                  -> (forall k (gs :: k). Reifies gs (V.Vector (OrderedMonomial (MOrder poly) (Arity poly)))
+                      => Proxy (TermWeighted gs ord) -> V.Vector poly -> a)
+                  -> V.Vector poly -> a
+withTermWeights _ bdy vs =
+  reify (V.map leadingMonomial vs) $ \(_ :: Proxy gs) ->
+    bdy (Proxy :: Proxy (TermWeighted gs ord)) vs
+
+instance (ModuleOrdering poly ord, IsOrderedPolynomial poly, Reifies (gs :: k) (V.Vector Int))
+       => ModuleOrdering poly (DegreeWeighted gs ord) where
   cmpModule _ l@(Signature i t) r@(Signature j u) =
-    let gs = reflect (Proxy :: Proxy gs) :: V.Vector poly
+    let gs = reflect (Proxy :: Proxy gs) :: V.Vector Int
     in compare
-         (totalDegree t + fromIntegral (totalDegree' (gs V.! i)))
-         (totalDegree u + fromIntegral (totalDegree' (gs V.! j)))
+         (totalDegree t + (gs V.! i))
+         (totalDegree u + (gs V.! j))
       <> cmpModule (Proxy @ord) l r
   {-# INLINE cmpModule #-}
 
-instance (ModuleOrdering poly ord, IsOrderedPolynomial poly, Reifies (gs :: k) (V.Vector poly))
+instance (ModuleOrdering poly ord,
+          IsOrderedPolynomial poly,
+          Reifies (gs :: k) (V.Vector (OrderedMonomial (MOrder poly) (Arity poly))))
       => ModuleOrdering poly (TermWeighted gs ord) where
   cmpModule _ l@(Signature i t) r@(Signature j u) =
-    let gs = reflect (Proxy :: Proxy gs) :: V.Vector poly
+    let gs = reflect (Proxy :: Proxy gs)
     in compare
-         (t * leadingMonomial (gs V.! i))
-         (u * leadingMonomial (gs V.! j))
+         (t * (gs V.! i))
+         (u * (gs V.! j))
        <> cmpModule (Proxy @ord) l r
   {-# INLINE cmpModule #-}
 
@@ -260,9 +278,6 @@ instance (Show (Coefficient poly), KnownNat (Arity poly)) => Show (Signature pol
 
 instance Eq (Signature poly) where
   Signature i m == Signature j n = i == j && n == m
-
--- instance (IsOrderedPolynomial poly, ModuleOrdering (Arity poly) ord) => Ord (Signature poly) where
---   compare (Signature i m) (Signature j n) = cmpModule (Proxy @ord) (i,m) (j,n)
 
 basis :: IsOrderedPolynomial a => Int -> WithModOrd ord a
 basis i = WithModOrd $ Signature i one
