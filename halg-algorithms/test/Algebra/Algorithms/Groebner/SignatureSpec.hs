@@ -52,7 +52,7 @@ f5Calcs = [ ("f5", Calc f5)
 spec :: Spec
 spec = parallel $
   forM_ f5Calcs $ \(name, Calc calc) ->
-    describe name $ modifyMaxSize (const 4) $ do
+    describe name $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
       prop "passes S-test" $
         checkForArity [2..3] $ prop_passesSTest calc
       prop "includes the original ideal" $
