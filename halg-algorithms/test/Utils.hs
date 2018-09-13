@@ -1,14 +1,10 @@
-{-# LANGUAGE CPP, DataKinds, DeriveGeneric, FlexibleContexts            #-}
-{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving       #-}
-{-# LANGUAGE KindSignatures, MultiParamTypeClasses                      #-}
-{-# LANGUAGE NoMonomorphismRestriction, RankNTypes, ScopedTypeVariables #-}
-{-# LANGUAGE StandaloneDeriving, TypeFamilies, TypeOperators            #-}
-{-# LANGUAGE UndecidableInstances                                       #-}
+{-# LANGUAGE CPP, DataKinds, FlexibleContexts, FlexibleInstances, GADTs   #-}
+{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction, RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables, TypeFamilies, TypeOperators             #-}
+{-# LANGUAGE UndecidableInstances                                         #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Utils (module Utils, module Algebra.TestUtils) where
-import           Algebra.Field.Prime
-import qualified Algebra.Field.Prime                as F
 import           Algebra.Internal
 import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial            hiding (Positive)
@@ -17,7 +13,7 @@ import           Algebra.Ring.Polynomial.Univariate
 import           Algebra.TestUtils
 import           Control.Lens                       hiding ((:<))
 import           Control.Monad
-import           Data.List                          (sortBy)
+import           Data.List                          (sortOn)
 import qualified Data.List                          as L
 import qualified Data.Map                           as M
 import qualified Data.Matrix                        as M hiding (fromList)
@@ -42,18 +38,18 @@ genUnipol len = QC.generate $ fromCoeffVec <$> QC.vectorOf len QC.arbitrary
     where
       fromCoeffVec = polynomial' . M.fromList . L.zip [singleton n | n <- [0..]]
 
-appendLM :: (Fraction Integer) -> Monomial 2 -> Polynomial (Fraction Integer) 2 -> Polynomial (Fraction Integer) 2
+appendLM :: Fraction Integer -> Monomial 2 -> Polynomial (Fraction Integer) 2 -> Polynomial (Fraction Integer) 2
 appendLM coef lm = _Wrapped %~ M.insert (OrderedMonomial lm) coef
 
 xPoly :: Monad m => SC.Series m (Polynomial (Fraction Integer) 2)
-xPoly = do
+xPoly =
   (series SC.>< series) >>- \(c, d) ->
     series >>- \p -> do
-      guard $ (leadingMonomial p) < (OrderedMonomial (d :< 0 :< NilL))
+      guard $ leadingMonomial p < OrderedMonomial (d :< 0 :< NilL)
       return $ appendLM c (d :< 0 :< NilL) p
 
 yPoly :: Monad m => SC.Series m (Polynomial (Fraction Integer) 2)
-yPoly = do
+yPoly =
   (series SC.>< series) >>- \(c, d) ->
     series >>- \p -> do
       guard $ leadingMonomial p < OrderedMonomial (d :< 0 :< NilL)
@@ -99,10 +95,10 @@ zeroDimG = do
   return $ ZeroDimIdeal $ toIdeal $ fs ++ i0
 
 isNonTrivial :: KnownNat n => ZeroDimIdeal n -> Bool
-isNonTrivial (ZeroDimIdeal ideal) = reifyQuotient ideal $ maybe False ((>0).length) . standardMonomials'
+isNonTrivial (ZeroDimIdeal ideal) = reifyQuotient ideal $ maybe False (not . null) . standardMonomials'
 
-data Equation = Equation { coefficients :: [[(Fraction Integer)]]
-                         , answers      :: [(Fraction Integer)]
+data Equation = Equation { coefficients :: [[Fraction Integer]]
+                         , answers      :: [Fraction Integer]
                          } deriving (Show, Eq, Ord)
 
 newtype MatrixCase a = MatrixCase { getMatrix :: [[a]]
@@ -134,7 +130,7 @@ unaryPoly ar (OLt sm) = do
 
 stdReduced :: (CoeffRing r, KnownNat n, NA.Field r, IsMonomialOrder n order)
            => [OrderedPolynomial r order n] -> [OrderedPolynomial r order n]
-stdReduced ps = sortBy (comparing leadingMonomial) $
+stdReduced ps = sortOn leadingMonomial $
                 map (\f -> injectCoeff (NA.recip $ leadingCoeff f) NA.* f) ps
 
 instance (Arbitrary k, KnownNat n, CoeffRing k, IsMonomialOrder n o)
@@ -156,3 +152,6 @@ polynomialOfArity sn = withKnownNat sn (runWrapPolynomial <$> arbitrary)
 instance (Monad m, Serial m k, CoeffRing k, KnownNat n, IsMonomialOrder n ord)
       =>  Serial m (OrderedPolynomial k ord n) where
   series = seriesPolynomial
+
+
+
