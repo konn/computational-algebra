@@ -115,12 +115,6 @@ tests:
   spec:
     main:                Spec.hs
     source-dirs:         test
-    other-modules:
-    - F5Spec
-    - F4Spec
-    - ZeroDimSpec
-    - HomogeneousSpec
-    - Utils
     ghc-options:
     - -Wall
     - -threaded
