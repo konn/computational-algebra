@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds, GADTs, RankNTypes, TypeOperators #-}
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
-module ZeroDimSpec where
+module Algebra.Algorithms.Groebner.ZeroDimSpec where
 import Algebra.Algorithms.Groebner
 import Algebra.Algorithms.ZeroDim
 import Algebra.Internal

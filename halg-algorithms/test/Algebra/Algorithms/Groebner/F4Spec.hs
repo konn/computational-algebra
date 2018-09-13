@@ -3,7 +3,7 @@
 {-# LANGUAGE TypeApplications                                          #-}
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
-module F4Spec where
+module Algebra.Algorithms.Groebner.F4Spec where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.Groebner.F4
 import           Algebra.Bridge.Singular

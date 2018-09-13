@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings, PatternSynonyms                      #-}
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
-module HomogeneousSpec where
+module Algebra.Algorithms.Groebner.HomogeneousSpec where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.Groebner.Homogeneous
 import           Algebra.Bridge.Singular

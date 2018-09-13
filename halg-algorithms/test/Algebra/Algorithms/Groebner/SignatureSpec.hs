@@ -1,9 +1,11 @@
+{-# LANGUAGE RankNTypes #-}
+
 {-# LANGUAGE DataKinds, ExplicitNamespaces, GADTs, NoImplicitPrelude   #-}
 {-# LANGUAGE OverloadedStrings, PartialTypeSignatures, PatternSynonyms #-}
 {-# LANGUAGE TypeApplications                                          #-}
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
-module F5Spec where
+module Algebra.Algorithms.Groebner.SignatureSpec where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.Groebner.Signature
 import           Algebra.Bridge.Singular
@@ -18,6 +20,7 @@ import           Control.Monad
 import qualified Data.Foldable                         as F
 import           Data.List                             (delete)
 import qualified Data.Sized.Builtin                    as SV
+import qualified Data.Vector                           as V
 import           Numeric.Field.Fraction                (Fraction)
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
@@ -29,15 +32,33 @@ import           Utils
 asGenListOf :: Gen [a] -> a -> Gen [a]
 asGenListOf = const
 
+newtype Calc
+  = Calc { runCalc :: forall poly. (Field (Coefficient poly), IsOrderedPolynomial poly) => Ideal poly -> [poly] }
+
+f5Calcs :: [(String, Calc)]
+f5Calcs = [ ("f5", Calc f5)
+          , ("f5With pot", Calc $ f5With (Proxy @POT))
+          , ("f5With top", Calc $ f5With (Proxy @TOP))
+          , ("f5With term-w-pot",
+             Calc $ withTermWeights (Proxy @POT) (\pxy -> f5With pxy . toIdeal . V.toList) . V.fromList . generators)
+          , ("f5With term-w-top",
+             Calc $ withTermWeights (Proxy @TOP) (\pxy -> f5With pxy . toIdeal . V.toList) . V.fromList . generators)
+          , ("f5With deg-w-pot",
+             Calc $ withDegreeWeights (Proxy @POT) (\pxy -> f5With pxy . toIdeal . V.toList) . V.fromList . generators)
+          , ("f5With deg-w-top",
+             Calc $ withDegreeWeights (Proxy @TOP) (\pxy -> f5With pxy . toIdeal . V.toList) . V.fromList . generators)
+          ]
+
 spec :: Spec
-spec = parallel $ do
-  describe "f5" $ modifyMaxSize (const 4) $ do
-    prop "passes S-test" $
-      checkForArity [2..3] $ prop_passesSTest f5
-    prop "includes the original ideal" $
-      checkForArity [2..3] $ prop_groebnerDivsOrig f5
-    prop "is included in the orignal ideal" $
-      checkForArity [2..3] $ prop_groebnerIncluded f5
+spec = parallel $
+  forM_ f5Calcs $ \(name, Calc calc) ->
+    describe name $ modifyMaxSize (const 4) $ do
+      prop "passes S-test" $
+        checkForArity [2..3] $ prop_passesSTest calc
+      prop "includes the original ideal" $
+        checkForArity [2..3] $ prop_groebnerDivsOrig calc
+      prop "is included in the orignal ideal" $
+        checkForArity [2..3] $ prop_groebnerIncluded calc
 
 prop_passesSTest :: (Ideal (Polynomial Rational n) -> [Polynomial Rational n])
                  -> SNat n -> Property
