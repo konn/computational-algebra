@@ -34,6 +34,7 @@ import           Data.Reflection              (Reifies (..), reify)
 import qualified Data.Set                     as Set
 import qualified Data.Vector                  as V
 import qualified Data.Vector.Mutable          as MV
+import qualified Data.Vector.Unboxed          as UV
 
 data Entry a b = Entry { priority :: !a
                        , payload :: !b
@@ -74,8 +75,8 @@ class IsOrderedPolynomial poly => ModuleOrdering poly ord where
   cmpModule :: proxy ord -> Signature poly -> Signature poly -> Ordering
   syzygyBase :: (Int, poly) -> (Int, poly) -> WithModOrd ord poly
   syzygyBase (i, gi) (j, gj) =
-    let sigI = WithModOrd @ord (Signature i $ leadingMonomial gj)
-        sigJ = WithModOrd @ord (Signature j $ leadingMonomial gi)
+    let sigI = WithModOrd (Signature i $ leadingMonomial gj)
+        sigJ = WithModOrd (Signature j $ leadingMonomial gi)
     in max sigI sigJ
   {-# INLINE syzygyBase #-}
 
@@ -117,8 +118,8 @@ newtype TermWeighted (gs :: k) ord = TermWeighted ord
 
 type OMonom poly = OrderedMonomial (MOrder poly) (Arity poly)
 
-toDegreeWeights :: (IsOrderedPolynomial poly, Foldable t) => t poly -> V.Vector Int
-toDegreeWeights = V.fromList . map totalDegree' . F.toList
+toDegreeWeights :: (IsOrderedPolynomial poly, Foldable t) => t poly -> UV.Vector Int
+toDegreeWeights = UV.fromList . map totalDegree' . F.toList
 {-# INLINE toDegreeWeights #-}
 
 toTermWeights :: (IsOrderedPolynomial poly, Foldable t) => t poly -> V.Vector (OMonom poly)
@@ -128,12 +129,13 @@ toTermWeights = V.fromList . map leadingMonomial . F.toList
 reifyDegreeWeights :: forall ord poly proxy a t. (IsOrderedPolynomial poly, ModuleOrdering poly ord, Foldable t)
                    => proxy ord
                    -> t poly
-                   -> (forall k (gs :: k). Reifies gs (V.Vector Int) => Proxy (DegreeWeighted gs ord) -> t poly -> a)
+                   -> (forall k (gs :: k). Reifies gs (UV.Vector Int) => Proxy (DegreeWeighted gs ord) -> t poly -> a)
                    -> a
 reifyDegreeWeights _ pols act =
   let vec = toDegreeWeights pols
   in reify vec $ \(Proxy :: Proxy gs) ->
      act (Proxy :: Proxy (DegreeWeighted gs ord)) pols
+{-# INLINE CONLIKE reifyDegreeWeights #-}
 
 reifyTermWeights :: forall ord poly proxy a t. (IsOrderedPolynomial poly, ModuleOrdering poly ord, Foldable t)
                  => proxy ord
@@ -144,14 +146,16 @@ reifyTermWeights _ pols act =
   let vec = toTermWeights pols
   in reify vec $ \(Proxy :: Proxy gs) ->
      act (Proxy :: Proxy (TermWeighted gs ord)) pols
+{-# INLINE CONLIKE reifyTermWeights #-}
 
 withDegreeWeights :: forall ord poly proxy a t. (IsOrderedPolynomial poly, ModuleOrdering poly ord, Foldable t)
                   => proxy ord
-                  -> (forall k (gs :: k). Reifies gs (V.Vector Int) => Proxy (DegreeWeighted gs ord) -> t poly -> a)
+                  -> (forall k (gs :: k). Reifies gs (UV.Vector Int) => Proxy (DegreeWeighted gs ord) -> t poly -> a)
                   -> t poly -> a
 withDegreeWeights _ bdy vs =
   reify (toDegreeWeights vs) $ \(_ :: Proxy gs) ->
     bdy (Proxy :: Proxy (DegreeWeighted gs ord)) vs
+{-# INLINE CONLIKE withDegreeWeights #-}
 
 withTermWeights :: forall ord poly proxy a t. (IsOrderedPolynomial poly, ModuleOrdering poly ord, Foldable t)
                   => proxy ord
@@ -161,24 +165,17 @@ withTermWeights :: forall ord poly proxy a t. (IsOrderedPolynomial poly, ModuleO
 withTermWeights _ bdy vs =
   reify (toTermWeights vs) $ \(_ :: Proxy gs) ->
     bdy (Proxy :: Proxy (TermWeighted gs ord)) vs
+{-# INLINE CONLIKE withTermWeights #-}
 
-instance (ModuleOrdering poly ord, IsOrderedPolynomial poly, Reifies (gs :: k) (V.Vector Int))
+instance (ModuleOrdering poly ord, IsOrderedPolynomial poly, Reifies (gs :: k) (UV.Vector Int))
        => ModuleOrdering poly (DegreeWeighted gs ord) where
   cmpModule _ l@(Signature i t) r@(Signature j u) =
     let gs = reflect (Proxy :: Proxy gs)
     in compare
-         (totalDegree t + (gs V.! i))
-         (totalDegree u + (gs V.! j))
+         (totalDegree t + (gs UV.! i))
+         (totalDegree u + (gs UV.! j))
       <> cmpModule (Proxy @ord) l r
   {-# INLINE cmpModule #-}
-  syzygyBase l@(i, gi) r@(j, gj) =
-    let gs = reflect (Proxy :: Proxy gs)
-        (mi, mj) = (leadingMonomial gi, leadingMonomial gj)
-    in case compare ((gs V.! i) + totalDegree' gj) ((gs V.! j) + totalDegree' gi) of
-      GT -> WithModOrd $ Signature i mj
-      LT -> WithModOrd $ Signature j mi
-      EQ -> DC.coerce (syzygyBase @poly @ord) l r
-  {-# INLINE syzygyBase #-}
 
 instance (ModuleOrdering poly ord,
           IsOrderedPolynomial poly,
@@ -191,14 +188,6 @@ instance (ModuleOrdering poly ord,
          (u * (gs V.! j))
        <> cmpModule (Proxy @ord) l r
   {-# INLINE cmpModule #-}
-  syzygyBase l@(i, gi) r@(j, gj) =
-    let gs = reflect (Proxy :: Proxy gs)
-        (mi, mj) = (leadingMonomial gi, leadingMonomial gj)
-    in case compare (gs V.! i * mj) (gs V.! j * mi) of
-      GT -> WithModOrd $ Signature i mj
-      LT -> WithModOrd $ Signature j mi
-      EQ -> DC.coerce (syzygyBase @poly @ord) l r
-  {-# INLINE syzygyBase #-}
 
 data ModuleElement ord poly = ME { syzSign :: !(WithModOrd ord poly)
                                  , _polElem :: !poly
