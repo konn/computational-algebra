@@ -93,6 +93,10 @@ regression =
                     ,-(3 % 4)* #x^2* #y - (1 % 2)* #x* #y^4
                     ,-(2 % 3)* #x^4* #y^3 - 3
                     ]
+  ,SomeIdeal @QQxyz [-(3 % 4)* #x ^3* #y ^2* #z + 3* #x ^2* #y ^3* #z^2 - (2 % 3)* #z^2
+                    ,(3 % 4)* #x * #y ^2* #z - (1 % 3)* #x  - (2 % 5)* #y ^4* #z^2
+                    ,(1 % 2)* #x ^4* #y ^4* #z^4 + (2 % 3)* #x * #y ^3* #z
+                    ]
   ]
 
 prop_passesSTest :: (Ideal (Polynomial Rational n) -> [Polynomial Rational n])
