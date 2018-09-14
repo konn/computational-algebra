@@ -59,7 +59,7 @@ mkTestCases num ideal = [ mkTC ("lex0" ++ either show id num) (mapIdeal (changeO
 
 mkTC :: (IsMonomialOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
 mkTC name jdeal =
-  env (return (jdeal, V.fromList $ toList jdeal)) $ \ ~(ideal, vec) ->
+  env (return jdeal) $ \ ideal ->
   bgroup name [ {- bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy) ideal
               , -} bench "syz+sugar" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)) ideal
               -- , bench "standard" $ nf calcGroebnerBasis ideal
