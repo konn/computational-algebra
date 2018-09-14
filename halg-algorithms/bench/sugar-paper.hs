@@ -10,12 +10,8 @@ import           Algebra.Algorithms.Groebner.Homogeneous
 import           Algebra.Algorithms.Groebner.Signature
 import           Algebra.Internal
 import           Algebra.Prelude.Core
-import           Algebra.Ring.Ideal
-import           Algebra.Ring.Polynomial
-import           Control.Monad                           (void)
 import           Control.Parallel.Strategies
 import           Data.Foldable                           (toList)
-import           Data.Reflection                         (reify)
 import qualified Data.Vector                             as V
 import           Gauge.Main
 import           Gauge.Main.Options
@@ -72,14 +68,14 @@ mkTC name jdeal =
               -- , bench "F4" $ nf f4 ideal
               , bench "F5+pot"  $ nf (f5With (Proxy @POT)) ideal
               , bench "F5+top"  $ nf (f5With (Proxy @TOP)) ideal
-              , bench "F5+term-w-pot" $ reify vec $ \(Proxy :: Proxy gs) ->
-                  nf (f5With (Proxy @(TermWeightedPOT gs))) ideal
-              , bench "F5+term-w-top" $ reify vec $ \(Proxy :: Proxy gs) ->
-                  nf (f5With (Proxy @(TermWeightedTOP gs))) ideal
-              , bench "F5+deg-w-pot" $ reify vec $ \(Proxy :: Proxy gs) ->
-                  nf (f5With (Proxy @(DegreeWeightedPOT gs))) ideal
-              , bench "F5+deg-w-top" $ reify vec $ \(Proxy :: Proxy gs) ->
-                  nf (f5With (Proxy @(DegreeWeightedTOP gs))) ideal
+              , bench "F5+term-w-pot" $ withTermWeights (Proxy @POT) (\pxy _ ->
+                  nf (f5With pxy) ideal) vec
+              , bench "F5+term-w-top" $ withTermWeights (Proxy @TOP) (\pxy _ ->
+                  nf (f5With pxy) ideal) vec
+              , bench "F5+deg-w-pot" $ withDegreeWeights (Proxy @POT) (\pxy _ ->
+                  nf (f5With pxy) ideal) vec
+              , bench "F5+deg-w-top" $ withDegreeWeights (Proxy @TOP) (\pxy _ ->
+                  nf (f5With pxy) ideal) vec
               ]
 
 main :: IO ()

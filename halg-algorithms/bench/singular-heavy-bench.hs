@@ -65,9 +65,9 @@ runTestCases lab i = do
 
 main :: IO ()
 main = do
-  runTestCases "Cyclic4" $ cyclic (sing :: Sing 4)
-  runTestCases "Cyclic5" $ cyclic (sing :: Sing 5)
-  runTestCases "Cyclic6" $ cyclic (sing :: Sing 6)
+  runTestCases "Cyclic-4" $ cyclic (sing :: Sing 4)
+  runTestCases "Cyclic-5" $ cyclic (sing :: Sing 5)
+  runTestCases "Cyclic-6" $ cyclic (sing :: Sing 6)
   runTestCases "Katsura-5" $ katsura (sing :: Sing 5)
   runTestCases "Katsura-6" $ katsura (sing :: Sing 6)
   runTestCases "Katsura-7" $ katsura (sing :: Sing 7)
