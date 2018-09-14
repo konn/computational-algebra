@@ -159,6 +159,7 @@ _heavy_bench: &heavy_bench
   - lens
   - reflection
   - vector
+  - deepseq
   - ghc-typelits-knownnat
   ghc-options:
   - -Wall

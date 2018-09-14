@@ -9,11 +9,12 @@ import Algebra.Algorithms.Groebner.Signature
 import Algebra.Field.Prime
 import Algebra.Prelude.Core
 import Cases
+import Control.DeepSeq
 import Gauge.Main
 import Gauge.Main.Options
 
 newtype CalcPoly where
-  CalcPoly :: (forall poly. FPol poly => Ideal poly -> [poly]) -> CalcPoly
+  CalcPoly :: (forall poly. (IsOrderedPolynomial poly, Field (Coefficient poly)) => Ideal poly -> [poly]) -> CalcPoly
 
 makeCase :: String
          -> CalcPoly
@@ -29,45 +30,49 @@ makeCase name calc =
       ]
   ]
 
-data SomeIdeal k where
-  SomeIdeal :: KnownNat n => Ideal (Polynomial k n) -> SomeIdeal k
+data SomeRatIdeal where
+  SomeRatIdeal :: (KnownNat n) => Ideal (Polynomial Rational n) -> SomeRatIdeal
 
-inputs :: [(String, SomeIdeal Rational)]
+data SomeIdeal where
+  SomeIdeal :: (Field k, NFData k, CoeffRing k, IsMonomialOrder n ord, KnownNat n)
+            => Ideal (OrderedPolynomial k ord n) -> SomeIdeal
+
+inputs :: [(String, SomeRatIdeal)]
 inputs =
-  [ ("Cyclic-4"  , SomeIdeal $ cyclic (sing :: Sing 4))
-  , ("Cyclic-5"  , SomeIdeal $ cyclic (sing :: Sing 5))
-  , ("Cyclic-6"  , SomeIdeal $ cyclic (sing :: Sing 6))
-  , ("Katsura-5" , SomeIdeal $ katsura (sing :: Sing 5))
-  , ("Katsura-6" , SomeIdeal $ katsura (sing :: Sing 6))
-  , ("Katsura-7" , SomeIdeal $ katsura (sing :: Sing 7))
+  [ ("Cyclic-4"  , SomeRatIdeal $ cyclic (sing :: Sing 4))
+  , ("Cyclic-5"  , SomeRatIdeal $ cyclic (sing :: Sing 5))
+  , ("Cyclic-6"  , SomeRatIdeal $ cyclic (sing :: Sing 6))
+  , ("Katsura-5" , SomeRatIdeal $ katsura (sing :: Sing 5))
+  , ("Katsura-6" , SomeRatIdeal $ katsura (sing :: Sing 6))
+  , ("Katsura-7" , SomeRatIdeal $ katsura (sing :: Sing 7))
   ]
 
-mkTC :: forall n. (KnownNat n)
+data SomeOrd n where
+  SomeOrd :: IsMonomialOrder n ord => ord -> SomeOrd n
+
+data SomeToCoe where
+  SomeToCoe :: (CoeffRing a, NFData a, Euclidean a, Field a) => (Rational -> a) -> SomeToCoe
+
+variateSetting :: [(String, SomeRatIdeal)] -> [(String, SomeIdeal)]
+variateSetting is =
+  concat [[ toCase name i (coe, toCoe) (ordName, ord) ]
+          | (name, SomeRatIdeal i) <- is
+          , (coe, toCoe) <- [("Q", SomeToCoe id), ("F_65521", SomeToCoe ratToF)]
+          , (ordName, ord) <- [("Grevlex", SomeOrd Grevlex), ("Lex", SomeOrd Lex)]
+          ]
+  where
+    toCase :: KnownNat n
+           => String -> Ideal (Polynomial Rational n) -> (String, SomeToCoe) -> (String, SomeOrd n) -> (String, SomeIdeal)
+    toCase name i (coe, SomeToCoe toCoe) (ordName, SomeOrd ord) =
+      (name ++ "/" ++ ordName ++ "," ++ coe,
+       SomeIdeal $ fmap (changeOrder ord . mapCoeff toCoe) i)
+
+mkTC :: forall k ord n. (NFData k, KnownNat n, Field k, CoeffRing k, IsMonomialOrder n ord)
      => CalcPoly
      -> String
-     -> Ideal (Polynomial Rational n) -> Benchmark
+     -> Ideal (OrderedPolynomial k ord n) -> Benchmark
 mkTC (CalcPoly calc) name jdeal =
-  let mkPair :: (IsOrderedPolynomial poly)
-             => (Polynomial Rational n -> poly)
-             -> Ideal poly
-      mkPair f = map f jdeal
-  in env (return
-        ( mkPair (changeOrder Grevlex)
-        , mkPair (changeOrder Lex)
-        , mkPair (mapCoeff ratToF . changeOrder Grevlex)
-        , mkPair (mapCoeff ratToF . changeOrder Lex)
-        , calc
-        , calc
-        , calc
-        , calc
-        )
-      ) $ \ ~(grjQ, lxjQ, grjF, lxjF, calcGF, calcLF, calcGQ, calcLQ) ->
-  bgroup name
-    [bench "Q,Grevlex"       $ nf calcGQ grjQ
-    ,bench "Q,Lex"           $ nf calcLQ lxjQ
-    ,bench "F_65521,Grevlex" $ nf calcGF grjF
-    ,bench "F_65521,Lex"     $ nf calcLF lxjF
-    ]
+  env (return jdeal) $ \ ideal ->  bench name $ nf calc ideal
 
 
 ratToF :: Rational -> F 65521
@@ -85,5 +90,5 @@ dic = [ ("f5+pot", CalcPoly $ f5With (Proxy :: Proxy POT))
 main :: IO ()
 main = defaultMainWith defaultConfig {csvFile = Just "heavy-f5.csv"}
      [ bgroup iname [ mkTC calc nam jdeal | (nam, calc) <- dic ]
-     | (iname, SomeIdeal jdeal) <- inputs
+     | (iname, SomeIdeal jdeal) <- variateSetting inputs
      ]
