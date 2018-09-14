@@ -176,10 +176,13 @@ calcSignatureGBWith _ (V.map monoize . V.filter (not . isZero) -> sideal) = runS
   let n = V.length sideal
       mods0 = V.generate n basis
       preGs = V.zipWith ME mods0 sideal
-      preHs = Set.fromList [ WithModOrd @ord (Signature @poly j lm)
+      preHs = Set.fromList [ syz
                            | j <- [0..n - 1]
                            , i <- [0..j - 1]
-                           , let lm = leadingMonomial (sideal V.! i)
+                           , let (gi, gj) = (sideal V.! i, sideal V.! j)
+                           , let l = ME (WithModOrd $ Signature j (leadingMonomial gi)) gi
+                           , let r = ME (WithModOrd $ Signature i (leadingMonomial gj)) gj
+                           , syz <- maybeToList $ syzME l r
                            ]
   gs <- newSTRef =<< V.unsafeThaw preGs
   hs <- newSTRef preHs
@@ -313,17 +316,17 @@ cancelModuleElement :: forall ord poly.
                     => ModuleElement ord poly
                     -> Maybe (Coefficient poly)
                     -> ModuleElement ord poly -> Maybe (ModuleElement ord poly)
-cancelModuleElement (ME u1 v1) mc (ME u2 v2) =
+cancelModuleElement p1@(ME u1 v1) mc (ME u2 v2) =
   let c = fromMaybe one mc
       v' = v1 - c .*. v2
-  in case compare u1 u2 of
-    LT -> do
-      guard $ not $ isZero c
-      return $ ME u2 (recip c .*. v')
+  in if isZero c
+  then return p1
+  else case compare u1 u2 of
+    LT -> return $ ME u2 (negate (recip c) .*. v')
     GT -> return $ ME u1 v'
     EQ -> do
       guard $ c /= one
-      return $ ME u1 (recip (one - c) .*. v')
+      return $ ME u1 (recip (c - one) .*. v')
 {-# INLINE cancelModuleElement #-}
 
 syzME :: (Field (Coefficient poly), IsOrderedPolynomial poly, ModuleOrdering poly ord)
@@ -344,9 +347,9 @@ sigDivs (Signature i n) (Signature j m) = i == j && n `divs` m
 
 covers :: (IsOrderedPolynomial poly)
        => ModuleElement ord poly -> ModuleElement ord poly -> Bool
-covers (ME (WithModOrd sig2) v2) (ME (WithModOrd sig1) v1) = fromMaybe False $ do
+covers (ME (WithModOrd sig2) v2) (ME (WithModOrd sig1) v1) =
   let t = sigMonom sig1 / sigMonom sig2
-  return $ sig2 `sigDivs` sig1 && (isZero v2 || t * leadingMonomial v2 < leadingMonomial v1)
+  in sig2 `sigDivs` sig1 && ((isZero v2 && not (isZero v1)) || t * leadingMonomial v2 < leadingMonomial v1)
 {-# INLINE covers #-}
 
 sigToElem :: IsOrderedPolynomial poly => Signature poly -> ModuleElement ord poly
