@@ -73,9 +73,9 @@ mkTC name jdeal =
               , bench "F5+t-top" $
                   nf (withTermWeights (Proxy @TOP) f5With) ideal
               , bench "F5+d-pot" $
-                  nf (withDegreeWeights (Proxy @TOP) f5With) ideal
-              , bench "F5+d-top" $
                   nf (withDegreeWeights (Proxy @POT) f5With) ideal
+              , bench "F5+d-top" $
+                  nf (withDegreeWeights (Proxy @TOP) f5With) ideal
               ]
 
 main :: IO ()
