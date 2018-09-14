@@ -5,18 +5,15 @@
 {-# LANGUAGE TypeFamilies, UndecidableInstances                      #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
 module Main where
-import           Algebra.Algorithms.Groebner.Signature
-import           Algebra.Field.Prime
-import           Algebra.Prelude.Core
-import           Cases
-import           Data.Reflection
-import           Data.Vector                           (Vector)
-import qualified Data.Vector                           as V
-import           Gauge.Main
-import           Gauge.Main.Options
+import Algebra.Algorithms.Groebner.Signature
+import Algebra.Field.Prime
+import Algebra.Prelude.Core
+import Cases
+import Gauge.Main
+import Gauge.Main.Options
 
 newtype CalcPoly where
-  CalcPoly :: (forall poly. FPol poly => Vector poly -> Ideal poly -> [poly]) -> CalcPoly
+  CalcPoly :: (forall poly. FPol poly => Ideal poly -> [poly]) -> CalcPoly
 
 makeCase :: String
          -> CalcPoly
@@ -52,8 +49,8 @@ mkTC :: forall n. (KnownNat n)
 mkTC (CalcPoly calc) name jdeal =
   let mkPair :: (IsOrderedPolynomial poly)
              => (Polynomial Rational n -> poly)
-             -> (Vector poly, Ideal poly)
-      mkPair f = (V.fromList $ generators $ map f jdeal, map f jdeal)
+             -> Ideal poly
+      mkPair f = map f jdeal
   in env (return
         ( mkPair (changeOrder Grevlex)
         , mkPair (changeOrder Lex)
@@ -66,10 +63,10 @@ mkTC (CalcPoly calc) name jdeal =
         )
       ) $ \ ~(grjQ, lxjQ, grjF, lxjF, calcGF, calcLF, calcGQ, calcLQ) ->
   bgroup name
-    [bench "Q,Grevlex"       $ nf (uncurry calcGQ) grjQ
-    ,bench "Q,Lex"           $ nf (uncurry calcLQ) lxjQ
-    ,bench "F_65521,Grevlex" $ nf (uncurry calcGF) grjF
-    ,bench "F_65521,Lex"     $ nf (uncurry calcLF) lxjF
+    [bench "Q,Grevlex"       $ nf calcGQ grjQ
+    ,bench "Q,Lex"           $ nf calcLQ lxjQ
+    ,bench "F_65521,Grevlex" $ nf calcGF grjF
+    ,bench "F_65521,Lex"     $ nf calcLF lxjF
     ]
 
 
@@ -77,16 +74,12 @@ ratToF :: Rational -> F 65521
 ratToF = modRat'
 
 dic :: [(String, CalcPoly)]
-dic = [ ("f5+pot", CalcPoly $ const $ f5With (Proxy :: Proxy POT))
-      , ("f5+top", CalcPoly $ const $ f5With (Proxy :: Proxy TOP))
-      , ("f5+term-w-pot", CalcPoly $ \vec ->
-            reifyTermWeights @POT vec f5With
-      , ("f5+term-w-top", CalcPoly $ \vec ->
-            reifyTermWeights @TOP vec f5With
-      , ("f5+deg-w-pot", CalcPoly $ \vec ->
-            reifyDegreeWeights @POT vec f5With
-      , ("f5+deg-w-top", CalcPoly $ \vec ->
-            reifyDegreeWeights @TOP vec f5With
+dic = [ ("f5+pot", CalcPoly $ f5With (Proxy :: Proxy POT))
+      , ("f5+top", CalcPoly $ f5With (Proxy :: Proxy TOP))
+      , ("f5+t-pot", CalcPoly $ withTermWeights (Proxy @POT) f5With)
+      , ("f5+t-top", CalcPoly $ withTermWeights (Proxy @TOP) f5With)
+      , ("f5+d-pot", CalcPoly $ withDegreeWeights (Proxy @POT) f5With)
+      , ("f5+d-top", CalcPoly $ withDegreeWeights (Proxy @TOP) f5With)
       ]
 
 main :: IO ()

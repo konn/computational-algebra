@@ -68,14 +68,14 @@ mkTC name jdeal =
               -- , bench "F4" $ nf f4 ideal
               , bench "F5+pot"  $ nf (f5With (Proxy @POT)) ideal
               , bench "F5+top"  $ nf (f5With (Proxy @TOP)) ideal
-              , bench "F5+term-w-pot" $ withTermWeights (Proxy @POT) (\pxy _ ->
-                  nf (f5With pxy) ideal) vec
-              , bench "F5+term-w-top" $ withTermWeights (Proxy @TOP) (\pxy _ ->
-                  nf (f5With pxy) ideal) vec
-              , bench "F5+deg-w-pot" $ withDegreeWeights (Proxy @POT) (\pxy _ ->
-                  nf (f5With pxy) ideal) vec
-              , bench "F5+deg-w-top" $ withDegreeWeights (Proxy @TOP) (\pxy _ ->
-                  nf (f5With pxy) ideal) vec
+              , bench "F5+t-pot" $
+                  nf (withTermWeights (Proxy @POT) f5With) ideal
+              , bench "F5+t-top" $
+                  nf (withTermWeights (Proxy @TOP) f5With) ideal
+              , bench "F5+d-pot" $
+                  nf (withDegreeWeights (Proxy @TOP) f5With) ideal
+              , bench "F5+d-top" $
+                  nf (withDegreeWeights (Proxy @POT) f5With) ideal
               ]
 
 main :: IO ()

@@ -126,21 +126,21 @@ reifyTermWeights _ pols act =
   in reify vec $ \(Proxy :: Proxy gs) ->
      act (Proxy :: Proxy (TermWeighted gs ord)) pols
 
-withDegreeWeights :: forall ord poly proxy a. (IsOrderedPolynomial poly, ModuleOrdering poly ord)
+withDegreeWeights :: forall ord poly proxy a t. (IsOrderedPolynomial poly, ModuleOrdering poly ord, Foldable t)
                   => proxy ord
-                  -> (forall k (gs :: k). Reifies gs (V.Vector Int) => Proxy (DegreeWeighted gs ord) -> V.Vector poly -> a)
-                  -> V.Vector poly -> a
+                  -> (forall k (gs :: k). Reifies gs (V.Vector Int) => Proxy (DegreeWeighted gs ord) -> t poly -> a)
+                  -> t poly -> a
 withDegreeWeights _ bdy vs =
-  reify (V.map totalDegree' vs) $ \(_ :: Proxy gs) ->
+  reify (toDegreeWeights vs) $ \(_ :: Proxy gs) ->
     bdy (Proxy :: Proxy (DegreeWeighted gs ord)) vs
 
-withTermWeights :: forall ord poly proxy a. (IsOrderedPolynomial poly, ModuleOrdering poly ord)
+withTermWeights :: forall ord poly proxy a t. (IsOrderedPolynomial poly, ModuleOrdering poly ord, Foldable t)
                   => proxy ord
                   -> (forall k (gs :: k). Reifies gs (V.Vector (OrderedMonomial (MOrder poly) (Arity poly)))
-                      => Proxy (TermWeighted gs ord) -> V.Vector poly -> a)
-                  -> V.Vector poly -> a
+                      => Proxy (TermWeighted gs ord) -> t poly -> a)
+                  -> t poly -> a
 withTermWeights _ bdy vs =
-  reify (V.map leadingMonomial vs) $ \(_ :: Proxy gs) ->
+  reify (toTermWeights vs) $ \(_ :: Proxy gs) ->
     bdy (Proxy :: Proxy (TermWeighted gs ord)) vs
 
 instance (ModuleOrdering poly ord, IsOrderedPolynomial poly, Reifies (gs :: k) (V.Vector Int))
