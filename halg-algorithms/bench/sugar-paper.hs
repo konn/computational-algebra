@@ -59,23 +59,23 @@ mkTestCases num ideal = [ mkTC ("lex0" ++ either show id num) (mapIdeal (changeO
 
 mkTC :: (IsMonomialOrder n ord, KnownNat n) => String -> Ideal (OrderedPolynomial (Fraction Integer) ord n) -> Benchmark
 mkTC name jdeal =
-  env (return jdeal) $ \ ideal ->
+  env (return (jdeal, V.fromList $ generators jdeal)) $ \ ~(ideal, vec) ->
   bgroup name [ {- bench "syzygy" $ nf (syzygyBuchbergerWithStrategy NormalStrategy) ideal
               , -} bench "syz+sugar" $ nf (syzygyBuchbergerWithStrategy (SugarStrategy NormalStrategy)) ideal
               -- , bench "standard" $ nf calcGroebnerBasis ideal
               , bench "naive-homog" $ nf calcGroebnerBasisAfterHomogenising ideal
               , bench "hilb" $ nf calcGroebnerBasisAfterHomogenisingHilb ideal
               -- , bench "F4" $ nf f4 ideal
-              , bench "F5+pot"  $ nf (f5With (Proxy @POT)) ideal
-              , bench "F5+top"  $ nf (f5With (Proxy @TOP)) ideal
+              , bench "F5+pot"  $ nf (f5With (Proxy @POT)) vec
+              , bench "F5+top"  $ nf (f5With (Proxy @TOP)) vec
               , bench "F5+t-pot" $
-                  nf (withTermWeights (Proxy @POT) f5With) ideal
+                  nf (withTermWeights (Proxy @POT) f5With) vec
               , bench "F5+t-top" $
-                  nf (withTermWeights (Proxy @TOP) f5With) ideal
+                  nf (withTermWeights (Proxy @TOP) f5With) vec
               , bench "F5+d-pot" $
-                  nf (withDegreeWeights (Proxy @POT) f5With) ideal
+                  nf (withDegreeWeights (Proxy @POT) f5With) vec
               , bench "F5+d-top" $
-                  nf (withDegreeWeights (Proxy @TOP) f5With) ideal
+                  nf (withDegreeWeights (Proxy @TOP) f5With) vec
               ]
 
 main :: IO ()
