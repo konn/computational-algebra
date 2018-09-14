@@ -80,17 +80,13 @@ dic :: [(String, CalcPoly)]
 dic = [ ("f5+pot", CalcPoly $ const $ f5With (Proxy :: Proxy POT))
       , ("f5+top", CalcPoly $ const $ f5With (Proxy :: Proxy TOP))
       , ("f5+term-w-pot", CalcPoly $ \vec ->
-            reify vec $ \(Proxy :: Proxy vec) ->
-            f5With (Proxy @(TermWeightedPOT vec)))
+            reifyTermWeights @POT vec f5With
       , ("f5+term-w-top", CalcPoly $ \vec ->
-            reify vec $ \(Proxy :: Proxy vec) ->
-            f5With (Proxy @(TermWeightedTOP vec)))
+            reifyTermWeights @TOP vec f5With
       , ("f5+deg-w-pot", CalcPoly $ \vec ->
-            reify vec $ \(Proxy :: Proxy vec) ->
-            f5With (Proxy @(DegreeWeightedPOT vec)))
+            reifyDegreeWeights @POT vec f5With
       , ("f5+deg-w-top", CalcPoly $ \vec ->
-            reify vec $ \(Proxy :: Proxy vec) ->
-            f5With (Proxy @(DegreeWeightedTOP vec)))
+            reifyDegreeWeights @TOP vec f5With
       ]
 
 main :: IO ()
