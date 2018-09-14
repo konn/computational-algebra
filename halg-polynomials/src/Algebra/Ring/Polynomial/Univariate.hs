@@ -129,7 +129,7 @@ instance (Eq r, Field r) => Euclidean (Unipol r) where
     if totalDegree' f `min` totalDegree' g < 50
     then divModUnipol f g
     else divModUnipolByMult f g
-  degree f = if isZero f then Nothing else Just (totalDegree' f)
+  degree f = if isZero f then Nothing else Just (fromIntegral $ totalDegree' f)
 
 leadingTermIM :: Monoidal r => Unipol r -> (Int, r)
 leadingTermIM = maybe (0, zero) fst . IM.maxViewWithKey . runUnipol
@@ -175,7 +175,7 @@ naiveMult (Unipol f) (Unipol g) =
 -- | Polynomial multiplication using Karatsuba's method.
 karatsuba :: forall r. CoeffRing r => Unipol r -> Unipol r -> Unipol r
 karatsuba f0 g0 =
-  let n0 = fromIntegral (totalDegree' f0 `max` totalDegree' g0) + 1
+  let n0 = (totalDegree' f0 `max` totalDegree' g0) + 1
       -- The least @m@ such that deg(f), deg(g) <= 2^m - 1.
       m0  = toEnum $ ceilingLogBase2 n0
   in Unipol $ loop m0 (runUnipol f0) (runUnipol g0)
@@ -327,7 +327,7 @@ instance CoeffRing r => IsPolynomial (Unipol r) where
               . mapMaybe (\(s, v) -> if isZero v then Nothing else Just (SV.head s, v))
               . M.toList
   {-# INLINE polynomial' #-}
-  totalDegree' = fromIntegral . maybe 0 (fst . fst) . IM.maxViewWithKey . runUnipol
+  totalDegree' = maybe 0 (fst . fst) . IM.maxViewWithKey . runUnipol
   {-# INLINE totalDegree' #-}
   var = varUnipol
   mapCoeff' f = Unipol . IM.mapMaybe (decZero . f) . runUnipol

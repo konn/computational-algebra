@@ -79,7 +79,7 @@ equalDegreeSplitM :: forall k m. (MonadRandom m, CoeffRing k,  FiniteField k)
                  -> Natural
                  -> m (Maybe (Unipol k))
 equalDegreeSplitM f d
-  | fromIntegral (totalDegree' f) `mod` d /= 0 = return Nothing
+  | totalDegree' f `mod` fromIntegral d /= 0 = return Nothing
   | otherwise = do
     let q = fromIntegral $ order (Proxy :: Proxy k)
         n = totalDegree' f
@@ -260,7 +260,7 @@ factorHenselSqFree f =
   let lc = leadingCoeff f
       Just p = find isGoodPrime primes
       normF  = integerSquareRoot (getSum $ foldMap (Sum . (^2)) $ terms f) + 1
-      power  = succ $ intLog2' $ integerLogBase' p $ normF * 2 ^ (totalDegree' f + 1)
+      power  = succ $ intLog2' $ integerLogBase' p $ normF * 2 ^ fromIntegral (totalDegree' f + 1)
   in reifyPrimeField p $ \fp -> do
   let lc' = modNat' fp lc
       f0 = mapCoeffUnipol ((/lc') . modNat' fp) f

@@ -176,8 +176,8 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
   {-# INLINE polynomial' #-}
 
   -- | Returns total degree.
-  totalDegree' :: poly -> Natural
-  totalDegree' = maybe 0 fromIntegral . maximumOf folded . HS.map osum . monomials
+  totalDegree' :: poly -> Int
+  totalDegree' = fromMaybe 0 . maximumOf folded . HS.map osum . monomials
   {-# INLINE totalDegree' #-}
 
   -- | @'var' n@ returns a polynomial representing n-th variable.

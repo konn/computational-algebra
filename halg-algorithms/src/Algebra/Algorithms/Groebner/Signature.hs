@@ -11,6 +11,7 @@ module Algebra.Algorithms.Groebner.Signature
   ( -- * Algorithms
     f5, f5With, calcSignatureGB, calcSignatureGBWith,
     withDegreeWeights, withTermWeights,
+    reifyDegreeWeights, reifyTermWeights,
     -- * Classes
     ModuleOrdering(..), POT(..), TOP(..),
     DegreeWeighted(..), TermWeighted(..),
@@ -26,6 +27,7 @@ import           Control.Monad.ST.Combinators (ST, STRef, modifySTRef',
                                                newSTRef, readSTRef, runST,
                                                writeSTRef, (.%=))
 import qualified Data.Coerce                  as DC
+import qualified Data.Foldable                as F
 import qualified Data.Heap                    as H
 import           Data.Monoid                  (First (..))
 import           Data.Reflection              (Reifies (..), reify)
@@ -94,12 +96,42 @@ type TermWeightedTOP gs   = TermWeighted gs TOP
 newtype DegreeWeighted (gs :: k) ord = DegreeWeighted ord
 newtype TermWeighted (gs :: k) ord = TermWeighted ord
 
+type OMonom poly = OrderedMonomial (MOrder poly) (Arity poly)
+
+toDegreeWeights :: (IsOrderedPolynomial poly, Foldable t) => t poly -> V.Vector Int
+toDegreeWeights = V.fromList . map totalDegree' . F.toList
+{-# INLINE toDegreeWeights #-}
+
+toTermWeights :: (IsOrderedPolynomial poly, Foldable t) => t poly -> V.Vector (OMonom poly)
+toTermWeights = V.fromList . map leadingMonomial . F.toList
+{-# INLINE toTermWeights #-}
+
+reifyDegreeWeights :: forall ord poly proxy a t. (IsOrderedPolynomial poly, ModuleOrdering poly ord, Foldable t)
+                   => proxy ord
+                   -> t poly
+                   -> (forall k (gs :: k). Reifies gs (V.Vector Int) => Proxy (DegreeWeighted gs ord) -> t poly -> a)
+                   -> a
+reifyDegreeWeights _ pols act =
+  let vec = toDegreeWeights pols
+  in reify vec $ \(Proxy :: Proxy gs) ->
+     act (Proxy :: Proxy (DegreeWeighted gs ord)) pols
+
+reifyTermWeights :: forall ord poly proxy a t. (IsOrderedPolynomial poly, ModuleOrdering poly ord, Foldable t)
+                 => proxy ord
+                 -> t poly
+                 -> (forall k (gs :: k). Reifies gs (V.Vector (OMonom poly)) => Proxy (TermWeighted gs ord) -> t poly -> a)
+                 -> a
+reifyTermWeights _ pols act =
+  let vec = toTermWeights pols
+  in reify vec $ \(Proxy :: Proxy gs) ->
+     act (Proxy :: Proxy (TermWeighted gs ord)) pols
+
 withDegreeWeights :: forall ord poly proxy a. (IsOrderedPolynomial poly, ModuleOrdering poly ord)
                   => proxy ord
                   -> (forall k (gs :: k). Reifies gs (V.Vector Int) => Proxy (DegreeWeighted gs ord) -> V.Vector poly -> a)
                   -> V.Vector poly -> a
 withDegreeWeights _ bdy vs =
-  reify (V.map (fromIntegral . totalDegree') vs) $ \(_ :: Proxy gs) ->
+  reify (V.map totalDegree' vs) $ \(_ :: Proxy gs) ->
     bdy (Proxy :: Proxy (DegreeWeighted gs ord)) vs
 
 withTermWeights :: forall ord poly proxy a. (IsOrderedPolynomial poly, ModuleOrdering poly ord)
@@ -114,7 +146,7 @@ withTermWeights _ bdy vs =
 instance (ModuleOrdering poly ord, IsOrderedPolynomial poly, Reifies (gs :: k) (V.Vector Int))
        => ModuleOrdering poly (DegreeWeighted gs ord) where
   cmpModule _ l@(Signature i t) r@(Signature j u) =
-    let gs = reflect (Proxy :: Proxy gs) :: V.Vector Int
+    let gs = reflect (Proxy :: Proxy gs)
     in compare
          (totalDegree t + (gs V.! i))
          (totalDegree u + (gs V.! j))
@@ -143,8 +175,6 @@ data JPair poly = JPair { _jpTerm  :: !(OMonom poly)
                         }
 deriving instance KnownNat (Arity poly) => Show (JPair poly)
 deriving instance KnownNat (Arity poly) => Eq (JPair poly)
-
-type OMonom p = OrderedMonomial (MOrder p) (Arity p)
 
 class Multiplicative c => Action c a where
   (.*!) :: c -> a -> a

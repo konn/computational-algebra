@@ -500,11 +500,11 @@ resultant = go one
     go res h s
         | totalDegree' s > 0     =
           let r    = h `modPolynomial` [s]
-              res' = res * negate one ^ (totalDegree' h * totalDegree' s)
-                     * leadingCoeff s ^ (totalDegree' h P.- totalDegree' r)
+              res' = res * negate one ^ fromIntegral (totalDegree' h * totalDegree' s)
+                     * leadingCoeff s ^ fromIntegral (totalDegree' h P.- totalDegree' r)
           in go res' s r
         | isZero h || isZero s = zero
-        | totalDegree' h > 0     = (leadingCoeff s ^ totalDegree' h) * res
+        | totalDegree' h > 0     = (leadingCoeff s ^ fromIntegral (totalDegree' h)) * res
         | otherwise              = res
 
     _ = Refl :: Arity poly :~: 1

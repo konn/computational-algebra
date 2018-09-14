@@ -483,7 +483,7 @@ nthRootInterval n (Interval lb ub)
 rootMultPoly :: Unipol Rational -> Unipol Rational -> Unipol Rational
 rootMultPoly f g =
   let ts = terms g
-      d = fromIntegral $ totalDegree' g
+      d = totalDegree' g
       g' = runAdd $ ifoldMap loop ts
       loop m k =
         let deg = totalDegree m
@@ -548,7 +548,7 @@ recipA a@Algebraic{} =
 rootRecipPoly :: Unipol Rational -> Unipol Rational
 rootRecipPoly f =
   let ts = terms f
-      d = fromIntegral $ totalDegree' f
+      d = totalDegree' f
   in runAdd $ ifoldMap (\m k -> Add $ toPolynomial
                                 (k, OrderedMonomial $ singleton $ d - totalDegree m) ) ts
 
@@ -644,14 +644,19 @@ presultant = go one one
     go !res !acc h s
         | totalDegree' s > 0     =
           let (_, r)    = h `pDivModPoly` s
-              (l, k, m) = (totalDegree' h, totalDegree' r, totalDegree' s) & each %~ P.toInteger
-              res' = res * pow (negate one) (P.fromIntegral $ l * m)
-                         * pow (leadingCoeff s) (P.fromIntegral $ abs $ l - k)
-              adj = pow (leadingCoeff s) (P.fromIntegral $ abs (1 + l - m))
+              (l, k, m) = (totalDegree' h, totalDegree' r, totalDegree' s)
+              res' = res * powSign (l * m)
+                         * pow (leadingCoeff s) (fromIntegral $ abs $ l - k)
+              adj = pow (leadingCoeff s) (fromIntegral $ abs (1 + l - m))
           in go res' (acc * adj) s r
         | isZero h || isZero s = zero
-        | totalDegree' h > 0     = pow (leadingCoeff s) (totalDegree' h) * res `quot` acc
+        | totalDegree' h > 0     = pow (leadingCoeff s) (fromIntegral $ totalDegree' h) * res `quot` acc
         | otherwise              = res `quot` acc
+
+powSign :: (Ring r, Integral n) => n -> r
+powSign n | even n = one
+          | otherwise = negate one
+{-# INLINE powSign #-}
 
 -- | @'realRoots' f@ finds all real roots of the rational polynomial @f@.
 realRoots :: Unipol Rational -> [Algebraic]

@@ -146,8 +146,8 @@ subspMatrix :: (Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord)
 subspMatrix on ideal =
   let poly = univPoly on ideal
       v    = var on `asTypeOf` head (generators ideal)
-      dim  = fromIntegral $ totalDegree' poly
-      cfs  = [negate $ coeff (leadingMonomial $ pow v (j :: Natural)) poly | j <- [0..fromIntegral (dim - 1)]]
+      dim  = totalDegree' poly
+      cfs  = [negate $ coeff (leadingMonomial $ pow v (j :: Natural)) poly | j <- [fromIntegral (dim - 1)]]
   in (M.fromLists [replicate (dim - 1) zero]
           M.<->
       fmap unwrapAlgebra (M.identity (dim - 1))) M.<|> M.colVector (V.fromList cfs)

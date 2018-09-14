@@ -174,7 +174,7 @@ companion :: (KnownNat n, CoeffRing r, Matrix mat,
               Elem mat r, IsMonomialOrder n ord)
           => Ordinal n -> OrderedPolynomial r ord n -> mat r
 companion odn poly =
-  let deg = fromIntegral $ totalDegree' poly
+  let deg = totalDegree' poly
       vx  = leadingMonomial (var odn `asTypeOf` poly)
   in buildMatrix deg deg $ \(j, k) ->
   if 1 <= k && k <= deg - 1
