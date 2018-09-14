@@ -70,20 +70,39 @@ calcSignatureGB :: forall poly.
 calcSignatureGB = withTermWeights (Proxy @POT) $ \pxy gs -> calcSignatureGBWith pxy gs
 {-# INLINE CONLIKE calcSignatureGB #-}
 
-class ModuleOrdering poly ord where
+class IsOrderedPolynomial poly => ModuleOrdering poly ord where
   cmpModule :: proxy ord -> Signature poly -> Signature poly -> Ordering
+  syzygyBase :: (Int, poly) -> (Int, poly) -> WithModOrd ord poly
+  syzygyBase (i, gi) (j, gj) =
+    let sigI = WithModOrd @ord (Signature i $ leadingMonomial gj)
+        sigJ = WithModOrd @ord (Signature j $ leadingMonomial gi)
+    in max sigI sigJ
+  {-# INLINE syzygyBase #-}
 
 data POT = POT deriving (Read, Show, Eq, Ord)
 
 instance IsOrderedPolynomial poly => ModuleOrdering poly POT where
   cmpModule _ (Signature i m) (Signature j n) = compare i j <> compare m n
   {-# INLINE cmpModule #-}
+  syzygyBase (i, gi) (j, gj) =
+    if i < j
+    then WithModOrd $ Signature j $ leadingMonomial gi
+    else WithModOrd $ Signature i $ leadingMonomial gj
+  {-# INLINE syzygyBase #-}
 
 data TOP = TOP deriving (Read, Show, Eq, Ord)
 
 instance IsOrderedPolynomial poly => ModuleOrdering poly TOP where
   cmpModule _ (Signature i m) (Signature j n) = compare m n <> compare i j
   {-# INLINE cmpModule #-}
+  syzygyBase (i, gi) (j, gj) =
+    let (mi, mj) = (leadingMonomial gi, leadingMonomial gj)
+    in case compare mi mj of
+      LT -> WithModOrd $ Signature i mj
+      GT -> WithModOrd $ Signature j mi
+      EQ | i < j -> WithModOrd $ Signature j mi
+         | otherwise -> WithModOrd $ Signature i mj
+  {-# INLINE syzygyBase #-}
 
 data WeightedPOT (gs :: k) = WeightedPOT
   deriving (Read, Show, Eq, Ord)
@@ -152,6 +171,14 @@ instance (ModuleOrdering poly ord, IsOrderedPolynomial poly, Reifies (gs :: k) (
          (totalDegree u + (gs V.! j))
       <> cmpModule (Proxy @ord) l r
   {-# INLINE cmpModule #-}
+  syzygyBase l@(i, gi) r@(j, gj) =
+    let gs = reflect (Proxy :: Proxy gs)
+        (mi, mj) = (leadingMonomial gi, leadingMonomial gj)
+    in case compare ((gs V.! i) + totalDegree' gj) ((gs V.! j) + totalDegree' gi) of
+      GT -> WithModOrd $ Signature i mj
+      LT -> WithModOrd $ Signature j mi
+      EQ -> DC.coerce (syzygyBase @poly @ord) l r
+  {-# INLINE syzygyBase #-}
 
 instance (ModuleOrdering poly ord,
           IsOrderedPolynomial poly,
@@ -164,6 +191,14 @@ instance (ModuleOrdering poly ord,
          (u * (gs V.! j))
        <> cmpModule (Proxy @ord) l r
   {-# INLINE cmpModule #-}
+  syzygyBase l@(i, gi) r@(j, gj) =
+    let gs = reflect (Proxy :: Proxy gs)
+        (mi, mj) = (leadingMonomial gi, leadingMonomial gj)
+    in case compare (gs V.! i * mj) (gs V.! j * mi) of
+      GT -> WithModOrd $ Signature i mj
+      LT -> WithModOrd $ Signature j mi
+      EQ -> DC.coerce (syzygyBase @poly @ord) l r
+  {-# INLINE syzygyBase #-}
 
 data ModuleElement ord poly = ME { syzSign :: !(WithModOrd ord poly)
                                  , _polElem :: !poly
@@ -206,13 +241,10 @@ calcSignatureGBWith _ (V.map monoize . V.filter (not . isZero) -> sideal) = runS
   let n = V.length sideal
       mods0 = V.generate n basis
       preGs = V.zipWith ME mods0 sideal
-      preHs = Set.fromList [ syz
+      preHs = Set.fromList [ syzygyBase (i, gi) (j, gj)
                            | j <- [0..n - 1]
                            , i <- [0..j - 1]
                            , let (gi, gj) = (sideal V.! i, sideal V.! j)
-                           , let l = ME (WithModOrd $ Signature j (leadingMonomial gi)) gi
-                           , let r = ME (WithModOrd $ Signature i (leadingMonomial gj)) gj
-                           , syz <- maybeToList $ syzME l r
                            ]
   gs <- newSTRef =<< V.unsafeThaw preGs
   hs <- newSTRef preHs
