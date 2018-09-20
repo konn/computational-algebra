@@ -131,6 +131,12 @@ instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
   leadingCoeff = fst . leadingTerm
   {-# INLINE leadingCoeff #-}
 
+  splitLeadingTerm (Polynomial d) =
+    case M.maxViewWithKey d of
+      Just ((deg, c), p) -> ((c, deg), Polynomial p)
+      Nothing -> ((zero, one), zero)
+  {-# INLINE splitLeadingTerm #-}
+
   mapMonomialMonotonic f = Polynomial . M.mapKeysMonotonic f . C.coerce
   {-# INLINE mapMonomialMonotonic #-}
 

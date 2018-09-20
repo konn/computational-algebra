@@ -117,8 +117,6 @@ type TermWeightedTOP gs   = TermWeighted gs TOP
 newtype DegreeWeighted (gs :: k) ord = DegreeWeighted ord
 newtype TermWeighted (gs :: k) ord = TermWeighted ord
 
-type OMonom poly = OrderedMonomial (MOrder poly) (Arity poly)
-
 toDegreeWeights :: (IsOrderedPolynomial poly, Foldable t) => t poly -> UV.Vector Int
 toDegreeWeights = UV.fromList . map totalDegree' . F.toList
 {-# INLINE [1] toDegreeWeights #-}

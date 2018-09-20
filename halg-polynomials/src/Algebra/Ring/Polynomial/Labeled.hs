@@ -1,10 +1,10 @@
-{-# LANGUAGE CPP, ConstraintKinds, DataKinds, FlexibleContexts          #-}
-{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving       #-}
-{-# LANGUAGE IncoherentInstances, KindSignatures, MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedLabels, PatternSynonyms, PolyKinds, RankNTypes   #-}
-{-# LANGUAGE RoleAnnotations, ScopedTypeVariables, TypeFamilies         #-}
-{-# LANGUAGE TypeInType, TypeOperators, UndecidableInstances            #-}
-{-# LANGUAGE UndecidableSuperClasses                                    #-}
+{-# LANGUAGE CPP, ConstraintKinds, DataKinds, FlexibleContexts             #-}
+{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving          #-}
+{-# LANGUAGE IncoherentInstances, KindSignatures, MultiParamTypeClasses    #-}
+{-# LANGUAGE OverloadedLabels, PatternSynonyms, PolyKinds, RankNTypes      #-}
+{-# LANGUAGE RoleAnnotations, ScopedTypeVariables, TypeApplications        #-}
+{-# LANGUAGE TypeFamilies, TypeInType, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE UndecidableSuperClasses                                       #-}
 module Algebra.Ring.Polynomial.Labeled
        (IsUniqueList, LabPolynomial(LabelPolynomial, unLabelPolynomial),
         LabPolynomial', LabUnipol, Wraps,
@@ -226,6 +226,9 @@ instance (IsOrderedPolynomial poly, Wraps vars poly) => IsOrderedPolynomial (Lab
 
   leadingCoeff = leadingCoeff . _unLabelPolynomial
   {-# INLINE leadingCoeff #-}
+
+  splitLeadingTerm = DC.coerce @(poly -> (Term poly, poly)) splitLeadingTerm
+  {-# INLINE splitLeadingTerm #-}
 
   fromOrderedMonomial m = LabelPolynomial_ (fromOrderedMonomial m :: poly)
   {-# INLINE fromOrderedMonomial #-}

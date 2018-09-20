@@ -94,8 +94,6 @@ f4WithStrategy' mrep select ideal = runST $ do
       bs .%= H.union (buildHeap fs [len0..len0 + size - 1])
   arrayToList gs
 
-type OMonom poly = OrderedMonomial (MOrder poly) (Arity poly)
-
 decodeMatrix :: (Matrix mat (Coefficient poly), IsOrderedPolynomial poly)
              => Vector (OMonom poly)
              -> mat (Coefficient poly)

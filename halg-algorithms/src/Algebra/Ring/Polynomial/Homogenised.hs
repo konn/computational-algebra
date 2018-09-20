@@ -66,6 +66,7 @@ instance IsOrderedPolynomial poly => IsOrderedPolynomial (Homogenised poly) wher
   leadingTerm poly =
     let dic = M.mapKeys OrderedMonomial $ terms' poly
     in if M.null dic then (zero, one) else swap $ M.findMax dic
+  {-# INLINE leadingTerm #-}
 
 instance (IsOrderedPolynomial poly, PrettyCoeff (Coefficient poly))
       => Show (Homogenised poly) where

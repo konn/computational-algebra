@@ -115,7 +115,7 @@ prop_groebnerDivsOrig calc sdim = withKnownNat sdim $
   forAll (elements [3..5]) $ \count ->
   forAll (vectorOf count (polynomialOfArity sdim)) $ groebnerDivsOrig calc
 
-groebnerDivsOrig :: (IsOrderedPolynomial r, Euclidean (Coefficient r), Division (Coefficient r), Foldable t)
+groebnerDivsOrig :: (IsOrderedPolynomial r, Euclidean (Coefficient r), Division (Coefficient r), Functor t, Foldable t)
                  => (Ideal r -> t r) -> [r] -> Bool
 groebnerDivsOrig calc ideal =
   let gs = calc $ toIdeal ideal
