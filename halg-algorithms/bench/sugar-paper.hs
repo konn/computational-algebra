@@ -10,6 +10,7 @@ import           Algebra.Algorithms.Groebner.Homogeneous
 import           Algebra.Algorithms.Groebner.Signature
 import           Algebra.Internal
 import           Algebra.Prelude.Core
+import           Algebra.Ring.Polynomial.Homogenised
 import           Control.Parallel.Strategies
 import           Data.Foldable                           (toList)
 import qualified Data.Vector                             as V
@@ -76,6 +77,16 @@ mkTC name jdeal =
                   nf (withDegreeWeights (Proxy @POT) f5With) vec
               , bench "F5+d-top" $
                   nf (withDegreeWeights (Proxy @TOP) f5With) vec
+              , bench "homog+F5+pot"  $ nf (fmap unhomogenise . f5With (Proxy @POT) . fmap homogenise) vec
+              , bench "homog+F5+top"  $ nf (fmap unhomogenise . f5With (Proxy @TOP) . fmap homogenise) vec
+              , bench "homog+F5+t-pot" $
+                  nf (fmap unhomogenise . withTermWeights (Proxy @POT) f5With . fmap homogenise) vec
+              , bench "homog+F5+t-top" $
+                  nf (fmap unhomogenise . withTermWeights (Proxy @TOP) f5With . fmap homogenise) vec
+              , bench "homog+F5+d-pot" $
+                  nf (fmap unhomogenise . withDegreeWeights (Proxy @POT) f5With . fmap homogenise) vec
+              , bench "homog+F5+d-top" $
+                  nf (fmap unhomogenise . withDegreeWeights (Proxy @TOP) f5With . fmap homogenise) vec
               ]
 
 main :: IO ()

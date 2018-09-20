@@ -2,10 +2,12 @@
 {-# LANGUAGE StandaloneDeriving, TypeOperators                      #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver               #-}
 module Algebra.Ring.Polynomial.Homogenised
-       (Homogenised, homogenise, unhomogenise, HomogOrder) where
+       (Homogenised, homogenise, unhomogenise, tryHomogenise, HomogOrder) where
 import           Algebra.Prelude.Core
 import           Algebra.Ring.Polynomial.Univariate
+import           Data.Foldable                      (toList)
 import qualified Data.Map                           as M
+import           Data.MonoTraversable               (osum)
 import qualified Data.Sized.Builtin                 as SV
 
 newtype Homogenised poly = Homogenised (Unipol poly)
@@ -109,3 +111,13 @@ homogenise p =
 unhomogenise :: IsOrderedPolynomial poly => Homogenised poly -> poly
 unhomogenise (Homogenised f) =
   substWith (*) (SV.singleton one) f
+
+isHomogeneous :: IsOrderedPolynomial poly
+              => poly -> Bool
+isHomogeneous poly =
+  let degs = map osum $ toList $ monomials poly
+  in and $ zipWith (==) degs (tail degs)
+
+tryHomogenise :: IsOrderedPolynomial poly => poly -> Either poly (Homogenised poly)
+tryHomogenise f | isHomogeneous f = Left f
+                | otherwise = Right $ homogenise f

@@ -8,6 +8,7 @@ module Main where
 import Algebra.Algorithms.Groebner.Signature
 import Algebra.Field.Prime
 import Algebra.Prelude.Core
+import Algebra.Ring.Polynomial.Homogenised
 import Cases
 import Control.DeepSeq
 import Gauge.Main
@@ -85,6 +86,12 @@ dic = [ ("f5+pot", CalcPoly $ f5With (Proxy :: Proxy POT))
       , ("f5+t-top", CalcPoly $ withTermWeights (Proxy @TOP) f5With)
       , ("f5+d-pot", CalcPoly $ withDegreeWeights (Proxy @POT) f5With)
       , ("f5+d-top", CalcPoly $ withDegreeWeights (Proxy @TOP) f5With)
+      , ("homog+f5+pot", CalcPoly $ fmap unhomogenise . f5With (Proxy :: Proxy POT) . fmap homogenise)
+      , ("homog+f5+top", CalcPoly $ fmap unhomogenise . f5With (Proxy :: Proxy TOP) . fmap homogenise)
+      , ("homog+f5+t-pot", CalcPoly $ fmap unhomogenise . withTermWeights (Proxy @POT) f5With . fmap homogenise)
+      , ("homog+f5+t-top", CalcPoly $ fmap unhomogenise . withTermWeights (Proxy @TOP) f5With . fmap homogenise)
+      , ("homog+f5+d-pot", CalcPoly $ fmap unhomogenise . withDegreeWeights (Proxy @POT) f5With . fmap homogenise)
+      , ("homog+f5+d-top", CalcPoly $ fmap unhomogenise . withDegreeWeights (Proxy @TOP) f5With . fmap homogenise)
       ]
 
 main :: IO ()
