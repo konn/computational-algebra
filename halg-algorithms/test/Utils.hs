@@ -11,7 +11,6 @@ import           Algebra.Ring.Polynomial            hiding (Positive)
 import           Algebra.Ring.Polynomial.Quotient
 import           Algebra.Ring.Polynomial.Univariate
 import           Algebra.TestUtils
-import           Control.Lens                       hiding ((:<))
 import           Control.Monad
 import           Data.List                          (sortOn)
 import qualified Data.List                          as L
@@ -39,7 +38,9 @@ genUnipol len = QC.generate $ fromCoeffVec <$> QC.vectorOf len QC.arbitrary
       fromCoeffVec = polynomial' . M.fromList . L.zip [singleton n | n <- [0..]]
 
 appendLM :: Fraction Integer -> Monomial 2 -> Polynomial (Fraction Integer) 2 -> Polynomial (Fraction Integer) 2
-appendLM coef lm = _Wrapped %~ M.insert (OrderedMonomial lm) coef
+appendLM coef lm f =
+  let c = coeff' lm f
+  in f + toPolynomial (coef - c, OrderedMonomial lm)
 
 xPoly :: Monad m => SC.Series m (Polynomial (Fraction Integer) 2)
 xPoly =
@@ -79,7 +80,7 @@ genLM m = withKnownNat m $ case zeroOrSucc m of
     coef <- arbitraryRational `suchThat` (/= 0)
     xf <- arbitrary :: QC.Gen (Polynomial (Fraction Integer) n)
     let xlm = OrderedMonomial $ fromListWithDefault (sSucc n) 0 [deg + 1]
-        f = xf & _Wrapped %~ M.insert xlm coef . M.filterWithKey (\k _ -> k < xlm)
+        f = polynomial $ M.insert xlm coef . M.filterWithKey (\k _ -> k < xlm) $ terms xf
     return $ f : fs
 
 zeroDimOf :: SNat n -> QC.Gen (ZeroDimIdeal n)
