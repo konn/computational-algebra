@@ -7,6 +7,7 @@
 -- | This module provides abstract classes for finitary polynomial types.
 module Algebra.Ring.Polynomial.Class
        ( IsPolynomial(..), IsOrderedPolynomial(..)
+       , Term, OMonom
        , substCoeff, liftMapCoeff
        , CoeffRing, oneNorm, maxNorm, monoize,
          sPolynomial, pDivModPoly, content, pp,
@@ -240,6 +241,14 @@ class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrder
   leadingCoeff = fst . leadingTerm
   {-# INLINE leadingCoeff #-}
 
+  -- | Splitting leading term, returning a pair of the leading term and the new polynomial
+  --   with the leading term subtracted.
+  splitLeadingTerm :: poly -> (Term poly, poly)
+  splitLeadingTerm p =
+    let t = leadingTerm p
+    in (t, p - toPolynomial t)
+  {-# INLINE splitLeadingTerm #-}
+
   -- | The collection of all monomials in the given polynomial,
   --   with metadata of their ordering.
   orderedMonomials :: poly -> S.Set (OrderedMonomial (MOrder poly) (Arity poly))
@@ -303,6 +312,10 @@ class (IsMonomialOrder (Arity poly) (MOrder poly), IsPolynomial poly) => IsOrder
   mapMonomialMonotonic tr  =
     _Terms %~ M.mapKeysMonotonic tr
   {-# INLINE mapMonomialMonotonic #-}
+
+
+type OMonom poly = OrderedMonomial (MOrder poly) (Arity poly)
+type Term poly = (Coefficient poly, OMonom poly)
 
 defaultTerms :: IsOrderedPolynomial poly
              => poly -> Map (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
@@ -626,42 +639,42 @@ showsPolynomialWith' showMult showsCoe vsVec d f = P.showParen (d P.> 10) $
     showFactor v n = Just $ v P.++ "^" P.++ P.show n
 
 -- | Calculate a polynomial quotient and remainder w.r.t. second argument.
-divModPolynomial :: (IsOrderedPolynomial poly, Field (Coefficient poly))
+divModPolynomial :: forall poly. (IsOrderedPolynomial poly, Field (Coefficient poly))
                  => poly -> [poly]
                  -> ([(poly, poly)], poly)
-divModPolynomial f0 fs = loop f0 zero (P.zip (L.nub fs) (P.repeat zero))
+divModPolynomial f0 fs = loop f0 zero (P.zip (map splitLeadingTerm $ L.nub fs) (P.repeat zero))
   where
     loop p r dic
-        | isZero p = (dic, r)
+        | isZero p = (map (first $ \(lt, q) -> toPolynomial lt + q) dic, r)
         | otherwise =
-            let ltP = toPolynomial $ leadingTerm p
-            in case L.break ((`divs` leadingMonomial p) . leadingMonomial . fst) dic of
-                 (_, []) -> loop (p - ltP) (r + ltP) dic
-                 (xs, (g, old):ys) ->
-                     let q = toPolynomial $ leadingTerm p `tryDiv` leadingTerm g
-                         dic' = xs P.++ (g, old + q) : ys
-                     in loop (p - (q * g)) r dic'
+            let (ltP, p') = splitLeadingTerm p
+            in case L.break ((`divs` snd ltP) . snd . fst . fst) dic of
+                 (_, []) -> loop p' (r + toPolynomial ltP) dic
+                 (xs, ((ltG, g), old):ys) ->
+                     let q = toPolynomial $ ltP `tryDiv` ltG
+                         dic' = xs P.++ ((ltG, g), old + q) : ys
+                     in loop (p' - (q * g)) r dic'
 {-# INLINABLE [2] divModPolynomial #-}
 
 -- | Remainder of given polynomial w.r.t. the second argument.
-modPolynomial :: (IsOrderedPolynomial poly, Field (Coefficient poly), Foldable t)
+modPolynomial :: (IsOrderedPolynomial poly, Field (Coefficient poly), Functor t, Foldable t)
               => poly -> t poly -> poly
-modPolynomial p rs = loop p zero
+modPolynomial p rs0 = loop p zero
   where
-    step r q =  do
-      let ltR = leadingTerm r
-          ltQ = leadingTerm q
+    rs = map splitLeadingTerm rs0
+    step r (ltQ, q) =  do
+      let (ltR, r') = splitLeadingTerm r
           lt  = ltR `tryDiv` ltQ
-      guard $ not (isZero r || isZero q) && snd ltQ `divs` snd ltR
-      return $ r - toPolynomial lt * q
+      guard $ not (isZero r || isZero (fst ltQ)) && snd ltQ `divs` snd ltR
+      return $ r' - toPolynomial lt * q
     loop !q !r
       | isZero q = r
       | otherwise =
           case getFirst $ foldMap (First . step q) rs of
             Just q' -> loop q' r
             Nothing ->
-              let lt = toPolynomial $ leadingTerm q
-              in loop (q - lt) (r + lt)
+              let (lt, q') = splitLeadingTerm q
+              in loop q' (r + toPolynomial lt)
 {-# SPECIALISE
  modPolynomial :: (IsOrderedPolynomial poly, Field (Coefficient poly))
                 => poly -> [poly] -> poly
