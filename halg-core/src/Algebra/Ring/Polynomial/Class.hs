@@ -573,14 +573,14 @@ showsCoeffWithOp (Negative s) = P.showString " - " . fromMaybe (P.showChar '1') 
 showsCoeffWithOp OneCoeff     = P.showString " + 1"
 showsCoeffWithOp (Positive s) = P.showString " + " . s
 
-showPolynomialWith :: (IsPolynomial poly, PrettyCoeff (Coefficient poly))
+showPolynomialWith :: (IsOrderedPolynomial poly, PrettyCoeff (Coefficient poly))
                     => Sized (Arity poly) P.String
                     -> Int
                     -> poly
                     -> P.String
 showPolynomialWith vs i p = showsPolynomialWith vs i p ""
 
-showPolynomialWith' :: (IsPolynomial poly)
+showPolynomialWith' :: (IsOrderedPolynomial poly)
                      => Bool
                      -> (Int -> Coefficient poly -> ShowSCoeff)
                      -> Sized (Arity poly) P.String
@@ -589,14 +589,14 @@ showPolynomialWith' :: (IsPolynomial poly)
                      -> P.String
 showPolynomialWith' b showsCoe vs i p = showsPolynomialWith' b showsCoe vs i p ""
 
-showsPolynomialWith :: (IsPolynomial poly, PrettyCoeff (Coefficient poly))
+showsPolynomialWith :: (IsOrderedPolynomial poly, PrettyCoeff (Coefficient poly))
                      => Sized (Arity poly) P.String
                      -> Int
                      -> poly
                      -> P.ShowS
 showsPolynomialWith = showsPolynomialWith' True showsCoeff
 
-showsPolynomialWith' :: (IsPolynomial poly)
+showsPolynomialWith' :: (IsOrderedPolynomial poly)
                      => Bool
                         -- ^ Whether print multiplication as @*@ or not.
                      -> (Int -> Coefficient poly -> ShowSCoeff)
@@ -609,7 +609,7 @@ showsPolynomialWith' :: (IsPolynomial poly)
                         -- ^ Polynomial
                      -> P.ShowS
 showsPolynomialWith' showMult showsCoe vsVec d f = P.showParen (d P.> 10) $
-  let tms  = map (showMonom *** showsCoe 10) $ M.toDescList $ terms' f
+  let tms  = map (showMonom *** showsCoe 10) $ M.toDescList $ terms f
   in case tms of
     [] -> P.showString "0"
     (mc : ts) -> P.foldr1 (.) $ showTermOnly mc : map showRestTerm ts
@@ -630,7 +630,7 @@ showsPolynomialWith' showMult showsCoe vsVec d f = P.showParen (d P.> 10) $
     multSymb | showMult  = '*'
              | otherwise = ' '
     showMonom m =
-      let fs = catMaybes $ P.zipWith showFactor vs $ otoList m
+      let fs = catMaybes $ P.zipWith showFactor vs $ otoList $ getMonomial m
       in if P.null fs
          then Nothing
          else Just $ foldr (.) P.id $ L.intersperse (P.showChar multSymb) (map P.showString fs)
