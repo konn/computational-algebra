@@ -576,7 +576,7 @@ padLeftPoly :: (IsMonomialOrder n ord, IsPolynomial poly)
             => Sing n -> ord -> poly -> PadPolyL n ord poly
 padLeftPoly n _ = withKnownNat n $ PadPolyL . injectCoeff
 
-instance (r ~ Coefficient poly, IsPolynomial poly,
+instance (r ~ Coefficient poly, IsOrderedPolynomial poly, SingI (Replicate n 1),
           KnownNat n, CoeffRing r, IsMonomialOrder n order, PrettyCoeff r)
        => Show (PadPolyL n order poly) where
   showsPrec = showsPolynomialWith $ generate sing (\i -> "X_" ++ show (fromEnum i))
