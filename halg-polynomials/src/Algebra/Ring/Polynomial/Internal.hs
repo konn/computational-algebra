@@ -140,19 +140,11 @@ instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
   mapMonomialMonotonic f = Polynomial . M.mapKeysMonotonic f . C.coerce
   {-# INLINE mapMonomialMonotonic #-}
 
-instance (KnownNat n, CoeffRing r, IsMonomialOrder n order)
-         => Wrapped (OrderedPolynomial r order n) where
-  type Unwrapped (OrderedPolynomial r order n) = Map (OrderedMonomial order n) r
-  _Wrapped' = iso terms polynomial
-
-instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord, t ~ OrderedPolynomial q ord' m)
-         => Rewrapped (OrderedPolynomial r ord n) t
-
 castPolynomial :: (CoeffRing r, KnownNat n, KnownNat m,
                    IsMonomialOrder n o, IsMonomialOrder m o')
                => OrderedPolynomial r o n
                -> OrderedPolynomial r o' m
-castPolynomial = _Wrapped %~ M.mapKeys castMonomial
+castPolynomial = C.coerce (mapKeys castMonomial)
 {-# INLINE castPolynomial #-}
 
 scastPolynomial :: (IsMonomialOrder n o, IsMonomialOrder m o', KnownNat m,
@@ -386,12 +378,12 @@ allVars = unsafeFromList' vars
 
 changeOrder :: (CoeffRing k, Eq (Monomial n), IsMonomialOrder n o, IsMonomialOrder n o',  KnownNat n)
             => o' -> OrderedPolynomial k o n -> OrderedPolynomial k o' n
-changeOrder _ = _Wrapped %~ M.mapKeys (OrderedMonomial . getMonomial)
+changeOrder _ = C.coerce $ mapKeys (OrderedMonomial . getMonomial)
 
 changeOrderProxy :: (CoeffRing k, Eq (Monomial n), IsMonomialOrder n o,
                      IsMonomialOrder n o',  KnownNat n)
                  => Proxy o' -> OrderedPolynomial k o n -> OrderedPolynomial k o' n
-changeOrderProxy _ = _Wrapped %~ M.mapKeys (OrderedMonomial . getMonomial)
+changeOrderProxy _ = C.coerce $ mapKeys (OrderedMonomial . getMonomial)
 
 getTerms :: OrderedPolynomial k order n -> [(k, OrderedMonomial order n)]
 getTerms = map (snd &&& fst) . M.toDescList . _terms
