@@ -90,7 +90,7 @@ mapPayload  = H.mapMonotonic . onPayload
 
 mergeWith :: Ord a => (b -> b -> b) -> (b -> b) -> (b -> b) -> RHeap a b -> RHeap a b -> RHeap a b
 mergeWith f fl fr l r =
-  H.mapMonotonic (\h -> REntry (priority $ H.minimum h) (foldr1 f $ map payload $ F.toList h)) $
+  H.mapMonotonic (\h -> REntry (priority $ H.minimum h) (foldl1 f $ map payload $ F.toList h)) $
   H.group $ H.union (H.mapMonotonic (onPayload fl) l) (H.mapMonotonic (onPayload fr) r)
 {-# INLINE mergeWith #-}
 
@@ -106,9 +106,11 @@ htoList = map (\(REntry a b) -> (a, b)) .  F.toList
 
 hfromList :: Ord a => [(a, b)] -> H.Heap (REntry a b)
 hfromList = H.fromList . map (uncurry REntry)
+{-# INLINE hfromList #-}
 
 mapKeysMonotonic :: Ord a' => (a -> a') -> H.Heap (REntry a b) -> H.Heap (REntry a' b)
 mapKeysMonotonic f = H.mapMonotonic (\(REntry a b) -> REntry (f a) b)
+{-# INLINE mapKeysMonotonic #-}
 
 viewMax :: H.Heap (REntry a b) -> Maybe ((a, b), H.Heap (REntry a b))
 viewMax d = H.viewMin d <&> \ (REntry a b,c) -> ((a,b), c)
@@ -234,7 +236,7 @@ instance (IsMonomialOrder n order, CoeffRing r, KnownNat n) => Group (OrderedPol
   negate (Polynomial dic) = Polynomial $ mapPayload negate dic
   {-# INLINE negate #-}
 
-  Polynomial f - Polynomial g = Polynomial $ mergeWith (-) id negate f g
+  Polynomial f - Polynomial g = Polynomial $ mergeWith (+) id negate f g
   {-# INLINE (-) #-}
 
 

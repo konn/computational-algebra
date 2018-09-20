@@ -130,8 +130,11 @@ instance (Wraps vars poly, Unital poly) => Unital (LabPolynomial poly vars) wher
   {-# INLINE one #-}
 
 instance (Wraps vars poly, Group poly) => Group (LabPolynomial poly vars) where
-  negate (LabelPolynomial_ f) = LabelPolynomial_ (negate f)
+  negate = DC.coerce @(poly -> poly) negate
   {-# INLINE negate #-}
+
+  (-) = DC.coerce @(poly -> poly -> poly) (-)
+  {-# INLINE (-) #-}
 
 instance (Wraps vars poly, RightModule Natural poly) => RightModule Natural (LabPolynomial poly vars) where
   LabelPolynomial_ f *. a = LabelPolynomial_ $  f *. a
