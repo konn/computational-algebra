@@ -1,9 +1,10 @@
-{-# LANGUAGE DataKinds, ExplicitNamespaces, GADTs, PatternSynonyms #-}
-{-# LANGUAGE ScopedTypeVariables                                   #-}
+{-# LANGUAGE DataKinds, ExplicitNamespaces, GADTs, NoImplicitPrelude #-}
+{-# LANGUAGE PatternSynonyms, ScopedTypeVariables, TypeApplications  #-}
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 module GroebnerSpec where
 import Algebra.Algorithms.Groebner
 import Algebra.Internal            (pattern (:<), KnownNat, pattern NilL, SNat)
+import Algebra.Prelude.Core        hiding ((===))
 import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
 import Utils
@@ -38,7 +39,7 @@ spec = parallel $ do
       within (minutes 5) $ checkForArity [1..4] prop_degdecay
     prop "divides correctly" $
       within (minutes 5) $ checkForArity [1..4] prop_divCorrect
-  describe "modPolynomial" $ modifyMaxSize (const 10) $ modifyMaxSuccess (const 10) $ do
+  describe "modPolynomial" $ modifyMaxSize (const 10) $ modifyMaxSuccess (const 10) $
     prop "Generates the same remainder as divModPolynomial" $
       within (minutes 5) $ checkForArity [1..4] $ \(sdim :: SNat n) ->
       forAll (polynomialOfArity sdim) $ \poly ->
@@ -49,6 +50,10 @@ spec = parallel $ do
     prop "passes S-test" $
       setSize 3 $
       within (minutes 5) $ checkForArity [2..3] prop_passesSTest
+    prop "passes S-test (regression)" $ once $
+      conjoin [ counterexample (show i) $ passesSTest i
+              | SomeIdeal i <- gbRegress
+              ]
     prop "divides all original generators" $
       within (minutes 5) $ checkForArity [2..3] prop_groebnerDivsOrig
     it "generates the same ideal as original" $
@@ -91,9 +96,12 @@ prop_isReduced sdim =
 
 prop_passesSTest :: KnownNat n => SNat n -> Property
 prop_passesSTest sdim =
-  forAll (sized $ \size -> vectorOf size (polynomialOfArity sdim)) $ \ideal ->
+  forAll (sized $ \size -> vectorOf size (polynomialOfArity sdim)) passesSTest
+
+passesSTest :: (Field (Coefficient poly), IsOrderedPolynomial poly) => [poly] -> Bool
+passesSTest ideal =
   let gs = calcGroebnerBasis $ toIdeal ideal
-  in all ((== 0) . (`modPolynomial` gs)) [sPolynomial f g | (f : fs) <- init $ tails gs, g <- fs]
+  in all (isZero . (`modPolynomial` gs)) [sPolynomial f g | (f : fs) <- init $ tails gs, g <- fs]
 
 prop_groebnerDivsOrig :: KnownNat n => SNat n -> Property
 prop_groebnerDivsOrig sdim =
@@ -132,3 +140,15 @@ ics_binary :: [IntersectCase (Fraction Integer) Grevlex 2]
 ics_binary =
   let [x, y] = F.toList allVars
   in [IC [x*y] [y] [x*y]]
+
+data SomeIdeal where
+  SomeIdeal :: (Show poly, Field (Coefficient poly), IsOrderedPolynomial poly) => [poly] -> SomeIdeal
+
+gbRegress :: [SomeIdeal]
+gbRegress =
+  [ let [x,y,z] = vars
+    in SomeIdeal @(OrderedPolynomial Rational Grevlex 3)
+       [ x * y ^3* z ^4
+       , (1 % 3) * x ^3* y ^4* z ^2 + 3* x * y ^2* z ^4
+       , - x ^3* y ^3* z ^3 +  x ^4* y * z ^4]
+  ]

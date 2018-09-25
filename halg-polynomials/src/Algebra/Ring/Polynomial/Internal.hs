@@ -3,8 +3,9 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving, LiberalTypeSynonyms             #-}
 {-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction, PolyKinds #-}
 {-# LANGUAGE RankNTypes, RoleAnnotations, ScopedTypeVariables            #-}
-{-# LANGUAGE StandaloneDeriving, TypeFamilies, TypeOperators             #-}
-{-# LANGUAGE TypeSynonymInstances, UndecidableInstances, ViewPatterns    #-}
+{-# LANGUAGE StandaloneDeriving, TypeApplications, TypeFamilies          #-}
+{-# LANGUAGE TypeOperators, TypeSynonymInstances, UndecidableInstances   #-}
+{-# LANGUAGE ViewPatterns                                                #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
@@ -140,11 +141,13 @@ instance (KnownNat n, CoeffRing r, IsMonomialOrder n ord)
   mapMonomialMonotonic f = Polynomial . M.mapKeysMonotonic f . C.coerce
   {-# INLINE mapMonomialMonotonic #-}
 
-castPolynomial :: (CoeffRing r, KnownNat n, KnownNat m,
+castPolynomial :: forall r n m o o'.
+                  (CoeffRing r, KnownNat n, KnownNat m,
                    IsMonomialOrder n o, IsMonomialOrder m o')
                => OrderedPolynomial r o n
                -> OrderedPolynomial r o' m
-castPolynomial = C.coerce (mapKeys castMonomial)
+castPolynomial = C.coerce @(Map (OrderedMonomial o n) r  -> Map (OrderedMonomial o' m) r)
+                 (M.mapKeys castMonomial)
 {-# INLINE castPolynomial #-}
 
 scastPolynomial :: (IsMonomialOrder n o, IsMonomialOrder m o', KnownNat m,
@@ -376,20 +379,26 @@ allVars :: forall k ord n . (IsMonomialOrder n ord, CoeffRing k, KnownNat n)
         => Sized n (OrderedPolynomial k ord n)
 allVars = unsafeFromList' vars
 
-changeOrder :: (CoeffRing k, Eq (Monomial n), IsMonomialOrder n o, IsMonomialOrder n o',  KnownNat n)
+changeOrder :: forall k n o o'.
+               (CoeffRing k, Eq (Monomial n), IsMonomialOrder n o, IsMonomialOrder n o',  KnownNat n)
             => o' -> OrderedPolynomial k o n -> OrderedPolynomial k o' n
-changeOrder _ = C.coerce $ mapKeys (OrderedMonomial . getMonomial)
+changeOrder _ =
+  C.coerce @(Map (OrderedMonomial o n) k -> Map (OrderedMonomial o' n) k) $
+  M.mapKeys (OrderedMonomial . getMonomial)
 
-changeOrderProxy :: (CoeffRing k, Eq (Monomial n), IsMonomialOrder n o,
+changeOrderProxy :: forall k n o o'.
+                    (CoeffRing k, Eq (Monomial n), IsMonomialOrder n o,
                      IsMonomialOrder n o',  KnownNat n)
                  => Proxy o' -> OrderedPolynomial k o n -> OrderedPolynomial k o' n
-changeOrderProxy _ = C.coerce $ mapKeys (OrderedMonomial . getMonomial)
+changeOrderProxy _ =
+  C.coerce @(Map (OrderedMonomial o n) k -> Map (OrderedMonomial o' n) k) $
+  M.mapKeys (OrderedMonomial . getMonomial)
 
 getTerms :: OrderedPolynomial k order n -> [(k, OrderedMonomial order n)]
 getTerms = map (snd &&& fst) . M.toDescList . _terms
 
-transformMonomial :: (IsMonomialOrder m o, CoeffRing k, KnownNat m)
-                  => (USized n Int -> USized m Int) -> OrderedPolynomial k o n -> OrderedPolynomial k o m
+transformMonomial :: (IsMonomialOrder m o', CoeffRing k, KnownNat m)
+                  => (USized n Int -> USized m Int) -> OrderedPolynomial k o n -> OrderedPolynomial k o' m
 transformMonomial tr (Polynomial d) =
   polynomial $ M.mapKeys (OrderedMonomial . tr . getMonomial) d
 

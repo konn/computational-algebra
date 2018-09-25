@@ -30,14 +30,12 @@ import Algebra.Internal
 import Algebra.Prelude.Core
 import Algebra.Ring.Polynomial.Univariate (Unipol)
 
-import           Control.Lens                 ((%~), (&), _Wrapped)
 import           Control.Monad.Loops          (whileM_)
 import           Control.Monad.ST             (ST, runST)
 import qualified Data.Foldable                as F
 import qualified Data.Foldable                as H
 import qualified Data.Heap                    as H
 import           Data.Kind                    (Type)
-import qualified Data.Map                     as M
 import           Data.MonoTraversable         (oall)
 import           Data.Sequence                (Seq ((:<|)))
 import qualified Data.Sequence                as Seq
@@ -400,7 +398,7 @@ unsafeThEliminationIdealWith :: ( IsOrderedPolynomial poly,
                              -> Ideal poly
                              -> Ideal (OrderedPolynomial k Grevlex (m -. n))
 unsafeThEliminationIdealWith ord n ideal =
-  withKnownNat n $ toIdeal [ f & _Wrapped %~ M.mapKeys (orderMonomial Nothing . V.drop n . getMonomial)
+  withKnownNat n $ toIdeal [ transformMonomial (V.drop n) f
                            | f <- calcGroebnerBasisWith ord ideal
                            , all (oall (== 0) . V.takeAtMost n . getMonomial . snd) $ getTerms f
                            ]
