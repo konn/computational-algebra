@@ -33,6 +33,14 @@ stages:
     key: ghc-8.4
     <<: *cached-dirs
 
+.header-ghc-86: &header-ghc-86
+  variables:
+    STACK_YAML: "stack-806.yaml"
+  allow_failure: true
+  cache: 
+    key: ghc-8.6
+    <<: *cached-dirs
+
 before_script:
 - echo $CI_PROJECT_DIR
 - export STACK_ROOT="${CI_PROJECT_DIR}/.stack-root"
@@ -90,6 +98,11 @@ build:ghc-8.4:
   <<:    *header-ghc-84
   <<:    *build-script
 
+build:ghc-8.6:
+  image: fpco/stack-build:lts-12.10
+  <<:    *header-ghc-86
+  <<:    *build-script
+
 test:ghc-8.0:
   image: fpco/stack-build:lts-9.5
   dependencies:
@@ -111,6 +124,13 @@ test:ghc-8.4:
   <<:    *header-ghc-84
   <<:    *test-script
   coverage: '/^\s*(\d+\s*%)\s*top-level declarations used/'
+
+test:ghc-8.6:
+  image: fpco/stack-build:lts-12.10
+  dependencies:
+  - build:ghc-8.6
+  <<:    *header-ghc-86
+  <<:    *test-script
 
 deploy_documents:
   only:
