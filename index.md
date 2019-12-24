@@ -70,12 +70,12 @@ import Data.Type.Ordinal.Builtin
 
 -- | 0-th variable of polynomial ring with at least one variable.
 -- Variables are 0-origin.
-x :: (KnownNat n, CoeffRing r, IsMonomialOrder n order, (0 :< n) ~ 'True)
+x :: (KnownNat n, CoeffRing r, IsMonomialOrder n order, (0 < n) ~ 'True)
   => OrderedPolynomial r order n
 x = var [od|0|]
 
 -- | 1-st variable of polynomial ring with at least two variable.
-y :: (KnownNat n, CoeffRing r, IsMonomialOrder n order, (1 :< n) ~ 'True)
+y :: (KnownNat n, CoeffRing r, IsMonomialOrder n order, (1 < n) ~ 'True)
   => OrderedPolynomial r order n
 y = var [od|1|]
 
