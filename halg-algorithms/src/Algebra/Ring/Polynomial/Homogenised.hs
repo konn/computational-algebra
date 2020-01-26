@@ -10,7 +10,7 @@ import qualified Data.Map                           as M
 import           Data.MonoTraversable               (osum)
 import qualified Data.Sized.Builtin                 as SV
 
-newtype Homogenised poly = Homogenised (Unipol poly)
+newtype Homogenised poly = Homogenised (OrderedPolynomial (Unipol (Coefficient poly)) (MOrder poly) (Arity poly))
 
 deriving instance IsOrderedPolynomial poly => Additive (Homogenised poly)
 deriving instance IsOrderedPolynomial poly => Unital (Homogenised poly)
@@ -29,11 +29,11 @@ deriving instance IsOrderedPolynomial poly => Semiring (Homogenised poly)
 deriving instance IsOrderedPolynomial poly => Rig (Homogenised poly)
 deriving instance IsOrderedPolynomial poly => Ring (Homogenised poly)
 deriving instance IsOrderedPolynomial poly => Num (Homogenised poly)
-instance (IsOrderedPolynomial poly, LeftModule (Scalar r) poly)
-      => LeftModule (Scalar r) (Homogenised poly) where
+instance (IsOrderedPolynomial poly, k ~ Coefficient poly)
+      => LeftModule (Scalar k) (Homogenised poly) where
   r .* Homogenised f = Homogenised $ mapCoeff' (r .*) f
-instance (IsOrderedPolynomial poly, RightModule (Scalar r) poly)
-      => RightModule (Scalar r) (Homogenised poly) where
+instance (IsOrderedPolynomial poly, k ~ Coefficient poly)
+      => RightModule (Scalar k) (Homogenised poly) where
    Homogenised f *. r = Homogenised $ mapCoeff' (*. r) f
 
 instance IsOrderedPolynomial poly => IsPolynomial (Homogenised poly) where
@@ -45,28 +45,35 @@ instance IsOrderedPolynomial poly => IsPolynomial (Homogenised poly) where
     let sn = sizedLength os
         sm = sing :: Sing (Arity poly)
     in withRefl (succInj' sn sm (Refl :: Succ k :~: Succ (Arity poly))) $
-    Homogenised $ (fromMonomial os :: poly) .*. fromMonomial (SV.singleton o)
+    Homogenised $ fromMonomial (SV.singleton o) !* fromMonomial os
   fromMonomial _ = error "Cannot happen!"
   terms' (Homogenised f) =
-    withRefl (plusComm (sArity f) sOne) $
     M.fromList
-    [(mr SV.++ ml, cf)
+    [(ml SV.++ mr, cf)
     | (ml, fpol) <- M.toList $ terms' f
     , (mr, cf) <- M.toList $ terms' fpol
     ]
   liftMap gen (Homogenised f) =
-    withKnownNat (sSucc $ sArity f) $
-    withRefl (lneqToLT (sArity f) (sSucc (sArity f))  $ lneqSucc (sArity f)) $
-    substWith (\g alg -> alg * liftMap (gen . inclusion) g) (singleton $ gen maxBound) f
+    let sn = sing :: SNat (Arity poly)
+    in -- withKnownNat (sSucc $ sArity f) $
+    withRefl (lneqToLT sn (sSucc sn)  $ lneqSucc sn) $
+    substWith (\g alg -> alg * liftMapUnipol (const $ gen maxBound) g) (generate sing $ gen . inclusion) f
 
 type HomogOrder n ord = ProductOrder n 1 ord Lex
 
 instance IsOrderedPolynomial poly => IsOrderedPolynomial (Homogenised poly) where
   type MOrder (Homogenised poly) = HomogOrder (Arity poly) (MOrder poly)
-  leadingTerm poly =
-    let dic = M.mapKeys OrderedMonomial $ terms' poly
-    in if M.null dic then (zero, one) else swap $ M.findMax dic
+  leadingTerm (Homogenised poly) =
+    let (p, l) = leadingTerm poly
+        (c, r) = leadingTerm p
+    in (c, OrderedMonomial $ getMonomial l SV.++ getMonomial r)
   {-# INLINE leadingTerm #-}
+  splitLeadingTerm (Homogenised poly) =
+    let ((p, l), rest) = splitLeadingTerm poly
+        ((c, r), grest) = splitLeadingTerm p
+        g = toPolynomial (grest, l) + rest
+    in ((c, OrderedMonomial $ getMonomial l SV.++ getMonomial r), Homogenised g)
+  {-# INLINE splitLeadingTerm #-}
 
 instance (IsOrderedPolynomial poly, PrettyCoeff (Coefficient poly))
       => Show (Homogenised poly) where
@@ -103,15 +110,15 @@ instance (Field (Coefficient poly), IsOrderedPolynomial poly) => DecidableAssoci
 homogenise :: IsOrderedPolynomial poly => poly -> Homogenised poly
 homogenise p =
   let d = totalDegree' p
-      recap m@(OrderedMonomial m0) =
-        OrderedMonomial $ m0 :> fromIntegral d - totalDegree m
-  in polynomial $
-     M.mapKeysMonotonic recap $
+  in Homogenised $
+     polynomial $
+     M.mapWithKey (\k v -> toPolynomial (v, OrderedMonomial $ SV.singleton (d - totalDegree k))) $
      terms p
 
 unhomogenise :: IsOrderedPolynomial poly => Homogenised poly -> poly
 unhomogenise (Homogenised f) =
-  substWith (*) (SV.singleton one) f
+  convertPolynomial $
+  mapCoeff (substWith (*) (SV.singleton one)) f
 
 isHomogeneous :: IsOrderedPolynomial poly
               => poly -> Bool
