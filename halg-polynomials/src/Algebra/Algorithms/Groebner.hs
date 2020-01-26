@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DataKinds, EmptyCase, FlexibleContexts        #-}
+{-# LANGUAGE ConstraintKinds, DataKinds, FlexibleContexts                   #-}
 {-# LANGUAGE FlexibleInstances, GADTs, MultiParamTypeClasses                #-}
 {-# LANGUAGE NoImplicitPrelude, ParallelListComp, PolyKinds, RankNTypes     #-}
 {-# LANGUAGE ScopedTypeVariables, TypeFamilies, TypeOperators, ViewPatterns #-}
@@ -15,8 +15,7 @@ module Algebra.Algorithms.Groebner
        , reduceMinimalGroebnerBasis, minimizeGroebnerBasis
        -- ** Selection Strategies
        , syzygyBuchbergerWithStrategy
-       , SelectionStrategy(..), calcWeight', GrevlexStrategy(..)
-       , NormalStrategy(..), SugarStrategy(..), GradedStrategy(..)
+       , module Algebra.Algorithms.Groebner.SelectionStrategy
        -- * Ideal operations
        , isIdealMember, intersection, thEliminationIdeal, thEliminationIdealWith
        , unsafeThEliminationIdealWith, eliminatePadding
@@ -26,9 +25,10 @@ module Algebra.Algorithms.Groebner
        , resultant, hasCommonFactor
        , lcmPolynomial, gcdPolynomial
        ) where
+import Algebra.Algorithms.Groebner.SelectionStrategy
 import Algebra.Internal
 import Algebra.Prelude.Core
-import Algebra.Ring.Polynomial.Univariate (Unipol)
+import Algebra.Ring.Polynomial.Univariate            (Unipol)
 
 import           Control.Monad.Loops          (whileM_)
 import           Control.Monad.ST             (ST, runST)
@@ -168,63 +168,6 @@ syzygyBuchbergerWithStrategy strategy ideal = runST $ do
                     => strategy -> Ideal (OrderedPolynomial k ord n) -> [OrderedPolynomial k ord n]
  #-}
 {-# INLINABLE [2] syzygyBuchbergerWithStrategy #-}
-
-
--- | Calculate the weight of given polynomials w.r.t. the given strategy.
---   Buchberger's algorithm proccesses the pair with the most least weight first.
---   This function requires the @Ord@ instance for the weight; this constraint is not required
---   in the 'calcWeight' because of the ease of implementation. So use this function.
-calcWeight' :: (SelectionStrategy (Arity poly) s, IsOrderedPolynomial poly)
-            => s -> poly -> poly -> Weight (Arity poly) s (MOrder poly)
-calcWeight' s = calcWeight (toProxy s)
-{-# INLINE calcWeight' #-}
-
--- | Type-class for selection strategies in Buchberger's algorithm.
-class SelectionStrategy n s where
-  type Weight n s ord :: Type
-  -- | Calculates the weight for the given pair of polynomial used for selection strategy.
-  calcWeight :: (IsOrderedPolynomial poly, n ~ Arity poly)
-             => Proxy s -> poly -> poly -> Weight n s (MOrder poly)
-
--- | Buchberger's normal selection strategy. This selects the pair with
---   the least LCM(LT(f), LT(g)) w.r.t. current monomial ordering.
-data NormalStrategy = NormalStrategy deriving (Read, Show, Eq, Ord)
-
-instance SelectionStrategy n NormalStrategy where
-  type Weight n NormalStrategy ord = OrderedMonomial ord n
-  calcWeight _ f g = lcmMonomial (leadingMonomial f)  (leadingMonomial g)
-  {-# INLINE calcWeight #-}
-
--- | Choose the pair with the least LCM(LT(f), LT(g)) w.r.t. 'Grevlex' order.
-data GrevlexStrategy = GrevlexStrategy deriving (Read, Show, Eq, Ord)
-
-instance SelectionStrategy n GrevlexStrategy where
-  type Weight n GrevlexStrategy ord = OrderedMonomial Grevlex n
-  calcWeight _ f g = changeMonomialOrderProxy Proxy $
-                     lcmMonomial (leadingMonomial f) (leadingMonomial g)
-  {-# INLINE calcWeight #-}
-
-data GradedStrategy = GradedStrategy deriving (Read, Show, Eq, Ord)
-
--- | Choose the pair with the least LCM(LT(f), LT(g)) w.r.t. graded current ordering.
-instance SelectionStrategy n GradedStrategy where
-  type Weight n GradedStrategy ord = OrderedMonomial (Graded ord) n
-  calcWeight _ f g = changeMonomialOrderProxy Proxy $
-                     lcmMonomial (leadingMonomial f)  (leadingMonomial g)
-  {-# INLINE calcWeight #-}
-
-
--- | Sugar strategy. This chooses the pair with the least phantom homogenized degree and then break the tie with the given strategy (say @s@).
-newtype SugarStrategy s = SugarStrategy s deriving (Read, Show, Eq, Ord)
-
-instance SelectionStrategy n s => SelectionStrategy n (SugarStrategy s) where
-  type Weight n (SugarStrategy s) ord = (Int, Weight n s ord)
-  calcWeight (Proxy :: Proxy (SugarStrategy s)) f g = (sugar, calcWeight (Proxy :: Proxy s) f g)
-    where
-      deg' = maximum . map totalDegree . H.toList . orderedMonomials
-      tsgr h = deg' h - totalDegree (leadingMonomial h)
-      sugar = max (tsgr f) (tsgr g) + totalDegree (lcmMonomial (leadingMonomial f) (leadingMonomial g))
-  {-# INLINE calcWeight #-}
 
 data PolyEntry p = PE { leadMon :: !(OrderedMonomial (MOrder p) (Arity p))
                       , poly :: p
