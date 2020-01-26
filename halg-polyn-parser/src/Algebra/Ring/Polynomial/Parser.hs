@@ -13,6 +13,8 @@ import           Algebra.Ring.Polynomial.Class
 import           Algebra.Ring.Polynomial.Monomial
 import           AlgebraicPrelude                 hiding (char)
 import           Control.Arrow                    (left)
+import           Control.Monad.Combinators.Expr
+import qualified Data.List.NonEmpty               as NE
 import qualified Data.Ratio                       as P
 import           Data.Singletons.Prelude
 import           Data.Singletons.Prelude.List
@@ -24,7 +26,6 @@ import qualified Prelude                          as P
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer       as L
-import           Text.Megaparsec.Expr
 
 lexeme :: (MonadParsec e T.Text m) => m a -> m a
 lexeme  = L.lexeme space
@@ -104,4 +105,4 @@ parsePolynomialWith :: (IsOrderedPolynomial poly)
                     -> T.Text
                     -> Either String poly
 parsePolynomialWith coeffP varP =
-  left parseErrorPretty . parse (space *> polynomialP coeffP varP <* eof) "input"
+  left (parseErrorPretty . NE.head . bundleErrors) . parse (space *> polynomialP coeffP varP <* eof) "input"

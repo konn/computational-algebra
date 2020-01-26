@@ -29,6 +29,7 @@ dependencies:
 - halg-core
 - singletons
 - text
+- parser-combinators
 - type-natural
 
 library:

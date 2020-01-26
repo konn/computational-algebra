@@ -120,7 +120,8 @@ tests:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
-    - -Odph
+    - -fsimplifier-phases=3 
+    - -fmax-simplifier-iterations=20
     - -rtsopts
     dependencies:
     - HUnit

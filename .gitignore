@@ -87,3 +87,8 @@ gh-pages-devel
 hash-consing/
 TAGS
 signature-gao-iv-wang
+profiling-results
+**/*-prof.pdf
+**/*-prof.ps
+stack*.yaml.lock
+**/*.cabal
