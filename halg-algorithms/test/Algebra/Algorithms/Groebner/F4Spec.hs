@@ -32,11 +32,11 @@ spec :: Spec
 spec = parallel $ do
   describe "f4" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
     prop "passes S-test" $
-      checkForArity [2..3] $ prop_passesSTest f4
+      checkForTypeNat [2..3] $ prop_passesSTest f4
     prop "includes the original ideal" $
-      checkForArity [2..3] $ prop_groebnerDivsOrig f4
+      checkForTypeNat [2..3] $ prop_groebnerDivsOrig f4
     prop "is included in the orignal ideal" $
-      checkForArity [2..3] $ prop_groebnerIncluded f4
+      checkForTypeNat [2..3] $ prop_groebnerIncluded f4
 
 prop_passesSTest :: (Ideal (Polynomial Rational n) -> [Polynomial Rational n])
                  -> SNat n -> Property

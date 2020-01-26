@@ -44,19 +44,19 @@ spec = parallel $ do
       pendingWith "need example"
   describe "univPoly" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
     prop "produces elimination ideal's monic generator" $ do
-      checkForArity [2..4] prop_univPoly
+      checkForTypeNat [2..4] prop_univPoly
   describe "radical" $ do
     it "really computes radical" $ do
       pendingWith "We can verify correctness by comparing with singular, but it's not quite smart way..."
 {-
-      checkForArity [2..4] $ \sdim ->
+      checkForTypeNat [2..4] $ \sdim ->
         forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
         stdReduced (generators $ radical ideal) == calcGroebnerBasis (singIdealFun "radical" ideal)
       -- pendingWith "I couldn't formulate the spec for radical without existentials :-("
 -}
   describe "fglm" $ modifyMaxSuccess (const 25) $ modifyMaxSize (const 3) $ do
     prop "computes monomial basis" $
-      checkForArity [2..4] $ \sdim ->
+      checkForTypeNat [2..4] $ \sdim ->
         case zeroOrSucc sdim of
           IsZero -> error "impossible"
           IsSucc k ->
@@ -68,7 +68,7 @@ spec = parallel $ do
                   map quotRepr $ fromJust $ standardMonomials' ii
             in stdReduced (snd $ fglm ideal) == stdReduced base
     prop "computes lex base" $ do
-      checkForArity [2..4] $ \sdim ->
+      checkForTypeNat [2..4] $ \sdim ->
         case zeroOrSucc sdim of
           IsZero -> error "impossible"
           IsSucc k -> withKnownNat k $
@@ -78,7 +78,7 @@ spec = parallel $ do
             stdReduced (fst $ fglm ideal)
               == stdReduced (calcGroebnerBasisWith Lex ideal)
     prop "returns lex base in descending order" $
-      checkForArity [2..4] $ \sdim ->
+      checkForTypeNat [2..4] $ \sdim ->
       case zeroOrSucc sdim of
         IsZero -> error "impossible"
         IsSucc k -> withKnownNat k $
@@ -88,17 +88,17 @@ spec = parallel $ do
               isDescending (map leadingMonomial $ fst $ fglm ideal)
   describe "solve'" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
     it "solves equation with admissible error" $ do
-      checkForArity [2..4] $ prop_isApproximateZero 1e-5 (solve' 1e-5)
+      checkForTypeNat [2..4] $ prop_isApproximateZero 1e-5 (solve' 1e-5)
   -- describe "solve''" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
   --   it "solves equation with admissible error" $ do
-  --     checkForArity [2..4] $ prop_isApproximateZero 1e-5 (solve'' 1e-10)
+  --     checkForTypeNat [2..4] $ prop_isApproximateZero 1e-5 (solve'' 1e-10)
   describe "solveViaCompanion" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
     it "solves equation with admissible error" $ do
-      checkForArity [2..4] $ prop_isApproximateZero 1e-5 (solveViaCompanion 1e-5)
+      checkForTypeNat [2..4] $ prop_isApproximateZero 1e-5 (solveViaCompanion 1e-5)
   describe "solveM" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
     prop "solves equation with admissible error" $ \seed ->
       let gen = mkStdGen seed
-      in checkForArity [2..4] $ prop_isApproximateZero 1e-10 (\t -> evalRand (solveM t) gen)
+      in checkForTypeNat [2..4] $ prop_isApproximateZero 1e-10 (\t -> evalRand (solveM t) gen)
 
 isDescending :: Ord a => [a] -> Bool
 isDescending xs = and $ zipWith (>=) xs (drop 1 xs)

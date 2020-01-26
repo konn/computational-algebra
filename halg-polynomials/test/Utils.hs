@@ -23,6 +23,6 @@ idealOfArity :: SNat n -> Gen (Ideal (Polynomial (Fraction Integer) n))
 idealOfArity sn = withKnownNat sn arbitrary
 
 
-polynomialOfArity :: (KnownNat n)
-                  => SNat n -> Gen (Polynomial (Fraction Integer) n)
+polynomialOfArity :: (KnownNat n, DecidableZero k, Field k, Eq k, Arbitrary k)
+                  => SNat n -> Gen (Polynomial k n)
 polynomialOfArity sn = withKnownNat sn (runWrapPolynomial <$> arbitrary)

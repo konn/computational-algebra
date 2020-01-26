@@ -2,7 +2,7 @@
 {-# LANGUAGE KindSignatures, MultiParamTypeClasses, RankNTypes          #-}
 {-# LANGUAGE ScopedTypeVariables, TypeOperators, UndecidableInstances   #-}
 module Algebra.TestUtils
-       ( liftSNat, checkForArity
+       ( liftSNat, checkForTypeNat
        , module Algebra.Ring.Polynomial.Test
        , module Algebra.Ring.Polynomial.Monomial.Test
        , module Algebra.Field.Fraction.Test
@@ -28,8 +28,8 @@ liftSNat f i =
   case TN.fromNatural i of
     SomeSing sn -> withKnownNat sn $ f sn
 
-checkForArity :: [Natural] -> (forall n. KnownNat (n :: Nat) => Sing n -> Property) -> Property
-checkForArity as test = forAll (QC.elements as) $ liftSNat test
+checkForTypeNat :: [Natural] -> (forall n. KnownNat (n :: Nat) => Sing n -> Property) -> Property
+checkForTypeNat as test = forAll (QC.elements as) $ liftSNat test
 
 
 

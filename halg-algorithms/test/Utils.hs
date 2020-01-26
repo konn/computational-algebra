@@ -142,12 +142,13 @@ instance (Arbitrary k, CoeffRing k)
       => Arbitrary (Unipol k) where
   arbitrary = arbitraryPolynomial
 
-idealOfArity :: SNat n -> Gen (Ideal (Polynomial (Fraction Integer) n))
+idealOfArity :: (KnownNat n, Eq k, NA.Field k, Arbitrary k)
+             => SNat n -> Gen (Ideal (Polynomial k n))
 idealOfArity sn = withKnownNat sn arbitrary
 
 
-polynomialOfArity :: (KnownNat n)
-                  => SNat n -> Gen (Polynomial (Fraction Integer) n)
+polynomialOfArity :: (KnownNat n, Eq k, NA.Field k, Arbitrary k)
+                  => SNat n -> Gen (Polynomial k n)
 polynomialOfArity sn = withKnownNat sn (runWrapPolynomial <$> arbitrary)
 
 instance (Monad m, Serial m k, CoeffRing k, KnownNat n, IsMonomialOrder n ord)

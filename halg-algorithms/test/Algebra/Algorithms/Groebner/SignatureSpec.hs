@@ -53,15 +53,15 @@ spec = parallel $
   forM_ f5Calcs $ \(name, Calc calc) ->
     describe name $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
       prop "passes S-test" $
-        checkForArity [2..3] $ prop_passesSTest calc
+        checkForTypeNat [2..3] $ prop_passesSTest calc
       prop "passes S-test (regression)" $
         once $ conjoin [counterexample (show ideal) $ passesSTest calc ideal | SomeIdeal ideal <- regression]
       prop "includes the original ideal" $
-        checkForArity [2..3] $ prop_groebnerDivsOrig calc
+        checkForTypeNat [2..3] $ prop_groebnerDivsOrig calc
       prop "includes the original ideal (regression)" $ once $
         once $ conjoin [counterexample (show ideal) $ groebnerDivsOrig calc ideal | SomeIdeal ideal <- regression]
       prop "is included in the orignal ideal" $
-        checkForArity [2..3] $ prop_groebnerIncluded calc
+        checkForTypeNat [2..3] $ prop_groebnerIncluded calc
       prop "is included in the orignal ideal (regression)" $
         once $ conjoin [counterexample (show ideal) $ groebnerIncluded calc ideal | SomeIdeal ideal <- regression]
 

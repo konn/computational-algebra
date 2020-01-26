@@ -33,26 +33,26 @@ spec :: Spec
 spec = parallel $ do
   describe "calcHomogeneousGroebnerBasis" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
     prop "passes S-test" $
-      checkForArity [2..3] $ prop_passesSTestWith homogenise unsafeCalcHomogeneousGroebnerBasis
+      checkForTypeNat [2..3] $ prop_passesSTestWith homogenise unsafeCalcHomogeneousGroebnerBasis
     prop "includes the original ideal" $
-      checkForArity [2..3] $ prop_groebnerDivsOrigWith homogenise unsafeCalcHomogeneousGroebnerBasis
+      checkForTypeNat [2..3] $ prop_groebnerDivsOrigWith homogenise unsafeCalcHomogeneousGroebnerBasis
     prop "is included in the orignal ideal" $
-      checkForArity [2..3] $ prop_groebnerIncludedWith homogenise unsafeCalcHomogeneousGroebnerBasis
+      checkForTypeNat [2..3] $ prop_groebnerIncludedWith homogenise unsafeCalcHomogeneousGroebnerBasis
   describe "calcHomogeneousGroebnerBasisHilbert" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
     prop "passes S-test" $
-      checkForArity [2..3] $ prop_passesSTestWith (homogenise . changeOrder Lex)
+      checkForTypeNat [2..3] $ prop_passesSTestWith (homogenise . changeOrder Lex)
       calcHomogeneousGroebnerBasisHilbert
     prop "includes the original ideal" $
-      checkForArity [2..3] $ prop_groebnerDivsOrigWith (homogenise . changeOrder Lex) calcHomogeneousGroebnerBasisHilbert
+      checkForTypeNat [2..3] $ prop_groebnerDivsOrigWith (homogenise . changeOrder Lex) calcHomogeneousGroebnerBasisHilbert
     prop "is included in the orignal ideal" $
-      checkForArity [2..3] $ prop_groebnerIncludedWith (homogenise . changeOrder Lex) calcHomogeneousGroebnerBasisHilbert
+      checkForTypeNat [2..3] $ prop_groebnerIncludedWith (homogenise . changeOrder Lex) calcHomogeneousGroebnerBasisHilbert
   describe "calcGroebnerBasisAfterHomogenising" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
     prop "passes S-test" $
-      checkForArity [2..3] $ prop_passesSTestWith id calcGroebnerBasisAfterHomogenising
+      checkForTypeNat [2..3] $ prop_passesSTestWith id calcGroebnerBasisAfterHomogenising
     prop "includes the original ideal" $
-      checkForArity [2..3] $ prop_groebnerDivsOrigWith id calcGroebnerBasisAfterHomogenising
+      checkForTypeNat [2..3] $ prop_groebnerDivsOrigWith id calcGroebnerBasisAfterHomogenising
     prop "is included in the orignal ideal" $
-      checkForArity [2..3] $ prop_groebnerIncludedWith id calcGroebnerBasisAfterHomogenising
+      checkForTypeNat [2..3] $ prop_groebnerIncludedWith id calcGroebnerBasisAfterHomogenising
 
 prop_passesSTestWith :: (KnownNat n, Coefficient poly' ~ Rational,
                          IsOrderedPolynomial poly', DecidableZero poly')
