@@ -36,9 +36,15 @@ stages:
 .header-ghc-86: &header-ghc-86
   variables:
     STACK_YAML: "stack-806.yaml"
-  allow_failure: true
   cache: 
     key: ghc-8.6
+    <<: *cached-dirs
+
+.header-ghc-86: &header-ghc-88
+  variables:
+    STACK_YAML: "stack-808.yaml"
+  cache: 
+    key: ghc-8.8
     <<: *cached-dirs
 
 before_script:
@@ -99,8 +105,13 @@ build:ghc-8.4:
   <<:    *build-script
 
 build:ghc-8.6:
-  image: fpco/stack-build:lts-12.10
+  image: fpco/stack-build:lts-14.21
   <<:    *header-ghc-86
+  <<:    *build-script
+
+build:ghc-8.8:
+  image: fpco/stack-build:lts-14.21
+  <<:    *header-ghc-88
   <<:    *build-script
 
 test:ghc-8.0:
@@ -126,10 +137,17 @@ test:ghc-8.4:
   coverage: '/^\s*(\d+\s*%)\s*top-level declarations used/'
 
 test:ghc-8.6:
-  image: fpco/stack-build:lts-12.10
+  image: fpco/stack-build:lts-14.21
   dependencies:
   - build:ghc-8.6
   <<:    *header-ghc-86
+  <<:    *test-script
+
+test:ghc-8.8:
+  image: fpco/stack-build:lts-14.21
+  dependencies:
+  - build:ghc-8.8
+  <<:    *header-ghc-88
   <<:    *test-script
 
 deploy_documents:
@@ -139,9 +157,9 @@ deploy_documents:
   stage: deploy
   allow_failure: true
   dependencies:
-  - test:ghc-8.4
+  - test:ghc-8.6
   cache: 
-    key: ghc-8.4
+    key: ghc-8.6
     policy: pull
     <<: *cached-dirs
   script:
