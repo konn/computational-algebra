@@ -1,5 +1,8 @@
 image: fpco/stack-build:lts-12.2
 
+variables:
+  GIT_STRATEGY: fetch
+
 stages:
 - build
 - test
