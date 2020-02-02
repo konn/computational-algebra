@@ -12,6 +12,7 @@ stages:
   paths:
   - .stack-work/
   - .stack-root/
+  - */.stack-work
   - .apt/
   - .hspec-failures
 
