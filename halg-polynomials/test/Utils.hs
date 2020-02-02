@@ -22,6 +22,8 @@ instance (Arbitrary k, CoeffRing k)
 idealOfArity :: SNat n -> Gen (Ideal (Polynomial (Fraction Integer) n))
 idealOfArity sn = withKnownNat sn arbitrary
 
+ratPolynomialOfArity :: KnownNat n => SNat n -> Gen (Polynomial (Fraction Integer) n)
+ratPolynomialOfArity = polynomialOfArity
 
 polynomialOfArity :: (KnownNat n, DecidableZero k, Field k, Eq k, Arbitrary k)
                   => SNat n -> Gen (Polynomial k n)
