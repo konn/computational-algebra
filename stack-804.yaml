@@ -23,3 +23,5 @@ extra-deps:
 - sized-0.3.0.0
 - type-natural-0.8.1.0
 - unamb-0.2.7
+- parser-combinators-1.1.0
+- megaparsec-7.0.5

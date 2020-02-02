@@ -36,5 +36,6 @@ extra-deps:
 - equational-reasoning-0.5.1.0
 - intern-0.9.2
 - sized-0.3.0.0
-
+- parser-combinators-1.1.0
+- megaparsec-7.0.5
 # pvp-bounds: both
