@@ -15,21 +15,26 @@ module Algebra.Internal
 import Algebra.Instances ()
 
 import           AlgebraicPrelude
-import           Control.Lens                 ((%~), _Unwrapping)
-import qualified Data.Foldable                as F
-import           Data.Kind                    (Type)
-import           Data.ListLike                (ListLike)
+import           Control.Lens            ((%~), _Unwrapping)
+import qualified Data.Foldable           as F
+import           Data.Kind               (Type)
+import           Data.ListLike           (ListLike)
 import           Data.Proxy
-import qualified Data.Sequence                as Seq
-import           Data.Singletons.Prelude      as Algebra.Internal (PNum (..),
-                                                                   POrd (..),
-                                                                   SNum (..),
-                                                                   SOrd (..),
-                                                                   Sing (SFalse, STrue),
-                                                                   SingI (..),
-                                                                   SingKind (..),
-                                                                   SomeSing (..),
-                                                                   withSingI)
+import qualified Data.Sequence           as Seq
+import           Data.Singletons.Prelude as Algebra.Internal (PNum (..),
+                                                              POrd (..),
+                                                              SNum (..),
+                                                              SOrd (..),
+                                                              SingI (..),
+                                                              SingKind (..),
+                                                              SomeSing (..),
+                                                              withSingI)
+#if MIN_VERSION_singletons(2,6,0)
+import Data.Singletons.Prelude as Algebra.Internal (SBool (SFalse, STrue), Sing)
+#else
+import Data.Singletons.Prelude as Algebra.Internal (Sing (SFalse, STrue))
+#endif
+
 import           Data.Singletons.Prelude.Enum as Algebra.Internal (PEnum (..),
                                                                    SEnum (..))
 import           Data.Singletons.TypeLits     as Algebra.Internal (KnownNat,
