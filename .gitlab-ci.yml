@@ -10,11 +10,11 @@ stages:
 
 .cached_dirs: &cached-dirs
   paths:
-  - .stack-work/
-  - .stack-root/
-  - */.stack-work
-  - .apt/
-  - .hspec-failures
+  - '.stack-work/'
+  - '.stack-root/'
+  - '*/.stack-work'
+  - '.apt/'
+  - '.hspec-failures'
 
 .header-ghc-82: &header-ghc-82
   variables:
