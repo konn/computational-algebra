@@ -41,9 +41,9 @@ import           Data.Sequence                (Seq ((:<|)))
 import qualified Data.Sequence                as Seq
 import           Data.Set                     (Set)
 import qualified Data.Set                     as Set
-import           Data.Singletons.Prelude      (Sing (SFalse, STrue), withSingI)
-import           Data.Singletons.Prelude.List (Length, Replicate, Sing (SCons))
-import           Data.Singletons.Prelude.List (sLength, sReplicate)
+import           Data.Singletons.Prelude      (withSingI)
+import           Data.Singletons.Prelude.Bool
+import           Data.Singletons.Prelude.List
 import qualified Data.Sized.Builtin           as V
 import           Data.STRef                   (STRef, modifySTRef, modifySTRef',
                                                newSTRef)

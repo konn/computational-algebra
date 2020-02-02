@@ -1,6 +1,6 @@
-{-# LANGUAGE CPP, DataKinds, ExplicitNamespaces, FlexibleContexts        #-}
-{-# LANGUAGE FlexibleInstances, GADTs, MultiParamTypeClasses, RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables, TypeOperators, UndecidableInstances    #-}
+{-# LANGUAGE CPP, DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses, RankNTypes, ScopedTypeVariables     #-}
+{-# LANGUAGE TypeOperators, UndecidableInstances                        #-}
 module Algebra.Ring.Polynomial.Monomial.Test
        (arbitraryMonomialOfSum, arbitraryMonomial
        ) where
@@ -32,7 +32,7 @@ arbitraryMonomialOfSum :: SNat n -> Int -> Gen (Monomial n)
 arbitraryMonomialOfSum n k =
   case zeroOrSucc n of
     IsZero | k == 0 -> QC.elements [SV.empty]
-           | otherwise -> fail "Empty list with positive sum"
+           | otherwise -> error "Impossible"
     IsSucc m -> withKnownNat m $ do
       l <- QC.elements [0..abs k]
       (l :<) <$> arbitraryMonomialOfSum m (abs k - l)
