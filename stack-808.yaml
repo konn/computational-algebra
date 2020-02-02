@@ -22,6 +22,6 @@ extra-deps:
 - type-natural-0.8.3.1@rev:1
 - singletons-presburger-0.3.0.0
 - algebra-4.3.1@rev:2
-- sized-0.3.0.0
+- sized-0.3.0.1
 - unamb-0.2.7
 - control-monad-loop-0.1
