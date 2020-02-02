@@ -42,7 +42,7 @@ spec = parallel $ do
   describe "modPolynomial" $ modifyMaxSize (const 10) $ modifyMaxSuccess (const 10) $
     prop "Generates the same remainder as divModPolynomial" $
       within (minutes 5) $ checkForTypeNat [1..4] $ \(sdim :: SNat n) ->
-      forAll (polynomialOfArity sdim) $ \poly ->
+      forAll (ratPolynomialOfArity sdim) $ \poly ->
       forAll (idealOfArity sdim) $ \ideal ->
         let gs = F.toList ideal
         in (poly `modPolynomial` gs) === snd (divModPolynomial poly gs)
@@ -76,7 +76,7 @@ prop_intersection :: KnownNat n => SNat n -> Property
 prop_intersection sdim =
   forAll (idealOfArity sdim) $ \ideal ->
   forAll (idealOfArity sdim) $ \jdeal ->
-  forAll (polynomialOfArity sdim) $ \f ->
+  forAll (ratPolynomialOfArity sdim) $ \f ->
   (f `isIdealMember` ideal && f `isIdealMember` jdeal)
   == f `isIdealMember` intersection [ideal, jdeal]
 
@@ -96,7 +96,7 @@ prop_isReduced sdim =
 
 prop_passesSTest :: KnownNat n => SNat n -> Property
 prop_passesSTest sdim =
-  forAll (sized $ \size -> vectorOf size (polynomialOfArity sdim)) passesSTest
+  forAll (sized $ \size -> vectorOf size (ratPolynomialOfArity sdim)) passesSTest
 
 passesSTest :: (Field (Coefficient poly), IsOrderedPolynomial poly) => [poly] -> Bool
 passesSTest ideal =
@@ -106,13 +106,13 @@ passesSTest ideal =
 prop_groebnerDivsOrig :: KnownNat n => SNat n -> Property
 prop_groebnerDivsOrig sdim =
   forAll (elements [3..15]) $ \count ->
-  forAll (vectorOf count (polynomialOfArity sdim)) $ \ideal ->
+  forAll (vectorOf count (ratPolynomialOfArity sdim)) $ \ideal ->
   let gs = calcGroebnerBasis $ toIdeal ideal
   in all ((== 0) . (`modPolynomial` gs)) ideal
 
 prop_divCorrect :: KnownNat n => SNat n -> Property
 prop_divCorrect sdim =
-  forAll (polynomialOfArity sdim) $ \poly ->
+  forAll (ratPolynomialOfArity sdim) $ \poly ->
   forAll (idealOfArity sdim) $ \ideal ->
   let dvs = generators ideal
       (qds, r) = poly `divModPolynomial` dvs
@@ -120,7 +120,7 @@ prop_divCorrect sdim =
 
 prop_indivisible :: KnownNat n => SNat n -> Property
 prop_indivisible sdim =
-  forAll (polynomialOfArity sdim) $ \poly ->
+  forAll (ratPolynomialOfArity sdim) $ \poly ->
   forAll (idealOfArity sdim) $ \ideal ->
   let dvs = generators ideal
       (_, r) = changeOrder Grevlex poly `divModPolynomial` dvs
@@ -128,7 +128,7 @@ prop_indivisible sdim =
 
 prop_degdecay :: KnownNat n => SNat n -> Property
 prop_degdecay sdim =
-  forAll (polynomialOfArity sdim) $ \poly ->
+  forAll (ratPolynomialOfArity sdim) $ \poly ->
   forAll (idealOfArity sdim) $ \ideal ->
   let dvs = generators ideal
       (qs, _) = poly `divModPolynomial` dvs

@@ -23,7 +23,7 @@ spec = parallel $ do
 prop_passesSTest :: SNat n -> Property
 prop_passesSTest sdim = withKnownNat sdim $
   forAll (elements [3..15]) $ \count ->
-  forAll (vectorOf count (polynomialOfArity sdim)) $ \ideal ->
+  forAll (vectorOf count (ratPolynomialOfArity sdim)) $ \ideal ->
   let gs = calcGroebnerBasis $ toIdeal ideal
   in all ((== 0) . (`modPolynomial` gs)) [sPolynomial f g | f <- gs, g <- gs, f /= g]
 
@@ -31,14 +31,14 @@ prop_groebnerDivsOrig :: SNat n -> Property
 prop_groebnerDivsOrig sdim =
   withKnownNat sdim $
   forAll (elements [3..15]) $ \count ->
-  forAll (vectorOf count (polynomialOfArity sdim)) $ \ideal ->
+  forAll (vectorOf count (ratPolynomialOfArity sdim)) $ \ideal ->
   let gs = calcGroebnerBasis $ toIdeal ideal
   in all ((== 0) . (`modPolynomial` gs)) ideal
 
 prop_divCorrect :: SNat n -> Property
 prop_divCorrect sdim =
   withKnownNat sdim $
-  forAll (polynomialOfArity sdim) $ \poly ->
+  forAll (ratPolynomialOfArity sdim) $ \poly ->
   forAll (idealOfArity sdim) $ \ideal ->
   let dvs = generators ideal
       (qds, r) = poly `divModPolynomial` dvs
@@ -47,7 +47,7 @@ prop_divCorrect sdim =
 prop_indivisible :: SNat n -> Property
 prop_indivisible sdim =
   withKnownNat sdim $
-  forAll (polynomialOfArity sdim) $ \poly ->
+  forAll (ratPolynomialOfArity sdim) $ \poly ->
   forAll (idealOfArity sdim) $ \ideal ->
   let dvs = generators ideal
       (_, r) = changeOrder Grevlex poly `divModPolynomial` dvs
@@ -56,7 +56,7 @@ prop_indivisible sdim =
 prop_degdecay :: SNat n -> Property
 prop_degdecay sdim =
   withKnownNat sdim $
-  forAll (polynomialOfArity sdim) $ \poly ->
+  forAll (ratPolynomialOfArity sdim) $ \poly ->
   forAll (idealOfArity sdim) $ \ideal ->
   let dvs = generators ideal
       (qs, _) = poly `divModPolynomial` dvs
