@@ -34,7 +34,7 @@ library:
   - halg-polynomials
   - halg-polyn-parser
   - semigroups
-  - megaparsec
+  - megaparsec          >= 7.0
   - process-extras
   - type-natural
   - transformers
