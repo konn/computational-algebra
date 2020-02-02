@@ -16,14 +16,6 @@ stages:
   - '.apt/'
   - '.hspec-failures'
 
-.header-ghc-82: &header-ghc-82
-  variables:
-    STACK_YAML: "stack-802.yaml"
-    GHC: 802
-  cache: 
-    key: ghc-8.2
-    <<: *cached-dirs
-
 .header-ghc-84: &header-ghc-84
   variables:
     STACK_YAML: "stack-804.yaml"
@@ -93,11 +85,6 @@ before_script:
   - stack setup
   - stack --no-terminal test --no-rerun-tests --coverage
 
-build:ghc-8.2:
-  image: fpco/stack-build:lts-11.4
-  <<:    *header-ghc-82
-  <<:    *build-script
-
 build:ghc-8.4:
   image: fpco/stack-build:lts-12.2
   <<:    *header-ghc-84
@@ -112,13 +99,6 @@ build:ghc-8.8:
   image: fpco/stack-build:lts-14.21
   <<:    *header-ghc-88
   <<:    *build-script
-
-test:ghc-8.2:
-  image: fpco/stack-build:lts-11.4
-  dependencies:
-  - build:ghc-8.2
-  <<:    *header-ghc-82
-  <<:    *test-script
 
 test:ghc-8.4:
   image: fpco/stack-build:lts-12.2
