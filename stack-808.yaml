@@ -19,7 +19,8 @@ packages:
 extra-deps:
 - equational-reasoning-0.6.0.1
 - ghc-typelits-presburger-0.3.0.0
-- type-natural-0.8.3.1@rev:2
+- type-natural-0.8.3.1@rev:1
+- singletons-presburger-0.3.0.0
 - algebra-4.3.1@rev:2
 - sized-0.3.0.0
 - unamb-0.2.7
