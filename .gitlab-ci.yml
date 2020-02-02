@@ -18,6 +18,7 @@ stages:
 .header-ghc-80: &header-ghc-80
   variables:
     STACK_YAML: "stack-800.yaml"
+    GHC: 800
   cache: 
     key: ghc-8.0
     <<: *cached-dirs
@@ -25,6 +26,7 @@ stages:
 .header-ghc-82: &header-ghc-82
   variables:
     STACK_YAML: "stack-802.yaml"
+    GHC: 802
   cache: 
     key: ghc-8.2
     <<: *cached-dirs
@@ -32,6 +34,7 @@ stages:
 .header-ghc-84: &header-ghc-84
   variables:
     STACK_YAML: "stack-804.yaml"
+    GHC: 804
   cache: 
     key: ghc-8.4
     <<: *cached-dirs
@@ -39,6 +42,7 @@ stages:
 .header-ghc-86: &header-ghc-86
   variables:
     STACK_YAML: "stack-806.yaml"
+    GHC: 806
   cache: 
     key: ghc-8.6
     <<: *cached-dirs
@@ -46,6 +50,7 @@ stages:
 .header-ghc-86: &header-ghc-88
   variables:
     STACK_YAML: "stack-808.yaml"
+    GHC: 808
   cache: 
     key: ghc-8.8
     <<: *cached-dirs
@@ -61,7 +66,12 @@ before_script:
 - mkdir -p "${APT_STATE_LISTS}/partial" && mkdir -p "${APT_CACHE_ARCHIVES}/partial"
 - apt-get update -y -qq && apt-get install -y -qq wget
 - wget ftp://jim.mathematik.uni-kl.de/repo/extra/gpg && apt-key add gpg && rm gpg
-- echo "deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu16 xenial main" >> /etc/apt/sources.list
+- |
+  if [ ${GHC} -lt 806 ]; then
+    echo "deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu16 xenial main" >> /etc/apt/sources.list
+  else
+    echo "deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu18 bionic main" >> /etc/apt/sources.list
+  fi
 - apt-get update -y -qq
 - apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev
 - stack upgrade
