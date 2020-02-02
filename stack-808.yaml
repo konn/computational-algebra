@@ -25,3 +25,4 @@ extra-deps:
 - sized-0.3.0.1
 - unamb-0.2.7
 - control-monad-loop-0.1
+- repa-3.4.1.4
