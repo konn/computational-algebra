@@ -25,11 +25,11 @@ description:         Please see the project Web Site <https://konn.github.io/com
 dependencies:
 - algebraic-prelude
 - base >= 4.7 && < 5
-- megaparsec >= 6.3
+- megaparsec >= 7.0
 - halg-core
 - singletons
 - text
-- parser-combinators
+- parser-combinators >= 1.1
 - type-natural
 
 library:
