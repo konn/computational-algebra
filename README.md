@@ -56,4 +56,11 @@ $ stack build
 In addition, you may need to install GSL and LAPACK (for matrix computation) beforehand.
 You can install them via Homebrew (OS X), `apt-get`, or other major package management systems.
 
+Paper
+-----
+* Hiromi Ishii, _A Purely Functional Computer Algebra System Embedded in Haskell_.
+  Computer Algebra in Scientific Computing, pp. 288-303. 20th International Workshop, CASC 2018, Lille, France, September 17-21, 2018, Proceedings ([arXiv][arXiv]).
+
 ### [Read More in Official Project Site](http://konn.github.io/computational-algebra/)
+
+[arXiv]: https://arxiv.org/abs/1807.01456
