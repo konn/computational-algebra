@@ -21,6 +21,6 @@ extra-deps:
 - ghc-typelits-presburger-0.3.0.0
 - type-natural-0.8.3.1
 - algebra-4.3.1@rev:2
-- sized-0.3.0.0
+- sized-0.4.0.0
 - unamb-0.2.7
 - control-monad-loop-0.1
