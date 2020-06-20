@@ -75,7 +75,7 @@ polyToVec f =
     IsZero -> SV.empty
     IsSucc _ ->
       unsafeFromList'
-        [ coeff (leadingMonomial $ (varX ^ i) `asTypeOf` f) f
+        [ coeff (OrderedMonomial $ SV.singleton i) f
         | i <- [0..fromIntegral (fromSing (sing :: SNat n)) P.- 1]
         ]
 
