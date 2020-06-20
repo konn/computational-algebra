@@ -169,8 +169,12 @@ squareFreeDecomp f =
 -- | Factorise a polynomial over finite field using Cantor-Zassenhaus algorithm
 factorise :: (MonadRandom m, CoeffRing k, FiniteField k)
           => Unipol k -> m [(Unipol k, Natural)]
-factorise f =
-  concat <$> mapM (\(r, h) -> map (,fromIntegral r) <$> factorSquareFree h) (IM.toList $  squareFreeDecomp f)
+factorise f0 = do
+  let f = monoize f0
+      c = leadingCoeff f0
+  map (first (c .*.))
+    . concat
+    <$> mapM (\(r, h) -> map (,fromIntegral r) <$> factorSquareFree h) (IM.toList $  squareFreeDecomp f)
 
 clearDenom :: (CoeffRing a, Euclidean a)
            => Unipol (Fraction a) -> (a, Unipol a)
