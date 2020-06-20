@@ -132,7 +132,7 @@ instance Reifies p Integer => NA.Group (F p) where
   F a - F b    = modNat $ a - b
   {-# INLINE (-) #-}
 
-  negate (F a) = F (reflect (Proxy :: Proxy p) - a)
+  negate (F a) = modNat $ negate a
   {-# INLINE negate #-}
 
 instance Reifies p Integer => NA.Abelian (F p)
