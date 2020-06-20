@@ -90,7 +90,9 @@ equalDegreeSplitM f d
             sum (zipWith (*) (map injectCoeff cs) [var 0 ^ l | l <-[0..]])
         g1 = gcd a f
     return $ (guard (g1 /= one) >> return g1)
-         <|> do let b | charUnipol f == 2  = traceCharTwo (powerUnipol f*d) a
+         <|> do let b | charUnipol f == 2  =
+                          withQuotient (principalIdeal f) $
+                          traceCharTwo (powerUnipol f*d) (modIdeal a)
                       | otherwise = modPow a (pred (q^d) `div`2) f
                     g2 = gcd (b - one) f
                 guard (g2 /= one && g2 /= f)
