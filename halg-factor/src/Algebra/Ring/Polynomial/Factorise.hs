@@ -174,9 +174,11 @@ factorise :: (MonadRandom m, CoeffRing k, FiniteField k)
 factorise f0 = do
   let f = monoize f0
       c = leadingCoeff f0
-  map (first (c .*.))
-    . concat
+  monoFacts <- concat
     <$> mapM (\(r, h) -> map (,fromIntegral r) <$> factorSquareFree h) (IM.toList $  squareFreeDecomp f)
+  pure $ if c == one
+    then monoFacts
+    else (injectCoeff c, 1) : monoFacts
 
 clearDenom :: (CoeffRing a, Euclidean a)
            => Unipol (Fraction a) -> (a, Unipol a)
