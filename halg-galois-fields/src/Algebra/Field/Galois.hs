@@ -71,7 +71,7 @@ vecToPoly v = sum $ imap (\i c -> injectCoeff c * varX^fromIntegral i) $ F.toLis
 
 polyToVec :: forall n r. (CoeffRing r, KnownNat n) => Unipol r -> Sized n r
 polyToVec f =
-  case zeroOrSucc (sing @n) of
+  case zeroOrSucc (sing :: SNat n) of
     IsZero -> SV.empty
     IsSucc _ ->
       unsafeFromList'
