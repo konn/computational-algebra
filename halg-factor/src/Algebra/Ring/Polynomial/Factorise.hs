@@ -72,7 +72,7 @@ modPow a p f = withQuotient (principalIdeal f) $
                repeatedSquare (modIdeal a) p
 
 traceCharTwo :: (Unital m, Monoidal m) => Natural -> m -> m
-traceCharTwo m a = sum [ a ^ (2 ^ i) | i <- [0..pred m]]
+traceCharTwo m a = foldl' (+) zero $ take (fromIntegral m) $ iterate (\(!x) ->x*x) a
 
 equalDegreeSplitM :: forall k m. (MonadRandom m, CoeffRing k,  FiniteField k)
                  => Unipol k
