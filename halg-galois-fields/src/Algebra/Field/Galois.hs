@@ -1,13 +1,13 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
-{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction      #-}
-{-# LANGUAGE ParallelListComp, PolyKinds, QuasiQuotes, RankNTypes  #-}
-{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeFamilies #-}
-{-# LANGUAGE TypeOperators, UndecidableInstances                   #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs     #-}
+{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction          #-}
+{-# LANGUAGE ParallelListComp, PolyKinds, QuasiQuotes, RankNTypes      #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeApplications #-}
+{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances         #-}
 module Algebra.Field.Galois (GF'(), IsGF', modPoly, modVec,
                              withIrreducible, linearRepGF, linearRepGF',
                              reifyGF', generateIrreducible,
                              withGF', GF, ConwayPolynomial(..),
-                             Conway, primitive, conway,
+                             Conway, primitive, primitive', conway,
                              conwayFile, addConwayPolynomials)  where
 import Algebra.Field.Galois.Conway
 import Algebra.Field.Prime
@@ -70,8 +70,14 @@ vecToPoly :: (CoeffRing r)
 vecToPoly v = sum $ imap (\i c -> injectCoeff c * varX^fromIntegral i) $ F.toList v
 
 polyToVec :: forall n r. (CoeffRing r, KnownNat n) => Unipol r -> Sized n r
-polyToVec f = unsafeFromList' [ coeff (leadingMonomial $ (varX ^ i) `asTypeOf` f) f
-                              | i <- [0..fromIntegral (fromSing (sing :: SNat n))]]
+polyToVec f =
+  case zeroOrSucc (sing @n) of
+    IsZero -> SV.empty
+    IsSucc _ ->
+      unsafeFromList'
+        [ coeff (leadingMonomial $ (varX ^ i) `asTypeOf` f) f
+        | i <- [0..fromIntegral (fromSing (sing :: SNat n)) P.- 1]
+        ]
 
 instance Reifies p Integer => Additive (GF' p n f)  where
   GF' v + GF' u = GF' $ SV.zipWithSame (+) v u
@@ -235,8 +241,11 @@ instance (KnownNat n, IsGF' p n f) => FiniteField (GF' p n f) where
     in P.map GF' $ T.sequence $
        SV.replicate sn $ elements Proxy
 
-primitive :: forall p n f. (IsGF' p n f) => GF' p (n + 1) f
-primitive = withKnownNat (sSucc (sing :: SNat n)) $ GF' $ polyToVec $ var [od|0|]
+primitive' :: forall p n f. (IsGF' p n f, (n >= 1) ~ 'True) => GF' p n f
+primitive' = withKnownNat (sSucc (sing :: SNat n)) $ GF' $ polyToVec $ var [od|0|]
+
+primitive :: forall p n. (IsGF' p n (Conway p n), (n >= 1) ~ 'True) => GF p n
+primitive = primitive'
 
 -- | Conway polynomial (if definition is known).
 conway :: forall p n. ConwayPolynomial p n
