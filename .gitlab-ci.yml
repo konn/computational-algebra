@@ -1,4 +1,4 @@
-image: fpco/stack-build:lts-12.2
+image: registry.gitlab.com/konn/computational-algebra/build-pre:0.6.0.0
 
 variables:
   GIT_STRATEGY: fetch
@@ -17,6 +17,7 @@ stages:
   - '.hspec-failures'
 
 .header-ghc-84: &header-ghc-84
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.4:0.6.0.0
   variables:
     STACK_YAML: "stack-804.yaml"
     GHC: 804
@@ -25,6 +26,7 @@ stages:
     <<: *cached-dirs
 
 .header-ghc-86: &header-ghc-86
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.6:0.6.0.0
   variables:
     STACK_YAML: "stack-806.yaml"
     GHC: 806
@@ -32,7 +34,8 @@ stages:
     key: ghc-8.6
     <<: *cached-dirs
 
-.header-ghc-86: &header-ghc-88
+.header-ghc-88: &header-ghc-88
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.8:0.6.0.0
   variables:
     STACK_YAML: "stack-808.yaml"
     GHC: 808
@@ -44,23 +47,6 @@ before_script:
 - echo $CI_PROJECT_DIR
 - export STACK_ROOT="${CI_PROJECT_DIR}/.stack-root"
 - export PATH="$HOME/.local/bin:$PATH"
-- export APT_DIR=$CI_PROJECT_DIR/.apt
-- export APT_STATE_LISTS=$APT_DIR/lists 
-- export APT_CACHE_ARCHIVES=$APT_DIR/archives
-- printf "dir::state::lists    ${APT_STATE_LISTS};\ndir::cache::archives    ${APT_CACHE_ARCHIVES};\n" > /etc/apt/apt.conf
-- mkdir -p "${APT_STATE_LISTS}/partial" && mkdir -p "${APT_CACHE_ARCHIVES}/partial"
-- apt-get update -y -qq && apt-get install -y -qq wget
-- wget ftp://jim.mathematik.uni-kl.de/repo/extra/gpg && apt-key add gpg && rm gpg
-- |
-  if [ ${GHC} -lt 806 ]; then
-    echo "deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu16 xenial main" >> /etc/apt/sources.list
-  else
-    echo "deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu18 bionic main" >> /etc/apt/sources.list
-  fi
-- apt-get update -y -qq
-- apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev
-- stack upgrade
-- stack setup
 - export LD_LIBRARY_PATH="$(dirname $(stack path --global-pkg-db))/rts:$LD_LIBRARY_PATH"
 
 .build-script: &build-script
@@ -71,7 +57,7 @@ before_script:
       echo "Already exists: ${STACK_ROOT}";
       ls "$STACK_ROOT";
     else
-      echo "No stack-root. copying fpco..."
+      echo "No stack-root. copying..."
       cp -r /root/.stack $STACK_ROOT;
     fi
   - stack --version
@@ -86,22 +72,18 @@ before_script:
   - stack --no-terminal test --no-rerun-tests --coverage
 
 build:ghc-8.4:
-  image: fpco/stack-build:lts-12.2
   <<:    *header-ghc-84
   <<:    *build-script
 
 build:ghc-8.6:
-  image: fpco/stack-build:lts-14.21
   <<:    *header-ghc-86
   <<:    *build-script
 
 build:ghc-8.8:
-  image: fpco/stack-build:lts-14.21
   <<:    *header-ghc-88
   <<:    *build-script
 
 test:ghc-8.4:
-  image: fpco/stack-build:lts-12.2
   dependencies:
   - build:ghc-8.4
   <<:    *header-ghc-84
@@ -109,14 +91,12 @@ test:ghc-8.4:
   coverage: '/^\s*(\d+\s*%)\s*top-level declarations used/'
 
 test:ghc-8.6:
-  image: fpco/stack-build:lts-14.21
   dependencies:
   - build:ghc-8.6
   <<:    *header-ghc-86
   <<:    *test-script
 
 test:ghc-8.8:
-  image: fpco/stack-build:lts-14.21
   dependencies:
   - build:ghc-8.8
   <<:    *header-ghc-88
@@ -125,7 +105,7 @@ test:ghc-8.8:
 deploy_documents:
   only:
   - master@konn/computational-algebra
-  image: fpco/stack-build:lts-12.2
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.6:0.6.0.0
   stage: deploy
   allow_failure: true
   dependencies:
