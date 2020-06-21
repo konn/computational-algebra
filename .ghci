@@ -4,7 +4,7 @@
 :set -XFlexibleContexts -XFlexibleInstances
 :set -XUndecidableInstances -XRebindableSyntax
 :set -XOverloadedLabels -XNoImplicitPrelude
-:set -XQuasiQuotes -XScopedTypeVariables
+:set -XQuasiQuotes -XScopedTypeVariables -XTypeApplications
 import Algebra.Prelude
 :set -ishare -itests -ibench
 :set prompt "ghci> "
