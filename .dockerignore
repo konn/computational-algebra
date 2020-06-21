@@ -1,0 +1,14 @@
+.stack-work
+.DS_Store
+Dockerfile
+.git
+**/.stack-work
+profiling-results
+bench-results
+_site
+_cache
+gh-pages-devel
+*.aux
+*.hp
+*.pdf
+*.ps
