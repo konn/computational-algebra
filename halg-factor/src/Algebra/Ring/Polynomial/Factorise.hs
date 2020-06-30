@@ -1,17 +1,19 @@
+{-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, GADTs           #-}
+{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, OverloadedLabels #-}
+{-# LANGUAGE OverloadedStrings, PatternSynonyms, PolyKinds              #-}
+{-# LANGUAGE ScopedTypeVariables, TupleSections, TypeApplications       #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
-{-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, GADTs               #-}
-{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, OverloadedStrings    #-}
-{-# LANGUAGE PatternSynonyms, PolyKinds, ScopedTypeVariables, TupleSections #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Algebra.Ring.Polynomial.Factorise
-       ( -- * Factorisation
-         factorise, factorQBigPrime, factorHensel,
-         -- * Internal helper functions
-         distinctDegFactor,
-         equalDegreeSplitM, equalDegreeFactorM,
-         henselStep, clearDenom,
-         squareFreePart, squareFreeDecomp
-       ) where
+  ( -- * Factorisation
+    factorise, factorQBigPrime, factorHensel,
+    isReducible,
+    -- * Internal helper functions
+    distinctDegFactor,
+    equalDegreeSplitM, equalDegreeFactorM,
+    henselStep, clearDenom,
+    squareFreePart, squareFreeDecomp
+  ) where
 import           Algebra.Arithmetic                 hiding (modPow)
 import           Algebra.Field.Prime
 import           Algebra.Prelude.Core
@@ -45,6 +47,7 @@ import qualified Data.Traversable                   as F
 import qualified Data.Vector                        as V
 import           Math.NumberTheory.Logarithms       (intLog2', integerLogBase')
 import           Math.NumberTheory.Powers.Squares   (integerSquareRoot)
+import qualified Math.NumberTheory.Primes           as PRIMES
 import           Numeric.Decidable.Zero             (isZero)
 import           Numeric.Domain.GCD                 (gcd, lcm)
 import qualified Numeric.Field.Fraction             as F
@@ -66,6 +69,7 @@ distinctDegFactor f0 = zip [1..] $ go id (var OZ :: Unipol k) f0 []
          then gs'
          else go gs' h' f'
 
+-- | @'modPow' f n g@ computes \(f^n \mod{g}\).
 modPow :: (Field (Coefficient poly), IsOrderedPolynomial poly)
        => poly -> Natural -> poly -> poly
 modPow a p f = withQuotient (principalIdeal f) $
@@ -171,7 +175,9 @@ squareFreeDecomp f =
 -- | Factorise a polynomial over finite field using Cantor-Zassenhaus algorithm
 factorise :: (MonadRandom m, CoeffRing k, FiniteField k)
           => Unipol k -> m [(Unipol k, Natural)]
-factorise f0 = do
+factorise f0
+  | isZero f0 = pure [(zero, 1)]
+  | otherwise = do
   let f = monoize f0
       c = leadingCoeff f0
   monoFacts <- concat
@@ -380,3 +386,25 @@ normalizeMod p = mapCoeffUnipol (subtract half . (`mod` p) . (+ half))
 
 isSquareFree :: forall poly. (IsOrderedPolynomial poly, GCDDomain poly) => poly -> Bool
 isSquareFree f = (f `gcd` diff 0 f) == one
+
+-- | Reducibility test for univariate polynomials over finite fields.
+isReducible
+  :: forall k. (FiniteField k, Eq k)
+  => Unipol k -> Bool
+isReducible f
+  | n == 0 = True
+  | n == 1 = False
+  | otherwise =
+    let divisors = map (PRIMES.unPrime . fst) $ PRIMES.factorise n
+        q = order $ Proxy @k
+        xqn = modPow #x (q^n) f
+              -- FIXME: Use the fast modular composition algorithm
+              -- using Horner's rule
+        test t =
+          let b = modPow #x (q ^ (n `div` t)) f
+              -- FIXME: Use the fast modular composition algorithm
+              -- using Horner's rule
+          in gcd (b - #x) f /= one
+    in xqn /= #x || any test divisors
+  where
+    n = fromIntegral @_ @Natural $ totalDegree' f

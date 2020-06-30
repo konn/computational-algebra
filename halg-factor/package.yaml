@@ -51,4 +51,21 @@ library:
 
 executables: {}
 
-tests: {}
+tests:
+  halg-factor-specs:
+    source-dirs: test
+    ghc-options:  -Wall
+    main: Spec.hs
+    dependencies:
+    - QuickCheck
+    - hspec
+    - quickcheck-instances
+    - halg-core-test
+    - MonadRandom
+    - halg-galois-fields
+    - algebraic-prelude
+    - halg-core
+    - halg-polynomials
+    - halg-factor
+    default-extensions:
+    - NoImplicitPrelude
