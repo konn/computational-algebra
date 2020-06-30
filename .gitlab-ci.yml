@@ -22,7 +22,7 @@ stages:
     STACK_YAML: "stack-804.yaml"
     GHC: 804
   cache: 
-    key: ghc-8.4
+    key: "${CI_COMMIT_REF_SLUG}-ghc-8.4"
     <<: *cached-dirs
 
 .header-ghc-86: &header-ghc-86
@@ -31,7 +31,7 @@ stages:
     STACK_YAML: "stack-806.yaml"
     GHC: 806
   cache: 
-    key: ghc-8.6
+    key: "${CI_COMMIT_REF_SLUG}-ghc-8.6"
     <<: *cached-dirs
 
 .header-ghc-88: &header-ghc-88
@@ -40,7 +40,7 @@ stages:
     STACK_YAML: "stack-808.yaml"
     GHC: 808
   cache: 
-    key: ghc-8.8
+    key: "${CI_COMMIT_REF_SLUG}-ghc-8.8"
     <<: *cached-dirs
 
 before_script:
@@ -111,7 +111,7 @@ deploy_documents:
   dependencies:
   - test:ghc-8.6
   cache: 
-    key: ghc-8.6
+    key: "${CI_COMMIT_REF_SLUG}-ghc-8.6"
     policy: pull
     <<: *cached-dirs
   script:
