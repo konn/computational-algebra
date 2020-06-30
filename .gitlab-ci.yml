@@ -45,21 +45,12 @@ stages:
 
 before_script:
 - echo $CI_PROJECT_DIR
-- export STACK_ROOT="${CI_PROJECT_DIR}/.stack-root"
 - export PATH="$HOME/.local/bin:$PATH"
 - export LD_LIBRARY_PATH="$(dirname $(stack path --global-pkg-db))/rts:$LD_LIBRARY_PATH"
 
 .build-script: &build-script
   stage:  build
   script: 
-  - |
-    if [ -d ${STACK_ROOT} ]; then
-      echo "Already exists: ${STACK_ROOT}";
-      ls "$STACK_ROOT";
-    else
-      echo "No stack-root. copying..."
-      cp -r /root/.stack $STACK_ROOT;
-    fi
   - stack --version
   - echo "$STACK_YAML"
   - stack setup
