@@ -59,6 +59,7 @@ tests:
     dependencies:
     - QuickCheck
     - HUnit
+    - containers
     - hspec
     - quickcheck-instances
     - halg-core-test
