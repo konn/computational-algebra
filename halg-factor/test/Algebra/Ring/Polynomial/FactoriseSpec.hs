@@ -9,12 +9,34 @@ import           Algebra.Field.Prime
 import           Algebra.Prelude.Core               hiding ((===))
 import           Algebra.Ring.Polynomial.Factorise
 import           Algebra.Ring.Polynomial.Univariate
+import           Control.Arrow
 import           Data.Functor                       ((<&>))
+import qualified Data.IntMap                        as IM
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.HUnit                         hiding (Testable)
 import           Test.QuickCheck                    as QC
 import           Type.Reflection
+
+data Regression where
+  MkRegression
+    :: (Num k, FiniteField k, PrettyCoeff k, CoeffRing k, Typeable k)
+    => Unipol k -> Regression
+
+regressions :: [Regression]
+regressions =
+  [ MkRegression @(GF 2 5) $ #x^2 + injectCoeff (ξ^2 + ξ + 1)
+  , MkRegression @(GF 2 5) $
+      (ξ^4 + 1) .*. #x^2 + injectCoeff (ξ^4 + ξ^3)
+  , MkRegression @(GF 2 5) $
+    #x^6 + (ξ^4 + ξ^3 + ξ^2 + ξ) .*. #x^5 + (ξ^4 + ξ + 1) .*. #x^4
+    + (ξ^3 + ξ^2 + ξ + 1) .*. #x^3 + (ξ^3 + 1) .*. #x^2
+    + (ξ^4 + ξ^3 + ξ + 1) .*. #x
+    + injectCoeff (ξ^4 + ξ^3 + ξ)
+  ]
+  where
+    ξ :: GF 2 5
+    ξ = primitive
 
 instance KnownNat n => Arbitrary (F n) where
   arbitrary = QC.elements $ Fin.elements $ Proxy @(F n)
@@ -37,15 +59,20 @@ spec = parallel $ do
     checkIsReducible @(F 3)
     checkIsReducible @(F 5)
 
+  describe "squareFreeDecomp" $
+    describe "correctly factors polynomials in regression tests" $
+      forM_ regressions $ \(MkRegression f) ->
+      when (leadingCoeff f == one) $
+      it (show f) $
+      let facts = map (swap >>> second fromIntegral)
+            $ IM.toList
+            $ squareFreeDecomp f
+      in fromFactorisation facts @?= f
+
   describe "factorise" $ do
-    it "factors <ξ^4 + 1>*x^2 + <ξ^4 + ξ^3> over GF(2^5) correctly" $ do
-      let f = (ξ^4 + 1) .*. #x^2 + injectCoeff (ξ^4 + ξ^3) :: Unipol (GF 2 5)
-          ξ = primitive :: GF 2 5
-      facts <- factorise f
-      fromFactorisation facts @?= f
-    it "factors x^2 + (ξ^2 + ξ + 1) over GF(2^5) correctly" $ do
-      let f = #x^2 + injectCoeff (ξ^2 + ξ + 1) :: Unipol (GF 2 5)
-          ξ = primitive :: GF 2 5
+    describe "correctly factors polynomials in regression tests" $
+      forM_ regressions $ \(MkRegression f) ->
+      it (show f) $ do
       facts <- factorise f
       fromFactorisation facts @?= f
     factorReconstructsIn @(F 2)

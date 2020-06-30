@@ -83,10 +83,9 @@ equalDegreeSplitM :: forall k m. (MonadRandom m, CoeffRing k,  FiniteField k)
                  -> Natural
                  -> m (Maybe (Unipol k))
 equalDegreeSplitM f d
-  | totalDegree' f `mod` fromIntegral d /= 0 = return Nothing
+  | n `mod` fromIntegral d /= 0 = return Nothing
   | otherwise = do
     let q = fromIntegral $ order (Proxy :: Proxy k)
-        n = totalDegree' f
         els = elements (Proxy :: Proxy k)
     e <- uniform [1..n P.- 1]
     cs <- replicateM (fromIntegral e) $ uniform els
@@ -101,20 +100,19 @@ equalDegreeSplitM f d
                     g2 = gcd (b - one) f
                 guard (g2 /= one && g2 /= f)
                 return g2
-
+  where n = totalDegree' f
 equalDegreeFactorM :: (Eq k, FiniteField k, MonadRandom m)
                    => Unipol k -> Natural -> m [Unipol k]
 equalDegreeFactorM f d = go f >>= \a -> return (a [])
   where
-    go h | totalDegree' h == 0 = return id
-         | otherwise =
-           if fromIntegral (totalDegree' h) == d
-           then return (h:)
-           else do
-             g <- untilJust (equalDegreeSplitM h d)
-             l <- go g
-             r <- go (h `quot` g)
-             return $ l . r
+    go h
+      | totalDegree' h == 0 = return id
+      | fromIntegral (totalDegree' h) == d = return (h:)
+      | otherwise = do
+          g <- untilJust (equalDegreeSplitM h d)
+          l <- go g
+          r <- go (h `quot` g)
+          return $ l . r
 
 factorSquareFree :: (Eq k, FiniteField k, MonadRandom m)
                  => Unipol k -> m [Unipol k]
