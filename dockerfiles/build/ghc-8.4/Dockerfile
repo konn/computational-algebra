@@ -22,3 +22,8 @@ WORKDIR /skeleton
 ENV STACK_YAML=stack-${GHC}.yaml
 RUN stack build --only-dependencies --test --no-run-tests \
     computational-algebra
+
+ENV GHC_LLVM_LLC_PATH=llc-5.0
+ENV GHC_LLVM_OPT_PATH=opt-5.0
+
+RUN echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-5.0 main" >> /etc/apt/sources.list && wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add - && apt-get update && apt-get -y install clang-5.0 lld-5.0

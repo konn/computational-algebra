@@ -17,7 +17,7 @@ stages:
   - '.hspec-failures'
 
 .header-ghc-84: &header-ghc-84
-  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.4:0.6.0.0
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.4:0.6.0.0-p1
   variables:
     STACK_YAML: "stack-804.yaml"
     GHC: 804
