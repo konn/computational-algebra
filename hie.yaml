@@ -10,6 +10,8 @@ cradle:
       component: "halg-core-test:lib"
     - path: "halg-factor/src"
       component: "halg-factor:lib"
+    - path: "halg-factor/test"
+      component: "halg-factor:test:halg-factor-specs"
 
     - path: "computational-algebra/src"
       component: "computational-algebra:lib"
