@@ -12,6 +12,7 @@ import           Algebra.Ring.Polynomial.Univariate
 import           Data.Functor                       ((<&>))
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
+import           Test.HUnit                         hiding (Testable)
 import           Test.QuickCheck                    as QC
 import           Type.Reflection
 
@@ -37,6 +38,16 @@ spec = parallel $ do
     checkIsReducible @(F 5)
 
   describe "factorise" $ do
+    it "factors <ξ^4 + 1>*x^2 + <ξ^4 + ξ^3> over GF(2^5) correctly" $ do
+      let f = (ξ^4 + 1) .*. #x^2 + injectCoeff (ξ^4 + ξ^3) :: Unipol (GF 2 5)
+          ξ = primitive :: GF 2 5
+      facts <- factorise f
+      fromFactorisation facts @?= f
+    it "factors x^2 + (ξ^2 + ξ + 1) over GF(2^5) correctly" $ do
+      let f = #x^2 + injectCoeff (ξ^2 + ξ + 1) :: Unipol (GF 2 5)
+          ξ = primitive :: GF 2 5
+      facts <- factorise f
+      fromFactorisation facts @?= f
     factorReconstructsIn @(F 2)
     factorIrreducibility @(F 2)
     factorReconstructsIn @(F 3)
@@ -126,3 +137,8 @@ checkIsReducible = do
   where
     prop' :: Testable prop => String -> prop -> Spec
     prop' txt = prop (txt <> "(" ++ show (typeRep @r) ++ ")")
+
+fromFactorisation
+  :: CoeffRing r => [(Unipol r, Natural)] -> Unipol r
+fromFactorisation facs =
+  product [g^n | (g, n) <- facs]

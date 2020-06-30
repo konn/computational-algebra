@@ -58,6 +58,7 @@ tests:
     main: Spec.hs
     dependencies:
     - QuickCheck
+    - HUnit
     - hspec
     - quickcheck-instances
     - halg-core-test
