@@ -35,7 +35,6 @@ import           Control.Monad.ST             (ST, runST)
 import qualified Data.Foldable                as F
 import qualified Data.Foldable                as H
 import qualified Data.Heap                    as H
-import           Data.Kind                    (Type)
 import           Data.MonoTraversable         (oall)
 import           Data.Sequence                (Seq ((:<|)))
 import qualified Data.Sequence                as Seq
