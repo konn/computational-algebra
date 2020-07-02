@@ -12,7 +12,8 @@ module Algebra.Ring.Polynomial.Factorise
     distinctDegFactor,
     equalDegreeSplitM, equalDegreeFactorM,
     henselStep, clearDenom,
-    squareFreePart, squareFreeDecomp
+    squareFreePart,
+    yun, squareFreeDecompFiniteField
   ) where
 import           Algebra.Arithmetic                 hiding (modPow)
 import           Algebra.Field.Prime
@@ -39,7 +40,6 @@ import           Data.Monoid                        ((<>))
 import           Data.Numbers.Primes                (primes)
 import           Data.Proxy                         (Proxy (..))
 import qualified Data.Set                           as S
-import qualified Data.Sized.Builtin                 as SV
 import           Data.STRef.Strict                  (STRef, modifySTRef,
                                                      newSTRef)
 import           Data.STRef.Strict                  (readSTRef, writeSTRef)
@@ -130,6 +130,10 @@ squareFreePart f =
      then v
      else v * squareFreePart (pthRoot f')
 
+-- | Yun's method to compute square-free decomposition of
+--   a univariate polynomial over field of characteristic \(0\).
+--
+--   Use 'squareFreeDecompFiniteField' for finite fields.
 yun :: (CoeffRing r, Field r)
     => Unipol r -> IntMap (Unipol r)
 yun f = let f' = diff OZ f
@@ -152,23 +156,31 @@ charUnipol _ = char (Proxy :: Proxy r)
 powerUnipol :: forall r. FiniteField r => Unipol r -> Natural
 powerUnipol _ = power (Proxy :: Proxy r)
 
-pthRoot :: (CoeffRing r, Characteristic r) => Unipol r -> Unipol r
+pthRoot :: forall r. (CoeffRing r, FiniteField r) => Unipol r -> Unipol r
 pthRoot f =
   let !p = charUnipol f
-  in if p == 0
-     then error "char R should be positive prime"
-     else mapMonomial (SV.map (`P.div` fromIntegral p)) f
+      !q = order $ Proxy @r
+      !s = q `div` p
+  in sum  [ (a^s) .*. #x^i
+          | (ip, a) <- IM.toList $ termsUnipol f
+          , (i, 0) <- [fromIntegral ip `P.divMod` p]
+          ]
 
-squareFreeDecomp :: (Eq k, Characteristic k, Field k)
-                 => Unipol k -> IntMap (Unipol k)
-squareFreeDecomp f =
+-- | Square-free decomposition of polynomials over a finite field.
+--
+--   Use 'yun' for a polynomials over a field of characteristic zero.
+squareFreeDecompFiniteField
+  :: (Eq k, FiniteField k)
+  => Unipol k -> IntMap (Unipol k)
+squareFreeDecompFiniteField f =
   let dcmp = yun f
       f'   = ifoldl (\i u g -> u `quot` (g ^ fromIntegral i)) f dcmp
       p    = fromIntegral $ charUnipol f
-  in if charUnipol f == 0 || isZero (f' - one)
+  in if isZero (f' - one)
      then dcmp
      else IM.filter (not . isZero . subtract one) $
-          IM.unionWith (*) dcmp $ IM.mapKeys (p*) $ squareFreeDecomp $ pthRoot f'
+          IM.unionWith (*) dcmp $ IM.mapKeys (p*) $
+          squareFreeDecompFiniteField $ pthRoot f'
 
 -- | Factorise a polynomial over finite field using Cantor-Zassenhaus algorithm
 factorise :: (MonadRandom m, CoeffRing k, FiniteField k)
@@ -179,7 +191,7 @@ factorise f0
   let f = monoize f0
       c = leadingCoeff f0
   monoFacts <- concat
-    <$> mapM (\(r, h) -> map (,fromIntegral r) <$> factorSquareFree h) (IM.toList $  squareFreeDecomp f)
+    <$> mapM (\(r, h) -> map (,fromIntegral r) <$> factorSquareFree h) (IM.toList $  squareFreeDecompFiniteField f)
   pure $ if c == one
     then monoFacts
     else (injectCoeff c, 1) : monoFacts
@@ -207,7 +219,7 @@ wrapSQFFactor :: (MonadRandom m)
 wrapSQFFactor fac f0 = do
   let (g, c) | leadingCoeff f0 < 0 = (- pp f0, - content f0)
              | otherwise = (pp f0, content f0)
-  ts0 <- F.mapM (secondM fac . clearDenom) (squareFreeDecomp $ monoize $ mapCoeffUnipol (F.% 1) g)
+  ts0 <- F.mapM (secondM fac . clearDenom) (yun $ monoize $ mapCoeffUnipol (F.% 1) g)
   let anss = IM.toList ts0
       k = c * leadingCoeff g `div` product (map (fst.snd) anss)
   return (k, IM.fromList $ map (second $ S.fromList . snd) anss)

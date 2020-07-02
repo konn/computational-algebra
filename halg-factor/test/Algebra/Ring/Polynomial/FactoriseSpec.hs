@@ -59,14 +59,14 @@ spec = parallel $ do
     checkIsReducible @(F 3)
     checkIsReducible @(F 5)
 
-  describe "squareFreeDecomp" $
+  describe "squareFreeDecompFiniteField" $
     describe "correctly factors polynomials in regression tests" $
       forM_ regressions $ \(MkRegression f) ->
       when (leadingCoeff f == one) $
       it (show f) $
       let facts = map (swap >>> second fromIntegral)
             $ IM.toList
-            $ squareFreeDecomp f
+            $ squareFreeDecompFiniteField f
       in fromFactorisation facts @?= f
 
   describe "factorise" $ do
