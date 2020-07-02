@@ -6,7 +6,7 @@
 -- | Polynomial type optimized to univariate polynomial.
 module Algebra.Ring.Polynomial.Univariate
        (Unipol(), naiveMult, karatsuba,
-        coeffList,
+        coeffList, cutoff, termsUnipol,
         divModUnipolByMult, divModUnipol,
         mapCoeffUnipol, liftMapUnipol,
         module Algebra.Ring.Polynomial.Class,
@@ -18,6 +18,7 @@ import qualified Data.Foldable                    as F
 
 import           Control.Arrow          (first)
 import           Control.DeepSeq        (NFData)
+import qualified Data.Coerce            as C
 import           Data.Function          (on)
 import           Data.Hashable          (Hashable (hashWithSalt))
 import qualified Data.HashSet           as HS
@@ -388,3 +389,13 @@ coeffList :: Monoidal k => Unipol k -> [k]
 coeffList (Unipol dic) =
   F.toList $ IM.unionWith (+) dic $
   IM.fromList [(n, zero) | n <- [0..maybe (- 1) (fst . fst) (IM.maxViewWithKey dic)] ]
+
+-- | @'cutoff m f@ gives the polynomial \(f\) but with terms
+--   degree strictly less than \(m\); i.e. \(\sum_{0 \leq i < m} a_i X^i\) for
+--   \(f = \sum_{i = 0}^n a_n X^n\).
+cutoff :: forall k. Natural -> Unipol k -> Unipol k
+cutoff n = C.coerce (fst . IM.split (fromIntegral n) :: IM.IntMap k -> IM.IntMap k)
+
+termsUnipol
+  :: Unipol k -> IM.IntMap k
+termsUnipol = C.coerce
