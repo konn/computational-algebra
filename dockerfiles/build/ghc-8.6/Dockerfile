@@ -20,4 +20,5 @@ COPY stack-${GHC}.yaml /skeleton
 
 WORKDIR /skeleton
 ENV STACK_YAML=stack-${GHC}.yaml
+RUN stack setup
 RUN stack build --only-dependencies --test --no-run-tests
