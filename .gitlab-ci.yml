@@ -1,4 +1,4 @@
-image: registry.gitlab.com/konn/computational-algebra/build-pre:0.6.0.0
+image: registry.gitlab.com/konn/computational-algebra/build-pre:0.6.0.0-p1
 
 variables:
   GIT_STRATEGY: fetch
@@ -17,7 +17,7 @@ stages:
   - '.hspec-failures'
 
 .header-ghc-84: &header-ghc-84
-  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.4:0.6.0.0-p1
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.4:0.6.0.0-p2
   allow_failure: true
   variables:
     STACK_YAML: "stack-804.yaml"
@@ -27,7 +27,7 @@ stages:
     <<: *cached-dirs
 
 .header-ghc-86: &header-ghc-86
-  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.6:0.6.0.0
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.6:0.6.0.0-p1
   variables:
     STACK_YAML: "stack-806.yaml"
     GHC: 806
@@ -36,7 +36,7 @@ stages:
     <<: *cached-dirs
 
 .header-ghc-88: &header-ghc-88
-  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.8:0.6.0.0
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.8:0.6.0.0-p1
   variables:
     STACK_YAML: "stack-808.yaml"
     GHC: 808
@@ -97,7 +97,7 @@ test:ghc-8.8:
 deploy_documents:
   only:
   - master@konn/computational-algebra
-  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.6:0.6.0.0
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.6:0.6.0.0-p1
   stage: deploy
   allow_failure: true
   dependencies:
