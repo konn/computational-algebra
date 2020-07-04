@@ -281,43 +281,6 @@ isRadical ideal =
   where
     _ = Witness :: IsTrue (0 < n) -- Just to suppress "redundant constraint" warning
 
--- solve'' :: forall r ord n.
---            (Show r, Sparse.Eq0 r, Normed r, Ord r, Field r, CoeffRing r, KnownNat n,
---             IsMonomialOrder ord, Convertible r Double, (0 < n) ~ 'True)
---        => Double
---        -> Ideal (OrderedPolynomial r ord n)
---        -> [Sized n  (Complex Double)]
--- solve'' err ideal =
---   reifyQuotient (radical ideal) $ \ii ->
---   let gbs = gBasis' ii
---       lexBase = fst $ fglm $ toIdeal gbs
---       upoly = last lexBase
---       restVars = init $ SV.toList allVars
---       calcEigs = nub . LA.toList . LA.eigenvalues . AM.fromLists
---       lastEigs = calcEigs $ matToLists $ fmap toComplex $ fmapUnwrap
---                  (AM.companion maxBound $ mapCoeff WrapField upoly)
---   in if gbs == [one]
---      then []
---      else if length (lastEigs) == length (fromJust $ standardMonomials' ii)
---           then solveSpan (init lexBase) lastEigs
---           else chooseAnswer $
---                lastEigs : map (calcEigs . map (map toComplex) . matrixRep . modIdeal' ii)
---                               restVars
---   where
---     mul p q = toComplex p * q
---     solveSpan rest lastEigs =
---       let answers = map (\f -> toPolynomial (leadingTerm f) - f) rest
---           substEig eig = substWith (\d b -> toComplex d * b) $ SV.unsafeFromList' $ map (const zero) rest ++ [eig]
---       in [ SV.unsafeFromList' $ map (substEig eig) answers ++ [eig]
---          | eig <- lastEigs
---          ]
---     chooseAnswer vs =
---           [ xs
---             | xs0 <- sequence vs
---             , let xs = SV.unsafeFromList' xs0
---             , all ((<err) . magnitude . substWith mul xs) $ generators ideal
---             ]
-
 -- * FGLM
 
 -- | Calculate the Groebner basis w.r.t. lex ordering of the zero-dimensional ideal using FGLM algorithm.
