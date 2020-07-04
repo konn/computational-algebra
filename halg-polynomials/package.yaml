@@ -84,7 +84,7 @@ executables: {}
   #   - halg-polynomials
 
 tests:
-  spec:
+  halg-polynomials-spec:
     main:                Spec.hs
     source-dirs:         test
     other-modules:

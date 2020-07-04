@@ -29,7 +29,7 @@ cradle:
     - path: "halg-polynomials/src"
       component: "halg-polynomials:lib"
     - path: "halg-polynomials/test"
-      component: "halg-polynomials:test:spec"
+      component: "halg-polynomials:test:halg-polynomials-spec"
 
     - path: "halg-galois-fields/src"
       component: "halg-galois-fields:lib"
@@ -63,6 +63,6 @@ cradle:
     - path: "halg-algorithms/app/std-prof.hs"
       component: "halg-algorithms:exe:std-prof"
     - path: "halg-algorithms/test"
-      component: "halg-algorithms:test:spec"
+      component: "halg-algorithms:test:halg-algorithms-specs"
     - path: "halg-polyn-parser/src"
       component: "halg-polyn-parser:lib"

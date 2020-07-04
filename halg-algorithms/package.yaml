@@ -112,7 +112,7 @@ executables:
     <<: *prof-settings
 
 tests:
-  spec:
+  halg-algorithms-specs:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
