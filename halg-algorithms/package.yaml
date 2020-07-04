@@ -128,6 +128,8 @@ tests:
     - ghc-typelits-knownnat
     - halg-core-test
     - halg-polynomials
+    - singletons-presburger
+    - singletons
     - halg-algorithms
     - halg-bridge-singular
     - QuickCheck
