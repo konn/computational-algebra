@@ -58,12 +58,7 @@ spec = parallel $ do
   describe "radical" $
     it "really computes radical" $
       pendingWith "We can verify correctness by comparing with singular, but it's not quite smart way..."
-{-
-      checkForTypeNat [2..4] $ \sdim ->
-        forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
-        stdReduced (generators $ radical ideal) == calcGroebnerBasis (singIdealFun "radical" ideal)
-      -- pendingWith "I couldn't formulate the spec for radical without existentials :-("
--}
+
   describe "fglm" $ modifyMaxSuccess (const 25) $ modifyMaxSize (const 3) $ do
     prop "computes monomial basis" $
       checkForTypeNat [2..4] $ \sdim ->
@@ -103,9 +98,6 @@ spec = parallel $ do
       forM_ companionRegressions $
       approxZeroTestCase 1e-5 (pure . solve' 1e-5)
 
-  -- describe "solve''" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
-  --   it "solves equation with admissible error" $ do
-  --     checkForTypeNat [2..4] $ prop_isApproximateZero 1e-5 (solve'' 1e-10)
   describe "solveViaCompanion" $
     modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
     it "solves equation with admissible error" $
@@ -117,7 +109,7 @@ spec = parallel $ do
 
   describe "solveM" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
     prop "solves equation with admissible error" $
-      checkForTypeNat [2..4] $ prop_isApproximateZero 1e-5 solveM
+      checkForTypeNat [2..4] $ prop_isApproximateZero 1e-9 solveM
     describe "solves regressions correctly" $
       forM_ companionRegressions $
       approxZeroTestCase 1e-9 solveM
@@ -163,7 +155,8 @@ approxZeroTestCase
       )
   -> SolverTestCase
   -> SpecWith ()
-approxZeroTestCase err calc (SolverTestCase f@(ZeroDimIdeal i)) = it (show f) $ do
+approxZeroTestCase err calc (SolverTestCase f@(ZeroDimIdeal i)) =
+  it (show $ getIdeal f) $ do
     isZeroDimensional (F.toList i) @? "Not zero-dimensional!"
     checkSolverApproxZero err calc f
       @? "Solved correctly"
