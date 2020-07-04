@@ -4,7 +4,7 @@
 {-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction            #-}
 {-# LANGUAGE OverloadedStrings, ParallelListComp, PatternSynonyms        #-}
 {-# LANGUAGE PolyKinds, ScopedTypeVariables, TypeFamilies, TypeOperators #-}
-{-# LANGUAGE TypeSynonymInstances, UndecidableInstances                  #-}
+{-# LANGUAGE UndecidableInstances                                        #-}
 -- | Algorithms for zero-dimensional ideals.
 --
 --   Since 0.4.0.0
@@ -141,16 +141,26 @@ solve' err ideal =
   where
     _ = Witness :: IsTrue (0 < n) -- Just to suppress "redundant constraint" warning
 
-subspMatrix :: (Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord)
-            => Ordinal n -> Ideal (OrderedPolynomial r ord n) -> M.Matrix r
+-- | Given a zero-dimensional ideal \(I\),
+--   \('subspMatrix' i I\) computes a multiplication matrix
+--   \(m_{x_i} \mathbin{\upharpoonright} V_i \) by \(x_i\)
+--   restricted to the subspace \(V_i = \mathop{\mathrm{span}}(\left\{\ x_i^n \ \middle|\ 1 \leq n \right\})\) of \(k[\mathbf{X}]\).
+subspMatrix
+  :: forall r n ord.
+      (Show r, Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord)
+  => Ordinal n -> Ideal (OrderedPolynomial r ord n) -> M.Matrix r
 subspMatrix on ideal =
   let poly = univPoly on ideal
-      v    = var on `asTypeOf` head (generators ideal)
+      v    = var on :: OrderedPolynomial r ord n
       dim  = totalDegree' poly
-      cfs  = [negate $ coeff (leadingMonomial $ pow v (j :: Natural)) poly | j <- [fromIntegral (dim - 1)]]
-  in (M.fromLists [replicate (dim - 1) zero]
-          M.<->
-      fmap unwrapAlgebra (M.identity (dim - 1))) M.<|> M.colVector (V.fromList cfs)
+      cfs  = [negate $ coeff (leadingMonomial $ pow v (j :: Natural)) poly | j <- [0..fromIntegral (dim - 1)]]
+      leftTops = M.fromLists [replicate (dim - 1) zero]
+      leftBots = fmap unwrapAlgebra (M.identity (dim - 1))
+      lfts = leftTops
+                M.<->
+             leftBots
+      rights = M.colVector (V.fromList cfs)
+  in lfts M.<|> rights
 
 -- | @'solveViaCompanion' err is@ finds numeric approximate root of the
 --   given zero-dimensional polynomial system @is@,
@@ -158,7 +168,7 @@ subspMatrix on ideal =
 --
 --   See also @'solve''@ and @'solveM'@.
 solveViaCompanion :: forall r ord n.
-                     (Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord, Convertible r Double)
+                     (Show r, Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord, Convertible r Double)
                   => Double
                   -> Ideal (OrderedPolynomial r ord n)
                   -> [Sized n (Complex Double)]
@@ -199,7 +209,7 @@ reduction on f = {-# SCC "reduction" #-}
   let df = {-# SCC "differentiate" #-} diff on f
   in snd $ head $ f `divPolynomial` calcGroebnerBasis (toIdeal [f, df])
 
--- | Calculate the monic generator of k[X_0, ..., X_n] `intersect` k[X_i].
+-- | Calculate the monic generator of \( k[X_0, ..., X_n] \cap k[X_i]\).
 univPoly :: forall r ord n. (Ord r, Field r, CoeffRing r, KnownNat n, IsMonomialOrder n ord)
          => Ordinal n
          -> Ideal (OrderedPolynomial r ord n)
@@ -208,19 +218,24 @@ univPoly nth ideal = {-# SCC "univPoly" #-}
   reifyQuotient ideal $ \pxy ->
   if gBasis' pxy == [one]
   then one
-  else let x = var nth
-           p0 : pows = [fmap WrapAlgebra $ vectorRep $ modIdeal' pxy (pow x i)
-                       | i <- [0:: Natural ..]
-                       | _ <- zero : fromJust (standardMonomials' pxy) ]
-           step m ~(p : ps) = {-# SCC "univPoly/step" #-}
-             case solveLinear m p of
-               Nothing  -> {-# SCC "recur" #-} step ({-# SCC "consCol" #-}m M.<|> M.colVector p) ps
-               Just ans ->
-                 let cur = fromIntegral $ V.length ans :: Natural
-                 in {-# SCC "buildRelation" #-}
-                    pow x cur - sum (zipWith (.*.) (fmap unwrapAlgebra $ V.toList ans)
-                                     [pow x i | i <- [0 :: Natural .. cur P.- 1]])
-       in step (M.colVector p0) pows
+  else
+    let x = var nth
+        monomDeg = fromIntegral
+          $ length
+          $ fromJust
+          $ standardMonomials' pxy
+        p0 : pows = [ fmap WrapAlgebra $ vectorRep $ modIdeal' pxy (pow x i)
+                    | i <- [0 :: Natural .. monomDeg]
+                    ]
+        step m ~(p : ps) = {-# SCC "univPoly/step" #-}
+          case solveLinear m p of
+            Nothing  -> {-# SCC "recur" #-} step ({-# SCC "consCol" #-}m M.<|> M.colVector p) ps
+            Just ans ->
+              let cur = fromIntegral $ V.length ans :: Natural
+              in {-# SCC "buildRelation" #-}
+                pow x cur - sum (zipWith (.*.) (fmap unwrapAlgebra $ V.toList ans)
+                [pow x i | i <- [0 :: Natural .. cur P.- 1]])
+    in step (M.colVector p0) pows
 
 -- | Solves linear system. If the given matrix is degenerate, this returns @Nothing@.
 solveLinear :: (Ord r, P.Fractional r)
