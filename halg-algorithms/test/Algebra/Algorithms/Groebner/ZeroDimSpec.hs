@@ -1,27 +1,37 @@
-{-# LANGUAGE DataKinds, GADTs, RankNTypes, TypeOperators #-}
+{-# LANGUAGE DataKinds, GADTs, LambdaCase, NoImplicitPrelude, RankNTypes #-}
+{-# LANGUAGE TypeApplications, TypeOperators                             #-}
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
+{-# OPTIONS_GHC -Wno-type-defaults #-}
+{-# OPTIONS_GHC -fplugin Data.Singletons.TypeNats.Presburger #-}
 module Algebra.Algorithms.Groebner.ZeroDimSpec where
-import Algebra.Algorithms.Groebner
-import Algebra.Algorithms.ZeroDim
-import Algebra.Internal
-import Algebra.Internal
-import Algebra.Ring.Ideal
-import Algebra.Ring.Polynomial
-import Algebra.Ring.Polynomial.Quotient
+import           Algebra.Algorithms.Groebner
+import           Algebra.Algorithms.ZeroDim
+import           Algebra.Internal
+import           Algebra.Internal
+import           Algebra.Prelude.Core             hiding ((%))
+import           Algebra.Ring.Ideal
+import           Algebra.Ring.Polynomial
+import           Algebra.Ring.Polynomial.Quotient
+import qualified Prelude                          as P
 
 import           Control.Monad
 import           Control.Monad.Random
 import           Data.Complex
 import           Data.Convertible       (convert)
+import qualified Data.Foldable          as F
 import qualified Data.Matrix            as M
 import           Data.Maybe
 import qualified Data.Sized.Builtin     as SV
 import qualified Data.Vector            as V
 import           Numeric.Field.Fraction (Fraction, (%))
+import           Numeric.Natural
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
+import           Test.HUnit
 import           Test.QuickCheck        hiding (promote)
 import           Utils
+
+default (Fraction Integer, Natural)
 
 asGenListOf :: Gen [a] -> a -> Gen [a]
 asGenListOf = const
@@ -38,15 +48,15 @@ spec = parallel $ do
       let mat = M.fromLists ms :: M.Matrix (Fraction Integer)
       in rank mat == M.ncols mat ==>
            forAll (vector (length $ head ms)) $ \v ->
-             let ans = M.getCol 1 $ mat * M.colVector (V.fromList v)
+             let ans = M.getCol 1 $ mat P.* M.colVector (V.fromList v)
              in solveLinear mat ans == Just (V.fromList v)
-    it "cannot solve unsolvable cases" $ do
+    it "cannot solve unsolvable cases" $
       pendingWith "need example"
-  describe "univPoly" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
-    prop "produces elimination ideal's monic generator" $ do
+  describe "univPoly" $ modifyMaxSuccess (const 25) $ modifyMaxSize (const 4) $
+    prop "produces monic generators of the elimination ideal" $
       checkForTypeNat [2..4] prop_univPoly
-  describe "radical" $ do
-    it "really computes radical" $ do
+  describe "radical" $
+    it "really computes radical" $
       pendingWith "We can verify correctness by comparing with singular, but it's not quite smart way..."
 {-
       checkForTypeNat [2..4] $ \sdim ->
@@ -67,7 +77,7 @@ spec = parallel $ do
                   reifyQuotient (mapIdeal (changeOrder Lex) ideal) $ \ii ->
                   map quotRepr $ fromJust $ standardMonomials' ii
             in stdReduced (snd $ fglm ideal) == stdReduced base
-    prop "computes lex base" $ do
+    prop "computes lex base" $
       checkForTypeNat [2..4] $ \sdim ->
         case zeroOrSucc sdim of
           IsZero -> error "impossible"
@@ -87,35 +97,95 @@ spec = parallel $ do
               forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
               isDescending (map leadingMonomial $ fst $ fglm ideal)
   describe "solve'" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
-    it "solves equation with admissible error" $ do
-      checkForTypeNat [2..4] $ prop_isApproximateZero 1e-5 (solve' 1e-5)
+    it "solves equation with admissible error" $
+      checkForTypeNat [2..4] $ prop_isApproximateZero 1e-5 (pure . solve' 1e-5)
+    describe "solves regression cases correctly" $
+      forM_ companionRegressions $
+      approxZeroTestCase 1e-5 (pure . solve' 1e-5)
+
   -- describe "solve''" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
   --   it "solves equation with admissible error" $ do
   --     checkForTypeNat [2..4] $ prop_isApproximateZero 1e-5 (solve'' 1e-10)
-  describe "solveViaCompanion" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
-    it "solves equation with admissible error" $ do
-      checkForTypeNat [2..4] $ prop_isApproximateZero 1e-5 (solveViaCompanion 1e-5)
+  describe "solveViaCompanion" $
+    modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
+    it "solves equation with admissible error" $
+      checkForTypeNat [2..4] $ prop_isApproximateZero 1e-5
+        (pure . solveViaCompanion 1e-5)
+    describe "solves regression cases correctly" $
+      forM_ companionRegressions $
+      approxZeroTestCase 1e-5 (pure . solveViaCompanion 1e-5)
+
   describe "solveM" $ modifyMaxSuccess (const 50) $ modifyMaxSize (const 4) $ do
-    prop "solves equation with admissible error" $ \seed ->
-      let gen = mkStdGen seed
-      in checkForTypeNat [2..4] $ prop_isApproximateZero 1e-10 (\t -> evalRand (solveM t) gen)
+    prop "solves equation with admissible error" $
+      checkForTypeNat [2..4] $ prop_isApproximateZero 1e-5 solveM
+    describe "solves regressions correctly" $
+      forM_ companionRegressions $
+      approxZeroTestCase 1e-9 solveM
 
 isDescending :: Ord a => [a] -> Bool
 isDescending xs = and $ zipWith (>=) xs (drop 1 xs)
 
-prop_isApproximateZero :: KnownNat n
-                       => Double
-                       -> (forall m. ((0 < m) ~ 'True, KnownNat m) =>
-                           Ideal (Polynomial (Fraction Integer) m) -> [Sized m (Complex Double)])
-                       -> SNat n -> Property
+prop_isApproximateZero
+  :: (KnownNat n)
+  => Double
+  -> (forall m. ((0 < m) ~ 'True, KnownNat m) =>
+      Ideal (Polynomial (Fraction Integer) m) -> IO [Sized m (Complex Double)])
+  -> SNat n -> Property
 prop_isApproximateZero err solver sn =
   case zeroOrSucc sn of
-    IsSucc k -> withKnownNat k $ forAll (zeroDimOf sn) $ \(ZeroDimIdeal ideal) ->
-      (case lneqZero k of
-        Witness ->
-          let anss = solver ideal
-              mul r d = convert r * d
-          in all (\as -> all ((<err) . magnitude . substWith mul as) $ generators ideal) anss) :: Bool
+    IsSucc _ -> withKnownNat sn $
+      forAll (zeroDimOf sn) $ ioProperty . checkSolverApproxZero err solver
+    IsZero -> error "prop_isApproximateZero must be called with non-zero typenats!"
+
+companionRegressions
+  :: [SolverTestCase]
+companionRegressions =
+  [ SolverTestCase @3 $
+    let [x,y,z] = vars
+    in ZeroDimIdeal $ toIdeal
+        [ 2*x^2 + (0.5 :: Fraction Integer) .*. x * y
+        , -(0.5 :: Fraction Integer) .*. y ^ 2 + y * z
+        , z^2 - z]
+  , SolverTestCase @3 $
+    let [x,y,z] = vars
+    in ZeroDimIdeal $ toIdeal
+        [ 2*x + 1, 2*y^2,-z^2 - 1]
+  , SolverTestCase @2 $
+    let [x,y] = vars
+    in ZeroDimIdeal $ toIdeal
+        [ x^2 - y, -2*y^2]
+  ]
+
+approxZeroTestCase
+  :: Double
+  -> (forall n. ((0 < n) ~ 'True, KnownNat n)
+        => Ideal (Polynomial (Fraction Integer) n) -> IO [Sized n (Complex Double)]
+      )
+  -> SolverTestCase
+  -> SpecWith ()
+approxZeroTestCase err calc (SolverTestCase f@(ZeroDimIdeal i)) = it (show f) $ do
+    isZeroDimensional (F.toList i) @? "Not zero-dimensional!"
+    checkSolverApproxZero err calc f
+      @? "Solved correctly"
+
+
+checkSolverApproxZero
+  :: ((0 < n) ~ 'True, KnownNat n)
+  => Double
+  -> (Ideal (Polynomial (Fraction Integer) n) -> IO [Sized n (Complex Double)])
+  -> ZeroDimIdeal n
+  -> IO Bool
+checkSolverApproxZero err solver (ZeroDimIdeal ideal) = do
+  anss <- solver ideal
+  let mul r d = convert r * d
+  pure
+    $ all (\as -> all ((<err) . magnitude . substWith mul as)
+    $ generators ideal) anss
+
+data SolverTestCase where
+  SolverTestCase
+    :: ((0 < n) ~ 'True, KnownNat n)
+    => ZeroDimIdeal n -> SolverTestCase
 
 prop_univPoly :: KnownNat n => SNat n -> Property
 prop_univPoly sdim =
