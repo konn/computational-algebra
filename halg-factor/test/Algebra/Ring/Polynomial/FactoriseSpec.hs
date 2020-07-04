@@ -10,6 +10,7 @@ import           Algebra.Prelude.Core               hiding ((===))
 import           Algebra.Ring.Polynomial.Factorise
 import           Algebra.Ring.Polynomial.Univariate
 import           Control.Arrow
+import           Control.Lens
 import           Data.Functor                       ((<&>))
 import qualified Data.IntMap                        as IM
 import           Test.Hspec
@@ -68,6 +69,22 @@ spec = parallel $ do
             $ IM.toList
             $ squareFreeDecompFiniteField f
       in fromFactorisation facts @?= f
+
+  describe "factorHensel" $
+    modifyMaxSize (const 5)
+      $ modifyMaxSuccess (const 25)
+      $ prop "reconstructs the original " $ \(NonZero f0) -> ioProperty $ do
+        let f = pp f0
+        (i, dic) <- factorHensel f
+        pure
+          $ tabulate "totalDegree" [show $ totalDegree' f]
+          $ tabulate "number of factors"
+            [show $ length dic]
+          $ i .*. runMult
+              (ifoldMap (\n fs ->
+                  Mult $ toInteger n .*. product fs
+              ) dic)
+              === f
 
   describe "factorise" $ do
     describe "correctly factors polynomials in regression tests" $

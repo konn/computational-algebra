@@ -64,6 +64,7 @@ tests:
     - quickcheck-instances
     - halg-core-test
     - MonadRandom
+    - lens
     - halg-galois-fields
     - algebraic-prelude
     - halg-core

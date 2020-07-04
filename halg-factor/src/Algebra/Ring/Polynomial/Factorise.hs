@@ -216,13 +216,15 @@ factorHensel = wrapSQFFactor factorHenselSqFree
 wrapSQFFactor :: (MonadRandom m)
               => (Unipol Integer -> m [Unipol Integer])
               -> Unipol Integer -> m (Integer, IntMap (Set (Unipol Integer)))
-wrapSQFFactor fac f0 = do
-  let (g, c) | leadingCoeff f0 < 0 = (- pp f0, - content f0)
-             | otherwise = (pp f0, content f0)
-  ts0 <- F.mapM (secondM fac . clearDenom) (yun $ monoize $ mapCoeffUnipol (F.% 1) g)
-  let anss = IM.toList ts0
-      k = c * leadingCoeff g `div` product (map (fst.snd) anss)
-  return (k, IM.fromList $ map (second $ S.fromList . snd) anss)
+wrapSQFFactor fac f0
+  | isZero f0 = pure (0, IM.empty)
+  | totalDegree' f0 == 1 = pure (1, IM.singleton 1 $ S.singleton f0)
+  | otherwise =  do
+    let (g, c) = (pp f0, content f0)
+    ts0 <- F.mapM (secondM fac . clearDenom) (yun $ monoize $ mapCoeffUnipol (F.% 1) g)
+    let anss = IM.toList ts0
+        k = c * leadingCoeff g `div` product (map (fst.snd) anss)
+    return (k, IM.fromList $ map (second $ S.fromList . snd) anss)
 
 
 secondM :: Functor f => (t -> f a) -> (t1, t) -> f (t1, a)
