@@ -29,8 +29,8 @@ asGenListOf :: Gen [a] -> a -> Gen [a]
 asGenListOf = const
 
 spec :: Spec
-spec = parallel $ do
-  describe "f4" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
+spec = parallel $
+  describe "f4" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 10) $ do
     prop "passes S-test" $
       checkForTypeNat [2..3] $ prop_passesSTest f4
     prop "includes the original ideal" $
