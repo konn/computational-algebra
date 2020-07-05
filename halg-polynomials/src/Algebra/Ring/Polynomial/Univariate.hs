@@ -37,7 +37,7 @@ import qualified Prelude                as P
 --   so if you want to treat the power greater than @maxBound :: Int@,
 --   please consider using other represntation.
 newtype Unipol r = Unipol { runUnipol :: IM.IntMap r }
-                 deriving (NFData)
+                 deriving (NFData, Foldable)
 type role Unipol representational
 
 instance Hashable r => Hashable (Unipol r) where
