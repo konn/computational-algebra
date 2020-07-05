@@ -202,13 +202,14 @@ clearDenom f =
   let g = foldr (lcm . denominator) one $ terms' f
   in (g, mapCoeffUnipol (numerator . ((g F.% one)*)) f)
 
--- | Factorise the given integer-coefficient polynomial,
+-- | Factorise the given primitive and square-freeinteger-coefficient polynomial,
 --   choosing a large enough prime.
 factorQBigPrime :: (MonadRandom m)
                => Unipol Integer -> m (Integer, IntMap (Set (Unipol Integer)))
 factorQBigPrime = wrapSQFFactor factorSqFreeQBP
 
--- | Factorise the given interger-coefficient polynomial by Hensel lifting.
+-- | Factorise the given sqaure-free
+--   interger-coefficient polynomial by Hensel lifting.
 factorHensel :: (MonadRandom m)
              => Unipol Integer -> m (Integer, IntMap (Set (Unipol Integer)))
 factorHensel = wrapSQFFactor factorHenselSqFree
@@ -217,14 +218,16 @@ wrapSQFFactor :: (MonadRandom m)
               => (Unipol Integer -> m [Unipol Integer])
               -> Unipol Integer -> m (Integer, IntMap (Set (Unipol Integer)))
 wrapSQFFactor fac f0
-  | isZero f0 = pure (0, IM.empty)
-  | totalDegree' f0 == 1 = pure (1, IM.singleton 1 $ S.singleton f0)
+  | n == 0 = pure (leadingCoeff f0, IM.empty)
+  | n == 1 = pure (1, IM.singleton 1 $ S.singleton f0)
   | otherwise =  do
     let (g, c) = (pp f0, content f0)
     ts0 <- F.mapM (secondM fac . clearDenom) (yun $ monoize $ mapCoeffUnipol (F.% 1) g)
     let anss = IM.toList ts0
         k = c * leadingCoeff g `div` product (map (fst.snd) anss)
     return (k, IM.fromList $ map (second $ S.fromList . snd) anss)
+  where
+    n = totalDegree' f0
 
 
 secondM :: Functor f => (t -> f a) -> (t1, t) -> f (t1, a)
@@ -280,8 +283,9 @@ factorSqFreeQBP f
       let fbar = mapCoeffUnipol (modNat' fp) f
       in gcd fbar (diff OZ fbar) == one
 
-factorHenselSqFree :: MonadRandom m
-                   => Unipol Integer -> m [Unipol Integer]
+factorHenselSqFree
+  :: MonadRandom m
+  => Unipol Integer -> m [Unipol Integer]
 factorHenselSqFree f =
   let lc = leadingCoeff f
       Just p = find isGoodPrime primes
@@ -291,8 +295,8 @@ factorHenselSqFree f =
   let lc' = modNat' fp lc
       f0 = mapCoeffUnipol ((/lc') . modNat' fp) f
   fps <- factorise f0
-  let gs = multiHensel (fromIntegral p) power f $
-           map (mapCoeffUnipol naturalRepr . fst) fps
+  let gs = multiHensel (fromIntegral p) power f
+          $ map (mapCoeffUnipol naturalRepr . fst) fps
   return $ loop (p^2^fromIntegral power) 1 (length gs) f gs []
   where
     lc = leadingCoeff f
@@ -309,26 +313,28 @@ factorHenselSqFree f =
                     , leadingCoeff q * leadingCoeff g == lc * leadingCoeff h
                     ]
         in case cands of
-            [] -> loop pk (l + 1) m h gs acc
-            ((ss, g, q) : _) ->
-             let u = leadingCoeff g `div` content g
-             in loop pk l m (mapCoeff' (`div` u) q) (gs L.\\ ss) (pp g : acc)
+          [] -> loop pk (l + 1) m h gs acc
+          ((ss, g, q) : _) ->
+            let u = leadingCoeff g `div` content g
+            in loop pk l m (mapCoeff' (`div` u) q) (gs L.\\ ss) (pp g : acc)
 
 -- | Given that @f = gh (mod m)@ with @sg + th = 1 (mod m)@ and @leadingCoeff f@ isn't zero divisor mod m,
 --   @henselStep m f g h s t@ calculates the unique (g', h', s', t') s.t.
 --   @f = g' h' (mod m^2), g' = g (mod m), h' = h (mod m), s' = s (mod m), t' = t (mod m)@, @h'@ monic.
-henselStep :: (Eq r, Euclidean r)
-           => r        -- ^ modulus
-           -> Unipol r
-           -> Unipol r
-           -> Unipol r
-           -> Unipol r
-           -> Unipol r
-           -> (Unipol r, Unipol r, Unipol r, Unipol r)
+henselStep
+  :: (Eq r, Euclidean r)
+  => r        -- ^ modulus
+  -> Unipol r
+  -> Unipol r
+  -> Unipol r
+  -> Unipol r
+  -> Unipol r
+  -> (Unipol r, Unipol r, Unipol r, Unipol r)
 henselStep m f g h s t =
   let modCoeff = mapCoeffUnipol (`rem` m^2)
-      divModSq u v = mapCoeffUnipol (F.% one) u `divide` mapCoeffUnipol (F.% one) v
-                     & both %~ mapCoeffUnipol (fromJust . modFraction (m^2))
+      divModSq u v =
+        mapCoeffUnipol (F.% one) u `divide` mapCoeffUnipol (F.% one) v
+        & both %~ mapCoeffUnipol (fromJust . modFraction (m^2))
       e = modCoeff $ f - g * h
       (q, r) = divModSq (s*e) h
       g' = modCoeff $ g + t * e + q * g
@@ -340,11 +346,12 @@ henselStep m f g h s t =
   in (g', h', s', t')
 
 -- | Repeatedly applies hensel lifting for monics.
-repeatHensel :: Integer -> Int
-             -> Unipol Integer
-             -> Unipol Integer -> Unipol Integer
-             -> Unipol Integer -> Unipol Integer
-             -> (Unipol Integer, Unipol Integer, Unipol Integer, Unipol Integer)
+repeatHensel
+  :: Integer -> Int
+  -> Unipol Integer
+  -> Unipol Integer -> Unipol Integer
+  -> Unipol Integer -> Unipol Integer
+  -> (Unipol Integer, Unipol Integer, Unipol Integer, Unipol Integer)
 repeatHensel !m 0 _ g h s t = (normalizeMod m g, normalizeMod m h, s, t)
 repeatHensel !m n f g h s t =
   let (g', h', s', t') = henselStep m f g h s t
