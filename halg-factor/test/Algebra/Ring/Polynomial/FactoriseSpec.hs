@@ -1,11 +1,14 @@
-{-# OPTIONS_GHC -Wno-orphans #-}
-{-# LANGUAGE AllowAmbiguousTypes, DataKinds, FlexibleInstances, GADTs #-}
-{-# LANGUAGE OverloadedLabels, ParallelListComp, PolyKinds            #-}
-{-# LANGUAGE ScopedTypeVariables, TypeApplications                    #-}
+{-# OPTIONS_GHC -Wno-orphans -Wno-type-defaults #-}
+{-# LANGUAGE AllowAmbiguousTypes, DataKinds, ExtendedDefaultRules        #-}
+{-# LANGUAGE FlexibleInstances, GADTs, OverloadedLabels, OverloadedLists #-}
+{-# LANGUAGE ParallelListComp, PolyKinds, ScopedTypeVariables            #-}
+{-# LANGUAGE TypeApplications                                            #-}
 module Algebra.Ring.Polynomial.FactoriseSpec where
 import qualified Algebra.Field.Finite               as Fin
+import           Algebra.Field.Fraction.Test        ()
 import           Algebra.Field.Galois
 import           Algebra.Field.Prime
+import           Algebra.Field.Prime.Test           ()
 import           Algebra.Prelude.Core               hiding ((===))
 import           Algebra.Ring.Polynomial.Factorise
 import           Algebra.Ring.Polynomial.Univariate
@@ -13,11 +16,15 @@ import           Control.Arrow
 import           Control.Lens
 import           Data.Functor                       ((<&>))
 import qualified Data.IntMap                        as IM
+import           Data.Monoid                        (Sum (..))
+import qualified Data.Set                           as S
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.HUnit                         hiding (Testable)
 import           Test.QuickCheck                    as QC
 import           Type.Reflection
+
+default ([])
 
 data Regression where
   MkRegression
@@ -39,9 +46,6 @@ regressions =
     ξ :: GF 2 5
     ξ = primitive
 
-instance KnownNat n => Arbitrary (F n) where
-  arbitrary = QC.elements $ Fin.elements $ Proxy @(F n)
-
 instance (KnownNat p, KnownNat n, ConwayPolynomial p n)
       => Arbitrary (GF p n) where
   arbitrary = QC.elements $ Fin.elements $ Proxy @(GF p n)
@@ -52,6 +56,11 @@ instance (Num r, Arbitrary r, CoeffRing r) => Arbitrary (Unipol r) where
         | c <- pns
         | n <- [0..]
         ]
+
+sqFree
+  :: Unipol Rational -> Unipol Rational
+sqFree g =
+  g `quot` gcd g (diff 0 g)
 
 spec :: Spec
 spec = parallel $ do
@@ -69,22 +78,66 @@ spec = parallel $ do
             $ IM.toList
             $ squareFreeDecompFiniteField f
       in fromFactorisation facts @?= f
+  forM_ [("factorQBigPrime", factorQBigPrime), ("factorHensel", factorHensel)]
+    $ \(lab, factorer) -> describe lab $ do
+      describe "factors regression cases correctly" $
+        forM_ intPolys $ \fs ->
+        it (show fs) $ do
+          (i, dic) <- factorer $ product fs
+          i @?= foldr (gcd . content) 1 fs
+          dic @?= IM.singleton 1 fs
+      modifyMaxSize (const 5) $
+        modifyMaxSuccess (const 25) $
+        prop "factors a product of distinct polynomials of degree 1"
+        $ \(Blind coes) -> again $ ioProperty $ do
+          let pls = [ injectCoeff i * #x + injectCoeff j
+                    | QC.NonZero r <- S.toList coes
+                    , let i = denominator r
+                          j = numerator r
+                    ]
+              expected = product pls
+              expectCount = length pls
+          (i, facs) <- factorer $ product pls
+          let f = i .*. runMult
+                    (ifoldMap (\n fs -> Mult $ product fs ^ fromIntegral n) facs)
+              givenFact = runAdd $ foldMap (Add . length) facs
+              factNumError = unlines
+                [ "# of factor mismatched!"
+                , "\texpected: " <> show expectCount
+                , "\t but got: " <> show givenFact
+                , "\t factors: " <> show facs
+                ]
+              prodLabel =
+                unlines
+                [ "Product doesnt match the result;"
+                , "\texpected: " ++ show expected
+                , "\t but got: " ++ show f
+                ]
+          pure  $ counterexample (show pls)
+                $ tabulate "# of factors" [show expectCount]
+                $ tabulate "0-Norm" [show $ foldr (max.abs) 0 f]
+                $ counterexample prodLabel (f === expected)
+            .&&. counterexample factNumError
+                  (givenFact === expectCount)
 
-  describe "factorHensel" $
-    modifyMaxSize (const 5)
-      $ modifyMaxSuccess (const 25)
-      $ prop "reconstructs the original " $ \(NonZero f0) -> ioProperty $ do
-        let f = pp f0
-        (i, dic) <- factorHensel f
-        pure
-          $ tabulate "totalDegree" [show $ totalDegree' f]
-          $ tabulate "number of factors"
-            [show $ length dic]
-          $ i .*. runMult
-              (ifoldMap (\n fs ->
-                  Mult $ toInteger n .*. product fs
-              ) dic)
-              === f
+
+      modifyMaxSize (const 3)
+          $ modifyMaxSuccess (const 25)
+          $ prop "reconstructs the original " $ \(NonZero f00) (NonZero g00) -> ioProperty $ do
+            let h0 = sqFree $ f00 * g00
+                f0 = h0 `quot` gcd (diff 0 h0) h0
+                c = foldr' (lcm . denominator) 1 f0
+                f = mapCoeffUnipol (numerator . (fromInteger c*)) f0
+            (i, dic) <- factorQBigPrime f
+            pure
+              $ tabulate "totalDegree" [show $ totalDegree' f]
+              $ tabulate "number of factors"
+                [show $ getSum $ foldMap (Sum . length) dic]
+              $ i .*. runMult
+                  (ifoldMap (\n fs ->
+                      Mult $ product fs ^ fromIntegral n
+                  ) dic)
+                  === f
 
   describe "factorise" $ do
     describe "correctly factors polynomials in regression tests" $
@@ -181,6 +234,13 @@ checkIsReducible = do
   where
     prop' :: Testable prop => String -> prop -> Spec
     prop' txt = prop (txt <> "(" ++ show (typeRep @r) ++ ")")
+
+intPolys :: [S.Set (Unipol Integer)]
+intPolys =
+  [ [#x + 2, 2 * #x ^ 2 + 1, #x - 2]
+  , [3 * #x + 1, 4 * #x + 3]
+  , [#x - 2, 4 * #x + 1]
+  ]
 
 fromFactorisation
   :: CoeffRing r => [(Unipol r, Natural)] -> Unipol r
