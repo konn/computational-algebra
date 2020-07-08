@@ -440,8 +440,8 @@ instance (Eq a, P.Integral a) => DecidableUnits (WrapIntegral a) where
 
   recipUnit (WrapIntegral r) =
     if isUnit (WrapIntegral r)
-    then Nothing
-    else Just (WrapIntegral r)
+    then Just (WrapIntegral r)
+    else Nothing
   {-# INLINE recipUnit #-}
 
 instance (Eq a, P.Integral a) => DecidableAssociates (WrapIntegral a) where
