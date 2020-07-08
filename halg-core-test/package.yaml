@@ -58,4 +58,6 @@ tests:
     - QuickCheck
     - arithmoi
     - hspec
+    - integer-gmp
+    - template-haskell
     - inspection-testing
