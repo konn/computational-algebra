@@ -173,6 +173,8 @@ proxyF :: Proxy (a :: k) -> Proxy (F a)
 proxyF Proxy = Proxy
 
 instance IsPrimeChar p => Eq (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => Eq (F p) #-}
   (==) = unwrapBinF (==)
 
 instance IsPrimeChar p => Normed (F p) where
@@ -181,6 +183,8 @@ instance IsPrimeChar p => Normed (F p) where
   liftNorm = modNat
 
 instance IsPrimeChar p => P.Num (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => P.Num (F p) #-}
   fromInteger = fromInteger'
   {-# INLINE fromInteger #-}
 
@@ -202,6 +206,7 @@ instance IsPrimeChar p => P.Num (F p) where
     _ -> 1
 
 pows :: forall p a1. (P.Integral a1, IsPrimeChar p) => F p -> a1 -> F p
+{-# INLINE pows #-}
 pows = flip $ \n -> liftFUnary $ \a ->
   unwrapIntegral $
   modPow
@@ -209,12 +214,16 @@ pows = flip $ \n -> liftFUnary $ \a ->
     (WrapIntegral $ fromInteger $ reflect $ Proxy @p) (toInteger n)
 
 instance IsPrimeChar p => NA.Additive (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => Additive (F p) #-}
   (+) = liftBinF (P.+)
   {-# INLINE (+) #-}
   sinnum1p n = liftFUnary $ \k -> (1 P.+ P.fromIntegral n) P.* k
   {-# INLINE sinnum1p #-}
 
 instance IsPrimeChar p => NA.Multiplicative (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => Multiplicative (F p) #-}
   (*) = liftBinF (P.*)
   {-# INLINE (*) #-}
 
@@ -222,28 +231,40 @@ instance IsPrimeChar p => NA.Multiplicative (F p) where
   {-# INLINE pow1p #-}
 
 instance IsPrimeChar p => NA.Monoidal (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => Monoidal (F p) #-}
   zero = wrapF 0
   {-# INLINE zero #-}
   sinnum n = liftFUnary $ \k -> P.fromIntegral n P.* k
   {-# INLINE sinnum #-}
 
 instance IsPrimeChar p => NA.LeftModule Natural (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => LeftModule Natural (F p) #-}
   (.*) n = liftFUnary $ \p -> fromIntegral n P.* p
   {-# INLINE (.*) #-}
 
 instance IsPrimeChar p => NA.RightModule Natural (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => RightModule Natural (F p) #-}
   (*.) = flip (.*)
   {-# INLINE (*.) #-}
 
 instance IsPrimeChar p => NA.LeftModule Integer (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => LeftModule Integer (F p) #-}
   (.*) n = liftFUnary $ \p -> fromIntegral n P.* p
   {-# INLINE (.*) #-}
 
 instance IsPrimeChar p => NA.RightModule Integer (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => RightModule Integer (F p) #-}
   (*.) = flip (.*)
   {-# INLINE (*.) #-}
 
 instance IsPrimeChar p => NA.Group (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => Group (F p) #-}
   (-) = liftBinF (P.-)
   {-# INLINE (-) #-}
 
@@ -255,23 +276,33 @@ instance IsPrimeChar p => NA.Abelian (F p)
 instance IsPrimeChar p => NA.Semiring (F p)
 
 instance IsPrimeChar p => NA.Rig (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => Rig (F p) #-}
   fromNatural = modNat . P.fromIntegral
   {-# INLINE fromNatural #-}
 
 instance IsPrimeChar p => NA.Ring (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => Ring (F p) #-}
   fromInteger = modNat
   {-# INLINE fromInteger #-}
 
 instance IsPrimeChar p => NA.DecidableZero (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => DecidableZero (F p) #-}
   isZero = unwrapF (== 0)
 
 instance IsPrimeChar p => NA.Unital (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => Unital (F p) #-}
   one = wrapF 1
   {-# INLINE one #-}
   pow = pows
   {-# INLINE pow #-}
 
 instance IsPrimeChar p => DecidableUnits (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => DecidableUnits (F p) #-}
   isUnit = unwrapF (/= 0)
   {-# INLINE isUnit #-}
 
@@ -283,6 +314,8 @@ instance IsPrimeChar p => DecidableUnits (F p) where
   {-# INLINE recipUnit #-}
 
 instance (IsPrimeChar p) => DecidableAssociates (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => DecidableAssociates (F p) #-}
   isAssociate p n =
     (isZero p && isZero n) || (not (isZero p) && not (isZero n))
   {-# INLINE isAssociate #-}
@@ -296,6 +329,8 @@ instance (IsPrimeChar p) => ZeroProductSemiring (F p)
 instance (IsPrimeChar p) => Euclidean (F p)
 
 instance IsPrimeChar p => Division (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'False)
+          => Division (F p) #-}
   recip = fromMaybe (error "recip: not unit") . recipUnit
   {-# INLINE recip #-}
   a / b =  a * recip b
@@ -304,6 +339,8 @@ instance IsPrimeChar p => Division (F p) where
   {-# INLINE (^) #-}
 
 instance IsPrimeChar p => P.Fractional (F p) where
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <= p) ~ 'True)
+          => P.Fractional (F p) #-}
   (/) = C.coerce ((P./) :: WrapAlgebra (F p) -> WrapAlgebra (F p) -> WrapAlgebra (F p))
   {-# INLINE (/) #-}
 
