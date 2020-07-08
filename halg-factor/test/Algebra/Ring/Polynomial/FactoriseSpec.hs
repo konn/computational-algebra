@@ -129,15 +129,22 @@ spec = parallel $ do
                 c = foldr' (lcm . denominator) 1 f0
                 f = mapCoeffUnipol (numerator . (fromInteger c*)) f0
             (i, dic) <- factorQBigPrime f
+            let facts = getSum $ ifoldMap (\n -> Sum . (n*) . length) dic
             pure
               $ tabulate "totalDegree" [show $ totalDegree' f]
               $ tabulate "number of factors"
-                [show $ getSum $ foldMap (Sum . length) dic]
-              $ i .*. runMult
+                [show facts]
+              $ counterexample
+                "reconstruction failed"
+                (i .*. runMult
                   (ifoldMap (\n fs ->
                       Mult $ product fs ^ fromIntegral n
                   ) dic)
-                  === f
+                  === f)
+                  .&&.
+                counterexample
+                  "# of factor mismatched"
+                (facts >= length (filter ((>0) . totalDegree') [f00,g00]))
 
   describe "factorise" $ do
     describe "correctly factors polynomials in regression tests" $
