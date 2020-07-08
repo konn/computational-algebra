@@ -121,15 +121,19 @@ liftBinF f = unwrapBinF $ \x y -> wrapF $ fromIntegral $ f x y
 
 instance {-# OVERLAPPING #-}  HasPrimeField Nat where
   type CharInfo n = KnownNat n
+  {-# INLINE charInfo_ #-}
   charInfo_ = fromIntegral . natVal
+  {-# INLINE liftFUnary_ #-}
   liftFUnary_ f = \(F i :: F p) ->
     case sing @WORD_MAX_BOUND %<= sing @p of
       STrue -> F $ f i
       SFalse -> F $ f i
+  {-# INLINE unwrapF #-}
   unwrapF f = \(F i :: F p) ->
     case sing @WORD_MAX_BOUND %<= sing @p of
       STrue -> f i
       SFalse -> f i
+  {-# INLINE wrapF_ #-}
   wrapF_ s =
     (case sing @WORD_MAX_BOUND %<= sing @p of
       STrue -> F s
