@@ -37,3 +37,25 @@ dependencies:
 library:
   source-dirs: src
   ghc-options:  -Wall -Wno-orphans
+
+
+tests:
+  halg-core-specs:
+    build-tools:
+    - hspec-discover
+    ghc-options:
+    - -Wall
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -O2
+    main:                Spec.hs
+    source-dirs:         test
+    dependencies:
+    - halg-core
+    - halg-core-test
+    - singletons
+    - QuickCheck
+    - arithmoi
+    - hspec
+    - inspection-testing

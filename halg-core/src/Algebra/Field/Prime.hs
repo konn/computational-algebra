@@ -12,7 +12,9 @@ module Algebra.Field.Prime
     modNat, modNat', modRat, modRat',
     FiniteField(..), order,
     -- * Auxiliary interfaces
-    HasPrimeField(..)
+    HasPrimeField(..),
+    -- ** Internals
+    wrapF, liftFUnary, liftBinF
   ) where
 import Algebra.Arithmetic            (modPow)
 import Algebra.Field.Finite
