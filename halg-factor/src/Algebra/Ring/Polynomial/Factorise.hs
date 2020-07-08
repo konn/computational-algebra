@@ -26,7 +26,8 @@ import           Control.Lens                       (both, ifoldl, (%~), (&))
 import           Control.Monad                      (guard, replicateM)
 import           Control.Monad                      (when)
 import           Control.Monad.Loops                (iterateUntil, untilJust)
-import           Control.Monad.Random               (MonadRandom, uniform)
+import           Control.Monad.Random               (MonadRandom, getRandomR,
+                                                     uniform)
 import           Control.Monad.ST.Strict            (ST, runST)
 import           Control.Monad.Trans                (lift)
 import           Control.Monad.Trans.Loop           (continue, foreach, while)
@@ -87,7 +88,7 @@ equalDegreeSplitM f d
   | otherwise = do
     let q = fromIntegral $ order (Proxy :: Proxy k)
         els = elements (Proxy :: Proxy k)
-    e <- uniform [1..n P.- 1]
+    e <- getRandomR (1, n P.- 1)
     cs <- replicateM (fromIntegral e) $ uniform els
     let a = var 0 ^ fromIntegral e +
             sum (zipWith (*) (map injectCoeff cs) [var 0 ^ l | l <-[0..]])
