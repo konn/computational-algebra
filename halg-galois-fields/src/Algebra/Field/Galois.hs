@@ -195,7 +195,7 @@ generateIrreducible p n =
     let f = varX^n + sum [ injectCoeff c * (varX^i) | c <- cs | i <- [0..n P.- 1]]
     return f
 
-withIrreducible :: forall p a. KnownNat p
+withIrreducible :: forall p a. IsPrimeChar p
                 => Unipol (F p)
                 -> (forall f (n :: Nat). (Reifies f (Unipol (F p))) => Proxy (GF' p n f) -> a)
                 -> a

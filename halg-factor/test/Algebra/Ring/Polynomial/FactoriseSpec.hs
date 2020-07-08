@@ -38,10 +38,10 @@ regressions =
     ξ :: GF 2 5
     ξ = primitive
 
-instance KnownNat n => Arbitrary (F n) where
+instance IsPrimeChar n => Arbitrary (F n) where
   arbitrary = QC.elements $ Fin.elements $ Proxy @(F n)
 
-instance (KnownNat p, KnownNat n, ConwayPolynomial p n)
+instance (IsPrimeChar p, KnownNat n, ConwayPolynomial p n)
       => Arbitrary (GF p n) where
   arbitrary = QC.elements $ Fin.elements $ Proxy @(GF p n)
 
