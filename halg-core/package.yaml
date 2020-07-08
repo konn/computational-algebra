@@ -50,6 +50,7 @@ dependencies:
 - equational-reasoning
 - ghc-typelits-knownnat
 - ghc-typelits-presburger >= 0.2.0.5
+- singletons-presburger
 - hashable
 - intern
 - lens
@@ -64,4 +65,6 @@ dependencies:
 
 library:
   source-dirs: src
+  dependencies:
+  - template-haskell
   ghc-options: ["-Wall", "-O2"]

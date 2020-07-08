@@ -4,14 +4,13 @@
 module Algebra.Field.Prime.Test where
 import Algebra.Field.Finite.Test
 
-import Algebra.Field.Prime    (F)
-import Data.Reflection        (Reifies)
-import Prelude                (Integer, Maybe (..), Monad)
+import Algebra.Field.Prime    (F, IsPrimeChar)
+import Prelude                (Maybe (..), Monad)
 import Test.QuickCheck        (Arbitrary (..))
 import Test.SmallCheck.Series (Serial (..))
 
-instance Reifies p Integer => Arbitrary (F p) where
+instance IsPrimeChar p => Arbitrary (F p) where
   arbitrary = arbitraryFiniteField (Nothing :: Maybe (F p))
 
-instance (Monad m, Reifies p Integer) => Serial m (F p) where
+instance (Monad m, IsPrimeChar p) => Serial m (F p) where
   series = seriesFiniteField (Nothing :: Maybe (F p))
