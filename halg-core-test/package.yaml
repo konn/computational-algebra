@@ -60,4 +60,4 @@ tests:
     - hspec
     - integer-gmp
     - template-haskell
-    - inspection-testing
+    - inspection-testing >= 0.3
