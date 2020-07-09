@@ -45,6 +45,8 @@ cradle:
       component: "halg-core-test:test:halg-core-specs"
     - path: "halg-core-test/opt-test"
       component: "halg-core-test:exe:halg-core-opt-test"
+    - path: "halg-core/bench/prime-field-simple-bench.hs"
+      component: "halg-core:bench:prime-field-simple-bench"
 
     - path: "halg-heaps/src"
       component: "halg-heaps:lib"

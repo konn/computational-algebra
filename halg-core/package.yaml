@@ -68,3 +68,15 @@ library:
   dependencies:
   - template-haskell
   ghc-options: ["-Wall", "-O2"]
+
+benchmarks:
+  prime-field-simple-bench:
+    source-dirs: bench
+    main: prime-field-simple-bench.hs
+    dependencies:
+    - halg-core
+    - gauge
+    ghc-options:
+    - -Wall
+    - -O2
+    
