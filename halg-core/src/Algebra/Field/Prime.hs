@@ -64,7 +64,7 @@ type family F_Nat_Aux (oob :: Bool) where
 
 instance {-# OVERLAPPING #-} SingI (WORD_MAX_BOUND <=? p) => NFData (F p) where
   {-# INLINE rnf #-}
-  rnf = case sing @(WORD_MAX_BOUND <=? p) of
+  rnf = case sing :: Sing (WORD_MAX_BOUND <=? p) of
     STrue -> rnf . runF
     SFalse -> rnf .runF
 
@@ -128,17 +128,17 @@ instance {-# OVERLAPPING #-} HasPrimeField Nat where
   charInfo_ = fromIntegral . natVal
   {-# INLINE liftFUnary_ #-}
   liftFUnary_ f = \(F i :: F p) ->
-    case sing @(WORD_MAX_BOUND <=? p) of
+    case sing :: Sing (WORD_MAX_BOUND <=? p) of
       STrue -> F $ f i
       SFalse -> F $ f i
   {-# INLINE unwrapF #-}
   unwrapF f = \(F i :: F p) ->
-    case sing @(WORD_MAX_BOUND <=? p) of
+    case sing :: Sing (WORD_MAX_BOUND <=? p) of
       STrue -> f i
       SFalse -> f i
   {-# INLINE wrapF_ #-}
   wrapF_ s =
-    (case sing @(WORD_MAX_BOUND <=? p) of
+    (case sing :: Sing (WORD_MAX_BOUND <=? p) of
       STrue -> F s
       SFalse -> F s)
       :: forall p. SingI (WORD_MAX_BOUND <=? p) => F (p :: Nat)
@@ -169,7 +169,9 @@ reifyPrimeField
   :: Integer
   -> (forall p. IsPrimeChar (p :: Nat) => Proxy (F p) -> a) -> a
 reifyPrimeField p f = reifyNat p $ \(_ :: Proxy p) ->
-  withSingI (unsafeCoerce $ sing @WORD_MAX_BOUND %<= sing @p :: Sing (WORD_MAX_BOUND <=? p))
+  withSingI (unsafeCoerce $
+          (sing :: Sing WORD_MAX_BOUND)
+      %<= (sing :: Sing p) :: Sing (WORD_MAX_BOUND <=? p))
   $ f $ Proxy @(F p)
 
 withPrimeField :: Integer -> (forall p. IsPrimeChar (p :: Nat) => F p) -> Integer
