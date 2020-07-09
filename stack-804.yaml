@@ -16,7 +16,6 @@ packages:
 - 'halg-polyn-parser'
 - 'halg-polynomials'
 
-allow-newer: true
 extra-deps:
 - control-monad-loop-0.1
 - equational-reasoning-0.5.1.0
@@ -31,5 +30,11 @@ extra-deps:
 - exact-pi-0.5.0.1@sha256:55e343462be57d692dc6b5fd27d2f52c39052cb402ea03692e4dc460fa69a5d0,2121
 - semirings-0.5.3@sha256:4b0d243f88bb07c0673978a37b6b9fd16da44f15e8d552fb08795d9a88a3dc76,3791
 - QuickCheck-2.12.6.1
+- hspec-core-2.6.1
+- repa-3.4.1.4
+- repa-algorithms-3.4.1.3
+- quickcheck-instances-0.3.19
+- hspec-2.6.1
+- hspec-discover-2.6.1
 - git: https://github.com/konn/inspection-testing.git
   commit: b3ea6650bf613dd008d4392eaf359b2ab962cbcd
