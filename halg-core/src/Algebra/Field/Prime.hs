@@ -1,9 +1,8 @@
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs         #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses #-}
-{-# LANGUAGE MultiWayIf, PolyKinds, QuantifiedConstraints, RankNTypes      #-}
-{-# LANGUAGE ScopedTypeVariables, TemplateHaskell, TypeApplications        #-}
-{-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances             #-}
-{-# LANGUAGE UndecidableSuperClasses                                       #-}
+{-# LANGUAGE MultiWayIf, PolyKinds, RankNTypes, ScopedTypeVariables        #-}
+{-# LANGUAGE TemplateHaskell, TypeApplications, TypeFamilies               #-}
+{-# LANGUAGE TypeOperators, UndecidableInstances, UndecidableSuperClasses  #-}
 {-# OPTIONS_GHC -fplugin Data.Singletons.TypeNats.Presburger #-}
 -- | Prime fields
 module Algebra.Field.Prime
