@@ -25,5 +25,3 @@ extra-deps:
 - sized-0.4.0.0
 - unamb-0.2.7
 - control-monad-loop-0.1
-- git: https://github.com/konn/inspection-testing.git
-  commit: defdd6e3536fd7ef59d09384375f0a46d9b475a0

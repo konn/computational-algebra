@@ -1,0 +1,1 @@
+FailureReport {failureReportSeed = 1324859739, failureReportMaxSuccess = 100, failureReportMaxSize = 100, failureReportMaxDiscardRatio = 10, failureReportPaths = []}

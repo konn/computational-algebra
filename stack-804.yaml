@@ -36,5 +36,4 @@ extra-deps:
 - quickcheck-instances-0.3.19
 - hspec-2.6.1
 - hspec-discover-2.6.1
-- git: https://github.com/konn/inspection-testing.git
-  commit: defdd6e3536fd7ef59d09384375f0a46d9b475a0
+- inspection-testing-0.4.2.4@sha256:10c2fe69eee3c66a4e1fa2f49173f1ff1142b131ed5a6eda986258ff2370aa76,7371

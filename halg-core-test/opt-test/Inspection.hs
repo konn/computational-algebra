@@ -8,7 +8,7 @@
       -dsuppress-module-prefixes -dsuppress-type-signatures
       -dsuppress-uniques
   #-}
-module Algebra.Field.PrimeSpec.Optimisation (optimisationSpecs) where
+module Inspection (main) where
 import           Algebra.Field.Prime
 import           AlgebraicPrelude
 import qualified AlgebraicPrelude         as NA
@@ -73,8 +73,8 @@ litLargeAnswer = $(
   in litE $ integerL $ (p*3 `div` 2) `mod` p
   )
 
-optimisationSpecs :: Spec
-optimisationSpecs = do
+main :: IO ()
+main = hspec $ do
   describe "optimisation for small primes (F 59)" $ do
     describe "literal" $ do
       it "doesn't contain type-classes"

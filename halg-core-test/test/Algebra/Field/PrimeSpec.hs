@@ -9,8 +9,6 @@
       -dsuppress-uniques
   #-}
 module Algebra.Field.PrimeSpec where
-import Algebra.Field.PrimeSpec.Optimisation
-
 import           Algebra.Field.Finite.Test ()
 import           Algebra.Field.Prime
 import           Algebra.Field.Prime.Test  ()
@@ -43,7 +41,6 @@ spec = describe "F p" $ do
   prop "is a field (for big primes)" $ \(BigPrime p) ->
     tabulate "p" [show p] $
     reifyPrimeField p $ property . isField
-  optimisationSpecs
 
 newtype SmallPrime = SmallPrime { runSmallPrime :: Integer }
   deriving newtype (Show)

@@ -34,10 +34,45 @@ dependencies:
 - smallcheck
 - type-natural
 
+flags:
+  opt-test:
+    description: "Whether to build optimisation test"
+    manual: true
+    default: false
+
 library:
   source-dirs: src
   ghc-options:  -Wall -Wno-orphans
 
+executables:
+  halg-core-opt-test:
+    when:
+    - condition: flag(opt-test)
+      then:
+        buildable: true
+      else:
+        buildable: false
+
+    ghc-options:
+    - -Wall
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -O2
+    - -fno-hpc
+    - -main-is Inspection
+    main:                Inspection.hs
+    source-dirs:         opt-test
+    dependencies:
+    - halg-core
+    - halg-core-test
+    - singletons
+    - QuickCheck >= 2.12
+    - arithmoi >= 0.9
+    - hspec
+    - integer-gmp
+    - template-haskell
+    - inspection-testing >= 0.3
 
 tests:
   halg-core-specs:
@@ -58,6 +93,4 @@ tests:
     - QuickCheck >= 2.12
     - arithmoi >= 0.9
     - hspec
-    - integer-gmp
     - template-haskell
-    - inspection-testing >= 0.3

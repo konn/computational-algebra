@@ -43,6 +43,8 @@ cradle:
       component: "halg-core:lib"
     - path: "halg-core-test/test"
       component: "halg-core-test:test:halg-core-specs"
+    - path: "halg-core-test/opt-test"
+      component: "halg-core-test:exe:halg-core-opt-test"
 
     - path: "halg-heaps/src"
       component: "halg-heaps:lib"
