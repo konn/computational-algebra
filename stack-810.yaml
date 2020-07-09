@@ -21,5 +21,5 @@ extra-deps:
 - control-monad-loop-0.1
 - repa-3.4.1.4
 - unamb-0.2.7
-- git: https://github.com/konn/inspection-testing
-  commit: f78c8e24a01605baf92b64b192fad3b9d7c4bae7
+- git: https://github.com/konn/inspection-testing.git
+  commit: b3ea6650bf613dd008d4392eaf359b2ab962cbcd
