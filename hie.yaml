@@ -41,6 +41,8 @@ cradle:
 
     - path: "halg-core/src"
       component: "halg-core:lib"
+    - path: "halg-core/bench/prime-field-simple-bench.hs"
+      component: "halg-core:bench:prime-field-simple-bench"
 
     - path: "halg-heaps/src"
       component: "halg-heaps:lib"
