@@ -23,7 +23,9 @@ extra-deps:
 - singletons-presburger-0.3.0.0
 - sized-0.3.0.0
 - type-natural-0.8.1.0
-- arithmoi-0.11.0.1
+- arithmoi-0.9.0.0
 - unamb-0.2.7
 - parser-combinators-1.1.0
 - megaparsec-7.0.5
+- exact-pi-0.5.0.1@sha256:55e343462be57d692dc6b5fd27d2f52c39052cb402ea03692e4dc460fa69a5d0,2121
+- semirings-0.5.3@sha256:4b0d243f88bb07c0673978a37b6b9fd16da44f15e8d552fb08795d9a88a3dc76,3791
