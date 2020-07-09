@@ -93,7 +93,7 @@ main = hspec $ do
         checkInspection $(inspectTest $ 'f59AddAlgebra `hasNoType` ''Integer)
       it "doesn't contain modInteger operation"
         $ checkInspection $(inspectTest $ 'f59AddAlgebra `doesNotUse` 'modInteger)
-      it "has the same core as \a b -> (a + b) `mod` 59"
+      it "has the same core as \\a b -> (a + b) `mod` 59"
         $ checkInspection $(inspectTest $ 'f59AddAlgebra ==- 'f59AddManual)
   describe ("optimisation for big prime (F " ++ show (natVal @LargeP Proxy) ++ ")") $ do
     describe "literal" $ do
@@ -113,5 +113,5 @@ main = hspec $ do
         checkInspection $(inspectTest $ 'fLargeAddAlgebra `hasNoType` ''Int)
       it "doesn't contain modInt# operation"
         $ checkInspection $(inspectTest $ 'fLargeAddAlgebra `doesNotUse` 'modInt#)
-      it "has the same core as \a b -> (a + b) `mod` p"
+      it "has the same core as \\a b -> (a + b) `mod` p"
         $ checkInspection $(inspectTest $ 'fLargeAddAlgebra ==- 'fLargeAddManual)
