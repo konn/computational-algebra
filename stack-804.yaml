@@ -23,6 +23,7 @@ extra-deps:
 - singletons-presburger-0.3.0.0
 - sized-0.3.0.0
 - type-natural-0.8.1.0
+- arithmoi-0.11.0.1
 - unamb-0.2.7
 - parser-combinators-1.1.0
 - megaparsec-7.0.5

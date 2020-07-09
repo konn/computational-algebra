@@ -56,7 +56,7 @@ tests:
     - halg-core-test
     - singletons
     - QuickCheck
-    - arithmoi
+    - arithmoi >= 0.9
     - hspec
     - integer-gmp
     - template-haskell
