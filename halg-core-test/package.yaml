@@ -55,7 +55,7 @@ tests:
     - halg-core
     - halg-core-test
     - singletons
-    - QuickCheck
+    - QuickCheck >= 2.12
     - arithmoi >= 0.9
     - hspec
     - integer-gmp
