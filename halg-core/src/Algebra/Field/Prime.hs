@@ -241,11 +241,11 @@ instance IsPrimeChar p => P.Num (F p) where
 
 pows :: forall p a1. (P.Integral a1, IsPrimeChar p) => F p -> a1 -> F p
 {-# INLINE pows #-}
-pows = flip $ \n -> liftFUnary $ \a ->
-  unwrapIntegral $
+pows = flip $ \n -> unwrapF $ \a ->
+  wrapF_ $ fromIntegral $
   modPow
     (WrapIntegral a)
-    (WrapIntegral $ fromInteger $ charInfo $ Proxy @p) (toInteger n)
+    (WrapIntegral $ fromInteger $ charInfo $ Proxy @p) n
 
 instance IsPrimeChar p => NA.Additive (F p) where
   {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <=? p) ~ 'False)
