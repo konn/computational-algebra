@@ -28,13 +28,12 @@ import           AlgebraicPrelude             hiding (lex)
 import           Control.DeepSeq              (NFData (..))
 import qualified Control.Foldl                as Fl
 import           Control.Lens                 (Ixed (..), imap, makeLenses,
-                                               makeWrapped, (%~), (&), (.~), _1,
-                                               _2, _Wrapped)
+                                               makeWrapped, (%~), (&), (.~),
+                                               _Wrapped)
 import qualified Data.Coerce                  as DC
 import           Data.Constraint              ((:=>) (..), Dict (..))
 import qualified Data.Constraint              as C
 import           Data.Constraint.Forall       (Forall, inst)
-import           Data.Functor.Identity        (Identity (..))
 import           Data.Hashable                (Hashable (..))
 import           Data.Kind                    (Type)
 import           Data.Maybe                   (catMaybes)
