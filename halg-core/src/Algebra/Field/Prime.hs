@@ -6,7 +6,7 @@
 {-# OPTIONS_GHC -fplugin Data.Singletons.TypeNats.Presburger #-}
 -- | Prime fields
 module Algebra.Field.Prime
-  ( F(), IsPrimeChar,
+  ( F(), IsPrimeChar, charInfo,
     naturalRepr, reifyPrimeField, withPrimeField,
     modNat, modNat', modRat, modRat',
     FiniteField(..), order,
@@ -90,6 +90,9 @@ class HasPrimeField kind where
     -> F (p :: kind) -> a
 
 charInfo :: IsPrimeChar p => pxy p -> Integer
+{-# SPECIALISE INLINE
+  charInfo :: ((WORD_MAX_BOUND <=? p) ~ 'False, KnownNat p)
+    => pxy p -> Integer #-}
 {-# INLINE charInfo #-}
 charInfo = charInfo_
 
@@ -98,13 +101,21 @@ liftFUnary
   :: forall p. IsPrimeChar p
   => (forall x. Integral x => x -> x)
   -> F p -> F p
+{-# SPECIALISE INLINE
+  liftFUnary :: ((WORD_MAX_BOUND <=? p) ~ 'False, KnownNat p)
+    => (forall x. Integral x => x -> x)
+    -> F p -> F p #-}
 liftFUnary f = liftFUnary_ $
   (`mod` fromInteger (charInfo @p Proxy)) . f
 
 wrapF
   :: forall p. (IsPrimeChar p)
   => (forall x. Integral x => x)
-  -> F (p :: kind)
+  -> F p
+{-# SPECIALISE INLINE
+  wrapF :: ((WORD_MAX_BOUND <=? p) ~ 'False, KnownNat p)
+    => (forall x. Integral x => x)
+    -> F p #-}
 {-# INLINE wrapF #-}
 wrapF = \s -> wrapF_ (unwrapIntegral $ s `rem` fromInteger (charInfo @p Proxy))
 
@@ -113,6 +124,10 @@ unwrapBinF
   => (forall x. Integral x => x -> x -> a)
   -> F p -> F p -> a
 {-# INLINE unwrapBinF #-}
+{-# SPECIALISE INLINE
+  unwrapBinF :: ((WORD_MAX_BOUND <=? p) ~ 'False, KnownNat p)
+    => (forall x. Integral x => x -> x -> a)
+    -> F p -> F p -> a #-}
 unwrapBinF f = unwrapF $ \i -> unwrapF $ \j -> f i (fromIntegral j)
 
 liftBinF
@@ -120,6 +135,11 @@ liftBinF
   => (forall x. Integral x => x -> x -> x)
   -> F p -> F p -> F p
 {-# INLINE liftBinF #-}
+{-# SPECIALISE INLINE
+  liftBinF :: ((WORD_MAX_BOUND <=? p) ~ 'False, KnownNat p)
+    => (forall x. Integral x => x -> x -> x)
+    -> F p -> F p -> F p
+  #-}
 liftBinF f = unwrapBinF $ \x y -> wrapF $ fromIntegral $ f x y
 
 instance {-# OVERLAPPING #-} HasPrimeField Nat where
@@ -150,10 +170,14 @@ instance HasPrimeField Type where
   wrapF_ = F
   unwrapF f = \(F p) -> f p
 
-class (HasPrimeField k, Reifies p Integer, CharInfo p)
+class (HasPrimeField k, CharInfo p)
   => IsPrimeChar (p :: k)
-instance (HasPrimeField k, Reifies p Integer, CharInfo p)
-  => IsPrimeChar (p :: k)
+instance (HasPrimeField k, CharInfo p)
+  => IsPrimeChar (p :: k) where
+  {-# SPECIALISE instance
+        ( KnownNat p, (WORD_MAX_BOUND <=? p) ~ 'False
+        )
+        => IsPrimeChar p #-}
 
 modNat :: IsPrimeChar (p :: k) => Integer -> F p
 modNat = modNat' Proxy
@@ -161,7 +185,7 @@ modNat = modNat' Proxy
 
 modNat' :: forall proxy (p :: k). IsPrimeChar p => proxy (F p) -> Integer -> F p
 modNat' _ i = wrapF $
-  let p = reflect (Proxy :: Proxy p)
+  let p = charInfo (Proxy :: Proxy p)
   in unwrapIntegral $ fromInteger i `rem` fromInteger p
 {-# INLINE modNat' #-}
 
@@ -209,9 +233,11 @@ instance IsPrimeChar p => P.Num (F p) where
   {-# INLINE (*) #-}
 
   abs = id
+  {-# INLINE abs #-}
   signum = liftFUnary $ \case
     0 -> 0
     _ -> 1
+  {-# INLINE signum #-}
 
 pows :: forall p a1. (P.Integral a1, IsPrimeChar p) => F p -> a1 -> F p
 {-# INLINE pows #-}
@@ -219,7 +245,7 @@ pows = flip $ \n -> liftFUnary $ \a ->
   unwrapIntegral $
   modPow
     (WrapIntegral a)
-    (WrapIntegral $ fromInteger $ reflect $ Proxy @p) (toInteger n)
+    (WrapIntegral $ fromInteger $ charInfo $ Proxy @p) (toInteger n)
 
 instance IsPrimeChar p => NA.Additive (F p) where
   {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <=? p) ~ 'False)
@@ -245,6 +271,8 @@ instance IsPrimeChar p => NA.Monoidal (F p) where
   {-# INLINE zero #-}
   sinnum n = liftFUnary $ \k -> P.fromIntegral n P.* k
   {-# INLINE sinnum #-}
+  sumWith f = foldl' (\a b -> a + f b) zero
+  {-# INLINE sumWith #-}
 
 instance IsPrimeChar p => NA.LeftModule Natural (F p) where
   {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <=? p) ~ 'False)
@@ -279,6 +307,13 @@ instance IsPrimeChar p => NA.Group (F p) where
   negate = liftFUnary P.negate
   {-# INLINE negate #-}
 
+  subtract = liftBinF P.subtract
+  {-# INLINE subtract #-}
+
+  times n = liftFUnary $ unwrapIntegral .
+    NA.times n . WrapIntegral
+  {-# INLINE times #-}
+
 instance IsPrimeChar p => NA.Abelian (F p)
 
 instance IsPrimeChar p => NA.Semiring (F p)
@@ -307,6 +342,8 @@ instance IsPrimeChar p => NA.Unital (F p) where
   {-# INLINE one #-}
   pow = pows
   {-# INLINE pow #-}
+  productWith f = foldl' (\a b -> a * f b) one
+  {-# INLINE productWith #-}
 
 instance IsPrimeChar p => DecidableUnits (F p) where
   {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <=? p) ~ 'False)
@@ -343,11 +380,13 @@ instance IsPrimeChar p => Division (F p) where
   {-# INLINE recip #-}
   a / b =  a * recip b
   {-# INLINE (/) #-}
+  (\\) = flip (/)
+  {-# INLINE (\\) #-}
   (^)   = pows
   {-# INLINE (^) #-}
 
 instance IsPrimeChar p => P.Fractional (F p) where
-  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <=? p) ~ 'True)
+  {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <=? p) ~ 'False)
           => P.Fractional (F p) #-}
   (/) = C.coerce ((P./) :: WrapAlgebra (F p) -> WrapAlgebra (F p) -> WrapAlgebra (F p))
   {-# INLINE (/) #-}
@@ -362,9 +401,8 @@ instance IsPrimeChar p => P.Fractional (F p) where
 instance IsPrimeChar p => NA.Commutative (F p)
 
 instance IsPrimeChar p => NA.Characteristic (F p) where
-  char _ = fromIntegral $ reflect (Proxy :: Proxy p)
+  char _ = fromIntegral $ charInfo (Proxy :: Proxy p)
   {-# INLINE char #-}
-
 
 instance IsPrimeChar p => Show (F p) where
   showsPrec d = unwrapF $ showsPrec d
@@ -374,6 +412,7 @@ instance IsPrimeChar p => PrettyCoeff (F p) where
     if | p == 0 -> Vanished
        | p == 1 -> OneCoeff
        | otherwise -> Positive $ showsPrec d p
+  {-# INLINE showsCoeff #-}
 
 instance IsPrimeChar p => FiniteField (F p) where
   power _ = 1
