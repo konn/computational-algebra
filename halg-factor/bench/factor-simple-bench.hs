@@ -107,7 +107,7 @@ main = defaultMain
       [ env (withShown $!! f0)
         $ \ ~(f, shown) ->
         bench ("degree " ++ shown) $ nfAppIO factorise f
-      | f0 <- [ gf_2_5_rand_deg5, gf_2_5_rand_deg10, gf_2_5_rand_deg50
+      | f0 <- [ gf_2_5_rand_deg5, gf_2_5_rand_deg10, gf_2_5_rand_deg25
               ]
       ]
     ]
@@ -391,9 +391,9 @@ gf_2_5_rand_deg10 :: Unipol (GF 2 5)
 gf_2_5_rand_deg10 =
   randomPoly (-3224523753560157840) Proxy 10
 
-gf_2_5_rand_deg50 :: Unipol (GF 2 5)
-gf_2_5_rand_deg50 =
-  randomPoly (-4134444955663732920) Proxy 50
+gf_2_5_rand_deg25 :: Unipol (GF 2 5)
+gf_2_5_rand_deg25 =
+  randomPoly (-4134444955663732920) Proxy 25
 
 f12379_rand_deg5 :: Unipol (F 12379)
 f12379_rand_deg5 =
