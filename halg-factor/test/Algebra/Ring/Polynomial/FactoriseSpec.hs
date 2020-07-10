@@ -10,6 +10,7 @@ import           Algebra.Prelude.Core               hiding ((===))
 import           Algebra.Ring.Polynomial.Factorise
 import           Algebra.Ring.Polynomial.Univariate
 import           Control.Arrow
+import           Control.Monad.Random
 import           Data.Functor                       ((<&>))
 import qualified Data.IntMap                        as IM
 import           Test.Hspec
@@ -20,7 +21,7 @@ import           Type.Reflection
 
 data Regression where
   MkRegression
-    :: (Num k, FiniteField k, PrettyCoeff k, CoeffRing k, Typeable k)
+    :: (Num k, FiniteField k, Random k, PrettyCoeff k, CoeffRing k, Typeable k)
     => Unipol k -> Regression
 
 regressions :: [Regression]
@@ -102,7 +103,7 @@ spec = parallel $ do
 
 factorReconstructsIn
   :: forall r.
-      ( Arbitrary r,
+      ( Arbitrary r, Random r,
         CoeffRing r, PrettyCoeff r,
         Typeable r, Num r, FiniteField r
       ) => Spec
@@ -119,7 +120,7 @@ factorReconstructsIn =
 
 factorIrreducibility
   :: forall r.
-      ( Arbitrary r,
+      ( Arbitrary r, Random r,
         CoeffRing r, PrettyCoeff r,
         Typeable r, Num r, FiniteField r
       ) => Spec

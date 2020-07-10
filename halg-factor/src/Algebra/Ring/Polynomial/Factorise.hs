@@ -26,7 +26,8 @@ import           Control.Lens                       (both, ifoldl, (%~), (&))
 import           Control.Monad                      (guard, replicateM)
 import           Control.Monad                      (when)
 import           Control.Monad.Loops                (iterateUntil, untilJust)
-import           Control.Monad.Random               (MonadRandom, getRandomR,
+import           Control.Monad.Random               (MonadRandom, Random,
+                                                     getRandom, getRandomR,
                                                      uniform)
 import           Control.Monad.ST.Strict            (ST, runST)
 import           Control.Monad.Trans                (lift)
@@ -79,17 +80,17 @@ modPow a p f = withQuotient (principalIdeal f) $
 traceCharTwo :: (Unital m, Monoidal m) => Natural -> m -> m
 traceCharTwo m a = foldl' (+) zero $ take (fromIntegral m) $ iterate (\(!x) ->x*x) a
 
-equalDegreeSplitM :: forall k m. (MonadRandom m, CoeffRing k,  FiniteField k)
-                 => Unipol k
-                 -> Natural
-                 -> m (Maybe (Unipol k))
+equalDegreeSplitM
+  :: forall k m. (MonadRandom m, Random k, CoeffRing k,  FiniteField k)
+  => Unipol k
+  -> Natural
+  -> m (Maybe (Unipol k))
 equalDegreeSplitM f d
   | n `mod` fromIntegral d /= 0 = return Nothing
   | otherwise = do
     let q = fromIntegral $ order (Proxy :: Proxy k)
-        els = elements (Proxy :: Proxy k)
     e <- getRandomR (1, n P.- 1)
-    cs <- replicateM (fromIntegral e) $ uniform els
+    cs <- replicateM (fromIntegral e) getRandom
     let a = var 0 ^ fromIntegral e +
             sum (zipWith (*) (map injectCoeff cs) [var 0 ^ l | l <-[0..]])
         g1 = gcd a f
@@ -102,7 +103,8 @@ equalDegreeSplitM f d
                 guard (g2 /= one && g2 /= f)
                 return g2
   where n = totalDegree' f
-equalDegreeFactorM :: (Eq k, FiniteField k, MonadRandom m)
+
+equalDegreeFactorM :: (Eq k, FiniteField k, MonadRandom m, Random k)
                    => Unipol k -> Natural -> m [Unipol k]
 equalDegreeFactorM f d = go f >>= \a -> return (a [])
   where
@@ -115,7 +117,7 @@ equalDegreeFactorM f d = go f >>= \a -> return (a [])
           r <- go (h `quot` g)
           return $ l . r
 
-factorSquareFree :: (Eq k, FiniteField k, MonadRandom m)
+factorSquareFree :: (Eq k, Random k, FiniteField k, MonadRandom m)
                  => Unipol k -> m [Unipol k]
 factorSquareFree f =
    concat <$> mapM (uncurry $ flip equalDegreeFactorM) (filter ((/= one) . snd) $ distinctDegFactor f)
@@ -184,7 +186,7 @@ squareFreeDecompFiniteField f =
           squareFreeDecompFiniteField $ pthRoot f'
 
 -- | Factorise a polynomial over finite field using Cantor-Zassenhaus algorithm
-factorise :: (MonadRandom m, CoeffRing k, FiniteField k)
+factorise :: (MonadRandom m, CoeffRing k, FiniteField k, Random k)
           => Unipol k -> m [(Unipol k, Natural)]
 factorise f0
   | isZero f0 = pure [(zero, 1)]

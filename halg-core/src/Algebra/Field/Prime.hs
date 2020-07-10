@@ -22,7 +22,7 @@ import Algebra.Ring.Polynomial.Class (PrettyCoeff (..), ShowSCoeff (..))
 
 import           AlgebraicPrelude
 import           Control.DeepSeq              (NFData (..))
-import           Control.Monad.Random         (uniform)
+import           Control.Monad.Random         (getRandomR, uniform)
 import           Control.Monad.Random         (runRand)
 import           Control.Monad.Random         (Random (..))
 import qualified Data.Coerce                  as C
@@ -422,9 +422,11 @@ instance IsPrimeChar p => FiniteField (F p) where
   {-# INLINE elements #-}
 
 instance IsPrimeChar p => Random (F p) where
-  random = runRand $ uniform (elements Proxy)
+  random = runRand $ modNat <$>
+    getRandomR (0 :: Integer, charInfo (Proxy :: Proxy p) - 1)
   {-# INLINE random #-}
-  randomR (a, b) = runRand $ uniform $ map modNat [naturalRepr a..naturalRepr b]
+  randomR (a, b) = runRand $ modNat <$>
+    getRandomR (naturalRepr a, naturalRepr b)
   {-# INLINE randomR #-}
 
 modRat :: FiniteField k => Proxy k -> Fraction Integer -> k
