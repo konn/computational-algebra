@@ -9,6 +9,7 @@
       -dsuppress-uniques
   #-}
 module Inspection (main) where
+import           Algebra.Arithmetic       (modPow)
 import           Algebra.Field.Prime
 import           AlgebraicPrelude
 import qualified AlgebraicPrelude         as NA
@@ -49,6 +50,18 @@ fLargeAddAlgebra = (NA.+)
 fLargeAddManual :: Integer -> Integer -> Integer
 fLargeAddManual = \ l r ->
   (l + r) `mod` natVal @LargeP Proxy
+
+f59ProductSum :: [[F 59]] -> F 59
+f59ProductSum xs = product $ map sum xs
+
+f59PowPrelude :: F 59 -> Natural -> F 59
+f59PowPrelude = (P.^)
+
+f59PowAlgebra :: F 59 -> Natural -> F 59
+f59PowAlgebra = (NA.^)
+
+f59ModPow :: WrapIntegral Int -> Natural -> WrapIntegral Int
+f59ModPow i n = modPow i 59 n
 
 checkInspection
   :: Result -> Expectation
@@ -95,6 +108,31 @@ main = hspec $ do
         $ checkInspection $(inspectTest $ 'f59AddAlgebra `doesNotUse` 'modInteger)
       it "has the same core as \\a b -> (a + b) `mod` 59"
         $ checkInspection $(inspectTest $ 'f59AddAlgebra ==- 'f59AddManual)
+    describe "productSum" $ do
+      it "doesn't contain type-classes" $
+        checkInspection $(inspectTest $ hasNoTypeClasses 'f59ProductSum)
+      it "doesn't contain modInteger" $
+        checkInspection $(inspectTest $ 'f59ProductSum `doesNotUse` 'modInteger)
+
+    describe "(P.^)" $ do
+      it "doesn't contain type-classes" $ do
+        checkInspection $(inspectTest $ hasNoTypeClasses 'f59PowPrelude)
+      it "doesn't contain type-natural comparison"
+        $ checkInspection $(inspectTest $ 'f59PowPrelude `doesNotUse` 'SLT)
+      it "doesn't contain modInteger operation"
+        $ checkInspection $(inspectTest $ 'f59PowPrelude `doesNotUse` 'modInteger)
+
+    describe "(NA.^)" $ do
+      it "is almost the same as modPow" $
+        checkInspection
+          $(inspectTest
+          $ 'f59PowAlgebra ==- 'f59ModPow
+          )
+      it "doesn't contain type-natural comparison"
+        $ checkInspection $(inspectTest $ 'f59PowAlgebra `doesNotUse` 'SLT)
+      it "doesn't contain modInteger operation"
+        $ checkInspection $(inspectTest $ 'f59PowAlgebra `doesNotUse` 'modInteger)
+
   describe ("optimisation for big prime (F " ++ show (natVal @LargeP Proxy) ++ ")") $ do
     describe "literal" $ do
       it "doesn't contain type-classes"
@@ -109,7 +147,7 @@ main = hspec $ do
         checkInspection $(inspectTest $ hasNoTypeClasses 'fLargeAddAlgebra)
       it "doesn't contain type-natural comparison"
         $ checkInspection $(inspectTest $ 'fLargeAddAlgebra `doesNotUse` 'SLT)
-      it "doesn't contain Integer type" $
+      it "doesn't contain Int type" $
         checkInspection $(inspectTest $ 'fLargeAddAlgebra `hasNoType` ''Int)
       it "doesn't contain modInt# operation"
         $ checkInspection $(inspectTest $ 'fLargeAddAlgebra `doesNotUse` 'modInt#)
