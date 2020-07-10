@@ -6,9 +6,10 @@ import           Algebra.Field.Prime
 import           Algebra.Prelude.Core
 import           Algebra.Ring.Polynomial.Factorise
 import           Algebra.Ring.Polynomial.Univariate
-import           Control.DeepSeq                    (($!!))
-import           Control.Monad.Random               (Random, getRandom,
-                                                     mkStdGen, runRand)
+import           Control.DeepSeq                    (NFData, ($!!))
+import           Control.Monad.Random               (Rand, Random, StdGen,
+                                                     evalRand, getRandom,
+                                                     mkStdGen)
 import           Gauge
 import qualified Prelude                            as P
 
@@ -21,7 +22,7 @@ main = defaultMain
     [ bgroup "F 2"
       [ env (withShown $!! f0)
         $ \ ~(f, shown) ->
-        bench shown $ nfAppIO factorise f
+        bench shown $ nfRand (-8064420878717134234) factorise f
       | f0 <- [ f2_irred_deg2, f2_irred_deg3
               , f2_irred_deg4, f2_irred_deg5
               , f2_irred_deg20]
@@ -29,13 +30,13 @@ main = defaultMain
     , bgroup "F 59"
       [ env (withShown $!! f0)
         $ \ ~(f, shown) ->
-        bench shown $ nfAppIO factorise f
+        bench shown $ nfRand 3598104117899586809 factorise f
       | f0 <- [f59_irred_deg2, f59_irred_deg3, f59_irred_deg4, f59_irred_deg5]
       ]
     , bgroup "F 12379"
       [ env (withShown $!! f0)
         $ \ ~(f, shown) ->
-        bench shown $ nfAppIO factorise f
+        bench shown $ nfRand (-3415579080620808637) factorise f
       | f0 <- [ f12379_irred_deg2, f12379_irred_deg3
               , f12379_irred_deg4, f12379_irred_deg5
               , f12379_irred_deg20]
@@ -43,7 +44,7 @@ main = defaultMain
     , bgroup "GF 2 5"
       [ env (withShown $!! f0)
         $ \ ~(f, shown) ->
-        bench ("degree " ++ shown) $ nfAppIO factorise f
+        bench ("degree " ++ shown) $ nfRand 9222476977982779266 factorise f
       | f0 <- [ gf2_5_irred_deg2, gf2_5_irred_deg3
               , gf2_5_irred_deg4, gf2_5_irred_deg5
               , gf_2_5_irred_deg20
@@ -54,7 +55,7 @@ main = defaultMain
     [ bgroup "F 59"
       [ env (withShown $!! f0)
         $ \ ~(f, shown) ->
-        bench ("factors " ++ shown) $ nfAppIO factorise f
+        bench ("factors " ++ shown) $ nfRand (-8112230046183841627) factorise f
       | f0 <- [ f59_degOnes_deg5, f59_degOnes_deg10
               , f59_degOnes_deg20, f59_degOnes_deg50
               , f59_degOnes_deg100
@@ -63,7 +64,7 @@ main = defaultMain
     , bgroup "F 12379"
       [ env (withShown $!! f0)
         $ \ ~(f, shown) ->
-        bench ("factors " ++ shown) $ nfAppIO factorise f
+        bench ("factors " ++ shown) $ nfRand (-1233791936103235945) factorise f
       | f0 <- [ f12379_degOnes_deg5, f12379_degOnes_deg10
               , f12379_degOnes_deg20, f12379_degOnes_deg50
               , f12379_degOnes_deg100
@@ -72,7 +73,7 @@ main = defaultMain
     , bgroup "GF 2 5"
       [ env (withShown $!! f0)
         $ \ ~(f, shown) ->
-        bench ("factors " ++ shown) $ nfAppIO factorise f
+        bench ("factors " ++ shown) $ nfRand 4327617932885998668 factorise f
       | f0 <- [ gf_2_5_degOnes_deg5, gf_2_5_degOnes_deg10
               , gf_2_5_degOnes_deg20, gf_2_5_degOnes_deg50
               ]
@@ -82,7 +83,7 @@ main = defaultMain
     [ bgroup "F 2"
       [ env (withShown $!! f0)
         $ \ ~(f, shown) ->
-        bench ("degree " ++ shown) $ nfAppIO factorise f
+        bench ("degree " ++ shown) $ nfRand 6147031469590640211 factorise f
       | f0 <- [ f2_rand_deg5, f2_rand_deg10, f2_rand_deg50
               , f2_rand_deg100
               ]
@@ -90,7 +91,7 @@ main = defaultMain
     , bgroup "F 59"
       [ env (withShown $!! f0)
         $ \ ~(f, shown) ->
-        bench ("degree " ++ shown) $ nfAppIO factorise f
+        bench ("degree " ++ shown) $ nfRand 7650165946084592722 factorise f
       | f0 <- [ f59_rand_deg5, f59_rand_deg10, f59_rand_deg50
               --, f59_rand_deg100
               ]
@@ -98,7 +99,7 @@ main = defaultMain
     , bgroup "F 12379"
       [ env (withShown $!! f0)
         $ \ ~(f, shown) ->
-        bench ("degree " ++ shown) $ nfAppIO factorise f
+        bench ("degree " ++ shown) $ nfRand 3397449910091052593 factorise f
       | f0 <- [ f12379_rand_deg5, f12379_rand_deg10, f12379_rand_deg50
               -- , f12379_rand_deg100
               ]
@@ -106,7 +107,7 @@ main = defaultMain
     , bgroup "GF 2 5"
       [ env (withShown $!! f0)
         $ \ ~(f, shown) ->
-        bench ("degree " ++ shown) $ nfAppIO factorise f
+        bench ("degree " ++ shown) $ nfRand (-4880855658687328228) factorise f
       | f0 <- [ gf_2_5_rand_deg5, gf_2_5_rand_deg10, gf_2_5_rand_deg25
               ]
       ]
@@ -418,4 +419,11 @@ randomPoly
 randomPoly _ _ 0 = one
 randomPoly seed _ deg =
   sum $ zipWith (\i -> (#x^ i *) . injectCoeff) [deg, deg P.- 1 ..]
-  $ one : fst (runRand (replicateM (fromIntegral deg) getRandom) (mkStdGen seed))
+  $ one : withSeed seed (replicateM (fromIntegral deg) getRandom)
+
+withSeed :: Seed -> Rand StdGen a -> a
+withSeed = flip evalRand . mkStdGen
+
+nfRand :: NFData b => Seed -> (a -> Rand StdGen b) -> a -> Benchmarkable
+nfRand seed f a =
+  nf (withSeed seed . f) a
