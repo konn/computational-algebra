@@ -71,3 +71,21 @@ tests:
     - halg-factor
     default-extensions:
     - NoImplicitPrelude
+
+benchmarks:
+  factor-simple-bench:
+    source-dirs: bench
+    main: factor-simple-bench.hs
+    dependencies:
+    - halg-core
+    - halg-polynomials
+    - halg-factor
+    - halg-galois-fields
+    - algebraic-prelude
+    - deepseq
+    - MonadRandom
+    - gauge
+    ghc-options:
+    - -Wall
+    - -O2
+    
