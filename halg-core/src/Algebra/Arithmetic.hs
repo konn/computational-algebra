@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns, NoImplicitPrelude, NoMonomorphismRestriction #-}
+{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
 module Algebra.Arithmetic
        (repeatedSquare, modPow, fermatTest, isPseudoPrime
        ) where
@@ -18,16 +18,7 @@ data PrimeResult = Composite | ProbablyPrime | Prime
 
 -- | Calculates @n@-th power efficiently, using repeated square method.
 repeatedSquare :: Unital r => r -> Natural -> r
-repeatedSquare a n
-  | n == 0 = one
-  | otherwise = go (naturalLog2 n - 1) a
-  where
-    go !k !acc
-      | k < 0 = acc
-      | otherwise = go (k - 1) $
-      if testBit n k
-      then acc*acc*a
-      else acc*acc
+repeatedSquare = pow
 
 -- | Fermat-test for pseudo-primeness.
 fermatTest :: MonadRandom m => Integer -> m PrimeResult
