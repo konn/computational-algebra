@@ -12,6 +12,10 @@ cradle:
       component: "halg-factor:lib"
     - path: "halg-factor/test"
       component: "halg-factor:test:halg-factor-specs"
+    - path: "halg-factor/app/factor-deg50-prof.hs"
+      component: "halg-factor:exe:factor-deg50-prof"
+    - path: "halg-factor/bench/factor-simple-bench.hs"
+      component: "halg-factor:bench:factor-simple-bench"
 
     - path: "computational-algebra/src"
       component: "computational-algebra:lib"
@@ -41,6 +45,8 @@ cradle:
 
     - path: "halg-core/src"
       component: "halg-core:lib"
+    - path: "halg-core/bench/prime-field-simple-bench.hs"
+      component: "halg-core:bench:prime-field-simple-bench"
 
     - path: "halg-heaps/src"
       component: "halg-heaps:lib"

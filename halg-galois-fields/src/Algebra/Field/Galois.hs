@@ -1,4 +1,5 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs     #-}
+{-# LANGUAGE DataKinds, DerivingStrategies, FlexibleContexts           #-}
+{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving      #-}
 {-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction          #-}
 {-# LANGUAGE ParallelListComp, PolyKinds, QuasiQuotes, RankNTypes      #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeApplications #-}
@@ -15,11 +16,12 @@ import Algebra.Internal
 import Algebra.Prelude.Core               hiding (varX)
 import Algebra.Ring.Polynomial.Univariate
 
+import           Control.DeepSeq
 import           Control.Lens                 (imap)
 import           Control.Monad                (replicateM)
 import           Control.Monad.Loops          (iterateUntil)
-import           Control.Monad.Random         (MonadRandom)
-import           Control.Monad.Random         (uniform)
+import           Control.Monad.Random         (MonadRandom, getRandom, runRand)
+import           Control.Monad.Random         (Random (..), getRandomR)
 import qualified Data.Foldable                as F
 import           Data.Kind                    (Type)
 import qualified Data.Ratio                   as Rat
@@ -39,6 +41,7 @@ import qualified Prelude                      as P
 -- | Galois field of order @p^n@.
 --   @f@ stands for the irreducible polynomial over @F_p@ of degree @n@.
 newtype GF' p (n :: TL.Nat) (f :: Type) = GF' { runGF' :: Sized n (F p) }
+  deriving newtype (NFData)
 deriving instance Reifies p Integer => Eq (GF' p n f)
 
 -- | Galois Field of order @p^n@. This uses conway polynomials
@@ -184,11 +187,11 @@ instance (Reifies p Integer, Reifies f (Unipol (F p)), KnownNat n) => P.Fraction
   recip = recip
 
 -- | @generateIrreducible p n@ generates irreducible polynomial over F_@p@ of degree @n@.
-generateIrreducible :: (MonadRandom m, FiniteField k, Eq k)
+generateIrreducible :: (MonadRandom m, Random k, FiniteField k, Eq k)
                     => proxy k -> Natural -> m (Unipol k)
 generateIrreducible p n =
   iterateUntil (\f -> all (\i -> one == gcd (varX^(order p^i) - varX) f ) [1.. n `div` 2]) $ do
-    cs <- replicateM (fromIntegral n) $ uniform (elements p)
+    cs <- replicateM (fromIntegral n) getRandom
     let f = varX^n + sum [ injectCoeff c * (varX^i) | c <- cs | i <- [0..n P.- 1]]
     return f
 
@@ -251,3 +254,10 @@ primitive = primitive'
 conway :: forall p n. ConwayPolynomial p n
        => SNat p -> SNat n -> Unipol (F p)
 conway = conwayPolynomial
+
+instance IsGF' p n f => Random (GF' p n f) where
+  random = runRand $
+    GF' <$> sequence (SV.replicate' getRandom)
+  randomR (GF' ls, GF' rs) = runRand $
+    GF' <$> sequence (SV.zipWithSame (curry getRandomR) ls rs)
+

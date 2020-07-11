@@ -14,6 +14,7 @@ import           Algebra.Ring.Polynomial.Factorise
 import           Algebra.Ring.Polynomial.Univariate
 import           Control.Arrow
 import           Control.Lens
+import           Control.Monad.Random
 import           Data.Functor                       ((<&>))
 import qualified Data.IntMap                        as IM
 import           Data.Monoid                        (Sum (..))
@@ -28,7 +29,7 @@ default ([])
 
 data Regression where
   MkRegression
-    :: (Num k, FiniteField k, PrettyCoeff k, CoeffRing k, Typeable k)
+    :: (Num k, FiniteField k, Random k, PrettyCoeff k, CoeffRing k, Typeable k)
     => Unipol k -> Regression
 
 regressions :: [Regression]
@@ -41,6 +42,26 @@ regressions =
     + (ξ^3 + ξ^2 + ξ + 1) .*. #x^3 + (ξ^3 + 1) .*. #x^2
     + (ξ^4 + ξ^3 + ξ + 1) .*. #x
     + injectCoeff (ξ^4 + ξ^3 + ξ)
+  , MkRegression @(F 2) $
+    #x^66 + #x^65 + #x^64 + #x^62 + #x^57
+    + #x^56 + #x^55 + #x^54 + #x^52 + #x^50
+    + #x^48 + #x^47 + #x^45 + #x^44 + #x^41
+    + #x^38 + #x^37 + #x^35 + #x^33 + #x^30
+    + #x^29 + #x^27 + #x^23 + #x^22 + #x^21
+    + #x^19 + #x^15 + #x^14 + #x^13 + #x^11
+    + #x^10 + #x^9 + #x^7 + #x^5
+    + #x^3 + #x^2 + #x + 1
+  , MkRegression @(F 3) $
+    #x^67 + 2* #x^64 + 2* #x^63 + #x^62 + #x^61 +
+    #x^59 + 2* #x^57 + 2* #x^55 + 2* #x^54 + 2* #x^53
+    + 2* #x^52 + #x^51 + 2* #x^50 + #x^46 + 2* #x^45
+    + #x^43 + #x^40 + 2* #x^39 + #x^38 + #x^37
+    + #x^36 + #x^33 + 2* #x^32 + 2* #x^30 + 2* #x^29
+    + 2* #x^27 + 2* #x^26 + 2* #x^24 + #x^23 + 2* #x^22
+    + #x^21 + 2* #x^20 + #x^19 + 2* #x^18 + #x^16
+    + #x^15 + 2* #x^14 + 2* #x^13 + 2* #x^12
+    + #x^11 + #x^10 + 2* #x^8 + 2* #x^5
+    + 2* #x^4 + 2* #x^3 + 2* #x + 2
   ]
   where
     ξ :: GF 2 5
@@ -179,7 +200,7 @@ spec = parallel $ do
 
 factorReconstructsIn
   :: forall r.
-      ( Arbitrary r,
+      ( Arbitrary r, Random r,
         CoeffRing r, PrettyCoeff r,
         Typeable r, Num r, FiniteField r
       ) => Spec
@@ -196,7 +217,7 @@ factorReconstructsIn =
 
 factorIrreducibility
   :: forall r.
-      ( Arbitrary r,
+      ( Arbitrary r, Random r,
         CoeffRing r, PrettyCoeff r,
         Typeable r, Num r, FiniteField r
       ) => Spec

@@ -51,6 +51,7 @@ library:
   ghc-options:  -Wall
   dependencies:
   - MonadRandom
+  - deepseq
   - lens
   - monad-loops
   - reflection

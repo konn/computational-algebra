@@ -18,7 +18,7 @@ module Algebra.Ring.Polynomial.Factorise
 import           Algebra.Arithmetic                 hiding (modPow)
 import           Algebra.Field.Prime
 import           Algebra.Prelude.Core
-import           Algebra.Ring.Polynomial.Quotient
+import           Algebra.Ring.Euclidean.Quotient
 import           Algebra.Ring.Polynomial.Univariate
 import           Control.Applicative                ((<|>))
 import           Control.Arrow                      ((***), (<<<))
@@ -26,7 +26,9 @@ import           Control.Lens                       (both, ifoldl, (%~), (&))
 import           Control.Monad                      (guard, replicateM)
 import           Control.Monad                      (when)
 import           Control.Monad.Loops                (iterateUntil, untilJust)
-import           Control.Monad.Random               (MonadRandom, uniform)
+import           Control.Monad.Random               (MonadRandom, Random,
+                                                     getRandom, getRandomR,
+                                                     uniform)
 import           Control.Monad.ST.Strict            (ST, runST)
 import           Control.Monad.Trans                (lift)
 import           Control.Monad.Trans.Loop           (continue, foreach, while)
@@ -70,38 +72,39 @@ distinctDegFactor f0 = zip [1..] $ go id (var OZ :: Unipol k) f0 []
          else go gs' h' f'
 
 -- | @'modPow' f n g@ computes \(f^n \mod{g}\).
-modPow :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+modPow :: (Euclidean poly)
        => poly -> Natural -> poly -> poly
-modPow a p f = withQuotient (principalIdeal f) $
-               repeatedSquare (modIdeal a) p
+modPow a p f = withQuotient f $
+  repeatedSquare (quotient a) p
 
 traceCharTwo :: (Unital m, Monoidal m) => Natural -> m -> m
 traceCharTwo m a = foldl' (+) zero $ take (fromIntegral m) $ iterate (\(!x) ->x*x) a
 
-equalDegreeSplitM :: forall k m. (MonadRandom m, CoeffRing k,  FiniteField k)
-                 => Unipol k
-                 -> Natural
-                 -> m (Maybe (Unipol k))
+equalDegreeSplitM
+  :: forall k m. (MonadRandom m, Random k, CoeffRing k,  FiniteField k)
+  => Unipol k
+  -> Natural
+  -> m (Maybe (Unipol k))
 equalDegreeSplitM f d
   | n `mod` fromIntegral d /= 0 = return Nothing
   | otherwise = do
     let q = fromIntegral $ order (Proxy :: Proxy k)
-        els = elements (Proxy :: Proxy k)
-    e <- uniform [1..n P.- 1]
-    cs <- replicateM (fromIntegral e) $ uniform els
+    e <- getRandomR (1, n P.- 1)
+    cs <- replicateM (fromIntegral e) getRandom
     let a = var 0 ^ fromIntegral e +
             sum (zipWith (*) (map injectCoeff cs) [var 0 ^ l | l <-[0..]])
         g1 = gcd a f
     return $ (guard (g1 /= one) >> return g1)
          <|> do let b | charUnipol f == 2  =
-                          withQuotient (principalIdeal f) $
-                          traceCharTwo (powerUnipol f*d) (modIdeal a)
+                          withQuotient f $
+                          traceCharTwo (powerUnipol f*d) (quotient a)
                       | otherwise = modPow a (pred (q^d) `div`2) f
                     g2 = gcd (b - one) f
                 guard (g2 /= one && g2 /= f)
                 return g2
   where n = totalDegree' f
-equalDegreeFactorM :: (Eq k, FiniteField k, MonadRandom m)
+
+equalDegreeFactorM :: (Eq k, FiniteField k, MonadRandom m, Random k)
                    => Unipol k -> Natural -> m [Unipol k]
 equalDegreeFactorM f d = go f >>= \a -> return (a [])
   where
@@ -114,7 +117,7 @@ equalDegreeFactorM f d = go f >>= \a -> return (a [])
           r <- go (h `quot` g)
           return $ l . r
 
-factorSquareFree :: (Eq k, FiniteField k, MonadRandom m)
+factorSquareFree :: (Eq k, Random k, FiniteField k, MonadRandom m)
                  => Unipol k -> m [Unipol k]
 factorSquareFree f =
    concat <$> mapM (uncurry $ flip equalDegreeFactorM) (filter ((/= one) . snd) $ distinctDegFactor f)
@@ -183,7 +186,7 @@ squareFreeDecompFiniteField f =
           squareFreeDecompFiniteField $ pthRoot f'
 
 -- | Factorise a polynomial over finite field using Cantor-Zassenhaus algorithm
-factorise :: (MonadRandom m, CoeffRing k, FiniteField k)
+factorise :: (MonadRandom m, CoeffRing k, FiniteField k, Random k)
           => Unipol k -> m [(Unipol k, Natural)]
 factorise f0
   | isZero f0 = pure [(zero, 1)]
