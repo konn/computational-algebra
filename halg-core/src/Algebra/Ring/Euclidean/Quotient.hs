@@ -30,9 +30,7 @@ liftBin
   => (a -> a -> a)
   -> Quotient r a -> Quotient r a -> Quotient r a
 {-# INLINE liftBin #-}
-liftBin f =
-  coerce $ \ x y ->
-    f x y `rem` reflect (Proxy :: Proxy r)
+liftBin = ((quotient .) .) . coerce
 
 liftUnary
   :: forall r a.
@@ -40,14 +38,21 @@ liftUnary
   => (a -> a)
   -> Quotient r a -> Quotient r a
 {-# INLINE liftUnary #-}
-liftUnary f =
-  coerce $ \ x ->
-    f x `rem` reflect (Proxy :: Proxy r)
+liftUnary = (quotient .) . coerce
 
 quotient
   :: forall r a. (Reifies r a, Euclidean a)
   => a -> Quotient r a
-quotient = Quotient . (`rem` reflect (Proxy :: Proxy r))
+quotient = Quotient . rem' (reflect (Proxy :: Proxy r))
+
+rem' :: Euclidean a => a -> a -> a
+{-# INLINE rem' #-}
+rem' a
+  | isZero a = id
+  | otherwise = (`rem` a)
+
+instance (Euclidean a, Reifies r a) => DecidableZero (Quotient r a) where
+  isZero (Quotient r) = isZero r
 
 instance (Euclidean a, Reifies r a) => Additive (Quotient r a) where
   (+) = liftBin (+)
@@ -112,10 +117,11 @@ instance (Euclidean a, Reifies r a)
 
 instance (Euclidean a, Reifies r a)
       => DecidableUnits (Quotient r a) where
-  recipUnit = \(Quotient i) ->
+  recipUnit = \(Quotient i) -> do
+    guard $ not $ isZero i
     let p = reflect (Proxy :: Proxy r)
         (u, _, x) = egcd p i
-    in quotient . (*x) <$> recipUnit u
+    quotient . (*x) <$> recipUnit u
   {-# INLINE recipUnit #-}
 
 withQuotient
