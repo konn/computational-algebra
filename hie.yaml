@@ -12,6 +12,8 @@ cradle:
       component: "halg-factor:lib"
     - path: "halg-factor/test"
       component: "halg-factor:test:halg-factor-specs"
+    - path: "halg-factor/app/factor-deg50-prof.hs"
+      component: "halg-factor:exe:factor-deg50-prof"
     - path: "halg-factor/bench/factor-simple-bench.hs"
       component: "halg-factor:bench:factor-simple-bench"
 

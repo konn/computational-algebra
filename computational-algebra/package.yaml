@@ -57,7 +57,6 @@ library:
   when:
     - condition: flag(profile)
       ghc-options:
-      - -prof
       - -fprof-auto-exported
 
 _exe-defaults: &exe-defaults
