@@ -67,6 +67,7 @@ library:
   source-dirs: src
   dependencies:
   - template-haskell
+  - integer-logarithms
   ghc-options: ["-Wall", "-O2"]
 
 benchmarks:

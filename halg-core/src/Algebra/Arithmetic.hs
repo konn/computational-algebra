@@ -1,30 +1,33 @@
-{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
+{-# LANGUAGE BangPatterns, NoImplicitPrelude, NoMonomorphismRestriction #-}
 module Algebra.Arithmetic
        (repeatedSquare, modPow, fermatTest, isPseudoPrime
        ) where
-import           AlgebraicPrelude         hiding (div, mod)
-import           Control.Lens             ((&), (+~), _1)
-import           Control.Monad.Random     (MonadRandom, uniform)
-import           Data.List                (elemIndex)
-import           Numeric.Decidable.Zero   (isZero)
-import           Numeric.Domain.Euclidean ()
-import           Prelude                  (div, mod)
-import qualified Prelude                  as P
+import           AlgebraicPrelude             hiding (div, mod)
+import           Control.Lens                 ((&), (+~), _1)
+import           Control.Monad.Random         (MonadRandom, uniform)
+import           Data.Bits
+import           Data.List                    (elemIndex)
+import           Math.NumberTheory.Logarithms
+import           Numeric.Decidable.Zero       (isZero)
+import           Numeric.Domain.Euclidean     ()
+import           Prelude                      (div, mod)
+import qualified Prelude                      as P
 
 data PrimeResult = Composite | ProbablyPrime | Prime
                  deriving (Read, Show, Eq, Ord)
 
 -- | Calculates @n@-th power efficiently, using repeated square method.
-repeatedSquare :: Multiplicative r => r -> Natural -> r
-repeatedSquare a n =
-  let bits = tail $ binRep n
-  in foldl (\b nk -> if nk == 1 then b * b * a else b * b) a bits
-
-binRep :: Natural -> [Natural]
-binRep = flip go []
+repeatedSquare :: Unital r => r -> Natural -> r
+repeatedSquare a n
+  | n == 0 = one
+  | otherwise = go (naturalLog2 n - 1) a
   where
-    go 0 = id
-    go k = go (k `div` 2) . ((k `mod` 2) :)
+    go !k !acc
+      | k < 0 = acc
+      | otherwise = go (k - 1) $
+      if testBit n k
+      then acc*acc*a
+      else acc*acc
 
 -- | Fermat-test for pseudo-primeness.
 fermatTest :: MonadRandom m => Integer -> m PrimeResult
