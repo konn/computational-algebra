@@ -41,6 +41,16 @@ f59AddManual :: Int -> Int -> Int
 f59AddManual = \l r ->
   (l + r) `mod` 59
 
+f59MulPrelude :: F 59 -> F 59 -> F 59
+f59MulPrelude = (P.*)
+
+f59MulAlgebra :: F 59 -> F 59 -> F 59
+f59MulAlgebra = (NA.*)
+
+f59MulManual :: Int -> Int -> Int
+f59MulManual = \l r ->
+  (l * r) `mod` 59
+
 fLargeAddPrelude :: F LargeP -> F LargeP -> F LargeP
 fLargeAddPrelude = (P.+)
 
@@ -70,9 +80,6 @@ f59RecipManual :: WrapIntegral Int -> WrapIntegral Int
 f59RecipManual = \k ->
   let (_,_,r) = head $ euclid 59 k
   in r `rem` 59
-
-inspect $ coreOf 'f59RecipAlgebra
-inspect $ coreOf 'f59RecipPrelude
 
 f59ModPow :: WrapIntegral Int -> Natural -> WrapIntegral Int
 f59ModPow i n = modPow i 59 n
@@ -122,6 +129,22 @@ main = hspec $ do
         $ checkInspection $(inspectTest $ 'f59AddAlgebra `doesNotUse` 'modInteger)
       it "has the same core as \\a b -> (a + b) `mod` 59"
         $ checkInspection $(inspectTest $ 'f59AddAlgebra ==- 'f59AddManual)
+
+    describe "(Prelude.*)" $ do
+      it "has the same core representation as (NA.*) modulo casting" $
+        checkInspection $(inspectTest $ 'f59MulPrelude ==- 'f59MulAlgebra)
+    describe "(NA.*)" $ do
+      it "doesn't contain type-classes" $ do
+        checkInspection $(inspectTest $ hasNoTypeClasses 'f59MulAlgebra)
+      it "doesn't contain type-natural comparison"
+        $ checkInspection $(inspectTest $ 'f59MulAlgebra `doesNotUse` 'SLT)
+      it "doesn't contain Integer type" $
+        checkInspection $(inspectTest $ 'f59MulAlgebra `hasNoType` ''Integer)
+      it "doesn't contain modInteger operation"
+        $ checkInspection $(inspectTest $ 'f59MulAlgebra `doesNotUse` 'modInteger)
+      it "has the same core as \\a b -> (a * b) `mod` 59"
+        $ checkInspection $(inspectTest $ 'f59MulAlgebra ==- 'f59MulManual)
+
     describe "productSum" $ do
       it "doesn't contain type-classes" $
         checkInspection $(inspectTest $ hasNoTypeClasses 'f59ProductSum)
@@ -148,8 +171,8 @@ main = hspec $ do
         $ checkInspection $(inspectTest $ 'f59PowAlgebra `doesNotUse` 'modInteger)
 
     describe ("NA.recip") $ do
-      it "doesn't contain type-classes" $ do
-        checkInspection $(inspectTest $ hasNoTypeClasses 'f59RecipAlgebra)
+      it "doesn't contain type-classes except IntegralDomain and UnitNormalForm" $ do
+        checkInspection $(inspectTest $ 'f59RecipAlgebra `hasNoTypeClassesExcept` [''IntegralDomain, ''UnitNormalForm])
       it "doesn't contain type-natural comparison"
         $ checkInspection $(inspectTest $ 'f59RecipAlgebra `doesNotUse` 'SLT)
       it "doesn't contain Int type" $
