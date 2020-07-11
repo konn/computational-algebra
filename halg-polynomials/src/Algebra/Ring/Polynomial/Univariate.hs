@@ -356,6 +356,13 @@ instance CoeffRing r => IsOrderedPolynomial (Unipol r) where
           (\((a, b),d) -> ((b, OrderedMonomial $ SV.singleton a), Unipol d))
     . IM.maxViewWithKey . runUnipol
   {-# INLINE splitLeadingTerm #-}
+  diff _ =
+      Unipol
+    . IM.mapKeysMonotonic pred
+    . IM.mapMaybeWithKey
+      (\i c -> guard (i > 0) >> decZero (toInteger i .* c))
+    . runUnipol
+  {-# INLINE diff #-}
 
 instance (CoeffRing r, PrettyCoeff r) => Show (Unipol r) where
   showsPrec = showsPolynomialWith (SV.singleton "x")
