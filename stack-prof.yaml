@@ -1,0 +1,44 @@
+resolver: lts-14.21
+
+flags:
+  computational-algebra:
+    profile: true
+  halg-factor:
+    profile: true
+  
+work-dir: .stack-prof
+
+build:
+  executable-profiling: true
+  library-profiling: true
+
+apply-ghc-options: everything
+rebuild-ghc-options: true
+ghc-options:
+  "$everything": -fno-prof-auto
+  "$locals": -fprof-auto
+
+packages:
+- 'computational-algebra'
+- 'algebraic-prelude'
+- 'halg-algebraic'
+- 'halg-algorithms'
+- 'halg-bridge-singular'
+- 'halg-core'
+- 'halg-core-test'
+- 'halg-factor'
+- 'halg-galois-fields'
+- 'halg-heaps'
+- 'halg-matrices'
+- 'halg-polyn-parser'
+- 'halg-polynomials'
+
+extra-deps:
+- equational-reasoning-0.6.0.1
+- ghc-typelits-presburger-0.3.0.0
+- singletons-presburger-0.3.0.1
+- type-natural-0.8.3.1
+- algebra-4.3.1@rev:2
+- sized-0.4.0.0
+- unamb-0.2.7
+- control-monad-loop-0.1

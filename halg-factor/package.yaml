@@ -25,6 +25,12 @@ description:         Please see the project Web Site <https://konn.github.io/com
 dependencies:
 - base >= 4.7 && < 5
 
+flags:
+  profile:
+    manual: true
+    default: false
+    description: Whether to build profiling executables or not (default false).
+
 library:
   source-dirs: src
   ghc-options:  -Wall
@@ -49,10 +55,35 @@ library:
   default-extensions:
   - NoImplicitPrelude
 
-executables: {}
+executables:
+  factor-deg50-prof:
+    source-dirs: app
+    ghc-options:
+    - -Wall
+    - -O2
+    - -rtsopts
+    - -threaded
+    main: factor-deg50-prof.hs
+    dependencies:
+    - halg-factor
+    - halg-core
+    - halg-polynomials
+    - base
+    - MonadRandom
+    - deepseq    
 
 tests:
   halg-factor-specs:
+    when:
+    - condition: flag(profile)
+      then:
+        buildable: true
+        ghc-options:
+        - -prof
+        - -fprof-auto-exported
+      else:
+        buildable: false
+
     source-dirs: test
     ghc-options:  -Wall
     main: Spec.hs
