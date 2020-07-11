@@ -422,14 +422,14 @@ instance IsPrimeChar p => Division (F p) where
 instance IsPrimeChar p => P.Fractional (F p) where
   {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <=? p) ~ 'False)
           => P.Fractional (F p) #-}
-  (/) = C.coerce ((P./) :: WrapAlgebra (F p) -> WrapAlgebra (F p) -> WrapAlgebra (F p))
+  (/) = (NA./)
   {-# INLINE (/) #-}
 
   fromRational r =
     modNat (R.numerator r) * recip (modNat $ R.denominator r)
   {-# INLINE fromRational #-}
 
-  recip = C.coerce (P.recip :: WrapAlgebra (F p) -> WrapAlgebra (F p))
+  recip = NA.recip
   {-# INLINE recip #-}
 
 instance IsPrimeChar p => NA.Commutative (F p)
