@@ -1,4 +1,5 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DerivingStrategies, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE StandaloneDeriving                             #-}
 -- | Prime fields
 {-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances          #-}
 {-# LANGUAGE MultiParamTypeClasses, PolyKinds, RankNTypes            #-}
@@ -15,7 +16,7 @@ import Algebra.Ring.Polynomial.Class (PrettyCoeff (..), ShowSCoeff (..))
 
 import           AlgebraicPrelude
 import           Control.DeepSeq              (NFData (..))
-import           Control.Monad.Random         (getRandomR, uniform)
+import           Control.Monad.Random         (getRandomR)
 import           Control.Monad.Random         (runRand)
 import           Control.Monad.Random         (Random (..))
 import qualified Data.Coerce                  as C
@@ -34,7 +35,12 @@ import qualified Prelude                      as P
 -- | Prime field of characteristic @p@.
 --   @p@ should be prime, and not statically checked.
 newtype F (p :: k) = F { runF :: Integer }
-                   deriving (NFData)
+  deriving (NFData, Hashable)
+
+-- | Caution: just for use with Map or Sets;
+--   no guarantee for the compatibility with
+--   field structure and normal forms!
+deriving newtype instance Ord (F p)
 
 
 instance Reifies p Integer => Read (F p) where
@@ -71,7 +77,7 @@ instance Reifies p Integer => Normed (F p) where
   liftNorm = modNat
 
 instance Reifies p Integer => P.Num (F p) where
-  fromInteger = fromInteger'
+  fromInteger = modNat
   {-# INLINE fromInteger #-}
 
   (+) = C.coerce ((P.+) :: WrapAlgebra (F p) -> WrapAlgebra (F p) -> WrapAlgebra (F p))
