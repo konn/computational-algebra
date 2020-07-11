@@ -1,7 +1,8 @@
-{-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, GADTs           #-}
-{-# LANGUAGE MultiParamTypeClasses, NoImplicitPrelude, OverloadedLabels #-}
-{-# LANGUAGE OverloadedStrings, PatternSynonyms, PolyKinds              #-}
-{-# LANGUAGE ScopedTypeVariables, TupleSections, TypeApplications       #-}
+{-# LANGUAGE BangPatterns, DataKinds, ExtendedDefaultRules        #-}
+{-# LANGUAGE FlexibleContexts, GADTs, MultiParamTypeClasses       #-}
+{-# LANGUAGE NoImplicitPrelude, OverloadedLabels, OverloadedLists #-}
+{-# LANGUAGE OverloadedStrings, PatternSynonyms, PolyKinds        #-}
+{-# LANGUAGE ScopedTypeVariables, TupleSections, TypeApplications #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Algebra.Ring.Polynomial.Factorise
@@ -11,7 +12,7 @@ module Algebra.Ring.Polynomial.Factorise
     -- * Internal helper functions
     distinctDegFactor,
     equalDegreeSplitM, equalDegreeFactorM,
-    henselStep, clearDenom,
+    henselStep, multiHensel, clearDenom,
     squareFreePart,
     yun, squareFreeDecompFiniteField
   ) where
@@ -54,6 +55,9 @@ import           Numeric.Decidable.Zero             (isZero)
 import           Numeric.Domain.GCD                 (gcd, lcm)
 import qualified Numeric.Field.Fraction             as F
 import qualified Prelude                            as P
+
+default ([])
+
 
 -- | @distinctDegFactor f@ computes the distinct-degree decomposition of the given
 --   square-free polynomial over finite field @f@.
@@ -366,25 +370,28 @@ multiHensel :: Natural          -- ^ prime @p@
             -> Unipol Integer   -- ^ original polynomial
             -> [Unipol Integer] -- ^ coprime factorisation mod @p@
             -> [Unipol Integer] -- ^ coprime factorisation mod @p^(2^k)@.
-multiHensel p n f [_]    = [normalizeMod (fromNatural p^fromIntegral n) f]
-multiHensel p n f [g, h] = reifyPrimeField (fromNatural p) $ \fp ->
-  let (_, s0, t0) = head $
-                    euclid
-                      (mapCoeffUnipol (modNat' fp) g)
-                      (mapCoeffUnipol (modNat' fp) h)
-      (s, t) = (s0, t0) & both %~ mapCoeffUnipol naturalRepr
-      (g', h', _, _) = repeatHensel (fromNatural p) n f g h s t
-  in [g', h']
-multiHensel p n f gs = reifyPrimeField (fromNatural p) $ \fp ->
-  let (ls, rs) = splitAt (length gs `div` 2) gs
-      (l, r) = (product ls, product rs)
-      (_, s0, t0) = head $
-                    euclid
-                      (mapCoeffUnipol (modNat' fp) l)
-                      (mapCoeffUnipol (modNat' fp) r)
-      (s, t) = (s0, t0) & both %~ mapCoeffUnipol naturalRepr
-      (fl, fr, _, _) = repeatHensel (fromNatural p) n f l r s t
-  in multiHensel p n fl ls ++ multiHensel p n fr rs
+{-# INLINE multiHensel #-}
+multiHensel p n = \f -> DL.toList . go f . V.fromList
+  where
+    go f [_]    = DL.singleton $ normalizeMod (fromNatural p^fromIntegral n) f
+    go f [g, h] = reifyPrimeField (fromNatural p) $ \fp ->
+      let (_, s0, t0) = head $
+                        euclid
+                          (mapCoeffUnipol (modNat' fp) g)
+                          (mapCoeffUnipol (modNat' fp) h)
+          (s, t) = (s0, t0) & both %~ mapCoeffUnipol naturalRepr
+          (g', h', _, _) = repeatHensel (fromNatural p) n f g h s t
+      in DL.fromList [g', h']
+    go f gs = reifyPrimeField (fromNatural p) $ \fp ->
+      let (ls, rs) = V.splitAt (V.length gs `div` 2) gs
+          (l, r) = (product ls, product rs)
+          (_, s0, t0) = head $
+                        euclid
+                          (mapCoeffUnipol (modNat' fp) l)
+                          (mapCoeffUnipol (modNat' fp) r)
+          (s, t) = (s0, t0) & both %~ mapCoeffUnipol naturalRepr
+          (fl, fr, _, _) = repeatHensel (fromNatural p) n f l r s t
+      in go fl ls <> go fr rs
 
 recipMod :: (Euclidean a, Eq a) => a -> a -> Maybe a
 recipMod m u =
