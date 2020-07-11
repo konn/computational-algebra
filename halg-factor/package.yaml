@@ -95,15 +95,6 @@ tests:
 
 benchmarks:
   factor-simple-bench:
-    when:
-    - condition: flag(profile)
-      then:
-        buildable: true
-        ghc-options:
-        - -prof
-        - -fprof-auto-exported
-      else:
-        buildable: false
     source-dirs: bench
     main: factor-simple-bench.hs
     dependencies:
