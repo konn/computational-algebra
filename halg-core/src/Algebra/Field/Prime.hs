@@ -3,6 +3,7 @@
 {-# LANGUAGE MultiWayIf, PolyKinds, RankNTypes, ScopedTypeVariables        #-}
 {-# LANGUAGE TemplateHaskell, TypeApplications, TypeFamilies               #-}
 {-# LANGUAGE TypeOperators, UndecidableInstances, UndecidableSuperClasses  #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 {-# OPTIONS_GHC -fplugin Data.Singletons.TypeNats.Presburger #-}
 -- | Prime fields
 module Algebra.Field.Prime
@@ -163,6 +164,38 @@ instance {-# OVERLAPPING #-} HasPrimeField Nat where
       SFalse -> F s)
       :: forall p. SingI (WORD_MAX_BOUND <=? p) => F (p :: Nat)
 
+
+minus :: IsPrimeChar p => F p -> F p -> F p
+{-# INLINE minus #-}
+{-# SPECIALISE INLINE minus
+  :: (KnownNat p, (WORD_MAX_BOUND <=? p) ~ 'False)
+  => F p -> F p -> F p
+  #-}
+minus = liftBinF (P.-)
+
+mulP :: IsPrimeChar p => F p -> F p -> F p
+{-# INLINE mulP #-}
+{-# SPECIALISE INLINE mulP
+  :: (KnownNat p, (WORD_MAX_BOUND <=? p) ~ 'False)
+  => F p -> F p -> F p
+  #-}
+mulP = liftBinF (P.*)
+
+plus :: IsPrimeChar p => F p -> F p -> F p
+{-# INLINE plus #-}
+{-# SPECIALISE INLINE plus
+  :: (KnownNat p, (WORD_MAX_BOUND <=? p) ~ 'False)
+  => F p -> F p -> F p
+  #-}
+plus = liftBinF (P.+)
+
+negP :: IsPrimeChar p => F p -> F p
+{-# INLINE negP #-}
+{-# SPECIALISE INLINE negP
+  :: (KnownNat p, (WORD_MAX_BOUND <=? p) ~ 'False)
+  => F p -> F p #-}
+negP = liftFUnary P.negate
+
 instance HasPrimeField Type where
   type CharInfo n = Reifies n Integer
   charInfo_ = reflect
@@ -217,19 +250,19 @@ instance IsPrimeChar p => Normed (F p) where
 instance IsPrimeChar p => P.Num (F p) where
   {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <=? p) ~ 'False)
           => P.Num (F p) #-}
-  fromInteger = fromInteger'
+  fromInteger = modNat
   {-# INLINE fromInteger #-}
 
-  (+) = C.coerce ((P.+) :: WrapAlgebra (F p) -> WrapAlgebra (F p) -> WrapAlgebra (F p))
+  (+) = plus
   {-# INLINE (+) #-}
 
-  (-) = C.coerce ((P.-) :: WrapAlgebra (F p) -> WrapAlgebra (F p) -> WrapAlgebra (F p))
+  (-) = minus
   {-# INLINE (-) #-}
 
-  negate = C.coerce (P.negate :: WrapAlgebra (F p) -> WrapAlgebra (F p))
+  negate = negP
   {-# INLINE negate #-}
 
-  (*) = C.coerce ((P.*) :: WrapAlgebra (F p) -> WrapAlgebra (F p) -> WrapAlgebra (F p))
+  (*) = mulP
   {-# INLINE (*) #-}
 
   abs = id
@@ -250,7 +283,7 @@ pows = flip $ \n -> unwrapF $ \a ->
 instance IsPrimeChar p => NA.Additive (F p) where
   {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <=? p) ~ 'False)
           => Additive (F p) #-}
-  (+) = liftBinF (P.+)
+  (+) = plus
   {-# INLINE (+) #-}
   sinnum1p n = liftFUnary $ \k -> (1 P.+ P.fromIntegral n) P.* k
   {-# INLINE sinnum1p #-}
@@ -258,10 +291,10 @@ instance IsPrimeChar p => NA.Additive (F p) where
 instance IsPrimeChar p => NA.Multiplicative (F p) where
   {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <=? p) ~ 'False)
           => Multiplicative (F p) #-}
-  (*) = liftBinF (P.*)
+  (*) = mulP
   {-# INLINE (*) #-}
 
-  pow1p n p = pows n (p P.+ 1)
+  pow1p n = pows n . succ
   {-# INLINE pow1p #-}
 
 instance IsPrimeChar p => NA.Monoidal (F p) where
@@ -301,17 +334,16 @@ instance IsPrimeChar p => NA.RightModule Integer (F p) where
 instance IsPrimeChar p => NA.Group (F p) where
   {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <=? p) ~ 'False)
           => Group (F p) #-}
-  (-) = liftBinF (P.-)
+  (-) = minus
   {-# INLINE (-) #-}
 
-  negate = liftFUnary P.negate
+  negate = negP
   {-# INLINE negate #-}
 
-  subtract = liftBinF P.subtract
+  subtract = flip minus
   {-# INLINE subtract #-}
 
-  times n = liftFUnary $ unwrapIntegral .
-    NA.times n . WrapIntegral
+  times n = liftFUnary (fromIntegral n P.*)
   {-# INLINE times #-}
 
 instance IsPrimeChar p => NA.Abelian (F p)
@@ -351,11 +383,10 @@ instance IsPrimeChar p => DecidableUnits (F p) where
   isUnit = unwrapF (/= 0)
   {-# INLINE isUnit #-}
 
-  recipUnit = unwrapF $ \k ->
-    let p = WrapIntegral $ fromInteger $ charInfo @p Proxy
-        (u,_,r) = head $ euclid p (WrapIntegral k)
-    in if u == 1
-      then Just $ wrapF $ fromIntegral $ unwrapIntegral $ r `rem` p else Nothing
+  recipUnit = \k ->
+    if k == 0
+    then Nothing
+    else Just $ recip k
   {-# INLINE recipUnit #-}
 
 instance (IsPrimeChar p) => DecidableAssociates (F p) where
@@ -376,7 +407,10 @@ instance (IsPrimeChar p) => Euclidean (F p)
 instance IsPrimeChar p => Division (F p) where
   {-# SPECIALISE instance (IsPrimeChar p, (WORD_MAX_BOUND <=? p) ~ 'False)
           => Division (F p) #-}
-  recip = fromMaybe (error "recip: not unit") . recipUnit
+  recip = unwrapF $ \k ->
+    let p = WrapIntegral $ fromInteger $ charInfo @p Proxy
+        (_,_,r) = head $ euclid p (WrapIntegral k)
+    in wrapF_ $ fromIntegral $ r `rem` p
   {-# INLINE recip #-}
   a / b =  a * recip b
   {-# INLINE (/) #-}

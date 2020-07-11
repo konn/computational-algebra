@@ -1,8 +1,9 @@
-{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances      #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses         #-}
-{-# LANGUAGE NoImplicitPrelude, NoRebindableSyntax, StandaloneDeriving #-}
-{-# LANGUAGE TemplateHaskell, TypeFamilies, UndecidableInstances       #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances       #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses          #-}
+{-# LANGUAGE NoImplicitPrelude, NoRebindableSyntax, ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving, TemplateHaskell, TypeFamilies          #-}
+{-# LANGUAGE UndecidableInstances                                       #-}
+{-# OPTIONS_GHC -O2 -fno-warn-orphans #-}
 -- | This module provides drop-in replacement for @'Prelude'@ module in base package,
 --   based on algebraic hierarchy provided by
 --   <https://hackage.haskell.org/package/algebra algebra> package.
@@ -87,6 +88,7 @@ import           BasicPrelude                          as AlgebraicPrelude hidin
                                                                             (^),
                                                                             (^^))
 import qualified Control.Lens.TH                       as L
+import           Data.Coerce                           (coerce)
 import qualified Data.Ratio                            as P
 import qualified Data.Semigroup                        as Semi
 import           Foreign.Storable                      (Storable)
@@ -369,34 +371,55 @@ newtype WrapIntegral a = WrapIntegral { unwrapIntegral :: a }
   deriving (Read, Show, Eq, Ord, P.Num, P.Real, P.Enum, P.Integral, Storable)
 
 instance (P.Num a) => Additive (WrapIntegral a) where
+  {-# SPECIALISE instance Additive (WrapIntegral Int) #-}
+  {-# SPECIALISE instance Additive (WrapIntegral Word) #-}
+  {-# SPECIALISE instance Additive (WrapIntegral Integer) #-}
   WrapIntegral a + WrapIntegral b = WrapIntegral (a P.+ b)
   {-# INLINE (+) #-}
   sinnum1p n (WrapIntegral a) = WrapIntegral ((1 P.+ fromIntegral n) P.* a)
   {-# INLINE sinnum1p #-}
 
 instance (P.Num a) => LeftModule Natural (WrapIntegral a) where
+  {-# SPECIALISE instance LeftModule Natural (WrapIntegral Int) #-}
+  {-# SPECIALISE instance LeftModule Natural (WrapIntegral Word) #-}
+  {-# SPECIALISE instance LeftModule Natural (WrapIntegral Integer) #-}
   n .* WrapIntegral r = WrapIntegral (P.fromIntegral n P.* r)
   {-# INLINE (.*) #-}
 
 instance (P.Num a) => RightModule Natural (WrapIntegral a) where
+  {-# SPECIALISE instance RightModule Natural (WrapIntegral Int) #-}
+  {-# SPECIALISE instance RightModule Natural (WrapIntegral Word) #-}
+  {-# SPECIALISE instance RightModule Natural (WrapIntegral Integer) #-}
   WrapIntegral r *. n = WrapIntegral (r P.* P.fromIntegral n)
   {-# INLINE (*.) #-}
 
 instance (P.Num a) => Monoidal (WrapIntegral a) where
+  {-# SPECIALISE instance Monoidal (WrapIntegral Int) #-}
+  {-# SPECIALISE instance Monoidal (WrapIntegral Word) #-}
+  {-# SPECIALISE instance Monoidal (WrapIntegral Integer) #-}
   zero = WrapIntegral (P.fromInteger 0)
   {-# INLINE zero #-}
   sinnum n (WrapIntegral a) = WrapIntegral (fromIntegral n P.* a)
   {-# INLINE sinnum #-}
 
 instance (P.Num a) => LeftModule Integer (WrapIntegral a) where
+  {-# SPECIALISE instance LeftModule Integer (WrapIntegral Int) #-}
+  {-# SPECIALISE instance LeftModule Integer (WrapIntegral Word) #-}
+  {-# SPECIALISE instance LeftModule Integer (WrapIntegral Integer) #-}
   n .* WrapIntegral r = WrapIntegral (P.fromIntegral n P.* r)
   {-# INLINE (.*) #-}
 
 instance (P.Num a) => RightModule Integer (WrapIntegral a) where
+  {-# SPECIALISE instance RightModule Integer (WrapIntegral Int) #-}
+  {-# SPECIALISE instance RightModule Integer (WrapIntegral Word) #-}
+  {-# SPECIALISE instance RightModule Integer (WrapIntegral Integer) #-}
   WrapIntegral r *. n = WrapIntegral (r P.* P.fromIntegral n)
   {-# INLINE (*.) #-}
 
 instance (P.Num a) => Group (WrapIntegral a) where
+  {-# SPECIALISE instance Group (WrapIntegral Int) #-}
+  {-# SPECIALISE instance Group (WrapIntegral Word) #-}
+  {-# SPECIALISE instance Group (WrapIntegral Integer) #-}
   negate (WrapIntegral a) = WrapIntegral $ P.negate a
   {-# INLINE negate #-}
   WrapIntegral a - WrapIntegral b = WrapIntegral (a P.- b)
@@ -407,34 +430,64 @@ instance (P.Num a) => Group (WrapIntegral a) where
   {-# INLINE times #-}
 
 instance (P.Num a) => Multiplicative (WrapIntegral a) where
+  {-# SPECIALISE instance Multiplicative (WrapIntegral Int) #-}
+  {-# SPECIALISE instance Multiplicative (WrapIntegral Word) #-}
+  {-# SPECIALISE instance Multiplicative (WrapIntegral Integer) #-}
   WrapIntegral p * WrapIntegral q = WrapIntegral (p P.* q)
   {-# INLINE (*) #-}
   pow1p (WrapIntegral p) n = WrapIntegral (p P.^ (n + 1))
   {-# INLINE pow1p #-}
 
 instance (P.Num a) => Unital (WrapIntegral a) where
+  {-# SPECIALISE instance Unital (WrapIntegral Int) #-}
+  {-# SPECIALISE instance Unital (WrapIntegral Word) #-}
+  {-# SPECIALISE instance Unital (WrapIntegral Integer) #-}
   one = WrapIntegral $ P.fromInteger 1
   {-# INLINE one #-}
   pow (WrapIntegral a) n = WrapIntegral $ a P.^ n
   {-# INLINE pow #-}
 
-instance P.Num a => Abelian (WrapIntegral a)
-instance P.Num a => Semiring (WrapIntegral a)
+instance P.Num a => Abelian (WrapIntegral a) where
+  {-# SPECIALISE instance Abelian (WrapIntegral Int) #-}
+  {-# SPECIALISE instance Abelian (WrapIntegral Word) #-}
+  {-# SPECIALISE instance Abelian (WrapIntegral Integer) #-}
+instance P.Num a => Semiring (WrapIntegral a) where
+  {-# SPECIALISE instance Semiring (WrapIntegral Int) #-}
+  {-# SPECIALISE instance Semiring (WrapIntegral Word) #-}
+  {-# SPECIALISE instance Semiring (WrapIntegral Integer) #-}
 instance P.Num a => Rig (WrapIntegral a) where
+  {-# SPECIALISE instance Rig (WrapIntegral Int) #-}
+  {-# SPECIALISE instance Rig (WrapIntegral Word) #-}
+  {-# SPECIALISE instance Rig (WrapIntegral Integer) #-}
   fromNatural = WrapIntegral . P.fromIntegral
   {-# INLINE fromNatural #-}
 instance P.Num a => Ring (WrapIntegral a) where
+  {-# SPECIALISE instance Ring (WrapIntegral Int) #-}
+  {-# SPECIALISE instance Ring (WrapIntegral Word) #-}
+  {-# SPECIALISE instance Ring (WrapIntegral Integer) #-}
   fromInteger = WrapIntegral . P.fromInteger
   {-# INLINE fromInteger #-}
 
-instance P.Num a => Commutative (WrapIntegral a)
+instance P.Num a => Commutative (WrapIntegral a) where
+  {-# SPECIALISE instance Commutative (WrapIntegral Int) #-}
+  {-# SPECIALISE instance Commutative (WrapIntegral Word) #-}
+  {-# SPECIALISE instance Commutative (WrapIntegral Integer) #-}
 
 instance (P.Num a, Eq a) => DecidableZero (WrapIntegral a) where
-  isZero (WrapIntegral a) = a == 0
+  {-# SPECIALISE instance DecidableZero (WrapIntegral Int) #-}
+  {-# SPECIALISE instance DecidableZero (WrapIntegral Word) #-}
+  {-# SPECIALISE instance DecidableZero (WrapIntegral Integer) #-}
+  isZero = (== 0)
   {-# INLINE isZero #-}
 
-instance (Eq a, P.Integral a) => ZeroProductSemiring (WrapIntegral a)
+instance (Eq a, P.Integral a) => ZeroProductSemiring (WrapIntegral a) where
+  {-# SPECIALISE instance ZeroProductSemiring (WrapIntegral Int) #-}
+  {-# SPECIALISE instance ZeroProductSemiring (WrapIntegral Word) #-}
+  {-# SPECIALISE instance ZeroProductSemiring (WrapIntegral Integer) #-}
 instance (Eq a, P.Integral a) => DecidableUnits (WrapIntegral a) where
+  {-# SPECIALISE instance DecidableUnits (WrapIntegral Int) #-}
+  {-# SPECIALISE instance DecidableUnits (WrapIntegral Word) #-}
+  {-# SPECIALISE instance DecidableUnits (WrapIntegral Integer) #-}
   isUnit (WrapIntegral r) = r == 1 || r == P.negate 1
   {-# INLINE isUnit #-}
 
@@ -445,16 +498,28 @@ instance (Eq a, P.Integral a) => DecidableUnits (WrapIntegral a) where
   {-# INLINE recipUnit #-}
 
 instance (Eq a, P.Integral a) => DecidableAssociates (WrapIntegral a) where
+  {-# SPECIALISE instance DecidableAssociates (WrapIntegral Int) #-}
+  {-# SPECIALISE instance DecidableAssociates (WrapIntegral Word) #-}
+  {-# SPECIALISE instance DecidableAssociates (WrapIntegral Integer) #-}
   isAssociate (WrapIntegral a) (WrapIntegral b) = P.abs a == P.abs b
   {-# INLINE isAssociate #-}
 
 instance (Eq a, P.Integral a) => UnitNormalForm (WrapIntegral a) where
+  {-# SPECIALISE instance UnitNormalForm (WrapIntegral Int) #-}
+  {-# SPECIALISE instance UnitNormalForm (WrapIntegral Word) #-}
+  {-# SPECIALISE instance UnitNormalForm (WrapIntegral Integer) #-}
   splitUnit (WrapIntegral 0) = (WrapIntegral 1, WrapIntegral 0)
   splitUnit (WrapIntegral a) = (WrapIntegral $ P.signum a, WrapIntegral $ P.abs a)
   {-# INLINE splitUnit #-}
 
-instance (Eq a, P.Integral a) => IntegralDomain (WrapIntegral a)
+instance (Eq a, P.Integral a) => IntegralDomain (WrapIntegral a) where
+  {-# SPECIALISE instance IntegralDomain (WrapIntegral Int) #-}
+  {-# SPECIALISE instance IntegralDomain (WrapIntegral Word) #-}
+  {-# SPECIALISE instance IntegralDomain (WrapIntegral Integer) #-}
 instance (Eq a, P.Integral a) => GCDDomain (WrapIntegral a) where
+  {-# SPECIALISE instance GCDDomain (WrapIntegral Int) #-}
+  {-# SPECIALISE instance GCDDomain (WrapIntegral Word) #-}
+  {-# SPECIALISE instance GCDDomain (WrapIntegral Integer) #-}
   gcd (WrapIntegral a) (WrapIntegral b) = WrapIntegral (P.gcd a b)
   {-# INLINE gcd #-}
 
@@ -462,21 +527,51 @@ instance (Eq a, P.Integral a) => GCDDomain (WrapIntegral a) where
   {-# INLINE lcm #-}
 
 instance (Eq a, P.Integral a) => Euclidean (WrapIntegral a) where
-  divide (WrapIntegral f) (WrapIntegral g) =
-    let (q, r) = P.divMod f g
-    in (WrapIntegral q, WrapIntegral r)
+  {-# SPECIALISE instance Euclidean (WrapIntegral Int) #-}
+  {-# SPECIALISE instance Euclidean (WrapIntegral Integer) #-}
+  {-# SPECIALISE instance Euclidean (WrapIntegral Word) #-}
+  divide = coerce (P.divMod :: a -> a -> (a,a))
+  {-# SPECIALISE INLINE divide
+      :: WrapIntegral Int -> WrapIntegral Int
+      -> (WrapIntegral Int, WrapIntegral Int) #-}
+  {-# SPECIALISE INLINE divide
+      :: WrapIntegral Integer -> WrapIntegral Integer
+      -> (WrapIntegral Integer, WrapIntegral Integer) #-}
+  {-# SPECIALISE INLINE divide
+      :: WrapIntegral Word -> WrapIntegral Word
+      -> (WrapIntegral Word, WrapIntegral Word) #-}
   {-# INLINE divide #-}
+
   degree (WrapIntegral 0) = Nothing
   degree (WrapIntegral a) = Just $ P.fromIntegral (P.abs a)
   {-# INLINE degree #-}
 
   quot (WrapIntegral a) (WrapIntegral b) = WrapIntegral $ P.div a b
+  {-# SPECIALISE INLINE quot
+      :: WrapIntegral Int -> WrapIntegral Int -> WrapIntegral Int #-}
+  {-# SPECIALISE INLINE quot
+      :: WrapIntegral Integer -> WrapIntegral Integer -> WrapIntegral Integer #-}
+  {-# SPECIALISE INLINE quot
+      :: WrapIntegral Word -> WrapIntegral Word -> WrapIntegral Word #-}
   {-# INLINE quot #-}
+
   rem  (WrapIntegral a) (WrapIntegral b) = WrapIntegral $ P.mod a b
+  {-# SPECIALISE INLINE rem
+      :: WrapIntegral Int -> WrapIntegral Int -> WrapIntegral Int #-}
+  {-# SPECIALISE INLINE rem
+      :: WrapIntegral Integer -> WrapIntegral Integer -> WrapIntegral Integer #-}
+  {-# SPECIALISE INLINE rem
+      :: WrapIntegral Word -> WrapIntegral Word -> WrapIntegral Word #-}
   {-# INLINE rem #-}
 
-instance (Eq a, P.Integral a) => PID (WrapIntegral a)
-instance (Eq a, P.Integral a) => UFD (WrapIntegral a)
+instance (Eq a, P.Integral a) => PID (WrapIntegral a) where
+  {-# SPECIALISE instance PID (WrapIntegral Int) #-}
+  {-# SPECIALISE instance PID (WrapIntegral Word) #-}
+  {-# SPECIALISE instance PID (WrapIntegral Integer) #-}
+instance (Eq a, P.Integral a) => UFD (WrapIntegral a) where
+  {-# SPECIALISE instance UFD (WrapIntegral Int) #-}
+  {-# SPECIALISE instance UFD (WrapIntegral Word) #-}
+  {-# SPECIALISE instance UFD (WrapIntegral Integer) #-}
 
 -- | Turning types from @'Numeric.Algebra'@ into Prelude's Num instances.
 --
@@ -537,8 +632,11 @@ instance Euclidean a => P.Num (Fraction a) where
 instance Euclidean d => P.Fractional (Fraction d) where
   {-# SPECIALISE instance P.Fractional (Fraction Integer) #-}
   fromRational r = fromInteger' (P.numerator r) % fromInteger' (P.denominator r)
+  {-# INLINE fromRational #-}
   recip = NA.recip
+  {-# INLINE recip #-}
   (/) = (NA./)
+  {-# INLINE (/) #-}
 
 -- | @'Monoid'@ instances for @'Additive'@s.
 --   N.B. Unlike @'WrapNum'@, @'P.Num'@ instance is

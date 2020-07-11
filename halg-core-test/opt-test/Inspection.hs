@@ -60,6 +60,20 @@ f59PowPrelude = (P.^)
 f59PowAlgebra :: F 59 -> Natural -> F 59
 f59PowAlgebra = (NA.^)
 
+f59RecipAlgebra :: F 59 -> F 59
+f59RecipAlgebra = (NA.recip)
+
+f59RecipPrelude :: F 59 -> F 59
+f59RecipPrelude = (P.recip)
+
+f59RecipManual :: WrapIntegral Int -> WrapIntegral Int
+f59RecipManual = \k ->
+  let (_,_,r) = head $ euclid 59 k
+  in r `rem` 59
+
+inspect $ coreOf 'f59RecipAlgebra
+inspect $ coreOf 'f59RecipPrelude
+
 f59ModPow :: WrapIntegral Int -> Natural -> WrapIntegral Int
 f59ModPow i n = modPow i 59 n
 
@@ -132,6 +146,18 @@ main = hspec $ do
         $ checkInspection $(inspectTest $ 'f59PowAlgebra `doesNotUse` 'SLT)
       it "doesn't contain modInteger operation"
         $ checkInspection $(inspectTest $ 'f59PowAlgebra `doesNotUse` 'modInteger)
+
+    describe ("NA.recip") $ do
+      it "doesn't contain type-classes" $ do
+        checkInspection $(inspectTest $ hasNoTypeClasses 'f59RecipAlgebra)
+      it "doesn't contain type-natural comparison"
+        $ checkInspection $(inspectTest $ 'f59RecipAlgebra `doesNotUse` 'SLT)
+      it "doesn't contain Int type" $
+        checkInspection $(inspectTest $ 'f59RecipAlgebra `hasNoType` ''Integer)
+      it "doesn't contain modInteger operation"
+        $ checkInspection $(inspectTest $ 'f59RecipAlgebra `doesNotUse` 'modInteger)
+      it "has the same core as \\a -> euclid 59 a `mod` p"
+        $ checkInspection $(inspectTest $ 'f59RecipAlgebra ==- 'f59RecipManual)
 
   describe ("optimisation for big prime (F " ++ show (natVal @LargeP Proxy) ++ ")") $ do
     describe "literal" $ do
