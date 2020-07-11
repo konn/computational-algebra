@@ -101,11 +101,8 @@ _profile-cond: &profile-cond
       else:
         buildable: false
   ghc-options:
-  - -caf-all
-  - -auto-all
   - -rtsopts
   - -eventlog
-  - -prof
   
 _examples: &examples
   algebraic:
