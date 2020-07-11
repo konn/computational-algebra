@@ -220,8 +220,11 @@ karatsuba f0 g0 =
               linearProduct ((Unipol .) . loop (m P.- 1) `on` runUnipol)
               (Unipol f1, Unipol f2)
               (Unipol g1, Unipol g2)
-        in IM.unionsWith (+) [IM.mapKeysMonotonic (2^m+) m2,
-                              IM.mapKeysMonotonic (2^(m P.- 1)+) m1, c]
+        in foldl1' (IM.mergeWithKey (\_ i j -> decZero (i + j)) id id)
+            [ IM.mapKeysMonotonic (2^m+) m2
+            , IM.mapKeysMonotonic (2^(m P.- 1)+) m1
+            , c
+            ]
 {-# INLINABLE karatsuba #-}
 
 

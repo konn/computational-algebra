@@ -18,7 +18,7 @@ module Algebra.Ring.Polynomial.Factorise
 import           Algebra.Arithmetic                 hiding (modPow)
 import           Algebra.Field.Prime
 import           Algebra.Prelude.Core
-import           Algebra.Ring.Polynomial.Quotient
+import           Algebra.Ring.Euclidean.Quotient
 import           Algebra.Ring.Polynomial.Univariate
 import           Control.Applicative                ((<|>))
 import           Control.Arrow                      ((***), (<<<))
@@ -72,10 +72,10 @@ distinctDegFactor f0 = zip [1..] $ go id (var OZ :: Unipol k) f0 []
          else go gs' h' f'
 
 -- | @'modPow' f n g@ computes \(f^n \mod{g}\).
-modPow :: (Field (Coefficient poly), IsOrderedPolynomial poly)
+modPow :: (Euclidean poly)
        => poly -> Natural -> poly -> poly
-modPow a p f = withQuotient (principalIdeal f) $
-               repeatedSquare (modIdeal a) p
+modPow a p f = withQuotient f $
+  repeatedSquare (quotient a) p
 
 traceCharTwo :: (Unital m, Monoidal m) => Natural -> m -> m
 traceCharTwo m a = foldl' (+) zero $ take (fromIntegral m) $ iterate (\(!x) ->x*x) a
@@ -96,8 +96,8 @@ equalDegreeSplitM f d
         g1 = gcd a f
     return $ (guard (g1 /= one) >> return g1)
          <|> do let b | charUnipol f == 2  =
-                          withQuotient (principalIdeal f) $
-                          traceCharTwo (powerUnipol f*d) (modIdeal a)
+                          withQuotient f $
+                          traceCharTwo (powerUnipol f*d) (quotient a)
                       | otherwise = modPow a (pred (q^d) `div`2) f
                     g2 = gcd (b - one) f
                 guard (g2 /= one && g2 /= f)

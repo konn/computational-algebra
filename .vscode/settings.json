@@ -1,6 +1,8 @@
 {
   "editor.tabCompletion": "onlySnippets",
   "files.exclude": {
+    "**/.stack-prof/": true,
+    "**/.stack-work/": true,
     "heap-poly": true
   },
   "stylishHaskell.showConsoleOnError": false
