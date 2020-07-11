@@ -54,10 +54,6 @@ dependencies:
 library:
   source-dirs: src
   ghc-options:  -Wall
-  when:
-    - condition: flag(profile)
-      ghc-options:
-      - -fprof-auto-exported
 
 _exe-defaults: &exe-defaults
   source-dirs: examples
@@ -110,7 +106,6 @@ _profile-cond: &profile-cond
   - -rtsopts
   - -eventlog
   - -prof
-  - -fprof-auto-exported
   
 _examples: &examples
   algebraic:

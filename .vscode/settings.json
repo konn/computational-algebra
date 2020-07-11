@@ -2,5 +2,6 @@
   "editor.tabCompletion": "onlySnippets",
   "files.exclude": {
     "heap-poly": true
-  }
+  },
+  "stylishHaskell.showConsoleOnError": false
 }

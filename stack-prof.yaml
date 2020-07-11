@@ -16,7 +16,7 @@ apply-ghc-options: everything
 rebuild-ghc-options: true
 ghc-options:
   "$everything": -fno-prof-auto
-  "$locals": -fprof-auto
+  "$locals": -fno-prof-auto
 
 packages:
 - 'computational-algebra'
