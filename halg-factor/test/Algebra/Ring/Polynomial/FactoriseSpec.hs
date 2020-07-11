@@ -1,3 +1,4 @@
+{-# LANGUAGE ViewPatterns #-}
 {-# OPTIONS_GHC -Wno-orphans -Wno-type-defaults #-}
 {-# LANGUAGE AllowAmbiguousTypes, DataKinds, ExtendedDefaultRules        #-}
 {-# LANGUAGE FlexibleInstances, GADTs, OverloadedLabels, OverloadedLists #-}
@@ -19,6 +20,8 @@ import           Data.Functor                       ((<&>))
 import qualified Data.IntMap                        as IM
 import           Data.Monoid                        (Sum (..))
 import qualified Data.Set                           as S
+import           Math.NumberTheory.Primes           hiding (factorise)
+import           Math.NumberTheory.Primes.Counting  (nthPrime)
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.HUnit                         hiding (Testable)
@@ -198,6 +201,94 @@ spec = parallel $ do
       modifyMaxSuccess (const 25) $
       factorIrreducibility @(GF 3 4)
 
+  describe "henselStep" $ do
+    describe "lifts all regression tests correctly" $
+      forM_ henselRegressions $ \inp@(HenselCase m f g h s t) ->
+      it (show inp) $ do
+      let (g', h', s', t') = henselStep m f g h s t
+          quo = mapCoeffUnipol (`mod` (m^2))
+          fgh' = quo (f - g' * h')
+          sgth = quo $ s' * g' + t' * h' - one
+      assertEqual "f - g' h' = 0 mod m^2, but:"
+        0
+        fgh'
+      assertEqual "s' g' + t' h' -1 = 0 mod m^2, but:"
+        0
+        sgth
+
+    modifyMaxSuccess (const 50) $ modifyMaxSize (const 50) $
+      prop "successively lifts f = gh mod m with sg + th = 1 to mod m^2 in Z[x]" $
+      forAll (QC.elements [1..10]) $
+      \ n
+        (unPrime -> p)
+        (NonZero x)
+        (NonEmpty xs)
+        (NonZero y)
+        (NonEmpty ys)
+        zeros ->
+      let g0 = ascendingTerms $ xs ++ [x `div` gcd p x]
+          h0 = ascendingTerms $ ys ++ [y `div` gcd p y]
+          (g,h,s,t) = reifyPrimeField p $ \fp ->
+            let g'0 = mapCoeffUnipol (modNat' fp) g0
+                h'0 = mapCoeffUnipol (modNat' fp) h0
+                g' = g'0 `quot` gcd g'0 h'0
+                h' = h'0 `quot` gcd g'0 h'0
+                (_,s',t') = egcd g' h'
+            in (mapCoeffUnipol naturalRepr g',
+                mapCoeffUnipol naturalRepr h',
+                mapCoeffUnipol naturalRepr s',
+                mapCoeffUnipol naturalRepr t'
+                )
+          f = g * h + p .*. zeros
+      in tabulate "iterateion" [show n]
+        $ tabulate "p" [show p]
+        $ tabulate "deg(g), deg(h)"
+            [ show $ totalDegree' g
+            , show $ totalDegree' h
+            ]
+        $ counterexample (show $ HenselCase p f g h s t)
+        $ chkIterateHensel n
+        $ HenselCase p f g h s t
+
+chkIterateHensel :: Int -> HenselCase -> Property
+chkIterateHensel 0 _ = property True
+chkIterateHensel n case_ =
+  let (cond, nextCase) = checkHenselOutput case_
+  in cond .&&. chkIterateHensel (pred n) nextCase
+
+checkHenselOutput
+  :: HenselCase
+  -> (Property, HenselCase)
+checkHenselOutput (HenselCase m f g h s t) =
+  let sqQuo = mapCoeffUnipol (`rem` m^2)
+      (gSq, hSq, sSq, tSq) = henselStep m f g h s t
+      gh' = sqQuo $ gSq * hSq
+      sgth' = sqQuo $ gSq * sSq + hSq * tSq
+      chk = counterexample (show $ HenselCase m f gSq hSq sSq tSq)
+        $ conjoin
+              [ counterexample
+                  (mconcat
+                    [ "g * h = ", show gSq, " * ", show hSq, " == "
+                    , show (sqQuo $ gSq * hSq)
+                    , "/=", show (sqQuo f), " mod ", show m]
+                  )
+                  (gh' === sqQuo f)
+              , counterexample
+                  (mconcat
+                    [ "sg + th = ("
+                    , show sSq, ") * (", show gSq
+                    , ") + (", show tSq, ") * (", show hSq, ") == "
+                    , show (sqQuo $ gSq * sSq + hSq * tSq)
+                    , " /= 1", " mod ", show m
+                    ]
+                  )
+                  (sgth' === 1)
+              ]
+  in (chk, HenselCase (m^2) f gSq hSq sSq tSq)
+
+instance Arbitrary (Prime Integer) where
+  arbitrary = nthPrime . getSmall . getPositive <$> arbitrary
+
 factorReconstructsIn
   :: forall r.
       ( Arbitrary r, Random r,
@@ -274,3 +365,36 @@ fromFactorisation
   :: CoeffRing r => [(Unipol r, Natural)] -> Unipol r
 fromFactorisation facs =
   product [g^n | (g, n) <- facs]
+
+ascendingTerms
+  :: CoeffRing r => [r] -> Unipol r
+ascendingTerms
+  = runAdd
+  . ifoldMap (\i -> Add .
+      ((#x^ fromIntegral i) *) . injectCoeff)
+
+data HenselCase =
+  HenselCase Integer (Unipol Integer) (Unipol Integer) (Unipol Integer) (Unipol Integer) (Unipol Integer)
+  deriving (Show, Eq, Ord)
+
+henselRegressions :: [HenselCase]
+henselRegressions =
+  [ HenselCase 5
+      (#x^4 - 1)
+      (#x^3 + 2 * #x^2 - #x - 2)
+      (#x - 2)
+      (-2)
+      (2 * #x^2 - 2 * #x - 1)
+  , HenselCase 5
+      (#x^4 - 1)
+      (#x^2 + 2 * #x + 2)
+      (#x^2 - 2 * #x + 2)
+      (-2 * #x - 1)
+      ( 2 * #x - 1)
+  , HenselCase 25
+      (#x^4 - 1)
+      (#x^3 + 7 * #x^2 - #x - 7)
+      (#x - 7)
+      8
+      (-8 * #x^2 - 12 * #x - 1)
+  ]
