@@ -23,12 +23,10 @@ import Algebra.Ring.Polynomial.Class (PrettyCoeff (..), ShowSCoeff (..))
 
 import           AlgebraicPrelude
 import           Control.DeepSeq              (NFData (..))
-import           Control.Monad.Random         (getRandomR, uniform)
+import           Control.Monad.Random         (getRandomR)
 import           Control.Monad.Random         (runRand)
 import           Control.Monad.Random         (Random (..))
-import qualified Data.Coerce                  as C
 import           Data.Kind                    (Constraint, Type)
-import           Data.Maybe                   (fromMaybe)
 import           Data.Proxy                   (Proxy (..), asProxyTypeOf)
 import qualified Data.Ratio                   as R
 import           Data.Reflection              (Reifies (reflect), reifyNat)
