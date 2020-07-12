@@ -152,7 +152,7 @@ spec = parallel $ do
                 f0 = h0 `quot` gcd (diff 0 h0) h0
                 c = foldr' (lcm . denominator) 1 f0
                 f = mapCoeffUnipol (numerator . (fromInteger c*)) f0
-            (i, dic) <- factorQBigPrime f
+            (i, dic) <- factorer f
             let facts = getSum $ ifoldMap (\n -> Sum . (n*) . length) dic
             pure
               $ tabulate "totalDegree" [show $ totalDegree' f]
