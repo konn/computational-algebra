@@ -1,9 +1,8 @@
-{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE AllowAmbiguousTypes, BangPatterns, DataKinds                   #-}
+{-# LANGUAGE ExtendedDefaultRules, FlexibleInstances, GADTs                 #-}
+{-# LANGUAGE OverloadedLabels, OverloadedLists, ParallelListComp            #-}
+{-# LANGUAGE PolyKinds, ScopedTypeVariables, TypeApplications, ViewPatterns #-}
 {-# OPTIONS_GHC -Wno-orphans -Wno-type-defaults #-}
-{-# LANGUAGE AllowAmbiguousTypes, DataKinds, ExtendedDefaultRules        #-}
-{-# LANGUAGE FlexibleInstances, GADTs, OverloadedLabels, OverloadedLists #-}
-{-# LANGUAGE ParallelListComp, PolyKinds, ScopedTypeVariables            #-}
-{-# LANGUAGE TypeApplications                                            #-}
 module Algebra.Ring.Polynomial.FactoriseSpec where
 import qualified Algebra.Field.Finite               as Fin
 import           Algebra.Field.Fraction.Test        ()
@@ -17,6 +16,7 @@ import           Control.Arrow
 import           Control.Lens
 import           Control.Monad.Random
 import           Data.Functor                       ((<&>))
+import qualified Data.HashMap.Strict                as HM
 import qualified Data.IntMap                        as IM
 import           Data.Monoid                        (Sum (..))
 import qualified Data.Set                           as S
@@ -249,6 +249,91 @@ spec = parallel $ do
         $ counterexample (show $ HenselCase p f g h s t)
         $ chkIterateHensel n
         $ HenselCase p f g h s t
+
+  modifyMaxSuccess (const 50) $ describe "pthRoot" $ do
+    prop "gives pth root" $ \(unPrime -> p) ->
+      reifyPrimeField p $ \(_ :: Proxy (F p)) ->
+        forAll arbitrary $ \(f :: Unipol (F p)) ->
+          pthRoot (f ^ fromIntegral p) === f
+
+  describe "multiHensel" $ do
+    it "solves regressions correctly" $ do
+      let facs = multiHensel 5 4 (#x^4 - 1)
+              [#x-1, #x-2, #x+2, #x+1]
+      assertEqual
+        "products reconstruct fail"
+        0
+        $ mapCoeffUnipol (`rem` 5^4) (product facs - (#x^4 - 1))
+
+    modifyMaxSuccess (const 25)
+      $ modifyMaxSize (const 20)
+      $ prop "lifts coprime factorisation correctly"
+      $ \(unPrime -> p) (QC.Positive (Small l))
+        (NonZero lca) (NonZero lcb)
+        (NonEmpty f00) (NonEmpty g00) ->
+        reifyPrimeField p $ \fp ->
+        tabulate "p" [show p] $
+        tabulate "iterateion" [show l] $
+        ioProperty $ do
+          let f = ascendingTerms (f00 ++ [clearFactor p lca])
+                  *
+                  ascendingTerms (g00 ++ [clearFactor p lcb])
+              proj = mapCoeffUnipol naturalRepr
+          fps0 <- factorise $ mapCoeffUnipol (modNat' fp) f
+          let (_, facs) = first (mapCoeffUnipol naturalRepr
+                                . product . map (uncurry (^)))
+                $ partition ((<1). totalDegree'.fst) fps0
+          let gs = map (proj . uncurry (^)) $ HM.toList
+                $ HM.fromListWith (+) facs
+          let facs' = multiHensel (fromIntegral p) l f gs
+          pure
+            $ tabulate "lc(f)"
+              [show $ leadingCoeff f]
+            $ tabulate
+              "deg(f)"
+              [show $ totalDegree' f]
+            $ tabulate "# of factors"
+              [show $ length gs]
+            $ counterexample ("(p,l,f,gs,lc(f)) = " ++ show (p,l,f, gs, leadingCoeff f))
+            $ mapCoeffUnipol (`mod` p^fromIntegral l) (f - leadingCoeff f .*. product facs')
+                === 0
+              .&&.
+              conjoin
+                (map (\k -> counterexample ("must be monic, but got: " ++ show k)
+                      $ leadingCoeff k === 1) facs')
+              .&&.
+              conjoin
+                  (zipWith
+                    (\k k' ->
+                        counterexample
+                          (unwords
+                            ["The polynomial", show k
+                            , "is lifted to", show k',
+                            "but not equal modulo p!"])
+                          (mapCoeffUnipol (modNat' fp) k ===
+                          mapCoeffUnipol (modNat' fp) k')
+                      )
+                  gs facs')
+
+hasCommon :: Euclidean d => d -> d -> Bool
+hasCommon = ((not . isUnit) .) . gcd
+{-# INLINE hasCommon #-}
+
+newtype ShortList a = ShortList { runShortList :: [a] }
+  deriving (Read, Show, Eq, Ord)
+
+instance Arbitrary a => Arbitrary (ShortList a) where
+  arbitrary = do
+    i <- QC.elements [1..5]
+    ShortList <$> vectorOf i arbitrary
+
+clearFactor :: Euclidean r => r -> r -> r
+clearFactor p = go
+  where
+    go !x
+      | isZero r = go q
+      | otherwise = x
+      where (q, r) = x `divide` p
 
 chkIterateHensel :: Int -> HenselCase -> Property
 chkIterateHensel 0 _ = property True
