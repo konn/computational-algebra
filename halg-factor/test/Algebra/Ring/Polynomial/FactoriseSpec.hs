@@ -148,7 +148,7 @@ spec = parallel $ do
       modifyMaxSize (const 3)
           $ modifyMaxSuccess (const 25)
           $ prop "reconstructs the original " $ \(NonZero f00) (NonZero g00) -> ioProperty $ do
-            let h0 = sqFree $ f00 * g00
+            let h0 = f00 * g00
                 f0 = h0 `quot` gcd (diff 0 h0) h0
                 c = foldr' (lcm . denominator) 1 f0
                 f = mapCoeffUnipol (numerator . (fromInteger c*)) f0
@@ -165,10 +165,6 @@ spec = parallel $ do
                       Mult $ product fs ^ fromIntegral n
                   ) dic)
                   === f)
-                  .&&.
-                counterexample
-                  "# of factor mismatched"
-                (facts >= length (filter ((>0) . totalDegree') [f00,g00]))
 
   describe "factorise" $ do
     describe "correctly factors polynomials in regression tests" $
