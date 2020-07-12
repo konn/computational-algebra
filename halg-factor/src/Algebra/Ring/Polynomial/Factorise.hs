@@ -1,8 +1,8 @@
-{-# LANGUAGE BangPatterns, DataKinds, ExtendedDefaultRules        #-}
-{-# LANGUAGE FlexibleContexts, GADTs, MultiParamTypeClasses       #-}
-{-# LANGUAGE NoImplicitPrelude, OverloadedLabels, OverloadedLists #-}
-{-# LANGUAGE OverloadedStrings, PatternSynonyms, PolyKinds        #-}
-{-# LANGUAGE ScopedTypeVariables, TupleSections, TypeApplications #-}
+{-# LANGUAGE BangPatterns, DataKinds, ExtendedDefaultRules          #-}
+{-# LANGUAGE FlexibleContexts, GADTs, MultiParamTypeClasses         #-}
+{-# LANGUAGE NoImplicitPrelude, OverloadedLabels, OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms, PolyKinds, ScopedTypeVariables        #-}
+{-# LANGUAGE TupleSections, TypeApplications, ViewPatterns          #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Algebra.Ring.Polynomial.Factorise
@@ -13,7 +13,7 @@ module Algebra.Ring.Polynomial.Factorise
     distinctDegFactor,
     equalDegreeSplitM, equalDegreeFactorM,
     henselStep, multiHensel, clearDenom,
-    squareFreePart,
+    squareFreePart, pthRoot,
     yun, squareFreeDecompFiniteField
   ) where
 import           Algebra.Arithmetic                 hiding (modPow)
@@ -23,7 +23,8 @@ import           Algebra.Ring.Euclidean.Quotient
 import           Algebra.Ring.Polynomial.Univariate
 import           Control.Applicative                ((<|>))
 import           Control.Arrow                      ((***), (<<<))
-import           Control.Lens                       (both, ifoldl, (%~), (&))
+import           Control.Lens                       (both, ifoldMap, ifoldl,
+                                                     (%~), (&))
 import           Control.Monad                      (guard, replicateM)
 import           Control.Monad                      (when)
 import           Control.Monad.Loops                (iterateUntil, untilJust)
@@ -34,12 +35,15 @@ import           Control.Monad.ST.Strict            (ST, runST)
 import           Control.Monad.Trans                (lift)
 import           Control.Monad.Trans.Loop           (continue, foreach, while)
 import qualified Data.DList                         as DL
+import qualified Data.FMList                        as FML
 import           Data.IntMap                        (IntMap)
 import qualified Data.IntMap.Strict                 as IM
+import qualified Data.IntSet                        as IS
 import qualified Data.List                          as L
 import           Data.Maybe                         (fromJust)
 import           Data.Monoid                        (Sum (..))
 import           Data.Monoid                        ((<>))
+import           Data.MonoTraversable               (MonoFoldable (ofoldMap))
 import           Data.Numbers.Primes                (primes)
 import           Data.Proxy                         (Proxy (..))
 import qualified Data.Set                           as S
@@ -48,15 +52,12 @@ import           Data.STRef.Strict                  (STRef, modifySTRef,
 import           Data.STRef.Strict                  (readSTRef, writeSTRef)
 import qualified Data.Traversable                   as F
 import qualified Data.Vector                        as V
-import           Math.NumberTheory.Logarithms       (intLog2', integerLogBase')
-import           Math.NumberTheory.Powers.Squares   (integerSquareRoot)
+import           Debug.Trace                        (trace)
 import qualified Math.NumberTheory.Primes           as PRIMES
 import           Numeric.Decidable.Zero             (isZero)
 import           Numeric.Domain.GCD                 (gcd, lcm)
 import qualified Numeric.Field.Fraction             as F
 import qualified Prelude                            as P
-
-default ([])
 
 
 -- | @distinctDegFactor f@ computes the distinct-degree decomposition of the given
@@ -368,30 +369,31 @@ repeatHensel !m n f g h s t =
 multiHensel :: Natural          -- ^ prime @p@
             -> Int              -- ^ iteration count @k@.
             -> Unipol Integer   -- ^ original polynomial
-            -> [Unipol Integer] -- ^ coprime factorisation mod @p@
+            -> [Unipol Integer] -- ^ monic coprime factorisation mod @p@
             -> [Unipol Integer] -- ^ coprime factorisation mod @p^(2^k)@.
 {-# INLINE multiHensel #-}
-multiHensel p n = \f -> DL.toList . go f . V.fromList
+multiHensel (toInteger -> p) n = \f -> DL.toList . go f . V.fromList
   where
-    go f [_]    = DL.singleton $ normalizeMod (fromNatural p^fromIntegral n) f
-    go f [g, h] = reifyPrimeField (fromNatural p) $ \fp ->
-      let (_, s0, t0) = head $
-                        euclid
-                          (mapCoeffUnipol (modNat' fp) g)
-                          (mapCoeffUnipol (modNat' fp) h)
+    go f gs
+      | len == 0 = DL.empty
+      | len == 1 = DL.singleton $
+          let q = p P.^ n
+              (u,_,bInv) = egcd q (leadingCoeff f)
+          in mapCoeffUnipol (`mod` q)
+            $ (bInv `quot` u) .*. f
+      | otherwise  = reifyPrimeField p $ \fp ->
+        let k = len `div` 2
+            d = ceilingLogBase2 n
+            (ls, rs) = V.splitAt k gs
+            (g0, h0) = (leadingCoeff f .*. product ls, product rs)
+              & both %~ mapCoeffUnipol (`mod` p)
+            (_, s0, t0) = egcd
+              (mapCoeffUnipol (modNat' fp) g0)
+              (mapCoeffUnipol (modNat' fp) h0)
           (s, t) = (s0, t0) & both %~ mapCoeffUnipol naturalRepr
-          (g', h', _, _) = repeatHensel (fromNatural p) n f g h s t
-      in DL.fromList [g', h']
-    go f gs = reifyPrimeField (fromNatural p) $ \fp ->
-      let (ls, rs) = V.splitAt (V.length gs `div` 2) gs
-          (l, r) = (product ls, product rs)
-          (_, s0, t0) = head $
-                        euclid
-                          (mapCoeffUnipol (modNat' fp) l)
-                          (mapCoeffUnipol (modNat' fp) r)
-          (s, t) = (s0, t0) & both %~ mapCoeffUnipol naturalRepr
-          (fl, fr, _, _) = repeatHensel (fromNatural p) n f l r s t
-      in go fl ls <> go fr rs
+            (g, h, _, _) = repeatHensel p d f g0 h0 s t
+        in go g ls <> go h rs
+      where len = V.length gs
 
 recipMod :: (Euclidean a, Eq a) => a -> a -> Maybe a
 recipMod m u =
