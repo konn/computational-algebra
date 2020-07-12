@@ -37,6 +37,7 @@ library:
   dependencies:
   - MonadRandom
   - algebra
+  - mono-traversable
   - algebraic-prelude
   - arithmoi
   - containers
@@ -45,6 +46,7 @@ library:
   - halg-core
   - halg-polynomials
   - integer-logarithms
+  - fmlist
   - lens
   - monad-loops
   - mtl
@@ -88,6 +90,7 @@ tests:
     - MonadRandom
     - lens
     - halg-galois-fields
+    - unordered-containers
     - algebraic-prelude
     - halg-core
     - halg-polynomials

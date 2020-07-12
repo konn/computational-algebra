@@ -23,8 +23,7 @@ import           Algebra.Ring.Euclidean.Quotient
 import           Algebra.Ring.Polynomial.Univariate
 import           Control.Applicative                ((<|>))
 import           Control.Arrow                      ((***), (<<<))
-import           Control.Lens                       (both, ifoldMap, ifoldl,
-                                                     (%~), (&))
+import           Control.Lens                       (both, ifoldMap, (%~), (&))
 import           Control.Monad                      (guard, replicateM)
 import           Control.Monad                      (when)
 import           Control.Monad.Loops                (iterateUntil, untilJust)
@@ -41,7 +40,6 @@ import qualified Data.IntMap.Strict                 as IM
 import qualified Data.IntSet                        as IS
 import qualified Data.List                          as L
 import           Data.Maybe                         (fromJust)
-import           Data.Monoid                        (Sum (..))
 import           Data.Monoid                        ((<>))
 import           Data.MonoTraversable               (MonoFoldable (ofoldMap))
 import           Data.Numbers.Primes                (primes)
@@ -52,7 +50,6 @@ import           Data.STRef.Strict                  (STRef, modifySTRef,
 import           Data.STRef.Strict                  (readSTRef, writeSTRef)
 import qualified Data.Traversable                   as F
 import qualified Data.Vector                        as V
-import           Debug.Trace                        (trace)
 import qualified Math.NumberTheory.Primes           as PRIMES
 import           Numeric.Decidable.Zero             (isZero)
 import           Numeric.Domain.GCD                 (gcd, lcm)
@@ -182,13 +179,14 @@ squareFreeDecompFiniteField
   => Unipol k -> IntMap (Unipol k)
 squareFreeDecompFiniteField f =
   let dcmp = yun f
-      f'   = ifoldl (\i u g -> u `quot` (g ^ fromIntegral i)) f dcmp
+      h'   = runMult $ ifoldMap (\i g -> Mult $ g ^ fromIntegral i) dcmp
+      fhInv = f `quot` h'
       p    = fromIntegral $ charUnipol f
-  in if isZero (f' - one)
+  in if fhInv == one
      then dcmp
      else IM.filter (not . isZero . subtract one) $
-          IM.unionWith (*) dcmp $ IM.mapKeys (p*) $
-          squareFreeDecompFiniteField $ pthRoot f'
+          IM.unionWith (*) dcmp $ IM.mapKeysMonotonic (p*) $
+          squareFreeDecompFiniteField $ pthRoot fhInv
 
 -- | Factorise a polynomial over finite field using Cantor-Zassenhaus algorithm
 factorise :: (MonadRandom m, CoeffRing k, FiniteField k, Random k)
@@ -216,7 +214,7 @@ factorQBigPrime :: (MonadRandom m)
                => Unipol Integer -> m (Integer, IntMap (Set (Unipol Integer)))
 factorQBigPrime = wrapSQFFactor factorSqFreeQBP
 
--- | Factorise the given sqaure-free
+-- | Factorise the given
 --   interger-coefficient polynomial by Hensel lifting.
 factorHensel :: (MonadRandom m)
              => Unipol Integer -> m (Integer, IntMap (Set (Unipol Integer)))
@@ -297,34 +295,36 @@ factorHenselSqFree
 factorHenselSqFree f =
   let lc = leadingCoeff f
       Just p = find isGoodPrime primes
-      normF  = integerSquareRoot (getSum $ foldMap (Sum . (^2)) $ terms f) + 1
-      power  = succ $ intLog2' $ integerLogBase' p $ normF * 2 ^ fromIntegral (totalDegree' f + 1)
+      power  = ceiling $ logBase (fromIntegral p) $ 2 * kB + 1
   in reifyPrimeField p $ \fp -> do
-  let lc' = modNat' fp lc
-      f0 = mapCoeffUnipol ((/lc') . modNat' fp) f
-  fps <- factorise f0
-  let gs = multiHensel (fromIntegral p) power f
-          $ map (mapCoeffUnipol naturalRepr . fst) fps
-  return $ loop (p^2^fromIntegral power) 1 (length gs) f gs []
+    let lc' = modNat' fp lc
+        f0 = mapCoeffUnipol ((/lc') . modNat' fp) f
+    fps <- map (normalizeMod p . mapCoeffUnipol naturalRepr . fst) <$> factorise f0
+    let gs = V.fromList $ map (normalizeMod $ p ^ fromIntegral power)
+            $ multiHensel (fromIntegral p) power f
+              fps
+        alives = IS.fromAscList [0 .. V.length gs - 1]
+    return $ loop (p P.^ power) alives 1 f gs []
   where
     lc = leadingCoeff f
+    kA = maxNorm f
+    n = totalDegree' f
+    kB :: Double
+    kB = sqrt (fromIntegral n + 1) * 2 P.^ n * fromIntegral (kA * lc)
     isGoodPrime p = reifyPrimeField p $ \fp ->
       lc `mod` p /= 0 && isSquareFree (mapCoeffUnipol (modNat' fp) f)
-    loop pk !l m !h gs acc
-      | fromIntegral (2 * l) > m =  if h == one then acc else h : acc
-      | otherwise =
-        let cands = [ (ss, g, q)
-                    | ss <- comb l gs
-                    , let g = normalizeMod pk $ lc .* product ss
-                    , let (q, r) = pDivModPoly (lc .* h) g
-                    , isZero r
-                    , leadingCoeff q * leadingCoeff g == lc * leadingCoeff h
-                    ]
-        in case cands of
-          [] -> loop pk (l + 1) m h gs acc
-          ((ss, g, q) : _) ->
-            let u = leadingCoeff g `div` content g
-            in loop pk l m (mapCoeff' (`div` u) q) (gs L.\\ ss) (pp g : acc)
+    loop pk alives !l !h gs acc
+      | 2 * l > IS.size alives =
+          if h == one then acc else h : acc
+      | otherwise = go pk alives l (combinations l alives) h (leadingCoeff h) gs acc
+    go pk alives l [] f' _ pols acc = loop pk alives (l + 1) f' pols acc
+    go pk alives l ((gs, hs) : cands) f' b pols acc
+      | oneNorm g * oneNorm h <= floor kB =
+          loop pk hs l (pp h) pols (pp g : acc)
+      | otherwise = go pk alives l cands f' b pols acc
+      where
+        g = normalizeMod pk $ b .* runMult (ofoldMap (Mult . V.unsafeIndex pols) gs)
+        h = normalizeMod pk $ b .* runMult (ofoldMap (Mult . V.unsafeIndex pols) hs)
 
 -- | Given that @f = gh (mod m)@ with @sg + th = 1 (mod m)@ and @leadingCoeff f@ isn't zero divisor mod m,
 --   @henselStep m f g h s t@ calculates the unique (g', h', s', t') s.t.
@@ -390,7 +390,7 @@ multiHensel (toInteger -> p) n = \f -> DL.toList . go f . V.fromList
             (_, s0, t0) = egcd
               (mapCoeffUnipol (modNat' fp) g0)
               (mapCoeffUnipol (modNat' fp) h0)
-          (s, t) = (s0, t0) & both %~ mapCoeffUnipol naturalRepr
+            (s, t) = (s0, t0) & both %~ mapCoeffUnipol naturalRepr
             (g, h, _, _) = repeatHensel p d f g0 h0 s t
         in go g ls <> go h rs
       where len = V.length gs
@@ -410,6 +410,17 @@ comb = (DL.toList .) . go
     go 0 [] = DL.singleton []
     go _ [] = DL.empty
     go k (x:xs) = DL.map (x :) (go (k - 1) xs) <> go k xs
+
+combinations :: Int -> IntSet -> [(IntSet, IntSet)]
+combinations n = map (both %~ IS.fromAscList) . FML.toList . go n . IS.toAscList
+  where
+    go 0 xs  = FML.singleton ([], xs)
+    go _ [] = FML.empty
+    go k (x:xs) =
+      let present = go (k - 1) xs
+          absent = go k xs
+      in fmap (first $ (:) x) present
+        <> fmap (second $ (:) x) absent
 
 normalizeMod :: Integer -> Unipol Integer -> Unipol Integer
 normalizeMod p = mapCoeffUnipol (subtract half . (`mod` p) . (+ half))
