@@ -50,7 +50,7 @@ modNat :: Reifies (p :: k) Integer => Integer -> F p
 modNat = modNat' Proxy
 {-# INLINE modNat #-}
 
-modNat' :: forall proxy (p :: k). Reifies p Integer => proxy (F p) -> Integer -> F p
+modNat' :: forall proxy p. Reifies p Integer => proxy (F p) -> Integer -> F p
 modNat' _ i =
   let p = reflect (Proxy :: Proxy p)
   in F (i `rem` p)
