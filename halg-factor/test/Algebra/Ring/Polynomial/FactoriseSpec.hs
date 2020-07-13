@@ -37,7 +37,18 @@ data Regression where
 
 regressions :: [Regression]
 regressions =
-  [ MkRegression @(GF 2 5) $ #x^2 + injectCoeff (ξ^2 + ξ + 1)
+  [ MkRegression @(F 3) $
+    #x^19 + 2* #x^18 + #x^15 + 2* #x^14 + 2* #x^12 + #x^11 + #x^7 +  #x^6 +  #x^5
+  , MkRegression @(F 3)
+  $ #x^89 + #x^88 + #x^87 + 2* #x^83 + 2* #x^82 + 2* #x^81 + 2* #x^79
+  + 2* #x^77 + 2* #x^76 + 2* #x^75 + #x^74 + 2* #x^73 + #x^72 + 2* #x^71
+  + 2* #x^68 + #x^67 + #x^66 + #x^64 + #x^62 + #x^61 + 2* #x^60 + #x^59
+  + 2* #x^58 + 2* #x^54 + #x^53 + #x^52 + #x^51 + 2* #x^50 + #x^49 + #x^48
+  + #x^47 + #x^45 + #x^44 + 2* #x^41 + 2* #x^38 + #x^36 + #x^34 + 2* #x^33
+  + #x^32 + 2* #x^29 + 2* #x^28 + #x^26 + 2* #x^25 + 2* #x^23 + 2* #x^22
+  + #x^21 + #x^20 + 2* #x^19 + 2* #x^17 + 2* #x^16 + 2* #x^15 + 2* #x^14
+  + 2* #x^12 + #x^10 + 2* #x^9 + 2* #x^7 + 2* #x^6 + 2* #x^3 + #x^2 + 2
+  , MkRegression @(GF 2 5) $ #x^2 + injectCoeff (ξ^2 + ξ + 1)
   , MkRegression @(GF 2 5) $
       (ξ^4 + 1) .*. #x^2 + injectCoeff (ξ^4 + ξ^3)
   , MkRegression @(GF 2 5) $
@@ -45,6 +56,8 @@ regressions =
     + (ξ^3 + ξ^2 + ξ + 1) .*. #x^3 + (ξ^3 + 1) .*. #x^2
     + (ξ^4 + ξ^3 + ξ + 1) .*. #x
     + injectCoeff (ξ^4 + ξ^3 + ξ)
+  , MkRegression @(F 2) $
+      #x^8 + #x^3 + #x^2 + #x
   , MkRegression @(F 2) $
     #x^66 + #x^65 + #x^64 + #x^62 + #x^57
     + #x^56 + #x^55 + #x^54 + #x^52 + #x^50
@@ -97,11 +110,21 @@ spec = parallel $ do
     describe "correctly factors polynomials in regression tests" $
       forM_ regressions $ \(MkRegression f) ->
       when (leadingCoeff f == one) $
-      it (show f) $
-      let facts = map (swap >>> second fromIntegral)
-            $ IM.toList
-            $ squareFreeDecompFiniteField f
-      in fromFactorisation facts @?= f
+      it (show f) $ do
+      let resls = squareFreeDecompFiniteField f
+          facts = map (swap >>> second fromIntegral)
+            $ IM.toList resls
+          onlyFacts = IM.toList resls
+      fromFactorisation facts @?= f
+      forM_ (init $ tails onlyFacts) $ \((i,h) : jfs) ->
+        forM_ jfs $ \(j, g) -> do
+          let common = gcd h g
+          common == 1 @? show (i, j) <> " = "
+            <> show (h, g)
+            <> " must be coprime, but has gcd: "
+            <> show common
+
+
   forM_ [("factorQBigPrime", factorQBigPrime), ("factorHensel", factorHensel)]
     $ \(lab, factorer) -> describe lab $ do
       describe "factors regression cases correctly" $
@@ -246,7 +269,9 @@ spec = parallel $ do
         $ chkIterateHensel n
         $ HenselCase p f g h s t
 
-  modifyMaxSuccess (const 50) $ describe "pthRoot" $ do
+  modifyMaxSuccess (const 50) $
+    modifyMaxSize (const 50) $
+    describe "pthRoot" $ do
     prop "gives pth root" $ \(unPrime -> p) ->
       reifyPrimeField p $ \(_ :: Proxy (F p)) ->
         forAll arbitrary $ \(f :: Unipol (F p)) ->
@@ -279,8 +304,7 @@ spec = parallel $ do
           let (_, facs) = first (mapCoeffUnipol naturalRepr
                                 . product . map (uncurry (^)))
                 $ partition ((<1). totalDegree'.fst) fps0
-          let gs = map (proj . uncurry (^)) $ HM.toList
-                $ HM.fromListWith (+) facs
+          let gs = map (proj . uncurry (^)) facs
           let facs' = multiHensel (fromIntegral p) l f gs
           pure
             $ tabulate "lc(f)"

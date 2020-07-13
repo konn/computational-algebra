@@ -37,11 +37,9 @@ import qualified Data.DList                         as DL
 import qualified Data.FMList                        as FML
 import           Data.IntMap                        (IntMap)
 import qualified Data.IntMap.Strict                 as IM
-import qualified Data.IntSet                        as IS
 import qualified Data.List                          as L
 import           Data.Maybe                         (fromJust)
 import           Data.Monoid                        ((<>))
-import           Data.MonoTraversable               (MonoFoldable (ofoldMap))
 import           Data.Numbers.Primes                (primes)
 import           Data.Proxy                         (Proxy (..))
 import qualified Data.Set                           as S
@@ -182,11 +180,49 @@ squareFreeDecompFiniteField f =
       h'   = runMult $ ifoldMap (\i g -> Mult $ g ^ fromIntegral i) dcmp
       fhInv = f `quot` h'
       p    = fromIntegral $ charUnipol f
-  in if fhInv == one
-     then dcmp
-     else IM.filter (not . isZero . subtract one) $
-          IM.unionWith (*) dcmp $ IM.mapKeysMonotonic (p*) $
-          squareFreeDecompFiniteField $ pthRoot fhInv
+      powers =
+        IM.mapKeysMonotonic (p*) $
+        squareFreeDecompFiniteField $ pthRoot fhInv
+      ((pns, pnjs), js) =
+        IM.mapAccumWithKey
+            (\(ps', pnjs') j g0 ->
+                let (g', pnjsps'') =
+                      IM.mapAccum
+                        (\g h ->
+                          let u = g `gcd` h
+                              h' = h `quot` u
+                          in (g `quot` u, (u, h'))
+                        )
+                      g0 ps'
+                    pnjs'' = IM.filter ((>0) . totalDegree')
+                      $ IM.mapKeysMonotonic (+ j)
+                      $ fst <$> pnjsps''
+                    ps'' = IM.filter ((>0) . totalDegree')
+                        $ snd <$> pnjsps''
+                in (( ps'', pnjs' <> pnjs''), g')
+            )
+            (powers, IM.empty)
+            $ fst (IM.split p dcmp)
+  in if fst (IM.findMax dcmp) < p && fhInv == one
+    then dcmp
+    else IM.unions [IM.filter ((>0) . totalDegree') js, pnjs, pns]
+
+
+newtype GCD a = GCD { runGCD :: a }
+
+instance Euclidean a => P.Semigroup (GCD a) where
+  (<>) = (GCD .) . (gcd `on` runGCD)
+instance Euclidean a => Monoid (GCD a) where
+  mappend = (<>)
+  mempty = GCD zero
+
+newtype LCM a = LCM { runLCM :: a }
+
+instance Euclidean a => P.Semigroup (LCM a) where
+  (<>) = (LCM .) . (lcm `on` runLCM)
+instance Euclidean a => Monoid (LCM a) where
+  mappend = (<>)
+  mempty = LCM one
 
 -- | Factorise a polynomial over finite field using Cantor-Zassenhaus algorithm
 factorise :: (MonadRandom m, CoeffRing k, FiniteField k, Random k)
@@ -234,7 +270,6 @@ wrapSQFFactor fac f0
     return (k, IM.fromList $ map (second $ S.fromList . snd) anss)
   where
     n = totalDegree' f0
-
 
 secondM :: Functor f => (t -> f a) -> (t1, t) -> f (t1, a)
 secondM f (a, b)= (a,) <$> f b
@@ -303,8 +338,9 @@ factorHenselSqFree f =
     let gs = V.fromList $ map (normalizeMod $ p ^ fromIntegral power)
             $ multiHensel (fromIntegral p) power f
               fps
-        alives = IS.fromAscList [0 .. V.length gs - 1]
-    return $ loop (p P.^ power) alives 1 f gs []
+        count = V.length gs
+        alives = [0 .. count - 1]
+    return $ loop (p P.^ power) alives count 1 f gs []
   where
     lc = leadingCoeff f
     kA = maxNorm f
@@ -313,18 +349,19 @@ factorHenselSqFree f =
     kB = sqrt (fromIntegral n + 1) * 2 P.^ n * fromIntegral (kA * lc)
     isGoodPrime p = reifyPrimeField p $ \fp ->
       lc `mod` p /= 0 && isSquareFree (mapCoeffUnipol (modNat' fp) f)
-    loop pk alives !l !h gs acc
-      | 2 * l > IS.size alives =
+    loop pk alives !count !l !h gs acc
+      | 2 * l > count =
           if h == one then acc else h : acc
-      | otherwise = go pk alives l (combinations l alives) h (leadingCoeff h) gs acc
-    go pk alives l [] f' _ pols acc = loop pk alives (l + 1) f' pols acc
-    go pk alives l ((gs, hs) : cands) f' b pols acc
+      | otherwise = go pk alives count l
+          (combinations l alives) h (leadingCoeff h) gs acc
+    go pk alives !count l [] f' _ pols acc = loop pk alives count (l + 1) f' pols acc
+    go pk alives !count l ((gs, hs) : cands) f' b pols acc
       | oneNorm g * oneNorm h <= floor kB =
-          loop pk hs l (pp h) pols (pp g : acc)
-      | otherwise = go pk alives l cands f' b pols acc
+          loop pk hs (count - l) l (pp h) pols (pp g : acc)
+      | otherwise = go pk alives count l cands f' b pols acc
       where
-        g = normalizeMod pk $ b .* runMult (ofoldMap (Mult . V.unsafeIndex pols) gs)
-        h = normalizeMod pk $ b .* runMult (ofoldMap (Mult . V.unsafeIndex pols) hs)
+        g = normalizeMod pk $ b .* runMult (foldMap (Mult . V.unsafeIndex pols) gs)
+        h = normalizeMod pk $ b .* runMult (foldMap (Mult . V.unsafeIndex pols) hs)
 
 -- | Given that @f = gh (mod m)@ with @sg + th = 1 (mod m)@ and @leadingCoeff f@ isn't zero divisor mod m,
 --   @henselStep m f g h s t@ calculates the unique (g', h', s', t') s.t.
@@ -411,8 +448,8 @@ comb = (DL.toList .) . go
     go _ [] = DL.empty
     go k (x:xs) = DL.map (x :) (go (k - 1) xs) <> go k xs
 
-combinations :: Int -> IntSet -> [(IntSet, IntSet)]
-combinations n = map (both %~ IS.fromAscList) . FML.toList . go n . IS.toAscList
+combinations :: Int -> [Int] -> [([Int], [Int])]
+combinations n = FML.toList . go n
   where
     go 0 xs  = FML.singleton ([], xs)
     go _ [] = FML.empty
