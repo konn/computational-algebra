@@ -1,7 +1,7 @@
-{-# LANGUAGE AllowAmbiguousTypes, BangPatterns, DataKinds                   #-}
-{-# LANGUAGE ExtendedDefaultRules, FlexibleInstances, GADTs                 #-}
-{-# LANGUAGE OverloadedLabels, OverloadedLists, ParallelListComp            #-}
-{-# LANGUAGE PolyKinds, ScopedTypeVariables, TypeApplications, ViewPatterns #-}
+{-# LANGUAGE AllowAmbiguousTypes, BangPatterns, DataKinds        #-}
+{-# LANGUAGE ExtendedDefaultRules, FlexibleInstances, GADTs      #-}
+{-# LANGUAGE OverloadedLabels, ParallelListComp, PolyKinds       #-}
+{-# LANGUAGE ScopedTypeVariables, TypeApplications, ViewPatterns #-}
 {-# OPTIONS_GHC -Wno-orphans -Wno-type-defaults #-}
 module Algebra.Ring.Polynomial.FactoriseSpec where
 import qualified Algebra.Field.Finite               as Fin
@@ -456,7 +456,7 @@ checkIsReducible = do
     prop' txt = prop (txt <> "(" ++ show (typeRep @r) ++ ")")
 
 intPolys :: [S.Set (Unipol Integer)]
-intPolys =
+intPolys = map S.fromList
   [ [#x + 2, 2 * #x ^ 2 + 1, #x - 2]
   , [3 * #x + 1, 4 * #x + 3]
   , [#x - 2, 4 * #x + 1]
