@@ -80,7 +80,7 @@ tests:
     ghc-options:  -Wall
     main: Spec.hs
     dependencies:
-    - QuickCheck
+    - QuickCheck >= 2.12
     - HUnit
     - containers
     - arithmoi
