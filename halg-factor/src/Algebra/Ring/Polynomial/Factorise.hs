@@ -1,8 +1,9 @@
 {-# LANGUAGE BangPatterns, DataKinds, ExtendedDefaultRules          #-}
 {-# LANGUAGE FlexibleContexts, GADTs, MultiParamTypeClasses         #-}
 {-# LANGUAGE NoImplicitPrelude, OverloadedLabels, OverloadedStrings #-}
-{-# LANGUAGE PatternSynonyms, PolyKinds, ScopedTypeVariables        #-}
-{-# LANGUAGE TupleSections, TypeApplications, ViewPatterns          #-}
+{-# LANGUAGE PatternSynonyms, PolyKinds, RecordWildCards            #-}
+{-# LANGUAGE ScopedTypeVariables, TupleSections, TypeApplications   #-}
+{-# LANGUAGE ViewPatterns                                           #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Algebra.Ring.Polynomial.Factorise
@@ -48,6 +49,8 @@ import           Data.STRef.Strict                  (STRef, modifySTRef,
 import           Data.STRef.Strict                  (readSTRef, writeSTRef)
 import qualified Data.Traversable                   as F
 import qualified Data.Vector                        as V
+import           Math.NumberTheory.Primes           (Prime, precPrime)
+import           Math.NumberTheory.Primes           (Prime (unPrime))
 import qualified Math.NumberTheory.Primes           as PRIMES
 import           Numeric.Decidable.Zero             (isZero)
 import           Numeric.Domain.GCD                 (gcd, lcm)
@@ -274,82 +277,98 @@ wrapSQFFactor fac f0
 secondM :: Functor f => (t -> f a) -> (t1, t) -> f (t1, a)
 secondM f (a, b)= (a,) <$> f b
 
-(<@>) :: (a -> b) -> STRef s a -> ST s b
-(<@>) f r = f <$> readSTRef r
-
-infixl 5 <@>
-
+-- | Factors square-free primitive integer-coefficient polynomial,
+--   using big enough prime.
 factorSqFreeQBP :: (MonadRandom m)
                 => Unipol Integer -> m [Unipol Integer]
-factorSqFreeQBP f
-  | n == 1 = return [f]
-  | otherwise = do
-    p <- iterateUntil isSqFreeMod (uniform ps)
-    reifyPrimeField p $ \fp -> do
-      let fbar = mapCoeffUnipol (modNat' fp) f
-      gvec <- V.fromList . concatMap (uncurry (flip replicate) <<< (normalizeMod p . mapCoeffUnipol naturalRepr) *** fromEnum)
-              <$> factorise (monoize fbar)
-      return $ runST $ do
-        bb <- newSTRef b
-        s  <- newSTRef 1
-        ts <- newSTRef [0..V.length gvec - 1]
-        gs <- newSTRef []
-        f' <- newSTRef f
-        while ((<=) <$> (2*) <@> s <*> length <@> ts) $ do
-          ts0 <- lift $ readSTRef ts
-          s0  <- lift $ readSTRef s
-          b0  <- lift $ readSTRef bb
-          foreach (comb s0 ts0) $ \ss -> do
-            let delta = ts0 L.\\ ss
-                g' = normalizeMod p $ b0 .*. product [ gvec V.! i | i <- ss]
-                h' = normalizeMod p $ b0 .*. product [ gvec V.! i | i <- delta]
-            when (oneNorm g' * oneNorm h' <= floor b') $ do
-              lift $ lift $ do
-                writeSTRef ts   delta
-                modifySTRef gs (pp g' :)
-                writeSTRef f' $ pp h'
-                writeSTRef bb $ leadingCoeff $ pp h'
-              lift continue
-          lift $ modifySTRef s (+1)
-        (:) <$> readSTRef f' <*> readSTRef gs
-  where
-    ps = takeWhile (< floor (4*b')) $ dropWhile (<= ceiling (2*b')) $ tail primes
-    b = leadingCoeff f
-    a = maxNorm f
-    b' = P.product [ P.sqrt (fromIntegral n P.+ 1), 2 P.^^ n, fromIntegral a,  fromIntegral b]
-         :: Double
-    n = totalDegree' f
-    isSqFreeMod :: Integer -> Bool
-    isSqFreeMod p = reifyPrimeField p $ \fp ->
-      let fbar = mapCoeffUnipol (modNat' fp) f
-      in gcd fbar (diff OZ fbar) == one
+{-# INLINE factorSqFreeQBP #-}
+factorSqFreeQBP =
+  factorPrimitiveIntegerPolWith
+    (const calcBasicConsts)
+    (\BasicConsts{..} -> const $
+        Just (floor $ 2*kB, ceiling $ 4*kB)
+    )
+    (const $ const . unPrime)
+    $ const $ const $ const id
+
+data BasicConsts =
+  BasicConsts
+  { kA :: !Integer
+  , kB :: !Double
+  , lc :: !Integer
+  }
+
+data HenselConsts = HenselConsts
+  { basicConsts :: !BasicConsts
+  , primePower  :: Natural
+  }
 
 factorHenselSqFree
   :: MonadRandom m
   => Unipol Integer -> m [Unipol Integer]
-factorHenselSqFree f =
+{-# INLINE factorHenselSqFree #-}
+factorHenselSqFree =
+  factorPrimitiveIntegerPolWith
+    calcHenselConsts
+    (const $ const Nothing)
+    (\HenselConsts{..} (unPrime -> p) _ ->
+        p ^ primePower
+    )
+    $ \HenselConsts{basicConsts = BasicConsts{..}, ..} (unPrime -> p) f gs ->
+        multiHensel (fromIntegral p) (fromIntegral primePower) f gs
+
+{-# INLINE calcHenselConsts #-}
+calcHenselConsts :: Prime Integer -> Unipol Integer -> HenselConsts
+calcHenselConsts p f =
+  let primePower = ceiling $ logBase (fromIntegral $ unPrime p) $ 2 * kB + 1
+      basicConsts@BasicConsts{..} = calcBasicConsts f
+  in HenselConsts{..}
+
+calcBasicConsts :: Unipol Integer -> BasicConsts
+calcBasicConsts f =
   let lc = leadingCoeff f
-      Just p = find isGoodPrime primes
-      power  = ceiling $ logBase (fromIntegral p) $ 2 * kB + 1
-  in reifyPrimeField p $ \fp -> do
+      kA = maxNorm f
+      n  = totalDegree' f
+      kB = sqrt (fromIntegral n + 1) * 2 P.^ n * fromIntegral (kA * lc)
+  in BasicConsts{..}
+
+factorPrimitiveIntegerPolWith
+  :: MonadRandom m
+  => (Prime Integer -> Unipol Integer -> a)
+      -- ^ Preprocess
+  -> (a -> Unipol Integer -> Maybe (Integer, Integer))
+      -- ^ Possible searching range for primes
+  -> (a -> Prime Integer -> Unipol Integer -> Integer)
+      -- ^ Modulus for final coefficients
+  -> (a -> Prime Integer -> Unipol Integer
+      -> [Unipol Integer] -> [Unipol Integer])
+      -- ^ Post processor for factor; identity in big-prime, multiHensel for hensel.
+  -> Unipol Integer -> m [Unipol Integer]
+factorPrimitiveIntegerPolWith pre mRange modulus postProcess f =
+  let lc = leadingCoeff f
+      info = pre p f
+      range = maybe PRIMES.primes (\(l,r) -> [precPrime l .. precPrime r])
+          $ mRange info f
+      Just p = find isGoodPrime range
+  in reifyPrimeField (unPrime p) $ \fp -> do
     let lc' = modNat' fp lc
         f0 = mapCoeffUnipol ((/lc') . modNat' fp) f
-    fps <- map (normalizeMod p . mapCoeffUnipol naturalRepr . fst) <$> factorise f0
-    let gs = V.fromList $ map (normalizeMod $ p ^ fromIntegral power)
-            $ multiHensel (fromIntegral p) power f
-              fps
+    fps <- map (normalizeMod (unPrime p)
+              . mapCoeffUnipol naturalRepr . fst)
+        <$> factorise f0
+    let gs = V.fromList $ postProcess info p f fps
         count = V.length gs
         alives = [0 .. count - 1]
-    return $ loop (p P.^ power) alives count 1 f gs []
+    return $ loop (modulus info p f) alives count 1 f gs []
   where
     lc = leadingCoeff f
+    isGoodPrime p = reifyPrimeField (unPrime p) $ \fp ->
+      lc `mod` unPrime p /= 0 && isSquareFree (mapCoeffUnipol (modNat' fp) f)
     kA = maxNorm f
     n = totalDegree' f
     kB :: Double
     kB = sqrt (fromIntegral n + 1) * 2 P.^ n * fromIntegral (kA * lc)
-    isGoodPrime p = reifyPrimeField p $ \fp ->
-      lc `mod` p /= 0 && isSquareFree (mapCoeffUnipol (modNat' fp) f)
-    loop pk alives !count !l !h gs acc
+    loop !pk alives !count !l !h gs acc
       | 2 * l > count =
           if h == one then acc else h : acc
       | otherwise = go pk alives count l
