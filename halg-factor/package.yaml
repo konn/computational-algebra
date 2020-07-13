@@ -39,7 +39,7 @@ library:
   - algebra
   - mono-traversable
   - algebraic-prelude
-  - arithmoi
+  - arithmoi >= 0.9
   - containers
   - control-monad-loop
   - dlist
