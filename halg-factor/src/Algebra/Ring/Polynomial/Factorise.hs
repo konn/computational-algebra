@@ -264,7 +264,7 @@ wrapSQFFactor :: (MonadRandom m)
               -> Unipol Integer -> m (Integer, IntMap (Set (Unipol Integer)))
 wrapSQFFactor fac f0
   | n == 0 = pure (leadingCoeff f0, IM.empty)
-  | n == 1 = pure (1, IM.singleton 1 $ S.singleton f0)
+  | n == 1 = pure (content f0, IM.singleton 1 $ S.singleton $ pp f0)
   | otherwise =  do
     let (g, c) = (pp f0, content f0)
     ts0 <- F.mapM (secondM fac . clearDenom) (yun $ monoize $ mapCoeffUnipol (F.% 1) g)
