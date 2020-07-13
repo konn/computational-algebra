@@ -23,30 +23,19 @@ import           Algebra.Prelude.Core
 import           Algebra.Ring.Euclidean.Quotient
 import           Algebra.Ring.Polynomial.Univariate
 import           Control.Applicative                ((<|>))
-import           Control.Arrow                      ((***), (<<<))
 import           Control.Lens                       (both, ifoldMap, (%~), (&))
 import           Control.Monad                      (guard, replicateM)
-import           Control.Monad                      (when)
-import           Control.Monad.Loops                (iterateUntil, untilJust)
+import           Control.Monad.Loops                (untilJust)
 import           Control.Monad.Random               (MonadRandom, Random,
-                                                     getRandom, getRandomR,
-                                                     uniform)
-import           Control.Monad.ST.Strict            (ST, runST)
-import           Control.Monad.Trans                (lift)
-import           Control.Monad.Trans.Loop           (continue, foreach, while)
+                                                     getRandom, getRandomR)
 import qualified Data.DList                         as DL
 import qualified Data.FMList                        as FML
 import           Data.IntMap                        (IntMap)
 import qualified Data.IntMap.Strict                 as IM
-import qualified Data.List                          as L
 import           Data.Maybe                         (fromJust)
 import           Data.Monoid                        ((<>))
-import           Data.Numbers.Primes                (primes)
 import           Data.Proxy                         (Proxy (..))
 import qualified Data.Set                           as S
-import           Data.STRef.Strict                  (STRef, modifySTRef,
-                                                     newSTRef)
-import           Data.STRef.Strict                  (readSTRef, writeSTRef)
 import qualified Data.Traversable                   as F
 import qualified Data.Vector                        as V
 import           Math.NumberTheory.Primes           (Prime, precPrime)
@@ -459,13 +448,6 @@ recipMod m u =
 
 modFraction :: (Euclidean s, Eq s) => s -> Fraction s -> Maybe s
 modFraction m d = ((numerator d `rem` m) *) <$> recipMod m (denominator d)
-
-comb :: Int -> [a] -> [[a]]
-comb = (DL.toList .) . go
-  where
-    go 0 [] = DL.singleton []
-    go _ [] = DL.empty
-    go k (x:xs) = DL.map (x :) (go (k - 1) xs) <> go k xs
 
 combinations :: Int -> [Int] -> [([Int], [Int])]
 combinations n = FML.toList . go n
