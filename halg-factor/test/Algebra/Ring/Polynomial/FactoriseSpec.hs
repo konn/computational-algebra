@@ -132,21 +132,19 @@ spec = parallel $ do
           (i, dic) <- factorer $ product fs
           i @?= foldr (gcd . content) 1 fs
           dic @?= IM.singleton 1 fs
-      modifyMaxSize (const 5) $
-        modifyMaxSuccess (const 25) $
+      modifyMaxSize (const 10) $
+        modifyMaxSuccess (const 50) $
         prop "factors a product of distinct polynomials of degree 1"
-        $ \(Blind coes) -> again $ ioProperty $ do
+        $ \(Blind (NonEmpty coes)) -> again $ ioProperty $ do
           let pls = [ injectCoeff i * #x + injectCoeff j
-                    | QC.NonZero r <- S.toList coes
-                    , let i = denominator r
-                          j = numerator r
+                    | (QC.NonZero i, j) <- coes
                     ]
               expected = product pls
               expectCount = length pls
           (i, facs) <- factorer $ product pls
           let f = i .*. runMult
                     (ifoldMap (\n fs -> Mult $ product fs ^ fromIntegral n) facs)
-              givenFact = runAdd $ foldMap (Add . length) facs
+              givenFact = runAdd $ ifoldMap (\n -> Add . (n*) . length) facs
               factNumError = unlines
                 [ "# of factor mismatched!"
                 , "\texpected: " <> show expectCount
@@ -161,17 +159,16 @@ spec = parallel $ do
                 ]
           pure  $ counterexample (show pls)
                 $ tabulate "# of factors" [show expectCount]
-                $ tabulate "0-Norm" [show $ foldr (max.abs) 0 f]
+                $ tabulate "max-Norm" [show $ maxNorm f]
                 $ counterexample prodLabel (f === expected)
             .&&. counterexample factNumError
                   (givenFact === expectCount)
 
 
-      modifyMaxSize (const 3)
-          $ modifyMaxSuccess (const 25)
+      modifyMaxSize (const 10)
+          $ modifyMaxSuccess (const 50)
           $ prop "reconstructs the original " $ \(NonZero f00) (NonZero g00) -> ioProperty $ do
-            let h0 = f00 * g00
-                f0 = h0 `quot` gcd (diff 0 h0) h0
+            let f0 = f00 * g00
                 c = foldr' (lcm . denominator) 1 f0
                 f = mapCoeffUnipol (numerator . (fromInteger c*)) f0
             (i, dic) <- factorer f
