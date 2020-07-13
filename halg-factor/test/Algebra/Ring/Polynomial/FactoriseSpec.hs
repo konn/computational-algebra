@@ -16,7 +16,6 @@ import           Control.Arrow
 import           Control.Lens
 import           Control.Monad.Random
 import           Data.Functor                       ((<&>))
-import qualified Data.HashMap.Strict                as HM
 import qualified Data.IntMap                        as IM
 import           Data.Monoid                        (Sum (..))
 import qualified Data.Set                           as S
