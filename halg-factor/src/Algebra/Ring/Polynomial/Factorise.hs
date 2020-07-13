@@ -258,7 +258,7 @@ wrapSQFFactor fac f0
     let (g, c) = (pp f0, content f0)
     ts0 <- F.mapM (secondM fac . clearDenom) (yun $ monoize $ mapCoeffUnipol (F.% 1) g)
     let anss = IM.toList ts0
-        k = c * leadingCoeff g `div` product (map (fst.snd) anss)
+        k = c * leadingCoeff g `div` product (map (\(p,(i,_)) -> i P.^ p) anss)
     return (k, IM.fromList $ map (second $ S.fromList . snd) anss)
   where
     n = totalDegree' f0
