@@ -37,7 +37,7 @@ import qualified Prelude                as P
 --   so if you want to treat the power greater than @maxBound :: Int@,
 --   please consider using other represntation.
 newtype Unipol r = Unipol { runUnipol :: IM.IntMap r }
-                 deriving (NFData)
+                 deriving (NFData, Foldable)
 type role Unipol representational
 
 instance Hashable r => Hashable (Unipol r) where
@@ -356,6 +356,13 @@ instance CoeffRing r => IsOrderedPolynomial (Unipol r) where
           (\((a, b),d) -> ((b, OrderedMonomial $ SV.singleton a), Unipol d))
     . IM.maxViewWithKey . runUnipol
   {-# INLINE splitLeadingTerm #-}
+  diff _ =
+      Unipol
+    . IM.mapKeysMonotonic pred
+    . IM.mapMaybeWithKey
+      (\i c -> guard (i > 0) >> decZero (toInteger i .* c))
+    . runUnipol
+  {-# INLINE diff #-}
 
 instance (CoeffRing r, PrettyCoeff r) => Show (Unipol r) where
   showsPrec = showsPolynomialWith (SV.singleton "x")

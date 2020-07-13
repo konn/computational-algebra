@@ -1,5 +1,5 @@
-{-# LANGUAGE DataKinds, DerivingVia, GADTs, MultiParamTypeClasses           #-}
-{-# LANGUAGE PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving #-}
+{-# LANGUAGE DataKinds, GADTs, MultiParamTypeClasses, PolyKinds, RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables, StandaloneDeriving                        #-}
 -- | Quotient rings for eulidean domains.
 --
 --   See @Algebra.Ring.Polynomial.Quotient@ in @halg-polynomial@
