@@ -309,7 +309,7 @@ permute0 (SCons x xs) ys =
          withKnownNat k (fromIntegral (toNatural n) S.:< permute0 xs ys)
     SNothing -> error "oops, you called permute0 for non-subset..."
 
-permute :: forall (xs :: [k])  ys. (IsSubsetOf xs ys , SEq k)
+permute :: forall k (xs :: [k])  ys. (IsSubsetOf xs ys , SEq k)
         => SList xs -> SList ys -> Sized (Length xs) Integer
 permute = _suppress (Proxy :: Proxy xs) (Proxy :: Proxy ys) permute0
 
