@@ -11,7 +11,8 @@ extra-source-files:
 - ChangeLog.md
 
 tested-with: |
-  GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2
+  GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2,
+  GHC == 8.10.1
 
 # Metadata used when publishing your package
 synopsis:            Polynomial parsers,  part of halg computational algebra suite.
