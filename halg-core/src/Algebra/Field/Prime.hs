@@ -215,7 +215,7 @@ modNat :: IsPrimeChar (p :: k) => Integer -> F p
 modNat = modNat' Proxy
 {-# INLINE modNat #-}
 
-modNat' :: forall proxy (p :: k). IsPrimeChar p => proxy (F p) -> Integer -> F p
+modNat' :: forall proxy p. IsPrimeChar p => proxy (F p) -> Integer -> F p
 modNat' _ i = wrapF $
   let p = charInfo (Proxy :: Proxy p)
   in unwrapIntegral $ fromInteger i `rem` fromInteger p
