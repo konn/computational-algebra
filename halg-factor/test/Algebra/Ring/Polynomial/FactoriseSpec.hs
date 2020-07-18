@@ -82,9 +82,6 @@ regressions =
     ξ :: GF 2 5
     ξ = primitive
 
-instance IsPrimeChar n => Arbitrary (F n) where
-  arbitrary = QC.elements $ Fin.elements $ Proxy @(F n)
-
 instance (IsPrimeChar p, KnownNat n, ConwayPolynomial p n)
       => Arbitrary (GF p n) where
   arbitrary = QC.elements $ Fin.elements $ Proxy @(GF p n)
