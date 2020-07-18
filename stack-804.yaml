@@ -27,8 +27,9 @@ extra-deps:
 - unamb-0.2.7
 - parser-combinators-1.1.0
 - megaparsec-7.0.5
-- exact-pi-0.5.0.1@sha256:55e343462be57d692dc6b5fd27d2f52c39052cb402ea03692e4dc460fa69a5d0,2121
-- semirings-0.5.3@sha256:4b0d243f88bb07c0673978a37b6b9fd16da44f15e8d552fb08795d9a88a3dc76,3791
+- arithmoi-0.9.0.0
+- exact-pi-0.5.0.1
+- semirings-0.5.3
 - QuickCheck-2.12.6.1
 - hspec-core-2.6.1
 - repa-3.4.1.4
@@ -36,4 +37,4 @@ extra-deps:
 - quickcheck-instances-0.3.19
 - hspec-2.6.1
 - hspec-discover-2.6.1
-- inspection-testing-0.4.2.4@sha256:10c2fe69eee3c66a4e1fa2f49173f1ff1142b131ed5a6eda986258ff2370aa76,7371
+- inspection-testing-0.4.2.4

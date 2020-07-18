@@ -1,8 +1,9 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs         #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses #-}
-{-# LANGUAGE MultiWayIf, PolyKinds, RankNTypes, ScopedTypeVariables        #-}
-{-# LANGUAGE TemplateHaskell, TypeApplications, TypeFamilies               #-}
-{-# LANGUAGE TypeOperators, UndecidableInstances, UndecidableSuperClasses  #-}
+{-# LANGUAGE DataKinds, DerivingStrategies, FlexibleContexts              #-}
+{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving         #-}
+{-# LANGUAGE LambdaCase, MultiParamTypeClasses, MultiWayIf, PolyKinds     #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, StandaloneDeriving          #-}
+{-# LANGUAGE TemplateHaskell, TypeApplications, TypeFamilies              #-}
+{-# LANGUAGE TypeOperators, UndecidableInstances, UndecidableSuperClasses #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 {-# OPTIONS_GHC -fplugin Data.Singletons.TypeNats.Presburger #-}
 -- | Prime fields

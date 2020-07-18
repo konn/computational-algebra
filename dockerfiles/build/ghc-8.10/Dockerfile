@@ -15,16 +15,10 @@ COPY halg-matrices/ /skeleton/halg-matrices
 COPY halg-polyn-parser/ /skeleton/halg-polyn-parser
 COPY halg-polynomials/ /skeleton/halg-polynomials
 
-ENV GHC=804
+ENV GHC=810
 COPY stack-${GHC}.yaml /skeleton
 
 WORKDIR /skeleton
 ENV STACK_YAML=stack-${GHC}.yaml
 RUN stack setup
 RUN stack build --only-dependencies --test --no-run-tests
-
-ENV GHC_LLVM_LLC_PATH=llc-5.0
-ENV GHC_LLVM_OPT_PATH=opt-5.0
-
-RUN LLR=$LD_LIBRARY_PATH && unset LD_LIBRARY_PATH && echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-5.0 main" >> /etc/apt/sources.list && wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add - && apt-get update && apt-get -y install clang-5.0 lld-5.0 && export LD_LIBRARY_PATH=$LLR
-

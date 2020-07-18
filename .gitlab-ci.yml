@@ -19,8 +19,7 @@ stages:
   - '.hspec-failures'
 
 .header-ghc-84: &header-ghc-84
-  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.4:0.6.0.0-p3
-  allow_failure: true
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.4:0.6.0.0-p4
   variables:
     STACK_YAML: "stack-804.yaml"
     GHC: 804
@@ -29,7 +28,7 @@ stages:
     <<: *cached-dirs
 
 .header-ghc-86: &header-ghc-86
-  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.6:0.6.0.0-p2
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.6:0.6.0.0-p3
   variables:
     STACK_YAML: "stack-806.yaml"
     GHC: 806
@@ -38,10 +37,19 @@ stages:
     <<: *cached-dirs
 
 .header-ghc-88: &header-ghc-88
-  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.8:0.6.0.0-p2
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.8:0.6.0.0-p3
   variables:
     STACK_YAML: "stack-808.yaml"
     GHC: 808
+  cache: 
+    key: "${CI_COMMIT_REF_SLUG}-ghc-8.8"
+    <<: *cached-dirs
+
+.header-ghc-88: &header-ghc-810
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.10:0.6.0.0
+  variables:
+    STACK_YAML: "stack-810.yaml"
+    GHC: 810
   cache: 
     key: "${CI_COMMIT_REF_SLUG}-ghc-8.8"
     <<: *cached-dirs
@@ -79,6 +87,10 @@ build:ghc-8.8:
   <<:    *header-ghc-88
   <<:    *build-script
 
+build:ghc-8.10:
+  <<:    *header-ghc-810
+  <<:    *build-script
+
 test:ghc-8.4:
   dependencies:
   - build:ghc-8.4
@@ -98,16 +110,22 @@ test:ghc-8.8:
   <<:    *header-ghc-88
   <<:    *test-script
 
+test:ghc-8.10:
+  dependencies:
+  - build:ghc-8.10
+  <<:    *header-ghc-810
+  <<:    *test-script
+
 deploy_documents:
   only:
   - master@konn/computational-algebra
-  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.6:0.6.0.0-p2
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.8:0.6.0.0-p3
   stage: deploy
   allow_failure: true
   dependencies:
-  - test:ghc-8.6
+  - test:ghc-8.8
   cache: 
-    key: "${CI_COMMIT_REF_SLUG}-ghc-8.6"
+    key: "${CI_COMMIT_REF_SLUG}-ghc-8.8"
     policy: pull
     <<: *cached-dirs
   script:
