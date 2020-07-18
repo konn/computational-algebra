@@ -88,7 +88,7 @@ instance SingularCoeff Integer where
 
   coeffType _ = IntegerCoeff
 
-instance KnownNat p => SingularCoeff (F p) where
+instance IsPrimeChar p => SingularCoeff (F p) where
   parseSingularCoeff = rationalP
 
   coeffType = Char . char

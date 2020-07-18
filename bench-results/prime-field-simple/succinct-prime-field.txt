@@ -1,0 +1,82 @@
+Benchmark prime-field-simple-bench: RUNNING...
+benchmarked recip a middle/F 2
+time                 155.1 ns   (154.1 ns .. 155.9 ns)
+                     1.000 R²   (0.999 R² .. 1.000 R²)
+mean                 154.3 ns   (153.7 ns .. 154.9 ns)
+std dev              1.829 ns   (1.560 ns .. 2.296 ns)
+
+benchmarked recip a middle/F 5
+time                 337.0 ns   (332.3 ns .. 342.2 ns)
+                     0.999 R²   (0.998 R² .. 0.999 R²)
+mean                 333.5 ns   (331.6 ns .. 335.4 ns)
+std dev              6.518 ns   (5.487 ns .. 7.813 ns)
+
+benchmarked recip a middle/F 59
+time                 327.0 ns   (319.3 ns .. 335.0 ns)
+                     0.996 R²   (0.993 R² .. 0.999 R²)
+mean                 338.7 ns   (333.5 ns .. 353.1 ns)
+std dev              25.57 ns   (11.58 ns .. 46.73 ns)
+variance introduced by outliers: 48% (moderately inflated)
+
+benchmarked recip a middle/F 12379
+time                 336.6 ns   (333.3 ns .. 340.5 ns)
+                     0.999 R²   (0.999 R² .. 1.000 R²)
+mean                 336.0 ns   (334.5 ns .. 337.5 ns)
+std dev              5.277 ns   (4.665 ns .. 6.132 ns)
+
+benchmarked recip a middle/F 3037000507 (large)
+time                 475.0 ns   (470.7 ns .. 479.8 ns)
+                     0.999 R²   (0.999 R² .. 1.000 R²)
+mean                 478.1 ns   (476.1 ns .. 480.2 ns)
+std dev              6.954 ns   (5.536 ns .. 8.713 ns)
+
+benchmarked product of units/F 2
+time                 11.53 ns   (11.37 ns .. 11.72 ns)
+                     0.999 R²   (0.999 R² .. 0.999 R²)
+mean                 11.45 ns   (11.39 ns .. 11.50 ns)
+std dev              185.6 ps   (157.3 ps .. 218.1 ps)
+
+benchmarked product of units/F 5
+time                 52.47 ns   (52.10 ns .. 52.87 ns)
+                     0.999 R²   (0.999 R² .. 1.000 R²)
+mean                 52.13 ns   (51.90 ns .. 52.38 ns)
+std dev              833.1 ps   (663.3 ps .. 1.106 ns)
+
+benchmarked product of units/F 59
+time                 711.1 ns   (704.1 ns .. 723.4 ns)
+                     0.999 R²   (0.999 R² .. 1.000 R²)
+mean                 706.9 ns   (705.2 ns .. 709.3 ns)
+std dev              6.973 ns   (4.830 ns .. 11.14 ns)
+
+benchmarked product of units/F 12379
+time                 148.8 μs   (146.6 μs .. 150.7 μs)
+                     0.998 R²   (0.997 R² .. 0.999 R²)
+mean                 154.1 μs   (151.5 μs .. 160.9 μs)
+std dev              14.10 μs   (8.022 μs .. 21.62 μs)
+variance introduced by outliers: 60% (severely inflated)
+
+benchmarked sum of prefix-products/F 2
+time                 8.807 ns   (8.729 ns .. 8.884 ns)
+                     1.000 R²   (0.999 R² .. 1.000 R²)
+mean                 8.827 ns   (8.793 ns .. 8.859 ns)
+std dev              109.4 ps   (95.53 ps .. 126.7 ps)
+
+benchmarked sum of prefix-products/F 5
+time                 144.2 ns   (143.1 ns .. 145.3 ns)
+                     1.000 R²   (0.999 R² .. 1.000 R²)
+mean                 144.0 ns   (143.5 ns .. 144.8 ns)
+std dev              2.105 ns   (1.366 ns .. 3.271 ns)
+
+benchmarked sum of prefix-products/F 59
+time                 19.70 μs   (19.55 μs .. 19.90 μs)
+                     0.998 R²   (0.995 R² .. 1.000 R²)
+mean                 19.74 μs   (19.66 μs .. 19.93 μs)
+std dev              406.5 ns   (199.0 ns .. 802.2 ns)
+
+benchmarking sum of prefix-products/F 6197 ... took 39.75 s, total 56 iterations
+benchmarked sum of prefix-products/F 6197
+time                 611.1 ms   (589.5 ms .. 638.2 ms)
+                     0.997 R²   (0.993 R² .. 1.000 R²)
+mean                 602.3 ms   (594.5 ms .. 611.2 ms)
+std dev              14.69 ms   (10.77 ms .. 19.51 ms)
+

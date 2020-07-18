@@ -12,11 +12,10 @@ build:
   executable-profiling: true
   library-profiling: true
 
-apply-ghc-options: everything
 rebuild-ghc-options: true
 ghc-options:
-  "$everything": -fno-prof-auto
-  "$locals": -fprof-auto
+  "$everything": -fno-prof-auto -fno-prof-cafs
+  "$locals": -fno-prof-auto -fno-prof-cafs
 
 packages:
 - 'computational-algebra'

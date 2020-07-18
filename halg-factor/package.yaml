@@ -59,6 +59,14 @@ library:
 
 executables:
   factor-deg50-prof:
+    when:
+    - condition: flag(profile)
+      then:
+        buildable: true
+        ghc-options:
+        - -fno-prof-auto
+      else:
+        buildable: false
     source-dirs: app
     ghc-options:
     - -Wall

@@ -4,5 +4,6 @@
     "**/.stack-prof/": true,
     "**/.stack-work/": true,
     "heap-poly": true
-  }
+  },
+  "stylishHaskell.showConsoleOnError": false
 }
