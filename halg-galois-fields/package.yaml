@@ -43,8 +43,13 @@ dependencies:
 - algebraic-prelude
 - algebra
 
-data-files:
-- data/*
+data-dir: data
+
+flags:
+  opt-test:
+    description: "Whether to build optimisation test"
+    manual: true
+    default: false
 
 library:
   source-dirs: src
@@ -58,7 +63,11 @@ library:
   - singletons
   - sized
   - template-haskell
+  - mono-traversable
+  - ListLike
   - vector
+  - primitive
+  - directory
   other-modules:
   - Algebra.Field.Galois.Conway
   - Algebra.Field.Galois.Internal
@@ -67,4 +76,28 @@ library:
 
 executables: {}
 
-tests: {}
+tests:
+  halg-gf-opt-test:
+    when:
+    - condition: flag(opt-test)
+      then:
+        buildable: true
+      else:
+        buildable: false
+    source-dirs: opt-test
+    main: halg-gf-opt-test.hs
+    ghc-options:
+    - -Wall
+    - -O2
+    - -fno-hpc
+    dependencies:
+    - halg-core
+    - halg-polynomials
+    - halg-galois-fields
+    - inspection-testing
+    - hspec
+    - vector
+    - primitive
+    - sized
+    - ListLike
+

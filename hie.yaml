@@ -37,6 +37,9 @@ cradle:
 
     - path: "halg-galois-fields/src"
       component: "halg-galois-fields:lib"
+    - path: "halg-galois-fields/opt-test"
+      component: "halg-galois-fields:test:halg-gf-opt-test"
+
 
     - path: "algebraic-prelude/src"
       component: "algebraic-prelude:lib"

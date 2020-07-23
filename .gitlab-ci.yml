@@ -66,7 +66,7 @@ before_script:
   - echo "$STACK_YAML"
   - stack setup
   - stack build --no-terminal --test --no-run-tests --coverage
-  - stack build --no-terminal --work-dir=.stack-no-coverage --flag halg-core-test:opt-test halg-core-test:exe:halg-core-opt-test
+  - stack build --no-terminal --work-dir=.stack-no-coverage --flag halg-core-test:opt-test --flag halg-galois-fields:opt-test halg-core-test:exe:halg-core-opt-test halg-galois-fields:text:halg-gf-opt-test
 
 .test-script: &test-script
   stage:  test
@@ -74,6 +74,7 @@ before_script:
   - stack setup
   - stack --no-terminal test --no-rerun-tests --coverage
   - stack exec --work-dir=.stack-no-coverage -- halg-core-opt-test
+  - stack exec --work-dir=.stack-no-coverage -- halg-gf-opt-test
 
 build:ghc-8.4:
   <<:    *header-ghc-84
