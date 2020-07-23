@@ -1,4 +1,8 @@
-{-# LANGUAGE DataKinds, DerivingStrategies, FlexibleContexts              #-}
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 810
+{-# LANGUAGE StandaloneKindSignatures #-}
+#endif
+
+{-# LANGUAGE CPP, DataKinds, DerivingStrategies, FlexibleContexts         #-}
 {-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving         #-}
 {-# LANGUAGE LambdaCase, MultiParamTypeClasses, MultiWayIf, PolyKinds     #-}
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, StandaloneDeriving          #-}
@@ -52,7 +56,16 @@ newtype F (p :: k) = F { runF :: F' p }
 type WORD_MAX_BOUND =
   $(litT $ numTyLit $ floor @Double
     $ sqrt $ fromIntegral $ maxBound @Int)
+
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 810
+type F' :: forall k. forall (p :: k) -> Type
+#endif
+
 type F' (p :: k) = F_Aux k p
+
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 810
+type F_Aux :: forall k (p :: k) -> Type
+#endif
 type family F_Aux (k :: Type) (p :: k) where
   F_Aux Nat (p :: Nat) =
     F_Nat_Aux (WORD_MAX_BOUND <=? p)
