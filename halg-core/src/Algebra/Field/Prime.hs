@@ -1,7 +1,7 @@
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 810
 {-# LANGUAGE StandaloneKindSignatures #-}
 #endif
-
+{-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE CPP, DataKinds, DerivingStrategies, FlexibleContexts         #-}
 {-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving         #-}
 {-# LANGUAGE LambdaCase, MultiParamTypeClasses, MultiWayIf, PolyKinds     #-}
@@ -19,7 +19,7 @@ module Algebra.Field.Prime
     -- * Auxiliary interfaces
     HasPrimeField(..),
     -- ** Internals
-    wrapF, liftFUnary, liftBinF
+    wrapF, liftFUnary, liftBinF, WORD_MAX_BOUND
   ) where
 import Algebra.Arithmetic            (modPow)
 import Algebra.Field.Finite
@@ -45,6 +45,7 @@ import           Language.Haskell.TH          (litT, numTyLit)
 import           Numeric.Algebra              (char)
 import           Numeric.Algebra              (Natural)
 import qualified Numeric.Algebra              as NA
+import           Data.Primitive.Types
 import           Numeric.Semiring.ZeroProduct (ZeroProductSemiring)
 import qualified Prelude                      as P
 import           Unsafe.Coerce                (unsafeCoerce)
@@ -490,3 +491,5 @@ derivingUnbox "Fp_small"
     |]
   [|runF|]
   [|F|]
+
+deriving newtype instance (WORD_MAX_BOUND <=? p) ~ 'False => Prim (F p)

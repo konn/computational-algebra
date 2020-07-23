@@ -63,6 +63,8 @@ dependencies:
 - vector
 - vector-th-unbox
 - primitive
+- vector-algorithms
+- vector-builder
 - vector-instances
 
 library:
