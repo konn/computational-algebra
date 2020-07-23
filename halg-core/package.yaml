@@ -61,6 +61,8 @@ dependencies:
 - type-natural
 - unordered-containers
 - vector
+- vector-th-unbox
+- primitive
 - vector-instances
 
 library:

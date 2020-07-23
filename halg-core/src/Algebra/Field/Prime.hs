@@ -35,6 +35,7 @@ import           Data.Kind                    (Constraint, Type)
 import           Data.Proxy                   (Proxy (..), asProxyTypeOf)
 import qualified Data.Ratio                   as R
 import           Data.Reflection              (Reifies (reflect), reifyNat)
+import           Data.Vector.Unboxed.Deriving
 import           Data.Singletons.Prelude
 import           GHC.Read
 import           GHC.TypeLits                 (KnownNat)
@@ -482,3 +483,10 @@ modRat _ q = NA.fromInteger (numerator q) NA./ NA.fromInteger (denominator q)
 modRat' :: FiniteField k => Fraction Integer -> k
 modRat' = modRat Proxy
 {-# INLINE modRat' #-}
+
+derivingUnbox "Fp_small"
+  [t| forall p. (WORD_MAX_BOUND <=? p) ~ 'False
+      => F p -> Int
+    |]
+  [|runF|]
+  [|F|]
