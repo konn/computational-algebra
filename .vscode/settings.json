@@ -5,5 +5,7 @@
     "**/.stack-work/": true,
     "heap-poly": true
   },
-  "stylishHaskell.showConsoleOnError": false
+  "stylishHaskell.showConsoleOnError": false,
+  "haskell.formattingProvider": "none",
+  "editor.defaultFormatter": "vigoo.stylish-haskell"
 }
