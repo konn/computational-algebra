@@ -54,7 +54,7 @@ type WORD_MAX_BOUND =
     $ sqrt $ fromIntegral $ maxBound @Int)
 type F' (p :: k) = F_Aux k p
 type family F_Aux (k :: Type) (p :: k) where
-  F_Aux Nat p =
+  F_Aux Nat (p :: Nat) =
     F_Nat_Aux (WORD_MAX_BOUND <=? p)
   F_Aux k p = Integer
 
