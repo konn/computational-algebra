@@ -8,12 +8,21 @@ module Algebra.Field.Galois.Conway
         conwayFile) where
 import Algebra.Field.Galois.Internal
 import Algebra.Prelude.Core
-import Control.Monad                 (liftM)
-import Language.Haskell.TH           (runIO)
 import Language.Haskell.TH           (DecsQ)
+import Language.Haskell.TH.Syntax
+import System.Directory
 
-do dat <- tail . init . lines <$> runIO (readFile "data/conway.txt")
-   concat <$> mapM (buildInstance . head . parseLine) dat
+do
+  dir <- runIO getCurrentDirectory
+  conwayFile : _ <- runIO $
+    filterM doesFileExist
+    [ dir </> "halg-galois-fields" </> "data" </> "conway.txt"
+    , "data" </> "conway.txt"
+    , "halg-galois-fields" </> "data" </> "conway.txt"
+    ]
+  addDependentFile conwayFile
+  dat <- tail . init . lines <$> runIO (readFile conwayFile)
+  concat <$> mapM (buildInstance . head . parseLine) dat
 
 -- | Macro to add Conway polynomials dictionary.
 addConwayPolynomials :: [(Integer, Integer, [Integer])] -> DecsQ
