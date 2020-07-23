@@ -7,5 +7,6 @@
   },
   "stylishHaskell.showConsoleOnError": false,
   "haskell.formattingProvider": "none",
-  "editor.defaultFormatter": "vigoo.stylish-haskell"
+  "editor.defaultFormatter": "vigoo.stylish-haskell",
+  "editor.formatOnSave": true
 }
