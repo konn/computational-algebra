@@ -35,7 +35,7 @@ stages:
     <<: *cached-dirs
 
 .header-ghc-88: &header-ghc-88
-  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.8:0.6.0.0-p3
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.8:0.6.0.0-p4
   variables:
     STACK_YAML: "stack-808.yaml"
     GHC: 808
@@ -115,7 +115,7 @@ test:ghc-8.10:
 deploy_documents:
   only:
   - master@konn/computational-algebra
-  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.8:0.6.0.0-p3
+  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.8:0.6.0.0-p4
   stage: deploy
   allow_failure: true
   dependencies:
