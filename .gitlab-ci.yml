@@ -18,15 +18,6 @@ stages:
   - '.apt/'
   - '.hspec-failures'
 
-.header-ghc-84: &header-ghc-84
-  image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.4:0.6.0.0-p4
-  variables:
-    STACK_YAML: "stack-804.yaml"
-    GHC: 804
-  cache: 
-    key: "${CI_COMMIT_REF_SLUG}-ghc-8.4"
-    <<: *cached-dirs
-
 .header-ghc-86: &header-ghc-86
   image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.6:0.6.0.0-p3
   variables:
@@ -76,10 +67,6 @@ before_script:
   - stack exec --work-dir=.stack-no-coverage -- halg-core-opt-test
   - stack exec --work-dir=.stack-no-coverage -- halg-gf-opt-test
 
-build:ghc-8.4:
-  <<:    *header-ghc-84
-  <<:    *build-script
-
 build:ghc-8.6:
   <<:    *header-ghc-86
   <<:    *build-script
@@ -91,13 +78,6 @@ build:ghc-8.8:
 build:ghc-8.10:
   <<:    *header-ghc-810
   <<:    *build-script
-
-test:ghc-8.4:
-  dependencies:
-  - build:ghc-8.4
-  <<:    *header-ghc-84
-  <<:    *test-script
-  coverage: '/^\s*(\d+\s*%)\s*top-level declarations used/'
 
 test:ghc-8.6:
   dependencies:
