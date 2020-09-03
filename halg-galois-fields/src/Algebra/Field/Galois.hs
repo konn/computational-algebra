@@ -1,3 +1,4 @@
+{-# LANGUAGE ConstraintKinds #-}
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 810
 {-# LANGUAGE StandaloneKindSignatures #-}
 #endif
@@ -12,7 +13,7 @@
 {-# LANGUAGE UndecidableSuperClasses                                   #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Algebra.Field.Galois
-  ( GF'(), IsGF', modPoly, modVec,
+  ( GF'(), IsGF', IsGF, modPoly, modVec,
     withIrreducible, linearRepGF, linearRepGF',
     reifyGF', generateIrreducible,
     withGF', GF, ConwayPolynomial(..),
@@ -106,6 +107,8 @@ modPoly = GF' . polyToVec
 modVec :: SV.Sized (GFSized' k p) n (F p) -> GF' p n f
 modVec = GF'
 
+class IsGF' p n (Conway p n) => IsGF p n 
+instance IsGF' p n (Conway p n) => IsGF p n 
 
 instance (IsGF' p n f, Show (F p))
   => Show (GF' p n f)  where
