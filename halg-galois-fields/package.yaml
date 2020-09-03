@@ -64,9 +64,9 @@ library:
   - sized
   - template-haskell
   - mono-traversable
-  - ListLike
   - vector
   - primitive
+  - subcategories
   - directory
   other-modules:
   - Algebra.Field.Galois.Conway
@@ -99,5 +99,5 @@ tests:
     - vector
     - primitive
     - sized
-    - ListLike
+    - subcategories
 

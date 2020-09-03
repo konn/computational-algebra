@@ -29,7 +29,7 @@ instance (Monad m, Serial m (Monomial n)) => Serial m (OrderedMonomial ord n) wh
   series = newtypeCons OrderedMonomial
 
 arbitraryMonomialOfSum :: SNat n -> Int -> Gen (Monomial n)
-arbitraryMonomialOfSum n k =
+arbitraryMonomialOfSum n k = withKnownNat n $
   case zeroOrSucc n of
     IsZero | k == 0 -> QC.elements [SV.empty]
            | otherwise -> error "Impossible"

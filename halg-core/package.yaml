@@ -37,7 +37,6 @@ default-extensions:
 - UndecidableInstances  
 
 dependencies:
-- ListLike
 - MonadRandom
 - algebra
 - algebraic-prelude
@@ -58,6 +57,7 @@ dependencies:
 - reflection
 - singletons
 - sized
+- subcategories
 - type-natural
 - unordered-containers
 - vector

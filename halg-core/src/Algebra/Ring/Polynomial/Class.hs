@@ -29,35 +29,25 @@ import           Algebra.Normed
 import           Algebra.Ring.Polynomial.Monomial
 import           Algebra.Scalar
 import           AlgebraicPrelude
-import           Control.Arrow                    ((***))
 import           Control.Lens                     (Iso', folded, ifoldMap, iso,
                                                    ix, maximumOf, (%~),
                                                    _Wrapped)
-import           Data.Foldable                    (foldr, maximum)
 import qualified Data.Foldable                    as F
 import qualified Data.HashSet                     as HS
 import           Data.Int
 import           Data.Kind                        (Type)
 import qualified Data.List                        as L
 import qualified Data.Map.Strict                  as M
-import           Data.Maybe                       (catMaybes, fromJust,
-                                                   fromMaybe)
+import           Data.Maybe                       (fromJust)
 import           Data.Monoid                      (First (..))
 import           Data.MonoTraversable
 import qualified Data.Ratio                       as R
 import qualified Data.Set                         as S
-import           Data.Singletons.Prelude          (SingKind (..))
 import qualified Data.Sized.Builtin               as V
 import           Data.Vector.Instances            ()
 import           Data.Word
-import           GHC.TypeLits                     (KnownNat, Nat)
 import qualified Numeric.Algebra.Complex          as NA
-import           Numeric.Decidable.Zero           (DecidableZero (..))
-import           Numeric.Domain.Euclidean         (Euclidean, quot)
-import           Numeric.Domain.GCD               (gcd)
-import           Numeric.Field.Fraction           (Fraction)
 import qualified Numeric.Field.Fraction           as NA
-import           Numeric.Natural                  (Natural)
 import qualified Numeric.Ring.Class               as NA
 import qualified Prelude                          as P
 

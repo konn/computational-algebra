@@ -1,35 +1,26 @@
-{-# LANGUAGE BangPatterns, DataKinds, FlexibleContexts, FlexibleInstances #-}
-{-# LANGUAGE GADTs, MultiParamTypeClasses, ScopedTypeVariables            #-}
-{-# LANGUAGE TypeApplications, TypeFamilies                               #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs        #-}
+{-# LANGUAGE MultiParamTypeClasses, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE TypeFamilies                                                 #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 -- | This Library provides some *dangerous* instances for @Double@s and @Complex@.
 module Algebra.Instances () where
 import Algebra.Scalar
 
 import           AlgebraicPrelude
-import           Control.DeepSeq              (NFData (..))
-import           Control.Monad.Random         (Random (..), getRandom)
-import           Control.Monad.Random         (getRandomR, runRand)
-import           Control.Monad.ST.Strict      (runST)
-import qualified Data.Coerce                  as DC
-import           Data.Complex                 (Complex (..))
-import           Data.Convertible.Base        (Convertible (..))
-import           Data.Functor.Identity
-import           Data.ListLike                (ListLike)
-import qualified Data.ListLike                as LL
+import           Control.DeepSeq          (NFData (..))
+import           Control.Monad.Random     (Random (..), getRandom)
+import           Control.Monad.Random     (getRandomR, runRand)
+import           Control.Subcategory
+import           Data.Complex             (Complex (..))
+import           Data.Convertible.Base    (Convertible (..))
 import           Data.MonoTraversable
-import qualified Data.Primitive.PrimArray     as PA
-import qualified Data.Ratio                   as P
-import qualified Data.Sized.Builtin           as SV
-import qualified Data.Vector                  as DV
-import qualified Data.Vector.Algorithms.Intro as AI
-import           Data.Vector.Instances        ()
-import qualified Data.Vector.Primitive        as PV
-import qualified Numeric.Algebra              as NA
-import qualified Prelude                      as P
-import           Unsafe.Coerce                (unsafeCoerce)
-import qualified VectorBuilder.Builder        as VB
-import qualified VectorBuilder.Vector         as VB
+import qualified Data.Primitive.PrimArray as PA
+import qualified Data.Ratio               as P
+import qualified Data.Vector              as DV
+import           Data.Vector.Instances    ()
+import qualified Data.Vector.Primitive    as PV
+import qualified Numeric.Algebra          as NA
+import qualified Prelude                  as P
 
 instance Additive r => Additive (DV.Vector r) where
   (+) = DV.zipWith (+)
@@ -209,115 +200,13 @@ instance PV.Prim a => MonoFunctor (PV.Vector a) where
 instance PV.Prim a => MonoTraversable (PV.Vector a) where
   otraverse = \f -> fmap PV.fromList . traverse f . PV.toList
 
-instance PV.Prim a => ListLike (PV.Vector a) a where
-  singleton = PV.singleton
-  null = PV.null
-  genericLength = fromIntegral . PV.length
-  head = PV.head
-  tail = PV.tail
-  cons = PV.cons
-  empty = PV.empty
-  snoc = PV.snoc
-  append = (<>)
-  last = PV.last
-  init = PV.init
-  length = PV.length
-  rigidMap = PV.map
-  reverse = PV.reverse
-  concat = VB.build . LL.foldMap VB.vector
-  rigidConcatMap = PV.concatMap
-  any = PV.any
-  all = PV.all
-  maximum = PV.maximum
-  minimum = PV.minimum
-
-  replicate = PV.replicate
-  take = PV.take
-  drop = PV.drop
-  splitAt = PV.splitAt
-  takeWhile = PV.takeWhile
-  dropWhile = PV.dropWhile
-  span = PV.span
-  elem = PV.elem
-  notElem = PV.notElem
-  find = PV.find
-  filter = PV.filter
-  partition = PV.partition
-  index = DC.coerce $ PV.indexM @a @Identity
-  elemIndex = PV.elemIndex
-  elemIndices = fmap LL.fromListLike . PV.elemIndices
-  findIndex = PV.findIndex
-  findIndices = fmap LL.fromListLike . PV.findIndices
-  rigidMapM = PV.mapM
-  sort = PV.modify AI.sort
-  sortBy f = PV.modify (AI.sortBy f)
-
-instance PV.Prim a => LL.FoldableLL (PV.Vector a) a where
-  foldl = PV.foldl
-  foldl' = PV.foldl'
-  foldl1 = PV.foldl1
-  foldr = PV.foldr
-  foldr' = PV.foldr'
-  foldr1 = PV.foldr1
-
-instance PV.Prim a => LL.ListLike (PA.PrimArray a) a where
-  null = (== 0) . PA.sizeofPrimArray
-  singleton = PA.replicatePrimArray 1
-  genericLength = fromIntegral . PA.sizeofPrimArray
-  head = (`PA.indexPrimArray` 0)
-  tail = \xs -> runST $ do
-    let !len = PA.sizeofPrimArray xs
-    mxs <- PA.newPrimArray (len - 1)
-    PA.copyPrimArray mxs 0 xs 0 (len - 1)
-    PA.unsafeFreezePrimArray mxs
-  cons = \x xs -> runST $ do
-    let !len = PA.sizeofPrimArray xs
-    mxxs <- PA.newPrimArray (1 + len)
-    PA.writePrimArray mxxs 0 x
-    PA.copyPrimArray
-      mxxs 0 xs 1 len
-    PA.unsafeFreezePrimArray mxxs
-  empty = runST $ do
-    PA.unsafeFreezePrimArray =<< PA.newPrimArray 0
-  snoc = \ xs x -> runST $ do
-    let !len = PA.sizeofPrimArray xs
-    mxxs <- PA.newPrimArray (1 + len)
-    PA.writePrimArray mxxs len x
-    PA.copyPrimArray
-      mxxs 0 xs 0 len
-    PA.unsafeFreezePrimArray mxxs
-  append = (<>)
-  last = PA.indexPrimArray <$> id <*> pred . PA.sizeofPrimArray
-  init = \xs -> runST $ do
-    let !len = PA.sizeofPrimArray xs
-    mxs <- PA.newPrimArray (len - 1)
-    PA.copyPrimArray mxs 0 xs 0 (len - 1)
-    PA.unsafeFreezePrimArray mxs
-  length = PA.sizeofPrimArray
-  rigidMap = PA.mapPrimArray
-
-  replicate = PA.replicatePrimArray
-  filter = PA.filterPrimArray
-  index = PA.indexPrimArray
-  rigidMapM = PA.traversePrimArray
-  toList = PA.primArrayToList
-  fromList = PA.primArrayFromList
-
-instance PV.Prim a => LL.FoldableLL (PA.PrimArray a) a where
-  foldl = PA.foldlPrimArray
-  foldr = PA.foldrPrimArray
-  foldl' = PA.foldlPrimArray'
-  foldr' = PA.foldrPrimArray'
-
 type instance Element (PA.PrimArray a) = a
 instance PV.Prim a => MonoFoldable (PA.PrimArray a) where
   ofoldMap f = PA.foldrPrimArray' (mappend . f) mempty
   ofoldr = PA.foldrPrimArray'
   ofoldl' = PA.foldlPrimArray'
-  ofoldl1Ex' = \f xs ->
-    PA.foldlPrimArray' f (LL.head xs) (LL.tail xs)
-  ofoldr1Ex = \f xs ->
-    PA.foldrPrimArray' f (LL.last xs) (LL.init xs)
+  ofoldl1Ex' = \f xs -> PA.foldlPrimArray' f (chead xs) (ctail xs)
+  ofoldr1Ex = cfoldr1
   otoList = PA.primArrayToList
   olength = PA.sizeofPrimArray
   onull = (== 0) . PA.sizeofPrimArray
@@ -332,9 +221,3 @@ instance PV.Prim a => MonoFunctor (PA.PrimArray a) where
 instance PV.Prim a => MonoTraversable (PA.PrimArray a) where
   otraverse = PA.traversePrimArray
   omapM = PA.traversePrimArray
-
-{-# RULES
-  "zipWithSame/PVector" [~1]
-  forall (f :: (PV.Prim a, PV.Prim b, PV.Prim c) => a -> b -> c).
-  SV.zipWithSame f = (unsafeCoerce .) . (. SV.unsized) . PV.zipWith f . SV.unsized
-  #-}

@@ -18,14 +18,9 @@ import           AlgebraicPrelude
 import           Control.Lens            ((%~), _Unwrapping)
 import qualified Data.Foldable           as F
 import           Data.Kind               (Type)
-import           Data.ListLike           (ListLike)
 import           Data.Proxy
 import qualified Data.Sequence           as Seq
-import           Data.Singletons.Prelude as Algebra.Internal (PNum (..),
-                                                              POrd (..),
-                                                              SNum (..),
-                                                              SOrd (..),
-                                                              SingI (..),
+import           Data.Singletons.Prelude as Algebra.Internal (SingI (..),
                                                               SingKind (..),
                                                               SomeSing (..),
                                                               withSingI)
@@ -35,10 +30,11 @@ import Data.Singletons.Prelude as Algebra.Internal (SBool (SFalse, STrue), Sing)
 import Data.Singletons.Prelude as Algebra.Internal (Sing (SFalse, STrue))
 #endif
 
+import           Control.Subcategory          (CFoldable)
+import           Control.Subcategory.Functor  (Dom)
 import           Data.Singletons.Prelude.Enum as Algebra.Internal (PEnum (..),
                                                                    SEnum (..))
-import           Data.Singletons.TypeLits     as Algebra.Internal (KnownNat,
-                                                                   withKnownNat)
+import           Data.Singletons.TypeLits     as Algebra.Internal (withKnownNat)
 import           Data.Sized.Builtin           as Algebra.Internal (pattern (:<),
                                                                    pattern (:>),
                                                                    pattern NilL,
@@ -82,7 +78,7 @@ coerceLength eql = _Unwrapping Flipped.Flipped %~ coerce eql
 
 type SNat (n :: Nat) = Sing n
 
-sizedLength :: ListLike (f a) a => S.Sized f n a -> Sing n
+sizedLength :: (CFoldable f, Dom f a) => S.Sized f n a -> Sing n
 sizedLength = S.sLength
 
 padVecs :: forall a n m. (Unbox a) => a -> USized n a -> USized m a

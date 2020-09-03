@@ -34,21 +34,15 @@ import qualified Data.Coerce                  as DC
 import           Data.Constraint              ((:=>) (..), Dict (..))
 import qualified Data.Constraint              as C
 import           Data.Constraint.Forall       (Forall, inst)
-import           Data.Hashable                (Hashable (..))
 import           Data.Kind                    (Type)
-import           Data.Maybe                   (catMaybes)
-import           Data.Monoid                  (Dual (..), Sum (..), (<>))
+import           Data.Monoid                  (Dual (..), Sum (..))
 import           Data.MonoTraversable         (MonoFoldable (..), oand,
                                                ofoldMap, ofoldl', ofoldlUnwrap,
                                                osum)
-import           Data.Ord                     (comparing)
 import qualified Data.Semigroup               as Semi
-import           Data.Singletons.Prelude      (SList, Sing)
-import           Data.Singletons.Prelude      (SingKind (..))
+import           Data.Singletons.Prelude      (SList)
 import           Data.Singletons.Prelude.List (Length, Replicate, sReplicate)
-import           Data.Singletons.TypeLits     (withKnownNat)
 import qualified Data.Sized.Builtin           as V
-import           Data.Type.Natural.Class      (IsPeano (..), PeanoOrder (..))
 import qualified Data.Vector.Generic          as G
 import qualified Data.Vector.Generic.Mutable  as M
 import           Data.Vector.Instances        ()

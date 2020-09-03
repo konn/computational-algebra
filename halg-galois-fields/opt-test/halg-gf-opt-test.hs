@@ -9,8 +9,6 @@ module Main where
 import           Algebra.Field.Galois
 import           Algebra.Field.Prime
 import           Algebra.Prelude.Core
-import qualified Data.ListLike         as LL
-import qualified Data.Sized.Builtin    as SV
 import qualified Data.Vector           as V
 import qualified Data.Vector.Primitive as P
 import           Numeric.Algebra       as NA
@@ -21,12 +19,10 @@ add_gf_2_8 :: GF 2 8 -> GF 2 8 -> GF 2 8
 add_gf_2_8 = (NA.+)
 
 add_gf_2_8_Manual
-  :: SV.Sized P.Vector 8 (F 2)
-  -> SV.Sized P.Vector 8 (F 2)
-  -> SV.Sized P.Vector 8 (F 2)
-add_gf_2_8_Manual = SV.zipWithSame (NA.+)
-
-inspect $ coreOf 'add_gf_2_8
+  :: P.Vector (F 2)
+  -> P.Vector (F 2)
+  -> P.Vector (F 2)
+add_gf_2_8_Manual = P.zipWith (NA.+)
 
 checkInspection
   :: Result -> Expectation
@@ -44,10 +40,8 @@ main = hspec $ do
       it "doesn't contain type class dictionary" $
         checkInspection
           $(inspectTest $
-              'add_gf_2_8
-                `hasNoTypeClassesExcept`
-              [''LL.ListLike]
+              hasNoTypeClasses 'add_gf_2_8
             )
-      -- it "is almost equivalent to P.zipWith (+)" $
-      --   checkInspection
-      --     $(inspectTest $ 'add_gf_2_8 ==- 'add_gf_2_8_Manual)
+      it "is almost equivalent to zipWith (+)" $
+        checkInspection
+          $(inspectTest $ 'add_gf_2_8 ==- 'add_gf_2_8_Manual)

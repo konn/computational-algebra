@@ -35,18 +35,20 @@ import           Data.Kind            (Type)
 import qualified Data.Ratio           as Rat
 import           Data.Reflection      (Reifies (..), reify)
 import qualified Data.Sized.Builtin   as SV
-import qualified Data.Sized as Sized
+import qualified Data.Sized.Builtin   as Sized
 import qualified Data.Vector          as V
 import qualified GHC.TypeLits         as TL
 import qualified Numeric.Algebra      as NA
 import qualified Prelude              as P
+import Control.Subcategory (CZip, Dom)
 import qualified Data.Vector.Primitive as Prim
 import Data.Singletons.TH (sCases)
-import Data.MonoTraversable (MonoTraversable, otraverse, Element, MonoFoldable(oall))
 import qualified Data.Vector.Generic as G
-import qualified Data.ListLike as LL
 import Unsafe.Coerce (unsafeCoerce)
 import qualified Data.Coerce as DC
+import Control.Subcategory.Foldable (CFreeMonoid)
+import Control.Subcategory.Foldable (CFoldable(call))
+import Control.Subcategory (CTraversable(ctraverse))
 
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 810
 type GFSized :: forall k. forall (p :: k) -> Type -> Type
@@ -95,7 +97,8 @@ type GF (p :: TL.Nat) n = GF' p n (Conway p n)
 modPoly :: forall k (p :: k) n f. 
   ( KnownNat n, IsPrimeChar p,
     G.Vector (GFSized' k p) (F p),
-    LL.ListLike (GFSized' k p (F p)) (F p)
+    CFreeMonoid (GFSized' k p), 
+    Dom (GFSized' k p) (F p)
   )
   => Unipol (F p) -> GF' p n f
 modPoly = GF' . polyToVec
@@ -107,7 +110,7 @@ modVec = GF'
 instance (IsGF' p n f, Show (F p))
   => Show (GF' p n f)  where
   showsPrec d (GF' (v SV.:< vs)) =
-    if oall isZero vs
+    if call isZero vs
     then showsPrec d v
     else showChar '<' . showString (showPolynomialWith (singleton "ξ") 0 $ vecToPoly $ v :< vs) . showChar '>'
   showsPrec _ _ = showString "0"
@@ -133,7 +136,7 @@ vecToPoly v = sum $ imap (\i c -> injectCoeff c * varX^fromIntegral i)
   => Unipol (F p) -> SV.Sized Prim.Vector n (F p)
   #-}
 polyToVec :: forall n r v.
-  (CoeffRing r, KnownNat n, G.Vector v r, LL.ListLike (v r) r)
+  (CoeffRing r, KnownNat n, G.Vector v r, CFreeMonoid v, Dom v r)
   => Unipol r -> SV.Sized v n r
 polyToVec f =
   case zeroOrSucc (sing :: SNat n) of
@@ -146,7 +149,7 @@ polyToVec f =
 
 mapSV
   :: forall f n a b.
-    (LL.ListLike (f a) a, LL.ListLike (f b) b)
+    (CFreeMonoid f, Dom f a, Dom f b)
   => (a -> b) -> SV.Sized f n a -> SV.Sized f n b
 {-# INLINE [1] mapSV #-}
 mapSV = SV.map
@@ -166,8 +169,7 @@ mapSV = SV.map
 
 zipWithSameSV
   :: forall f a b c n.
-    ( LL.ListLike (f a) a, LL.ListLike (f b) b
-    , LL.ListLike (f c) c
+    ( CZip f, CFreeMonoid f, Dom f a, Dom f b, Dom f c
     )
   => (a -> b -> c) -> SV.Sized f n a -> SV.Sized f n b -> SV.Sized f n c
 {-# INLINE [2] zipWithSameSV #-}
@@ -201,24 +203,6 @@ zipWithFpBoxed = unsafeCoerce $ V.zipWith @(F p) @(F p) @(F p)
 
 "zipWith/Fp/Prim/F 3" [~2]
   zipWithSameSV = zipWithFpPrim @3
-  #-}
-
-{-# SPECIALISE zipWithSame
-  :: (F p -> F p -> F p)
-  -> Sized n (F p) -> Sized n (F p)
-  -> Sized n (F p)
-  #-}
-{-# SPECIALISE zipWithSame
-  :: (F 2 -> F 2 -> F 2)
-  -> SV.Sized Prim.Vector n (F 2)
-  -> SV.Sized Prim.Vector n (F 2)  
-  -> SV.Sized Prim.Vector n (F 2)
-  #-}
-{-# SPECIALISE zipWithSame
-  :: (F 3 -> F 3 -> F 3)
-  -> SV.Sized Prim.Vector n (F 3)
-  -> SV.Sized Prim.Vector n (F 3)  
-  -> SV.Sized Prim.Vector n (F 3)
   #-}
 
 instance IsGF' p n f => Additive (GF' p n f)  where
@@ -275,10 +259,10 @@ instance (IsGF' p n f) => Ring (GF' p n f) where
       IsSucc k -> withKnownNat k $ GF' $ fromInteger n :< SV.replicate' zero
 
 instance (IsGF' p n f) => DecidableZero (GF' p n f) where
-  isZero (GF' sv) = oall isZero sv
+  isZero (GF' sv) = call isZero sv
 
 instance (IsGF' p n f) => DecidableUnits (GF' p n f) where
-  isUnit (GF' sv) = not $ oall isZero sv
+  isUnit (GF' sv) = not $ call isZero sv
   recipUnit a | isZero a = Nothing
               | otherwise = Just $ recip a
 
@@ -339,10 +323,11 @@ withIrreducible
   :: forall p a.
     ( IsPrimeChar (p :: k),
       G.Vector (GFSized' k p) (F p),
-      MonoFoldable (GFSized' k p (F p)),
-      Element (GFSized' k p (F p)) ~ F p,
-      MonoTraversable (GFSized' k p (F p)),
-      LL.ListLike (GFSized' k p (F p)) (F p)
+      CFreeMonoid (GFSized' k p),
+      CTraversable (GFSized' k p),
+      Monoid (GFSized' k p (F p)),
+      CZip (GFSized' k p),
+      Dom (GFSized' k p) (F p)
     )
   => Unipol (F p)
   -> (forall f (n :: Nat). (IsGF' p n f) => Proxy (GF' p n f) -> a)
@@ -377,9 +362,6 @@ reifyGF' p n f = reifyPrimeField (P.toInteger p) $ \(pxy :: Proxy (F p)) -> do
 linearRepGF :: (IsGF' p n f) => GF' p n f -> V.Vector (F p)
 linearRepGF = G.convert . SV.unsized . runGF'
 
-linearRepGFRaw :: (IsGF' (p :: k) n f) => GF' p n f -> GFSized' k p (F p)
-linearRepGFRaw = G.convert . SV.unsized . runGF'
-
 linearRepGF' :: (IsGF' p n f) => GF' p n f -> V.Vector Integer
 linearRepGF' = V.map naturalRepr . linearRepGF
 
@@ -397,28 +379,30 @@ proxyGF' _ _ Proxy = Proxy
 class 
   ( KnownNat n, IsPrimeChar p, Reifies f (Unipol (F p)),
     G.Vector (GFSized' k p) (F p),
-    LL.ListLike (GFSized' k p (F p)) (F p),
-    MonoTraversable (GFSized' k p (F p)),
-    MonoFoldable (GFSized' k p (F p)),
-    Element (GFSized' k p (F p)) ~ F p
+    CTraversable (GFSized' k p),
+    CFreeMonoid (GFSized' k p),
+    Monoid (GFSized' k p (F p)),
+    CZip (GFSized' k p),
+    Dom (GFSized' k p) (F p)
   )
   => IsGF' (p :: k) n f
 instance
   ( KnownNat n, IsPrimeChar p, Reifies f (Unipol (F p)),
     G.Vector (GFSized' k p) (F p),
-    LL.ListLike (GFSized' k p (F p)) (F p),
-    MonoFoldable (GFSized' k p (F p)),
-    MonoTraversable (GFSized' k p (F p)),
-    Element (GFSized' k p (F p)) ~ F p
+    CTraversable (GFSized' k p),
+    CZip (GFSized' k p),
+    CFreeMonoid (GFSized' k p),
+    Dom (GFSized' k p) (F p),
+    Monoid (GFSized' k p (F p))
   )
-  => IsGF' p n f
+  => IsGF' (p :: k) n f
 
 
 instance (KnownNat n, IsGF' p n f) => FiniteField (GF' p n f) where
   power _ = fromIntegral $ fromSing (sing :: SNat n)
   elements _ =
     let sn = sing :: SNat n
-    in P.map (GF' . SV.unsafeToSized') $ otraverse (const $ elements Proxy)
+    in P.map (GF' . SV.unsafeToSized') $ ctraverse (const $ elements Proxy)
       $ SV.unsized
       $ SV.replicate sn (0 :: F p)
 
@@ -435,8 +419,8 @@ conway = conwayPolynomial
 
 instance IsGF' p n f => Random (GF' p n f) where
   random = runRand $
-    GF' . SV.unsafeToSized' 
-    <$> otraverse (const $ getRandom) (SV.unsized $ SV.replicate (sing :: SNat n) 0)
+    GF' . hoistSized
+    <$> ctraverse (const getRandom) (SV.replicate  @V.Vector(sing :: SNat n) (0 :: Int))
   randomR (GF' ls, GF' rs) = runRand $
     GF' . hoistSized <$> sequence 
       (zipWithSameSV (curry getRandomR) 
@@ -444,7 +428,10 @@ instance IsGF' p n f => Random (GF' p n f) where
           (hoistSized @V.Vector rs))
 
 hoistSized
-  :: forall g f n a. (G.Vector f a, G.Vector g a, KnownNat n, LL.ListLike (g a) a)
+  :: forall g f n a. 
+      ( G.Vector f a, G.Vector g a, KnownNat n,
+        Dom f a, Dom g a
+      )
   => SV.Sized f n a -> SV.Sized g n a
 {-# INLINE hoistSized #-}
 hoistSized = SV.unsafeToSized' . G.convert . SV.unsized

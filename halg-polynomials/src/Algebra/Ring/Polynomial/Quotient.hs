@@ -252,7 +252,7 @@ stdMonoms basis = do
             -> Maybe [OrderedMonomial Grevlex 1]
  #-}
 
-diag :: Unbox a => a -> a -> SNat n -> [USized n a]
+diag :: (Unbox a) => a -> a -> SNat n -> [USized n a]
 diag d z n = [ generate n (\j -> if i == j then d else z)
              | i <- enumOrdinal n
              ]
