@@ -21,3 +21,7 @@ extra-deps:
 - control-monad-loop-0.1
 - repa-3.4.1.4
 - unamb-0.2.7
+- git: https://github.com/konn/sized.git
+  commit: 57e36fb31222dbcdcd0bfc9303d2f07cf2f96b88
+- git: https://github.com/konn/subcategories.git
+  commit: 79c68f79ed77d24e35e5f7a4d580f9a8f5d0b71a
