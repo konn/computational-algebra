@@ -36,7 +36,7 @@ stages:
     key: "${CI_COMMIT_REF_SLUG}-ghc-8.8"
     <<: *cached-dirs
 
-.header-ghc-88: &header-ghc-810
+.header-ghc-810: &header-ghc-810
   image: registry.gitlab.com/konn/computational-algebra/build/ghc-8.10:0.6.0.0
   variables:
     STACK_YAML: "stack-810.yaml"
