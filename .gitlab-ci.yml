@@ -57,7 +57,7 @@ before_script:
   - echo "$STACK_YAML"
   - stack setup
   - stack build --no-terminal --test --no-run-tests --coverage
-  - stack build --no-terminal --work-dir=.stack-no-coverage --flag halg-core-test:opt-test --flag halg-galois-fields:opt-test halg-core-test:exe:halg-core-opt-test halg-galois-fields:text:halg-gf-opt-test
+  - stack build --no-terminal --work-dir=.stack-no-coverage --flag halg-core-test:opt-test --flag halg-galois-fields:opt-test halg-core-test:exe:halg-core-opt-test halg-galois-fields:test:halg-gf-opt-test
 
 .test-script: &test-script
   stage:  test
