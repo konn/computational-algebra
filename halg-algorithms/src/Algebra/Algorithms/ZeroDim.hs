@@ -375,7 +375,7 @@ nextMonomial = do
              ]
   monomial .== next
 
-beta :: Monomial n -> Ordinal n -> Monomial n
+beta :: KnownNat n => Monomial n -> Ordinal n -> Monomial n
 beta xs o@(OLt k) =
   let n = sizedLength xs
   in withRefl (lneqSuccLeq k n) $

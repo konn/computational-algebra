@@ -54,6 +54,6 @@ mapIdeal :: (r -> r') -> Ideal r -> Ideal r'
 mapIdeal fun (Ideal xs) = Ideal $ fmap fun xs
 {-# INLINE [1] mapIdeal #-}
 
-someSizedIdeal :: Ideal r -> S.SomeSized Vector Nat r
+someSizedIdeal :: Ideal r -> S.SomeSized Vector r
 someSizedIdeal (Ideal xs) =
   S.toSomeSized $ V.fromList $ F.toList xs

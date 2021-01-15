@@ -1,6 +1,8 @@
 {-# LANGUAGE GADTs, GeneralizedNewtypeDeriving, ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE StandaloneDeriving, TypeOperators                      #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver               #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Presburger #-}
 module Algebra.Ring.Polynomial.Homogenised
        (Homogenised, homogenise, unhomogenise, tryHomogenise, HomogOrder) where
 import           Algebra.Prelude.Core
@@ -9,6 +11,7 @@ import           Data.Foldable                      (toList)
 import qualified Data.Map                           as M
 import           Data.MonoTraversable               (osum)
 import qualified Data.Sized.Builtin                 as SV
+import Data.Type.Equality (gcastWith)
 
 newtype Homogenised poly = Homogenised (OrderedPolynomial (Unipol (Coefficient poly)) (MOrder poly) (Arity poly))
 
@@ -42,9 +45,7 @@ instance IsOrderedPolynomial poly => IsPolynomial (Homogenised poly) where
   sArity _ = sing
   injectCoeff = Homogenised . injectCoeff . injectCoeff
   fromMonomial ((os :: USized k Int) :> o) =
-    let sn = sizedLength os
-        sm = sing :: Sing (Arity poly)
-    in withRefl (succInj' sn sm (Refl :: Succ k :~: Succ (Arity poly))) $
+    gcastWith (succInj' (sing @(Arity poly)) (sing @k) Refl) $
     Homogenised $ fromMonomial (SV.singleton o) !* fromMonomial os
   fromMonomial _ = error "Cannot happen!"
   terms' (Homogenised f) =

@@ -21,15 +21,11 @@ import           AlgebraicPrelude
 import           Control.DeepSeq              (NFData)
 import           Control.Lens                 (each, (%~), (&))
 import qualified Data.Coerce                  as DC
-import           Data.Function                (on)
 import qualified Data.List                    as L
 import           Data.Singletons.Prelude
-import           Data.Singletons.Prelude.Enum (SEnum (..))
 import           Data.Singletons.Prelude.List hiding (Group)
 import qualified Data.Sized.Builtin           as S
-import           Data.Type.Natural.Class      (IsPeano (..), sOne)
 import           GHC.Exts                     (Constraint)
-import           GHC.OverloadedLabels         (IsLabel (..))
 import qualified Numeric.Algebra              as NA
 import qualified Prelude                      as P
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 802
@@ -300,12 +296,12 @@ instance (Euclidean poly , Wraps vars poly)
 
 -- | So unsafe! Don't expose it!
 permute0 :: (SEq k) => SList (xs :: [k]) -> SList (ys :: [k]) -> Sized (Length xs) Integer
-permute0 SNil _ = S.NilL
+permute0 SNil _ = S.Nil
 permute0 (SCons x xs) ys =
   case sElemIndex x ys of
     SJust n  ->
       let k = sLength xs
-      in coerceLength (plusComm k sOne) $ withKnownNat (sSucc k) $
+      in withKnownNat (sing @1 %+ k) $
          withKnownNat k (fromIntegral (toNatural n) S.:< permute0 xs ys)
     SNothing -> error "oops, you called permute0 for non-subset..."
 

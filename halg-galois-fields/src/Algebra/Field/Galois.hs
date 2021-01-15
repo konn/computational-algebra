@@ -1,9 +1,11 @@
 {-# LANGUAGE DataKinds, DerivingStrategies, FlexibleContexts           #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving      #-}
 {-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction          #-}
 {-# LANGUAGE ParallelListComp, PolyKinds, QuasiQuotes, RankNTypes      #-}
 {-# LANGUAGE ScopedTypeVariables, StandaloneDeriving, TypeApplications #-}
 {-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances         #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Presburger #-}
 module Algebra.Field.Galois (GF'(), IsGF', modPoly, modVec,
                              withIrreducible, linearRepGF, linearRepGF',
                              reifyGF', generateIrreducible,
@@ -18,7 +20,6 @@ import Algebra.Ring.Polynomial.Univariate
 
 import           Control.DeepSeq
 import           Control.Lens                 (imap)
-import           Control.Monad                (replicateM)
 import           Control.Monad.Loops          (iterateUntil)
 import           Control.Monad.Random         (MonadRandom, getRandom, runRand)
 import           Control.Monad.Random         (Random (..), getRandomR)
@@ -26,17 +27,13 @@ import qualified Data.Foldable                as F
 import           Data.Kind                    (Type)
 import qualified Data.Ratio                   as Rat
 import           Data.Reflection              (Reifies (..), reify)
-import           Data.Singletons.Prelude.Enum (SEnum (..))
-import           Data.Singletons.TypeLits     (withKnownNat)
 import qualified Data.Sized.Builtin           as SV
 import qualified Data.Traversable             as T
 import qualified Data.Vector                  as V
 import qualified GHC.TypeLits                 as TL
 import qualified Numeric.Algebra              as NA
-import           Numeric.Domain.Euclidean     (Euclidean)
-import           Numeric.Domain.GCD           (GCDDomain, gcd)
-import           Numeric.Semiring.ZeroProduct (ZeroProductSemiring)
 import qualified Prelude                      as P
+import Data.Sized.Builtin (pattern Nil)
 
 -- | Galois field of order @p^n@.
 --   @f@ stands for the irreducible polynomial over @F_p@ of degree @n@.
@@ -56,14 +53,14 @@ modPoly = GF' . polyToVec
 modVec :: Sized n (F p) -> GF' p n f
 modVec = GF'
 
-instance (Reifies p Integer, Show (F p)) => Show (GF' p n f)  where
+instance (Reifies p Integer, KnownNat n, Show (F p)) => Show (GF' p n f)  where
   showsPrec d (GF' (v :< vs)) =
     if F.all isZero vs
     then showsPrec d v
     else showChar '<' . showString (showPolynomialWith (singleton "ξ") 0 $ vecToPoly $ v :< vs) . showChar '>'
   showsPrec _ _ = showString "0"
 
-instance (Reifies p Integer, Show (F p)) => PrettyCoeff (GF' p n f)
+instance (Reifies p Integer, KnownNat n, Show (F p)) => PrettyCoeff (GF' p n f)
 
 varX :: CoeffRing r => Unipol r
 varX = var [od|0|]
@@ -115,8 +112,9 @@ instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer)
 instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Unital (GF' p n f) where
   one =
     case zeroOrSucc (sing :: SNat n) of
-      IsZero   -> GF' NilL
-      IsSucc k -> withKnownNat k $ GF' $ one :< SV.replicate' zero
+      IsZero   -> GF' Nil
+      IsSucc k -> withKnownNat k $ GF' $ 
+        one :< SV.replicate k zero
 
 instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Semiring (GF' p n f)
 
@@ -124,15 +122,17 @@ instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Rig (GF' p
   fromNatural n =
     case zeroOrSucc (sing :: SNat n) of
       IsZero -> GF' SV.empty
-      IsSucc k -> withKnownNat k $ GF' $ fromNatural n :< SV.replicate' zero
+      IsSucc k -> withKnownNat k $ GF' $ 
+        fromNatural n :< SV.replicate k zero
 
 instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Commutative (GF' p n f)
 
 instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Ring (GF' p n f) where
   fromInteger n =
     case zeroOrSucc (sing :: SNat n) of
-      IsZero   -> GF' NilL
-      IsSucc k -> withKnownNat k $ GF' $ fromInteger n :< SV.replicate' zero
+      IsZero   -> GF' Nil
+      IsSucc k -> withKnownNat k $
+        GF' $ fromInteger n :< SV.replicate k zero
 
 instance (KnownNat n, Reifies p Integer) => DecidableZero (GF' p n f) where
   isZero (GF' sv) = F.all isZero sv

@@ -28,8 +28,7 @@ import           AlgebraicPrelude             hiding (lex)
 import           Control.DeepSeq              (NFData (..))
 import qualified Control.Foldl                as Fl
 import           Control.Lens                 (Ixed (..), imap, makeLenses,
-                                               makeWrapped, (%~), (&), (.~), _1,
-                                               _2, _Wrapped)
+                                               makeWrapped, (%~), (&), (.~), _Wrapped)
 import qualified Data.Coerce                  as DC
 import           Data.Constraint              ((:=>) (..), Dict (..))
 import qualified Data.Constraint              as C
@@ -418,7 +417,7 @@ withStrongMonomialOrder _ _ r = r C.\\ dict
 -- | Comparing monomials with different arity,
 --   padding with @0@ at bottom of the shorter monomial to
 --   make the length equal.
-cmpAnyMonomial :: IsStrongMonomialOrder ord
+cmpAnyMonomial :: (IsStrongMonomialOrder ord, KnownNat n, KnownNat m)
                => Proxy ord -> Monomial n -> Monomial m -> Ordering
 cmpAnyMonomial pxy t t' =
   let (l, u, u') = padVecs 0 t t'

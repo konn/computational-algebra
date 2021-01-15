@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP, DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses, RankNTypes, ScopedTypeVariables     #-}
 {-# LANGUAGE TypeOperators, UndecidableInstances                        #-}
+{-# OPTIONS_GHC -fplugin Data.Singletons.TypeNats.Presburger #-}
 module Algebra.Ring.Polynomial.Monomial.Test
        (arbitraryMonomialOfSum, arbitraryMonomial
        ) where
@@ -18,18 +19,21 @@ import qualified Test.QuickCheck                  as QC
 import           Test.SmallCheck.Series           (Serial, cons0, newtypeCons,
                                                    series)
 import qualified Test.SmallCheck.Series           as SC
+import Data.Type.Equality (gcastWith)
 
 instance (KnownNat n, Monad m) => Serial m (Monomial n) where
   series =
     case zeroOrSucc (sing :: SNat n) of
       IsZero   -> cons0 SV.empty
-      IsSucc n -> withKnownNat n $ SV.cons <$> (SC.getNonNegative <$> series) <*> series
+      IsSucc n -> 
+        gcastWith (succAndPlusOneL n) $
+        withKnownNat n $ SV.cons <$> (SC.getNonNegative <$> series) <*> series
 
 instance (Monad m, Serial m (Monomial n)) => Serial m (OrderedMonomial ord n) where
   series = newtypeCons OrderedMonomial
 
 arbitraryMonomialOfSum :: SNat n -> Int -> Gen (Monomial n)
-arbitraryMonomialOfSum n k =
+arbitraryMonomialOfSum n k = withKnownNat n $
   case zeroOrSucc n of
     IsZero | k == 0 -> QC.elements [SV.empty]
            | otherwise -> error "Impossible"
