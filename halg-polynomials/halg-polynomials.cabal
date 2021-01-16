@@ -1,0 +1,101 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 8c488aaac6ada6d2818b612e17db60d16a2a35b52c8a6110788f58b3784ddc6a
+
+name:           halg-polynomials
+version:        0.6.0.0
+synopsis:       Polynomial rings and basic Gröbner basis computation,  part of halg computational algebra suite.
+
+description:    Please see the project Web Site <https://konn.github.io/computational-algebra>
+category:       Math
+homepage:       https://github.com/konn/halg-polynomials#readme
+bug-reports:    https://github.com/konn/halg-polynomials/issues
+author:         Hiromi ISHII
+maintainer:     konn.jinro _at_ gmail.com
+copyright:      2018 (c) Hiromi ISHII
+license:        BSD3
+license-file:   LICENSE
+tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/konn/halg-polynomials
+
+library
+  hs-source-dirs:
+      src
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances NoImplicitPrelude
+  ghc-options: -Wall -O2 -fplugin Data.Singletons.TypeNats.Presburger -fplugin GHC.TypeLits.KnownNat.Solver
+  build-depends:
+      algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , containers
+    , deepseq
+    , equational-reasoning
+    , ghc-typelits-knownnat
+    , halg-core
+    , hashable
+    , heaps
+    , lens
+    , matrix
+    , monad-loops
+    , mono-traversable
+    , reflection
+    , singletons
+    , singletons-presburger
+    , sized
+    , text
+    , type-natural
+    , unamb
+    , unordered-containers
+    , vector
+  exposed-modules:
+      Algebra.Algorithms.Groebner
+      Algebra.Algorithms.Groebner.SelectionStrategy
+      Algebra.Prelude.Core
+      Algebra.Ring.Polynomial
+      Algebra.Ring.Polynomial.Labeled
+      Algebra.Ring.Polynomial.Quotient
+      Algebra.Ring.Polynomial.Univariate
+  other-modules:
+      Algebra.Ring.Polynomial.Internal
+  default-language: Haskell2010
+
+test-suite halg-polynomials-spec
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      GroebnerSpec
+      PolynomialSpec
+      UnivariateSpec
+      QuotientSpec
+      Utils
+  hs-source-dirs:
+      test
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      QuickCheck
+    , algebra
+    , algebraic-prelude
+    , base
+    , containers
+    , halg-core
+    , halg-core-test
+    , halg-polynomials
+    , hspec
+    , hspec-discover
+    , matrix
+    , sized
+    , vector
+  default-language: Haskell2010

@@ -1,0 +1,108 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: cb336ceb68047876ed07a60d23778caba4a7e2a8e7d57fefae753f94e3a5e917
+
+name:           halg-matrices
+version:        0.6.0.0
+synopsis:       Abstraction layer ror various matrix libraries, part of halg computational algebra suite.
+description:    Please see the project Web Site <https://konn.github.io/computational-algebra>
+category:       Math
+homepage:       https://github.com/konn/halg-matrices#readme
+bug-reports:    https://github.com/konn/halg-matrices/issues
+author:         Hiromi ISHII
+maintainer:     konn.jinro _at_ gmail.com
+copyright:      2018 (c) Hiromi ISHII
+license:        BSD3
+license-file:   LICENSE
+tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/konn/halg-matrices
+
+library
+  hs-source-dirs:
+      src
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses NoImplicitPrelude OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  ghc-options: -Wall
+  build-depends:
+      MonadRandom
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , containers
+    , deepseq
+    , halg-core
+    , halg-polynomials
+    , hmatrix
+    , lens
+    , matrix
+    , monad-loops
+    , mtl
+    , parallel
+    , primes
+    , primitive
+    , reflection
+    , repa
+    , vector
+  exposed-modules:
+      Algebra.Algorithms.ChineseRemainder
+      Algebra.LinkedMatrix
+      Algebra.Matrix
+      Algebra.Matrix.DataMatrix
+      Algebra.Matrix.Generic
+      Algebra.Matrix.Generic.Mutable
+      Algebra.Matrix.HMatrix
+      Algebra.Matrix.IntMap
+      Algebra.Matrix.RepaIntMap
+  other-modules:
+      Algebra.Matrix.Generic.Base
+  default-language: Haskell2010
+
+benchmark gauss-bench
+  type: exitcode-stdio-1.0
+  main-is: gauss-bench.hs
+  other-modules:
+      Paths_halg_matrices
+  hs-source-dirs:
+      app
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses NoImplicitPrelude OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  ghc-options: -Wall -Odph -threaded -O2 -rtsopts -with-rtsopts=-N
+  build-depends:
+      MonadRandom
+    , QuickCheck
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , containers
+    , deepseq
+    , directory
+    , filepath
+    , gauge
+    , halg-core
+    , halg-core-test
+    , halg-matrices
+    , halg-polynomials
+    , hmatrix
+    , lens
+    , matrix
+    , monad-loops
+    , mtl
+    , parallel
+    , primes
+    , primitive
+    , random
+    , reflection
+    , repa
+    , split
+    , vector
+  default-language: Haskell2010

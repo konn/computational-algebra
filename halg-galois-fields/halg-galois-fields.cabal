@@ -1,0 +1,63 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 09cc53f894ff1625922a182d854d26fa8d2d0ac393e8a3f9607c019cdeb8557f
+
+name:           halg-galois-fields
+version:        0.6.0.0
+synopsis:       General Galois fields, part of halg computational algebra suite.
+description:    Please see the project Web Site <https://konn.github.io/computational-algebra>
+category:       Math
+homepage:       https://github.com/konn/computational-algebra#readme
+bug-reports:    https://github.com/konn/computational-algebra/issues
+author:         Hiromi ISHII
+maintainer:     konn.jinro _at_ gmail.com
+copyright:      2018 (c) Hiromi ISHII
+license:        BSD3
+license-file:   LICENSE
+tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+data-files:
+    data/conway.txt
+
+source-repository head
+  type: git
+  location: https://github.com/konn/computational-algebra
+
+library
+  hs-source-dirs:
+      src
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses NoImplicitPrelude OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances NoImplicitPrelude
+  ghc-options: -Wall
+  build-depends:
+      MonadRandom
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , deepseq
+    , directory
+    , equational-reasoning
+    , ghc-typelits-presburger
+    , halg-core
+    , halg-polynomials
+    , lens
+    , monad-loops
+    , reflection
+    , singletons
+    , sized
+    , template-haskell
+    , type-natural
+    , vector
+  exposed-modules:
+      Algebra.Field.Galois
+  other-modules:
+      Algebra.Field.Galois.Conway
+      Algebra.Field.Galois.Internal
+  default-language: Haskell2010
