@@ -4,7 +4,7 @@ module UnivariateSpec where
 import           Algebra.Algorithms.Groebner
 import           Algebra.Field.Prime
 import           Algebra.Internal                   (pattern (:<), KnownNat,
-                                                     pattern NilL, SNat)
+                                                     pattern Nil, SNat)
 import           Algebra.Ring.Polynomial            (OrderedPolynomial)
 import           Algebra.Ring.Polynomial.Univariate
 import           Control.Monad

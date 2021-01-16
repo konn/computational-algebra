@@ -22,3 +22,7 @@ extra-deps:
 - repa-3.4.1.4@rev:7
 - unamb-0.2.7
 - process-extras-0.7.4
+- ghc-typelits-presburger-0.4.0.0
+- singletons-presburger-0.4.0.0
+- sized-0.9.0.0@rev:1
+- type-natural-0.9.0.0@rev:1

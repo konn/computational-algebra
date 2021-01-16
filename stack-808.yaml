@@ -17,7 +17,12 @@ packages:
 - 'halg-polynomials'
 
 extra-deps:
+- subcategories-0.1.0.0
 - algebra-4.3.1@rev:2
 - unamb-0.2.7
 - control-monad-loop-0.1
 - repa-3.4.1.4
+- type-natural-0.9.0.0@rev:1
+- sized-0.9.0.0@rev:1
+- ghc-typelits-presburger-0.4.0.0
+- singletons-presburger-0.4.0.0

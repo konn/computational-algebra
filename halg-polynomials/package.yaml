@@ -45,7 +45,11 @@ default-extensions:
 
 library:
   source-dirs: src
-  ghc-options: ["-Wall", "-O2"]
+  ghc-options:
+  - -Wall
+  - -O2
+  - -fplugin Data.Singletons.TypeNats.Presburger
+  - -fplugin GHC.TypeLits.KnownNat.Solver
   other-modules:
   - Algebra.Ring.Polynomial.Internal
   dependencies:
@@ -54,6 +58,7 @@ library:
   - deepseq
   - equational-reasoning
   - ghc-typelits-knownnat
+  - singletons-presburger
   - hashable
   - heaps
   - lens

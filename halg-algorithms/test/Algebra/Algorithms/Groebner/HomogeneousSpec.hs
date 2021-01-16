@@ -8,7 +8,7 @@ import           Algebra.Algorithms.Groebner.Homogeneous
 import           Algebra.Bridge.Singular
 import           Algebra.Internal                        (pattern (:<),
                                                           KnownNat,
-                                                          pattern NilL, SNat,
+                                                          pattern Nil, SNat,
                                                           sSucc)
 import           Algebra.Prelude.Core
 import           Algebra.Ring.Ideal

@@ -1,9 +1,11 @@
 {-# LANGUAGE BangPatterns, ConstraintKinds, DataKinds, ExplicitNamespaces  #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                    #-}
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, NoImplicitPrelude #-}
 {-# LANGUAGE ParallelListComp, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
 {-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances             #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
+{-# OPTIONS_GHC -fplugin Data.Singletons.TypeNats.Presburger #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Presburger #-}
 -- | This module provides abstract classes for finitary polynomial types.
 module Algebra.Ring.Polynomial.Class
        ( IsPolynomial(..), IsOrderedPolynomial(..)
@@ -29,37 +31,30 @@ import           Algebra.Normed
 import           Algebra.Ring.Polynomial.Monomial
 import           Algebra.Scalar
 import           AlgebraicPrelude
-import           Control.Arrow                    ((***))
 import           Control.Lens                     (Iso', folded, ifoldMap, iso,
                                                    ix, maximumOf, (%~),
                                                    _Wrapped)
-import           Data.Foldable                    (foldr, maximum)
 import qualified Data.Foldable                    as F
 import qualified Data.HashSet                     as HS
 import           Data.Int
 import           Data.Kind                        (Type)
 import qualified Data.List                        as L
 import qualified Data.Map.Strict                  as M
-import           Data.Maybe                       (catMaybes, fromJust,
-                                                   fromMaybe)
+import           Data.Maybe                       (fromJust)
 import           Data.Monoid                      (First (..))
 import           Data.MonoTraversable
 import qualified Data.Ratio                       as R
 import qualified Data.Set                         as S
-import           Data.Singletons.Prelude          (SingKind (..))
 import qualified Data.Sized.Builtin               as V
 import           Data.Vector.Instances            ()
 import           Data.Word
-import           GHC.TypeLits                     (KnownNat, Nat)
 import qualified Numeric.Algebra.Complex          as NA
-import           Numeric.Decidable.Zero           (DecidableZero (..))
-import           Numeric.Domain.Euclidean         (Euclidean, quot)
-import           Numeric.Domain.GCD               (gcd)
-import           Numeric.Field.Fraction           (Fraction)
 import qualified Numeric.Field.Fraction           as NA
-import           Numeric.Natural                  (Natural)
 import qualified Numeric.Ring.Class               as NA
 import qualified Prelude                          as P
+import Data.Type.Natural.Class.Order (PeanoOrder(lneqSuccLeq))
+import Data.Type.Natural.Class (PeanoOrder(leqTrans, lneqToLT, minusPlus, plusMonotoneR), IsPeano(plusSuccR))
+import Data.Singletons.Prelude.Enum (SEnum(sSucc))
 
 infixl 7 *<, >*, *|<, >|*, !*
 
@@ -393,7 +388,7 @@ pp f = mapCoeff' (`quot` content f) f
 {-# INLINE pp #-}
 
 -- | See also @'injectVarsOffset'@ and @'injectVarsAtEnd'@.
-injectVars :: ((Arity r <= Arity r') ~ 'P.True,
+injectVars :: ((Arity r <= Arity r'),
                IsPolynomial r,
                IsPolynomial r',
                Coefficient r ~ Coefficient r') => r -> r'
@@ -405,7 +400,7 @@ injectVars = liftMap (var . inclusion)
 --   the target polynomial ring.
 --
 --   See also @'injectVars'@ and @'injectVarsOffset'@.
-injectVarsAtEnd :: forall r r'. ((Arity r <= Arity r') ~ 'P.True,
+injectVarsAtEnd :: forall r r'. ((Arity r <= Arity r'),
                     IsPolynomial r,
                     IsPolynomial r',
                     Coefficient r ~ Coefficient r') => r -> r'
@@ -415,7 +410,7 @@ injectVarsAtEnd =
   in withRefl (minusPlus sm sn Witness) $ injectVarsOffset (sm %- sn)
 {-# INLINE injectVarsAtEnd #-}
 
-shift :: forall n m k. ((n + m <= k) ~ 'True , KnownNat m, KnownNat k) => Sing n -> Ordinal m -> Ordinal k
+shift :: forall n m k. ((n + m <= k), KnownNat m, KnownNat k) => Sing n -> Ordinal m -> Ordinal k
 shift sn (OLt (sl :: Sing l)) =
   let sm = sing :: Sing m
       sk = sing :: Sing k
@@ -423,7 +418,6 @@ shift sn (OLt (sl :: Sing l)) =
      withWitness (lneqMonotoneR sn sl sm Witness) $
      withWitness (lneqLeqTrans (sn %+ sl) (sn %+ sm) sk Witness Witness) $
      OLt (sn %+ sl)
-shift _ _ = error "Could not happen!"
 {-# INLINE [1] shift #-}
 {-# RULES
 "shift/zero" forall (ns :: Sing 0).
@@ -431,7 +425,7 @@ shift _ _ = error "Could not happen!"
   #-}
 
 lneqLeqTrans :: Sing (n :: Nat) -> Sing m -> Sing l
-             -> IsTrue (n < m) -> IsTrue (m <= l) -> IsTrue (n < l)
+             -> IsTrue (n < m) -> IsTrue (m <=? l) -> IsTrue (n < l)
 lneqLeqTrans sn sm sl nLTm mLEl =
   withRefl (lneqSuccLeq sn sl) $
   withRefl (lneqSuccLeq sn sm) $
@@ -443,13 +437,13 @@ lneqMonotoneR sn sm sl mLTl =
   withRefl (lneqSuccLeq sm sl) $
   withRefl (lneqSuccLeq (sn %+ sm) (sn %+ sl)) $
   withRefl (plusSuccR sn sm) $
-  plusMonotoneR sn (sSucc sm) sl (mLTl :: IsTrue ((m + 1) <= l))
+  plusMonotoneR sn (sm %+ sing @1) sl (mLTl :: IsTrue ((m + 1) <=? l))
 
 -- | Similar to @'injectVars'@, but @'injectVarsOffset' n f@
 --   injects variables into the first but @n@ variables.
 --
 --   See also @'injectVars'@ and @'injectVarsAtEnd'@.
-injectVarsOffset :: forall n r r' . ((n + Arity r <= Arity r') ~ 'P.True,
+injectVarsOffset :: forall n r r' . ((n + Arity r <= Arity r'),
                   IsPolynomial r,
                   IsPolynomial r',
                   Coefficient r ~ Coefficient r') => Sing n -> r -> r'

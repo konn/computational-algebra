@@ -8,7 +8,7 @@ import           Algebra.Algorithms.Groebner
 import           Algebra.Algorithms.Groebner.F4
 import           Algebra.Bridge.Singular
 import           Algebra.Internal                    (pattern (:<), KnownNat,
-                                                      pattern NilL, SNat, sSucc)
+                                                      pattern Nil, SNat, sSucc)
 import           Algebra.Prelude.Core
 import           Algebra.Ring.Ideal
 import           Algebra.Ring.Polynomial

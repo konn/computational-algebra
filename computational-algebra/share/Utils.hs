@@ -86,15 +86,15 @@ xPoly :: Monad m => SC.Series m (Polynomial (Fraction Integer) 2)
 xPoly = do
   (series SC.>< series) >>- \(c, d) ->
     series >>- \p -> do
-      guard $ (leadingMonomial p) < (OrderedMonomial (d :< 0 :< NilL))
-      return $ appendLM c (d :< 0 :< NilL) p
+      guard $ (leadingMonomial p) < (OrderedMonomial (d :< 0 :< Nil))
+      return $ appendLM c (d :< 0 :< Nil) p
 
 yPoly :: Monad m => SC.Series m (Polynomial (Fraction Integer) 2)
 yPoly = do
   (series SC.>< series) >>- \(c, d) ->
     series >>- \p -> do
-      guard $ leadingMonomial p < OrderedMonomial (d :< 0 :< NilL)
-      return $ appendLM c (0 :< d :< NilL) p
+      guard $ leadingMonomial p < OrderedMonomial (d :< 0 :< Nil)
+      return $ appendLM c (0 :< d :< Nil) p
 
 instance Monad m => Serial m (ZeroDimIdeal 2) where
   series = do

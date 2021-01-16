@@ -59,6 +59,9 @@ library:
   - convertible
   - equational-reasoning
   - ghc-typelits-presburger
+  - singletons-presburger
+  - singletons
+  - type-natural
   - equational-reasoning
   - foldl
   - ghc-typelits-knownnat

@@ -56,6 +56,7 @@ library:
   - monad-loops
   - ghc-typelits-presburger
   - equational-reasoning
+  - type-natural
   - directory
   - reflection
   - singletons
