@@ -3,7 +3,7 @@
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 module GroebnerSpec where
 import Algebra.Algorithms.Groebner
-import Algebra.Internal            (pattern (:<), KnownNat, pattern NilL, SNat)
+import Algebra.Internal            (pattern (:<), KnownNat, pattern Nil, SNat)
 import Algebra.Prelude.Core        hiding ((===))
 import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial

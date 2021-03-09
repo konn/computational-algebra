@@ -16,20 +16,13 @@ import           Algebra.Ring.Polynomial.Class
 import           Algebra.Ring.Polynomial.Monomial
 import qualified Data.Foldable                    as F
 
-import           Control.Arrow          (first)
 import           Control.DeepSeq        (NFData)
 import qualified Data.Coerce            as C
-import           Data.Function          (on)
-import           Data.Hashable          (Hashable (hashWithSalt))
 import qualified Data.HashSet           as HS
-import           Data.IntMap            (IntMap)
 import qualified Data.IntMap            as IM
 import qualified Data.Map.Strict        as M
-import           Data.Maybe             (mapMaybe)
-import           Data.Ord               (comparing)
 import qualified Data.Sized.Builtin     as SV
 import qualified Numeric.Algebra        as NA
-import           Numeric.Decidable.Zero (DecidableZero (..))
 import qualified Prelude                as P
 
 -- | Univariate polynomial.

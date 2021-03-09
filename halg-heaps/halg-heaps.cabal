@@ -1,0 +1,49 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 3fd016547ac03a4dee67f9811352b2557872b17983d7416ff580ae49ee71cb45
+
+name:           halg-heaps
+version:        0.1.0.0
+synopsis:       Various heap structures
+description:    Please see the README on GitHub at <https://github.com/konn/halg-heaps#readme>
+category:       Data
+homepage:       https://github.com/konn/halg-heaps#readme
+bug-reports:    https://github.com/konn/halg-heaps/issues
+author:         Hiromi ISHII
+maintainer:     konn.jinro _at_ gmail.com
+copyright:      2018 (c) Hiromi ISHII
+license:        BSD3
+license-file:   LICENSE
+tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/konn/halg-heaps
+
+library
+  exposed-modules:
+      Data.Entry
+      Data.Heap.Class
+      Data.Heap.Ekmett
+      Data.Heap.Pairing
+      Data.Heap.Spray
+  other-modules:
+      Paths_halg_heaps
+  hs-source-dirs:
+      src
+  default-extensions: BangPatterns ConstraintKinds GADTs MultiParamTypeClasses TypeFamilies
+  ghc-options: -O2 -Wall
+  build-depends:
+      base >=4.7 && <5
+    , heaps
+    , reflection
+  default-language: Haskell2010

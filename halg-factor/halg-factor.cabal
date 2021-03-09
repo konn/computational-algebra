@@ -1,0 +1,132 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: df2e9ec9f91c37ce6ce095bc9e1f5f377174060333b26596f1b9808014bfa9d4
+
+name:           halg-factor
+version:        0.6.0.0
+synopsis:       Polynomial factorisation algorithms, part of halg computational algebra suite.
+description:    Please see the project Web Site <https://konn.github.io/computational-algebra>
+category:       Math
+homepage:       https://github.com/konn/halg-factor#readme
+bug-reports:    https://github.com/konn/halg-factor/issues
+author:         Hiromi ISHII
+maintainer:     konn.jinro _at_ gmail.com
+copyright:      2018 (c) Hiromi ISHII
+license:        BSD3
+license-file:   LICENSE
+tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/konn/halg-factor
+
+flag profile
+  description: Whether to build profiling executables or not (default false).
+  manual: True
+  default: False
+
+library
+  exposed-modules:
+      Algebra.Ring.Polynomial.Factorise
+  other-modules:
+      Paths_halg_factor
+  hs-source-dirs:
+      src
+  default-extensions: NoImplicitPrelude
+  ghc-options: -Wall
+  build-depends:
+      MonadRandom
+    , algebra
+    , algebraic-prelude
+    , arithmoi >=0.9
+    , base >=4.7 && <5
+    , containers
+    , control-monad-loop
+    , dlist
+    , fmlist
+    , halg-core
+    , halg-polynomials
+    , integer-logarithms
+    , lens
+    , monad-loops
+    , mono-traversable
+    , mtl
+    , primes
+    , sized
+    , type-natural
+    , vector
+  default-language: Haskell2010
+
+executable factor-deg50-prof
+  main-is: factor-deg50-prof.hs
+  other-modules:
+      Paths_halg_factor
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -O2 -rtsopts -threaded
+  build-depends:
+      MonadRandom
+    , base
+    , deepseq
+    , halg-core
+    , halg-factor
+    , halg-polynomials
+  default-language: Haskell2010
+
+test-suite halg-factor-specs
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Algebra.Ring.Polynomial.FactoriseSpec
+      Paths_halg_factor
+  hs-source-dirs:
+      test
+  default-extensions: NoImplicitPrelude
+  ghc-options: -Wall
+  build-depends:
+      HUnit
+    , MonadRandom
+    , QuickCheck >=2.12
+    , algebraic-prelude
+    , arithmoi
+    , base >=4.7 && <5
+    , containers
+    , halg-core
+    , halg-core-test
+    , halg-factor
+    , halg-galois-fields
+    , halg-polynomials
+    , hspec
+    , lens
+    , quickcheck-instances
+    , unordered-containers
+  default-language: Haskell2010
+
+benchmark factor-simple-bench
+  type: exitcode-stdio-1.0
+  main-is: factor-simple-bench.hs
+  other-modules:
+      Paths_halg_factor
+  hs-source-dirs:
+      bench
+  ghc-options: -Wall -O2
+  build-depends:
+      MonadRandom
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , deepseq
+    , gauge
+    , halg-core
+    , halg-factor
+    , halg-galois-fields
+    , halg-polynomials
+  default-language: Haskell2010

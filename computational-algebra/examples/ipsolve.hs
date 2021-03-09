@@ -128,9 +128,9 @@ testC :: Sized' 4 Int
 testM :: Sized' 2 (Sized' 4 Int)
 testB :: Sized' 2 Int
 (testC, testM, testB) =
-  (1000 :< 1 :< 1 :< 100 :< NilL,
-   (3 :< -2 :< 1 :< -1 :< NilL) :< (4 :< 1 :< -1 :< 0 :< NilL) :< NilL,
-   -1 :< 5 :< NilL)
+  (1000 :< 1 :< 1 :< 100 :< Nil,
+   (3 :< -2 :< 1 :< -1 :< Nil) :< (4 :< 1 :< -1 :< 0 :< Nil) :< Nil,
+   -1 :< 5 :< Nil)
 
 data Rect = Rect { _height :: Int, _width :: Int
                  } deriving (Read, Show, Eq, Ord)

@@ -54,6 +54,10 @@ library:
   - deepseq
   - lens
   - monad-loops
+  - ghc-typelits-presburger
+  - equational-reasoning
+  - type-natural
+  - directory
   - reflection
   - singletons
   - sized

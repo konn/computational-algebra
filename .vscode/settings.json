@@ -6,6 +6,6 @@
     "heap-poly": true
   },
   "stylishHaskell.showConsoleOnError": false,
-  "haskell.formattingProvider": "none",
-  "editor.defaultFormatter": "vigoo.stylish-haskell"
+  "haskell.formattingProvider": "fourmolu",
+  "editor.defaultFormatter": "haskell.haskell"
 }

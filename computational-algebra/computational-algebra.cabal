@@ -1,0 +1,483 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 3c52532f45f1008be4e9bc3a85782ab5dbd0fbf3d2861a061b53bcc2f0ff6fec
+
+name:           computational-algebra
+version:        0.6.0.0
+description:    Please see the project Web Site at <https://konn.github.io/computational-algebra>
+category:       Math
+homepage:       https://github.com/konn/computational-algebra#readme
+bug-reports:    https://github.com/konn/computational-algebra/issues
+author:         Hiromi ISHII
+maintainer:     konn.jinro _at_ gmail.com
+copyright:      2018 (c) Hiromi ISHII
+license:        BSD3
+license-file:   LICENSE
+tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/konn/computational-algebra
+
+flag examples
+  description: Whether to build example binaries (default: False)
+
+  manual: True
+  default: False
+
+flag profile
+  description: Whether to build profiling binaries (default: False)
+
+  manual: True
+  default: False
+
+library
+  exposed-modules:
+      Algebra.Prelude
+  other-modules:
+      Paths_computational_algebra
+  hs-source-dirs:
+      src
+  ghc-options: -Wall
+  build-depends:
+      MonadRandom
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , containers
+    , halg-algebraic
+    , halg-algorithms
+    , halg-core
+    , halg-core-test
+    , halg-factor
+    , halg-galois-fields
+    , halg-matrices
+    , halg-polyn-parser
+    , halg-polynomials
+    , singletons
+    , sized
+  if flag(profile)
+    ghc-options: -fprof-auto-exported
+  default-language: Haskell2010
+
+executable algebraic
+  main-is: algebraic.hs
+  other-modules:
+      Paths_computational_algebra
+  hs-source-dirs:
+      examples
+  default-extensions: DataKinds NoImplicitPrelude
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MonadRandom
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , computational-algebra
+    , containers
+    , convertible
+    , deepseq
+    , halg-algebraic
+    , halg-algorithms
+    , halg-core
+    , halg-core-test
+    , halg-factor
+    , halg-galois-fields
+    , halg-matrices
+    , halg-polyn-parser
+    , halg-polynomials
+    , hmatrix
+    , matrix
+    , reflection
+    , singletons
+    , sized
+    , vector
+  if flag(examples)
+    buildable: True
+  else
+    buildable: False
+  default-language: Haskell2010
+
+executable groebner-prof
+  main-is: groebner-prof.hs
+  other-modules:
+      Paths_computational_algebra
+  hs-source-dirs:
+      examples
+  default-extensions: DataKinds NoImplicitPrelude
+  ghc-options: -caf-all -auto-all -rtsopts -eventlog -prof -fprof-auto-exported
+  build-depends:
+      MonadRandom
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , computational-algebra
+    , containers
+    , deepseq
+    , halg-algebraic
+    , halg-algorithms
+    , halg-core
+    , halg-core-test
+    , halg-factor
+    , halg-galois-fields
+    , halg-matrices
+    , halg-polyn-parser
+    , halg-polynomials
+    , hspec-smallcheck ==0.5.*
+    , singletons
+    , sized
+  if flag(profile)
+    buildable: True
+  else
+    buildable: False
+  default-language: Haskell2010
+
+executable hensel-prof
+  main-is: hensel-prof.hs
+  other-modules:
+      Paths_computational_algebra
+  hs-source-dirs:
+      examples
+  default-extensions: DataKinds NoImplicitPrelude
+  ghc-options: -caf-all -auto-all -rtsopts -eventlog -prof -fprof-auto-exported
+  build-depends:
+      MonadRandom
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , computational-algebra
+    , containers
+    , deepseq
+    , halg-algebraic
+    , halg-algorithms
+    , halg-core
+    , halg-core-test
+    , halg-factor
+    , halg-galois-fields
+    , halg-matrices
+    , halg-polyn-parser
+    , halg-polynomials
+    , hspec-smallcheck ==0.5.*
+    , singletons
+    , sized
+  if flag(profile)
+    buildable: True
+  else
+    buildable: False
+  default-language: Haskell2010
+
+executable quotient
+  main-is: quotient.hs
+  other-modules:
+      Paths_computational_algebra
+  hs-source-dirs:
+      examples
+  default-extensions: DataKinds NoImplicitPrelude
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MonadRandom
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , computational-algebra
+    , containers
+    , convertible
+    , deepseq
+    , halg-algebraic
+    , halg-algorithms
+    , halg-core
+    , halg-core-test
+    , halg-factor
+    , halg-galois-fields
+    , halg-matrices
+    , halg-polyn-parser
+    , halg-polynomials
+    , hmatrix
+    , matrix
+    , reflection
+    , singletons
+    , sized
+    , vector
+  if flag(examples)
+    buildable: True
+  else
+    buildable: False
+  default-language: Haskell2010
+
+executable sandpit-poly
+  main-is: sandpit-poly.hs
+  other-modules:
+      Paths_computational_algebra
+  hs-source-dirs:
+      examples
+  default-extensions: DataKinds NoImplicitPrelude
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MonadRandom
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , computational-algebra
+    , containers
+    , convertible
+    , deepseq
+    , halg-algebraic
+    , halg-algorithms
+    , halg-core
+    , halg-core-test
+    , halg-factor
+    , halg-galois-fields
+    , halg-matrices
+    , halg-polyn-parser
+    , halg-polynomials
+    , hmatrix
+    , matrix
+    , reflection
+    , singletons
+    , sized
+    , vector
+  if flag(examples)
+    buildable: True
+  else
+    buildable: False
+  default-language: Haskell2010
+
+benchmark coercion-bench
+  type: exitcode-stdio-1.0
+  main-is: coercion.hs
+  hs-source-dirs:
+      bench
+  ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MonadRandom
+    , QuickCheck
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , computational-algebra
+    , constraints
+    , containers
+    , deepseq
+    , gauge
+    , halg-algebraic
+    , halg-algorithms
+    , halg-core
+    , halg-core-test
+    , halg-factor
+    , halg-galois-fields
+    , halg-matrices
+    , halg-polyn-parser
+    , halg-polynomials
+    , matrix
+    , parallel
+    , process
+    , singletons
+    , sized
+  default-language: Haskell2010
+
+benchmark normal-bench
+  type: exitcode-stdio-1.0
+  main-is: bench.hs
+  hs-source-dirs:
+      bench
+  ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MonadRandom
+    , QuickCheck
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , computational-algebra
+    , constraints
+    , containers
+    , deepseq
+    , gauge
+    , halg-algebraic
+    , halg-algorithms
+    , halg-core
+    , halg-core-test
+    , halg-factor
+    , halg-galois-fields
+    , halg-matrices
+    , halg-polyn-parser
+    , halg-polynomials
+    , matrix
+    , parallel
+    , process
+    , singletons
+    , sized
+  default-language: Haskell2010
+
+benchmark quotient-bench-randomized
+  type: exitcode-stdio-1.0
+  main-is: quotient-bench-randomized.hs
+  hs-source-dirs:
+      bench
+  ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MonadRandom
+    , QuickCheck
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , computational-algebra
+    , constraints
+    , containers
+    , deepseq
+    , gauge
+    , halg-algebraic
+    , halg-algorithms
+    , halg-core
+    , halg-core-test
+    , halg-factor
+    , halg-galois-fields
+    , halg-matrices
+    , halg-polyn-parser
+    , halg-polynomials
+    , matrix
+    , parallel
+    , process
+    , singletons
+    , sized
+  default-language: Haskell2010
+
+benchmark solve-bench
+  type: exitcode-stdio-1.0
+  main-is: solve.hs
+  hs-source-dirs:
+      bench
+  ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MonadRandom
+    , QuickCheck
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , computational-algebra
+    , constraints
+    , containers
+    , deepseq
+    , gauge
+    , halg-algebraic
+    , halg-algorithms
+    , halg-core
+    , halg-core-test
+    , halg-factor
+    , halg-galois-fields
+    , halg-matrices
+    , halg-polyn-parser
+    , halg-polynomials
+    , matrix
+    , parallel
+    , process
+    , singletons
+    , sized
+  default-language: Haskell2010
+
+benchmark unipol-bench
+  type: exitcode-stdio-1.0
+  main-is: unipol-bench.hs
+  hs-source-dirs:
+      bench
+  ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MonadRandom
+    , QuickCheck
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , computational-algebra
+    , constraints
+    , containers
+    , deepseq
+    , gauge
+    , halg-algebraic
+    , halg-algorithms
+    , halg-core
+    , halg-core-test
+    , halg-factor
+    , halg-galois-fields
+    , halg-matrices
+    , halg-polyn-parser
+    , halg-polynomials
+    , matrix
+    , parallel
+    , process
+    , singletons
+    , sized
+  default-language: Haskell2010
+
+benchmark unipol-div-bench
+  type: exitcode-stdio-1.0
+  main-is: unipol-div.hs
+  hs-source-dirs:
+      bench
+  ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MonadRandom
+    , QuickCheck
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , computational-algebra
+    , constraints
+    , containers
+    , deepseq
+    , gauge
+    , halg-algebraic
+    , halg-algorithms
+    , halg-core
+    , halg-core-test
+    , halg-factor
+    , halg-galois-fields
+    , halg-matrices
+    , halg-polyn-parser
+    , halg-polynomials
+    , matrix
+    , parallel
+    , process
+    , singletons
+    , sized
+  default-language: Haskell2010
+
+benchmark unipol-mult-bench
+  type: exitcode-stdio-1.0
+  main-is: unipol-mult.hs
+  hs-source-dirs:
+      bench
+  ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MonadRandom
+    , QuickCheck
+    , algebra
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , computational-algebra
+    , constraints
+    , containers
+    , deepseq
+    , gauge
+    , halg-algebraic
+    , halg-algorithms
+    , halg-core
+    , halg-core-test
+    , halg-factor
+    , halg-galois-fields
+    , halg-matrices
+    , halg-polyn-parser
+    , halg-polynomials
+    , matrix
+    , parallel
+    , process
+    , singletons
+    , sized
+  default-language: Haskell2010

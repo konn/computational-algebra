@@ -25,6 +25,9 @@ description:         Please see the README on Github at <https://github.com/konn
 dependencies:
 - algebraic-prelude
 - base >= 4.7 && < 5
+- singletons-presburger
+- singletons
+- equational-reasoning
 - containers
 - halg-core
 - QuickCheck

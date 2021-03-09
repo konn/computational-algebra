@@ -3,6 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses, PatternSynonyms, PolyKinds, RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables, TypeFamilies, TypeOperators              #-}
 {-# OPTIONS_GHC -Wincomplete-patterns -Wno-orphans #-}
+{-# OPTIONS_GHC -fplugin Data.Singletons.TypeNats.Presburger #-}
 #if __GLASGOW_HASKELL__ >= 806
 {-# LANGUAGE NoStarIsType #-}
 #endif
@@ -18,14 +19,9 @@ import           AlgebraicPrelude
 import           Control.Lens            ((%~), _Unwrapping)
 import qualified Data.Foldable           as F
 import           Data.Kind               (Type)
-import           Data.ListLike           (ListLike)
-import           Data.Proxy
+import Data.Proxy ( Proxy(..), asProxyTypeOf, KProxy(..) )
 import qualified Data.Sequence           as Seq
-import           Data.Singletons.Prelude as Algebra.Internal (PNum (..),
-                                                              POrd (..),
-                                                              SNum (..),
-                                                              SOrd (..),
-                                                              SingI (..),
+import           Data.Singletons.Prelude as Algebra.Internal (SNum((%+), (%-)), SOrd((%<=)), POrd(Max), SingI (..),
                                                               SingKind (..),
                                                               SomeSing (..),
                                                               withSingI)
@@ -35,14 +31,11 @@ import Data.Singletons.Prelude as Algebra.Internal (SBool (SFalse, STrue), Sing)
 import Data.Singletons.Prelude as Algebra.Internal (Sing (SFalse, STrue))
 #endif
 
-import           Data.Singletons.Prelude.Enum as Algebra.Internal (PEnum (..),
-                                                                   SEnum (..))
-import           Data.Singletons.TypeLits     as Algebra.Internal (KnownNat,
-                                                                   withKnownNat)
+import           Data.Singletons.TypeLits     as Algebra.Internal (withKnownNat)
 import           Data.Sized.Builtin           as Algebra.Internal (pattern (:<),
                                                                    pattern (:>),
-                                                                   pattern NilL,
-                                                                   pattern NilR,
+                                                                   pattern Nil,
+                                                                   pattern Nil,
                                                                    generate,
                                                                    sIndex,
                                                                    singleton,
@@ -52,16 +45,14 @@ import           Data.Sized.Builtin           as Algebra.Internal (pattern (:<),
 import qualified Data.Sized.Builtin           as S
 import qualified Data.Sized.Flipped           as Flipped (Flipped (..))
 import           Data.Type.Equality           ((:~:) (..))
-import           Data.Type.Natural.Class      as Algebra.Internal hiding
-                                                                   (fromNatural)
 import           Data.Type.Ordinal.Builtin
 import qualified Data.Vector                  as DV
 import qualified Data.Vector.Unboxed          as UV
-import           GHC.TypeLits                 as Algebra.Internal hiding
-                                                                   (type (*),
+import           GHC.TypeLits                 as Algebra.Internal 
+                                                                   (type (<=?), type (*), KnownNat,
                                                                    type (+),
                                                                    type (-),
-                                                                   type (<=))
+                                                                   type (<=), Nat)
 import           Proof.Equational             (coerce, withRefl)
 import           Proof.Equational             as Algebra.Internal (because,
                                                                    coerce,
@@ -69,6 +60,7 @@ import           Proof.Equational             as Algebra.Internal (because,
                                                                    (=~=))
 import           Proof.Propositional          as Algebra.Internal (IsTrue (..),
                                                                    withWitness)
+import Data.Type.Natural.Class (IsPeano(plusComm), PeanoOrder(geqToMax, notLeqToLeq, minusPlus, leqToMax), SOrd(sMax))
 
 toProxy :: a -> Proxy a
 toProxy _ = Proxy
@@ -82,10 +74,13 @@ coerceLength eql = _Unwrapping Flipped.Flipped %~ coerce eql
 
 type SNat (n :: Nat) = Sing n
 
-sizedLength :: ListLike (f a) a => S.Sized f n a -> Sing n
+sizedLength :: (KnownNat n, S.DomC f a) => S.Sized f n a -> Sing n
 sizedLength = S.sLength
 
-padVecs :: forall a n m. (Unbox a) => a -> USized n a -> USized m a
+type n < m = n + 1 <=? m
+
+padVecs :: forall a n m. 
+  (Unbox a, KnownNat n, KnownNat m) => a -> USized n a -> USized m a
         -> (SNat (Max n m), USized (Max n m) a, USized (Max n m) a)
 padVecs d xs ys
   = let (n, m) = (S.sLength xs, S.sLength ys)

@@ -1,0 +1,54 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 4442e06ecbcaaf030635d38b502d56c20c8195fe3c14e66584f4c906dfd9888c
+
+name:           halg-algebraic
+version:        0.6.0.0
+synopsis:       Algebraic reals, part of halg computational algebra suite.
+description:    Please see the project Web Site <https://konn.github.io/computational-algebra>
+category:       Math
+homepage:       https://github.com/konn/halg-algebraic#readme
+bug-reports:    https://github.com/konn/halg-algebraic/issues
+author:         Hiromi ISHII
+maintainer:     konn.jinro _at_ gmail.com
+copyright:      2018 (c) Hiromi ISHII
+license:        BSD3
+license-file:   LICENSE
+tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2,  GHC == 8.10.1
+
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/konn/halg-algebraic
+
+library
+  hs-source-dirs:
+      src
+  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses NoImplicitPrelude OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  ghc-options: -Wall
+  build-depends:
+      MonadRandom
+    , algebra
+    , algebraic-prelude
+    , arithmoi
+    , base >=4.7 && <5
+    , containers
+    , entropy
+    , halg-factor
+    , halg-polynomials
+    , lens
+    , mono-traversable
+    , sized
+  exposed-modules:
+      Algebra.Field.AlgebraicReal
+  other-modules:
+      Paths_halg_algebraic
+  default-language: Haskell2010

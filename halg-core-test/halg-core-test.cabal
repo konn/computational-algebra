@@ -1,0 +1,58 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: a0511f42681f894b96d58abf92cbe7ab590a43e6234b9ed410f7434600022e2c
+
+name:           halg-core-test
+version:        0.1.0.0
+description:    Please see the README on Github at <https://github.com/konn/halg-core-test#readme>
+homepage:       https://github.com/konn/halg-core-test#readme
+bug-reports:    https://github.com/konn/halg-core-test/issues
+author:         Hiromi ISHII
+maintainer:     konn.jinro _at_ gmail.com
+copyright:      2018 (c) Hiromi ISHII
+license:        BSD3
+license-file:   LICENSE
+tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/konn/halg-core-test
+
+library
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wno-orphans
+  build-depends:
+      QuickCheck
+    , algebraic-prelude
+    , base >=4.7 && <5
+    , containers
+    , equational-reasoning
+    , halg-core
+    , quickcheck-instances
+    , reflection
+    , singletons
+    , singletons-presburger
+    , sized
+    , smallcheck
+    , type-natural
+  exposed-modules:
+      Algebra.Field.Finite.Test
+      Algebra.Field.Fraction.Test
+      Algebra.Field.Prime.Test
+      Algebra.Ring.Ideal.Test
+      Algebra.Ring.Polynomial.Monomial.Test
+      Algebra.Ring.Polynomial.Test
+      Algebra.TestUtils
+  other-modules:
+      Paths_halg_core_test
+  default-language: Haskell2010
