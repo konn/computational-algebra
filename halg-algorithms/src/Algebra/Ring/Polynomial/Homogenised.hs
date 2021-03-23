@@ -15,9 +15,9 @@ import Algebra.Ring.Polynomial.Univariate
 import Data.Foldable (toList)
 import qualified Data.Map as M
 import Data.MonoTraversable (osum)
-import qualified Data.Sized.Builtin as SV
+import qualified Data.Sized as SV
 import Data.Type.Equality (gcastWith)
-import Data.Type.Natural (IsPeano (succInj, succInj'))
+import Data.Type.Natural.Lemma.Arithmetic (succInj, succInj')
 
 newtype Homogenised poly = Homogenised (OrderedPolynomial (Unipol (Coefficient poly)) (MOrder poly) (Arity poly))
 
@@ -70,7 +70,7 @@ instance
 instance IsOrderedPolynomial poly => IsPolynomial (Homogenised poly) where
   type Coefficient (Homogenised poly) = Coefficient poly
   type Arity (Homogenised poly) = Arity poly + 1
-  sArity _ = sing
+  sArity _ = sNat
   injectCoeff = Homogenised . injectCoeff . injectCoeff
   fromMonomial ((os :: USized k Int) :> o) =
     gcastWith (succInj (Refl :: k + 1 :~: Arity poly + 1)) $
@@ -83,12 +83,12 @@ instance IsOrderedPolynomial poly => IsPolynomial (Homogenised poly) where
       , (mr, cf) <- M.toList $ terms' fpol
       ]
   liftMap gen (Homogenised f) =
-    withKnownNat (sing @1 %+ sing @(Arity poly)) $
+    withKnownNat (sNat @1 %+ sNat @(Arity poly)) $
       substWith
         ( \g alg ->
             alg * liftMapUnipol (const $ gen (maxBound :: Ordinal (Arity poly + 1))) g
         )
-        (generate sing $ gen . inclusion)
+        (generate sNat $ gen . inclusion)
         f
 
 type HomogOrder n ord = ProductOrder n 1 ord Lex
@@ -111,7 +111,7 @@ instance
   (IsOrderedPolynomial poly, PrettyCoeff (Coefficient poly)) =>
   Show (Homogenised poly)
   where
-  showsPrec = showsPolynomialWith $ generate sing (\i -> "X_" ++ show (fromEnum i))
+  showsPrec = showsPolynomialWith $ generate sNat (\i -> "X_" ++ show (fromEnum i))
 
 instance (IsOrderedPolynomial poly) => ZeroProductSemiring (Homogenised poly)
 

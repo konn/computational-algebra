@@ -54,9 +54,8 @@ import qualified Data.Foldable as F
 import Data.Kind (Type)
 import qualified Data.Ratio as Rat
 import Data.Reflection (Reifies (..), reify)
-import qualified Data.Sized.Builtin as SV
+import qualified Data.Sized as SV
 import qualified Data.Traversable as T
-import Data.Type.Natural.Class (ZeroOrSucc (..), zeroOrSucc)
 import qualified Data.Vector as V
 import qualified GHC.TypeLits as TL
 import qualified Numeric.Algebra as NA
@@ -103,12 +102,12 @@ vecToPoly v = sum $ imap (\i c -> injectCoeff c * varX ^ fromIntegral i) $ F.toL
 
 polyToVec :: forall n r. (CoeffRing r, KnownNat n) => Unipol r -> Sized n r
 polyToVec f =
-  case zeroOrSucc (sing :: SNat n) of
+  case zeroOrSucc (sNat :: SNat n) of
     IsZero -> SV.empty
     IsSucc _ ->
       unsafeFromList'
         [ coeff (OrderedMonomial $ SV.singleton i) f
-        | i <- [0 .. fromIntegral (fromSing (sing :: SNat n)) P.- 1]
+        | i <- [0 .. fromIntegral (toNatural (sNat :: SNat n)) P.- 1]
         ]
 
 instance Reifies p Integer => Additive (GF' p n f) where
@@ -145,7 +144,7 @@ instance
 
 instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Unital (GF' p n f) where
   one =
-    case zeroOrSucc (sing :: SNat n) of
+    case zeroOrSucc (sNat :: SNat n) of
       IsZero -> GF' Nil
       IsSucc k ->
         withKnownNat k $
@@ -156,7 +155,7 @@ instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Semiring (
 
 instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Rig (GF' p n f) where
   fromNatural n =
-    case zeroOrSucc (sing :: SNat n) of
+    case zeroOrSucc (sNat :: SNat n) of
       IsZero -> GF' SV.empty
       IsSucc k ->
         withKnownNat k $
@@ -167,7 +166,7 @@ instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Commutativ
 
 instance (KnownNat n, Reifies f (Unipol (F p)), Reifies p Integer) => Ring (GF' p n f) where
   fromInteger n =
-    case zeroOrSucc (sing :: SNat n) of
+    case zeroOrSucc (sNat :: SNat n) of
       IsZero -> GF' Nil
       IsSucc k ->
         withKnownNat k $
@@ -265,8 +264,8 @@ withIrreducible ::
   (forall f (n :: Nat). (Reifies f (Unipol (F p))) => Proxy (GF' p n f) -> a) ->
   a
 withIrreducible r f =
-  case toSing (fromIntegral $ totalDegree' r) of
-    SomeSing sn ->
+  case toSomeSNat (fromIntegral $ totalDegree' r) of
+    SomeSNat sn ->
       withKnownNat sn $
         reify r (f . proxyGF' (Proxy :: Proxy (F n)) sn)
 
@@ -282,8 +281,8 @@ reifyGF' ::
   m a
 reifyGF' p n f = reifyPrimeField (P.toInteger p) $ \pxy -> do
   mpol <- generateIrreducible pxy n
-  case toSing (fromIntegral p) of
-    SomeSing sp -> return $ withKnownNat sp $ withIrreducible mpol f
+  case toSomeSNat (fromIntegral p) of
+    SomeSNat sp -> return $ withKnownNat sp $ withIrreducible mpol f
 
 linearRepGF :: GF' p n f -> V.Vector (F p)
 linearRepGF = SV.unsized . runGF'
@@ -313,15 +312,15 @@ instance (KnownNat n, KnownNat p, Reifies f (Unipol (F p))) => IsGF' p n f
 instance (KnownNat n, IsGF' p n f) => ZeroProductSemiring (GF' p n f)
 
 instance (KnownNat n, IsGF' p n f) => FiniteField (GF' p n f) where
-  power _ = fromIntegral $ fromSing (sing :: SNat n)
+  power _ = fromIntegral $ toNatural (sNat :: SNat n)
   elements _ =
-    let sn = sing :: SNat n
+    let sn = sNat :: SNat n
      in P.map GF' $
           T.sequence $
             SV.replicate sn $ elements Proxy
 
 primitive' :: forall p n f. (IsGF' p n f, 1 <= n) => GF' p n f
-primitive' = withKnownNat (sing @1 %+ (sing :: SNat n)) $ GF' $ polyToVec $ var [od|0|]
+primitive' = withKnownNat (sNat @1 %+ (sNat :: SNat n)) $ GF' $ polyToVec $ var [od|0|]
 
 primitive :: forall p n. (IsGF' p n (Conway p n), 1 <= n) => GF p n
 primitive = primitive'

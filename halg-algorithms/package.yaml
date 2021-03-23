@@ -192,6 +192,7 @@ benchmarks:
     - -with-rtsopts=-N
   ordering-bench:
     source-dirs:  bench
+    buildable: false
     main:         ordering-bench.hs
     dependencies:
     - halg-algorithms
@@ -201,6 +202,7 @@ benchmarks:
     - folds
     - foldl
     - lens
+    - vector
     ghc-options:
     - -Wall
     - -O2
@@ -375,6 +377,7 @@ benchmarks:
     <<: *heavy_bench
 
   f5-heap-bench:
+    buildable: false
     main: f5-heap-bench.hs
     source-dirs:
     - bench

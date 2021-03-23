@@ -21,7 +21,7 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-type-defaults #-}
-{-# OPTIONS_GHC -fplugin Data.Singletons.TypeNats.Presburger #-}
+{-# OPTIONS_GHC -fplugin Data.Type.Natural.Presburger.MinMaxSolver #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 
 module Algebra.Ring.Polynomial.Internal
@@ -70,7 +70,8 @@ import qualified Data.Map.Strict as M
 import Data.MonoTraversable (osum)
 import qualified Data.Set as Set
 import Data.Singletons.Prelude.List (Replicate)
-import qualified Data.Sized.Builtin as S
+import qualified Data.Sized as S
+import Data.Type.Natural.Lemma.Order
 import qualified Numeric.Algebra as NA
 import qualified Prelude as P
 
@@ -302,7 +303,7 @@ instance
   (KnownNat n, CoeffRing r, IsMonomialOrder n order, PrettyCoeff r) =>
   Show (OrderedPolynomial r order n)
   where
-  showsPrec = showsPolynomialWith $ generate sing (\i -> "X_" ++ show (fromEnum i))
+  showsPrec = showsPolynomialWith $ generate sNat (\i -> "X_" ++ show (fromEnum i))
 
 {- | We provide Num instance to use trivial injection R into R[X].
    Do not use signum or abs.
@@ -449,7 +450,7 @@ instance
 
 varX ::
   forall r n order.
-  (CoeffRing r, KnownNat n, IsMonomialOrder n order, (0 < n) ~ 'True) =>
+  (CoeffRing r, KnownNat n, IsMonomialOrder n order, (0 < n)) =>
   OrderedPolynomial r order n
 varX = var OZ
 
@@ -553,7 +554,7 @@ shiftR ::
   OrderedPolynomial r ord n ->
   OrderedPolynomial r ord (k + n)
 shiftR k =
-  withKnownNat (k %+ (sing :: SNat n)) $
+  withKnownNat (k %+ (sNat :: SNat n)) $
     withKnownNat k $ transformMonomial (S.append (S.replicate' 0))
 
 -- | Calculate the homogenized polynomial of given one, with additional variable is the last variable.
@@ -576,12 +577,11 @@ unhomogenize ::
   ) =>
   OrderedPolynomial k ord (n + 1) ->
   OrderedPolynomial k ord n
-unhomogenize f =
+unhomogenize =
   substWith
     (.*.)
     ( allVars `S.append` S.singleton one
     )
-    f
 
 reversal ::
   (CoeffRing k, IsMonomialOrder 1 o) =>
@@ -717,17 +717,19 @@ instance
   where
   type Coefficient (PadPolyL n ord poly) = Coefficient poly
   type Arity (PadPolyL n ord poly) = n + Arity poly
-  sArity _ = sing
-  liftMap f = subst $ S.generate sing f
+  sArity _ = sNat
+  liftMap f = subst $ S.generate sNat f
   subst vec (PadPolyL f) =
-    let sn = sing :: Sing n
-     in case S.splitAt sn vec of
-          (ls, rs) -> substWith (\g a -> a * subst rs g) ls f
+    let sn = sNat :: SNat n
+     in withWitness (plusLeqL sn (sNat @(Arity poly))) $
+          case S.splitAt sn vec of
+            (ls, rs) -> substWith (\g a -> a * subst rs g) ls f
   injectCoeff = PadPolyL . injectCoeff . injectCoeff
   fromMonomial m =
-    let sn = sing :: Sing n
-     in case S.splitAt sn m of
-          (ls, rs) -> PadPolyL $ fromMonomial ls * injectCoeff (fromMonomial rs)
+    let sn = sNat :: SNat n
+     in withWitness (plusLeqL sn (sNat @(Arity poly))) $
+          case S.splitAt sn m of
+            (ls, rs) -> PadPolyL $ fromMonomial ls * injectCoeff (fromMonomial rs)
   terms' (PadPolyL m) =
     M.fromList
       [ (ls S.++ rs, k)
@@ -749,7 +751,7 @@ instance
 
 padLeftPoly ::
   (IsMonomialOrder n ord, IsPolynomial poly) =>
-  Sing n ->
+  SNat n ->
   ord ->
   poly ->
   PadPolyL n ord poly
@@ -766,7 +768,7 @@ instance
   ) =>
   Show (PadPolyL n order poly)
   where
-  showsPrec = showsPolynomialWith $ generate sing (\i -> "X_" ++ show (fromEnum i))
+  showsPrec = showsPolynomialWith $ generate sNat (\i -> "X_" ++ show (fromEnum i))
 
 mapOrderedPolynomial ::
   forall r r' n n' ord' ord.
@@ -778,7 +780,7 @@ mapOrderedPolynomial ::
 mapOrderedPolynomial mapCoe mapVar (Polynomial dic) =
   let toGenerator =
         OrderedMonomial
-          . generate sing
+          . generate sNat
           . (runAdd .)
           . ifoldMapMonom (\o l j -> Add $ if j == mapVar o then l else 0)
           . getMonomial

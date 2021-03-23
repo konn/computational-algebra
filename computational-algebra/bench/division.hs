@@ -1,10 +1,19 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, GADTs #-}
-{-# LANGUAGE MultiParamTypeClasses, OverloadedStrings, PolyKinds   #-}
-{-# LANGUAGE QuasiQuotes, TemplateHaskell, UndecidableInstances    #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
+
 module Main where
+
 import Algebra.Algorithms.Groebner
-import Algebra.Prelude             (Fraction, SNat)
+import Algebra.Prelude (Fraction, SNat)
 import Algebra.Ring.Ideal
 import Algebra.Ring.Polynomial
 import Control.Applicative
@@ -12,18 +21,20 @@ import Control.Concurrent
 import Control.DeepSeq
 import Control.Monad
 import Control.Parallel.Strategies
-import Data.Type.Natural.Builtin   hiding (one)
+import Data.Type.Natural hiding (one)
+import GHC.TypeLits (KnownNat)
 import Gauge.Main
-import GHC.TypeLits                (KnownNat)
-import Prelude                     hiding (product)
 import System.Process
 import Test.QuickCheck
+import Prelude hiding (product)
 
-sTwo :: Sing 2
+sTwo :: SNat 2
 sTwo = [snat|2|]
-sThree :: Sing 3
+
+sThree :: SNat 3
 sThree = [snat|3|]
-sFour :: Sing 4
+
+sFour :: SNat 4
 sFour = [snat|4|]
 
 makeIdeals :: KnownNat n => Int -> SNat n -> Int -> IO [(Polynomial (Fraction Integer) n, [Polynomial (Fraction Integer) n])]
@@ -34,14 +45,16 @@ makeIdeals count sn dpI = do
 
 mkTestCases :: KnownNat n => [(Polynomial (Fraction Integer) n, [Polynomial (Fraction Integer) n])] -> IO [Benchmark]
 mkTestCases is =
-  forM (zip [1..] is) $ \(n, (f0, gs0)) -> do
-      f  <- return $!! (f0 `using` rdeepseq)
-      gs <- return $!! (gs0 `using` rdeepseq)
-      return $ bgroup (concat ["case-",show n])
-                 [ bench "ST+LoopT" $ nf (uncurry divModPolynomial') (f, gs)
-                 , bench "ST+monad" $ nf (uncurry divModPolynomial'') (f, gs)
-                 , bench "List" $ nf (uncurry divModPolynomial) (f, gs)
-                 ]
+  forM (zip [1 ..] is) $ \(n, (f0, gs0)) -> do
+    f <- return $!! (f0 `using` rdeepseq)
+    gs <- return $!! (gs0 `using` rdeepseq)
+    return $
+      bgroup
+        (concat ["case-", show n])
+        [ bench "ST+LoopT" $ nf (uncurry divModPolynomial') (f, gs)
+        , bench "ST+monad" $ nf (uncurry divModPolynomial'') (f, gs)
+        , bench "List" $ nf (uncurry divModPolynomial) (f, gs)
+        ]
 
 main :: IO ()
 main = do
@@ -53,7 +66,7 @@ main = do
   case04 <- mkTestCases =<< makeIdeals 3 sFour 7
   putStrLn "done. purge and sleep 10secs..."
   system "purge"
-  threadDelay $ 10^7
+  threadDelay $ 10 ^ 7
   defaultMain $
     [ bgroup "2-ary" case01
     , bgroup "3-ary" case02

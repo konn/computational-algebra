@@ -50,6 +50,7 @@ dependencies:
 - containers
 - singletons
 - sized
+- type-natural
 
 library:
   source-dirs: src
@@ -141,15 +142,23 @@ _bench-common: &bench-common
     - constraints
     - containers
     - gauge
+    - reflection
     - deepseq
+    - lens
+    - vector
     - matrix
     - parallel
+    - ghc-typelits-presburger
+    - equational-reasoning
     - process
     - sized
     - computational-algebra
     - QuickCheck
+    - smallcheck
+    - quickcheck-instances
     source-dirs:
     - bench
+    - share
     ghc-options:
     - -O2
     - -threaded
@@ -167,18 +176,23 @@ benchmarks:
     other-modules: []
   quotient-bench-randomized:
     <<: *bench-common
+    buildable: false
     main: quotient-bench-randomized.hs
-    other-modules: []
+    other-modules:
+    - Utils
   solve-bench:
+    buildable: false
     <<: *bench-common
     main: solve.hs
-    other-modules: []
+    other-modules:
+    - Utils
   coercion-bench:
     <<: *bench-common
     other-modules: []
     main: coercion.hs
   unipol-mult-bench:
     <<: *bench-common
+    buildable: false
     main: unipol-mult.hs
     other-modules: []
   unipol-div-bench:

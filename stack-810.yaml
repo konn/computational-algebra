@@ -1,4 +1,4 @@
-resolver: lts-17.4
+resolver: lts-17.6
 
 flags: {}
 packages:
@@ -17,12 +17,11 @@ packages:
 - 'halg-polynomials'
 
 extra-deps:
-- algebra-4.3.1@rev:2
+- algebra-4.3.1
 - control-monad-loop-0.1
-- repa-3.4.1.4@rev:7
+- ghc-typelits-presburger-0.6.0.0
+- singletons-presburger-0.6.0.0
+- sized-1.0.0.0
+- type-natural-1.1.0.0
+- repa-3.4.1.4
 - unamb-0.2.7
-- process-extras-0.7.4
-- ghc-typelits-presburger-0.4.0.0
-- singletons-presburger-0.4.0.0
-- sized-0.9.0.0@rev:1
-- type-natural-0.9.0.0@rev:1

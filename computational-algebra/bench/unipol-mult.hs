@@ -6,7 +6,7 @@ import           Data.Char                          (toLower)
 import           Data.List                          (intercalate)
 import qualified Data.Map                           as M
 import           Data.Proxy                         (Proxy (..))
-import           Data.Sized.Builtin                 (singleton)
+import           Data.Sized                 (singleton)
 import           Data.Typeable
 import           Gauge.Main
 import           Numeric.Field.Fraction

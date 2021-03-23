@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4a231577d6f85a63aeae736774632b0c10ea8420c0ad0a46c548d093ed3f7ae2
+-- hash: 449b25560368fe366b4a00c541f08ce90c803cebe94607ef8152888b6e2dc46c
 
 name:           halg-algorithms
 version:        0.6.0.0
@@ -269,6 +269,7 @@ benchmark f5-heap-bench
     , semigroups
     , sized
     , vector
+  buildable: False
   default-language: Haskell2010
 
 benchmark heavy-bench
@@ -357,6 +358,8 @@ benchmark ordering-bench
     , parallel
     , semigroups
     , sized
+    , vector
+  buildable: False
   default-language: Haskell2010
 
 benchmark quot-non-rewrite-bench

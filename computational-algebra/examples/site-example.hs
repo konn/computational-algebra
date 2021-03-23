@@ -5,7 +5,7 @@ module Main where
 import Algebra.Algorithms.Groebner
 import Algebra.Field.Finite
 import Algebra.Prelude
-import Data.Type.Ordinal.Builtin
+import Data.Type.Ordinal
 
 -- | 0-th variable of polynomial ring with at least one variable.
 -- Variables are 0-origin.

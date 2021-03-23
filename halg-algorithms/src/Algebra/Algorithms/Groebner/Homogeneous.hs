@@ -53,12 +53,11 @@ import Data.STRef
     readSTRef,
     writeSTRef,
   )
-import qualified Data.Sized.Builtin as SV
+import qualified Data.Sized as SV
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import GHC.Conc (par)
 import GHC.Exts (Constraint)
-import GHC.TypeNats (natVal)
 import qualified Numeric.Field.Fraction as NA
 
 isHomogeneous ::
@@ -329,7 +328,7 @@ instance LeftModule (Unipol Integer) (HPS n) where
 
 binoms :: forall n. KnownNat n => Natural -> HPS n
 binoms p =
-  let n = fromIntegral $ natVal (sing :: Sing n)
+  let n = fromIntegral $ natVal (sNat :: SNat n)
    in ((1 - #x) ^ p :: Unipol Integer)
         .* HPS [binom (n + m - 1) m | m <- [0 ..]] 1
 {-# INLINE binoms #-}
@@ -362,7 +361,7 @@ hilbertPoincareSeriesForMonomials ms0 =
             Just (ReversedEntry 1 _, _) -> binoms $ fromIntegral $ H.size ms
             Just (ReversedEntry _ m, _) ->
               let Just i = SV.sFindIndex (> 0) m
-                  xi = varMonom sing i
+                  xi = varMonom sNat i
                   upd (ReversedEntry _ xs) =
                     let xs' = (xs & ix i %~ max 0 . pred)
                      in ReversedEntry (osum xs') xs'

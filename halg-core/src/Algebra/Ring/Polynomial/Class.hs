@@ -4,8 +4,7 @@
 {-# LANGUAGE LiberalTypeSynonyms, MultiParamTypeClasses, NoImplicitPrelude #-}
 {-# LANGUAGE ParallelListComp, PolyKinds, RankNTypes, ScopedTypeVariables  #-}
 {-# LANGUAGE TypeFamilies, TypeOperators, UndecidableInstances             #-}
-{-# OPTIONS_GHC -fplugin Data.Singletons.TypeNats.Presburger #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Presburger #-}
+{-# OPTIONS_GHC -fplugin Data.Type.Natural.Presburger.MinMaxSolver #-}
 -- | This module provides abstract classes for finitary polynomial types.
 module Algebra.Ring.Polynomial.Class
        ( IsPolynomial(..), IsOrderedPolynomial(..)
@@ -45,16 +44,15 @@ import           Data.Monoid                      (First (..))
 import           Data.MonoTraversable
 import qualified Data.Ratio                       as R
 import qualified Data.Set                         as S
-import qualified Data.Sized.Builtin               as V
+import qualified Data.Sized               as V
 import           Data.Vector.Instances            ()
 import           Data.Word
 import qualified Numeric.Algebra.Complex          as NA
 import qualified Numeric.Field.Fraction           as NA
 import qualified Numeric.Ring.Class               as NA
 import qualified Prelude                          as P
-import Data.Type.Natural.Class.Order (PeanoOrder(lneqSuccLeq))
-import Data.Type.Natural.Class (PeanoOrder(leqTrans, lneqToLT, minusPlus, plusMonotoneR), IsPeano(plusSuccR))
-import Data.Singletons.Prelude.Enum (SEnum(sSucc))
+import Data.Type.Natural.Lemma.Order (lneqSuccLeq, leqTrans, lneqToLT, minusPlus, plusMonotoneR)
+import Data.Type.Natural.Lemma.Arithmetic (plusSuccR)
 
 infixl 7 *<, >*, *|<, >|*, !*
 
@@ -117,7 +115,7 @@ class (CoeffRing (Coefficient poly), Eq poly, DecidableZero poly, KnownNat (Arit
 
   -- | Non-dependent version of arity.
   arity :: proxy poly -> P.Integer
-  arity _pxy = fromIntegral $ fromSing $ sArity' (zero :: poly)
+  arity _pxy = fromIntegral $ toNatural $ sArity' (zero :: poly)
   {-# INLINE arity #-}
 
   -- | Inject coefficient into polynomial.
@@ -405,39 +403,39 @@ injectVarsAtEnd :: forall r r'. ((Arity r <= Arity r'),
                     IsPolynomial r',
                     Coefficient r ~ Coefficient r') => r -> r'
 injectVarsAtEnd =
-  let sn = sArity (Nothing :: Maybe r)
-      sm = sArity (Nothing :: Maybe r')
+  let sn = sArity (Proxy @r)
+      sm = sArity (Proxy @r')
   in withRefl (minusPlus sm sn Witness) $ injectVarsOffset (sm %- sn)
 {-# INLINE injectVarsAtEnd #-}
 
-shift :: forall n m k. ((n + m <= k), KnownNat m, KnownNat k) => Sing n -> Ordinal m -> Ordinal k
-shift sn (OLt (sl :: Sing l)) =
-  let sm = sing :: Sing m
-      sk = sing :: Sing k
+shift :: forall n m k. ((n + m <= k), KnownNat m, KnownNat k) => SNat n -> Ordinal m -> Ordinal k
+shift sn (OLt (sl :: SNat l)) =
+  let sm = sNat :: SNat m
+      sk = sNat :: SNat k
   in withRefl (lneqToLT sl sm Witness) $
      withWitness (lneqMonotoneR sn sl sm Witness) $
      withWitness (lneqLeqTrans (sn %+ sl) (sn %+ sm) sk Witness Witness) $
      OLt (sn %+ sl)
 {-# INLINE [1] shift #-}
 {-# RULES
-"shift/zero" forall (ns :: Sing 0).
+"shift/zero" forall (ns :: SNat 0).
   shift ns = inclusion
   #-}
 
-lneqLeqTrans :: Sing (n :: Nat) -> Sing m -> Sing l
-             -> IsTrue (n < m) -> IsTrue (m <=? l) -> IsTrue (n < l)
+lneqLeqTrans :: SNat (n :: Nat) -> SNat m -> SNat l
+             -> IsTrue (n <? m) -> IsTrue (m <=? l) -> IsTrue (n <? l)
 lneqLeqTrans sn sm sl nLTm mLEl =
   withRefl (lneqSuccLeq sn sl) $
   withRefl (lneqSuccLeq sn sm) $
   leqTrans (sSucc sn) sm sl nLTm mLEl
 
-lneqMonotoneR :: forall n m l. Sing (n :: Nat) -> Sing m -> Sing l
-              -> IsTrue (m < l) -> IsTrue ((n + m) < (n + l))
+lneqMonotoneR :: forall n m l. SNat n -> SNat m -> SNat l
+              -> IsTrue (m <? l) -> IsTrue ((n + m) <? (n + l))
 lneqMonotoneR sn sm sl mLTl =
   withRefl (lneqSuccLeq sm sl) $
   withRefl (lneqSuccLeq (sn %+ sm) (sn %+ sl)) $
   withRefl (plusSuccR sn sm) $
-  plusMonotoneR sn (sm %+ sing @1) sl (mLTl :: IsTrue ((m + 1) <=? l))
+  plusMonotoneR sn (sm %+ sNat @1) sl (mLTl :: IsTrue ((m + 1) <=? l))
 
 -- | Similar to @'injectVars'@, but @'injectVarsOffset' n f@
 --   injects variables into the first but @n@ variables.
@@ -446,11 +444,11 @@ lneqMonotoneR sn sm sl mLTl =
 injectVarsOffset :: forall n r r' . ((n + Arity r <= Arity r'),
                   IsPolynomial r,
                   IsPolynomial r',
-                  Coefficient r ~ Coefficient r') => Sing n -> r -> r'
+                  Coefficient r ~ Coefficient r') => SNat n -> r -> r'
 injectVarsOffset sn = liftMap (var . shift sn)
 {-# INLINE [1] injectVarsOffset #-}
 {-# RULES
-"injectVarsOffset eql" forall (sn :: Sing 0).
+"injectVarsOffset eql" forall (sn :: SNat 0).
  injectVarsOffset sn = injectVars
  #-}
 
@@ -746,7 +744,7 @@ mapPolynomial :: (IsOrderedPolynomial poly, IsOrderedPolynomial poly')
               => (Coefficient poly -> Coefficient poly') -> (Ordinal (Arity poly) -> Ordinal (Arity poly'))
               -> poly -> poly'
 mapPolynomial mapCoe injVar =
-  substWith (\coe g -> mapCoe coe !* g) (generate sing (var . injVar))
+  substWith (\coe g -> mapCoe coe !* g) (generate sNat (var . injVar))
 {-# INLINE [3] mapPolynomial #-}
 {-# RULES
 "mapPolynomial/id" mapPolynomial id id = id

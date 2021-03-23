@@ -15,7 +15,7 @@ import           Data.Complex
 import           Data.Convertible
 import           Data.List                        (find, nub, partition, sortBy)
 import qualified Data.Matrix                      as M
-import qualified Data.Sized.Builtin               as SV
+import qualified Data.Sized               as SV
 import qualified Data.Vector                      as V
 import           Debug.Trace
 import qualified Numeric.LinearAlgebra            as LA

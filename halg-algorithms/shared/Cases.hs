@@ -40,7 +40,7 @@ i3 = toIdeal [x ^ 31 - x ^ 6 - x - y, x ^ 8 - z, x ^ 10 - t]
 
 cyclic ::
   forall n.
-  Sing n ->
+  SNat n ->
   Ideal (OrderedPolynomial Rational Grevlex n)
 cyclic n =
   withKnownNat n $
@@ -52,10 +52,10 @@ mkCyclic :: Ring r => Int -> [r] -> r
 mkCyclic n cycs = sum $ map product $ take (length cycs) $ map (take n) $ tails $ cycle cycs
 
 katsura8 :: Ideal (Polynomial Rational 9)
-katsura8 = katsura sing
+katsura8 = katsura sNat
 
 katsura9 :: Ideal (Polynomial Rational 10)
-katsura9 = katsura sing
+katsura9 = katsura sNat
 
 katsura :: SNat n -> Ideal (Polynomial Rational (n + 1))
 katsura sn =
