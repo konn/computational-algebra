@@ -76,7 +76,7 @@ benchmark gauss-bench
   hs-source-dirs:
       app
   default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses NoImplicitPrelude OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
-  ghc-options: -Wall -Odph -threaded -O2 -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -threaded -O2 -rtsopts -with-rtsopts=-N
   build-depends:
       MonadRandom
     , QuickCheck
