@@ -29,6 +29,7 @@ import qualified Data.Matrix as M hiding (fromList)
 import Data.Ord
 import Data.Reflection
 import Data.Sized (fromListWithDefault)
+import Data.Type.Natural.Lemma.Arithmetic
 import qualified Data.Vector as V
 import qualified Numeric.Algebra as NA
 import Numeric.Field.Fraction
