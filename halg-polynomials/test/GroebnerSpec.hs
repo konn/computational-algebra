@@ -12,7 +12,7 @@ import Utils
 import           Control.Monad
 import qualified Data.Foldable            as F
 import           Data.List                (delete, tails)
-import qualified Data.Sized.Builtin       as SV
+import qualified Data.Sized       as SV
 import           Numeric.Field.Fraction   (Fraction)
 import           Test.Hspec
 import           Test.Hspec.QuickCheck

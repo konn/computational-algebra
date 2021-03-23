@@ -48,9 +48,9 @@ newtype Sparse ratio n m a = Sparse { runSparse :: [Vector a] }
 instance (KnownNat r, KnownNat n, KnownNat m, DecidableZero a, Arbitrary a)
       => Arbitrary (Sparse r n m a) where
   arbitrary =
-    let r = fromIntegral (toNatural (sing :: Sing r)) P./ 100
-        nrows = fromIntegral $ toNatural (sing :: Sing n)
-        ncols = fromIntegral $ toNatural (sing :: Sing m)
+    let r = fromIntegral (toNatural (sNat :: SNat r)) P./ 100
+        nrows = fromIntegral $ toNatural (sNat :: SNat n)
+        ncols = fromIntegral $ toNatural (sNat :: SNat m)
     in Sparse <$> sparseMatrixOf arbitrary r nrows ncols
 
 main :: IO ()

@@ -6,6 +6,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fplugin Data.Singletons.TypeNats.Presburger #-}
@@ -21,10 +22,9 @@ import Algebra.Ring.Polynomial.Monomial
   ( Monomial,
     OrderedMonomial (..),
   )
-import qualified Data.Sized.Builtin as SV
+import qualified Data.Sized as SV
 import Data.Type.Equality (gcastWith)
-import Data.Type.Natural.Class (ZeroOrSucc (..), succAndPlusOneL, zeroOrSucc)
-import GHC.TypeLits (KnownNat)
+import Data.Type.Natural.Lemma.Arithmetic (succAndPlusOneL)
 import Test.QuickCheck
   ( Arbitrary,
     Gen,
@@ -44,7 +44,7 @@ import Prelude
 
 instance (KnownNat n, Monad m) => Serial m (Monomial n) where
   series =
-    case zeroOrSucc (sing :: SNat n) of
+    case zeroOrSucc (sNat @n) of
       IsZero -> cons0 SV.empty
       IsSucc n ->
         gcastWith (succAndPlusOneL n) $
@@ -73,7 +73,7 @@ arbitraryMonomial =
   SV.unsafeFromList len . map abs
     <$> vectorOf (sNatToInt len) arbitrarySizedBoundedIntegral
   where
-    len = sing :: SNat n
+    len = sNat :: SNat n
 
 instance (KnownNat n) => Arbitrary (OrderedMonomial ord n) where
   arbitrary = OrderedMonomial <$> arbitrary

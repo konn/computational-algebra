@@ -70,8 +70,9 @@ import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import Data.Singletons.Prelude (SEq ((%==)))
 import Data.Singletons.Prelude.List
-import qualified Data.Sized.Builtin as V
-import Data.Type.Natural.Class (IsPeano (plusMinus'), induction, plusCongR)
+import qualified Data.Sized as V
+import Data.Type.Natural.Lemma.Arithmetic (plusCongR, plusMinus')
+import Unsafe.Coerce (unsafeCoerce)
 import qualified Prelude as P
 
 -- | Test if the given ideal is Groebner basis, using Buchberger criteria and relatively primeness.
@@ -360,49 +361,8 @@ groebnerTest ::
   Bool
 groebnerTest f fs = f `modPolynomial` fs == zero
 
-newtype LengthReplicate n = LengthReplicate
-  { runLengthReplicate ::
-      forall x.
-      Sing (x :: Nat) ->
-      Length (Replicate n x) :~: n
-  }
-
-lengthReplicate :: forall m x. SNat m -> SNat x -> Length (Replicate m x) :~: m
-lengthReplicate = runLengthReplicate . induction base step
-  where
-    base :: LengthReplicate 0
-    base = LengthReplicate $ const Refl
-
-    step :: forall n. SNat n -> LengthReplicate n -> LengthReplicate (1 + n)
-    step n (LengthReplicate ih) = LengthReplicate $ \x ->
-      case (sOne %+ n) %== sZero of
-        STrue -> error "Could not happen"
-        SFalse ->
-          start
-            (sLength (sReplicate (sing @1 %+ n) x))
-            =~= sLength (x `SCons` sReplicate (sOne %+ n %- sOne) x)
-            =~= sOne %+ sLength (sReplicate ((sOne %+ n) %- sOne) x)
-            === sOne %+ sLength (sReplicate n x)
-              `because` plusCongR
-                sOne
-                ( lengthCong $
-                    replicateCong
-                      (plusMinus' sOne n)
-                      x
-                )
-            === sOne %+ n `because` plusCongR sOne (ih x)
-
-sOne :: SNat 1
-sOne = sing
-
-sZero :: SNat 0
-sZero = sing
-
-lengthCong :: a :~: b -> Length a :~: Length b
-lengthCong Refl = Refl
-
-replicateCong :: a :~: b -> Sing x -> Replicate a x :~: Replicate b x
-replicateCong Refl _ = Refl
+lengthReplicate :: forall m x p. SNat m -> p x -> Length (Replicate m x) :~: m
+lengthReplicate _ _ = unsafeCoerce $ Refl @()
 
 -- | Calculate n-th elimination ideal using 'WeightedEliminationOrder' ordering.
 thEliminationIdeal ::
@@ -417,9 +377,9 @@ thEliminationIdeal ::
   Ideal (OrderedPolynomial (Coefficient poly) (MOrder poly) (Arity poly - n))
 thEliminationIdeal n =
   withSingI (sOnes n) $
-    withRefl (lengthReplicate n (sing @1)) $
+    withRefl (lengthReplicate n (sNat @1)) $
       withKnownNat n $
-        withKnownNat ((sing :: SNat (Arity poly)) %- n) $
+        withKnownNat ((sNat :: SNat (Arity poly)) %- n) $
           mapIdeal (changeOrderProxy Proxy) . thEliminationIdealWith (weightedEliminationOrder n) n
 {-# INLINE CONLIKE thEliminationIdeal #-}
 
@@ -491,11 +451,11 @@ intersection ::
 intersection ideals
   | null ideals = principalIdeal one
   | otherwise =
-    case toSing $ fromIntegral $ F.length ideals of
-      SomeSing sk ->
+    case toSomeSNat $ fromIntegral $ F.length ideals of
+      SomeSNat sk ->
         withSingI (sOnes sk) $
           withKnownNat sk $
-            let ts = genericTake (fromSing sk) vars
+            let ts = genericTake (toNatural sk) vars
                 inj = padLeftPoly sk Grevlex
                 tis = zipWith (\ideal t -> mapIdeal ((t *) . inj) ideal) (F.toList ideals) ts
                 j = foldr appendIdeal (principalIdeal (one - foldr (+) zero ts)) tis
@@ -534,8 +494,8 @@ saturationByPrincipalIdeal is g =
   let n = sArity' g
    in withKnownNat n $
         eliminatePadding $
-          addToIdeal (one - (padLeftPoly (sing @1) Grevlex g * var 0)) $
-            mapIdeal (padLeftPoly (sing @1) Grevlex) is
+          addToIdeal (one - (padLeftPoly (sNat @1) Grevlex g * var 0)) $
+            mapIdeal (padLeftPoly (sNat @1) Grevlex) is
 {-# INLINE CONLIKE saturationByPrincipalIdeal #-}
 
 -- | Saturation ideal

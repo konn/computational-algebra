@@ -14,7 +14,7 @@ import           Control.Lens                          (_1, _2)
 import           Data.Monoid                           (Dual (..))
 import           Data.Sequence                         (Seq ((:<|), (:|>)))
 import qualified Data.Sequence                         as Seq
-import           Data.Sized.Builtin                    (unsized)
+import           Data.Sized                    (unsized)
 import           Gauge.Main
 
 type Comparer = Fold (Int, Int) Ordering

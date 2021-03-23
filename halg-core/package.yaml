@@ -49,6 +49,7 @@ dependencies:
 - foldl
 - equational-reasoning
 - ghc-typelits-knownnat
+- ghc-typelits-natnormalise
 - ghc-typelits-presburger >= 0.4
 - singletons-presburger >= 0.4
 - hashable

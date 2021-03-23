@@ -4,7 +4,7 @@ import           Algebra.Field.Finite
 import           Algebra.Prelude                    hiding ((%))
 import           Algebra.Ring.Polynomial.Univariate
 import qualified Data.Map                           as M
-import qualified Data.Sized.Builtin                 as SV
+import qualified Data.Sized                 as SV
 import           Gauge.Main
 import           Numeric.Field.Fraction             ((%))
 

@@ -20,6 +20,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
+{-# LANGUAGE ViewPatterns #-}
 module Algebra.Ring.Polynomial.Labeled
   ( IsUniqueList,
     LabPolynomial (LabelPolynomial, unLabelPolynomial),
@@ -43,14 +44,14 @@ import Control.DeepSeq (NFData)
 import Control.Lens (each, (%~), (&))
 import qualified Data.Coerce as DC
 import qualified Data.List as L
-import Data.Singletons.Prelude
+import Data.Singletons.Prelude hiding (SNum(..))
 import Data.Singletons.Prelude.List hiding (Group)
-import qualified Data.Sized.Builtin as S
+import qualified Data.Sized as S
 import GHC.Exts (Constraint)
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 802
 import qualified Data.Text as T
 #endif
-import GHC.TypeLits (natVal, symbolVal, TypeError, ErrorMessage(..), KnownSymbol)
+import GHC.TypeLits (symbolVal, TypeError, ErrorMessage(..), KnownSymbol)
 import qualified Numeric.Algebra as NA
 import qualified Prelude as P
 
@@ -130,7 +131,7 @@ instance
 #endif
 
           fromSing svs
-        vsVec = generate sing $ \i -> vs !! fromEnum i
+        vsVec = generate sNat $ \i -> vs !! fromEnum i
      in showsPolynomialWith vsVec d f
 
 instance
@@ -349,9 +350,9 @@ permute0 :: (SEq k) => SList (xs :: [k]) -> SList (ys :: [k]) -> Sized (Length x
 permute0 SNil _ = S.Nil
 permute0 (SCons x xs) ys =
   case sElemIndex x ys of
-    SJust n -> withKnownNat n $
-      let k = sLength xs
-       in withKnownNat (sing @1 %+ k) $
+    SJust (singToSNat -> n) -> withKnownNat n $
+      let k = singToSNat $ sLength xs
+       in withKnownNat (sNat @1 %+ k) $
             withKnownNat k (fromIntegral (natVal n) S.:< permute0 xs ys)
     SNothing -> error "oops, you called permute0 for non-subset..."
 

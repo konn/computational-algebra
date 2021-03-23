@@ -27,4 +27,4 @@ c3 = [ x+y+z, x*y+y*z+z*x, x*y*z-1]
     [x,y,z] = vars
 
 main :: IO ()
-main = f4 (cyclic @5 sing) `deepseq` return ()
+main = f4 (cyclic @5 sNat) `deepseq` return ()

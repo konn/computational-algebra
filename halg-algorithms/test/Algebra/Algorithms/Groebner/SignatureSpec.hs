@@ -18,7 +18,7 @@ import           Algebra.Ring.Polynomial.Labeled
 import           Control.Monad
 import qualified Data.Foldable                         as F
 import           Data.List                             (delete)
-import qualified Data.Sized.Builtin                    as SV
+import qualified Data.Sized                    as SV
 import qualified Data.Vector                           as V
 import           Numeric.Field.Fraction                (Fraction)
 import           Test.Hspec

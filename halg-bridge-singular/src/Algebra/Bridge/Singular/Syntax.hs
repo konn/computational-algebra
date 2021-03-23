@@ -82,7 +82,7 @@ instance
   SingularOrder k (ProductOrder n m o1 o2)
   where
   singularOrder _ _ =
-    let (sn, sm) = (sing :: Sing n, sing :: Sing m)
+    let (sn, sm) = (sNat :: SNat n, sNat :: SNat m)
      in T.concat
           [ "("
           , singularOrder sn (Proxy :: Proxy o1)
@@ -160,7 +160,7 @@ data RingSpec where
   RingSpec ::
     SingularOrder n ord =>
     RingCoeffSpec ->
-    Sing n ->
+    SNat n ->
     proxy ord ->
     RingSpec
 
@@ -182,7 +182,7 @@ prettySingularPolynomial ::
   poly ->
   Text
 prettySingularPolynomial =
-  let vs = generate sing $ \i -> "x(" ++ show (ordToNatural i) ++ ")"
+  let vs = generate sNat $ \i -> "x(" ++ show (ordToNatural i) ++ ")"
    in T.pack . showPolynomialWith' True prettySingularCoeff vs 5
 
 instance

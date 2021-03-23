@@ -35,7 +35,7 @@ import           Data.Maybe                         (fromJust)
 import           Data.MonoTraversable
 import qualified Data.Ratio                         as R
 import qualified Data.Set                           as S
-import qualified Data.Sized.Builtin                 as SV
+import qualified Data.Sized                 as SV
 import           GHC.Num                            (Num)
 import           Math.NumberTheory.Powers
 import           Numeric.Algebra.Complex            hiding (i)

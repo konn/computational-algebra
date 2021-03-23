@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2eb79c53be77050cbf3b8f438fae2570fca2f3f6e44091bd8e37d061f0a49e66
+-- hash: 93b0c003a7e850b6c67f48a368841ebcf03ad621e970c57875601a2bdd2983d0
 
 name:           halg-core
 version:        0.6.0.0
@@ -47,6 +47,7 @@ library
     , equational-reasoning
     , foldl
     , ghc-typelits-knownnat
+    , ghc-typelits-natnormalise
     , ghc-typelits-presburger >=0.4
     , hashable
     , intern
@@ -99,6 +100,7 @@ benchmark prime-field-simple-bench
     , foldl
     , gauge
     , ghc-typelits-knownnat
+    , ghc-typelits-natnormalise
     , ghc-typelits-presburger >=0.4
     , halg-core
     , hashable

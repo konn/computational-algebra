@@ -16,7 +16,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
-{-# OPTIONS_GHC -fplugin Data.Singletons.TypeNats.Presburger #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Presburger #-}
 
 {- | Algorithms for zero-dimensional ideals.
 
@@ -65,7 +65,7 @@ import qualified Data.Matrix as M
 import Data.Maybe (fromJust)
 import Data.Reflection (Reifies)
 import Data.STRef.Strict (newSTRef)
-import qualified Data.Sized.Builtin as SV
+import qualified Data.Sized as SV
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import qualified Numeric.Algebra as NA
@@ -87,13 +87,13 @@ solveM ::
   , KnownNat n
   , IsMonomialOrder n ord
   , Convertible r Double
-  , (0 < n) ~ 'True
+  , 0 < n
   ) =>
   Ideal (OrderedPolynomial r ord n) ->
   m [Sized n (Complex Double)]
 solveM ideal =
   {-# SCC "solveM" #-}
-  withKnownNat (sSucc (sing :: SNat n)) $
+  withKnownNat (sSucc (sNat :: SNat n)) $
     reifyQuotient (radical ideal) $ \pxy ->
       case standardMonomials' pxy of
         Just bs -> step 10 (length bs)
@@ -104,7 +104,7 @@ solveM ideal =
       do
         coeffs <-
           {-# SCC "solveM/coeff-gen" #-}
-          replicateM (sNatToInt (sSucc (sing :: SNat n))) $ getRandomR (- bd, bd)
+          replicateM (sNatToInt (sSucc (sNat :: SNat n))) $ getRandomR (- bd, bd)
         let vars = one : SV.toList allVars
             f = sum $ zipWith (.*.) (map (NA.fromInteger :: Integer -> r) coeffs) vars
         case solveWith f ideal of
@@ -121,7 +121,7 @@ solveWith ::
   , Ord r
   , Field r
   , CoeffRing r
-  , (0 < n) ~ 'True
+  , 0 < n
   , IsMonomialOrder n ord
   , KnownNat n
   , Convertible r Double
@@ -131,7 +131,7 @@ solveWith ::
   Maybe [Sized n (Complex Double)]
 solveWith f0 i0 =
   {-# SCC "solveWith" #-}
-  withKnownNat (sSucc (sing :: SNat n)) $
+  withKnownNat (sSucc (sNat :: SNat n)) $
     reifyQuotient (radical i0) $ \pxy ->
       let ideal = gBasis' pxy
           Just base = map (leadingMonomial . quotRepr) <$> standardMonomials' pxy
@@ -175,7 +175,7 @@ solve' ::
   ( Field r
   , CoeffRing r
   , KnownNat n
-  , (0 < n) ~ 'True
+  , 0 < n
   , IsMonomialOrder n ord
   , Convertible r Double
   ) =>
@@ -196,8 +196,6 @@ solve' err ideal =
             , let xs = SV.unsafeFromList' xs0
             , all ((< err) . magnitude . substWith mul xs) $ generators ideal
             ]
-  where
-    _ = Witness :: IsTrue (0 < n) -- Just to suppress "redundant constraint" warning
 
 {- | Given a zero-dimensional ideal \(I\),
    \('subspMatrix' i I\) computes a multiplication matrix
@@ -241,7 +239,7 @@ solveViaCompanion err ideal =
     else
       let vs =
             map (nub . LA.toList . LA.eigenvalues . LA.fromLists . matToLists . fmap toComplex . flip subspMatrix ideal) $
-              enumOrdinal (sing :: SNat n)
+              enumOrdinal (sNat :: SNat n)
           mul p q = toComplex p * q
        in [ xs
           | xs0 <- sequence vs
@@ -379,7 +377,7 @@ radical ::
   Ideal (OrderedPolynomial r ord n)
 radical ideal =
   {-# SCC "radical" #-}
-  let gens = {-# SCC "calcGens" #-} map (\on -> reduction on $ univPoly on ideal) $ enumOrdinal (sing :: SNat n)
+  let gens = {-# SCC "calcGens" #-} map (\on -> reduction on $ univPoly on ideal) $ enumOrdinal (sNat :: SNat n)
    in toIdeal $ calcGroebnerBasis $ toIdeal $ generators ideal ++ gens
 
 -- | Test if the given zero-dimensional ideal is radical or not.
@@ -388,7 +386,7 @@ isRadical ::
   ( Ord r
   , CoeffRing r
   , KnownNat n
-  , (0 < n) ~ 'True
+  , 0 < n
   , Field r
   , IsMonomialOrder n ord
   ) =>
@@ -397,10 +395,8 @@ isRadical ::
 isRadical ideal =
   let gens =
         map (\on -> reduction on $ univPoly on ideal) $
-          enumOrdinal (sing :: SNat n)
+          enumOrdinal (sNat :: SNat n)
    in all (`isIdealMember` ideal) gens
-  where
-    _ = Witness :: IsTrue (0 < n) -- Just to suppress "redundant constraint" warning
 
 -- * FGLM
 
@@ -412,7 +408,7 @@ fglm ::
   , KnownNat n
   , Field r
   , IsMonomialOrder n ord
-  , (0 < n) ~ 'True
+  , 0 < n
   ) =>
   Ideal (OrderedPolynomial r ord n) ->
   ([OrderedPolynomial r Lex n], [OrderedPolynomial r Lex n])
@@ -424,7 +420,7 @@ fglmMap ::
   forall k ord n.
   ( Ord k
   , Field k
-  , (0 < n) ~ 'True
+  , 0 < n
   , IsMonomialOrder n ord
   , CoeffRing k
   , KnownNat n
@@ -473,7 +469,7 @@ mainLoop = do
 
 toContinue ::
   forall s r o n.
-  ( (0 < n) ~ 'True
+  ( 0 < n
   , Ord r
   , KnownNat n
   , Field r
@@ -486,8 +482,6 @@ toContinue = do
     Just g -> do
       let xLast = P.maximum allVars `asTypeOf` g
       return $ not $ leadingMonomial g `isPowerOf` leadingMonomial xLast
-  where
-    _ = Witness :: IsTrue (0 < n) -- Just to suppress "redundant constraint" warning
 
 nextMonomial ::
   forall s r ord n.
@@ -501,7 +495,7 @@ nextMonomial = do
           maximumBy
             (comparing snd)
             [ (OrderedMonomial monom, fromEnum od)
-            | od <- enumOrdinal (sing :: SNat n)
+            | od <- enumOrdinal (sNat :: SNat n)
             , let monom = beta (getMonomial m) od
             , all (not . (`divs` OrderedMonomial monom)) gs
             ]
@@ -512,6 +506,3 @@ beta xs o@(OLt k) =
   let n = sizedLength xs
    in (SV.take (sSucc k) $ xs & ix o +~ 1) SV.++ SV.replicate (n %- sSucc k) 0
 beta _ _ = error "beta: Bug in ghc!"
-
-sSucc :: SNat k -> SNat (1 + k)
-sSucc = (sing @1 %+)

@@ -21,7 +21,8 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Presburger #-}
+{-# OPTIONS_GHC -fplugin Data.Type.Natural.Presburger.MinMaxSolver #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 module Algebra.Ring.Polynomial.Monomial
   ( Monomial,
@@ -104,8 +105,8 @@ import Data.Monoid (Dual (..), Sum (..))
 import qualified Data.Semigroup as Semi
 import Data.Singletons.Prelude (SList)
 import Data.Singletons.Prelude.List (Length, Replicate, sReplicate)
-import qualified Data.Sized.Builtin as V
-import Data.Type.Natural.Class (IsPeano (..), PeanoOrder (..))
+import qualified Data.Sized as V
+import Data.Type.Natural.Lemma.Order
 import qualified Data.Vector.Generic as G
 import qualified Data.Vector.Generic.Mutable as M
 import Data.Vector.Instances ()
@@ -135,7 +136,7 @@ instance KnownNat n => Multiplicative (Monomial n) where
   {-# INLINE (*) #-}
 
 instance KnownNat n => Unital (Monomial n) where
-  one = fromList sing []
+  one = fromList sNat []
 
 {- | Monomial' order (of degree n). This should satisfy following laws:
  (1) Totality: forall a, b (a < b || a == b || b < a)
@@ -311,7 +312,7 @@ instance IsOrder n ord => IsOrder n (Graded ord) where
 instance IsMonomialOrder n ord => IsMonomialOrder n (Graded ord)
 
 data ProductOrder (n :: Nat) (m :: Nat) (a :: Type) (b :: Type) where
-  ProductOrder :: Sing n -> Sing m -> ord -> ord' -> ProductOrder n m ord ord'
+  ProductOrder :: SNat n -> SNat m -> ord -> ord' -> ProductOrder n m ord ord'
 
 productOrder ::
   forall ord ord' n m.
@@ -319,16 +320,16 @@ productOrder ::
   Proxy (ProductOrder n m ord ord') ->
   MonomialOrder (n + m)
 productOrder _ mon mon' =
-  let n = sing :: SNat n
-      m = sing :: SNat m
+  let n = sNat :: SNat n
+      m = sNat :: SNat m
    in withWitness (plusLeqL n m) $
         case (V.splitAt n mon, V.splitAt n mon') of
           ((xs, xs'), (ys, ys')) ->
             cmpMonomial (Proxy :: Proxy ord) xs ys
               <> cmpMonomial
                 (Proxy :: Proxy ord')
-                (coerceLength (plusMinus' n m) xs')
-                (coerceLength (plusMinus' n m) ys')
+                xs'
+                ys'
 
 productOrder' ::
   forall n ord ord' m.
@@ -475,8 +476,8 @@ eliminationOrder :: SNat n -> SNat m -> EliminationOrder n m
 eliminationOrder n m =
   withKnownNat n $ ProductOrder n m Grevlex Grevlex
 
-sOnes :: Sing n -> Sing (Replicate n 1)
-sOnes n = sReplicate n (sing :: Sing 1)
+sOnes :: SNat n -> SList (Replicate n 1)
+sOnes n = sReplicate (sNatToSingleton n) sing
 
 weightedEliminationOrder :: SNat n -> WeightedEliminationOrder n Grevlex
 weightedEliminationOrder n =
@@ -490,7 +491,7 @@ instance (Eq (Monomial n), IsOrder n name) => Ord (OrderedMonomial name n) where
   OrderedMonomial m `compare` OrderedMonomial n = cmpMonomial (Proxy :: Proxy name) m n
 
 castMonomial :: (KnownNat m) => OrderedMonomial o n -> OrderedMonomial o' m
-castMonomial = _Wrapped %~ fromList sing . otoList
+castMonomial = _Wrapped %~ fromList sNat . otoList
 
 scastMonomial :: SNat m -> OrderedMonomial o n -> OrderedMonomial o m
 scastMonomial sdim = _Wrapped %~ fromList sdim . otoList
