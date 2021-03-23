@@ -27,6 +27,7 @@ import Numeric.Algebra hiding ((<), (^))
 import qualified Numeric.Algebra as NA
 import Numeric.Field.Fraction (Fraction)
 import Test.QuickCheck
+import Utils
 import Prelude hiding
   ( Fractional (..),
     Integral (..),
@@ -73,7 +74,7 @@ eqn03 =
 eqn04 :: Ideal (Polynomial (Fraction Integer) 3)
 eqn04 = toIdeal [x * y + z - x * z, x ^^ 2 - z, 2 * x ^^ 3 - x ^^ 2 * y * z - 1]
 
-mkBench :: (KnownNat n, (0 < n) ~ 'True) => Ideal (Polynomial (Fraction Integer) n) -> IO [Benchmark]
+mkBench :: (KnownNat n, (0 < n)) => Ideal (Polynomial (Fraction Integer) n) -> IO [Benchmark]
 mkBench is = do
   gen <- newStdGen
   return
@@ -84,7 +85,7 @@ mkBench is = do
     ]
 
 randomCase ::
-  (0 < n) ~ 'True =>
+  (0 < n) =>
   Int ->
   SNat n ->
   IO [Ideal (Polynomial (Fraction Integer) n)]

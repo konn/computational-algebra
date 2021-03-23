@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3c52532f45f1008be4e9bc3a85782ab5dbd0fbf3d2861a061b53bcc2f0ff6fec
+-- hash: 6e886aef540e1e9a8a66aa2b868e46f9f3049eb308fa7fe8c38717904fb26bce
 
 name:           computational-algebra
 version:        0.6.0.0
@@ -65,6 +65,7 @@ library
     , halg-polynomials
     , singletons
     , sized
+    , type-natural
   if flag(profile)
     ghc-options: -fprof-auto-exported
   default-language: Haskell2010
@@ -100,6 +101,7 @@ executable algebraic
     , reflection
     , singletons
     , sized
+    , type-natural
     , vector
   if flag(examples)
     buildable: True
@@ -135,6 +137,7 @@ executable groebner-prof
     , hspec-smallcheck ==0.5.*
     , singletons
     , sized
+    , type-natural
   if flag(profile)
     buildable: True
   else
@@ -169,6 +172,7 @@ executable hensel-prof
     , hspec-smallcheck ==0.5.*
     , singletons
     , sized
+    , type-natural
   if flag(profile)
     buildable: True
   else
@@ -206,6 +210,7 @@ executable quotient
     , reflection
     , singletons
     , sized
+    , type-natural
     , vector
   if flag(examples)
     buildable: True
@@ -244,6 +249,7 @@ executable sandpit-poly
     , reflection
     , singletons
     , sized
+    , type-natural
     , vector
   if flag(examples)
     buildable: True
@@ -256,6 +262,7 @@ benchmark coercion-bench
   main-is: coercion.hs
   hs-source-dirs:
       bench
+      share
   ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       MonadRandom
@@ -267,7 +274,9 @@ benchmark coercion-bench
     , constraints
     , containers
     , deepseq
+    , equational-reasoning
     , gauge
+    , ghc-typelits-presburger
     , halg-algebraic
     , halg-algorithms
     , halg-core
@@ -277,11 +286,17 @@ benchmark coercion-bench
     , halg-matrices
     , halg-polyn-parser
     , halg-polynomials
+    , lens
     , matrix
     , parallel
     , process
+    , quickcheck-instances
+    , reflection
     , singletons
     , sized
+    , smallcheck
+    , type-natural
+    , vector
   default-language: Haskell2010
 
 benchmark normal-bench
@@ -289,6 +304,7 @@ benchmark normal-bench
   main-is: bench.hs
   hs-source-dirs:
       bench
+      share
   ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       MonadRandom
@@ -300,7 +316,9 @@ benchmark normal-bench
     , constraints
     , containers
     , deepseq
+    , equational-reasoning
     , gauge
+    , ghc-typelits-presburger
     , halg-algebraic
     , halg-algorithms
     , halg-core
@@ -310,18 +328,27 @@ benchmark normal-bench
     , halg-matrices
     , halg-polyn-parser
     , halg-polynomials
+    , lens
     , matrix
     , parallel
     , process
+    , quickcheck-instances
+    , reflection
     , singletons
     , sized
+    , smallcheck
+    , type-natural
+    , vector
   default-language: Haskell2010
 
 benchmark quotient-bench-randomized
   type: exitcode-stdio-1.0
   main-is: quotient-bench-randomized.hs
+  other-modules:
+      Utils
   hs-source-dirs:
       bench
+      share
   ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       MonadRandom
@@ -333,7 +360,9 @@ benchmark quotient-bench-randomized
     , constraints
     , containers
     , deepseq
+    , equational-reasoning
     , gauge
+    , ghc-typelits-presburger
     , halg-algebraic
     , halg-algorithms
     , halg-core
@@ -343,18 +372,28 @@ benchmark quotient-bench-randomized
     , halg-matrices
     , halg-polyn-parser
     , halg-polynomials
+    , lens
     , matrix
     , parallel
     , process
+    , quickcheck-instances
+    , reflection
     , singletons
     , sized
+    , smallcheck
+    , type-natural
+    , vector
+  buildable: False
   default-language: Haskell2010
 
 benchmark solve-bench
   type: exitcode-stdio-1.0
   main-is: solve.hs
+  other-modules:
+      Utils
   hs-source-dirs:
       bench
+      share
   ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       MonadRandom
@@ -366,7 +405,9 @@ benchmark solve-bench
     , constraints
     , containers
     , deepseq
+    , equational-reasoning
     , gauge
+    , ghc-typelits-presburger
     , halg-algebraic
     , halg-algorithms
     , halg-core
@@ -376,11 +417,18 @@ benchmark solve-bench
     , halg-matrices
     , halg-polyn-parser
     , halg-polynomials
+    , lens
     , matrix
     , parallel
     , process
+    , quickcheck-instances
+    , reflection
     , singletons
     , sized
+    , smallcheck
+    , type-natural
+    , vector
+  buildable: False
   default-language: Haskell2010
 
 benchmark unipol-bench
@@ -388,6 +436,7 @@ benchmark unipol-bench
   main-is: unipol-bench.hs
   hs-source-dirs:
       bench
+      share
   ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       MonadRandom
@@ -399,7 +448,9 @@ benchmark unipol-bench
     , constraints
     , containers
     , deepseq
+    , equational-reasoning
     , gauge
+    , ghc-typelits-presburger
     , halg-algebraic
     , halg-algorithms
     , halg-core
@@ -409,11 +460,17 @@ benchmark unipol-bench
     , halg-matrices
     , halg-polyn-parser
     , halg-polynomials
+    , lens
     , matrix
     , parallel
     , process
+    , quickcheck-instances
+    , reflection
     , singletons
     , sized
+    , smallcheck
+    , type-natural
+    , vector
   default-language: Haskell2010
 
 benchmark unipol-div-bench
@@ -421,6 +478,7 @@ benchmark unipol-div-bench
   main-is: unipol-div.hs
   hs-source-dirs:
       bench
+      share
   ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       MonadRandom
@@ -432,7 +490,9 @@ benchmark unipol-div-bench
     , constraints
     , containers
     , deepseq
+    , equational-reasoning
     , gauge
+    , ghc-typelits-presburger
     , halg-algebraic
     , halg-algorithms
     , halg-core
@@ -442,11 +502,17 @@ benchmark unipol-div-bench
     , halg-matrices
     , halg-polyn-parser
     , halg-polynomials
+    , lens
     , matrix
     , parallel
     , process
+    , quickcheck-instances
+    , reflection
     , singletons
     , sized
+    , smallcheck
+    , type-natural
+    , vector
   default-language: Haskell2010
 
 benchmark unipol-mult-bench
@@ -454,6 +520,7 @@ benchmark unipol-mult-bench
   main-is: unipol-mult.hs
   hs-source-dirs:
       bench
+      share
   ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       MonadRandom
@@ -465,7 +532,9 @@ benchmark unipol-mult-bench
     , constraints
     , containers
     , deepseq
+    , equational-reasoning
     , gauge
+    , ghc-typelits-presburger
     , halg-algebraic
     , halg-algorithms
     , halg-core
@@ -475,9 +544,16 @@ benchmark unipol-mult-bench
     , halg-matrices
     , halg-polyn-parser
     , halg-polynomials
+    , lens
     , matrix
     , parallel
     , process
+    , quickcheck-instances
+    , reflection
     , singletons
     , sized
+    , smallcheck
+    , type-natural
+    , vector
+  buildable: False
   default-language: Haskell2010

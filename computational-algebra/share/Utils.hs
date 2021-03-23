@@ -13,6 +13,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults -fno-warn-orphans #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Presburger #-}
 
 module Utils
   ( ZeroDimIdeal (..),
@@ -59,6 +60,7 @@ import Data.Sized hiding
   )
 import qualified Data.Sized as SV
 import qualified Data.Type.Natural as TN
+import Data.Type.Natural.Lemma.Arithmetic
 import qualified Data.Vector as V
 import Numeric.Algebra (DecidableZero, Ring)
 import qualified Numeric.Algebra as NA
@@ -293,14 +295,14 @@ arbitrarySolvable = do
 
 liftSNat :: (forall n. KnownNat (n :: Nat) => SNat n -> Property) -> NA.Natural -> Property
 liftSNat f i =
-  case TN.fromNatural i of
-    SomeSing sn -> withKnownNat sn $ f sn
+  case toSomeSNat i of
+    SomeSNat sn -> withKnownNat sn $ f sn
 
 unaryPoly :: SNat n -> Ordinal n -> Gen (Polynomial (Fraction Integer) n)
 unaryPoly ar (OLt sm) = do
   f <- polyOfDim sOne
   withKnownNat ar $
-    withKnownNat (sm %:+ sOne) $
+    withKnownNat (sm %+ sOne) $
       return $ scastPolynomial ar $ shiftR sm f
 
 checkForArity :: [NA.Natural] -> (forall n. KnownNat (n :: Nat) => SNat n -> Property) -> Property
