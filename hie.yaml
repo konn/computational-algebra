@@ -62,6 +62,8 @@ cradle:
 
     - path: "halg-algorithms/src"
       component: "halg-algorithms:lib"
+    - path: "halg-algorithms/bench/f5-heap-bench.hs"
+      component: "halg-algorithms:bench:f5-heap-bench"
     - path: "halg-algorithms/app/f4-prof.hs"
       component: "halg-algorithms:exe:f4-prof"
     - path: "halg-algorithms/app/f5-prof.hs"
