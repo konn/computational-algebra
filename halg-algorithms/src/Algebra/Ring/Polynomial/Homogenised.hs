@@ -7,6 +7,7 @@
 {-# OPTIONS_GHC -fplugin Data.Singletons.TypeNats.Presburger #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Presburger #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 module Algebra.Ring.Polynomial.Homogenised (Homogenised, homogenise, unhomogenise, tryHomogenise, HomogOrder) where
 

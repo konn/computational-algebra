@@ -103,8 +103,13 @@ import Data.MonoTraversable
   )
 import Data.Monoid (Dual (..), Sum (..))
 import qualified Data.Semigroup as Semi
+
+#if MIN_VERSION_singletons(3,0,0)
+import Data.List.Singletons (SList, Length, Replicate, sReplicate)
+#else
 import Data.Singletons.Prelude (SList)
 import Data.Singletons.Prelude.List (Length, Replicate, sReplicate)
+#endif
 import qualified Data.Sized as V
 import Data.Type.Natural.Lemma.Order
 import qualified Data.Vector.Generic as G

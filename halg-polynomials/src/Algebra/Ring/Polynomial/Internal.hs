@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ExplicitNamespaces #-}
@@ -69,7 +70,11 @@ import qualified Data.Map.Merge.Strict as MM
 import qualified Data.Map.Strict as M
 import Data.MonoTraversable (osum)
 import qualified Data.Set as Set
+#if MIN_VERSION_singletons(3,0,0)
+import Data.List.Singletons (Replicate)
+#else
 import Data.Singletons.Prelude.List (Replicate)
+#endif
 import qualified Data.Sized as S
 import Data.Type.Natural.Lemma.Order
 import qualified Numeric.Algebra as NA

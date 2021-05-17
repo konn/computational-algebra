@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances      #-}
+{-# LANGUAGE CPP, ConstraintKinds, FlexibleContexts, FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses         #-}
 {-# LANGUAGE NoImplicitPrelude, NoRebindableSyntax, StandaloneDeriving #-}
 {-# LANGUAGE TemplateHaskell, TypeFamilies, UndecidableInstances       #-}
@@ -76,6 +76,9 @@ import           BasicPrelude                          as AlgebraicPrelude hidin
                                                                             read,
                                                                             readFile,
                                                                             show,
+#if MIN_VERSION_base(4,14,0)
+                                                                            singleton,
+#endif
                                                                             subtract,
                                                                             sum,
                                                                             unlines,

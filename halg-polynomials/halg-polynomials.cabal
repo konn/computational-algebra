@@ -51,7 +51,6 @@ library
     , monad-loops
     , mono-traversable
     , reflection
-    , singletons
     , singletons-presburger
     , sized
     , text
@@ -59,6 +58,13 @@ library
     , unamb
     , unordered-containers
     , vector
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >= 3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons < 3.0
   exposed-modules:
       Algebra.Algorithms.Groebner
       Algebra.Algorithms.Groebner.SelectionStrategy

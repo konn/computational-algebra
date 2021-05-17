@@ -44,14 +44,22 @@ import Control.DeepSeq (NFData)
 import Control.Lens (each, (%~), (&))
 import qualified Data.Coerce as DC
 import qualified Data.List as L
+#if MIN_VERSION_singletons(3,0,0)
+import Data.Singletons (type (@@))
+import Data.Eq.Singletons
+import Data.Function.Singletons (FlipSym0)
+import Data.List.Singletons hiding (Group)
+import Data.Maybe.Singletons
+#else
 import Data.Singletons.Prelude hiding (SNum(..))
 import Data.Singletons.Prelude.List hiding (Group)
+#endif
 import qualified Data.Sized as S
 import GHC.Exts (Constraint)
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 802
 import qualified Data.Text as T
 #endif
-import GHC.TypeLits (symbolVal, TypeError, ErrorMessage(..), KnownSymbol)
+import GHC.TypeLits (symbolVal, TypeError, ErrorMessage(..), Symbol, KnownSymbol)
 import qualified Numeric.Algebra as NA
 import qualified Prelude as P
 

@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -61,15 +62,17 @@ import Algebra.Ring.Polynomial.Univariate (Unipol)
 import Control.Monad.Loops (whileM_)
 import Control.Monad.ST (ST, runST)
 import qualified Data.Foldable as F
-import qualified Data.Foldable as H
 import qualified Data.Heap as H
 import Data.MonoTraversable (oall)
 import Data.STRef (STRef, modifySTRef, modifySTRef', newSTRef, readSTRef, writeSTRef)
 import Data.Sequence (Seq ((:<|)))
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
-import Data.Singletons.Prelude (SEq ((%==)))
+#if MIN_VERSION_singletons(3,0,0)
+import Data.List.Singletons
+#else
 import Data.Singletons.Prelude.List
+#endif
 import qualified Data.Sized as V
 import Data.Type.Natural.Lemma.Arithmetic (plusCongR, plusMinus')
 import Unsafe.Coerce (unsafeCoerce)
@@ -189,24 +192,24 @@ syzygyBuchbergerWithStrategy strategy ideal = runST $ do
         g0 = leadingMonomial g
         l = lcmMonomial f0 g0
         redundant =
-          H.any
+          F.any
             ( \(H.Entry _ h) ->
                 (h `notElem` [f, g])
                   && all
-                    (\k -> H.all ((/= k) . H.payload) rest)
+                    (\k -> F.all ((/= k) . H.payload) rest)
                     [(f, h), (g, h), (h, f), (h, g)]
                   && leadingMonomial h `divs` l
             )
             gs0
     when (l /= f0 * g0 && not redundant) $ do
       len0 <- readSTRef len
-      let qs = H.toList gs0
+      let qs = F.toList gs0
           s = sPolynomial f g `modPolynomial` map H.payload qs
       when (s /= zero) $ do
         b %= H.union (H.fromList [H.Entry (calcWeight' strategy q s, j) (q, s) | H.Entry _ q <- qs | j <- [len0 + 1 ..]])
         gs %= H.insert (H.Entry (leadingMonomial s) s)
         len %= (* 2)
-  map H.payload . H.toList <$> readSTRef gs
+  map H.payload . F.toList <$> readSTRef gs
 {-# SPECIALIZE INLINE [0] syzygyBuchbergerWithStrategy ::
   (Field k, CoeffRing k, KnownNat n) =>
   SugarStrategy NormalStrategy ->

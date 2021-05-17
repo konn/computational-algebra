@@ -1,0 +1,5 @@
+packages: .,
+  ../algebraic-prelude
+
+allow-newer:
+  equational-reasoning:template-haskell
