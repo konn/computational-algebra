@@ -57,6 +57,7 @@ library
     , equational-reasoning
     , foldl
     , ghc-typelits-knownnat
+    , ghc-typelits-natnormalise
     , ghc-typelits-presburger
     , halg-core
     , halg-heaps
@@ -72,11 +73,17 @@ library
     , parallel
     , reflection
     , semigroups
-    , singletons
     , singletons-presburger
     , sized
     , type-natural
     , vector
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >= 3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons < 3.0
   default-language: Haskell2010
 
 executable f4-prof

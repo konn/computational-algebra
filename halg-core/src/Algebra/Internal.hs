@@ -36,6 +36,17 @@ import qualified Data.Foldable as F
 import Data.Kind (Type)
 import Data.Proxy (KProxy (..), Proxy (..), asProxyTypeOf)
 import qualified Data.Sequence as Seq
+
+#if MIN_VERSION_singletons(3,0,0)
+import Data.Singletons as Algebra.Internal
+  ( Sing,
+    SingI (..),
+    SingKind (..),
+    SomeSing (..),
+    withSingI,
+  )
+import qualified GHC.TypeLits.Singletons as Sing
+#else
 import Data.Singletons.Prelude as Algebra.Internal
   ( Sing,
     SingI (..),
@@ -44,6 +55,8 @@ import Data.Singletons.Prelude as Algebra.Internal
     withSingI,
   )
 import qualified Data.Singletons.TypeLits as Sing
+#endif
+
 import Data.Sized as Algebra.Internal
   ( generate,
     sIndex,

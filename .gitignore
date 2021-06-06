@@ -12,6 +12,8 @@ cabal-dev
 .hsenv
 .cabal-sandbox/
 cabal.sandbox.config
+cabal.project.local
+dist-newstyle/
 *.prof
 *.aux
 *.hp

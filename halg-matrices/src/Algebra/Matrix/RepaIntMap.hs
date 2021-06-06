@@ -1,8 +1,12 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveFunctor, PartialTypeSignatures, PatternSynonyms #-}
 {-# LANGUAGE StandaloneDeriving, TypeOperators, ViewPatterns       #-}
 {-# OPTIONS_GHC -rtsopts -threaded -fno-liberate-case     #-}
 {-# OPTIONS_GHC  -fmax-simplifier-iterations=20 #-}
-{-# OPTIONS_GHC -funfolding-keeness-factor1000 -fllvm -optlo-O3 #-}
+{-# OPTIONS_GHC -funfolding-keeness-factor1000 -optlo-O3 #-}
+#ifndef mingw32_HOST_OS
+{-# OPTIONS_GHC -fllvm #-}
+#endif
 {-# OPTIONS_GHC -fsimplifier-phases=3  #-}
 {-# OPTIONS_GHC -funfolding-use-threshold1000                   #-}
 module Algebra.Matrix.RepaIntMap
