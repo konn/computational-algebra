@@ -115,5 +115,5 @@ jobs:
           TEST_EXE=$(echo "$i" | cut -d':' -f3)
           echo "Testing: ${TEST_EXE}"
           chmod +x ${{steps.test-bins.outputs.download-path}}/${TEST_EXE}
-          ${{steps.test-bins.outputs.download-path}}/${TEST_EXE}
+          ${{steps.test-bins.outputs.download-path}}/${TEST_EXE} +RTS -N
         done
