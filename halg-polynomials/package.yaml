@@ -66,12 +66,20 @@ library:
   - monad-loops
   - mono-traversable
   - reflection
-  - singletons
   - text
   - type-natural
   - unamb
   - unordered-containers
   - vector
+  when:
+  - condition: impl(ghc >= 9.0)
+    then:
+      dependencies:
+      - singletons >= 3.0
+      - singletons-base
+    else:
+      dependencies:
+      - singletons < 3.0
   default-extensions:
   - NoImplicitPrelude
 

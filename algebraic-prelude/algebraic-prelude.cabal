@@ -1,10 +1,8 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 84ebe1ee75cbe38fd2284dd56aeda42de487d850f526ad35b53b8a4ce02afd44
 
 name:           algebraic-prelude
 version:        0.1.1.0
@@ -32,12 +30,13 @@ library
       Paths_algebraic_prelude
   hs-source-dirs:
       src
-  default-extensions: NoImplicitPrelude
+  default-extensions:
+      NoImplicitPrelude
   ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
     , basic-prelude
-    , lens >= 4.0 && < 5.1
+    , lens >=4.0 && <5.1
     , semigroups
   if impl(ghc >=8.4)
     build-depends:
@@ -53,7 +52,8 @@ executable sandpit
       Paths_algebraic_prelude
   hs-source-dirs:
       examples
-  default-extensions: NoImplicitPrelude
+  default-extensions:
+      NoImplicitPrelude
   ghc-options: -Wall
   build-depends:
       algebraic-prelude

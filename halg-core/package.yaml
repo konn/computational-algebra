@@ -57,12 +57,21 @@ dependencies:
 - lens
 - mono-traversable
 - reflection
-- singletons
 - sized
 - type-natural
 - unordered-containers
 - vector
 - vector-instances
+
+when:
+- condition: impl(ghc >= 9.0)
+  then:
+    dependencies:
+    - singletons >= 3.0
+    - singletons-base
+  else:
+    dependencies: 
+    - singletons < 3.0
 
 library:
   source-dirs: src

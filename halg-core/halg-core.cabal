@@ -1,10 +1,8 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 93b0c003a7e850b6c67f48a368841ebcf03ad621e970c57875601a2bdd2983d0
 
 name:           halg-core
 version:        0.6.0.0
@@ -18,9 +16,10 @@ maintainer:     konn.jinro _at_ gmail.com
 copyright:      2018 (c) Hiromi ISHII
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
-
 build-type:     Simple
+tested-with:
+    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+
 extra-source-files:
     README.md
     ChangeLog.md
@@ -30,9 +29,35 @@ source-repository head
   location: https://github.com/konn/halg-core
 
 library
+  exposed-modules:
+      Algebra.Arithmetic
+      Algebra.Field.Finite
+      Algebra.Field.Prime
+      Algebra.Instances
+      Algebra.Internal
+      Algebra.Normed
+      Algebra.Ring.Euclidean.Quotient
+      Algebra.Ring.Ideal
+      Algebra.Ring.Polynomial.Class
+      Algebra.Ring.Polynomial.Monomial
+      Algebra.Scalar
+  other-modules:
+      Paths_halg_core
   hs-source-dirs:
       src
-  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses NoImplicitPrelude OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  default-extensions:
+      CPP
+      DataKinds
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      MultiParamTypeClasses
+      NoImplicitPrelude
+      OverloadedLabels
+      PolyKinds
+      TypeFamilies
+      TypeInType
+      UndecidableInstances
   ghc-options: -Wall -O2
   build-depends:
       ListLike
@@ -62,25 +87,11 @@ library
     , vector-instances
   if impl(ghc >= 9.0)
     build-depends:
-        singletons >= 3.0
+        singletons >=3.0
       , singletons-base
   else
     build-depends:
-        singletons < 3.0
-  exposed-modules:
-      Algebra.Arithmetic
-      Algebra.Field.Finite
-      Algebra.Field.Prime
-      Algebra.Instances
-      Algebra.Internal
-      Algebra.Normed
-      Algebra.Ring.Euclidean.Quotient
-      Algebra.Ring.Ideal
-      Algebra.Ring.Polynomial.Class
-      Algebra.Ring.Polynomial.Monomial
-      Algebra.Scalar
-  other-modules:
-      Paths_halg_core
+        singletons <3.0
   default-language: Haskell2010
 
 benchmark prime-field-simple-bench
@@ -90,7 +101,19 @@ benchmark prime-field-simple-bench
       Paths_halg_core
   hs-source-dirs:
       bench
-  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses NoImplicitPrelude OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  default-extensions:
+      CPP
+      DataKinds
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      MultiParamTypeClasses
+      NoImplicitPrelude
+      OverloadedLabels
+      PolyKinds
+      TypeFamilies
+      TypeInType
+      UndecidableInstances
   ghc-options: -Wall -O2
   build-depends:
       ListLike
@@ -114,11 +137,17 @@ benchmark prime-field-simple-bench
     , lens
     , mono-traversable
     , reflection
-    , singletons
     , singletons-presburger >=0.4
     , sized
     , type-natural
     , unordered-containers
     , vector
     , vector-instances
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010

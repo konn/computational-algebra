@@ -1,10 +1,8 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: cb336ceb68047876ed07a60d23778caba4a7e2a8e7d57fefae753f94e3a5e917
 
 name:           halg-matrices
 version:        0.6.0.0
@@ -18,9 +16,10 @@ maintainer:     konn.jinro _at_ gmail.com
 copyright:      2018 (c) Hiromi ISHII
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
-
 build-type:     Simple
+tested-with:
+    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+
 extra-source-files:
     README.md
     ChangeLog.md
@@ -30,9 +29,33 @@ source-repository head
   location: https://github.com/konn/halg-matrices
 
 library
+  exposed-modules:
+      Algebra.Algorithms.ChineseRemainder
+      Algebra.LinkedMatrix
+      Algebra.Matrix
+      Algebra.Matrix.DataMatrix
+      Algebra.Matrix.Generic
+      Algebra.Matrix.Generic.Mutable
+      Algebra.Matrix.HMatrix
+      Algebra.Matrix.IntMap
+      Algebra.Matrix.RepaIntMap
+  other-modules:
+      Algebra.Matrix.Generic.Base
   hs-source-dirs:
       src
-  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses NoImplicitPrelude OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  default-extensions:
+      CPP
+      DataKinds
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      MultiParamTypeClasses
+      NoImplicitPrelude
+      OverloadedLabels
+      PolyKinds
+      TypeFamilies
+      TypeInType
+      UndecidableInstances
   ghc-options: -Wall
   build-depends:
       MonadRandom
@@ -54,18 +77,6 @@ library
     , reflection
     , repa
     , vector
-  exposed-modules:
-      Algebra.Algorithms.ChineseRemainder
-      Algebra.LinkedMatrix
-      Algebra.Matrix
-      Algebra.Matrix.DataMatrix
-      Algebra.Matrix.Generic
-      Algebra.Matrix.Generic.Mutable
-      Algebra.Matrix.HMatrix
-      Algebra.Matrix.IntMap
-      Algebra.Matrix.RepaIntMap
-  other-modules:
-      Algebra.Matrix.Generic.Base
   default-language: Haskell2010
 
 benchmark gauss-bench
@@ -75,8 +86,20 @@ benchmark gauss-bench
       Paths_halg_matrices
   hs-source-dirs:
       app
-  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses NoImplicitPrelude OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
-  ghc-options: -Wall -threaded -O2 -rtsopts -with-rtsopts=-N
+  default-extensions:
+      CPP
+      DataKinds
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      MultiParamTypeClasses
+      NoImplicitPrelude
+      OverloadedLabels
+      PolyKinds
+      TypeFamilies
+      TypeInType
+      UndecidableInstances
+  ghc-options: -Wall -Odph -threaded -O2 -rtsopts -with-rtsopts=-N
   build-depends:
       MonadRandom
     , QuickCheck

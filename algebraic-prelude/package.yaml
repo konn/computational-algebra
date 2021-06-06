@@ -21,7 +21,7 @@ library:
   dependencies:
   - base >=4.7 && <5
   - basic-prelude
-  - lens ==4.*
+  - lens >= 4.0 && < 5.1
   - semigroups
   when:
   - condition: impl(ghc >=8.4)

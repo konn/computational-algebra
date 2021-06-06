@@ -1,10 +1,8 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 8c488aaac6ada6d2818b612e17db60d16a2a35b52c8a6110788f58b3784ddc6a
 
 name:           halg-polynomials
 version:        0.6.0.0
@@ -19,9 +17,10 @@ maintainer:     konn.jinro _at_ gmail.com
 copyright:      2018 (c) Hiromi ISHII
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
-
 build-type:     Simple
+tested-with:
+    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+
 extra-source-files:
     README.md
     ChangeLog.md
@@ -31,9 +30,31 @@ source-repository head
   location: https://github.com/konn/halg-polynomials
 
 library
+  exposed-modules:
+      Algebra.Algorithms.Groebner
+      Algebra.Algorithms.Groebner.SelectionStrategy
+      Algebra.Prelude.Core
+      Algebra.Ring.Polynomial
+      Algebra.Ring.Polynomial.Labeled
+      Algebra.Ring.Polynomial.Quotient
+      Algebra.Ring.Polynomial.Univariate
+  other-modules:
+      Algebra.Ring.Polynomial.Internal
   hs-source-dirs:
       src
-  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances NoImplicitPrelude
+  default-extensions:
+      CPP
+      DataKinds
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      MultiParamTypeClasses
+      OverloadedLabels
+      PolyKinds
+      TypeFamilies
+      TypeInType
+      UndecidableInstances
+      NoImplicitPrelude
   ghc-options: -Wall -O2 -fplugin Data.Singletons.TypeNats.Presburger -fplugin GHC.TypeLits.KnownNat.Solver
   build-depends:
       algebra
@@ -60,21 +81,11 @@ library
     , vector
   if impl(ghc >= 9.0)
     build-depends:
-        singletons >= 3.0
+        singletons >=3.0
       , singletons-base
   else
     build-depends:
-        singletons < 3.0
-  exposed-modules:
-      Algebra.Algorithms.Groebner
-      Algebra.Algorithms.Groebner.SelectionStrategy
-      Algebra.Prelude.Core
-      Algebra.Ring.Polynomial
-      Algebra.Ring.Polynomial.Labeled
-      Algebra.Ring.Polynomial.Quotient
-      Algebra.Ring.Polynomial.Univariate
-  other-modules:
-      Algebra.Ring.Polynomial.Internal
+        singletons <3.0
   default-language: Haskell2010
 
 test-suite halg-polynomials-spec
@@ -88,7 +99,18 @@ test-suite halg-polynomials-spec
       Utils
   hs-source-dirs:
       test
-  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  default-extensions:
+      CPP
+      DataKinds
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      MultiParamTypeClasses
+      OverloadedLabels
+      PolyKinds
+      TypeFamilies
+      TypeInType
+      UndecidableInstances
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       QuickCheck

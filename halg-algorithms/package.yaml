@@ -46,6 +46,7 @@ dependencies:
 - heaps
 - semigroups
 - sized
+- ghc-typelits-natnormalise
 
 library:
   source-dirs: src
@@ -60,7 +61,6 @@ library:
   - equational-reasoning
   - ghc-typelits-presburger
   - singletons-presburger
-  - singletons
   - type-natural
   - equational-reasoning
   - foldl
@@ -78,6 +78,15 @@ library:
   - vector
   default-extensions:
   - NoImplicitPrelude
+  when:
+  - condition: impl(ghc >= 9.0)
+    then:
+      dependencies:
+      - singletons >= 3.0
+      - singletons-base
+    else:
+      dependencies:
+      - singletons < 3.0
 
 _prof-settings: &prof-settings
   source-dirs:
