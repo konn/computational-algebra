@@ -136,8 +136,6 @@ jobs:
         ghc:
         - 8.10.4
       fail-fast: false
-    env:
-      STACK_YAML: stack-8.10.4.yaml
     steps:
     - uses: actions/checkout@v2
       with:
@@ -154,7 +152,6 @@ jobs:
           ${{ runner.os }}-doc-${{ env.cache-name }}-${{ matrix.ghc }}
           ${{ runner.os }}-doc-${{ env.cache-name }}-
           ${{ runner.os }}-doc-
-          ${{ runner.os }}-
     - name: Cache .stack-work
       uses: actions/cache@v2.1.6
       env:
@@ -166,7 +163,6 @@ jobs:
           ${{ runner.os }}-doc-${{ env.cache-name }}-${{ matrix.ghc }}
           ${{ runner.os }}-doc-${{ env.cache-name }}-
           ${{ runner.os }}-doc-
-          ${{ runner.os }}-
 
     - name: Setup Haskell
       uses: haskell/actions/setup@v1.2.1
