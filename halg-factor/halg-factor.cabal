@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: df2e9ec9f91c37ce6ce095bc9e1f5f377174060333b26596f1b9808014bfa9d4
+-- hash: 6ae0b4ce20650389aa0ac94eda2e2a5a36642a99257b93c832e9658058c6408f
 
 name:           halg-factor
 version:        0.6.0.0
@@ -18,7 +18,8 @@ maintainer:     konn.jinro _at_ gmail.com
 copyright:      2018 (c) Hiromi ISHII
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+tested-with:
+    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
 
 build-type:     Simple
 extra-source-files:
@@ -41,7 +42,8 @@ library
       Paths_halg_factor
   hs-source-dirs:
       src
-  default-extensions: NoImplicitPrelude
+  default-extensions:
+      NoImplicitPrelude
   ghc-options: -Wall
   build-depends:
       MonadRandom
@@ -90,7 +92,8 @@ test-suite halg-factor-specs
       Paths_halg_factor
   hs-source-dirs:
       test
-  default-extensions: NoImplicitPrelude
+  default-extensions:
+      NoImplicitPrelude
   ghc-options: -Wall
   build-depends:
       HUnit

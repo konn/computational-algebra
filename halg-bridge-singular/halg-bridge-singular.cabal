@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9ec6af7f3a237cecdd7834da97bf2cbeacfb1fbd88640b513bd25fe5cb0668b4
+-- hash: fe0931ffa016b67459d1011db26a92a4dd25907424437dd78746ccfd021fbf5f
 
 name:           halg-bridge-singular
 version:        0.6.0.0
@@ -18,7 +18,8 @@ maintainer:     konn.jinro _at_ gmail.com
 copyright:      2018 (c) Hiromi ISHII
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+tested-with:
+    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
 
 build-type:     Simple
 extra-source-files:

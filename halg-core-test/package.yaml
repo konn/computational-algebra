@@ -37,6 +37,10 @@ dependencies:
 - smallcheck
 - type-natural
 
+when:
+- condition: impl(ghc >= 9)
+  dependencies: singletons-base
+
 library:
   source-dirs: src
   ghc-options:  -Wall -Wno-orphans

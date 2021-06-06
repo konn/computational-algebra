@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4442e06ecbcaaf030635d38b502d56c20c8195fe3c14e66584f4c906dfd9888c
+-- hash: ca63e4e7f0188aaf74d34596bbdc9c44a5043f3b2d6f705d60b37ae8476068d0
 
 name:           halg-algebraic
 version:        0.6.0.0
@@ -18,7 +18,8 @@ maintainer:     konn.jinro _at_ gmail.com
 copyright:      2018 (c) Hiromi ISHII
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2,  GHC == 8.10.1
+tested-with:
+    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2,  GHC == 8.10.1
 
 build-type:     Simple
 extra-source-files:
@@ -32,18 +33,30 @@ source-repository head
 library
   hs-source-dirs:
       src
-  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses NoImplicitPrelude OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances
+  default-extensions:
+      CPP
+      DataKinds
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      MultiParamTypeClasses
+      NoImplicitPrelude
+      OverloadedLabels
+      PolyKinds
+      TypeFamilies
+      TypeInType
+      UndecidableInstances
   ghc-options: -Wall
   build-depends:
       MonadRandom
     , algebra
     , algebraic-prelude
-    , arithmoi
     , base >=4.7 && <5
     , containers
     , entropy
     , halg-factor
     , halg-polynomials
+    , integer-roots
     , lens
     , mono-traversable
     , sized

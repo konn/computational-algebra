@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6e886aef540e1e9a8a66aa2b868e46f9f3049eb308fa7fe8c38717904fb26bce
+-- hash: cd0655a283e0981e0c72f05fa6d816f16d07dbc46ab0cc321f22acc8c463bb58
 
 name:           computational-algebra
 version:        0.6.0.0
@@ -17,7 +17,8 @@ maintainer:     konn.jinro _at_ gmail.com
 copyright:      2018 (c) Hiromi ISHII
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+tested-with:
+    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
 
 build-type:     Simple
 extra-source-files:
@@ -76,7 +77,9 @@ executable algebraic
       Paths_computational_algebra
   hs-source-dirs:
       examples
-  default-extensions: DataKinds NoImplicitPrelude
+  default-extensions:
+      DataKinds
+      NoImplicitPrelude
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       MonadRandom
@@ -115,7 +118,9 @@ executable groebner-prof
       Paths_computational_algebra
   hs-source-dirs:
       examples
-  default-extensions: DataKinds NoImplicitPrelude
+  default-extensions:
+      DataKinds
+      NoImplicitPrelude
   ghc-options: -caf-all -auto-all -rtsopts -eventlog -prof -fprof-auto-exported
   build-depends:
       MonadRandom
@@ -150,7 +155,9 @@ executable hensel-prof
       Paths_computational_algebra
   hs-source-dirs:
       examples
-  default-extensions: DataKinds NoImplicitPrelude
+  default-extensions:
+      DataKinds
+      NoImplicitPrelude
   ghc-options: -caf-all -auto-all -rtsopts -eventlog -prof -fprof-auto-exported
   build-depends:
       MonadRandom
@@ -185,7 +192,9 @@ executable quotient
       Paths_computational_algebra
   hs-source-dirs:
       examples
-  default-extensions: DataKinds NoImplicitPrelude
+  default-extensions:
+      DataKinds
+      NoImplicitPrelude
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       MonadRandom
@@ -224,7 +233,9 @@ executable sandpit-poly
       Paths_computational_algebra
   hs-source-dirs:
       examples
-  default-extensions: DataKinds NoImplicitPrelude
+  default-extensions:
+      DataKinds
+      NoImplicitPrelude
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       MonadRandom

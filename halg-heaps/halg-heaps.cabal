@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3fd016547ac03a4dee67f9811352b2557872b17983d7416ff580ae49ee71cb45
+-- hash: 94e31bb8dfd8f879a6a21e371070a0737e0bf5c6f018bc3cd876788f7ebc5d14
 
 name:           halg-heaps
 version:        0.1.0.0
@@ -18,7 +18,8 @@ maintainer:     konn.jinro _at_ gmail.com
 copyright:      2018 (c) Hiromi ISHII
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+tested-with:
+    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
 
 build-type:     Simple
 extra-source-files:
@@ -40,7 +41,12 @@ library
       Paths_halg_heaps
   hs-source-dirs:
       src
-  default-extensions: BangPatterns ConstraintKinds GADTs MultiParamTypeClasses TypeFamilies
+  default-extensions:
+      BangPatterns
+      ConstraintKinds
+      GADTs
+      MultiParamTypeClasses
+      TypeFamilies
   ghc-options: -O2 -Wall
   build-depends:
       base >=4.7 && <5

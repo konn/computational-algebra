@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bb52e4247859ee90c428fb5cd52c22452f137333f046e745fff663fe93fd15d2
+-- hash: 2e9a12b6396cd7f5917ba8404ba3064a5324065f0917b2176f911f5f9a71cc4b
 
 name:           halg-polyn-parser
 version:        0.6.0.0
@@ -18,7 +18,8 @@ maintainer:     konn.jinro _at_ gmail.com
 copyright:      2018 (c) Hiromi ISHII
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+tested-with:
+    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
 
 build-type:     Simple
 extra-source-files:
@@ -39,9 +40,15 @@ library
     , halg-core
     , megaparsec >=7.0
     , parser-combinators >=1.1
-    , singletons
     , text
     , type-natural
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   exposed-modules:
       Algebra.Ring.Polynomial.Parser
   other-modules:

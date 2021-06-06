@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 09cc53f894ff1625922a182d854d26fa8d2d0ac393e8a3f9607c019cdeb8557f
+-- hash: 135d3f38b592d6ad734060c6f0954043a04e388e1dac76cb2e5609f4b70c6cd8
 
 name:           halg-galois-fields
 version:        0.6.0.0
@@ -18,7 +18,8 @@ maintainer:     konn.jinro _at_ gmail.com
 copyright:      2018 (c) Hiromi ISHII
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+tested-with:
+    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
 
 build-type:     Simple
 extra-source-files:
@@ -34,7 +35,20 @@ source-repository head
 library
   hs-source-dirs:
       src
-  default-extensions: CPP DataKinds FlexibleContexts FlexibleInstances GADTs MultiParamTypeClasses NoImplicitPrelude OverloadedLabels PolyKinds TypeFamilies TypeInType UndecidableInstances NoImplicitPrelude
+  default-extensions:
+      CPP
+      DataKinds
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      MultiParamTypeClasses
+      NoImplicitPrelude
+      OverloadedLabels
+      PolyKinds
+      TypeFamilies
+      TypeInType
+      UndecidableInstances
+      NoImplicitPrelude
   ghc-options: -Wall
   build-depends:
       MonadRandom

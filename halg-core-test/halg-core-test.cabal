@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a0511f42681f894b96d58abf92cbe7ab590a43e6234b9ed410f7434600022e2c
+-- hash: 9e31175e35b0b93f2f915aa2ec9fcd5a447c3a05722120d942aa470640d42279
 
 name:           halg-core-test
 version:        0.1.0.0
@@ -16,7 +16,8 @@ maintainer:     konn.jinro _at_ gmail.com
 copyright:      2018 (c) Hiromi ISHII
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
+tested-with:
+    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.2, GHC == 8.10.1
 
 build-type:     Simple
 extra-source-files:
@@ -45,6 +46,9 @@ library
     , sized
     , smallcheck
     , type-natural
+  if impl(ghc >= 9)
+    build-depends:
+        singletons-base
   exposed-modules:
       Algebra.Field.Finite.Test
       Algebra.Field.Fraction.Test

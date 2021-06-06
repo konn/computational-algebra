@@ -30,10 +30,15 @@ import Control.Arrow (left)
 import Control.Monad.Combinators.Expr
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Ratio as P
-import Data.Singletons.Prelude
+#if MIN_VERSION_singletons(3,0,0)
+import Data.List.Singletons
+#else
 import Data.Singletons.Prelude.List
+#endif
+
 import qualified Data.Text as T
 import Data.Void
+import GHC.TypeLits (Symbol)
 import Text.Megaparsec
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
