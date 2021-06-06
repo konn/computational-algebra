@@ -1,9 +1,0 @@
-packages: .,
-  ../algebraic-prelude,
-  ../halg-core,
-  ../halg-heaps,
-  ../halg-matrices,
-  ../halg-polynomials
-
-allow-newer:
-  equational-reasoning:template-haskell
