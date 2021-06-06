@@ -1,4 +1,4 @@
-on: [push]
+on: [push, pull_request]
 name: build
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
         cache-name: cache-stack-local
       with:
         path: '**/.stack-work'
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.ghc }}-${{ hashFiles('**/package.yaml') }}-${{ hashFiles('**/stack.yaml') }}-${{ hashFiles('**/stack.yaml.lock') }}
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.ghc }}-${{ hashFiles('**/package.yaml') }}-${{ hashFiles('**/stack.yaml') }}-${{ hashFiles('**/stack.yaml.lock') }}-${{ hashFiles('**/*.hs') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.ghc }}
           ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -71,6 +71,8 @@ jobs:
         path: 'test-bins/'
   
   test:
+    needs:
+    - build
     runs-on: ubuntu-latest
     strategy:
       matrix:
