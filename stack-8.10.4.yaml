@@ -1,5 +1,8 @@
 resolver: lts-17.14
 
+build:
+  haddock-deps: false
+
 flags: {}
 packages:
 - 'computational-algebra'
@@ -27,3 +30,5 @@ extra-deps:
 - type-natural-1.1.0.0
 - repa-3.4.1.4
 - unamb-0.2.7
+
+
