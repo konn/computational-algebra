@@ -56,7 +56,7 @@ jobs:
         ghc-version: ${{matrix.ghc}}
         enable-stack: true
         stack-version: "2.7.1"
-    - run: stack build --test --no-run-tests --haddock --haddock-deps
+    - run: stack build --test --no-run-tests --haddock --no-haddock-deps
     - name: "Collect documents"
       run: |
         cp -r $(stack path --local-doc-root) docs
