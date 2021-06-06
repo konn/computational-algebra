@@ -9,7 +9,6 @@ jobs:
         - 8.10.4
         - 9.0.1
       fail-fast: false
-    continue-on-error: true
     name: Build ${{ matrix.ghc }}
     env:
       STACK_YAML: stack-${{matrix.ghc}}.yaml
