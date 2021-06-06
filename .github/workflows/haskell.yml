@@ -61,7 +61,7 @@ jobs:
         stack ide targets |& grep :test: | while read i; do
           PACK=$(echo "$i" | cut -d':' -f1);
           EXE=$(echo "$i" | cut -d':' -f3);
-          ls $PACK/$(stack path --dist-dir)/build/$EXE/$EXE test-bins;
+          cp $PACK/$(stack path --dist-dir)/build/$EXE/$EXE test-bins;
         done
     - uses: actions/upload-artifact@v2.2.3
       with:
