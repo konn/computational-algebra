@@ -56,7 +56,10 @@ jobs:
         ghc-version: ${{matrix.ghc}}
         enable-stack: true
         stack-version: "2.7.1"
-    - run: stack build --test --no-run-tests
+    - run: stack build --test --no-run-tests --haddock --haddock-deps
+    - name: "Collect documents"
+      run: |
+        cp -r $(stack path --local-doc-root) docs
     - name: "Collect test exes"
       run: |
         mkdir -p test-bins/
@@ -69,6 +72,12 @@ jobs:
       with:
         name: test-artifacts-${{ matrix.ghc }}
         path: 'test-bins/'
+  
+    - uses: actions/upload-artifact@v2.2.3
+      name: upload docs
+      with:
+        name: doc-artifacts-${{ matrix.ghc }}
+        path: 'docs/'
   
   test:
     needs:
@@ -117,3 +126,67 @@ jobs:
           chmod +x ${{steps.test-bins.outputs.download-path}}/${TEST_EXE}
           ${{steps.test-bins.outputs.download-path}}/${TEST_EXE} +RTS -N
         done
+
+  document:
+    needs: build
+    runs-on: ubuntu-latest
+    name: Deploy Document
+    strategy:
+      matrix:
+        ghc:
+        - 8.10.4
+      fail-fast: false
+    env:
+      STACK_YAML: stack-8.10.4.yaml
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: gh-pages-devel
+
+    - name: cache ~/.stack
+      uses: actions/cache@v2.1.6
+      env:
+        cache-name: cache-stack-global-doc
+      with:
+        path: ~/.stack
+        key: ${{ runner.os }}-doc-${{ matrix.ghc }}-${{ hashFiles('**/package.yaml') }}-${{ hashFiles('**/stack.yaml') }}-${{ hashFiles('**/stack.yaml.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-doc-${{ env.cache-name }}-${{ matrix.ghc }}
+          ${{ runner.os }}-doc-${{ env.cache-name }}-
+          ${{ runner.os }}-doc-
+          ${{ runner.os }}-
+    - name: Cache .stack-work
+      uses: actions/cache@v2.1.6
+      env:
+        cache-name: cache-stack-local-doc
+      with:
+        path: '**/.stack-work'
+        key: ${{ runner.os }}-doc-${{ env.cache-name }}-${{ matrix.ghc }}-${{ hashFiles('**/package.yaml') }}-${{ hashFiles('**/stack.yaml') }}-${{ hashFiles('**/stack.yaml.lock') }}-${{ hashFiles('**/*.hs') }}
+        restore-keys: |
+          ${{ runner.os }}-doc-${{ env.cache-name }}-${{ matrix.ghc }}
+          ${{ runner.os }}-doc-${{ env.cache-name }}-
+          ${{ runner.os }}-doc-
+          ${{ runner.os }}-
+
+    - name: Setup Haskell
+      uses: haskell/actions/setup@v1.2.1
+      with:
+        ghc-version: ${{matrix.ghc}}
+        enable-stack: true
+        stack-version: "2.7.1"
+    
+    - name: Build static site generator
+      run: |
+        stack build --fast
+    - name: Download docs artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: doc-artifacts-${{ matrix.ghc }}
+        path: 'docs/'
+    - name: Generate Static site
+      run: stack exec -- site build
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./_site
