@@ -106,7 +106,8 @@ jobs:
         ghc-version: ${{matrix.ghc}}
         enable-stack: true
         stack-version: "2.7.1"
-    - run: |
+    - name: Run all Tests
+      run: |
         stack ide targets |& grep :test: | while read i; do
           TEST_EXE=$(echo "$i" | cut -d':' -f3)
           echo "Testing: ${TEST_EXE}"
