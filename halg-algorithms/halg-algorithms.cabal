@@ -306,9 +306,10 @@ test-suite halg-algorithms-specs
       TypeInType
       UndecidableInstances
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N -fsimplifier-phases=3 -fmax-simplifier-iterations=20 -rtsopts
+  build-tool-depends:
+      tasty-discover:tasty-discover
   build-depends:
-      HUnit
-    , MonadRandom
+      MonadRandom
     , QuickCheck
     , algebra
     , base >=4.7 && <5
@@ -325,8 +326,6 @@ test-suite halg-algorithms-specs
     , halg-heaps
     , halg-polynomials
     , heaps
-    , hspec
-    , hspec-discover
     , lens
     , matrix
     , quickcheck-instances
@@ -336,6 +335,10 @@ test-suite halg-algorithms-specs
     , singletons-presburger
     , sized
     , smallcheck
+    , tasty
+    , tasty-expected-failure
+    , tasty-hunit
+    , tasty-quickcheck
     , type-natural
     , vector
   if impl(ghc >= 9.0)

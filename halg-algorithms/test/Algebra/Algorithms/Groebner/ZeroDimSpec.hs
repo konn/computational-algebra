@@ -30,10 +30,12 @@ import Data.Type.Natural.Lemma.Order
 import qualified Data.Vector as V
 import Numeric.Field.Fraction (Fraction, (%))
 import Numeric.Natural
-import Test.HUnit
-import Test.Hspec
-import Test.Hspec.QuickCheck
 import Test.QuickCheck hiding (promote)
+import qualified Test.QuickCheck as QC
+import Test.Tasty
+import Test.Tasty.ExpectedFailure
+import Test.Tasty.HUnit
+import Test.Tasty.QuickCheck
 import Utils
 import qualified Prelude as P
 
@@ -42,101 +44,128 @@ default (Fraction Integer, Natural)
 asGenListOf :: Gen [a] -> a -> Gen [a]
 asGenListOf = const
 
-spec :: Spec
-spec = parallel $ do
-  describe "solveLinear" $ do
-    it "solves data set correctly" $
-      forM_ linSet $ \set ->
-        solveLinear (M.fromLists $ inputMat set) (V.fromList $ inputVec set)
-          `shouldBe` Just (V.fromList $ answer set)
-    prop "solves any solvable cases" $
-      forAll (resize 10 arbitrary) $ \(MatrixCase ms) ->
-        let mat = M.fromLists ms :: M.Matrix (Fraction Integer)
-         in rank mat == M.ncols mat
-              ==> forAll (vector (length $ head ms))
-              $ \v ->
-                let ans = M.getCol 1 $ mat P.* M.colVector (V.fromList v)
-                 in solveLinear mat ans == Just (V.fromList v)
-    it "cannot solve unsolvable cases" $
-      pendingWith "need example"
-  describe "univPoly" $
-    modifyMaxSuccess (const 25) $
-      modifyMaxSize (const 4) $
-        prop "produces monic generators of the elimination ideal" $
-          checkForTypeNat [2 .. 4] prop_univPoly
-  describe "radical" $
-    it "really computes radical" $
-      pendingWith "We can verify correctness by comparing with singular, but it's not quite smart way..."
+test_solveLinear :: TestTree
+test_solveLinear =
+  testGroup
+    "solveLinear"
+    [ testCase "solves data set correctly" $
+        forM_ linSet $ \set ->
+          solveLinear (M.fromLists $ inputMat set) (V.fromList $ inputVec set)
+            @?= Just (V.fromList $ answer set)
+    , testProperty "solves any solvable cases" $
+        forAll (resize 10 arbitrary) $ \(MatrixCase ms) ->
+          let mat = M.fromLists ms :: M.Matrix (Fraction Integer)
+           in rank mat == M.ncols mat
+                ==> forAll (vector (length $ head ms))
+                $ \v ->
+                  let ans = M.getCol 1 $ mat P.* M.colVector (V.fromList v)
+                   in solveLinear mat ans == Just (V.fromList v)
+    , ignoreTestBecause "Needs effective inputs for this" $
+        testCase "cannot solve unsolvable cases" $
+          pure ()
+    ]
 
-  describe "fglm" $
-    modifyMaxSuccess (const 25) $
-      modifyMaxSize (const 3) $ do
-        prop "computes monomial basis" $
-          checkForTypeNat [2 .. 4] $ \sdim ->
-            case zeroOrSucc sdim of
-              IsZero -> error "impossible"
-              IsSucc k ->
-                withWitness (lneqSucc k) $
-                  withWitness (lneqZero k) $
-                    withKnownNat k $
-                      forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
-                        let base =
-                              reifyQuotient (mapIdeal (changeOrder Lex) ideal) $ \ii ->
-                                map quotRepr $ fromJust $ standardMonomials' ii
-                         in stdReduced (snd $ fglm ideal) == stdReduced base
-        prop "computes lex base" $
-          checkForTypeNat [2 .. 4] $ \sdim ->
-            case zeroOrSucc sdim of
-              IsZero -> error "impossible"
-              IsSucc k -> withKnownNat k $
-                withWitness (lneqSucc k) $
-                  withWitness (lneqZero k) $
-                    forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
-                      stdReduced (fst $ fglm ideal)
-                        == stdReduced (calcGroebnerBasisWith Lex ideal)
-        prop "returns lex base in descending order" $
-          checkForTypeNat [2 .. 4] $ \sdim ->
-            case zeroOrSucc sdim of
-              IsZero -> error "impossible"
-              IsSucc k -> withKnownNat k $
-                case (lneqSucc k, lneqZero k) of
-                  (Witness, Witness) ->
-                    forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
-                      isDescending (map leadingMonomial $ fst $ fglm ideal)
-  describe "solve'" $
-    modifyMaxSuccess (const 50) $
-      modifyMaxSize (const 4) $ do
-        it "solves equation with admissible error" $
-          checkForTypeNat [2 .. 4] $ prop_isApproximateZero 1e-5 (pure . solve' 1e-5)
-        describe "solves regression cases correctly" $
-          forM_ companionRegressions $
-            approxZeroTestCase 1e-5 (pure . solve' 1e-5)
+test_univPoly :: TestTree
+test_univPoly =
+  testGroup
+    "univPoly"
+    [ testProperty "produces monic generators of the elimination ideal" $
+        withMaxSuccess 25 $
+          QC.mapSize (const 4) $
+            checkForTypeNat [2 .. 4] chk_univPoly
+    ]
 
-  describe "solveViaCompanion" $
-    modifyMaxSuccess (const 50) $
-      modifyMaxSize (const 4) $ do
-        it "solves equation with admissible error" $
-          checkForTypeNat [2 .. 4] $
-            prop_isApproximateZero
-              1e-5
-              (pure . solveViaCompanion 1e-5)
-        describe "solves regression cases correctly" $
-          forM_ companionRegressions $
-            approxZeroTestCase 1e-5 (pure . solveViaCompanion 1e-5)
+test_radical :: TestTree
+test_radical =
+  testGroup
+    "radical"
+    [ ignoreTestBecause "We can verify correctness by comparing with singular, but it's not quite smart way..." $
+        testCase "really computes radical" $ pure ()
+    ]
 
-  describe "solveM" $
-    modifyMaxSuccess (const 50) $
-      modifyMaxSize (const 4) $ do
-        prop "solves equation with admissible error" $
-          checkForTypeNat [2 .. 4] $ prop_isApproximateZero 1e-9 solveM
-        describe "solves regressions correctly" $
-          forM_ companionRegressions $
-            approxZeroTestCase 1e-9 solveM
+test_fglm :: TestTree
+test_fglm =
+  testGroup
+    "fglm"
+    [ testProperty "computes monomial basis" $
+        withMaxSuccess 25 $
+          mapSize (const 3) $
+            checkForTypeNat [2 .. 4] $ \sdim ->
+              case zeroOrSucc sdim of
+                IsZero -> error "impossible"
+                IsSucc k ->
+                  withWitness (lneqSucc k) $
+                    withWitness (lneqZero k) $
+                      withKnownNat k $
+                        forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
+                          let base =
+                                reifyQuotient (mapIdeal (changeOrder Lex) ideal) $ \ii ->
+                                  map quotRepr $ fromJust $ standardMonomials' ii
+                           in stdReduced (snd $ fglm ideal) == stdReduced base
+    , testProperty "computes lex base" $
+        checkForTypeNat [2 .. 4] $ \sdim ->
+          case zeroOrSucc sdim of
+            IsZero -> error "impossible"
+            IsSucc k -> withKnownNat k $
+              withWitness (lneqSucc k) $
+                withWitness (lneqZero k) $
+                  forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
+                    stdReduced (fst $ fglm ideal)
+                      == stdReduced (calcGroebnerBasisWith Lex ideal)
+    , testProperty "returns lex base in descending order" $
+        checkForTypeNat [2 .. 4] $ \sdim ->
+          case zeroOrSucc sdim of
+            IsZero -> error "impossible"
+            IsSucc k -> withKnownNat k $
+              case (lneqSucc k, lneqZero k) of
+                (Witness, Witness) ->
+                  forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
+                    isDescending (map leadingMonomial $ fst $ fglm ideal)
+    ]
+
+test_solve' :: TestTree
+test_solve' =
+  testGroup
+    "solve'"
+    [ testProperty "solves equation with admissible error" $
+        withMaxSuccess 50 $
+          mapSize (const 4) $ do
+            checkForTypeNat [2 .. 4] $ chkIsApproximateZero 1e-5 (pure . solve' 1e-5)
+    , testGroup "solves regression cases correctly" $
+        map (approxZeroTestCase 1e-5 (pure . solve' 1e-5)) companionRegressions
+    ]
+
+test_solveViaCompanion :: TestTree
+test_solveViaCompanion =
+  testGroup
+    "solveViaCompanion"
+    [ testProperty "solves equation with admissible error" $
+        withMaxSuccess 50 $
+          mapSize (const 4) $
+            checkForTypeNat [2 .. 4] $
+              chkIsApproximateZero
+                1e-5
+                (pure . solveViaCompanion 1e-5)
+    , testGroup "solves regression cases correctly" $
+        map (approxZeroTestCase 1e-5 (pure . solveViaCompanion 1e-5)) companionRegressions
+    ]
+
+test_solveM :: TestTree
+test_solveM =
+  testGroup
+    "solveM"
+    [ testProperty "solves equation with admissible error" $
+        withMaxSuccess 50 $
+          mapSize (const 4) $
+            checkForTypeNat [2 .. 4] $ chkIsApproximateZero 1e-9 solveM
+    , testGroup "solves regressions correctly" $
+        map (approxZeroTestCase 1e-9 solveM) companionRegressions
+    ]
 
 isDescending :: Ord a => [a] -> Bool
 isDescending xs = and $ zipWith (>=) xs (drop 1 xs)
 
-prop_isApproximateZero ::
+chkIsApproximateZero ::
   (KnownNat n) =>
   Double ->
   ( forall m.
@@ -146,12 +175,12 @@ prop_isApproximateZero ::
   ) ->
   SNat n ->
   Property
-prop_isApproximateZero err solver sn =
+chkIsApproximateZero err solver sn =
   case zeroOrSucc sn of
     IsSucc _ ->
       withKnownNat sn $
         forAll (zeroDimOf sn) $ ioProperty . checkSolverApproxZero err solver
-    IsZero -> error "prop_isApproximateZero must be called with non-zero typenats!"
+    IsZero -> error "chkIsApproximateZero must be called with non-zero typenats!"
 
 companionRegressions ::
   [SolverTestCase]
@@ -184,9 +213,9 @@ approxZeroTestCase ::
     IO [Sized n (Complex Double)]
   ) ->
   SolverTestCase ->
-  SpecWith ()
+  TestTree
 approxZeroTestCase err calc (SolverTestCase f@(ZeroDimIdeal i)) =
-  it (show $ getIdeal f) $ do
+  testCase (show $ getIdeal f) $ do
     isZeroDimensional (F.toList i) @? "Not zero-dimensional!"
     checkSolverApproxZero err calc f
       @? "Solved correctly"
@@ -214,8 +243,8 @@ data SolverTestCase where
     ZeroDimIdeal n ->
     SolverTestCase
 
-prop_univPoly :: KnownNat n => SNat n -> Property
-prop_univPoly sdim =
+chk_univPoly :: KnownNat n => SNat n -> Property
+chk_univPoly sdim =
   forAll (zeroDimOf sdim) $ \(ZeroDimIdeal ideal) ->
     let ods = enumOrdinal sdim
      in conjoin $

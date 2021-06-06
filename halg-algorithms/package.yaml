@@ -138,8 +138,10 @@ tests:
     - -fsimplifier-phases=3 
     - -fmax-simplifier-iterations=20
     - -rtsopts
+    build-tools:
+    - tasty-discover
     dependencies:
-    - HUnit
+    - tasty
     - ghc-typelits-knownnat
     - halg-core-test
     - halg-polynomials
@@ -147,11 +149,13 @@ tests:
     - singletons
     - halg-algorithms
     - halg-bridge-singular
+    - tasty-quickcheck
+    - tasty-expected-failure
+    - tasty-hunit
     - QuickCheck
     - convertible
     - containers
     - equational-reasoning
-    - hspec
     - lens
     - matrix
     - ghc-typelits-knownnat
@@ -160,7 +164,6 @@ tests:
     - smallcheck
     - type-natural
     - vector
-    - hspec-discover
 
 _heavy_bench: &heavy_bench
   source-dirs:

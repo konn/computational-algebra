@@ -1,93 +1,147 @@
-{-# LANGUAGE DataKinds, ExplicitNamespaces, GADTs, NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings, PatternSynonyms                      #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE ExplicitNamespaces #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
-module Algebra.Algorithms.Groebner.HomogeneousSpec where
-import           Algebra.Algorithms.Groebner
-import           Algebra.Algorithms.Groebner.Homogeneous
-import           Algebra.Bridge.Singular
-import           Algebra.Internal                        (pattern (:<),
-                                                          KnownNat,
-                                                          pattern Nil, SNat,
-                                                          sSucc)
-import           Algebra.Prelude.Core
-import           Algebra.Ring.Ideal
-import           Algebra.Ring.Polynomial
-import           Algebra.Ring.Polynomial.Homogenised
-import           Control.Monad
-import qualified Data.Foldable                           as F
-import           Data.List                               (delete)
-import qualified Data.Sized                      as SV
-import           Numeric.Field.Fraction                  (Fraction)
-import           Test.Hspec
-import           Test.Hspec.QuickCheck
-import           Test.HUnit.Lang
-import           Test.QuickCheck
-import           Utils
 
+module Algebra.Algorithms.Groebner.HomogeneousSpec where
+
+import Algebra.Algorithms.Groebner
+import Algebra.Algorithms.Groebner.Homogeneous
+import Algebra.Bridge.Singular
+import Algebra.Internal
+  ( KnownNat,
+    SNat,
+    sSucc,
+    pattern Nil,
+    pattern (:<),
+  )
+import Algebra.Prelude.Core
+import Algebra.Ring.Ideal
+import Algebra.Ring.Polynomial
+import Algebra.Ring.Polynomial.Homogenised
+import Control.Monad
+import qualified Data.Foldable as F
+import Data.List (delete)
+import qualified Data.Sized as SV
+import Numeric.Field.Fraction (Fraction)
+import Test.QuickCheck
+import Test.Tasty
+import Test.Tasty.HUnit
+import Test.Tasty.QuickCheck
+import Utils
 
 asGenListOf :: Gen [a] -> a -> Gen [a]
 asGenListOf = const
 
-spec :: Spec
-spec = parallel $ do
-  describe "calcHomogeneousGroebnerBasis" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
-    prop "passes S-test" $
-      checkForTypeNat [2..3] $ prop_passesSTestWith homogenise unsafeCalcHomogeneousGroebnerBasis
-    prop "includes the original ideal" $
-      checkForTypeNat [2..3] $ prop_groebnerDivsOrigWith homogenise unsafeCalcHomogeneousGroebnerBasis
-    prop "is included in the orignal ideal" $
-      checkForTypeNat [2..3] $ prop_groebnerIncludedWith homogenise unsafeCalcHomogeneousGroebnerBasis
-  describe "calcHomogeneousGroebnerBasisHilbert" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
-    prop "passes S-test" $
-      checkForTypeNat [2..3] $ prop_passesSTestWith (homogenise . changeOrder Lex)
-      calcHomogeneousGroebnerBasisHilbert
-    prop "includes the original ideal" $
-      checkForTypeNat [2..3] $ prop_groebnerDivsOrigWith (homogenise . changeOrder Lex) calcHomogeneousGroebnerBasisHilbert
-    prop "is included in the orignal ideal" $
-      checkForTypeNat [2..3] $ prop_groebnerIncludedWith (homogenise . changeOrder Lex) calcHomogeneousGroebnerBasisHilbert
-  describe "calcGroebnerBasisAfterHomogenising" $ modifyMaxSize (const 4) $ modifyMaxSuccess (const 25) $ do
-    prop "passes S-test" $
-      checkForTypeNat [2..3] $ prop_passesSTestWith id calcGroebnerBasisAfterHomogenising
-    prop "includes the original ideal" $
-      checkForTypeNat [2..3] $ prop_groebnerDivsOrigWith id calcGroebnerBasisAfterHomogenising
-    prop "is included in the orignal ideal" $
-      checkForTypeNat [2..3] $ prop_groebnerIncludedWith id calcGroebnerBasisAfterHomogenising
+test_calcHomogeneousGroebnerBasis :: TestTree
+test_calcHomogeneousGroebnerBasis =
+  testGroup
+    "calcHomogeneousGroebnerBasis"
+    [ testProperty "passes S-test" $
+        withMaxSuccess 25 $
+          mapSize (const 4) $
+            checkForTypeNat [2 .. 3] $ passesSTestWith homogenise unsafeCalcHomogeneousGroebnerBasis
+    , testProperty "includes the original ideal" $
+        withMaxSuccess 25 $
+          mapSize (const 4) $
+            checkForTypeNat [2 .. 3] $ groebnerDivsOrigWith homogenise unsafeCalcHomogeneousGroebnerBasis
+    , testProperty "is included in the orignal ideal" $
+        withMaxSuccess 25 $
+          mapSize (const 4) $
+            checkForTypeNat [2 .. 3] $ groebnerIncludedWith homogenise unsafeCalcHomogeneousGroebnerBasis
+    ]
 
-prop_passesSTestWith :: (KnownNat n, Coefficient poly' ~ Rational,
-                         IsOrderedPolynomial poly', DecidableZero poly')
-                     => (Polynomial Rational n -> poly')
-                     -> (Ideal poly' -> [poly'])
-                     -> SNat n -> Property
-prop_passesSTestWith prepro calc sdim =
+test_calcHomogeneousGroebnerBasisHilbert :: TestTree
+test_calcHomogeneousGroebnerBasisHilbert =
+  testGroup
+    "calcHomogeneousGroebnerBasisHilbert"
+    [ testProperty "passes S-test" $
+        withMaxSuccess 25 $
+          mapSize (const 4) $
+            checkForTypeNat [2 .. 3] $
+              passesSTestWith
+                (homogenise . changeOrder Lex)
+                calcHomogeneousGroebnerBasisHilbert
+    , testProperty "includes the original ideal" $
+        withMaxSuccess 25 $
+          mapSize (const 4) $
+            checkForTypeNat [2 .. 3] $ groebnerDivsOrigWith (homogenise . changeOrder Lex) calcHomogeneousGroebnerBasisHilbert
+    , testProperty "is included in the orignal ideal" $
+        withMaxSuccess 25 $
+          mapSize (const 4) $
+            checkForTypeNat [2 .. 3] $ groebnerIncludedWith (homogenise . changeOrder Lex) calcHomogeneousGroebnerBasisHilbert
+    ]
+
+test_calcGroebnerBasisAfterHomogenising :: TestTree
+test_calcGroebnerBasisAfterHomogenising =
+  testGroup
+    "calcGroebnerBasisAfterHomogenising"
+    [ testProperty "passes S-test" $
+        withMaxSuccess 25 $
+          mapSize (const 4) $
+            checkForTypeNat [2 .. 3] $ passesSTestWith id calcGroebnerBasisAfterHomogenising
+    , testProperty "includes the original ideal" $
+        withMaxSuccess 25 $
+          mapSize (const 4) $
+            checkForTypeNat [2 .. 3] $ groebnerDivsOrigWith id calcGroebnerBasisAfterHomogenising
+    , testProperty "is included in the orignal ideal" $
+        withMaxSuccess 25 $
+          mapSize (const 4) $
+            checkForTypeNat [2 .. 3] $ groebnerIncludedWith id calcGroebnerBasisAfterHomogenising
+    ]
+
+passesSTestWith ::
+  ( KnownNat n
+  , Coefficient poly' ~ Rational
+  , IsOrderedPolynomial poly'
+  , DecidableZero poly'
+  ) =>
+  (Polynomial Rational n -> poly') ->
+  (Ideal poly' -> [poly']) ->
+  SNat n ->
+  Property
+passesSTestWith prepro calc sdim =
   forAll (sized $ \size -> vectorOf size (polynomialOfArity sdim)) $ \ideal ->
-  let gs = calc $ toIdeal $ map prepro ideal
-  in all (isZero . (`modPolynomial` gs)) [sPolynomial f g | f <- gs, g <- gs, f /= g]
+    let gs = calc $ toIdeal $ map prepro ideal
+     in all (isZero . (`modPolynomial` gs)) [sPolynomial f g | f <- gs, g <- gs, f /= g]
 
-prop_groebnerDivsOrigWith :: (KnownNat n, Coefficient poly' ~ Rational,
-                              IsOrderedPolynomial poly', DecidableZero poly')
-                          => (Polynomial Rational n -> poly')
-                          -> (Ideal poly' -> [poly'])
-                          -> SNat n -> Property
-prop_groebnerDivsOrigWith prepro calc sdim =
-  forAll (elements [3..15]) $ \count ->
-  forAll (vectorOf count (polynomialOfArity sdim)) $ \jdeal ->
-  let ideal = map prepro jdeal
-      gs = calc $ toIdeal ideal
-  in all (isZero . (`modPolynomial` gs)) ideal
+groebnerDivsOrigWith ::
+  ( KnownNat n
+  , Coefficient poly' ~ Rational
+  , IsOrderedPolynomial poly'
+  , DecidableZero poly'
+  ) =>
+  (Polynomial Rational n -> poly') ->
+  (Ideal poly' -> [poly']) ->
+  SNat n ->
+  Property
+groebnerDivsOrigWith prepro calc sdim =
+  forAll (elements [3 .. 15]) $ \count ->
+    forAll (vectorOf count (polynomialOfArity sdim)) $ \jdeal ->
+      let ideal = map prepro jdeal
+          gs = calc $ toIdeal ideal
+       in all (isZero . (`modPolynomial` gs)) ideal
 
-prop_groebnerIncludedWith :: (KnownNat n, Coefficient poly' ~ Rational,
-                              IsSingularPolynomial poly', DecidableZero poly')
-                          => (Polynomial Rational n -> poly')
-                          -> (Ideal poly' -> [poly'])
-                          -> SNat n -> Property
-prop_groebnerIncludedWith prepro calc sdim =
-  forAll (elements [3..15]) $ \count ->
-  forAll (vectorOf count (polynomialOfArity sdim)) $ \jdeal -> do
-  let ideal = map prepro jdeal
-      gs = calc $ toIdeal ideal
-  is <- evalSingularIdealWith [] [] $
-        funE "reduce" [idealE' $ toIdeal gs, funE "groebner" [idealE' $ toIdeal ideal]]
-  if all isZero is
-    then return ()
-    else assertFailure "Non-zero element found"
+groebnerIncludedWith ::
+  ( KnownNat n
+  , Coefficient poly' ~ Rational
+  , IsSingularPolynomial poly'
+  , DecidableZero poly'
+  ) =>
+  (Polynomial Rational n -> poly') ->
+  (Ideal poly' -> [poly']) ->
+  SNat n ->
+  Property
+groebnerIncludedWith prepro calc sdim =
+  forAll (elements [3 .. 15]) $ \count ->
+    forAll (vectorOf count (polynomialOfArity sdim)) $ \jdeal -> ioProperty $ do
+      let ideal = map prepro jdeal
+          gs = calc $ toIdeal ideal
+      is <-
+        evalSingularIdealWith [] [] $
+          funE "reduce" [idealE' $ toIdeal gs, funE "groebner" [idealE' $ toIdeal ideal]]
+      pure $ all isZero is
