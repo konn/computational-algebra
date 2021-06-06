@@ -44,16 +44,16 @@ test_f4 =
   testGroup
     "f4"
     [ testProperty "passes S-test" $
-        withMaxSuccess 10 $
-          mapSize (const 4) $
+        withMaxSuccess 5 $
+          mapSize (const 3) $
             checkForTypeNat [2 .. 3] $ passesSTest f4
     , testProperty "includes the original ideal" $
-        withMaxSuccess 10 $
-          mapSize (const 4) $
+        withMaxSuccess 5 $
+          mapSize (const 3) $
             checkForTypeNat [2 .. 3] $ groebnerDivsOrig f4
     , testProperty "is included in the orignal ideal" $
-        withMaxSuccess 10 $
-          mapSize (const 4) $
+        withMaxSuccess 5 $
+          mapSize (const 3) $
             checkForTypeNat [2 .. 3] $ groebnerIncluded f4
     ]
 
