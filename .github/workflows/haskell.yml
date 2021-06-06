@@ -101,6 +101,7 @@ jobs:
       id: test-bins
       with:
         name: test-artifacts-${{ matrix.ghc }}
+        path: test-bins
     - name: Setup Haskell
       uses: haskell/actions/setup@v1.2.1
       with:
