@@ -1,0 +1,42 @@
+resolver: lts-17.12
+compiler: ghc-9.0.1
+compiler-check: match-exact
+
+flags: {}
+packages:
+- 'computational-algebra'
+- 'algebraic-prelude'
+- 'halg-algebraic'
+- 'halg-algorithms'
+- 'halg-bridge-singular'
+- 'halg-core'
+- 'halg-core-test'
+- 'halg-factor'
+- 'halg-galois-fields'
+- 'halg-heaps'
+- 'halg-matrices'
+- 'halg-polyn-parser'
+- 'halg-polynomials'
+
+extra-deps:
+- algebra-4.3.1
+- control-monad-loop-0.1
+- ghc-typelits-presburger-0.6.0.0
+- singletons-presburger-0.6.0.0
+- equational-reasoning-0.7.0.0@rev:2
+- sized-1.0.0.0
+- type-natural-1.1.0.0
+- repa-3.4.1.4@rev:8
+- profunctors-5.6.2
+- unamb-0.2.7
+- singletons-th-3.0
+- th-desugar-1.12
+- singletons-3.0
+- singletons-base-3.0
+- generic-deriving-1.14
+- th-expand-syns-0.4.8.0
+- syb-0.7.2.1
+- indexed-traversable-instances-0.1
+- lens-5.0.1
+- github: Bodigrim/arithmoi
+  commit: 29099a51cfddb3c77f726e86a5784553456e10ab
