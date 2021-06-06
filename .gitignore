@@ -92,7 +92,6 @@ signature-gao-iv-wang
 profiling-results
 **/*-prof.pdf
 **/*-prof.ps
-stack*.yaml.lock
 ### https://raw.github.com/github/gitignore/f9291de89f5f7dc0d3d87f9eb111b839f81d5dbc/Global/VisualStudioCode.gitignore
 
 .vscode/*

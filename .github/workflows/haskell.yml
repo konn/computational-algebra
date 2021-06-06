@@ -1,0 +1,23 @@
+on: [push]
+name: build
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ghc:
+        - 8.10.4
+        - 9.0.1
+    name: Build ${{ matrix.ghc }}
+    env:
+      STACK_YAML: stack-${{matrix.ghc}}.yaml
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Haskell
+      uses: haskell/actions/setup@v1.2.1
+      with:
+        ghc-version: ${{matrix.ghc}}
+        enable-stack: true
+        stack-version: "2.7.1"
+    - run: stack build --test --no-run-tests
+  
