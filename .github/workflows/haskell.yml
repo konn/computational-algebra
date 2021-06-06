@@ -98,6 +98,7 @@ jobs:
 
     - name: Download Test artifacts
       uses: actions/download-artifact@v2
+      id: test-bins
       with:
         name: test-artifacts-${{ matrix.ghc }}
     - name: Setup Haskell
@@ -108,10 +109,10 @@ jobs:
         stack-version: "2.7.1"
     - name: Run all Tests
       run: |
-        ls test-bins
+        ls ${{steps.test-bins.outputs.download-path}}
         stack ide targets |& grep :test: | while read i; do
           TEST_EXE=$(echo "$i" | cut -d':' -f3)
           echo "Testing: ${TEST_EXE}"
-          chmod +x test-bins/${TEST_EXE}
-          test-bins/${TEST_EXE}
+          chmod +x ${{steps.test-bins.outputs.download-path}}/${TEST_EXE}
+          ${{steps.test-bins.outputs.download-path}}/${TEST_EXE}
         done
