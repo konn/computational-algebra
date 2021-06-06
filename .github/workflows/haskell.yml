@@ -108,8 +108,10 @@ jobs:
         stack-version: "2.7.1"
     - name: Run all Tests
       run: |
+        ls test-bins
         stack ide targets |& grep :test: | while read i; do
           TEST_EXE=$(echo "$i" | cut -d':' -f3)
           echo "Testing: ${TEST_EXE}"
-          ./test-bins/${TEST_EXE}
+          chmod +x test-bins/${TEST_EXE}
+          test-bins/${TEST_EXE}
         done
