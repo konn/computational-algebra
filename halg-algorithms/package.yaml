@@ -22,6 +22,16 @@ category:            Math
 # common to point users to the README.md file.
 description:         Please see the project Web Site <https://konn.github.io/computational-algebra>
 
+when:
+- condition: impl(ghc >= 9.0)
+  then:
+    dependencies:
+    - singletons >= 3.0
+    - singletons-base
+  else:
+    dependencies:
+    - singletons < 3.0
+
 default-extensions:
 - CPP
 - DataKinds
@@ -78,15 +88,6 @@ library:
   - vector
   default-extensions:
   - NoImplicitPrelude
-  when:
-  - condition: impl(ghc >= 9.0)
-    then:
-      dependencies:
-      - singletons >= 3.0
-      - singletons-base
-    else:
-      dependencies:
-      - singletons < 3.0
 
 _prof-settings: &prof-settings
   source-dirs:

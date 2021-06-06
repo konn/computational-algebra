@@ -134,6 +134,13 @@ executable f4-prof
     , semigroups
     , sized
     , vector
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
 
 executable f5-prof
@@ -173,6 +180,13 @@ executable f5-prof
     , semigroups
     , sized
     , vector
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
 
 executable katsura-prof
@@ -212,6 +226,13 @@ executable katsura-prof
     , semigroups
     , sized
     , vector
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
 
 executable std-prof
@@ -251,6 +272,13 @@ executable std-prof
     , semigroups
     , sized
     , vector
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
 
 test-suite halg-algorithms-specs
@@ -310,6 +338,13 @@ test-suite halg-algorithms-specs
     , smallcheck
     , type-natural
     , vector
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
 
 benchmark f5-heap-bench
@@ -360,6 +395,13 @@ benchmark f5-heap-bench
     , sized
     , vector
   buildable: False
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
 
 benchmark heavy-bench
@@ -406,6 +448,13 @@ benchmark heavy-bench
     , semigroups
     , sized
     , vector
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
 
 benchmark homog-bench
@@ -443,6 +492,13 @@ benchmark homog-bench
     , parallel
     , semigroups
     , sized
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
 
 benchmark ordering-bench
@@ -486,6 +542,13 @@ benchmark ordering-bench
     , sized
     , vector
   buildable: False
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
 
 benchmark quot-non-rewrite-bench
@@ -534,6 +597,13 @@ benchmark quot-non-rewrite-bench
     , semigroups
     , sized
     , vector
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
 
 benchmark quot-rewrite-bench
@@ -582,6 +652,13 @@ benchmark quot-rewrite-bench
     , semigroups
     , sized
     , vector
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
 
 benchmark singular-bench
@@ -631,6 +708,13 @@ benchmark singular-bench
     , statistics
     , text
     , vector
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
 
 benchmark singular-heavy-bench
@@ -683,6 +767,13 @@ benchmark singular-heavy-bench
     , statistics
     , text
     , vector
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
 
 benchmark sugar-hilb-bench
@@ -724,6 +815,13 @@ benchmark sugar-hilb-bench
     , parallel
     , semigroups
     , sized
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
 
 benchmark sugar-paper-bench
@@ -770,4 +868,11 @@ benchmark sugar-paper-bench
     , semigroups
     , sized
     , vector
+  if impl(ghc >= 9.0)
+    build-depends:
+        singletons >=3.0
+      , singletons-base
+  else
+    build-depends:
+        singletons <3.0
   default-language: Haskell2010
