@@ -8,11 +8,45 @@ jobs:
         ghc:
         - 8.10.4
         - 9.0.1
+      fail-fast: false
+    continue-on-error: true
     name: Build ${{ matrix.ghc }}
     env:
       STACK_YAML: stack-${{matrix.ghc}}.yaml
     steps:
     - uses: actions/checkout@v2
+    - name: Install dependencies (apt)
+      run: |
+        apt-get update -y -qq && apt-get install -y -qq wget
+        wget ftp://jim.mathematik.uni-kl.de/repo/extra/gpg && apt-key add gpg && rm gpg
+        echo "deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu18 bionic main" >> /etc/apt/sources.list
+        apt-get update -y -qq
+        apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev
+
+    - name: cache ~/.stack
+      uses: actions/cache@v2.1.6
+      env:
+        cache-name: cache-stack-global
+      with:
+        path: ~/.stack
+        key: ${{ runner.os }}-build-${{ matrix.ghc }}-${{ hashFiles('**/package.yaml') }}-${{ hashFiles('**/stack.yaml') }}-${{ hashFiles('**/stack.yaml.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.ghc }}
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - name: Cache .stack-work
+      uses: actions/cache@v2.1.6
+      env:
+        cache-name: cache-stack-local
+      with:
+        path: '**/.stack-work'
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.ghc }}-${{ hashFiles('**/package.yaml') }}-${{ hashFiles('**/stack.yaml') }}-${{ hashFiles('**/stack.yaml.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.ghc }}
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
     - name: Setup Haskell
       uses: haskell/actions/setup@v1.2.1
       with:
@@ -20,4 +54,16 @@ jobs:
         enable-stack: true
         stack-version: "2.7.1"
     - run: stack build --test --no-run-tests
+    - name: "Collect test exes"
+      run: |
+        mkdir -p test-bins/
+        stack ide targets |& grep :test: | while read i; do
+          PACK=$(echo "$i" | cut -d':' -f1);
+          EXE=$(echo "$i" | cut -d':' -f3);
+          ls $PACK/$(stack path --dist-dir)/build/$EXE/$EXE test-bins;
+        done
+    - uses: actions/upload-artifact@v2.2.3
+      with:
+        name: test-artifacts-${{ matrix.ghc }}
+        path: 'test-bins/'
   
