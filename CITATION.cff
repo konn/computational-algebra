@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: |
+  If you use this software, please cite it using these metadata.
+title: The computational-algebra package
+abstract: |
+  Well-kinded computational algebra system as an EDSL in Haskell.
+authors:
+  - family-names: Ishii
+    given-names: Hiromi
+preferred-citation:
+  authors:
+    - family-names: Ishii
+      given-names: Hiromi
+  title: "A Purely Functional Computer Algebra System Embedded in Haskell"
+  type: article
+  doi: 10.1007/978-3-319-99639-4_20
+  collection-title: "CASC 2018: Computer Algebra in Scientific Computing"
+  collection-type: proceedings
+  isbn: 978-3-319-99639-4
+  publisher:
+    name: Springer
+  year: 2018
+  pages: "288-303"
+identifiers:
+  - description: |
+      The original paper describing the entire architecture of the library.
+    type: doi
+    value: "10.1007/978-3-319-99639-4_20"
+  - description: |
+      The arXiv preprint version of the original paper.
+    type: other
+    value: "arXiv:1807.01456"
+  - description: |
+      Haskell package uploaded to Hackage
+    type: url
+    value: https://hackage.haskell.org/package/computational-algebra
+    
+
+repository-code: "https://github.com/konn/computational-algebra"
