@@ -22,7 +22,6 @@ import Algebra.Ring.Euclidean.Quotient (Quotient, quotientBy, reifyQuotient, rep
 import Algebra.Ring.Fraction.Decomp
 import Algebra.Ring.Polynomial.Factorise (clearDenom, factorHensel)
 import Algebra.Ring.Polynomial.Univariate
-import Control.Exception (assert)
 import Control.Lens (ifoldMap)
 import Control.Monad.Random
 import Control.Monad.Trans.Writer.CPS (Writer, runWriter, tell)
@@ -30,7 +29,6 @@ import qualified Data.DList as DL
 import qualified Data.IntMap.Strict as IM
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
-import Data.Maybe
 import Data.Monoid (Any (Any))
 import Data.Reflection (Reifies (reflect))
 import Data.Semigroup (Semigroup)
@@ -248,8 +246,14 @@ generatingFunction recs =
 
 {- | Solves ternary linear recurrent sequence (e.g. Fibonacci).
 
->>> evalRandIO (solveTernaryRecurrence (1 :< 1 :< Nil) (0 :< 1 :< Nil))
-((1 / 5) * 1 + (2 / 5) * 1 * Root(x^2 + x - 1)) * (n + 1 * 1) ^ 0 * (1 * 1 + 1 * 1 * Root(x^2 + x - 1)) ^ n + (((-1 / 5) * 1 + (-2 / 5) * 1 * Root(x^2 + x - 1)) * (n + 1 * 1) ^ 0 * (0 * 1 + (-1) * 1 * Root(x^2 + x - 1)) ^ n + 0 * 1) + 0
+* Example: Fibonacci sequence
+
+>>> fib <- evalRandIO $ solveTernaryRecurrence (1 :< 1 :< Nil) (0 :< 1 :< Nil)
+>>> fib
+((2 / 5)*Root(x^2 + x - 1) + (1 / 5)) * (Root(x^2 + x - 1) + 1) ^ n + (-(2 / 5)*Root(x^2 + x - 1) - (1 / 5)) * (-Root(x^2 + x - 1)) ^ n
+
+>>> map (evalGeneralTerm fib) [0..12]
+[0,1,1,2,3,5,8,13,21,34,55,89,144]
 -}
 solveTernaryRecurrence ::
   (MonadRandom m) =>
@@ -258,8 +262,38 @@ solveTernaryRecurrence ::
   -- | Initial values
   Sized 2 Rational ->
   m (GeneralTerm Rational)
-solveTernaryRecurrence coes iniVals = do
-  let f = generatingFunction $ Recurrence coes iniVals
+solveTernaryRecurrence coes iniVals =
+  solveRationalRecurrence (Recurrence coes iniVals)
+
+{- |
+Solves general (n+1)-ary linear recurrent sequence.
+
+** Example1: Tribonacci sequence defined by:
+T_{n+3} = T_n + T_{n+1} + T_{n+2}
+T_0 = 0, T_1 = 0, T_2 = 1
+
+>>> trib <- evalRandIO $ solveRationalRecurrence $ Recurrence (1 :< 1 :< 1 :< Nil) (0 :< 0 :< 1 :< Nil)
+>>> trib
+((5 / 22)*Root(x^3 + x^2 + x - 1)^2 + (1 / 22)*Root(x^3 + x^2 + x - 1) + (1 / 11)) * (Root(x^3 + x^2 + x - 1)^2 + Root(x^3 + x^2 + x - 1) + 1) ^ n + (-(5 / 22)*Root(x^3 + x^2 + x - 1) - (2 / 11)*Root(1*x^2 + Root(x^3 + x^2 + x - 1) + 1*x + Root(x^3 + x^2 + x - 1)^2 + Root(x^3 + x^2 + x - 1) + 1) + -(5 / 22)*Root(x^3 + x^2 + x - 1)^2 - (5 / 22)*Root(x^3 + x^2 + x - 1) - (3 / 22)) * (-Root(x^3 + x^2 + x - 1)*Root(1*x^2 + Root(x^3 + x^2 + x - 1) + 1*x + Root(x^3 + x^2 + x - 1)^2 + Root(x^3 + x^2 + x - 1) + 1) + -Root(x^3 + x^2 + x - 1)^2 - Root(x^3 + x^2 + x - 1)) ^ n + ((5 / 22)*Root(x^3 + x^2 + x - 1) + (2 / 11)*Root(1*x^2 + Root(x^3 + x^2 + x - 1) + 1*x + Root(x^3 + x^2 + x - 1)^2 + Root(x^3 + x^2 + x - 1) + 1) + (2 / 11)*Root(x^3 + x^2 + x - 1) + (1 / 22)) * (Root(x^3 + x^2 + x - 1)*Root(1*x^2 + Root(x^3 + x^2 + x - 1) + 1*x + Root(x^3 + x^2 + x - 1)^2 + Root(x^3 + x^2 + x - 1) + 1)) ^ n
+>>> map (evalGeneralTerm trib) [0..12]
+[0,0,1,1,2,4,7,13,24,44,81,149,274]
+
+** Example2: Tetrabonacci sequence defined by:
+T_{n+4} = T_n + T_{n+1} + T_{n+2} + T_{n+3}
+T_0 = 0, T_1 = 0, T_2 = 0, T_3 = 1
+
+>>> tet <- evalRandIO $ solveRationalRecurrence $ Recurrence (1 :< 1 :< 1 :< 1 :< Nil) (0 :< 0 :< 0 :< 1 :< Nil)
+>>> tet
+>>> map (evalGeneralTerm tet) [0..12]
+[0,0,0,1,1,2,4,8,15,29,56,108,208]
+-}
+solveRationalRecurrence ::
+  (MonadRandom m) =>
+  -- | Recurrence coefficients
+  Recurrence Rational ->
+  m (GeneralTerm Rational)
+solveRationalRecurrence recurr = do
+  let f = generatingFunction recurr
   PartialFraction {..} <- flip partialFractionDecomposition f $ \g -> do
     let (c, g') = clearDenom g
     (lc, facs) <- factorHensel g'
@@ -288,8 +322,11 @@ solveTernaryRecurrence coes iniVals = do
                   powDens
               else -- Must be quadtraic and square-free as we expect ternary recurrence.
 
-                let Just (_, q) = IM.lookupMin powDens
-                 in unliftQuadInverse (q F.% h)
+                IM.foldMapWithKey
+                  ( \mul q ->
+                      unliftQuadInverse (fromIntegral mul) (q F.% h)
+                  )
+                  powDens
         )
         partialFracs
 
@@ -377,31 +414,64 @@ deriving newtype instance
 unliftQuadInverse ::
   forall k.
   (CoeffRing k, Field k) =>
-  -- | Formal fraction with quadratic denominator
+  -- | Multiplicity
+  Natural ->
+  -- | Formal fraction with square-free denominator of degree >= 2.
   Fraction (Unipol k) ->
   GeneralTerm k
-unliftQuadInverse f
-  | degree (denominator f) /= Just 2 = error "Input numerator is not quadratic!"
+unliftQuadInverse n f
+  | totalDegree' (denominator f) == 2 =
+    reifyQuotient (denominator f) $ \(den :: Proxy r) ->
+      let root = WrapDecidableUnits $ quotientBy den #x
+          g = mapCoeffUnipol (WrapDecidableUnits . quotientBy den . injectCoeff) $ denominator f
+          h = mapCoeffUnipol (WrapDecidableUnits . quotientBy den . injectCoeff) $ numerator f
+          rootg = #x - injectCoeff root
+          (root'g, _) = g `divModUnipol` rootg
+          PartialFraction {..} =
+            partialFractionDecompositionWith h ((rootg, n) :| [(root'g, n)])
+       in Lift den $
+            foldMap
+              ( \(z, im) ->
+                  let c = negate $ constantTerm z
+                   in IM.foldMapWithKey
+                        ( \l p ->
+                            linearInverse c (fromIntegral l * n) (constantTerm p)
+                        )
+                        im
+              )
+              partialFracs
   | otherwise =
     reifyQuotient (denominator f) $ \(den :: Proxy r) ->
       let root = WrapDecidableUnits $ quotientBy den #x
           g = mapCoeffUnipol (WrapDecidableUnits . quotientBy den . injectCoeff) $ denominator f
           h = mapCoeffUnipol (WrapDecidableUnits . quotientBy den . injectCoeff) $ numerator f
           rootg = #x - injectCoeff root
-          (root'g, r) = g `divModUnipol` rootg
+          (root'g, _) = g `divModUnipol` rootg
           PartialFraction {..} =
             partialFractionDecompositionWith h ((rootg, 1) :| [(root'g, 1)])
-       in assert (isZero r) $
-            Lift den $
-              foldMap
-                ( \(z, im) ->
-                    let c = negate $ constantTerm z
-                        num =
-                          constantTerm $
-                            snd $ fromJust $ IM.lookupMin im
-                     in linearInverse c 1 num
-                )
-                partialFracs
+       in Lift den $
+            foldMap
+              ( \(z, im) ->
+                  if totalDegree' z <= 1
+                    then
+                      let c = negate $ constantTerm z
+                       in IM.foldMapWithKey
+                            ( \l p ->
+                                linearInverse c (fromIntegral l * n) (constantTerm p)
+                            )
+                            im
+                    else
+                      IM.foldMapWithKey
+                        ( \l u ->
+                            -- Because a denominator is square-free,
+                            -- we can just recurse to extension field.
+                            unliftQuadInverse
+                              (fromIntegral l * n)
+                              (u F.% z)
+                        )
+                        im
+              )
+              partialFracs
 
 linearInverse ::
   (CoeffRing k, Field k) =>
