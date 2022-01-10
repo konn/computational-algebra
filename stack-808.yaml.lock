@@ -10,7 +10,14 @@ packages:
       size: 5556
       sha256: 2dea7d23304c09c902fb1f90f45b1b22df6ded47fb717742cca119f9f3667b21
   original:
-    hackage: algebra-4.3.1
+    hackage: algebra-4.3.1@rev:2
+- completed:
+    hackage: unamb-0.2.7@sha256:ce5db0575bca8ca04c9e9dce3ba75b6f9e5ceea834c6ba4fae45aca6fa963334,2385
+    pantry-tree:
+      size: 217
+      sha256: c3c4ac7408c2999b6779714459d2433ff2495f90161d7c3ca349ca3aa6386be8
+  original:
+    hackage: unamb-0.2.7
 - completed:
     hackage: control-monad-loop-0.1@sha256:2b8d9fbc6e53f2c8f679188952b90f2c69507d1c1efd8867beb64591a22b341c,1106
     pantry-tree:
@@ -19,22 +26,15 @@ packages:
   original:
     hackage: control-monad-loop-0.1
 - completed:
-    hackage: repa-3.4.1.4@sha256:70ef4758937baa29be1ac0a78ecbccf341b3f276c9efb632b4829eea80445e2d,3315
+    hackage: repa-3.4.1.4@sha256:5c836bc314ea04ac284d21117b361eb95829d793e8f82508535aa0ca04911d9e,3315
     pantry-tree:
       size: 2965
-      sha256: 294773b0e6be4a4198133715d4c7f2d0d8e5aec4adea7e59578d1b3823a7879d
+      sha256: 658dece8ff797a9ff0940ad812b966e0a93c3e4442f73c27b96d615106db7db8
   original:
     hackage: repa-3.4.1.4
-- completed:
-    hackage: unamb-0.2.7@sha256:ce5db0575bca8ca04c9e9dce3ba75b6f9e5ceea834c6ba4fae45aca6fa963334,2385
-    pantry-tree:
-      size: 217
-      sha256: c3c4ac7408c2999b6779714459d2433ff2495f90161d7c3ca349ca3aa6386be8
-  original:
-    hackage: unamb-0.2.7
 snapshots:
 - completed:
-    size: 586110
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/21.yaml
-    sha256: ce4fb8d44f3c6c6032060a02e0ebb1bd29937c9a70101c1517b92a87d9515160
-  original: lts-18.21
+    size: 488576
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/15/0.yaml
+    sha256: e4b6a87b47ec1cf63a7f1a0884a3b276fce2b0d174a10e8753c4f618e7983568
+  original: lts-15.0

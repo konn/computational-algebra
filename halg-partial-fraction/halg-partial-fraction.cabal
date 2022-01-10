@@ -1,0 +1,74 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           halg-partial-fraction
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/halg-partial-fraction#readme>
+homepage:       https://github.com/githubuser/halg-partial-fraction#readme
+bug-reports:    https://github.com/githubuser/halg-partial-fraction/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2022 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/halg-partial-fraction
+
+library
+  exposed-modules:
+      Algebra.Ring.Fraction.Decomp
+      Algebra.Ring.LinearRecurrentSequence
+  other-modules:
+      Paths_halg_partial_fraction
+  hs-source-dirs:
+      src
+  ghc-options: -Wall
+  build-depends:
+      MonadRandom
+    , algebra
+    , algebraic-prelude
+    , arithmoi >=0.9
+    , base >=4.7 && <5
+    , containers
+    , dlist
+    , halg-core
+    , halg-factor
+    , halg-polynomials
+    , lens
+    , mono-traversable
+    , reflection
+    , sized
+    , transformers
+    , type-natural
+    , unordered-containers
+    , vector
+  default-language: Haskell2010
+
+test-suite halg-partial-fraction-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_halg_partial_fraction
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-tool-depends:
+      tasty-discover:tasty-discover
+  build-depends:
+      base >=4.7 && <5
+    , halg-core-test
+    , halg-factor
+    , halg-partial-fraction
+    , tasty
+    , tasty-QuickCheck
+    , tasty-hunit
+  default-language: Haskell2010
