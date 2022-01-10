@@ -1,7 +1,10 @@
-resolver: lts-17.14
+resolver: lts-18.21
 
 build:
   haddock-deps: false
+
+ghc-options:
+  $everything: -haddock
 
 flags: {}
 packages:
@@ -16,6 +19,7 @@ packages:
 - 'halg-galois-fields'
 - 'halg-heaps'
 - 'halg-matrices'
+- 'halg-partial-fraction'
 - 'halg-polyn-parser'
 - 'halg-polynomials'
 
@@ -24,11 +28,5 @@ allow-newer: true
 extra-deps:
 - algebra-4.3.1
 - control-monad-loop-0.1
-- ghc-typelits-presburger-0.6.0.0
-- singletons-presburger-0.6.0.0
-- sized-1.0.0.0
-- type-natural-1.1.0.0
 - repa-3.4.1.4
 - unamb-0.2.7
-
-

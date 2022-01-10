@@ -18,6 +18,7 @@ packages:
 - 'halg-galois-fields'
 - 'halg-heaps'
 - 'halg-matrices'
+- 'halg-partial-fraction'
 - 'halg-polyn-parser'
 - 'halg-polynomials'
 
