@@ -17,15 +17,17 @@
 
 module Algebra.Ring.LinearRecurrentSequence where
 
+import Algebra.Field.Finite (FiniteField)
 import Algebra.Prelude.Core
 import Algebra.Ring.Euclidean.Quotient (Quotient, quotientBy, reifyQuotient, representative)
 import Algebra.Ring.Fraction.Decomp
-import Algebra.Ring.Polynomial.Factorise (clearDenom, factorHensel)
+import Algebra.Ring.Polynomial.Factorise (clearDenom, factorHensel, factorise)
 import Algebra.Ring.Polynomial.Univariate
 import Control.Lens (ifoldMap)
 import Control.Monad.Random
 import Control.Monad.Trans.Writer.CPS (Writer, runWriter, tell)
 import qualified Data.DList as DL
+import Data.Functor ((<&>))
 import qualified Data.IntMap.Strict as IM
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
@@ -292,43 +294,92 @@ solveRationalRecurrence ::
   -- | Recurrence coefficients
   Recurrence Rational ->
   m (GeneralTerm Rational)
-solveRationalRecurrence recurr = do
-  let f = generatingFunction recurr
-  PartialFraction {..} <- flip partialFractionDecomposition f $ \g -> do
-    let (c, g') = clearDenom g
-    (lc, facs) <- factorHensel g'
-    let (Mult lc', fs') =
-          IM.foldMapWithKey
-            ( \d ->
-                foldMap
-                  ( \(mapCoeffUnipol (F.% 1) -> f0) ->
-                      let lc0 = leadingCoeff f0
-                          f' = monoize f0
-                       in (Mult lc0, DL.singleton (f', fromIntegral d))
-                  )
-            )
-            facs
-    pure (fromInteger lc * lc' * (1 F.% c), NE.fromList $ DL.toList fs')
-  pure $
-    reduceGeneralTerm $
-      foldMap
-        ( \(h, powDens) ->
-            if totalDegree' h <= 1
-              then
-                IM.foldMapWithKey
-                  ( \n q ->
-                      linearInverse (negate $ constantTerm h) (fromIntegral n) (constantTerm q)
-                  )
-                  powDens
-              else -- Must be quadtraic and square-free as we expect ternary recurrence.
+solveRationalRecurrence = solveRecurrenceWith $ \g -> do
+  let (c, g') = clearDenom g
+  (lc, facs) <- factorHensel g'
+  let (Mult lc', fs') =
+        IM.foldMapWithKey
+          ( \d ->
+              foldMap
+                ( \(mapCoeffUnipol (F.% 1) -> f0) ->
+                    let lc0 = leadingCoeff f0
+                        f' = monoize f0
+                     in (Mult lc0, DL.singleton (f', fromIntegral d))
+                )
+          )
+          facs
+  pure (fromInteger lc * lc' * (1 F.% c), NE.fromList $ DL.toList fs')
 
-                IM.foldMapWithKey
-                  ( \mul q ->
-                      unliftQuadInverse (fromIntegral mul) (q F.% h)
-                  )
-                  powDens
-        )
-        partialFracs
+{- |
+Solves linear recurrent sequence over finite fields.
+
+** Example1: Fibonacci sequence over F_{17}.
+>>> import Numeric.Field.Prime
+>>> :set -XDataKinds
+>>> fibF17 <- evalRandIO $ solveFiniteFieldRecurrence $ Recurrence (1 :< 1 :< Nil) (0 :< (1 :: F 17) :< Nil)
+>>> fibF17
+(14*Root(x^2 + x + 16) + 7) * (Root(x^2 + x + 16) + 1) ^ n + (3*Root(x^2 + x + 16) + 10) * (16*Root(x^2 + x + 16)) ^ n
+
+>>> map (evalGeneralTerm  fibF17) [0..20]
+[0,1,1,2,3,5,8,13,4,0,4,4,8,12,3,15,1,16,0,16,16]
+
+** Example2: Tetrabonacci over F_{17}
+>>> tetF17 <- evalRandIO $ solveFiniteFieldRecurrence $ Recurrence ((1 :: F 17) :< 1 :< 1 :< 1 :< Nil) (0 :< 0 :< 0 :< 1 :< Nil)tion
+>>> map (evalGeneralTerm tetF17) [0..20][0,0,0,1,1,2,4,8,15,12,5,6,4,10,8,11,16,11,12,16,4]
+
+** Example3: Twekaed tribonacci over GF_{5^3}
+
+T_{n+3} = T_n + T_{n+1} + T_{n+2}
+T_0 = 1, T_1 = ξ, T_2 = ξ^2,
+where ξ is a primitive element of GF_{5^3}.
+
+>>> tetGF53 <- evalRandIO $ solveFiniteFieldRecurrence $ Recurrence (1 :< (1 :: GF 5 3) :< 1 :< Nil) ( 1 :< primitive :< (primitive ^ 2) :< Nil)
+>>> tetGF53
+<ξ^2 + ξ + 1> * <3*ξ + 2> ^ n + <ξ^2 + ξ + 1> * <4*ξ^2> ^ n + <3*ξ^2 + 3*ξ + 4> * <ξ^2 + 2*ξ + 4> ^ n
+
+>>> map (evalGeneralTerm  tetGF53) [0..20]
+[1,<ξ>,<ξ^2>,<ξ^2 + ξ + 1>,<2*ξ^2 + 2*ξ + 1>,<4*ξ^2 + 3*ξ + 2>,<2*ξ^2 + ξ + 4>,<3*ξ^2 + ξ + 2>,<4*ξ^2 + 3>,<4*ξ^2 + 2*ξ + 4>,<ξ^2 + 3*ξ + 4>,<4*ξ^2 + 1>,<4*ξ^2 + 4>,<4*ξ^2 + 3*ξ + 4>,<2*ξ^2 + 3*ξ + 4>,<ξ + 2>,<ξ^2 + 2*ξ>,<3*ξ^2 + ξ + 1>,<4*ξ^2 + 4*ξ + 3>,<3*ξ^2 + 2*ξ + 4>,<2*ξ + 3>]
+-}
+solveFiniteFieldRecurrence ::
+  (MonadRandom m, CoeffRing k, FiniteField k, Random k) =>
+  -- | Recurrence coefficients
+  Recurrence k ->
+  m (GeneralTerm k)
+solveFiniteFieldRecurrence = solveRecurrenceWith $ \g0 -> do
+  let g = monoize g0
+      lc = leadingCoeff g
+  facs <- factorise g
+  pure (lc, NE.fromList facs)
+
+solveRecurrenceWith ::
+  (Functor m, CoeffRing k, Field k) =>
+  -- | Factorisation function; must return content and monic square-free factorisation over k.
+  (Unipol k -> m (k, NonEmpty (Unipol k, Natural))) ->
+  -- | Recurrence coefficients
+  Recurrence k ->
+  m (GeneralTerm k)
+solveRecurrenceWith factor recurr =
+  let f = generatingFunction recurr
+   in partialFractionDecomposition factor f <&> \PartialFraction {..} ->
+        reduceGeneralTerm $
+          foldMap
+            ( \(h, powDens) ->
+                if totalDegree' h <= 1
+                  then
+                    IM.foldMapWithKey
+                      ( \n q ->
+                          linearInverse (negate $ constantTerm h) (fromIntegral n) (constantTerm q)
+                      )
+                      powDens
+                  else --
+
+                    IM.foldMapWithKey
+                      ( \mul q ->
+                          unliftQuadInverse (fromIntegral mul) (q F.% h)
+                      )
+                      powDens
+            )
+            partialFracs
 
 -- | Unsafe wrapper to treat 'DecidableUnits' as if it is a field.
 newtype WrapDecidableUnits k = WrapDecidableUnits {runWrapDecidableUnits :: k}

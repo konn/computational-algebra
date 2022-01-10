@@ -22,7 +22,7 @@ data PartialFractionDecomp k = PartialFraction
   deriving (Show, Eq, Ord)
 
 partialFractionDecomposition ::
-  (Field k, CoeffRing k, Applicative m) =>
+  (Field k, CoeffRing k, Functor m) =>
   (Unipol k -> m (k, NonEmpty (Unipol k, Natural))) ->
   Fraction (Unipol k) ->
   m (PartialFractionDecomp k)
