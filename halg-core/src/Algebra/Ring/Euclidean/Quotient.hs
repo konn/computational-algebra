@@ -24,6 +24,7 @@ module Algebra.Ring.Euclidean.Quotient
 where
 
 import Algebra.Ring.Ideal
+import Algebra.Ring.Polynomial.Class
 import AlgebraicPrelude
 import Data.Coerce (coerce)
 import Data.Kind (Type)
@@ -42,7 +43,15 @@ instance (Show a, Reifies r a) => Show (Quotient r a) where
     showParen (d > 10) $
       showsPrec 11 a . showString " (mod "
         . showsPrec 11 (reflect (Proxy :: Proxy r))
-        . showChar '>'
+        . showChar ')'
+
+instance (Show a, Reifies r a, DecidableZero a) => PrettyCoeff (Quotient r a) where
+  showsCoeff _ (Quotient a)
+    | isZero a = Vanished
+    | otherwise =
+      Positive $
+        showParen True $
+          showParen True (shows a) . showString " + " . showsPrec 11 (reflect (Proxy :: Proxy r))
 
 liftBin ::
   forall r a.

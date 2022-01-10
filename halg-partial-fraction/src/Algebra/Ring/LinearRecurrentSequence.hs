@@ -1,41 +1,45 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MonoLocalBinds #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Algebra.Ring.LinearRecurrentSequence where
 
 import Algebra.Prelude.Core
-import Algebra.Ring.Euclidean.Quotient (Quotient, quotient, quotientBy, reifyQuotient, representative, withQuotient)
+import Algebra.Ring.Euclidean.Quotient (Quotient, quotientBy, reifyQuotient, representative)
 import Algebra.Ring.Fraction.Decomp
 import Algebra.Ring.Polynomial.Factorise (clearDenom, factorHensel)
 import Algebra.Ring.Polynomial.Univariate
 import Control.Exception (assert)
 import Control.Lens (ifoldMap)
 import Control.Monad.Random
+import Control.Monad.Trans.Writer.CPS (Writer, runWriter, tell)
 import qualified Data.DList as DL
 import qualified Data.IntMap.Strict as IM
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe
+import Data.Monoid (Any (Any))
 import Data.Reflection (Reifies (reflect))
+import Data.Semigroup (Semigroup)
 import qualified Data.Sized as S
 import qualified Data.Sized as SV
 import qualified Data.Vector as V
 import qualified Numeric.Field.Fraction as F
 import qualified Numeric.Ring.Class as AC
+import Unsafe.Coerce (unsafeCoerce)
 
 data Power = P Natural | Np
   deriving (Eq, Ord)
@@ -44,16 +48,22 @@ instance Show Power where
   showsPrec _ (P n) = shows n
   showsPrec _ Np = showString "n"
 
-data GeneralTerm k
-  = Const k
-  | N
-  | GeneralTerm k :^ Power
-  | GeneralTerm k :+ GeneralTerm k
-  | GeneralTerm k :* GeneralTerm k
-  | GeneralTerm k :- GeneralTerm k
-  | Sqrt (GeneralTerm k)
-  | Root (Unipol k)
-  deriving (Eq, Ord, Foldable)
+data GeneralTerm k where
+  Const :: k -> GeneralTerm k
+  N :: GeneralTerm k
+  (:^) :: GeneralTerm k -> Power -> GeneralTerm k
+  (:+) :: GeneralTerm k -> GeneralTerm k -> GeneralTerm k
+  (:*) :: GeneralTerm k -> GeneralTerm k -> GeneralTerm k
+  (:-) :: GeneralTerm k -> GeneralTerm k -> GeneralTerm k
+  Lift ::
+    Reifies s (Unipol k) =>
+    Proxy s ->
+    GeneralTerm (WrapDecidableUnits (Quotient s (Unipol k))) ->
+    GeneralTerm k
+
+deriving via Add (GeneralTerm k) instance Additive k => Semigroup (GeneralTerm k)
+
+deriving via Add (GeneralTerm k) instance Rig k => Monoid (GeneralTerm k)
 
 instance Additive (GeneralTerm k) where
   (+) = (:+)
@@ -120,28 +130,57 @@ instance Ring k => Rig (GeneralTerm k) where
 instance Ring k => Ring (GeneralTerm k) where
   fromInteger = Const . fromInteger'
 
-instance (Show k, CoeffRing k, PrettyCoeff k) => Show (GeneralTerm k) where
-  showsPrec d (Const k) = showsPrec d k
-  showsPrec _ N = showString "n"
-  showsPrec d (gt :^ po) =
-    showParen (d > 8) $
-      showsPrec 9 gt . showString " ^ " . shows po
-  showsPrec d (gt :+ gt') =
-    showParen (d > 6) $
-      showsPrec 6 gt . showString " + " . showsPrec 7 gt'
-  showsPrec d (gt :- gt') =
-    showParen (d > 6) $
-      showsPrec 6 gt . showString " - " . showsPrec 7 gt'
-  showsPrec d (gt :* gt') =
-    showParen (d > 7) $
-      showsPrec 7 gt . showString " * " . showsPrec 8 gt'
-  showsPrec d (Sqrt gt) =
-    showParen (d > 10) $
-      showString "√" . showsPrec 10 gt
-  showsPrec _ (Root un) =
-    showString "Root("
-      . showsPrec 10 un
-      . showChar ')'
+showsGTWith :: (CoeffRing k, Field k) => (Int -> k -> ShowSCoeff) -> Int -> GeneralTerm k -> ShowS
+showsGTWith = loop
+  where
+    loop ::
+      (CoeffRing a, Field a) =>
+      (Int -> a -> ShowSCoeff) ->
+      Int ->
+      GeneralTerm a ->
+      ShowS
+    loop showsElt _ (Const a) = case showsElt 11 a of
+      Vanished -> showString "0"
+      i -> showsCoeffAsTerm i
+    loop _ _ N = showString "n"
+    loop showsElt d (gt' :^ po) =
+      showParen (d > 8) $
+        loop showsElt 11 gt' . showString " ^ " . showsPrec 8 po
+    loop showsElt d (gt' :+ gt_a) =
+      showParen (d > 6) $
+        loop showsElt 6 gt'
+          . showString " + "
+          . loop showsElt 6 gt_a
+    loop showsElt d (gt' :* gt_a) =
+      showParen (d > 7) $
+        loop showsElt 7 gt'
+          . showString " * "
+          . loop showsElt 7 gt_a
+    loop showsElt d (gt' :- gt_a) =
+      showParen (d > 6) $
+        loop showsElt 6 gt'
+          . showString " - "
+          . loop showsElt 6 gt_a
+    loop showsElt d (Lift (s :: Proxy s) gt') =
+      let f = reflect s
+       in loop
+            ( \d' ->
+                Positive
+                  . showsPolynomialWith'
+                    True
+                    showsElt
+                    ( SV.singleton $
+                        "Root(" <> showPolynomialWith' True showsElt (SV.singleton "x") 10 f <> ")"
+                    )
+                    d'
+                  . representative
+                  . runWrapDecidableUnits
+            )
+            d
+            gt'
+
+instance (Show k, Field k, CoeffRing k, PrettyCoeff k) => Show (GeneralTerm k) where
+  showsPrec = showsGTWith showsCoeff
 
 infixl 6 :+, :-
 
@@ -237,21 +276,20 @@ solveTernaryRecurrence coes iniVals = do
             facs
     pure (fromInteger lc * lc' * (1 F.% c), NE.fromList $ DL.toList fs')
   pure $
-    runAdd $
+    reduceGeneralTerm $
       foldMap
         ( \(h, powDens) ->
             if totalDegree' h <= 1
               then
                 IM.foldMapWithKey
                   ( \n q ->
-                      Add $
-                        linearInverse (negate $ constantTerm h) (fromIntegral n) (constantTerm q)
+                      linearInverse (negate $ constantTerm h) (fromIntegral n) (constantTerm q)
                   )
                   powDens
               else -- Must be quadtraic and square-free as we expect ternary recurrence.
 
                 let Just (_, q) = IM.lookupMin powDens
-                 in Add $ unliftQuadInverse (q F.% h)
+                 in unliftQuadInverse (q F.% h)
         )
         partialFracs
 
@@ -260,6 +298,7 @@ newtype WrapDecidableUnits k = WrapDecidableUnits {runWrapDecidableUnits :: k}
   deriving newtype
     ( Eq
     , Ord
+    , Show
     , Hashable
     , Additive
     , Monoidal
@@ -275,6 +314,7 @@ newtype WrapDecidableUnits k = WrapDecidableUnits {runWrapDecidableUnits :: k}
     , DecidableUnits
     , Commutative
     , ZeroProductSemiring
+    , PrettyCoeff
     )
 
 instance DecidableUnits k => Division (WrapDecidableUnits k) where
@@ -352,44 +392,16 @@ unliftQuadInverse f
           PartialFraction {..} =
             partialFractionDecompositionWith h ((rootg, 1) :| [(root'g, 1)])
        in assert (isZero r) $
-            unliftGeneralTerm $
-              runAdd $
-                foldMap
-                  ( \(z, im) ->
-                      let c = negate $ constantTerm z
-                          num =
-                            constantTerm $
-                              snd $ fromJust $ IM.lookupMin im
-                       in Add $ mapGTCoeff runWrapDecidableUnits $ linearInverse c 1 num
-                  )
-                  partialFracs
-
-mapGTCoeff ::
-  (CoeffRing c, CoeffRing d) => (c -> d) -> GeneralTerm c -> GeneralTerm d
-mapGTCoeff f (Const x) = Const (f x)
-mapGTCoeff f (a :+ b) = mapGTCoeff f a :+ mapGTCoeff f b
-mapGTCoeff f (a :- b) = mapGTCoeff f a :- mapGTCoeff f b
-mapGTCoeff f (a :* b) = mapGTCoeff f a :* mapGTCoeff f b
-mapGTCoeff f (a :^ n) = mapGTCoeff f a :^ n
-mapGTCoeff _ N = N
-mapGTCoeff f (Sqrt a) = Sqrt $ mapGTCoeff f a
-mapGTCoeff f (Root h) = Root $ mapCoeffUnipol f h
-
-unliftGeneralTerm ::
-  forall k s.
-  (CoeffRing k, Reifies s (Unipol k)) =>
-  GeneralTerm (Quotient s (Unipol k)) ->
-  GeneralTerm k
-unliftGeneralTerm (Const q) =
-  let g = reflect (Proxy :: Proxy s)
-   in substWith ((:*) . Const) (SV.singleton (Root g)) $ representative q
-unliftGeneralTerm (a :+ b) = unliftGeneralTerm a :+ unliftGeneralTerm b
-unliftGeneralTerm (a :- b) = unliftGeneralTerm a :- unliftGeneralTerm b
-unliftGeneralTerm (a :* b) = unliftGeneralTerm a :* unliftGeneralTerm b
-unliftGeneralTerm (a :^ b) = unliftGeneralTerm a :^ b
-unliftGeneralTerm (Sqrt a) = Sqrt $ unliftGeneralTerm a
-unliftGeneralTerm Root {} = error "Unlifting Root(...) not supported"
-unliftGeneralTerm N = N
+            Lift den $
+              foldMap
+                ( \(z, im) ->
+                    let c = negate $ constantTerm z
+                        num =
+                          constantTerm $
+                            snd $ fromJust $ IM.lookupMin im
+                     in linearInverse c 1 num
+                )
+                partialFracs
 
 linearInverse ::
   (CoeffRing k, Field k) =>
@@ -404,3 +416,119 @@ linearInverse alpha k c =
   Const (c * negate (recip alpha) ^ k)
     :* ((N :+ Const one) :^ P (pred k))
     :* Const (recip alpha) :^ Np
+
+type Rewriter = Writer Any
+
+progress :: a -> Rewriter a
+progress a = a <$ tell (Any True)
+
+reduceGeneralTerm :: (Field k, CoeffRing k) => GeneralTerm k -> GeneralTerm k
+reduceGeneralTerm = fixedPoint simplifyGeneralTerm
+
+fixedPoint :: (a -> Rewriter a) -> a -> a
+fixedPoint f = go
+  where
+    go x =
+      let (x', Any reduced) = runWriter $ f x
+       in if reduced then go x' else x
+
+simplifyGeneralTerm ::
+  (Field k, CoeffRing k) => GeneralTerm k -> Rewriter (GeneralTerm k)
+simplifyGeneralTerm k@Const {} = pure k
+simplifyGeneralTerm k@N = pure k
+simplifyGeneralTerm (l :+ r) =
+  ((,) <$> simplifyGeneralTerm l <*> simplifyGeneralTerm r) >>= \case
+    (Const z, r') | isZero z -> progress r'
+    (l', Const z) | isZero z -> progress l'
+    (Const l', Const r') -> progress $ Const $ l' + r'
+    (Const l', Lift s a) ->
+      progress $
+        Lift s $
+          Const (WrapDecidableUnits $ quotientBy s $ injectCoeff l') :+ a
+    (Lift s a, Const r') ->
+      progress $
+        Lift s $
+          a :+ Const (WrapDecidableUnits $ quotientBy s $ injectCoeff r')
+    (Lift s a, Lift s' b)
+      | reflect s == reflect s' ->
+        progress $ Lift s (a :+ unsafeCoerce b)
+    (l', r') -> pure $ l' :+ r'
+simplifyGeneralTerm (l :- r) =
+  ((,) <$> simplifyGeneralTerm l <*> simplifyGeneralTerm r) >>= \case
+    (l', Const z) | isZero z -> progress l'
+    (Const l', Const r') -> progress $ Const $ l' - r'
+    (Const l', Lift s a) ->
+      progress $
+        Lift s $
+          Const (WrapDecidableUnits $ quotientBy s $ injectCoeff l') :- a
+    (Lift s a, Const r') ->
+      progress $
+        Lift s $
+          a :- Const (WrapDecidableUnits $ quotientBy s $ injectCoeff r')
+    (Lift s a, Lift s' b)
+      | reflect s == reflect s' ->
+        progress $ Lift s (a :- unsafeCoerce b)
+    (l', r') -> pure $ l' :+ r'
+simplifyGeneralTerm (l :* r) =
+  ((,) <$> simplifyGeneralTerm l <*> simplifyGeneralTerm r) >>= \case
+    (Const z, r')
+      | isZero z -> progress $ Const zero
+      | z == one -> progress r'
+    (l', Const z)
+      | isZero z -> progress $ Const zero
+      | z == one -> progress l'
+    (Const l', Const r') -> progress $ Const $ l' * r'
+    (Const l', Lift s a) ->
+      progress $
+        Lift s $
+          Const (WrapDecidableUnits $ quotientBy s $ injectCoeff l') :* a
+    (Lift s a, Const r') ->
+      progress $
+        Lift s $
+          a :* Const (WrapDecidableUnits $ quotientBy s $ injectCoeff r')
+    (Lift s a, Lift s' b)
+      | reflect s == reflect s' ->
+        progress $ Lift s (a :* unsafeCoerce b)
+    (l', r') -> pure $ l' :* r'
+simplifyGeneralTerm (l :^ p) = do
+  lred <- simplifyGeneralTerm l
+  case (lred, p) of
+    (l'@(Const z), _)
+      | z == one -> progress l'
+    (Const z, P n) -> progress $ Const $ z ^ n
+    (_, P 0) -> progress $ Const one
+    (l', r') -> pure $ l' :^ r'
+simplifyGeneralTerm (Lift p a) =
+  simplifyGeneralTerm a >>= \case
+    Const (WrapDecidableUnits a')
+      | totalDegree' (representative a') < 1 ->
+        progress $ Const $ constantTerm $ representative a'
+    r -> pure $ Lift p r
+
+{-
+
+Solves fibonnaci sequence; i.e.  recurrent sequence defined by
+a_{n + 2} = 1 a_n + 1 a_{n + 1}
+a_0 = 0
+a_1 = 1
+
+>>> fib <- evalRandIO $ solveTernaryRecurrence (1 :< 1 :< Nil) (0 :< 1 :< Nil)
+>>> evalGeneralTerm fib 12
+144
+-}
+evalGeneralTerm ::
+  (CoeffRing k, Field k) =>
+  GeneralTerm k ->
+  Natural ->
+  GeneralTerm k
+evalGeneralTerm f n = fixedPoint (substN >=> simplifyGeneralTerm) f
+  where
+    substN :: (CoeffRing f, Field f) => GeneralTerm f -> Rewriter (GeneralTerm f)
+    substN N = progress $ Const $ fromNatural n
+    substN k@Const {} = pure k
+    substN (l :+ r) = (:+) <$> substN l <*> substN r
+    substN (l :- r) = (:-) <$> substN l <*> substN r
+    substN (l :* r) = (:*) <$> substN l <*> substN r
+    substN (l :^ Np) = (:^ P n) <$> substN l
+    substN (l :^ P k) = (:^ P k) <$> substN l
+    substN (Lift p s) = Lift p <$> substN s

@@ -45,6 +45,7 @@ library:
   - vector
   - MonadRandom
   - reflection
+  - transformers
 
 tests:
   halg-partial-fraction-test:

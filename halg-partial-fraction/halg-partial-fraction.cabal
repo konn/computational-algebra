@@ -47,6 +47,7 @@ library
     , mono-traversable
     , reflection
     , sized
+    , transformers
     , type-natural
     , unordered-containers
     , vector
