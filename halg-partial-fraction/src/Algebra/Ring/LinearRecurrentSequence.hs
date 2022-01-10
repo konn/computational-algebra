@@ -325,7 +325,8 @@ Solves linear recurrent sequence over finite fields.
 
 ** Example2: Tetrabonacci over F_{17}
 >>> tetF17 <- evalRandIO $ solveFiniteFieldRecurrence $ Recurrence ((1 :: F 17) :< 1 :< 1 :< 1 :< Nil) (0 :< 0 :< 0 :< 1 :< Nil)tion
->>> map (evalGeneralTerm tetF17) [0..20][0,0,0,1,1,2,4,8,15,12,5,6,4,10,8,11,16,11,12,16,4]
+>>> map (evalGeneralTerm tetF17) [0..20]
+[0,0,0,1,1,2,4,8,15,12,5,6,4,10,8,11,16,11,12,16,4]
 
 ** Example3: Twekaed tribonacci over GF_{5^3}
 
@@ -333,11 +334,11 @@ T_{n+3} = T_n + T_{n+1} + T_{n+2}
 T_0 = 1, T_1 = ξ, T_2 = ξ^2,
 where ξ is a primitive element of GF_{5^3}.
 
->>> tetGF53 <- evalRandIO $ solveFiniteFieldRecurrence $ Recurrence (1 :< (1 :: GF 5 3) :< 1 :< Nil) ( 1 :< primitive :< (primitive ^ 2) :< Nil)
->>> tetGF53
+>>> triGF53 <- evalRandIO $ solveFiniteFieldRecurrence $ Recurrence (1 :< (1 :: GF 5 3) :< 1 :< Nil) ( 1 :< primitive :< (primitive ^ 2) :< Nil)
+>>> triGF53
 <ξ^2 + ξ + 1> * <3*ξ + 2> ^ n + <ξ^2 + ξ + 1> * <4*ξ^2> ^ n + <3*ξ^2 + 3*ξ + 4> * <ξ^2 + 2*ξ + 4> ^ n
 
->>> map (evalGeneralTerm  tetGF53) [0..20]
+>>> map (evalGeneralTerm  triGF53) [0..20]
 [1,<ξ>,<ξ^2>,<ξ^2 + ξ + 1>,<2*ξ^2 + 2*ξ + 1>,<4*ξ^2 + 3*ξ + 2>,<2*ξ^2 + ξ + 4>,<3*ξ^2 + ξ + 2>,<4*ξ^2 + 3>,<4*ξ^2 + 2*ξ + 4>,<ξ^2 + 3*ξ + 4>,<4*ξ^2 + 1>,<4*ξ^2 + 4>,<4*ξ^2 + 3*ξ + 4>,<2*ξ^2 + 3*ξ + 4>,<ξ + 2>,<ξ^2 + 2*ξ>,<3*ξ^2 + ξ + 1>,<4*ξ^2 + 4*ξ + 3>,<3*ξ^2 + 2*ξ + 4>,<2*ξ + 3>]
 -}
 solveFiniteFieldRecurrence ::
