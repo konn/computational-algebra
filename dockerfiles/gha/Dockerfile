@@ -25,7 +25,7 @@ RUN addgroup --system --gid 121 github \
     && adduser --system --gid 121 --home /github/home --uid 1001 runner
 
 # We have to grant github to be sudoer.
-RUN usermod -aG sudo runner && usermod -aG root runner && sed -i "s/%sudo\tALL=(ALL:ALL) ALL/%sudo\tALL=NOPASSWD: ALL/" /etc/sudoers && cat /etc/sudoers
+RUN usermod -aG sudo runner && usermod -aG root runner && sed -i "s/%sudo\tALL=(ALL:ALL) ALL/%sudo\tALL=NOPASSWD: ALL/" /etc/sudoers
 
 USER runner:github
 
