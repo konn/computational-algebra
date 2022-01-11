@@ -43,13 +43,8 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-    - uses: haskell/actions/setup@v1.2.9
-      with:
-        ghc-version: ${{matrix.ghc}}
-        enable-stack: true
-        stack-version: latest
 
-    - run: stack build --system-ghc --test --no-run-tests --haddock --no-haddock-deps
+    - run: stack build --test --no-run-tests --haddock --no-haddock-deps
     - name: "Collect documents"
       run: |
         cp -r $(stack path --local-doc-root) docs
