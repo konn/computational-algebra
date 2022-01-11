@@ -1,7 +1,6 @@
 FROM ubuntu:20.04
 LABEL org.opencontainers.image.source https://github.com/konn/computational-algebra
 
-ENV PATH /root/.local/bin:$PATH
 ENV LD_LIBRARY_PATH $MPI/lib:$LD_LIBRARY_PATH
 
 RUN apt-get update -y -qq && apt-get install -y -qq wget gnupg2 sudo
@@ -18,5 +17,8 @@ RUN apt-get update -y -qq
 RUN apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev clang-9 llvm-9 llvm-9-dev libllvm9
 
 # Sets up Stack
+RUN mkdir -p /github/home
+ENV HOME "/github/home"
+ENV TAR_OPTIONS --no-same-owner
 RUN wget -qO- https://get.haskellstack.org/ | sh
-ENV PATH="${HOME}/.local/bin:/usr/local/bin:${PATH}"
+ENV PATH "/github/home/.local/bin:/usr/local/bin:${PATH}"
