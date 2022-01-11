@@ -6,8 +6,7 @@ name: build
 jobs:
   build:
     runs-on: ubuntu-20.04
-    container:
-      image: ghcr.io/konn/computational-algebra/gha:latest
+    container: ghcr.io/konn/computational-algebra/gha:latest
     strategy:
       matrix:
         ghc:
@@ -21,7 +20,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Whoami
       run: |
-        echo "${UID}, ${USER}"
+        echo "Whoami: $(id -un):$(id -gn)"
 
     - name: cache ~/.stack
       uses: actions/cache@v2.1.6
@@ -74,8 +73,7 @@ jobs:
     needs:
     - build
     runs-on: ubuntu-20.04
-    container:
-      image: ghcr.io/konn/computational-algebra/gha:latest
+    container: ghcr.io/konn/computational-algebra/gha:latest
     strategy:
       matrix:
         ghc:
@@ -107,8 +105,7 @@ jobs:
   document:
     needs: build
     runs-on: ubuntu-20.04
-    container:
-      image: ghcr.io/konn/computational-algebra/gha:latest
+    container: ghcr.io/konn/computational-algebra/gha:latest
     name: Deploy Document
     strategy:
       matrix:
