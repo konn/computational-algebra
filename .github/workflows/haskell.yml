@@ -19,6 +19,9 @@ jobs:
       STACK_YAML: stack-${{matrix.ghc}}.yaml
     steps:
     - uses: actions/checkout@v2
+    - name: Whoami
+      run: |
+        echo "${UID}, ${USER}"
 
     - name: cache ~/.stack
       uses: actions/cache@v2.1.6
