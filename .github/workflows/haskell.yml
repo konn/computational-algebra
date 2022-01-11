@@ -76,7 +76,7 @@ jobs:
       matrix:
         ghc:
         - 8.10.7
-        - 9.0.1
+        - 9.0.2
       fail-fast: false
     name: Test ${{ matrix.ghc }}
     env:
