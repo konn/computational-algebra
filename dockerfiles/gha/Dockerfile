@@ -32,3 +32,4 @@ USER runner:github
 
 ENV TAR_OPTIONS --no-same-owner
 ENV PATH "/github/home/.local/bin:/usr/local/bin:${PATH}"
+ENV LANG "en_us.UTF-8"
