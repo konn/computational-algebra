@@ -1,4 +1,6 @@
-resolver: nightly-2022-01-10
+resolver: nightly-2022-01-06
+compiler: ghc-9.0.2
+compiler-check: match-exact
 
 build:
   haddock-deps: false
