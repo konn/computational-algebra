@@ -104,56 +104,56 @@ jobs:
           ${{steps.test-bins.outputs.download-path}}/${TEST_EXE} +RTS -N
         done
 
-  document:
-    needs: build
-    runs-on: ubuntu-20.04
-    container: ghcr.io/konn/computational-algebra/gha:latest
-    name: Deploy Document
-    strategy:
-      matrix:
-        ghc:
-        - 8.10.7
-      fail-fast: false
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        ref: gh-pages-devel
+  # document:
+  #   needs: build
+  #   runs-on: ubuntu-20.04
+  #   container: ghcr.io/konn/computational-algebra/gha:latest
+  #   name: Deploy Document
+  #   strategy:
+  #     matrix:
+  #       ghc:
+  #       - 8.10.7
+  #     fail-fast: false
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #     with:
+  #       ref: gh-pages-devel
 
-    - name: cache ~/.stack
-      uses: actions/cache@v2.1.6
-      env:
-        cache-name: cache-stack-global-doc
-      with:
-        path: ~/.stack
-        key: ${{ runner.os }}-doc-${{ matrix.ghc }}-${{ hashFiles('**/package.yaml') }}-${{ hashFiles('**/stack.yaml') }}-${{ hashFiles('**/stack.yaml.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-doc-${{ env.cache-name }}-${{ matrix.ghc }}
-          ${{ runner.os }}-doc-${{ env.cache-name }}-
-          ${{ runner.os }}-doc-
-    - name: Cache .stack-work
-      uses: actions/cache@v2.1.6
-      env:
-        cache-name: cache-stack-local-doc
-      with:
-        path: '**/.stack-work'
-        key: ${{ runner.os }}-doc-${{ env.cache-name }}-${{ matrix.ghc }}-${{ hashFiles('**/package.yaml') }}-${{ hashFiles('**/stack.yaml') }}-${{ hashFiles('**/stack.yaml.lock') }}-${{ hashFiles('**/*.hs') }}
-        restore-keys: |
-          ${{ runner.os }}-doc-${{ env.cache-name }}-${{ matrix.ghc }}
-          ${{ runner.os }}-doc-${{ env.cache-name }}-
-          ${{ runner.os }}-doc-
+  #   - name: cache ~/.stack
+  #     uses: actions/cache@v2.1.6
+  #     env:
+  #       cache-name: cache-stack-global-doc
+  #     with:
+  #       path: ~/.stack
+  #       key: ${{ runner.os }}-doc-${{ matrix.ghc }}-${{ hashFiles('**/package.yaml') }}-${{ hashFiles('**/stack.yaml') }}-${{ hashFiles('**/stack.yaml.lock') }}
+  #       restore-keys: |
+  #         ${{ runner.os }}-doc-${{ env.cache-name }}-${{ matrix.ghc }}
+  #         ${{ runner.os }}-doc-${{ env.cache-name }}-
+  #         ${{ runner.os }}-doc-
+  #   - name: Cache .stack-work
+  #     uses: actions/cache@v2.1.6
+  #     env:
+  #       cache-name: cache-stack-local-doc
+  #     with:
+  #       path: '**/.stack-work'
+  #       key: ${{ runner.os }}-doc-${{ env.cache-name }}-${{ matrix.ghc }}-${{ hashFiles('**/package.yaml') }}-${{ hashFiles('**/stack.yaml') }}-${{ hashFiles('**/stack.yaml.lock') }}-${{ hashFiles('**/*.hs') }}
+  #       restore-keys: |
+  #         ${{ runner.os }}-doc-${{ env.cache-name }}-${{ matrix.ghc }}
+  #         ${{ runner.os }}-doc-${{ env.cache-name }}-
+  #         ${{ runner.os }}-doc-
 
-    - name: Build static site generator
-      run: |
-        stack build --fast
-    - name: Download docs artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: doc-artifacts-${{ matrix.ghc }}
-        path: 'docs/'
-    - name: Generate Static site
-      run: stack exec -- site build
-    - name: Deploy
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./_site
+  #   - name: Build static site generator
+  #     run: |
+  #       stack build --fast
+  #   - name: Download docs artifact
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #       name: doc-artifacts-${{ matrix.ghc }}
+  #       path: 'docs/'
+  #   - name: Generate Static site
+  #     run: stack exec -- site build
+  #   - name: Deploy
+  #     uses: peaceiris/actions-gh-pages@v3
+  #     with:
+  #       github_token: ${{ secrets.GITHUB_TOKEN }}
+  #       publish_dir: ./_site
