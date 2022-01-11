@@ -18,6 +18,11 @@ jobs:
       STACK_YAML: stack-${{matrix.ghc}}.yaml
     steps:
     - uses: actions/checkout@v2
+    - name: Whoami
+      run: |
+        echo "Whoami: ${HOME} $(id -un):$(id -gn)"
+        pwd
+        ls -lav .
     - name: Corrects permission
       run: |
         chown -R "$(id -un):$(id -gn)" "${HOME}"
