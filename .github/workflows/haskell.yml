@@ -44,12 +44,6 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-    - name: Setup Haskell
-      uses: haskell/actions/setup@v1.2.1
-      with:
-        ghc-version: ${{matrix.ghc}}
-        enable-stack: true
-        stack-version: "2.7.1"
     - run: stack build --test --no-run-tests --haddock --no-haddock-deps
     - name: "Collect documents"
       run: |
@@ -97,12 +91,6 @@ jobs:
       with:
         name: test-artifacts-${{ matrix.ghc }}
         path: test-bins
-    - name: Setup Haskell
-      uses: haskell/actions/setup@v1.2.1
-      with:
-        ghc-version: ${{matrix.ghc}}
-        enable-stack: true
-        stack-version: "2.7.1"
     - name: Run all Tests
       run: |
         ls ${{steps.test-bins.outputs.download-path}}
@@ -152,13 +140,6 @@ jobs:
           ${{ runner.os }}-doc-${{ env.cache-name }}-
           ${{ runner.os }}-doc-
 
-    - name: Setup Haskell
-      uses: haskell/actions/setup@v1.2.1
-      with:
-        ghc-version: ${{matrix.ghc}}
-        enable-stack: true
-        stack-version: "2.7.1"
-    
     - name: Build static site generator
       run: |
         stack build --fast

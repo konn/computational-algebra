@@ -4,7 +4,7 @@ LABEL org.opencontainers.image.source https://github.com/konn/computational-alge
 ENV PATH /root/.local/bin:$PATH
 ENV LD_LIBRARY_PATH $MPI/lib:$LD_LIBRARY_PATH
 
-RUN apt-get update -y -qq && apt-get install -y -qq wget gnupg2
+RUN apt-get update -y -qq && apt-get install -y -qq wget gnupg2 sudo
 RUN echo 'Dir::Bin::Methods::ftp "ftp";' >> /etc/apt/apt.conf.d/99local-ftp
 
 # Adding Singular repo to apt
@@ -16,3 +16,7 @@ RUN echo "deb http://apt.llvm.org/focal llvm-toolchain-focal-9 main" >> /etc/apt
   wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add
 RUN apt-get update -y -qq
 RUN apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev clang-9 llvm-9 llvm-9-dev libllvm9
+
+# Sets up Stack
+RUN wget -qO- https://get.haskellstack.org/ | sh
+ENV PATH="${HOME}/.local/bin:/usr/local/bin:${PATH}"
