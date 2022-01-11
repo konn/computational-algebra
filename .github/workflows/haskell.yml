@@ -51,7 +51,7 @@ jobs:
     - name: "Collect test exes"
       run: |
         mkdir -p test-bins/
-        stack ide targets |& grep :test: | while read i; do
+        stack ide targets 2>&1 | grep :test: | while read i; do
           PACK=$(echo "$i" | cut -d':' -f1);
           EXE=$(echo "$i" | cut -d':' -f3);
           cp $PACK/$(stack path --dist-dir)/build/$EXE/$EXE test-bins;
@@ -93,7 +93,7 @@ jobs:
     - name: Run all Tests
       run: |
         ls ${{steps.test-bins.outputs.download-path}}
-        stack ide targets |& grep :test: | while read i; do
+        stack ide targets 2>&1 | grep :test: | while read i; do
           TEST_EXE=$(echo "$i" | cut -d':' -f3)
           echo "Testing: ${TEST_EXE}"
           chmod +x ${{steps.test-bins.outputs.download-path}}/${TEST_EXE}
