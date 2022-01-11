@@ -27,15 +27,15 @@ RUN addgroup --system --gid 121 github \
 
 # We have to grant github to be sudoer.
 RUN usermod -aG sudo runner && usermod -aG root runner && sed -i "s/%sudo\tALL=(ALL:ALL) ALL/%sudo\tALL=NOPASSWD: ALL/" /etc/sudoers
-RUN echo "en_us.UTF-8" > /etc/locale.conf
+RUN echo "C.UTF-8" > /etc/locale.conf
 
 USER runner:github
 
 ENV TAR_OPTIONS --no-same-owner
 ENV PATH "/github/home/.local/bin:/usr/local/bin:${PATH}"
-ENV LANG "en_us.UTF-8"
-ENV LC_CTYPE "en_us.UTF-8"
-ENV LC_TIME "en_us.UTF-8"
-ENV LC_MESSAGES "en_us.UTF-8"
-ENV LC_ALL "en_us.UTF-8"
-ENV LANGUAGE "en_us.UTF-8"
+ENV LANG "C.UTF-8"
+ENV LC_CTYPE "C.UTF-8"
+ENV LC_TIME "C.UTF-8"
+ENV LC_MESSAGES "C.UTF-8"
+ENV LC_ALL "C.UTF-8"
+ENV LANGUAGE "C.UTF-8"
