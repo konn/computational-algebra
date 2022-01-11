@@ -7,7 +7,7 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     container:
-      image: ghcr.io/konn/computational-algebra/gha:0.0
+      image: ghcr.io/konn/computational-algebra/gha:latest
     strategy:
       matrix:
         ghc:
@@ -78,7 +78,7 @@ jobs:
     - build
     runs-on: ubuntu-20.04
     container:
-      image: ghcr.io/konn/computational-algebra/gha:0.0
+      image: ghcr.io/konn/computational-algebra/gha:latest
     strategy:
       matrix:
         ghc:
@@ -117,7 +117,7 @@ jobs:
     needs: build
     runs-on: ubuntu-20.04
     container:
-      image: ghcr.io/konn/computational-algebra/gha:0.0
+      image: ghcr.io/konn/computational-algebra/gha:latest
     name: Deploy Document
     strategy:
       matrix:
