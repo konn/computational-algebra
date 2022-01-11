@@ -18,14 +18,11 @@ jobs:
       STACK_YAML: stack-${{matrix.ghc}}.yaml
     steps:
     - uses: actions/checkout@v2
-    - name: Whoami
-      run: |
-        echo "Whoami: ${HOME} $(id -un):$(id -gn)"
-        pwd
-        ls -lav .
-    - name: Corrects permission
-      run: |
-        chown -R "$(id -un):$(id -gn)" "${HOME}"
+    - uses: haskell/actions/setup@v1.2.9
+      with:
+        ghc-version: ${{matrix.ghc}}
+        enable-stack: true
+        stack-version: latest
 
     - name: cache ~/.stack
       uses: actions/cache@v2.1.6
