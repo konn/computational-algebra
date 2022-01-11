@@ -18,11 +18,6 @@ jobs:
       STACK_YAML: stack-${{matrix.ghc}}.yaml
     steps:
     - uses: actions/checkout@v2
-    - uses: haskell/actions/setup@v1.2.9
-      with:
-        ghc-version: ${{matrix.ghc}}
-        enable-stack: true
-        stack-version: latest
 
     - name: cache ~/.stack
       uses: actions/cache@v2.1.6
@@ -48,7 +43,13 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-    - run: stack build --test --no-run-tests --haddock --no-haddock-deps
+    - uses: haskell/actions/setup@v1.2.9
+      with:
+        ghc-version: ${{matrix.ghc}}
+        enable-stack: true
+        stack-version: latest
+
+    - run: stack build --system-ghc --test --no-run-tests --haddock --no-haddock-deps
     - name: "Collect documents"
       run: |
         cp -r $(stack path --local-doc-root) docs
