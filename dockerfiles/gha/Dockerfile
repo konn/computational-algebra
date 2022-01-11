@@ -1,4 +1,5 @@
 FROM ubuntu:20.04
+LABEL org.opencontainers.image.source https://github.com/konn/computational-algebra
 
 ENV PATH /root/.local/bin:$PATH
 ENV LD_LIBRARY_PATH $MPI/lib:$LD_LIBRARY_PATH
