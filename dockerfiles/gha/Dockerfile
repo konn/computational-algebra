@@ -16,8 +16,8 @@ RUN echo "deb http://apt.llvm.org/focal llvm-toolchain-focal-9 main" >> /etc/apt
 RUN apt-get update -y -qq
 RUN apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev clang-9 llvm-9 llvm-9-dev libllvm9
 
-# Sets up Stack
-RUN wget -qO- https://get.haskellstack.org/ | sh
+# Sets up curl
+RUN apt-get install -y -qq curl
 
 # Althoug contradictory to GitHub documents, we need to add new
 # users and call USER to get permission just right.
