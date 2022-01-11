@@ -69,6 +69,6 @@ test-suite halg-partial-fraction-test
     , halg-factor
     , halg-partial-fraction
     , tasty
-    , tasty-QuickCheck
     , tasty-hunit
+    , tasty-quickcheck
   default-language: Haskell2010
