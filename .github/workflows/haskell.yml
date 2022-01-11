@@ -1,9 +1,10 @@
 on: [push, pull_request]
 name: build
 
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ghcr.io/konn/computational-algebra/gha:latest
     strategy:
       matrix:
         ghc:
@@ -15,16 +16,6 @@ jobs:
       STACK_YAML: stack-${{matrix.ghc}}.yaml
     steps:
     - uses: actions/checkout@v2
-    - name: Install dependencies (apt)
-      run: |
-        sudo apt-get update -y -qq && sudo apt-get install -y -qq wget
-        wget ftp://jim.mathematik.uni-kl.de/repo/extra/gpg && sudo apt-key add gpg && rm gpg
-        echo 'Dir::Bin::Methods::ftp "ftp";' | sudo tee -a /etc/apt/apt.conf.d/99local-ftp
-        sudo touch /etc/apt/sources.list.d/singular.list
-        echo "deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu20 focal main" | sudo tee -a /etc/apt/sources.list.d/singular.list
-        echo "deb http://apt.llvm.org/focal llvm-toolchain-focal-9 main" | sudo tee -a /etc/apt/sources.list.d/llvm.list
-        sudo apt-get update -y -qq
-        sudo apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev clang-9 llvm-9 llvm-9-dev libllvm9
 
     - name: cache ~/.stack
       uses: actions/cache@v2.1.6
@@ -82,7 +73,7 @@ jobs:
   test:
     needs:
     - build
-    runs-on: ubuntu-latest
+    runs-on: ghcr.io/konn/computational-algebra/gha:latest
     strategy:
       matrix:
         ghc:
@@ -94,16 +85,6 @@ jobs:
       STACK_YAML: stack-${{matrix.ghc}}.yaml
     steps:
     - uses: actions/checkout@v2
-    - name: Install dependencies (apt)
-      run: |
-        sudo apt-get update -y -qq && sudo apt-get install -y -qq wget
-        wget ftp://jim.mathematik.uni-kl.de/repo/extra/gpg && sudo apt-key add gpg && rm gpg
-        echo 'Dir::Bin::Methods::ftp "ftp";' | sudo tee -a /etc/apt/apt.conf.d/99local-ftp
-        sudo touch /etc/apt/sources.list.d/singular.list
-        echo "deb ftp://jim.mathematik.uni-kl.de/repo/ubuntu20 focal main" | sudo tee -a /etc/apt/sources.list.d/singular.list
-        echo "deb http://apt.llvm.org/focal llvm-toolchain-focal-9 main" | sudo tee -a /etc/apt/sources.list.d/llvm.list
-        sudo apt-get update -y -qq
-        sudo apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev clang-9 llvm-9 llvm-9-dev libllvm9
 
     - name: Download Test artifacts
       uses: actions/download-artifact@v2
@@ -129,7 +110,7 @@ jobs:
 
   document:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ghcr.io/konn/computational-algebra/gha:latest
     name: Deploy Document
     strategy:
       matrix:
