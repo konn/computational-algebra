@@ -18,10 +18,9 @@ jobs:
       STACK_YAML: stack-${{matrix.ghc}}.yaml
     steps:
     - uses: actions/checkout@v2
-    - name: Whoami
+    - name: Corrects permission
       run: |
-        echo "Whoami: ${HOME} $(id -un):$(id -gn)"
-        ls -lav /github/home
+        chown -R "$(id -un):$(id -gn)" "${HOME}"
 
     - name: cache ~/.stack
       uses: actions/cache@v2.1.6
