@@ -17,8 +17,14 @@ RUN apt-get update -y -qq
 RUN apt-get install -y -qq singular41 libgmp3-dev libgsl0-dev liblapack-dev clang-9 llvm-9 llvm-9-dev libllvm9
 
 # Sets up Stack
-RUN mkdir -p /github/home
-ENV HOME "/github/home"
-ENV TAR_OPTIONS --no-same-owner
 RUN wget -qO- https://get.haskellstack.org/ | sh
+
+# Althoug contradictory to GitHub documents, we need to add new
+# users and call USER to get permission just right.
+RUN addgroup --system --gid 121 github \
+    && adduser --system --gid 121 --home /github/home --uid 1001 runner
+
+USER runner:github
+
+ENV TAR_OPTIONS --no-same-owner
 ENV PATH "/github/home/.local/bin:/usr/local/bin:${PATH}"
