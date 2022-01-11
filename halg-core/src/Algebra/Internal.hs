@@ -157,5 +157,7 @@ pattern Flipped xs = Flipped.Flipped xs
 sNatToInt :: SNat n -> Int
 sNatToInt = fromIntegral . toNatural
 
+#if !MIN_VERSION_hashable(1,4,0)
 instance Hashable a => Hashable (Seq.Seq a) where
   hashWithSalt d = hashWithSalt d . F.toList
+#endif
