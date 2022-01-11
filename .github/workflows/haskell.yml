@@ -20,7 +20,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Whoami
       run: |
-        echo "Whoami: $(id -un):$(id -gn)"
+        echo "Whoami: ${HOME} $(id -un):$(id -gn)"
+        ls -lav /github/home
 
     - name: cache ~/.stack
       uses: actions/cache@v2.1.6
