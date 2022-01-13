@@ -1,0 +1,11 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: local
+    hooks:
+    - id: generate-build-workflow
+      name: Generates GitHub Workflow from Dhall
+      language: system
+      files: '\.github/workflows/haskell\.dhall$'
+      entry: |
+        ./scripts/dhall-to-yaml.sh
