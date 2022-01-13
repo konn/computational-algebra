@@ -94,4 +94,4 @@ jobs:
         - 'false'
 name: Build
 'on':
-- "pull-request"
+- pull_request: {}

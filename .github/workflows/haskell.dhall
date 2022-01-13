@@ -34,7 +34,7 @@ let local-stack-cache
       , path = "**/.stack-work"
       }
 
-in  { on = [ "pull-request" ]
+in  { on = [ GHA.On::{pull_request = Some GHA.PullRequest::{=}} ]
     , name = "Build"
     , jobs.build
       =
