@@ -9,3 +9,9 @@ repos:
       files: '\.github/workflows/hello\.dhall$'
       entry: |
         ./scripts/dhall-to-yaml.sh
+    - id: generate-build-workflow (lib.dhall)
+      name: Generates GitHub Workflow from Dhall
+      language: system
+      files: '\.github/workflows/lib\.dhall$'
+      entry: |
+        ./scripts/dhall-to-yaml.sh .github/workflows/hello.dhall
