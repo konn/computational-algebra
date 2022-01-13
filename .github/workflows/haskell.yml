@@ -55,7 +55,7 @@ jobs:
         - ghc: '9.2.1'
           isHead: true
         isHead:
-        - 'false'
+        - false
   test:
     container: "ghcr.io/konn/computational-algebra/gha:0.7"
     "continue-on-error": "${{matrix.isHead}}"
@@ -91,7 +91,7 @@ jobs:
         - ghc: '9.2.1'
           isHead: true
         isHead:
-        - 'false'
+        - false
 name: Build
 'on':
 - pull_request

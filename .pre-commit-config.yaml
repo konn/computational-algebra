@@ -6,6 +6,6 @@ repos:
     - id: generate-build-workflow
       name: Generates GitHub Workflow from Dhall
       language: system
-      files: '\.github/workflows/haskell\.dhall$'
+      files: '\.github/workflows/hello\.dhall$'
       entry: |
         ./scripts/dhall-to-yaml.sh
