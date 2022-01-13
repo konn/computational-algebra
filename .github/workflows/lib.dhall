@@ -88,7 +88,7 @@ let makeGhcHeader =
                       (\(x : GHCVersion.Type) -> Data/Bool.not x.allow-failure)
                       versions
                   )
-            , isHead = [ "false" ]
+            , isHead = [ False ]
             , include =
                 Data/List.map
                   GHCVersion.Type
