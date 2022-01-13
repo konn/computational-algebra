@@ -26,7 +26,7 @@ let hashFiles =
       \(files : List Text) ->
         let args = T.concatMapSep "," Text (\(fp : Text) -> "\"${fp}\"") files
 
-        in  "\${{ hashFiles(${args}) }}"
+        in "\${{ hashFiles(${args}) }}"
 
 let cache-components =
       \(cfg : CacheSetup) ->

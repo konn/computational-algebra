@@ -12,16 +12,16 @@ jobs:
     - name: Cache ~/.stack
       uses: "actions/cache@v2"
       with:
-        key: "${{runner.os}}-build-global-stack-${{matrix.ghc}}-hashFiles(\"${{env.STACK_YAML}}\",\"**/package.yaml\",\"**/*.cabal\")"
+        key: "${{runner.os}}-build-global-stack-${{matrix.ghc}}-${{ hashFiles(\"${{env.STACK_YAML}}\",\"**/package.yaml\",\"**/*.cabal\") }}"
         path: ~/.stack
         "restore-keys": "${{runner.os}}-build-global-stack-${{matrix.ghc}}-"
     - name: "Cache **/.stack-work"
       uses: "actions/cache@v2"
       with:
-        key: "${{runner.os}}-build-local-stack-${{matrix.ghc}}-hashFiles(\"${{env.STACK_YAML}}\",\"**/package.yaml\",\"**/*.cabal\")-hashFiles(\"**/*.hs\",\"**/*.lhs\")"
+        key: "${{runner.os}}-build-local-stack-${{matrix.ghc}}-${{ hashFiles(\"${{env.STACK_YAML}}\",\"**/package.yaml\",\"**/*.cabal\") }}-${{ hashFiles(\"**/*.hs\",\"**/*.lhs\") }}"
         path: "**/.stack-work"
         "restore-keys": |
-          ${{runner.os}}-build-local-stack-${{matrix.ghc}}-hashFiles("${{env.STACK_YAML}}","**/package.yaml","**/*.cabal")-
+          ${{runner.os}}-build-local-stack-${{matrix.ghc}}-${{ hashFiles("${{env.STACK_YAML}}","**/package.yaml","**/*.cabal") }}-
           ${{runner.os}}-build-local-stack-${{matrix.ghc}}-
     - name: Build
       run: "stack build --test --no-run-tests --haddock --no-haddock-deps"

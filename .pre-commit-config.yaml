@@ -14,4 +14,4 @@ repos:
       language: system
       files: '\.github/workflows/lib\.dhall$'
       entry: |
-        ./scripts/dhall-to-yaml.sh .github/workflows/hello.dhall
+        ./scripts/dhall-to-yaml.sh .github/workflows/haskell.dhall
