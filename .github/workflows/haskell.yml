@@ -59,6 +59,52 @@ jobs:
           isHead: true
         isHead:
         - false
+  document:
+    container: "ubuntu:20.04"
+    name: Build Document
+    needs:
+    - build
+    "runs-on": "ubuntu-20.04"
+    steps:
+    - uses: "actions/checkout@v2"
+      with:
+        ref: "gh-pages-devel"
+    - name: Cache ~/.stack
+      uses: "actions/cache@v2"
+      with:
+        key: "document-global-stack-${{ hashFiles(package.yaml,'**/*.cabal',stack.yaml) }}"
+        path: ~/.stack
+        "restore-keys": "document-global-stack-"
+    - name: "Cache **/.stack-work"
+      uses: "actions/cache@v2"
+      with:
+        key: "document-local-stack-${{ hashFiles(package.yaml,'**/*.cabal',stack.yaml) }}-${{ hashFiles('**/*.hs') }}"
+        path: "**/.stack-work"
+        "restore-keys": |
+          document-local-stack-${{ hashFiles(package.yaml,'**/*.cabal',stack.yaml) }}-
+          document-local-stack-
+    - uses: "haskell/actions/setup@v1"
+      with:
+        "enable-stack": 'true'
+        "stack-version": '2.7.1'
+    - name: Build static site generator
+      run: "stack build --fast"
+    - id: "download-docs"
+      uses: "actions/download-artifact@v2"
+      with:
+        name: "doc-artifacts-${{ matrix.ghc }}"
+        path: docs/
+    - name: Generate site
+      run: "stack exec -- site build"
+    - name: Deploy GitHub Pages
+      uses: "peaceiris/actions-gh-pages@v3"
+      with:
+        github_token: "${{ secrets.GITHUB_TOKEN }}"
+        publish_dir: ./_site
+    strategy:
+      matrix:
+        ghc:
+        - '8.10.7'
   test:
     container: "ghcr.io/konn/computational-algebra/gha:0.7"
     "continue-on-error": "${{matrix.isHead}}"

@@ -103,4 +103,53 @@ in  { on = [ "pull_request" ]
                   }
               ]
             }
+    , jobs.document
+      = GHA.Job::{
+      , container = Some "ubuntu:20.04"
+      , runs-on = GHA.types.RunsOn.`ubuntu-20.04`
+      , strategy = Some GHA.Strategy::{ matrix = toMap { ghc = [ "8.10.7" ] } }
+      , needs = Some [ "build" ]
+      , name = Some "Build Document"
+      , steps =
+        [ GHA.steps.actions/checkout
+          with `with` = Some (toMap { ref = "gh-pages-devel" })
+        , lib.action/cache
+            { base-key = "document-global-stack"
+            , path = "~/.stack"
+            , key-files = [ [ "package.yaml", "'**/*.cabal'", "stack.yaml" ] ]
+            }
+        , lib.action/cache
+            { base-key = "document-local-stack"
+            , path = "**/.stack-work"
+            , key-files =
+              [ [ "package.yaml", "'**/*.cabal'", "stack.yaml" ]
+              , [ "'**/*.hs'" ]
+              ]
+            }
+        , GHA.steps.actions/setup-haskell
+            GHA.actions/HaskellSetup::{
+            , enable-stack = Some True
+            , stack-version = Some "2.7.1"
+            }
+        , lib.action/run
+            { name = "Build static site generator", run = "stack build --fast" }
+        , GHA.Step::{
+          , uses = Some "actions/download-artifact@v2"
+          , id = Some "download-docs"
+          , `with` = Some (toMap docs-artifact)
+          }
+        , lib.action/run
+            { name = "Generate site", run = "stack exec -- site build" }
+        , GHA.Step::{
+          , name = Some "Deploy GitHub Pages"
+          , uses = Some "peaceiris/actions-gh-pages@v3"
+          , `with` = Some
+              ( toMap
+                  { github_token = "\${{ secrets.GITHUB_TOKEN }}"
+                  , publish_dir = "./_site"
+                  }
+              )
+          }
+        ]
+      }
     }
