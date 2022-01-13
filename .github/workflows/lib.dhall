@@ -24,7 +24,7 @@ let CacheSetup = { base-key : Text, key-files : List (List Text), path : Text }
 
 let hashFiles =
       \(files : List Text) ->
-        let args = T.concatMapSep "," Text (\(fp : Text) -> "\"${fp}\"") files
+        let args = T.concatSep "," files
 
         in "\${{ hashFiles(${args}) }}"
 

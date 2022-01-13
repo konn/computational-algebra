@@ -20,7 +20,9 @@ let global-stack-cache
     : lib.CacheSetup
     = { base-key = "\${{runner.os}}-build-global-stack-\${{matrix.ghc}}"
       , key-files =
-        [ [ "**/package.yaml", "**/*.cabal" ], ["format('{0}', env.STACK_YAML)"] ]
+        [ [ "'**/package.yaml'", "'**/*.cabal'" ]
+        , [ "format('{0}', env.STACK_YAML)" ]
+        ]
       , path = "~/.stack"
       }
 
@@ -28,9 +30,9 @@ let local-stack-cache
     : lib.CacheSetup
     = { base-key = "\${{runner.os}}-build-local-stack-\${{matrix.ghc}}"
       , key-files =
-        [ [ "**/package.yaml", "**/*.cabal" ]
-        , ["format('{0}', env.STACK_YAML)"]
-        , [ "**/*.hs", "**/*.lhs" ]
+        [ [ "'**/package.yaml'", "'**/*.cabal'" ]
+        , [ "format('{0}', env.STACK_YAML)" ]
+        , [ "'**/*.hs'", "'**/*.lhs'" ]
         ]
       , path = "**/.stack-work"
       }
