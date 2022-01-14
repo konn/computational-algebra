@@ -43,10 +43,10 @@ jobs:
       with:
         name: "test-artifacts-${{ matrix.ghc }}"
         path: "test-bins/"
-    - name: "Upload doc-artifacts-${{ matrix.ghc }}"
+    - name: "Upload doc-artifacts-${{matrix.ghc}}"
       uses: "actions/upload-artifact@v2.2.3"
       with:
-        name: "doc-artifacts-${{ matrix.ghc }}"
+        name: "doc-artifacts-${{matrix.ghc}}"
         path: docs/
     strategy:
       "fail-fast": false
@@ -97,4 +97,7 @@ jobs:
         - false
 name: Build
 'on':
-- pull_request
+  pull_request: {}
+  push:
+    branches:
+    - master

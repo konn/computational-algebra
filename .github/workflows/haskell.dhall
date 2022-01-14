@@ -13,9 +13,6 @@ let ghcHeaders = lib.makeGhcHeader versions
 let test-bins-artifact =
       { name = "test-artifacts-\${{ matrix.ghc }}", path = "test-bins/" }
 
-let docs-artifact =
-      { name = "doc-artifacts-\${{ matrix.ghc }}", path = "docs/" }
-
 let global-stack-cache
     : lib.CacheSetup
     = { base-key = "\${{runner.os}}-build-global-stack-\${{matrix.ghc}}"
@@ -37,7 +34,12 @@ let local-stack-cache
       , path = "**/.stack-work"
       }
 
-in  { on = [ "pull_request" ]
+let docs-artifact = lib.docs-artifact-for "\${{matrix.ghc}}"
+
+in  { on =
+      { pull_request = {=}
+      , push = toMap { branches = [ "master" ] }
+      }
     , name = "Build"
     , jobs.build
       =

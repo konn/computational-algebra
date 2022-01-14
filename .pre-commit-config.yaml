@@ -4,14 +4,15 @@ repos:
 -   repo: local
     hooks:
     - id: generate-build-workflow
-      name: Generates GitHub Workflow from Dhall
+      name: Generates GitHub Workflow from Dhall (individual)
       language: system
-      files: '\.github/workflows/haskell\.dhall$'
+      files: '\.github/workflows/(pages|haskell)\.dhall$'
       entry: |
         ./scripts/dhall-to-yaml.sh
-    - id: generate-build-workflow (lib.dhall)
-      name: Generates GitHub Workflow from Dhall
+    - id: generate-build-workflow
+      name: Generates GitHub Workflow from Dhall (lib.dhall)
       language: system
       files: '\.github/workflows/lib\.dhall$'
       entry: |
         ./scripts/dhall-to-yaml.sh .github/workflows/haskell.dhall
+        ./scripts/dhall-to-yaml.sh .github/workflows/pages.dhall

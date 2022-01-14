@@ -24,9 +24,7 @@ let CacheSetup = { base-key : Text, key-files : List (List Text), path : Text }
 
 let hashFiles =
       \(files : List Text) ->
-        let args = T.concatSep "," files
-
-        in "\${{ hashFiles(${args}) }}"
+        let args = T.concatSep "," files in "\${{ hashFiles(${args}) }}"
 
 let cache-components =
       \(cfg : CacheSetup) ->
@@ -118,6 +116,9 @@ let action/run =
       \(cfg : { name : Text, run : Text }) ->
         GHA.Step::{ name = Some cfg.name, run = Some cfg.run }
 
+let docs-artifact-for =
+      \(ver : Text) -> { name = "doc-artifacts-${ver}", path = "docs/" }
+
 in  { GHA
     , GHCVersion
     , makeGhcHeader
@@ -127,4 +128,5 @@ in  { GHA
     , action/cache
     , action/upload
     , action/run
+    , docs-artifact-for
     }
