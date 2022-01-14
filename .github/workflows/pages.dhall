@@ -17,13 +17,19 @@ let local-stack-cache =
         ]
       }
 
-let download-id = "download-docs"
-
 let docGhcVersion = "8.10.7"
 
-in  GHA.Workflow::{
-    , name = "Update Documentation"
-    , on = GHA.On::{ push = Some GHA.Push::{ branches = Some [ "master" ] } }
+let docs-artifact = lib.docs-artifact-for docGhcVersion
+
+let docs-zip = "docs.zip"
+
+in  { name = "Update Documentation"
+    , on.workflow_run
+      =
+      { workflows = [ "Build" ]
+      , types = [ "completed" ]
+      , branches = [ "master" ]
+      }
     , jobs = toMap
         { document = GHA.Job::{
           , runs-on = GHA.types.RunsOn.`ubuntu-20.04`
@@ -43,10 +49,34 @@ in  GHA.Workflow::{
                 , run = "stack build --fast"
                 }
             , GHA.Step::{
-              , uses = Some "actions/download-artifact@v2"
-              , id = Some download-id
-              , `with` = Some (toMap (lib.docs-artifact-for docGhcVersion))
+              , name = Some "download artifacts"
+              , uses = Some "actions/github-script@v5"
+              , `with` = Some
+                  ( toMap
+                      { script =
+                          ''
+                          let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            run_id: context.payload.workflow_run.id,
+                          });
+                          let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
+                            return artifact.name == "${docs-artifact.name}"
+                          })[0];
+                          let download = await github.rest.actions.downloadArtifact({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            artifact_id: matchArtifact.id,
+                            archive_format: 'zip',
+                          });
+                          let fs = require('fs');
+                          fs.writeFileSync(`''${process.env.GITHUB_WORKSPACE}/${docs-zip}`, Buffer.from(download.data));
+                          ''
+                      }
+                  )
               }
+            , lib.action/run
+                { name = "Extract artifacts", run = "unzip ${docs-zip}" }
             , lib.action/run
                 { name = "Generate static site"
                 , run = "stack exec -- site build"
