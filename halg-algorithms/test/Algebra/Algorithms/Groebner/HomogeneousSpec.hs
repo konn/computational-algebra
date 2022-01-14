@@ -42,15 +42,15 @@ test_calcHomogeneousGroebnerBasis =
   testGroup
     "calcHomogeneousGroebnerBasis"
     [ testProperty "passes S-test" $
-        withMaxSuccess 25 $
+        withMaxSuccess 5 $
           mapSize (const 4) $
             checkForTypeNat [2 .. 3] $ passesSTestWith homogenise unsafeCalcHomogeneousGroebnerBasis
     , testProperty "includes the original ideal" $
-        withMaxSuccess 25 $
+        withMaxSuccess 5 $
           mapSize (const 4) $
             checkForTypeNat [2 .. 3] $ groebnerDivsOrigWith homogenise unsafeCalcHomogeneousGroebnerBasis
     , testProperty "is included in the orignal ideal" $
-        withMaxSuccess 25 $
+        withMaxSuccess 5 $
           mapSize (const 4) $
             checkForTypeNat [2 .. 3] $ groebnerIncludedWith homogenise unsafeCalcHomogeneousGroebnerBasis
     ]
@@ -60,18 +60,18 @@ test_calcHomogeneousGroebnerBasisHilbert =
   testGroup
     "calcHomogeneousGroebnerBasisHilbert"
     [ testProperty "passes S-test" $
-        withMaxSuccess 25 $
+        withMaxSuccess 5 $
           mapSize (const 4) $
             checkForTypeNat [2 .. 3] $
               passesSTestWith
                 (homogenise . changeOrder Lex)
                 calcHomogeneousGroebnerBasisHilbert
     , testProperty "includes the original ideal" $
-        withMaxSuccess 25 $
+        withMaxSuccess 5 $
           mapSize (const 4) $
             checkForTypeNat [2 .. 3] $ groebnerDivsOrigWith (homogenise . changeOrder Lex) calcHomogeneousGroebnerBasisHilbert
     , testProperty "is included in the orignal ideal" $
-        withMaxSuccess 25 $
+        withMaxSuccess 5 $
           mapSize (const 4) $
             checkForTypeNat [2 .. 3] $ groebnerIncludedWith (homogenise . changeOrder Lex) calcHomogeneousGroebnerBasisHilbert
     ]
