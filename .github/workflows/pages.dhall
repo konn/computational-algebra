@@ -5,14 +5,16 @@ let GHA = lib.GHA
 let global-stack-cache =
       { base-key = "document-global-stack"
       , path = "~/.stack"
-      , key-files = [ [ "package.yaml", "'**/*.cabal'", "stack.yaml" ] ]
+      , key-files = [ [ "'package.yaml'", "'**/*.cabal'", "'stack.yaml'" ] ]
       }
 
 let local-stack-cache =
       { base-key = "document-local-stack"
       , path = "**/.stack-work"
       , key-files =
-        [ [ "package.yaml", "'**/*.cabal'", "stack.yaml" ], [ "'**/*.hs'" ] ]
+        [ [ "'package.yaml'", "'**/*.cabal'", "'stack.yaml'" ]
+        , [ "'**/*.hs'" ]
+        ]
       }
 
 let download-id = "download-docs"

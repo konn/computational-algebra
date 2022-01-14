@@ -10,16 +10,16 @@ jobs:
     - name: Cache ~/.stack
       uses: "actions/cache@v2"
       with:
-        key: "document-global-stack-${{ hashFiles(package.yaml,'**/*.cabal',stack.yaml) }}"
+        key: "document-global-stack-${{ hashFiles('package.yaml','**/*.cabal','stack.yaml') }}"
         path: ~/.stack
         "restore-keys": "document-global-stack-"
     - name: "Cache **/.stack-work"
       uses: "actions/cache@v2"
       with:
-        key: "document-local-stack-${{ hashFiles(package.yaml,'**/*.cabal',stack.yaml) }}-${{ hashFiles('**/*.hs') }}"
+        key: "document-local-stack-${{ hashFiles('package.yaml','**/*.cabal','stack.yaml') }}-${{ hashFiles('**/*.hs') }}"
         path: "**/.stack-work"
         "restore-keys": |
-          document-local-stack-${{ hashFiles(package.yaml,'**/*.cabal',stack.yaml) }}-
+          document-local-stack-${{ hashFiles('package.yaml','**/*.cabal','stack.yaml') }}-
           document-local-stack-
     - uses: "haskell/actions/setup@v1"
       with:
