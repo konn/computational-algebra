@@ -1,0 +1,29 @@
+resolver: nightly-2022-01-06
+compiler: ghc-9.0.2
+compiler-check: match-exact
+
+build:
+  haddock-deps: false
+
+flags: {}
+packages:
+- 'computational-algebra'
+- 'algebraic-prelude'
+- 'halg-algebraic'
+- 'halg-algorithms'
+- 'halg-bridge-singular'
+- 'halg-core'
+- 'halg-core-test'
+- 'halg-factor'
+- 'halg-galois-fields'
+- 'halg-heaps'
+- 'halg-matrices'
+- 'halg-partial-fraction'
+- 'halg-polyn-parser'
+- 'halg-polynomials'
+
+extra-deps:
+- algebra-4.3.1
+- control-monad-loop-0.1
+- repa-3.4.1.4@rev:8
+- unamb-0.2.7

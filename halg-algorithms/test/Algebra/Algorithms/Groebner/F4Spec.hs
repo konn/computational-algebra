@@ -32,6 +32,7 @@ import qualified Data.Sized as SV
 import Numeric.Field.Fraction (Fraction)
 import Test.QuickCheck
 import Test.Tasty
+import Test.Tasty.ExpectedFailure (ignoreTestBecause)
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck
 import Utils
@@ -41,21 +42,22 @@ asGenListOf = const
 
 test_f4 :: TestTree
 test_f4 =
-  testGroup
-    "f4"
-    [ testProperty "passes S-test" $
-        withMaxSuccess 5 $
-          mapSize (const 3) $
-            checkForTypeNat [2 .. 3] $ passesSTest f4
-    , testProperty "includes the original ideal" $
-        withMaxSuccess 5 $
-          mapSize (const 3) $
-            checkForTypeNat [2 .. 3] $ groebnerDivsOrig f4
-    , testProperty "is included in the orignal ideal" $
-        withMaxSuccess 5 $
-          mapSize (const 3) $
-            checkForTypeNat [2 .. 3] $ groebnerIncluded f4
-    ]
+  ignoreTestBecause "Tests for F_4 takes much time" $
+    testGroup
+      "f4"
+      [ testProperty "passes S-test" $
+          withMaxSuccess 5 $
+            mapSize (const 3) $
+              checkForTypeNat [2 .. 3] $ passesSTest f4
+      , testProperty "includes the original ideal" $
+          withMaxSuccess 5 $
+            mapSize (const 3) $
+              checkForTypeNat [2 .. 3] $ groebnerDivsOrig f4
+      , testProperty "is included in the orignal ideal" $
+          withMaxSuccess 5 $
+            mapSize (const 3) $
+              checkForTypeNat [2 .. 3] $ groebnerIncluded f4
+      ]
 
 passesSTest ::
   (Ideal (Polynomial Rational n) -> [Polynomial Rational n]) ->

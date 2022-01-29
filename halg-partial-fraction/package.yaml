@@ -60,7 +60,7 @@ tests:
     dependencies:
     - halg-partial-fraction
     - tasty
-    - tasty-QuickCheck
+    - tasty-quickcheck
     - tasty-hunit
     - halg-core-test
     - halg-factor

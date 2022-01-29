@@ -36,7 +36,6 @@ import qualified Data.Foldable as F
 import Data.Kind (Type)
 import Data.Proxy (KProxy (..), Proxy (..), asProxyTypeOf)
 import qualified Data.Sequence as Seq
-
 #if MIN_VERSION_singletons(3,0,0)
 import Data.Singletons as Algebra.Internal
   ( Sing,
@@ -157,5 +156,7 @@ pattern Flipped xs = Flipped.Flipped xs
 sNatToInt :: SNat n -> Int
 sNatToInt = fromIntegral . toNatural
 
+#if !MIN_VERSION_hashable(1,3,4)
 instance Hashable a => Hashable (Seq.Seq a) where
   hashWithSalt d = hashWithSalt d . F.toList
+#endif
