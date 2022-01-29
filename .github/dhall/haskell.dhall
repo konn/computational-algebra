@@ -4,7 +4,7 @@ let GHA = lib.GHA
 
 let ghc = lib.ghc
 
-let versions = [ ghc "8.10.7", ghc "9.0.2" ]
+let versions = [ ghc "8.10.7", ghc "9.0.2", lib.ghcHead "9.2.1" ]
 
 let ghcHeaders = lib.makeGhcHeader versions
 
@@ -34,7 +34,11 @@ let local-stack-cache
 
 let docs-artifact = lib.docs-artifact-for "\${{matrix.ghc}}"
 
-in  { on = { pull_request = {=}, push = toMap { branches = [ "master" ] } }
+in  { on =
+      { pull_request = {=}
+      , push = toMap { branches = [ "master" ] }
+      , schedule = [ { cron = "00 13 * * *" } ]
+      }
     , name = "Build"
     , jobs.build
       =

@@ -12,9 +12,10 @@ else
 fi
 
 YAML_NAME="${1/.dhall/.yml}"
+YAML_PATH=".github/workflows/$(basename "${YAML_NAME}")"
 NEW="$("${DHALL_TO_YAML}" --file "$1" --generated-comment)"
-if diff <(echo "${NEW}") <(cat "${YAML_NAME}") >/dev/null ; then
+if diff <(echo "${NEW}") <(cat "${YAML_PATH}") >/dev/null ; then
   echo "OK"
 else
-  echo "${NEW}" >"${YAML_NAME}"
+  echo "${NEW}" >"${YAML_PATH}"
 fi

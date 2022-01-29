@@ -54,7 +54,9 @@ jobs:
         ghc:
         - '8.10.7'
         - '9.0.2'
-        include: []
+        include:
+        - ghc: '9.2.1'
+          isHead: true
         isHead:
         - false
   test:
@@ -88,7 +90,9 @@ jobs:
         ghc:
         - '8.10.7'
         - '9.0.2'
-        include: []
+        include:
+        - ghc: '9.2.1'
+          isHead: true
         isHead:
         - false
 name: Build
@@ -97,3 +101,5 @@ name: Build
   push:
     branches:
     - master
+  schedule:
+  - cron: "00 13 * * *"

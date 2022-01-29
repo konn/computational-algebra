@@ -18,20 +18,6 @@ packages:
       sha256: e0bb7221ac929e5fe3722f4838551e962589a8fed18199d9791385864855f466
   original:
     hackage: control-monad-loop-0.1
-- completed:
-    hackage: repa-3.4.1.4@sha256:df02acc0f65be7ff67cf71058841644425337c5ebd44c95b1ac1564a1e3c4858,3323
-    pantry-tree:
-      size: 2965
-      sha256: 2addb474c6f496d26c4335ca4c6a333c746d7f90957d13182c13a1483c6db7e7
-  original:
-    hackage: repa-3.4.1.4
-- completed:
-    hackage: unamb-0.2.7@sha256:ce5db0575bca8ca04c9e9dce3ba75b6f9e5ceea834c6ba4fae45aca6fa963334,2385
-    pantry-tree:
-      size: 217
-      sha256: c3c4ac7408c2999b6779714459d2433ff2495f90161d7c3ca349ca3aa6386be8
-  original:
-    hackage: unamb-0.2.7
 snapshots:
 - completed:
     size: 586110

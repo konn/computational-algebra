@@ -1,4 +1,5 @@
 resolver: nightly-2022-01-27
+compiler: ghc-9.2.1
 compiler-check: match-exact
 
 build:
@@ -21,7 +22,15 @@ packages:
 - 'halg-polyn-parser'
 - 'halg-polynomials'
 
+allow-newer: true
 extra-deps:
 - algebra-4.3.1
 - control-monad-loop-0.1
 - unamb-0.2.7
+- subcategories-0.2.0.0
+- base-compat-0.12.1
+- base-compat-batteries-0.12.1
+- th-desugar-1.13
+- lens-5.1
+- singletons-th-3.1
+- singletons-base-3.1
