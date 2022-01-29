@@ -37,7 +37,7 @@ let docs-artifact = lib.docs-artifact-for "\${{matrix.ghc}}"
 in  { on =
       { pull_request = {=}
       , push = toMap { branches = [ "master" ] }
-      , schedule = [ { cron = "00 00 * * *" } ]
+      , schedule = [ { cron = "00 13 * * *" } ]
       }
     , name = "Build"
     , jobs.build
