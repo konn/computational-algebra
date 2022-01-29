@@ -34,7 +34,11 @@ let local-stack-cache
 
 let docs-artifact = lib.docs-artifact-for "\${{matrix.ghc}}"
 
-in  { on = { pull_request = {=}, push = toMap { branches = [ "master" ] } }
+in  { on =
+      { pull_request = {=}
+      , push = toMap { branches = [ "master" ] }
+      , schedule = [ { cron = "00 00 * * *" } ]
+      }
     , name = "Build"
     , jobs.build
       =
