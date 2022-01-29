@@ -1,10 +1,9 @@
-resolver: lts-18.21
+resolver: nightly-2022-01-06
+compiler: ghc-9.2.1
+compiler-check: match-exact
 
 build:
   haddock-deps: false
-
-ghc-options:
-  $everything: -haddock
 
 flags: {}
 packages:
@@ -23,8 +22,7 @@ packages:
 - 'halg-polyn-parser'
 - 'halg-polynomials'
 
-allow-newer: true
-
 extra-deps:
 - algebra-4.3.1
 - control-monad-loop-0.1
+- unamb-0.2.7

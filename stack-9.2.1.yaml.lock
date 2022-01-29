@@ -18,9 +18,23 @@ packages:
       sha256: e0bb7221ac929e5fe3722f4838551e962589a8fed18199d9791385864855f466
   original:
     hackage: control-monad-loop-0.1
+- completed:
+    hackage: repa-3.4.1.4@sha256:5a99bde69fe96a18d70aae23f47c8f719b1134558dca3ee5a7c15423b68a132e,3323
+    pantry-tree:
+      size: 2965
+      sha256: 060bec03e51bb6f40acc52c70f8e36804e18f80590b09dc8141352f1b14b03e7
+  original:
+    hackage: repa-3.4.1.4@rev:8
+- completed:
+    hackage: unamb-0.2.7@sha256:ce5db0575bca8ca04c9e9dce3ba75b6f9e5ceea834c6ba4fae45aca6fa963334,2385
+    pantry-tree:
+      size: 217
+      sha256: c3c4ac7408c2999b6779714459d2433ff2495f90161d7c3ca349ca3aa6386be8
+  original:
+    hackage: unamb-0.2.7
 snapshots:
 - completed:
-    size: 586110
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/21.yaml
-    sha256: ce4fb8d44f3c6c6032060a02e0ebb1bd29937c9a70101c1517b92a87d9515160
-  original: lts-18.21
+    size: 623654
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/nightly/2022/1/6.yaml
+    sha256: efba441fbb0fff82c5be10ccda625e25b38f6673588ed5ddb8ef9239ec130d39
+  original: nightly-2022-01-06
