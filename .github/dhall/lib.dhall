@@ -11,8 +11,9 @@ let T =
       https://raw.githubusercontent.com/dhall-lang/dhall-lang/v21.1.0/Prelude/Text/package.dhall
 
 let GHCVersion =
-      { Type = { version : Text, allow-failure : Bool }
+      { Type = { version : Text, allow-failure : Bool, generate-page : Bool }
       , default.allow-failure = False
+      , default.generate-page = False
       }
 
 let ghc = \(ver : Text) -> GHCVersion::{ version = ver }
@@ -119,6 +120,11 @@ let action/run =
 let docs-artifact-for =
       \(ver : Text) -> { name = "doc-artifacts-${ver}", path = "docs/" }
 
+let pages-artifact-for =
+      \(ver : Text) -> { name = "pages-artifacts-${ver}", path = "_site/" }
+
+let current-ghc = "\${{matrix.ghc}}"
+
 in  { GHA
     , GHCVersion
     , makeGhcHeader
@@ -129,4 +135,6 @@ in  { GHA
     , action/upload
     , action/run
     , docs-artifact-for
+    , pages-artifact-for
+    , current-ghc
     }

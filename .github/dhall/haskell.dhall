@@ -1,12 +1,26 @@
 let lib = ./lib.dhall
 
+let Data/List =
+      https://raw.githubusercontent.com/dhall-lang/dhall-lang/v21.1.0/Prelude/List/package.dhall
+
 let GHA = lib.GHA
 
 let ghc = lib.ghc
 
-let versions = [ ghc "8.10.7", ghc "9.0.2", lib.ghcHead "9.2.1" ]
+let versions =
+      [ (ghc "8.10.7")
+        with generate-page = True
+      , ghc "9.0.2"
+      , lib.ghcHead "9.2.1"
+      ]
 
 let ghcHeaders = lib.makeGhcHeader versions
+
+let docsGhcs =
+      Data/List.filter
+        lib.GHCVersion.Type
+        (\(ver : lib.GHCVersion.Type) -> ver.generate-page)
+        versions
 
 let test-bins-artifact =
       { name = "test-artifacts-\${{ matrix.ghc }}", path = "test-bins/" }
@@ -43,7 +57,7 @@ in  { on =
     , jobs.build
       =
             ghcHeaders
-        /\  { name = "Build \${{matrix.ghc}}"
+        /\  { name = "Build ${lib.current-ghc}"
             , steps =
               [ GHA.steps.actions/checkout
               , lib.action/cache global-stack-cache
@@ -78,7 +92,7 @@ in  { on =
       =
             ghcHeaders
         /\  { needs = [ "build" ]
-            , name = "Test \${{matrix.ghc}}"
+            , name = "Test ${lib.current-ghc}"
             , steps =
               [ GHA.steps.actions/checkout
               , GHA.Step::{
@@ -104,4 +118,64 @@ in  { on =
                   }
               ]
             }
+    , jobs.build-pages
+      =
+        let global-stack-cache =
+              { base-key = "document-global-stack"
+              , path = "~/.stack"
+              , key-files =
+                [ [ "'package.yaml'", "'**/*.cabal'", "'stack.yaml'" ] ]
+              }
+
+        let local-stack-cache =
+              { base-key = "document-local-stack"
+              , path = "**/.stack-work"
+              , key-files =
+                [ [ "'package.yaml'", "'**/*.cabal'", "'stack.yaml'" ]
+                , [ "'**/*.hs'" ]
+                ]
+              }
+
+        in      lib.makeGhcHeader docsGhcs
+            /\  { needs = [ "build" ]
+                , name = "Build GitHub Pages for ${lib.current-ghc}"
+                , steps =
+                  [ GHA.steps.actions/checkout
+                    with `with` = Some (toMap { ref = "gh-pages-devel" })
+                  , lib.action/cache global-stack-cache
+                  , lib.action/cache local-stack-cache
+                  , GHA.steps.actions/setup-haskell
+                      GHA.actions/HaskellSetup::{
+                      , enable-stack = Some True
+                      , stack-version = Some "2.7.3"
+                      , ghc-version = Some "8.10.7"
+                      }
+                  , lib.action/run
+                      { name = "Build static site generator"
+                      , run = "stack build --fast"
+                      }
+                  , GHA.Step::{
+                    , uses = Some "actions/download-artifact@v2"
+                    , id = Some "docs"
+                    , `with` = Some (toMap docs-artifact)
+                    }
+                  , lib.action/run
+                      { name = "Place document in correct place"
+                      , run =
+                          let dl-path =
+                                "\${{steps.test-bins.outputs.download-path}}"
+
+                          in  ''
+                              if [ "${dl-path}" != "$(pwd)/docs" ]; then
+                                cp -r ${dl-path} ./docs;
+                              fi
+                              ''
+                      }
+                  , lib.action/run
+                      { name = "Generate static site"
+                      , run = "stack exec -- site build"
+                      }
+                  , lib.action/upload (lib.pages-artifact-for lib.current-ghc)
+                  ]
+                }
     }
