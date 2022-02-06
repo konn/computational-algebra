@@ -1,18 +1,23 @@
 let GHA =
       https://raw.githubusercontent.com/regadas/github-actions-dhall/master/package.dhall
+        sha256:53da2310a2e009556455a73684b997c3bd53192637ac3c77562c30e3815f5f23
 
 let Data/List =
       https://raw.githubusercontent.com/dhall-lang/dhall-lang/v21.1.0/Prelude/List/package.dhall
+        sha256:11081c23436cb9c5fa60d53416e62845071990b43b3c48973cb2f19f5d5adbee
 
 let Data/Bool =
       https://raw.githubusercontent.com/dhall-lang/dhall-lang/v21.1.0/Prelude/Bool/package.dhall
+        sha256:7ee950e7c2142be5923f76d00263e536b71d96cb9c190d7743c1679501ddeb0a
 
 let T =
       https://raw.githubusercontent.com/dhall-lang/dhall-lang/v21.1.0/Prelude/Text/package.dhall
+        sha256:79b671a70ac459b799a53bbb8a383cc8b81b40421745c54bf0fb1143168cbd6f
 
 let GHCVersion =
-      { Type = { version : Text, allow-failure : Bool }
+      { Type = { version : Text, allow-failure : Bool, generate-page : Bool }
       , default.allow-failure = False
+      , default.generate-page = False
       }
 
 let ghc = \(ver : Text) -> GHCVersion::{ version = ver }
@@ -119,6 +124,11 @@ let action/run =
 let docs-artifact-for =
       \(ver : Text) -> { name = "doc-artifacts-${ver}", path = "docs/" }
 
+let pages-artifact-for =
+      \(ver : Text) -> { name = "pages-artifacts-${ver}", path = "_site/" }
+
+let current-ghc = "\${{matrix.ghc}}"
+
 in  { GHA
     , GHCVersion
     , makeGhcHeader
@@ -129,4 +139,6 @@ in  { GHA
     , action/upload
     , action/run
     , docs-artifact-for
+    , pages-artifact-for
+    , current-ghc
     }

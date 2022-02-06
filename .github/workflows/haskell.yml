@@ -59,6 +59,98 @@ jobs:
           isHead: true
         isHead:
         - false
+  "build-pages":
+    "continue-on-error": "${{matrix.isHead}}"
+    env: {}
+    name: "Build GitHub Pages for ${{matrix.ghc}}"
+    needs:
+    - build
+    - "build-site-generator"
+    "runs-on": "ubuntu-latest"
+    steps:
+    - uses: "actions/checkout@v2"
+      with:
+        ref: "gh-pages-devel"
+    - name: Cache _cache
+      uses: "actions/cache@v2"
+      with:
+        key: "${{runner.os}}-site-${{matrix.ghc}}-${{ hashFiles('index.md','stylesheets/**/*','templates/**/*','katex/**/*','javascripts/**/*','images/**/*') }}"
+        path: _cache
+        "restore-keys": "${{runner.os}}-site-${{matrix.ghc}}-"
+    - name: "Installs dependency (node)"
+      run: npm install jsdom
+    - id: docs
+      uses: "actions/download-artifact@v2"
+      with:
+        name: "doc-artifacts-${{matrix.ghc}}"
+        path: docs/
+    - name: Place document in correct place
+      run: |
+        if [ "${{steps.docs.outputs.download-path}}" != "$(pwd)/docs" ]; then
+          cp -r ${{steps.docs.outputs.download-path}} ./docs;
+        fi
+    - id: "site-bin"
+      name: Download site generator
+      uses: "actions/download-artifact@v2"
+      with:
+        name: "site-bin-artifact"
+        path: "site-bin"
+    - name: Locate bin
+      run: |
+        cp -r ${{steps.site-bin.outputs.download-path}}/site ./
+        chmod +x ./site
+    - name: Generate static site
+      run: ./site build
+    - name: "Upload pages-artifacts-${{matrix.ghc}}"
+      uses: "actions/upload-artifact@v2.2.3"
+      with:
+        name: "pages-artifacts-${{matrix.ghc}}"
+        path: _site/
+    strategy:
+      "fail-fast": false
+      matrix:
+        ghc:
+        - '8.10.7'
+        include: []
+        isHead:
+        - false
+  "build-site-generator":
+    name: Build Site Generator
+    "runs-on": "ubuntu-20.04"
+    steps:
+    - uses: "actions/checkout@v2"
+      with:
+        ref: "gh-pages-devel"
+    - name: Cache ~/.stack
+      uses: "actions/cache@v2"
+      with:
+        key: "document-global-stack-${{ hashFiles('package.yaml','**/*.cabal','stack.yaml') }}"
+        path: ~/.stack
+        "restore-keys": "document-global-stack-"
+    - name: "Cache **/.stack-work"
+      uses: "actions/cache@v2"
+      with:
+        key: "document-local-stack-${{ hashFiles('package.yaml','**/*.cabal','stack.yaml') }}-${{ hashFiles('**/*.hs') }}"
+        path: "**/.stack-work"
+        "restore-keys": |
+          document-local-stack-${{ hashFiles('package.yaml','**/*.cabal','stack.yaml') }}-
+          document-local-stack-
+    - uses: "haskell/actions/setup@v1"
+      with:
+        "enable-stack": 'true'
+        "ghc-version": '8.10.7'
+        "stack-version": '2.7.3'
+    - name: Build static site generator
+      run: "stack build --fast"
+    - name: Collect bins
+      run: |
+        mkdir -p "site-bin"
+        cp "$(stack path --dist-dir)/build/site/site" "site-bin"
+    - name: "Upload site-bin-artifact"
+      uses: "actions/upload-artifact@v2.2.3"
+      with:
+        name: "site-bin-artifact"
+        path: "site-bin"
   test:
     container: "ghcr.io/konn/computational-algebra/gha:0.7"
     "continue-on-error": "${{matrix.isHead}}"

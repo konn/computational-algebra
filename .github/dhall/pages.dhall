@@ -1,27 +1,14 @@
-let lib = ./lib.dhall
+let lib =
+      ./lib.dhall
+        sha256:91b944152fcbeba7e2303bce839d8685d2feaf7f6decc91a48fe55f34601afaa
 
 let GHA = lib.GHA
 
-let global-stack-cache =
-      { base-key = "document-global-stack"
-      , path = "~/.stack"
-      , key-files = [ [ "'package.yaml'", "'**/*.cabal'", "'stack.yaml'" ] ]
-      }
-
-let local-stack-cache =
-      { base-key = "document-local-stack"
-      , path = "**/.stack-work"
-      , key-files =
-        [ [ "'package.yaml'", "'**/*.cabal'", "'stack.yaml'" ]
-        , [ "'**/*.hs'" ]
-        ]
-      }
-
 let docGhcVersion = "8.10.7"
 
-let docs-artifact = lib.docs-artifact-for docGhcVersion
+let pages-artifact = lib.pages-artifact-for docGhcVersion
 
-let docs-zip = "docs.zip"
+let pages-zip = "pages.zip"
 
 in  { name = "Update Documentation"
     , on.workflow_run
@@ -35,20 +22,7 @@ in  { name = "Update Documentation"
           , runs-on = GHA.types.RunsOn.`ubuntu-20.04`
           , name = Some "Generate and Upload Sites"
           , steps =
-            [ GHA.steps.actions/checkout
-              with `with` = Some (toMap { ref = "gh-pages-devel" })
-            , lib.action/cache global-stack-cache
-            , lib.action/cache local-stack-cache
-            , GHA.steps.actions/setup-haskell
-                GHA.actions/HaskellSetup::{
-                , enable-stack = Some True
-                , stack-version = Some "2.7.3"
-                }
-            , lib.action/run
-                { name = "Build static site generator"
-                , run = "stack build --fast"
-                }
-            , GHA.Step::{
+            [ GHA.Step::{
               , name = Some "download artifacts"
               , uses = Some "actions/github-script@v5"
               , `with` = Some
@@ -61,7 +35,7 @@ in  { name = "Update Documentation"
                             run_id: context.payload.workflow_run.id,
                           });
                           let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
-                            return artifact.name == "${docs-artifact.name}"
+                            return artifact.name == "${pages-artifact.name}"
                           })[0];
                           let download = await github.rest.actions.downloadArtifact({
                             owner: context.repo.owner,
@@ -70,18 +44,14 @@ in  { name = "Update Documentation"
                             archive_format: 'zip',
                           });
                           let fs = require('fs');
-                          fs.writeFileSync(`''${process.env.GITHUB_WORKSPACE}/${docs-zip}`, Buffer.from(download.data));
+                          fs.writeFileSync(`''${process.env.GITHUB_WORKSPACE}/${pages-zip}`, Buffer.from(download.data));
                           ''
                       }
                   )
               }
             , lib.action/run
                 { name = "Extract artifacts"
-                , run = "unzip ${docs-zip} -d ./docs"
-                }
-            , lib.action/run
-                { name = "Generate static site"
-                , run = "stack exec -- site build"
+                , run = "unzip ${pages-zip} -d ./_site"
                 }
             , GHA.Step::{
               , name = Some "Deploy GitHub Pages"

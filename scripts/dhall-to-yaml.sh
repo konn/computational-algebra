@@ -11,11 +11,17 @@ else
   fi
 fi
 
-YAML_NAME="${1/.dhall/.yml}"
-YAML_PATH=".github/workflows/$(basename "${YAML_NAME}")"
-NEW="$("${DHALL_TO_YAML}" --file "$1" --generated-comment)"
-if diff <(echo "${NEW}") <(cat "${YAML_PATH}") >/dev/null ; then
-  echo "OK"
-else
-  echo "${NEW}" >"${YAML_PATH}"
-fi
+GITHUB_DIR=".github"
+WORKFLOWS="${GITHUB_DIR}/workflows"
+DHALLS="${GITHUB_DIR}/dhall"
+
+for BASE in haskell pages; do
+  YAML_PATH="${WORKFLOWS}/${BASE}.yml"
+  DHALL_PATH="${DHALLS}/${BASE}.dhall"
+  NEW="$("${DHALL_TO_YAML}" --file "${DHALL_PATH}" --generated-comment)"
+  if diff <(echo "${NEW}") <(cat "${YAML_PATH}") >/dev/null ; then
+    echo "${BASE}: OK"
+  else
+    echo "${NEW}" >"${YAML_PATH}"
+  fi
+done

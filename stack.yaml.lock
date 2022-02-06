@@ -19,13 +19,6 @@ packages:
   original:
     hackage: control-monad-loop-0.1
 - completed:
-    hackage: repa-3.4.1.4@sha256:70ef4758937baa29be1ac0a78ecbccf341b3f276c9efb632b4829eea80445e2d,3315
-    pantry-tree:
-      size: 2965
-      sha256: 294773b0e6be4a4198133715d4c7f2d0d8e5aec4adea7e59578d1b3823a7879d
-  original:
-    hackage: repa-3.4.1.4
-- completed:
     hackage: unamb-0.2.7@sha256:ce5db0575bca8ca04c9e9dce3ba75b6f9e5ceea834c6ba4fae45aca6fa963334,2385
     pantry-tree:
       size: 217
