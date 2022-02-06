@@ -89,7 +89,7 @@ jobs:
         path: "site-bin"
     - name: Locate bin
       run: |
-        cp -r ${{steps.docs.outputs.download-path}}/site ./
+        cp -r ${{steps.site-bin.outputs.download-path}}/site ./
         chmod +x ./site
     - name: Generate static site
       run: ./site build

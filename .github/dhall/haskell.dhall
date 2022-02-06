@@ -168,48 +168,53 @@ in  { on =
             }
     , jobs.build-pages
       =
-            ( (lib.makeGhcHeader docsGhcs)
-              with container = None Text
-              with env.STACK_YAML = None Text
-            )
-        /\  { needs = [ "build", "build-site-generator" ]
-            , name = "Build GitHub Pages for ${lib.current-ghc}"
-            , steps =
-              [ GHA.steps.actions/checkout
-                with `with` = Some (toMap { ref = "gh-pages-devel" })
-              , GHA.Step::{
-                , uses = Some "actions/download-artifact@v2"
-                , id = Some "docs"
-                , `with` = Some (toMap docs-artifact)
-                }
-              , lib.action/run
-                  { name = "Place document in correct place"
-                  , run =
-                      let dl-path = "\${{steps.docs.outputs.download-path}}"
+        let site-bin-id = "site-bin"
 
-                      in  ''
-                          if [ "${dl-path}" != "$(pwd)/docs" ]; then
-                            cp -r ${dl-path} ./docs;
-                          fi
+        let docs-id = "docs"
+
+        in      ( (lib.makeGhcHeader docsGhcs)
+                  with container = None Text
+                  with env.STACK_YAML = None Text
+                )
+            /\  { needs = [ "build", "build-site-generator" ]
+                , name = "Build GitHub Pages for ${lib.current-ghc}"
+                , steps =
+                  [ GHA.steps.actions/checkout
+                    with `with` = Some (toMap { ref = "gh-pages-devel" })
+                  , GHA.Step::{
+                    , uses = Some "actions/download-artifact@v2"
+                    , id = Some docs-id
+                    , `with` = Some (toMap docs-artifact)
+                    }
+                  , lib.action/run
+                      { name = "Place document in correct place"
+                      , run =
+                          let dl-path =
+                                "\${{steps.${docs-id}.outputs.download-path}}"
+
+                          in  ''
+                              if [ "${dl-path}" != "$(pwd)/docs" ]; then
+                                cp -r ${dl-path} ./docs;
+                              fi
+                              ''
+                      }
+                  , GHA.Step::{
+                    , uses = Some "actions/download-artifact@v2"
+                    , id = Some site-bin-id
+                    , name = Some "Download site generator"
+                    , `with` = Some (toMap site-bin-artifact)
+                    }
+                  , lib.action/run
+                      { name = "Locate bin"
+                      , run =
                           ''
-                  }
-              , GHA.Step::{
-                , uses = Some "actions/download-artifact@v2"
-                , id = Some "site-bin"
-                , name = Some "Download site generator"
-                , `with` = Some (toMap site-bin-artifact)
+                          cp -r ''${{steps.${site-bin-id}.outputs.download-path}}/site ./
+                          chmod +x ./site
+                          ''
+                      }
+                  , lib.action/run
+                      { name = "Generate static site", run = "./site build" }
+                  , lib.action/upload (lib.pages-artifact-for lib.current-ghc)
+                  ]
                 }
-              , lib.action/run
-                  { name = "Locate bin"
-                  , run =
-                      ''
-                      cp -r ''${{steps.docs.outputs.download-path}}/site ./
-                      chmod +x ./site
-                      ''
-                  }
-              , lib.action/run
-                  { name = "Generate static site", run = "./site build" }
-              , lib.action/upload (lib.pages-artifact-for lib.current-ghc)
-              ]
-            }
     }
