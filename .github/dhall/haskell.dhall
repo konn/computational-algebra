@@ -1,7 +1,10 @@
-let lib = ./lib.dhall
+let lib =
+      ./lib.dhall
+        sha256:91b944152fcbeba7e2303bce839d8685d2feaf7f6decc91a48fe55f34601afaa
 
 let Data/List =
       https://raw.githubusercontent.com/dhall-lang/dhall-lang/v21.1.0/Prelude/List/package.dhall
+        sha256:11081c23436cb9c5fa60d53416e62845071990b43b3c48973cb2f19f5d5adbee
 
 let GHA = lib.GHA
 
@@ -138,6 +141,7 @@ in  { on =
 
         in      ( (lib.makeGhcHeader docsGhcs)
                   with env.STACK_YAML = "stack.yaml"
+                  with container = None Text
                 )
             /\  { needs = [ "build" ]
                 , name = "Build GitHub Pages for ${lib.current-ghc}"
