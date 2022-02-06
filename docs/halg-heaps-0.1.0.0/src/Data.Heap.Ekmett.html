@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Heap.Ekmett</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">H.Heap</span></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><span class="hs-identifier">HC</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span>   </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Heap</span></span><span>       </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">H</span></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Data.Heap.Class.html"><span class="hs-identifier">Data.Heap.Class</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">HC</span></span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679042387"><span class="annot"><a href="Data.Heap.Class.html#Heap"><span class="hs-identifier hs-type">HC.Heap</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">H.Heap</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-7"></span><span>  </span><span id="local-6989586621679042382"><span class="annot"><span class="annottext">empty :: Heap a
+</span><a href="Data.Heap.Class.html#empty"><span class="hs-identifier hs-var hs-var hs-var hs-var">empty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Heap a
+forall a. Heap a
+</span><span class="hs-identifier hs-var">H.empty</span></span><span>
+</span><span id="line-8"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Heap.Class.html#empty"><span class="hs-pragma hs-type">empty</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-9"></span><span>  </span><span id="local-6989586621679042379"><span class="annot"><span class="annottext">null :: Heap a -&gt; Bool
+</span><a href="Data.Heap.Class.html#null"><span class="hs-identifier hs-var hs-var hs-var hs-var">null</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Heap a -&gt; Bool
+forall a. Heap a -&gt; Bool
+</span><span class="hs-identifier hs-var">H.null</span></span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Heap.Class.html#null"><span class="hs-pragma hs-type">null</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-11"></span><span>  </span><span id="local-6989586621679042376"><span class="annot"><span class="annottext">insert :: a -&gt; Heap a -&gt; Heap a
+</span><a href="Data.Heap.Class.html#insert"><span class="hs-identifier hs-var hs-var hs-var hs-var">insert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Heap a -&gt; Heap a
+forall a. Ord a =&gt; a -&gt; Heap a -&gt; Heap a
+</span><span class="hs-identifier hs-var">H.insert</span></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Heap.Class.html#insert"><span class="hs-pragma hs-type">insert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-13"></span><span>  </span><span id="local-6989586621679042373"><span class="annot"><span class="annottext">merge :: Heap a -&gt; Heap a -&gt; Heap a
+</span><a href="Data.Heap.Class.html#merge"><span class="hs-identifier hs-var hs-var hs-var hs-var">merge</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Heap a -&gt; Heap a -&gt; Heap a
+forall a. Heap a -&gt; Heap a -&gt; Heap a
+</span><span class="hs-identifier hs-var">H.union</span></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Heap.Class.html#merge"><span class="hs-pragma hs-type">merge</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-15"></span><span>  </span><span id="local-6989586621679042370"><span class="annot"><span class="annottext">findMin :: Heap a -&gt; Maybe a
+</span><a href="Data.Heap.Class.html#findMin"><span class="hs-identifier hs-var hs-var hs-var hs-var">findMin</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a, Heap a) -&gt; a) -&gt; Maybe (a, Heap a) -&gt; Maybe a
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(a, Heap a) -&gt; a
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">(Maybe (a, Heap a) -&gt; Maybe a)
+-&gt; (Heap a -&gt; Maybe (a, Heap a)) -&gt; Heap a -&gt; Maybe a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Heap a -&gt; Maybe (a, Heap a)
+forall a. Heap a -&gt; Maybe (a, Heap a)
+</span><span class="hs-identifier hs-var">H.viewMin</span></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Heap.Class.html#findMin"><span class="hs-pragma hs-type">findMin</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-17"></span><span>  </span><span id="local-6989586621679042366"><span class="annot"><span class="annottext">deleteMin :: Heap a -&gt; Maybe (Heap a)
+</span><a href="Data.Heap.Class.html#deleteMin"><span class="hs-identifier hs-var hs-var hs-var hs-var">deleteMin</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a, Heap a) -&gt; Heap a) -&gt; Maybe (a, Heap a) -&gt; Maybe (Heap a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(a, Heap a) -&gt; Heap a
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">(Maybe (a, Heap a) -&gt; Maybe (Heap a))
+-&gt; (Heap a -&gt; Maybe (a, Heap a)) -&gt; Heap a -&gt; Maybe (Heap a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Heap a -&gt; Maybe (a, Heap a)
+forall a. Heap a -&gt; Maybe (a, Heap a)
+</span><span class="hs-identifier hs-var">H.viewMin</span></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Heap.Class.html#deleteMin"><span class="hs-pragma hs-type">deleteMin</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-19"></span><span>  </span><span id="local-6989586621679042364"><span class="annot"><span class="annottext">singleton :: a -&gt; Heap a
+</span><a href="Data.Heap.Class.html#singleton"><span class="hs-identifier hs-var hs-var hs-var hs-var">singleton</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Heap a
+forall a. Ord a =&gt; a -&gt; Heap a
+</span><span class="hs-identifier hs-var">H.singleton</span></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Heap.Class.html#singleton"><span class="hs-pragma hs-type">singleton</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-21"></span><span>  </span><span id="local-6989586621679042361"><span class="annot"><span class="annottext">span :: (a -&gt; Bool) -&gt; Heap a -&gt; (Heap a, Heap a)
+</span><a href="Data.Heap.Class.html#span"><span class="hs-identifier hs-var hs-var hs-var hs-var">span</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; Bool) -&gt; Heap a -&gt; (Heap a, Heap a)
+forall a. (a -&gt; Bool) -&gt; Heap a -&gt; (Heap a, Heap a)
+</span><span class="hs-identifier hs-var">H.span</span></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Heap.Class.html#span"><span class="hs-pragma hs-type">span</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-23"></span><span>  </span><span id="local-6989586621679042358"><span class="annot"><span class="annottext">toList :: Heap a -&gt; [a]
+</span><a href="Data.Heap.Class.html#toList"><span class="hs-identifier hs-var hs-var hs-var hs-var">toList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Heap a -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Heap.Class.html#toList"><span class="hs-pragma hs-type">toList</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-25"></span><span>  </span><span id="local-6989586621679042355"><span class="annot"><span class="annottext">fromList :: [a] -&gt; Heap a
+</span><a href="Data.Heap.Class.html#fromList"><span class="hs-identifier hs-var hs-var hs-var hs-var">fromList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Heap a
+forall a. Ord a =&gt; [a] -&gt; Heap a
+</span><span class="hs-identifier hs-var">H.fromList</span></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Heap.Class.html#fromList"><span class="hs-pragma hs-type">fromList</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-27"></span></pre></body></html>

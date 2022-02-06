@@ -1,108 +1,560 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP, DataKinds, FlexibleContexts, GADTs, KindSignatures       #-}</span><span>
-</span><a name="line-2"></a><span class="hs-pragma">{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction                  #-}</span><span>
-</span><a name="line-3"></a><span class="hs-pragma">{-# LANGUAGE OverloadedStrings, PartialTypeSignatures, ScopedTypeVariables #-}</span><span>
-</span><a name="line-4"></a><span class="hs-pragma">{-# LANGUAGE TypeFamilies                                                  #-}</span><span>
-</span><a name="line-5"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra.Ring.Polynomial.Parser</span><span>
-</span><a name="line-6"></a><span>       </span><span class="hs-special">(</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#unlabeldVarP"><span class="hs-identifier hs-var">unlabeldVarP</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#labeledVarP"><span class="hs-identifier hs-var">labeledVarP</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#polynomialP"><span class="hs-identifier hs-var">polynomialP</span></a><span>
-</span><a name="line-7"></a><span>       </span><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#rationalP"><span class="hs-identifier hs-var">rationalP</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#integerP"><span class="hs-identifier hs-var">integerP</span></a><span>
-</span><a name="line-8"></a><span>       </span><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#parsePolynomialWith"><span class="hs-identifier hs-var">parsePolynomialWith</span></a><span>
-</span><a name="line-9"></a><span>       </span><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a><span> </span><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a><span>
-</span><a name="line-10"></a><span>       </span><span class="hs-special">)</span><span>
-</span><a name="line-11"></a><span>       </span><span class="hs-keyword">where</span><span>
-</span><a name="line-12"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Algebra.Ring.Polynomial.Class</span><span>
-</span><a name="line-13"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Algebra.Ring.Polynomial.Monomial</span><span>
-</span><a name="line-14"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">AlgebraicPrelude</span><span>                 </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">char</span><span class="hs-special">)</span><span>
-</span><a name="line-15"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Control.Arrow</span><span>                    </span><span class="hs-special">(</span><span class="hs-identifier hs-var">left</span><span class="hs-special">)</span><span>
-</span><a name="line-16"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data.Ratio</span><span>                       </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">P</span><span>
-</span><a name="line-17"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data.Singletons.Prelude</span><span>
-</span><a name="line-18"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data.Singletons.Prelude.List</span><span>
-</span><a name="line-19"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data.Text</span><span>                        </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">T</span><span>
-</span><a name="line-20"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data.Type.Ordinal.Builtin</span><span>
-</span><a name="line-21"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data.Void</span><span>
-</span><a name="line-22"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">GHC.TypeLits</span><span>
-</span><a name="line-23"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Prelude</span><span>                          </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">P</span><span>
-</span><a name="line-24"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Text.Megaparsec</span><span>
-</span><a name="line-25"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Text.Megaparsec.Char</span><span>
-</span><a name="line-26"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Text.Megaparsec.Char.Lexer</span><span>       </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">L</span><span>
-</span><a name="line-27"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Text.Megaparsec.Expr</span><span>
-</span><a name="line-28"></a><span>
-</span><a name="line-29"></a><span class="hs-identifier">lexeme</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">MonadParsec</span><span> </span><a href="#local-6989586621679139466"><span class="hs-identifier hs-type">e</span></a><span> </span><span class="hs-identifier hs-type">T.Text</span><span> </span><a href="#local-6989586621679139467"><span class="hs-identifier hs-type">m</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><a href="#local-6989586621679139467"><span class="hs-identifier hs-type">m</span></a><span> </span><a href="#local-6989586621679139468"><span class="hs-identifier hs-type">a</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="#local-6989586621679139467"><span class="hs-identifier hs-type">m</span></a><span> </span><a href="#local-6989586621679139468"><span class="hs-identifier hs-type">a</span></a><span>
-</span><a name="line-30"></a><a name="lexeme"><a href="Algebra.Ring.Polynomial.Parser.html#lexeme"><span class="hs-identifier">lexeme</span></a></a><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">L.lexeme</span><span> </span><span class="hs-identifier hs-var">space</span><span>
-</span><a name="line-31"></a><span>
-</span><a name="line-32"></a><span class="hs-identifier">symbol</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">MonadParsec</span><span> </span><a href="#local-6989586621679139464"><span class="hs-identifier hs-type">e</span></a><span> </span><span class="hs-identifier hs-type">T.Text</span><span> </span><a href="#local-6989586621679139465"><span class="hs-identifier hs-type">m</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">T.Text</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="#local-6989586621679139465"><span class="hs-identifier hs-type">m</span></a><span> </span><span class="hs-identifier hs-type">T.Text</span><span>
-</span><a name="line-33"></a><a name="symbol"><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier">symbol</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">L.symbol</span><span> </span><span class="hs-identifier hs-var">space</span><span>
-</span><a name="line-34"></a><span>
-</span><a name="line-35"></a><span class="hs-keyword">type</span><span> </span><a name="Parser"><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier">Parser</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-type">Parsec</span><span> </span><span class="hs-identifier hs-type">Void</span><span> </span><span class="hs-identifier hs-type">T.Text</span><span>
-</span><a name="line-36"></a><span class="hs-keyword">type</span><span> </span><a name="VariableParser"><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier">VariableParser</span></a></a><span> </span><a name="local-6989586621679138081"><a href="#local-6989586621679138081"><span class="hs-identifier">n</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Ordinal</span><span> </span><a href="#local-6989586621679138081"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span>
-</span><a name="line-37"></a><span>
-</span><a name="line-38"></a><span class="hs-identifier">unlabeldVarP</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">KnownNat</span><span> </span><a href="#local-6989586621679139462"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span>
-</span><a name="line-39"></a><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><a href="#local-6989586621679139463"><span class="hs-identifier hs-type">proxy</span></a><span> </span><a href="#local-6989586621679139462"><span class="hs-identifier hs-type">n</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">T.Text</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a><span> </span><a href="#local-6989586621679139462"><span class="hs-identifier hs-type">n</span></a><span>
-</span><a name="line-40"></a><a name="unlabeldVarP"><a href="Algebra.Ring.Polynomial.Parser.html#unlabeldVarP"><span class="hs-identifier">unlabeldVarP</span></a></a><span> </span><a name="local-6989586621679139469"><a href="#local-6989586621679139469"><span class="hs-identifier">pxy</span></a></a><span> </span><a name="local-6989586621679139470"><a href="#local-6989586621679139470"><span class="hs-identifier">pfx</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#lexeme"><span class="hs-identifier hs-var">lexeme</span></a><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-keyword">do</span><span>
-</span><a name="line-41"></a><span>  </span><a name="local-6989586621679139471"><a href="#local-6989586621679139471"><span class="hs-identifier">i</span></a></a><span> </span><span class="hs-glyph">&lt;-</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier hs-var">symbol</span></a><span> </span><a href="#local-6989586621679139470"><span class="hs-identifier hs-var">pfx</span></a><span> </span><span class="hs-operator hs-var">*&gt;</span><span> </span><span class="hs-identifier hs-var">char</span><span> </span><span class="hs-char">'_'</span><span> </span><span class="hs-operator hs-var">*&gt;</span><span> </span><span class="hs-identifier hs-var">L.decimal</span><span>
-</span><a name="line-42"></a><span>  </span><span class="hs-keyword">case</span><span> </span><span class="hs-identifier hs-var">naturalToOrd</span><span> </span><a href="#local-6989586621679139471"><span class="hs-identifier hs-var">i</span></a><span> </span><span class="hs-keyword">of</span><span>
-</span><a name="line-43"></a><span>    </span><span class="hs-identifier hs-var">Just</span><span> </span><a name="local-6989586621679139472"><a href="#local-6989586621679139472"><span class="hs-identifier">o</span></a></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-var">return</span><span> </span><a href="#local-6989586621679139472"><span class="hs-identifier hs-var">o</span></a><span>
-</span><a name="line-44"></a><span>    </span><span class="hs-identifier hs-var">Nothing</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-var">fail</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-string">&quot;Number &quot;</span><span> </span><span class="hs-operator hs-var">++</span><span> </span><span class="hs-identifier hs-var">show</span><span> </span><a href="#local-6989586621679139471"><span class="hs-identifier hs-var">i</span></a><span> </span><span class="hs-operator hs-var">++</span><span> </span><span class="hs-string">&quot; is out of bound: &quot;</span><span> </span><span class="hs-operator hs-var">++</span><span> </span><span class="hs-identifier hs-var">show</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">natVal</span><span> </span><a href="#local-6989586621679139469"><span class="hs-identifier hs-var">pxy</span></a><span class="hs-special">)</span><span>
-</span><a name="line-45"></a><span>
-</span><a name="line-46"></a><span class="hs-identifier">fromSingList</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Sing</span><span> </span><span class="hs-special">(</span><a href="#local-6989586621679139461"><span class="hs-identifier hs-type">list</span></a><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-identifier hs-type">Symbol</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-identifier hs-type">T.Text</span><span class="hs-special">]</span><span>
-</span><a name="line-47"></a><span class="hs-cpp">#if MIN_VERSION_singletons(2,3,0)
-</span><a name="fromSingList"><a href="Algebra.Ring.Polynomial.Parser.html#fromSingList"><span class="hs-identifier">fromSingList</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">fromSing</span><span>
-</span><a name="line-49"></a><span class="hs-cpp">#else
-</span><span class="hs-identifier">fromSingList</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">map</span><span> </span><span class="hs-identifier">T.pack</span><span> </span><span class="hs-operator">.</span><span> </span><span class="hs-identifier">fromSing</span><span>
-</span><a name="line-51"></a><span class="hs-cpp">#endif
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE GADTs #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE KindSignatures #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE PartialTypeSignatures #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-9"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-10"></span><span class="hs-pragma">{-# LANGUAGE NoImplicitPrelude #-}</span><span>
+</span><span id="line-11"></span><span class="hs-pragma">{-# LANGUAGE NoMonomorphismRestriction #-}</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra.Ring.Polynomial.Parser</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#unlabeldVarP"><span class="hs-identifier">unlabeldVarP</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#labeledVarP"><span class="hs-identifier">labeledVarP</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#polynomialP"><span class="hs-identifier">polynomialP</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#rationalP"><span class="hs-identifier">rationalP</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#integerP"><span class="hs-identifier">integerP</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#parsePolynomialWith"><span class="hs-identifier">parsePolynomialWith</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier">Parser</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-21"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier">VariableParser</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Algebra.Internal</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Algebra.Ring.Polynomial.Class</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Algebra.Ring.Polynomial.Monomial</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">AlgebraicPrelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">char</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Arrow</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">left</span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Combinators.Expr</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NE</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Ratio</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span class="hs-cpp">
+#if MIN_VERSION_singletons(3,0,0)
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.List.Singletons</span><span class="hs-cpp">
+#else
+</span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Singletons.Prelude.List</span></span><span class="hs-cpp">
+#endif
 </span><span>
-</span><a name="line-53"></a><span class="hs-identifier">labeledVarP</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><a name="local-6989586621679139460"><a href="#local-6989586621679139460"><span class="hs-identifier">list</span></a></a><span class="hs-operator">.</span><span>
-</span><a name="line-54"></a><span>               </span><span class="hs-identifier hs-type">Sing</span><span> </span><span class="hs-special">(</span><a href="#local-6989586621679139460"><span class="hs-identifier hs-type">list</span></a><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-identifier hs-type">Symbol</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Length</span><span> </span><a href="#local-6989586621679139460"><span class="hs-identifier hs-type">list</span></a><span class="hs-special">)</span><span>
-</span><a name="line-55"></a><a name="labeledVarP"><a href="Algebra.Ring.Polynomial.Parser.html#labeledVarP"><span class="hs-identifier">labeledVarP</span></a></a><span> </span><a name="local-6989586621679140341"><a href="#local-6989586621679140341"><span class="hs-identifier">slist</span></a></a><span> </span><span class="hs-glyph">=</span><span>
-</span><a name="line-56"></a><span>  </span><span class="hs-identifier hs-var">choice</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">zipWith</span><span> </span><a href="#local-6989586621679140342"><span class="hs-identifier hs-var">go</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">enumOrdinal</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">sLength</span><span> </span><a href="#local-6989586621679140341"><span class="hs-identifier hs-var">slist</span></a><span class="hs-special">)</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#fromSingList"><span class="hs-identifier hs-var">fromSingList</span></a><span> </span><a href="#local-6989586621679140341"><span class="hs-identifier hs-var">slist</span></a><span>
-</span><a name="line-57"></a><span>  </span><span class="hs-keyword">where</span><span>
-</span><a name="line-58"></a><span>    </span><a name="local-6989586621679140342"><a href="#local-6989586621679140342"><span class="hs-identifier">go</span></a></a><span> </span><a name="local-6989586621679140343"><a href="#local-6989586621679140343"><span class="hs-identifier">i</span></a></a><span> </span><a name="local-6989586621679140344"><a href="#local-6989586621679140344"><span class="hs-identifier">v</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="#local-6989586621679140343"><span class="hs-identifier hs-var">i</span></a><span> </span><span class="hs-operator hs-var">&lt;$</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier hs-var">symbol</span></a><span> </span><a href="#local-6989586621679140344"><span class="hs-identifier hs-var">v</span></a><span>
-</span><a name="line-59"></a><span>
-</span><a name="line-60"></a><span class="hs-identifier">varPowP</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">KnownNat</span><span> </span><a href="#local-6989586621679139458"><span class="hs-identifier hs-type">n</span></a><span> </span><span class="hs-glyph">=&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a><span> </span><a href="#local-6989586621679139458"><span class="hs-identifier hs-type">n</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">OrderedMonomial</span><span> </span><a href="#local-6989586621679139459"><span class="hs-identifier hs-type">ord</span></a><span> </span><a href="#local-6989586621679139458"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span>
-</span><a name="line-61"></a><a name="varPowP"><a href="Algebra.Ring.Polynomial.Parser.html#varPowP"><span class="hs-identifier">varPowP</span></a></a><span> </span><a name="local-6989586621679140571"><a href="#local-6989586621679140571"><span class="hs-identifier">vp</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#lexeme"><span class="hs-identifier hs-var">lexeme</span></a><span> </span><span class="hs-operator hs-var">$</span><span>
-</span><a name="line-62"></a><span>  </span><span class="hs-identifier hs-var">pow</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">orderMonomial</span><span> </span><span class="hs-identifier hs-var">Proxy</span><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-identifier hs-var">varMonom</span><span> </span><span class="hs-identifier hs-var">sing</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><a href="#local-6989586621679140571"><span class="hs-identifier hs-var">vp</span></a><span class="hs-special">)</span><span>
-</span><a name="line-63"></a><span>      </span><span class="hs-operator hs-var">&lt;*&gt;</span><span> </span><span class="hs-identifier hs-var">option</span><span> </span><span class="hs-special">(</span><span class="hs-number">1</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Natural</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier hs-var">symbol</span></a><span> </span><span class="hs-string">&quot;^&quot;</span><span> </span><span class="hs-operator hs-var">*&gt;</span><span> </span><span class="hs-identifier hs-var">L.decimal</span><span class="hs-special">)</span><span>
-</span><a name="line-64"></a><span>
-</span><a name="line-65"></a><span class="hs-identifier">monomialP</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">KnownNat</span><span> </span><a href="#local-6989586621679139300"><span class="hs-identifier hs-type">n</span></a><span> </span><span class="hs-glyph">=&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a><span> </span><a href="#local-6989586621679139300"><span class="hs-identifier hs-type">n</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">OrderedMonomial</span><span> </span><a href="#local-6989586621679139301"><span class="hs-identifier hs-type">ord</span></a><span> </span><a href="#local-6989586621679139300"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span>
-</span><a name="line-66"></a><a name="monomialP"><a href="Algebra.Ring.Polynomial.Parser.html#monomialP"><span class="hs-identifier">monomialP</span></a></a><span> </span><a name="local-6989586621679141481"><a href="#local-6989586621679141481"><span class="hs-identifier">v</span></a></a><span> </span><span class="hs-glyph">=</span><span>
-</span><a name="line-67"></a><span>  </span><span class="hs-identifier hs-var">product</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#varPowP"><span class="hs-identifier hs-var">varPowP</span></a><span> </span><a href="#local-6989586621679141481"><span class="hs-identifier hs-var">v</span></a><span> </span><span class="hs-special">`</span><span class="hs-identifier hs-var">sepBy1</span><span class="hs-special">`</span><span> </span><span class="hs-identifier hs-var">optional</span><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier hs-var">symbol</span></a><span> </span><span class="hs-string">&quot;*&quot;</span><span class="hs-special">)</span><span>
-</span><a name="line-68"></a><span>
-</span><a name="line-69"></a><span class="hs-identifier">factorP</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">IsOrderedPolynomial</span><span> </span><a href="#local-6989586621679139298"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span>
-</span><a name="line-70"></a><span>        </span><span class="hs-glyph">=&gt;</span><span> </span><a href="#local-6989586621679139299"><span class="hs-identifier hs-type">proxy</span></a><span> </span><a href="#local-6989586621679139298"><span class="hs-identifier hs-type">poly</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Coefficient</span><span> </span><a href="#local-6989586621679139298"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Arity</span><span> </span><a href="#local-6989586621679139298"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a><span> </span><a href="#local-6989586621679139298"><span class="hs-identifier hs-type">poly</span></a><span>
-</span><a name="line-71"></a><a name="factorP"><a href="Algebra.Ring.Polynomial.Parser.html#factorP"><span class="hs-identifier">factorP</span></a></a><span> </span><span class="hs-identifier">_</span><span> </span><a name="local-6989586621679141760"><a href="#local-6989586621679141760"><span class="hs-identifier">coeffP</span></a></a><span> </span><a name="local-6989586621679141761"><a href="#local-6989586621679141761"><span class="hs-identifier">varP</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">injectCoeff</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#lexeme"><span class="hs-identifier hs-var">lexeme</span></a><span> </span><a href="#local-6989586621679141760"><span class="hs-identifier hs-var">coeffP</span></a><span>
-</span><a name="line-72"></a><span>                    </span><span class="hs-operator hs-var">&lt;|&gt;</span><span> </span><span class="hs-identifier hs-var">fromOrderedMonomial</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#monomialP"><span class="hs-identifier hs-var">monomialP</span></a><span> </span><a href="#local-6989586621679141761"><span class="hs-identifier hs-var">varP</span></a><span>
-</span><a name="line-73"></a><span>
-</span><a name="line-74"></a><span class="hs-identifier">binary</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">MonadParsec</span><span> </span><a href="#local-6989586621679139295"><span class="hs-identifier hs-type">e</span></a><span> </span><span class="hs-identifier hs-type">Text</span><span> </span><a href="#local-6989586621679139296"><span class="hs-identifier hs-type">m</span></a><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Text</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><a href="#local-6989586621679139297"><span class="hs-identifier hs-type">a</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="#local-6989586621679139297"><span class="hs-identifier hs-type">a</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="#local-6989586621679139297"><span class="hs-identifier hs-type">a</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Operator</span><span> </span><a href="#local-6989586621679139296"><span class="hs-identifier hs-type">m</span></a><span> </span><a href="#local-6989586621679139297"><span class="hs-identifier hs-type">a</span></a><span>
-</span><a name="line-75"></a><a name="binary"><a href="Algebra.Ring.Polynomial.Parser.html#binary"><span class="hs-identifier">binary</span></a></a><span>  </span><a name="local-6989586621679141762"><a href="#local-6989586621679141762"><span class="hs-identifier">name</span></a></a><span> </span><a name="local-6989586621679141763"><a href="#local-6989586621679141763"><span class="hs-identifier">f</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">InfixL</span><span>  </span><span class="hs-special">(</span><a href="#local-6989586621679141763"><span class="hs-identifier hs-var">f</span></a><span> </span><span class="hs-operator hs-var">&lt;$</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier hs-var">symbol</span></a><span> </span><a href="#local-6989586621679141762"><span class="hs-identifier hs-var">name</span></a><span class="hs-special">)</span><span>
-</span><a name="line-76"></a><span>
-</span><a name="line-77"></a><span class="hs-identifier">prefix</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">MonadParsec</span><span> </span><a href="#local-6989586621679139292"><span class="hs-identifier hs-type">e</span></a><span> </span><span class="hs-identifier hs-type">Text</span><span> </span><a href="#local-6989586621679139293"><span class="hs-identifier hs-type">m</span></a><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Text</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><a href="#local-6989586621679139294"><span class="hs-identifier hs-type">a</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="#local-6989586621679139294"><span class="hs-identifier hs-type">a</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Operator</span><span> </span><a href="#local-6989586621679139293"><span class="hs-identifier hs-type">m</span></a><span> </span><a href="#local-6989586621679139294"><span class="hs-identifier hs-type">a</span></a><span>
-</span><a name="line-78"></a><a name="prefix"><a href="Algebra.Ring.Polynomial.Parser.html#prefix"><span class="hs-identifier">prefix</span></a></a><span>  </span><a name="local-6989586621679141764"><a href="#local-6989586621679141764"><span class="hs-identifier">name</span></a></a><span> </span><a name="local-6989586621679141765"><a href="#local-6989586621679141765"><span class="hs-identifier">f</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">Prefix</span><span>  </span><span class="hs-special">(</span><a href="#local-6989586621679141765"><span class="hs-identifier hs-var">f</span></a><span> </span><span class="hs-operator hs-var">&lt;$</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier hs-var">symbol</span></a><span> </span><a href="#local-6989586621679141764"><span class="hs-identifier hs-var">name</span></a><span class="hs-special">)</span><span>
-</span><a name="line-79"></a><span>
-</span><a name="line-80"></a><span class="hs-identifier">table</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">CoeffRing</span><span> </span><a href="#local-6989586621679139289"><span class="hs-identifier hs-type">a</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">MonadParsec</span><span> </span><a href="#local-6989586621679139290"><span class="hs-identifier hs-type">e</span></a><span> </span><span class="hs-identifier hs-type">Text</span><span> </span><a href="#local-6989586621679139291"><span class="hs-identifier hs-type">m</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="hs-identifier hs-type">Operator</span><span> </span><a href="#local-6989586621679139291"><span class="hs-identifier hs-type">m</span></a><span> </span><a href="#local-6989586621679139289"><span class="hs-identifier hs-type">a</span></a><span class="hs-special">]</span><span class="hs-special">]</span><span>
-</span><a name="line-81"></a><a name="table"><a href="Algebra.Ring.Polynomial.Parser.html#table"><span class="hs-identifier">table</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">[</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#prefix"><span class="hs-identifier hs-var">prefix</span></a><span> </span><span class="hs-string">&quot;-&quot;</span><span> </span><span class="hs-identifier hs-var">negate</span><span>
-</span><a name="line-82"></a><span>          </span><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#prefix"><span class="hs-identifier hs-var">prefix</span></a><span> </span><span class="hs-string">&quot;+&quot;</span><span> </span><span class="hs-identifier hs-var">id</span><span>
-</span><a name="line-83"></a><span>          </span><span class="hs-special">]</span><span>
-</span><a name="line-84"></a><span>        </span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#binary"><span class="hs-identifier hs-var">binary</span></a><span> </span><span class="hs-string">&quot;*&quot;</span><span> </span><span class="hs-special">(</span><span class="hs-operator hs-var">*</span><span class="hs-special">)</span><span> </span><span class="hs-special">]</span><span>
-</span><a name="line-85"></a><span>        </span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#binary"><span class="hs-identifier hs-var">binary</span></a><span> </span><span class="hs-string">&quot;+&quot;</span><span> </span><span class="hs-special">(</span><span class="hs-operator hs-var">+</span><span class="hs-special">)</span><span> </span><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#binary"><span class="hs-identifier hs-var">binary</span></a><span> </span><span class="hs-string">&quot;-&quot;</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="hs-special">)</span><span class="hs-special">]</span><span>
-</span><a name="line-86"></a><span>        </span><span class="hs-special">]</span><span>
-</span><a name="line-87"></a><span>
-</span><a name="line-88"></a><span class="hs-identifier">polynomialP</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">IsOrderedPolynomial</span><span> </span><a href="#local-6989586621679139288"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span>
-</span><a name="line-89"></a><span>            </span><span class="hs-glyph">=&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Coefficient</span><span> </span><a href="#local-6989586621679139288"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Arity</span><span> </span><a href="#local-6989586621679139288"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a><span> </span><a href="#local-6989586621679139288"><span class="hs-identifier hs-type">poly</span></a><span>
-</span><a name="line-90"></a><a name="polynomialP"><a href="Algebra.Ring.Polynomial.Parser.html#polynomialP"><span class="hs-identifier">polynomialP</span></a></a><span> </span><a name="local-6989586621679143549"><a href="#local-6989586621679143549"><span class="hs-identifier">coeffP</span></a></a><span> </span><a name="local-6989586621679143550"><a href="#local-6989586621679143550"><span class="hs-identifier">varP</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="#local-6989586621679143551"><span class="hs-identifier hs-var">body</span></a><span>
-</span><a name="line-91"></a><span>  </span><span class="hs-keyword">where</span><span> </span><a name="local-6989586621679143551"><a href="#local-6989586621679143551"><span class="hs-identifier">body</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">makeExprParser</span><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Polynomial.Parser.html#factorP"><span class="hs-identifier hs-var">factorP</span></a><span> </span><span class="hs-identifier hs-var">Proxy</span><span> </span><a href="#local-6989586621679143549"><span class="hs-identifier hs-var">coeffP</span></a><span> </span><a href="#local-6989586621679143550"><span class="hs-identifier hs-var">varP</span></a><span class="hs-special">)</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#table"><span class="hs-identifier hs-var">table</span></a><span>
-</span><a name="line-92"></a><span>
-</span><a name="line-93"></a><span class="hs-identifier">rationalP</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Field</span><span> </span><a href="#local-6989586621679139287"><span class="hs-identifier hs-type">k</span></a><span> </span><span class="hs-glyph">=&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a><span> </span><a href="#local-6989586621679139287"><span class="hs-identifier hs-type">k</span></a><span>
-</span><a name="line-94"></a><a name="rationalP"><a href="Algebra.Ring.Polynomial.Parser.html#rationalP"><span class="hs-identifier">rationalP</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#fromRat"><span class="hs-identifier hs-var">fromRat</span></a><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-identifier hs-var">P.toRational</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">L.scientific</span><span>
-</span><a name="line-95"></a><span>
-</span><a name="line-96"></a><span class="hs-identifier">integerP</span><span> </span><span class="hs-glyph">::</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a><span> </span><span class="hs-identifier hs-type">Integer</span><span>
-</span><a name="line-97"></a><a name="integerP"><a href="Algebra.Ring.Polynomial.Parser.html#integerP"><span class="hs-identifier">integerP</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">fromInteger'</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">L.decimal</span><span>
-</span><a name="line-98"></a><span>
-</span><a name="line-99"></a><span class="hs-identifier">fromRat</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Field</span><span> </span><a href="#local-6989586621679138312"><span class="hs-identifier hs-type">k</span></a><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">P.Rational</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="#local-6989586621679138312"><span class="hs-identifier hs-type">k</span></a><span>
-</span><a name="line-100"></a><a name="fromRat"><a href="Algebra.Ring.Polynomial.Parser.html#fromRat"><span class="hs-identifier">fromRat</span></a></a><span> </span><a name="local-6989586621679143552"><a href="#local-6989586621679143552"><span class="hs-identifier">r</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">fromInteger'</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">P.numerator</span><span> </span><a href="#local-6989586621679143552"><span class="hs-identifier hs-var">r</span></a><span class="hs-special">)</span><span> </span><span class="hs-operator hs-var">/</span><span> </span><span class="hs-identifier hs-var">fromInteger'</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">P.denominator</span><span> </span><a href="#local-6989586621679143552"><span class="hs-identifier hs-var">r</span></a><span class="hs-special">)</span><span>
-</span><a name="line-101"></a><span>
-</span><a name="line-102"></a><span class="hs-identifier">parsePolynomialWith</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">IsOrderedPolynomial</span><span> </span><a href="#local-6989586621679138171"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span>
-</span><a name="line-103"></a><span>                    </span><span class="hs-glyph">=&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Coefficient</span><span> </span><a href="#local-6989586621679138171"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Arity</span><span> </span><a href="#local-6989586621679138171"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span>
-</span><a name="line-104"></a><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">T.Text</span><span>
-</span><a name="line-105"></a><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Either</span><span> </span><span class="hs-identifier hs-type">String</span><span> </span><a href="#local-6989586621679138171"><span class="hs-identifier hs-type">poly</span></a><span>
-</span><a name="line-106"></a><a name="parsePolynomialWith"><a href="Algebra.Ring.Polynomial.Parser.html#parsePolynomialWith"><span class="hs-identifier">parsePolynomialWith</span></a></a><span> </span><a name="local-6989586621679143678"><a href="#local-6989586621679143678"><span class="hs-identifier">coeffP</span></a></a><span> </span><a name="local-6989586621679143679"><a href="#local-6989586621679143679"><span class="hs-identifier">varP</span></a></a><span> </span><span class="hs-glyph">=</span><span>
-</span><a name="line-107"></a><span>  </span><span class="hs-identifier hs-var">left</span><span> </span><span class="hs-identifier hs-var">parseErrorPretty</span><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-identifier hs-var">parse</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">space</span><span> </span><span class="hs-operator hs-var">*&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Parser.html#polynomialP"><span class="hs-identifier hs-var">polynomialP</span></a><span> </span><a href="#local-6989586621679143678"><span class="hs-identifier hs-var">coeffP</span></a><span> </span><a href="#local-6989586621679143679"><span class="hs-identifier hs-var">varP</span></a><span> </span><span class="hs-operator hs-var">&lt;*</span><span> </span><span class="hs-identifier hs-var">eof</span><span class="hs-special">)</span><span> </span><span class="hs-string">&quot;input&quot;</span><span>
-</span><a name="line-108"></a></pre></body></html>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Void</span></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeLits</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Symbol</span></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Megaparsec</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Megaparsec.Char</span></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Text.Megaparsec.Char.Lexer</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">L</span></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span id="local-6989586621679234049"><span id="local-6989586621679234050"><span id="local-6989586621679234051"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#lexeme"><span class="hs-identifier hs-type">lexeme</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadParsec</span></span><span> </span><span class="annot"><a href="#local-6989586621679234051"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679234050"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679234050"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679234049"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679234050"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679234049"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-48"></span><span id="lexeme"><span class="annot"><span class="annottext">lexeme :: m a -&gt; m a
+</span><a href="Algebra.Ring.Polynomial.Parser.html#lexeme"><span class="hs-identifier hs-var hs-var">lexeme</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m () -&gt; m a -&gt; m a
+forall e s (m :: * -&gt; *) a. MonadParsec e s m =&gt; m () -&gt; m a -&gt; m a
+</span><span class="hs-identifier hs-var">L.lexeme</span></span><span> </span><span class="annot"><span class="annottext">m ()
+forall e s (m :: * -&gt; *).
+(MonadParsec e s m, Token s ~ Char) =&gt;
+m ()
+</span><span class="hs-identifier hs-var">space</span></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span id="local-6989586621679234041"><span id="local-6989586621679234042"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier hs-type">symbol</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadParsec</span></span><span> </span><span class="annot"><a href="#local-6989586621679234042"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679234041"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679234041"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span></span></span><span>
+</span><span id="line-51"></span><span id="symbol"><span class="annot"><span class="annottext">symbol :: Text -&gt; m Text
+</span><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier hs-var hs-var">symbol</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m () -&gt; Tokens Text -&gt; m (Tokens Text)
+forall e s (m :: * -&gt; *).
+MonadParsec e s m =&gt;
+m () -&gt; Tokens s -&gt; m (Tokens s)
+</span><span class="hs-identifier hs-var">L.symbol</span></span><span> </span><span class="annot"><span class="annottext">m ()
+forall e s (m :: * -&gt; *).
+(MonadParsec e s m, Token s ~ Char) =&gt;
+m ()
+</span><span class="hs-identifier hs-var">space</span></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-keyword">type</span><span> </span><span id="Parser"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-var">Parser</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parsec</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Void</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-keyword">type</span><span> </span><span id="VariableParser"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-var">VariableParser</span></a></span></span><span> </span><span id="local-6989586621679233854"><span class="annot"><a href="#local-6989586621679233854"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ordinal</span></span><span> </span><span class="annot"><a href="#local-6989586621679233854"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span id="local-6989586621679233852"><span id="local-6989586621679233853"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#unlabeldVarP"><span class="hs-identifier hs-type">unlabeldVarP</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679233853"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-59"></span><span>  </span><span class="annot"><a href="#local-6989586621679233852"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679233853"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-60"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-61"></span><span>  </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679233853"><span class="hs-identifier hs-type">n</span></a></span></span></span><span>
+</span><span id="line-62"></span><span id="unlabeldVarP"><span class="annot"><span class="annottext">unlabeldVarP :: proxy n -&gt; Text -&gt; VariableParser n
+</span><a href="Algebra.Ring.Polynomial.Parser.html#unlabeldVarP"><span class="hs-identifier hs-var hs-var">unlabeldVarP</span></a></span></span><span> </span><span id="local-6989586621679233851"><span class="annot"><span class="annottext">proxy n
+</span><a href="#local-6989586621679233851"><span class="hs-identifier hs-var">pxy</span></a></span></span><span> </span><span id="local-6989586621679233850"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679233850"><span class="hs-identifier hs-var">pfx</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">VariableParser n -&gt; VariableParser n
+forall e (m :: * -&gt; *) a. MonadParsec e Text m =&gt; m a -&gt; m a
+</span><a href="Algebra.Ring.Polynomial.Parser.html#lexeme"><span class="hs-identifier hs-var">lexeme</span></a></span><span> </span><span class="annot"><span class="annottext">(VariableParser n -&gt; VariableParser n)
+-&gt; VariableParser n -&gt; VariableParser n
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621679233849"><span class="annot"><span class="annottext">Natural
+</span><a href="#local-6989586621679233849"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Text -&gt; ParsecT Void Text Identity Text
+forall e (m :: * -&gt; *). MonadParsec e Text m =&gt; Text -&gt; m Text
+</span><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier hs-var">symbol</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679233850"><span class="hs-identifier hs-var">pfx</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT Void Text Identity Text
+-&gt; ParsecT Void Text Identity Char
+-&gt; ParsecT Void Text Identity Char
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token Text -&gt; ParsecT Void Text Identity (Token Text)
+forall e s (m :: * -&gt; *).
+(MonadParsec e s m, Token s ~ Char) =&gt;
+Token s -&gt; m (Token s)
+</span><span class="hs-identifier hs-var">char</span></span><span> </span><span class="annot"><span class="annottext">Char
+Token Text
+</span><span class="hs-char">&#39;_&#39;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Void Text Identity Char
+-&gt; ParsecT Void Text Identity Natural
+-&gt; ParsecT Void Text Identity Natural
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Void Text Identity Natural
+forall e s (m :: * -&gt; *) a.
+(MonadParsec e s m, Token s ~ Char, Num a) =&gt;
+m a
+</span><span class="hs-identifier hs-var">L.decimal</span></span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Natural -&gt; Maybe (Ordinal n)
+forall (n :: Nat). KnownNat n =&gt; Natural -&gt; Maybe (Ordinal n)
+</span><span class="hs-identifier hs-var">naturalToOrd</span></span><span> </span><span class="annot"><span class="annottext">Natural
+</span><a href="#local-6989586621679233849"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-65"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679233845"><span class="annot"><span class="annottext">Ordinal n
+</span><a href="#local-6989586621679233845"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordinal n -&gt; VariableParser n
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Ordinal n
+</span><a href="#local-6989586621679233845"><span class="hs-identifier hs-var">o</span></a></span><span>
+</span><span id="line-66"></span><span>    </span><span class="annot"><span class="annottext">Maybe (Ordinal n)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; VariableParser n
+forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; VariableParser n) -&gt; String -&gt; VariableParser n
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Number &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall w. Monoid w =&gt; w -&gt; w -&gt; w
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Natural -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Natural
+</span><a href="#local-6989586621679233849"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall w. Monoid w =&gt; w -&gt; w -&gt; w
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot; is out of bound: &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall w. Monoid w =&gt; w -&gt; w -&gt; w
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Natural -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">proxy n -&gt; Natural
+forall (n :: Nat) (proxy :: Nat -&gt; *).
+KnownNat n =&gt;
+proxy n -&gt; Natural
+</span><span class="hs-identifier hs-var">natVal</span></span><span> </span><span class="annot"><span class="annottext">proxy n
+</span><a href="#local-6989586621679233851"><span class="hs-identifier hs-var">pxy</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span id="local-6989586621679233991"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#fromSingList"><span class="hs-identifier hs-type">fromSingList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Sing</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679233991"><span class="hs-identifier hs-type">list</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Symbol</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span class="hs-special">]</span></span><span class="hs-cpp">
+#if MIN_VERSION_singletons(2,3,0)
+</span><span id="fromSingList"><span class="annot"><span class="annottext">fromSingList :: Sing list -&gt; [Text]
+</span><a href="Algebra.Ring.Polynomial.Parser.html#fromSingList"><span class="hs-identifier hs-var hs-var">fromSingList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing list -&gt; [Text]
+forall k (a :: k). SingKind k =&gt; Sing a -&gt; Demote k
+</span><span class="hs-identifier hs-var">fromSing</span></span><span class="hs-cpp">
+#else
+</span><span class="hs-identifier">fromSingList</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">map</span><span> </span><span class="hs-identifier">T.pack</span><span> </span><span class="hs-operator">.</span><span> </span><span class="hs-identifier">fromSing</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-75"></span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#labeledVarP"><span class="hs-identifier hs-type">labeledVarP</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679233839"><span class="annot"><a href="#local-6989586621679233839"><span class="hs-identifier hs-type">list</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-77"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Sing</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679233839"><span class="hs-identifier hs-type">list</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Symbol</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-78"></span><span>  </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Length</span></span><span> </span><span class="annot"><a href="#local-6989586621679233839"><span class="hs-identifier hs-type">list</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-79"></span><span id="labeledVarP"><span class="annot"><span class="annottext">labeledVarP :: Sing list -&gt; VariableParser (Length list)
+</span><a href="Algebra.Ring.Polynomial.Parser.html#labeledVarP"><span class="hs-identifier hs-var hs-var">labeledVarP</span></a></span></span><span> </span><span id="local-6989586621679233838"><span class="annot"><span class="annottext">Sing list
+</span><a href="#local-6989586621679233838"><span class="hs-identifier hs-var">slist</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-80"></span><span>  </span><span class="annot"><span class="annottext">[ParsecT Void Text Identity (Ordinal (Length list))]
+-&gt; ParsecT Void Text Identity (Ordinal (Length list))
+forall (f :: * -&gt; *) (m :: * -&gt; *) a.
+(Foldable f, Alternative m) =&gt;
+f (m a) -&gt; m a
+</span><span class="hs-identifier hs-var">choice</span></span><span> </span><span class="annot"><span class="annottext">([ParsecT Void Text Identity (Ordinal (Length list))]
+ -&gt; ParsecT Void Text Identity (Ordinal (Length list)))
+-&gt; [ParsecT Void Text Identity (Ordinal (Length list))]
+-&gt; ParsecT Void Text Identity (Ordinal (Length list))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Ordinal (Length list)
+ -&gt; Text -&gt; ParsecT Void Text Identity (Ordinal (Length list)))
+-&gt; [Ordinal (Length list)]
+-&gt; [Text]
+-&gt; [ParsecT Void Text Identity (Ordinal (Length list))]
+forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="annot"><span class="annottext">Ordinal (Length list)
+-&gt; Text -&gt; ParsecT Void Text Identity (Ordinal (Length list))
+forall (f :: * -&gt; *) e a. MonadParsec e Text f =&gt; a -&gt; Text -&gt; f a
+</span><a href="#local-6989586621679233835"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SNat (Length list) -&gt; [Ordinal (Length list)]
+forall (n :: Nat). SNat n -&gt; [Ordinal n]
+</span><span class="hs-identifier hs-var">enumOrdinal</span></span><span> </span><span class="annot"><span class="annottext">(SNat (Length list) -&gt; [Ordinal (Length list)])
+-&gt; SNat (Length list) -&gt; [Ordinal (Length list)]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Sing (Length list) -&gt; SNat (Length list)
+forall (n :: Nat). Sing n -&gt; SNat n
+</span><span class="hs-identifier hs-var">singToSNat</span></span><span> </span><span class="annot"><span class="annottext">(Sing (Length list) -&gt; SNat (Length list))
+-&gt; Sing (Length list) -&gt; SNat (Length list)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Sing list -&gt; Sing (Apply LengthSym0 list)
+forall (t :: * -&gt; *) a (t1 :: t a).
+SFoldable t =&gt;
+Sing t1 -&gt; Sing (Apply LengthSym0 t1)
+</span><span class="hs-identifier hs-var">sLength</span></span><span> </span><span class="annot"><span class="annottext">Sing list
+</span><a href="#local-6989586621679233838"><span class="hs-identifier hs-var">slist</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Text] -&gt; [ParsecT Void Text Identity (Ordinal (Length list))])
+-&gt; [Text] -&gt; [ParsecT Void Text Identity (Ordinal (Length list))]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Sing list -&gt; [Text]
+forall (list :: [Symbol]). Sing list -&gt; [Text]
+</span><a href="Algebra.Ring.Polynomial.Parser.html#fromSingList"><span class="hs-identifier hs-var">fromSingList</span></a></span><span> </span><span class="annot"><span class="annottext">Sing list
+</span><a href="#local-6989586621679233838"><span class="hs-identifier hs-var">slist</span></a></span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-82"></span><span>    </span><span id="local-6989586621679233835"><span class="annot"><span class="annottext">go :: a -&gt; Text -&gt; f a
+</span><a href="#local-6989586621679233835"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679233831"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679233831"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679233830"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679233830"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679233831"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f Text -&gt; f a
+forall (f :: * -&gt; *) a b. Functor f =&gt; a -&gt; f b -&gt; f a
+</span><span class="hs-operator hs-var">&lt;$</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; f Text
+forall e (m :: * -&gt; *). MonadParsec e Text m =&gt; Text -&gt; m Text
+</span><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier hs-var">symbol</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679233830"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span id="local-6989586621679233956"><span id="local-6989586621679233957"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#varPowP"><span class="hs-identifier hs-type">varPowP</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679233957"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679233957"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OrderedMonomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679233956"><span class="hs-identifier hs-type">ord</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679233957"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-85"></span><span id="varPowP"><span class="annot"><span class="annottext">varPowP :: VariableParser n -&gt; Parser (OrderedMonomial ord n)
+</span><a href="Algebra.Ring.Polynomial.Parser.html#varPowP"><span class="hs-identifier hs-var hs-var">varPowP</span></a></span></span><span> </span><span id="local-6989586621679233827"><span class="annot"><span class="annottext">VariableParser n
+</span><a href="#local-6989586621679233827"><span class="hs-identifier hs-var">vp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-86"></span><span>  </span><span class="annot"><span class="annottext">Parser (OrderedMonomial ord n) -&gt; Parser (OrderedMonomial ord n)
+forall e (m :: * -&gt; *) a. MonadParsec e Text m =&gt; m a -&gt; m a
+</span><a href="Algebra.Ring.Polynomial.Parser.html#lexeme"><span class="hs-identifier hs-var">lexeme</span></a></span><span> </span><span class="annot"><span class="annottext">(Parser (OrderedMonomial ord n) -&gt; Parser (OrderedMonomial ord n))
+-&gt; Parser (OrderedMonomial ord n) -&gt; Parser (OrderedMonomial ord n)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-87"></span><span>    </span><span class="annot"><span class="annottext">OrderedMonomial ord n -&gt; Natural -&gt; OrderedMonomial ord n
+forall r. Unital r =&gt; r -&gt; Natural -&gt; r
+</span><span class="hs-identifier hs-var">pow</span></span><span> </span><span class="annot"><span class="annottext">(OrderedMonomial ord n -&gt; Natural -&gt; OrderedMonomial ord n)
+-&gt; Parser (OrderedMonomial ord n)
+-&gt; ParsecT Void Text Identity (Natural -&gt; OrderedMonomial ord n)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Proxy ord -&gt; Monomial n -&gt; OrderedMonomial ord n
+forall k (proxy :: k -&gt; *) (ord :: k) (n :: Nat).
+proxy ord -&gt; Monomial n -&gt; OrderedMonomial ord n
+</span><span class="hs-identifier hs-var">orderMonomial</span></span><span> </span><span class="annot"><span class="annottext">Proxy ord
+forall k (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="annot"><span class="annottext">(Monomial n -&gt; OrderedMonomial ord n)
+-&gt; (Ordinal n -&gt; Monomial n) -&gt; Ordinal n -&gt; OrderedMonomial ord n
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; Ordinal n -&gt; Monomial n
+forall (n :: Nat). SNat n -&gt; Ordinal n -&gt; Monomial n
+</span><span class="hs-identifier hs-var">varMonom</span></span><span> </span><span class="annot"><span class="annottext">SNat n
+forall (n :: Nat). KnownNat n =&gt; SNat n
+</span><span class="hs-identifier hs-var">sNat</span></span><span> </span><span class="annot"><span class="annottext">(Ordinal n -&gt; OrderedMonomial ord n)
+-&gt; VariableParser n -&gt; Parser (OrderedMonomial ord n)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">VariableParser n
+</span><a href="#local-6989586621679233827"><span class="hs-identifier hs-var">vp</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>      </span><span class="annot"><span class="annottext">ParsecT Void Text Identity (Natural -&gt; OrderedMonomial ord n)
+-&gt; ParsecT Void Text Identity Natural
+-&gt; Parser (OrderedMonomial ord n)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Natural
+-&gt; ParsecT Void Text Identity Natural
+-&gt; ParsecT Void Text Identity Natural
+forall (m :: * -&gt; *) a. Alternative m =&gt; a -&gt; m a -&gt; m a
+</span><span class="hs-identifier hs-var">option</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Natural
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; ParsecT Void Text Identity Text
+forall e (m :: * -&gt; *). MonadParsec e Text m =&gt; Text -&gt; m Text
+</span><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier hs-var">symbol</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;^&quot;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Void Text Identity Text
+-&gt; ParsecT Void Text Identity Natural
+-&gt; ParsecT Void Text Identity Natural
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Void Text Identity Natural
+forall e s (m :: * -&gt; *) a.
+(MonadParsec e s m, Token s ~ Char, Num a) =&gt;
+m a
+</span><span class="hs-identifier hs-var">L.decimal</span></span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span id="local-6989586621679233817"><span id="local-6989586621679233818"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#monomialP"><span class="hs-identifier hs-type">monomialP</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679233818"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679233818"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OrderedMonomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679233817"><span class="hs-identifier hs-type">ord</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679233818"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-91"></span><span id="monomialP"><span class="annot"><span class="annottext">monomialP :: VariableParser n -&gt; Parser (OrderedMonomial ord n)
+</span><a href="Algebra.Ring.Polynomial.Parser.html#monomialP"><span class="hs-identifier hs-var hs-var">monomialP</span></a></span></span><span> </span><span id="local-6989586621679233815"><span class="annot"><span class="annottext">VariableParser n
+</span><a href="#local-6989586621679233815"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-92"></span><span>  </span><span class="annot"><span class="annottext">[OrderedMonomial ord n] -&gt; OrderedMonomial ord n
+forall (f :: * -&gt; *) r. (Foldable f, Unital r) =&gt; f r -&gt; r
+</span><span class="hs-identifier hs-var">product</span></span><span> </span><span class="annot"><span class="annottext">([OrderedMonomial ord n] -&gt; OrderedMonomial ord n)
+-&gt; ParsecT Void Text Identity [OrderedMonomial ord n]
+-&gt; Parser (OrderedMonomial ord n)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">VariableParser n -&gt; Parser (OrderedMonomial ord n)
+forall (n :: Nat) ord.
+KnownNat n =&gt;
+VariableParser n -&gt; Parser (OrderedMonomial ord n)
+</span><a href="Algebra.Ring.Polynomial.Parser.html#varPowP"><span class="hs-identifier hs-var">varPowP</span></a></span><span> </span><span class="annot"><span class="annottext">VariableParser n
+</span><a href="#local-6989586621679233815"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Parser (OrderedMonomial ord n)
+-&gt; ParsecT Void Text Identity (Maybe Text)
+-&gt; ParsecT Void Text Identity [OrderedMonomial ord n]
+forall (m :: * -&gt; *) a sep. MonadPlus m =&gt; m a -&gt; m sep -&gt; m [a]
+</span><span class="hs-operator hs-var">`sepBy1`</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Void Text Identity Text
+-&gt; ParsecT Void Text Identity (Maybe Text)
+forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f (Maybe a)
+</span><span class="hs-identifier hs-var">optional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; ParsecT Void Text Identity Text
+forall e (m :: * -&gt; *). MonadParsec e Text m =&gt; Text -&gt; m Text
+</span><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier hs-var">symbol</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;*&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span id="local-6989586621679233912"><span id="local-6989586621679233913"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#factorP"><span class="hs-identifier hs-type">factorP</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-95"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679233913"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-96"></span><span>  </span><span class="annot"><a href="#local-6989586621679233912"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679233913"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-97"></span><span>  </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679233913"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-98"></span><span>  </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arity</span></span><span> </span><span class="annot"><a href="#local-6989586621679233913"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-99"></span><span>  </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679233913"><span class="hs-identifier hs-type">poly</span></a></span></span></span><span>
+</span><span id="line-100"></span><span id="factorP"><span class="annot"><span class="annottext">factorP :: proxy poly
+-&gt; Parser (Coefficient poly)
+-&gt; VariableParser (Arity poly)
+-&gt; Parser poly
+</span><a href="Algebra.Ring.Polynomial.Parser.html#factorP"><span class="hs-identifier hs-var hs-var">factorP</span></a></span></span><span> </span><span class="annot"><span class="annottext">proxy poly
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679233810"><span class="annot"><span class="annottext">Parser (Coefficient poly)
+</span><a href="#local-6989586621679233810"><span class="hs-identifier hs-var">coeffP</span></a></span></span><span> </span><span id="local-6989586621679233809"><span class="annot"><span class="annottext">VariableParser (Arity poly)
+</span><a href="#local-6989586621679233809"><span class="hs-identifier hs-var">varP</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-101"></span><span>  </span><span class="annot"><span class="annottext">Coefficient poly -&gt; poly
+forall poly. IsPolynomial poly =&gt; Coefficient poly -&gt; poly
+</span><span class="hs-identifier hs-var">injectCoeff</span></span><span> </span><span class="annot"><span class="annottext">(Coefficient poly -&gt; poly)
+-&gt; Parser (Coefficient poly) -&gt; Parser poly
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parser (Coefficient poly) -&gt; Parser (Coefficient poly)
+forall e (m :: * -&gt; *) a. MonadParsec e Text m =&gt; m a -&gt; m a
+</span><a href="Algebra.Ring.Polynomial.Parser.html#lexeme"><span class="hs-identifier hs-var">lexeme</span></a></span><span> </span><span class="annot"><span class="annottext">Parser (Coefficient poly)
+</span><a href="#local-6989586621679233810"><span class="hs-identifier hs-var">coeffP</span></a></span><span>
+</span><span id="line-102"></span><span>    </span><span class="annot"><span class="annottext">Parser poly -&gt; Parser poly -&gt; Parser poly
+forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
+</span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly) -&gt; poly
+forall poly.
+IsOrderedPolynomial poly =&gt;
+OrderedMonomial (MOrder poly) (Arity poly) -&gt; poly
+</span><span class="hs-identifier hs-var">fromOrderedMonomial</span></span><span> </span><span class="annot"><span class="annottext">(OrderedMonomial (MOrder poly) (Arity poly) -&gt; poly)
+-&gt; ParsecT
+     Void Text Identity (OrderedMonomial (MOrder poly) (Arity poly))
+-&gt; Parser poly
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">VariableParser (Arity poly)
+-&gt; ParsecT
+     Void Text Identity (OrderedMonomial (MOrder poly) (Arity poly))
+forall (n :: Nat) ord.
+KnownNat n =&gt;
+VariableParser n -&gt; Parser (OrderedMonomial ord n)
+</span><a href="Algebra.Ring.Polynomial.Parser.html#monomialP"><span class="hs-identifier hs-var">monomialP</span></a></span><span> </span><span class="annot"><span class="annottext">VariableParser (Arity poly)
+</span><a href="#local-6989586621679233809"><span class="hs-identifier hs-var">varP</span></a></span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span id="local-6989586621679233921"><span id="local-6989586621679233922"><span id="local-6989586621679233923"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#binary"><span class="hs-identifier hs-type">binary</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadParsec</span></span><span> </span><span class="annot"><a href="#local-6989586621679233923"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679233922"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679233921"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679233921"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679233921"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Operator</span></span><span> </span><span class="annot"><a href="#local-6989586621679233922"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679233921"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-105"></span><span id="binary"><span class="annot"><span class="annottext">binary :: Text -&gt; (a -&gt; a -&gt; a) -&gt; Operator m a
+</span><a href="Algebra.Ring.Polynomial.Parser.html#binary"><span class="hs-identifier hs-var hs-var">binary</span></a></span></span><span> </span><span id="local-6989586621679233804"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679233804"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679233803"><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679233803"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (a -&gt; a -&gt; a) -&gt; Operator m a
+forall (m :: * -&gt; *) a. m (a -&gt; a -&gt; a) -&gt; Operator m a
+</span><span class="hs-identifier hs-var">InfixL</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679233803"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; a) -&gt; m Text -&gt; m (a -&gt; a -&gt; a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; a -&gt; f b -&gt; f a
+</span><span class="hs-operator hs-var">&lt;$</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; m Text
+forall e (m :: * -&gt; *). MonadParsec e Text m =&gt; Text -&gt; m Text
+</span><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier hs-var">symbol</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679233804"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span id="local-6989586621679233927"><span id="local-6989586621679233928"><span id="local-6989586621679233929"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#prefix"><span class="hs-identifier hs-type">prefix</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadParsec</span></span><span> </span><span class="annot"><a href="#local-6989586621679233929"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679233928"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679233927"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679233927"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Operator</span></span><span> </span><span class="annot"><a href="#local-6989586621679233928"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679233927"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-108"></span><span id="prefix"><span class="annot"><span class="annottext">prefix :: Text -&gt; (a -&gt; a) -&gt; Operator m a
+</span><a href="Algebra.Ring.Polynomial.Parser.html#prefix"><span class="hs-identifier hs-var hs-var">prefix</span></a></span></span><span> </span><span id="local-6989586621679233800"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679233800"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679233799"><span class="annot"><span class="annottext">a -&gt; a
+</span><a href="#local-6989586621679233799"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (a -&gt; a) -&gt; Operator m a
+forall (m :: * -&gt; *) a. m (a -&gt; a) -&gt; Operator m a
+</span><span class="hs-identifier hs-var">Prefix</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a
+</span><a href="#local-6989586621679233799"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; a) -&gt; m Text -&gt; m (a -&gt; a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; a -&gt; f b -&gt; f a
+</span><span class="hs-operator hs-var">&lt;$</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; m Text
+forall e (m :: * -&gt; *). MonadParsec e Text m =&gt; Text -&gt; m Text
+</span><a href="Algebra.Ring.Polynomial.Parser.html#symbol"><span class="hs-identifier hs-var">symbol</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679233800"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span id="local-6989586621679233908"><span id="local-6989586621679233909"><span id="local-6989586621679233911"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#table"><span class="hs-identifier hs-type">table</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679233911"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadParsec</span></span><span> </span><span class="annot"><a href="#local-6989586621679233909"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679233908"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Operator</span></span><span> </span><span class="annot"><a href="#local-6989586621679233908"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679233911"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-111"></span><span id="table"><span class="annot"><span class="annottext">table :: [[Operator m a]]
+</span><a href="Algebra.Ring.Polynomial.Parser.html#table"><span class="hs-identifier hs-var hs-var">table</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-112"></span><span>  </span><span class="hs-special">[</span><span>
+</span><span id="line-113"></span><span>    </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Text -&gt; (a -&gt; a) -&gt; Operator m a
+forall e (m :: * -&gt; *) a.
+MonadParsec e Text m =&gt;
+Text -&gt; (a -&gt; a) -&gt; Operator m a
+</span><a href="Algebra.Ring.Polynomial.Parser.html#prefix"><span class="hs-identifier hs-var">prefix</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;-&quot;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+forall r. Group r =&gt; r -&gt; r
+</span><span class="hs-identifier hs-var">negate</span></span><span>
+</span><span id="line-114"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text -&gt; (a -&gt; a) -&gt; Operator m a
+forall e (m :: * -&gt; *) a.
+MonadParsec e Text m =&gt;
+Text -&gt; (a -&gt; a) -&gt; Operator m a
+</span><a href="Algebra.Ring.Polynomial.Parser.html#prefix"><span class="hs-identifier hs-var">prefix</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;+&quot;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-115"></span><span>    </span><span class="hs-special">]</span><span>
+</span><span id="line-116"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Text -&gt; (a -&gt; a -&gt; a) -&gt; Operator m a
+forall e (m :: * -&gt; *) a.
+MonadParsec e Text m =&gt;
+Text -&gt; (a -&gt; a -&gt; a) -&gt; Operator m a
+</span><a href="Algebra.Ring.Polynomial.Parser.html#binary"><span class="hs-identifier hs-var">binary</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;*&quot;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall r. Multiplicative r =&gt; r -&gt; r -&gt; r
+</span><span class="hs-operator hs-var">(*)</span></span><span class="hs-special">]</span><span>
+</span><span id="line-117"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Text -&gt; (a -&gt; a -&gt; a) -&gt; Operator m a
+forall e (m :: * -&gt; *) a.
+MonadParsec e Text m =&gt;
+Text -&gt; (a -&gt; a -&gt; a) -&gt; Operator m a
+</span><a href="Algebra.Ring.Polynomial.Parser.html#binary"><span class="hs-identifier hs-var">binary</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;+&quot;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall r. Additive r =&gt; r -&gt; r -&gt; r
+</span><span class="hs-operator hs-var">(+)</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text -&gt; (a -&gt; a -&gt; a) -&gt; Operator m a
+forall e (m :: * -&gt; *) a.
+MonadParsec e Text m =&gt;
+Text -&gt; (a -&gt; a -&gt; a) -&gt; Operator m a
+</span><a href="Algebra.Ring.Polynomial.Parser.html#binary"><span class="hs-identifier hs-var">binary</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;-&quot;</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-118"></span><span>  </span><span class="hs-special">]</span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span id="local-6989586621679233873"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#polynomialP"><span class="hs-identifier hs-type">polynomialP</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-121"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679233873"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-122"></span><span>  </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679233873"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-123"></span><span>  </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arity</span></span><span> </span><span class="annot"><a href="#local-6989586621679233873"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-124"></span><span>  </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679233873"><span class="hs-identifier hs-type">poly</span></a></span></span><span>
+</span><span id="line-125"></span><span id="polynomialP"><span class="annot"><span class="annottext">polynomialP :: Parser (Coefficient poly)
+-&gt; VariableParser (Arity poly) -&gt; Parser poly
+</span><a href="Algebra.Ring.Polynomial.Parser.html#polynomialP"><span class="hs-identifier hs-var hs-var">polynomialP</span></a></span></span><span> </span><span id="local-6989586621679233791"><span class="annot"><span class="annottext">Parser (Coefficient poly)
+</span><a href="#local-6989586621679233791"><span class="hs-identifier hs-var">coeffP</span></a></span></span><span> </span><span id="local-6989586621679233790"><span class="annot"><span class="annottext">VariableParser (Arity poly)
+</span><a href="#local-6989586621679233790"><span class="hs-identifier hs-var">varP</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Parser poly
+</span><a href="#local-6989586621679233789"><span class="hs-identifier hs-var">body</span></a></span><span>
+</span><span id="line-126"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-127"></span><span>    </span><span id="local-6989586621679233789"><span class="annot"><span class="annottext">body :: Parser poly
+</span><a href="#local-6989586621679233789"><span class="hs-identifier hs-var hs-var">body</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Parser poly
+-&gt; [[Operator (ParsecT Void Text Identity) poly]] -&gt; Parser poly
+forall (m :: * -&gt; *) a.
+MonadPlus m =&gt;
+m a -&gt; [[Operator m a]] -&gt; m a
+</span><span class="hs-identifier hs-var">makeExprParser</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Proxy poly
+-&gt; Parser (Coefficient poly)
+-&gt; VariableParser (Arity poly)
+-&gt; Parser poly
+forall poly (proxy :: * -&gt; *).
+IsOrderedPolynomial poly =&gt;
+proxy poly
+-&gt; Parser (Coefficient poly)
+-&gt; VariableParser (Arity poly)
+-&gt; Parser poly
+</span><a href="Algebra.Ring.Polynomial.Parser.html#factorP"><span class="hs-identifier hs-var">factorP</span></a></span><span> </span><span class="annot"><span class="annottext">Proxy poly
+forall k (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="annot"><span class="annottext">Parser (Coefficient poly)
+</span><a href="#local-6989586621679233791"><span class="hs-identifier hs-var">coeffP</span></a></span><span> </span><span class="annot"><span class="annottext">VariableParser (Arity poly)
+</span><a href="#local-6989586621679233790"><span class="hs-identifier hs-var">varP</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[[Operator (ParsecT Void Text Identity) poly]]
+forall a e (m :: * -&gt; *).
+(CoeffRing a, MonadParsec e Text m) =&gt;
+[[Operator m a]]
+</span><a href="Algebra.Ring.Polynomial.Parser.html#table"><span class="hs-identifier hs-var">table</span></a></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span id="local-6989586621679233787"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#rationalP"><span class="hs-identifier hs-type">rationalP</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679233787"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679233787"><span class="hs-identifier hs-type">k</span></a></span></span><span>
+</span><span id="line-130"></span><span id="rationalP"><span class="annot"><span class="annottext">rationalP :: Parser k
+</span><a href="Algebra.Ring.Polynomial.Parser.html#rationalP"><span class="hs-identifier hs-var hs-var">rationalP</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; k
+forall k. Field k =&gt; Rational -&gt; k
+</span><a href="Algebra.Ring.Polynomial.Parser.html#fromRat"><span class="hs-identifier hs-var">fromRat</span></a></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; k) -&gt; (Scientific -&gt; Rational) -&gt; Scientific -&gt; k
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Scientific -&gt; Rational
+forall a. Real a =&gt; a -&gt; Rational
+</span><span class="hs-identifier hs-var">P.toRational</span></span><span> </span><span class="annot"><span class="annottext">(Scientific -&gt; k)
+-&gt; ParsecT Void Text Identity Scientific -&gt; Parser k
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Void Text Identity Scientific
+forall e s (m :: * -&gt; *).
+(MonadParsec e s m, Token s ~ Char) =&gt;
+m Scientific
+</span><span class="hs-identifier hs-var">L.scientific</span></span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#integerP"><span class="hs-identifier hs-type">integerP</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
+</span><span id="line-133"></span><span id="integerP"><span class="annot"><span class="annottext">integerP :: Parser Integer
+</span><a href="Algebra.Ring.Polynomial.Parser.html#integerP"><span class="hs-identifier hs-var hs-var">integerP</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer
+forall r. Ring r =&gt; Integer -&gt; r
+</span><span class="hs-identifier hs-var">fromInteger&#39;</span></span><span> </span><span class="annot"><span class="annottext">(Integer -&gt; Integer) -&gt; Parser Integer -&gt; Parser Integer
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parser Integer
+forall e s (m :: * -&gt; *) a.
+(MonadParsec e s m, Token s ~ Char, Num a) =&gt;
+m a
+</span><span class="hs-identifier hs-var">L.decimal</span></span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span id="local-6989586621679233906"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#fromRat"><span class="hs-identifier hs-type">fromRat</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679233906"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">P.Rational</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679233906"><span class="hs-identifier hs-type">k</span></a></span></span><span>
+</span><span id="line-136"></span><span id="fromRat"><span class="annot"><span class="annottext">fromRat :: Rational -&gt; k
+</span><a href="Algebra.Ring.Polynomial.Parser.html#fromRat"><span class="hs-identifier hs-var hs-var">fromRat</span></a></span></span><span> </span><span id="local-6989586621679233783"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679233783"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; k
+forall r. Ring r =&gt; Integer -&gt; r
+</span><span class="hs-identifier hs-var">fromInteger&#39;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Integer
+forall a. Ratio a -&gt; a
+</span><span class="hs-identifier hs-var">P.numerator</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679233783"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">k -&gt; k -&gt; k
+forall r. Division r =&gt; r -&gt; r -&gt; r
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; k
+forall r. Ring r =&gt; Integer -&gt; r
+</span><span class="hs-identifier hs-var">fromInteger&#39;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Integer
+forall a. Ratio a -&gt; a
+</span><span class="hs-identifier hs-var">P.denominator</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679233783"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span id="local-6989586621679233779"><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#parsePolynomialWith"><span class="hs-identifier hs-type">parsePolynomialWith</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-139"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679233779"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-140"></span><span>  </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#Parser"><span class="hs-identifier hs-type">Parser</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679233779"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-141"></span><span>  </span><span class="annot"><a href="Algebra.Ring.Polynomial.Parser.html#VariableParser"><span class="hs-identifier hs-type">VariableParser</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arity</span></span><span> </span><span class="annot"><a href="#local-6989586621679233779"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-142"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-143"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><a href="#local-6989586621679233779"><span class="hs-identifier hs-type">poly</span></a></span></span><span>
+</span><span id="line-144"></span><span id="parsePolynomialWith"><span class="annot"><span class="annottext">parsePolynomialWith :: Parser (Coefficient poly)
+-&gt; VariableParser (Arity poly) -&gt; Text -&gt; Either String poly
+</span><a href="Algebra.Ring.Polynomial.Parser.html#parsePolynomialWith"><span class="hs-identifier hs-var hs-var">parsePolynomialWith</span></a></span></span><span> </span><span id="local-6989586621679233778"><span class="annot"><span class="annottext">Parser (Coefficient poly)
+</span><a href="#local-6989586621679233778"><span class="hs-identifier hs-var">coeffP</span></a></span></span><span> </span><span id="local-6989586621679233777"><span class="annot"><span class="annottext">VariableParser (Arity poly)
+</span><a href="#local-6989586621679233777"><span class="hs-identifier hs-var">varP</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-145"></span><span>  </span><span class="annot"><span class="annottext">(ParseErrorBundle Text Void -&gt; String)
+-&gt; Either (ParseErrorBundle Text Void) poly -&gt; Either String poly
+forall (a :: * -&gt; * -&gt; *) b c d.
+ArrowChoice a =&gt;
+a b c -&gt; a (Either b d) (Either c d)
+</span><span class="hs-identifier hs-var">left</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ParseError Text Void -&gt; String
+forall s e.
+(VisualStream s, ShowErrorComponent e) =&gt;
+ParseError s e -&gt; String
+</span><span class="hs-identifier hs-var">parseErrorPretty</span></span><span> </span><span class="annot"><span class="annottext">(ParseError Text Void -&gt; String)
+-&gt; (ParseErrorBundle Text Void -&gt; ParseError Text Void)
+-&gt; ParseErrorBundle Text Void
+-&gt; String
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (ParseError Text Void) -&gt; ParseError Text Void
+forall a. NonEmpty a -&gt; a
+</span><span class="hs-identifier hs-var">NE.head</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (ParseError Text Void) -&gt; ParseError Text Void)
+-&gt; (ParseErrorBundle Text Void -&gt; NonEmpty (ParseError Text Void))
+-&gt; ParseErrorBundle Text Void
+-&gt; ParseError Text Void
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ParseErrorBundle Text Void -&gt; NonEmpty (ParseError Text Void)
+forall s e. ParseErrorBundle s e -&gt; NonEmpty (ParseError s e)
+</span><span class="hs-identifier hs-var hs-var">bundleErrors</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Either (ParseErrorBundle Text Void) poly -&gt; Either String poly)
+-&gt; (Text -&gt; Either (ParseErrorBundle Text Void) poly)
+-&gt; Text
+-&gt; Either String poly
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Parsec Void Text poly
+-&gt; String -&gt; Text -&gt; Either (ParseErrorBundle Text Void) poly
+forall e s a.
+Parsec e s a -&gt; String -&gt; s -&gt; Either (ParseErrorBundle s e) a
+</span><span class="hs-identifier hs-var">parse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ParsecT Void Text Identity ()
+forall e s (m :: * -&gt; *).
+(MonadParsec e s m, Token s ~ Char) =&gt;
+m ()
+</span><span class="hs-identifier hs-var">space</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Void Text Identity ()
+-&gt; Parsec Void Text poly -&gt; Parsec Void Text poly
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parser (Coefficient poly)
+-&gt; VariableParser (Arity poly) -&gt; Parsec Void Text poly
+forall poly.
+IsOrderedPolynomial poly =&gt;
+Parser (Coefficient poly)
+-&gt; VariableParser (Arity poly) -&gt; Parser poly
+</span><a href="Algebra.Ring.Polynomial.Parser.html#polynomialP"><span class="hs-identifier hs-var">polynomialP</span></a></span><span> </span><span class="annot"><span class="annottext">Parser (Coefficient poly)
+</span><a href="#local-6989586621679233778"><span class="hs-identifier hs-var">coeffP</span></a></span><span> </span><span class="annot"><span class="annottext">VariableParser (Arity poly)
+</span><a href="#local-6989586621679233777"><span class="hs-identifier hs-var">varP</span></a></span><span> </span><span class="annot"><span class="annottext">Parsec Void Text poly
+-&gt; ParsecT Void Text Identity () -&gt; Parsec Void Text poly
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f a
+</span><span class="hs-operator hs-var">&lt;*</span></span><span> </span><span class="annot"><span class="annottext">ParsecT Void Text Identity ()
+forall e s (m :: * -&gt; *). MonadParsec e s m =&gt; m ()
+</span><span class="hs-identifier hs-var">eof</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;input&quot;</span></span><span>
+</span><span id="line-146"></span></pre></body></html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE ConstraintKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleInstances #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE GADTs #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE PolyKinds #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-9"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-10"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-11"></span><span class="hs-pragma">{-# LANGUAGE TypeOperators #-}</span><span>
+</span><span id="line-12"></span><span class="hs-pragma">{-# LANGUAGE NoImplicitPrelude #-}</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra.Algorithms.Groebner.SelectionStrategy</span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#SelectionStrategy"><span class="hs-identifier">SelectionStrategy</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#calcWeight%27"><span class="hs-identifier">calcWeight&#39;</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#GrevlexStrategy"><span class="hs-identifier">GrevlexStrategy</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>    </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#NormalStrategy"><span class="hs-identifier">NormalStrategy</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#SugarStrategy"><span class="hs-identifier">SugarStrategy</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#GradedStrategy"><span class="hs-identifier">GradedStrategy</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Algebra.Internal</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Algebra.Prelude.Core.html"><span class="hs-identifier">Algebra.Prelude.Core</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Kind</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Type</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">{- | Calculate the weight of given polynomials w.r.t. the given strategy.
+   Buchberger&#39;s algorithm proccesses the pair with the most least weight first.
+   This function requires the @Ord@ instance for the weight; this constraint is not required
+   in the &#39;calcWeight&#39; because of the ease of implementation. So use this function.
+-}</span><span>
+</span><span id="line-34"></span><span id="local-6989586621679386090"><span id="local-6989586621679386091"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#calcWeight%27"><span class="hs-identifier hs-type">calcWeight&#39;</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#SelectionStrategy"><span class="hs-identifier hs-type">SelectionStrategy</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arity</span></span><span> </span><span class="annot"><a href="#local-6989586621679386091"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679386090"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679386091"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-36"></span><span>  </span><span class="annot"><a href="#local-6989586621679386090"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-37"></span><span>  </span><span class="annot"><a href="#local-6989586621679386091"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-38"></span><span>  </span><span class="annot"><a href="#local-6989586621679386091"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-39"></span><span>  </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#Weight"><span class="hs-identifier hs-type">Weight</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arity</span></span><span> </span><span class="annot"><a href="#local-6989586621679386091"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679386090"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MOrder</span></span><span> </span><span class="annot"><a href="#local-6989586621679386091"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-40"></span><span id="calcWeight%27"><span class="annot"><span class="annottext">calcWeight&#39; :: s -&gt; poly -&gt; poly -&gt; Weight (Arity poly) s (MOrder poly)
+</span><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#calcWeight%27"><span class="hs-identifier hs-var hs-var">calcWeight&#39;</span></a></span></span><span> </span><span id="local-6989586621679386089"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679386089"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Proxy s -&gt; poly -&gt; poly -&gt; Weight (Arity poly) s (MOrder poly)
+forall k (n :: Nat) (s :: k) poly.
+(SelectionStrategy n s, IsOrderedPolynomial poly,
+ n ~ Arity poly) =&gt;
+Proxy s -&gt; poly -&gt; poly -&gt; Weight n s (MOrder poly)
+</span><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#calcWeight"><span class="hs-identifier hs-var">calcWeight</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s -&gt; Proxy s
+forall a. a -&gt; Proxy a
+</span><span class="hs-identifier hs-var">toProxy</span></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679386089"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#calcWeight%27"><span class="hs-pragma hs-type">calcWeight&#39;</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- | Type-class for selection strategies in Buchberger&#39;s algorithm.</span><span>
+</span><span id="line-44"></span><span class="hs-keyword">class</span><span> </span><span id="SelectionStrategy"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#SelectionStrategy"><span class="hs-identifier hs-var">SelectionStrategy</span></a></span></span><span> </span><span id="local-6989586621679386157"><span class="annot"><a href="#local-6989586621679386157"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span id="local-6989586621679386156"><span class="annot"><a href="#local-6989586621679386156"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="Weight"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#Weight"><span class="hs-identifier hs-var">Weight</span></a></span></span><span> </span><span id="local-6989586621679386157"><span class="annot"><a href="#local-6989586621679386157"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span id="local-6989586621679386156"><span class="annot"><a href="#local-6989586621679386156"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679386086"><span class="annot"><a href="#local-6989586621679386086"><span class="hs-identifier hs-type">ord</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-comment">-- | Calculates the weight for the given pair of polynomial used for selection strategy.</span><span>
+</span><span id="line-48"></span><span>  </span><span id="local-6989586621679386154"><span id="calcWeight"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#calcWeight"><span class="hs-identifier hs-type">calcWeight</span></a></span></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-49"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679386154"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679386157"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arity</span></span><span> </span><span class="annot"><a href="#local-6989586621679386154"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-50"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Proxy</span></span><span> </span><span class="annot"><a href="#local-6989586621679386156"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-51"></span><span>    </span><span class="annot"><a href="#local-6989586621679386154"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-52"></span><span>    </span><span class="annot"><a href="#local-6989586621679386154"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-53"></span><span>    </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#Weight"><span class="hs-identifier hs-type">Weight</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679386157"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679386156"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MOrder</span></span><span> </span><span class="annot"><a href="#local-6989586621679386154"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-comment">{- | Buchberger&#39;s normal selection strategy. This selects the pair with
+   the least LCM(LT(f), LT(g)) w.r.t. current monomial ordering.
+-}</span><span>
+</span><span id="line-58"></span><span class="hs-keyword">data</span><span> </span><span id="NormalStrategy"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#NormalStrategy"><span class="hs-identifier hs-var">NormalStrategy</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NormalStrategy"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#NormalStrategy"><span class="hs-identifier hs-var">NormalStrategy</span></a></span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679386077"><span id="local-6989586621679386079"><span id="local-6989586621679386081"><span id="local-6989586621679386083"><span class="annot"><span class="annottext">ReadPrec [NormalStrategy]
+ReadPrec NormalStrategy
+Int -&gt; ReadS NormalStrategy
+ReadS [NormalStrategy]
+(Int -&gt; ReadS NormalStrategy)
+-&gt; ReadS [NormalStrategy]
+-&gt; ReadPrec NormalStrategy
+-&gt; ReadPrec [NormalStrategy]
+-&gt; Read NormalStrategy
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+readListPrec :: ReadPrec [NormalStrategy]
+$creadListPrec :: ReadPrec [NormalStrategy]
+readPrec :: ReadPrec NormalStrategy
+$creadPrec :: ReadPrec NormalStrategy
+readList :: ReadS [NormalStrategy]
+$creadList :: ReadS [NormalStrategy]
+readsPrec :: Int -&gt; ReadS NormalStrategy
+$creadsPrec :: Int -&gt; ReadS NormalStrategy
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679386070"><span id="local-6989586621679386072"><span id="local-6989586621679386074"><span class="annot"><span class="annottext">Int -&gt; NormalStrategy -&gt; ShowS
+[NormalStrategy] -&gt; ShowS
+NormalStrategy -&gt; String
+(Int -&gt; NormalStrategy -&gt; ShowS)
+-&gt; (NormalStrategy -&gt; String)
+-&gt; ([NormalStrategy] -&gt; ShowS)
+-&gt; Show NormalStrategy
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [NormalStrategy] -&gt; ShowS
+$cshowList :: [NormalStrategy] -&gt; ShowS
+show :: NormalStrategy -&gt; String
+$cshow :: NormalStrategy -&gt; String
+showsPrec :: Int -&gt; NormalStrategy -&gt; ShowS
+$cshowsPrec :: Int -&gt; NormalStrategy -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679386065"><span id="local-6989586621679386067"><span class="annot"><span class="annottext">NormalStrategy -&gt; NormalStrategy -&gt; Bool
+(NormalStrategy -&gt; NormalStrategy -&gt; Bool)
+-&gt; (NormalStrategy -&gt; NormalStrategy -&gt; Bool) -&gt; Eq NormalStrategy
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: NormalStrategy -&gt; NormalStrategy -&gt; Bool
+$c/= :: NormalStrategy -&gt; NormalStrategy -&gt; Bool
+== :: NormalStrategy -&gt; NormalStrategy -&gt; Bool
+$c== :: NormalStrategy -&gt; NormalStrategy -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679386049"><span id="local-6989586621679386051"><span id="local-6989586621679386053"><span id="local-6989586621679386055"><span id="local-6989586621679386057"><span id="local-6989586621679386059"><span id="local-6989586621679386061"><span class="annot"><span class="annottext">Eq NormalStrategy
+Eq NormalStrategy
+-&gt; (NormalStrategy -&gt; NormalStrategy -&gt; Ordering)
+-&gt; (NormalStrategy -&gt; NormalStrategy -&gt; Bool)
+-&gt; (NormalStrategy -&gt; NormalStrategy -&gt; Bool)
+-&gt; (NormalStrategy -&gt; NormalStrategy -&gt; Bool)
+-&gt; (NormalStrategy -&gt; NormalStrategy -&gt; Bool)
+-&gt; (NormalStrategy -&gt; NormalStrategy -&gt; NormalStrategy)
+-&gt; (NormalStrategy -&gt; NormalStrategy -&gt; NormalStrategy)
+-&gt; Ord NormalStrategy
+NormalStrategy -&gt; NormalStrategy -&gt; Bool
+NormalStrategy -&gt; NormalStrategy -&gt; Ordering
+NormalStrategy -&gt; NormalStrategy -&gt; NormalStrategy
+forall a.
+Eq a
+-&gt; (a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+min :: NormalStrategy -&gt; NormalStrategy -&gt; NormalStrategy
+$cmin :: NormalStrategy -&gt; NormalStrategy -&gt; NormalStrategy
+max :: NormalStrategy -&gt; NormalStrategy -&gt; NormalStrategy
+$cmax :: NormalStrategy -&gt; NormalStrategy -&gt; NormalStrategy
+&gt;= :: NormalStrategy -&gt; NormalStrategy -&gt; Bool
+$c&gt;= :: NormalStrategy -&gt; NormalStrategy -&gt; Bool
+&gt; :: NormalStrategy -&gt; NormalStrategy -&gt; Bool
+$c&gt; :: NormalStrategy -&gt; NormalStrategy -&gt; Bool
+&lt;= :: NormalStrategy -&gt; NormalStrategy -&gt; Bool
+$c&lt;= :: NormalStrategy -&gt; NormalStrategy -&gt; Bool
+&lt; :: NormalStrategy -&gt; NormalStrategy -&gt; Bool
+$c&lt; :: NormalStrategy -&gt; NormalStrategy -&gt; Bool
+compare :: NormalStrategy -&gt; NormalStrategy -&gt; Ordering
+$ccompare :: NormalStrategy -&gt; NormalStrategy -&gt; Ordering
+$cp1Ord :: Eq NormalStrategy
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span id="local-6989586621679386047"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#SelectionStrategy"><span class="hs-identifier hs-type">SelectionStrategy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679386047"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#NormalStrategy"><span class="hs-identifier hs-type">NormalStrategy</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="Weight"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#Weight"><span class="hs-identifier hs-var">Weight</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679386047"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#NormalStrategy"><span class="hs-identifier hs-type">NormalStrategy</span></a></span><span> </span><span id="local-6989586621679386044"><span class="annot"><a href="#local-6989586621679386044"><span class="hs-identifier hs-type hs-type">ord</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OrderedMonomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679386044"><span class="hs-identifier hs-type">ord</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679386047"><span class="hs-identifier hs-type">n</span></a></span><span>
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621679386043"><span class="annot"><span class="annottext">calcWeight :: Proxy NormalStrategy
+-&gt; poly -&gt; poly -&gt; Weight n NormalStrategy (MOrder poly)
+</span><a href="#local-6989586621679386043"><span class="hs-identifier hs-var hs-var hs-var hs-var">calcWeight</span></a></span></span><span> </span><span class="annot"><span class="annottext">Proxy NormalStrategy
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679386042"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679386042"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679386041"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679386041"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) n
+-&gt; OrderedMonomial (MOrder poly) n
+-&gt; OrderedMonomial (MOrder poly) n
+forall k (n :: Nat) (ord :: k).
+KnownNat n =&gt;
+OrderedMonomial ord n
+-&gt; OrderedMonomial ord n -&gt; OrderedMonomial ord n
+</span><span class="hs-identifier hs-var">lcmMonomial</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+forall poly.
+IsOrderedPolynomial poly =&gt;
+poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+</span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679386042"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+forall poly.
+IsOrderedPolynomial poly =&gt;
+poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+</span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679386041"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#calcWeight"><span class="hs-pragma hs-type">calcWeight</span></a></span><span> </span><span class="hs-pragma">#-}</span></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- | Choose the pair with the least LCM(LT(f), LT(g)) w.r.t. &#39;Grevlex&#39; order.</span><span>
+</span><span id="line-66"></span><span class="hs-keyword">data</span><span> </span><span id="GrevlexStrategy"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#GrevlexStrategy"><span class="hs-identifier hs-var">GrevlexStrategy</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="GrevlexStrategy"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#GrevlexStrategy"><span class="hs-identifier hs-var">GrevlexStrategy</span></a></span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679386030"><span id="local-6989586621679386032"><span id="local-6989586621679386034"><span id="local-6989586621679386036"><span class="annot"><span class="annottext">ReadPrec [GrevlexStrategy]
+ReadPrec GrevlexStrategy
+Int -&gt; ReadS GrevlexStrategy
+ReadS [GrevlexStrategy]
+(Int -&gt; ReadS GrevlexStrategy)
+-&gt; ReadS [GrevlexStrategy]
+-&gt; ReadPrec GrevlexStrategy
+-&gt; ReadPrec [GrevlexStrategy]
+-&gt; Read GrevlexStrategy
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+readListPrec :: ReadPrec [GrevlexStrategy]
+$creadListPrec :: ReadPrec [GrevlexStrategy]
+readPrec :: ReadPrec GrevlexStrategy
+$creadPrec :: ReadPrec GrevlexStrategy
+readList :: ReadS [GrevlexStrategy]
+$creadList :: ReadS [GrevlexStrategy]
+readsPrec :: Int -&gt; ReadS GrevlexStrategy
+$creadsPrec :: Int -&gt; ReadS GrevlexStrategy
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679386024"><span id="local-6989586621679386026"><span id="local-6989586621679386028"><span class="annot"><span class="annottext">Int -&gt; GrevlexStrategy -&gt; ShowS
+[GrevlexStrategy] -&gt; ShowS
+GrevlexStrategy -&gt; String
+(Int -&gt; GrevlexStrategy -&gt; ShowS)
+-&gt; (GrevlexStrategy -&gt; String)
+-&gt; ([GrevlexStrategy] -&gt; ShowS)
+-&gt; Show GrevlexStrategy
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [GrevlexStrategy] -&gt; ShowS
+$cshowList :: [GrevlexStrategy] -&gt; ShowS
+show :: GrevlexStrategy -&gt; String
+$cshow :: GrevlexStrategy -&gt; String
+showsPrec :: Int -&gt; GrevlexStrategy -&gt; ShowS
+$cshowsPrec :: Int -&gt; GrevlexStrategy -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679386020"><span id="local-6989586621679386022"><span class="annot"><span class="annottext">GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool
+(GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool)
+-&gt; (GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool)
+-&gt; Eq GrevlexStrategy
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool
+$c/= :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool
+== :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool
+$c== :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679386005"><span id="local-6989586621679386007"><span id="local-6989586621679386009"><span id="local-6989586621679386011"><span id="local-6989586621679386013"><span id="local-6989586621679386015"><span id="local-6989586621679386017"><span class="annot"><span class="annottext">Eq GrevlexStrategy
+Eq GrevlexStrategy
+-&gt; (GrevlexStrategy -&gt; GrevlexStrategy -&gt; Ordering)
+-&gt; (GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool)
+-&gt; (GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool)
+-&gt; (GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool)
+-&gt; (GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool)
+-&gt; (GrevlexStrategy -&gt; GrevlexStrategy -&gt; GrevlexStrategy)
+-&gt; (GrevlexStrategy -&gt; GrevlexStrategy -&gt; GrevlexStrategy)
+-&gt; Ord GrevlexStrategy
+GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool
+GrevlexStrategy -&gt; GrevlexStrategy -&gt; Ordering
+GrevlexStrategy -&gt; GrevlexStrategy -&gt; GrevlexStrategy
+forall a.
+Eq a
+-&gt; (a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+min :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; GrevlexStrategy
+$cmin :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; GrevlexStrategy
+max :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; GrevlexStrategy
+$cmax :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; GrevlexStrategy
+&gt;= :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool
+$c&gt;= :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool
+&gt; :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool
+$c&gt; :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool
+&lt;= :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool
+$c&lt;= :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool
+&lt; :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool
+$c&lt; :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; Bool
+compare :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; Ordering
+$ccompare :: GrevlexStrategy -&gt; GrevlexStrategy -&gt; Ordering
+$cp1Ord :: Eq GrevlexStrategy
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span id="local-6989586621679386004"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#SelectionStrategy"><span class="hs-identifier hs-type">SelectionStrategy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679386004"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#GrevlexStrategy"><span class="hs-identifier hs-type">GrevlexStrategy</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="Weight"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#Weight"><span class="hs-identifier hs-var">Weight</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679386004"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#GrevlexStrategy"><span class="hs-identifier hs-type">GrevlexStrategy</span></a></span><span> </span><span id="local-6989586621679386002"><span class="annot"><a href="#local-6989586621679386002"><span class="hs-identifier hs-type hs-type">ord</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OrderedMonomial</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Grevlex</span></span><span> </span><span class="annot"><a href="#local-6989586621679386004"><span class="hs-identifier hs-type">n</span></a></span><span>
+</span><span id="line-70"></span><span>  </span><span id="local-6989586621679386001"><span class="annot"><span class="annottext">calcWeight :: Proxy GrevlexStrategy
+-&gt; poly -&gt; poly -&gt; Weight n GrevlexStrategy (MOrder poly)
+</span><a href="#local-6989586621679386001"><span class="hs-identifier hs-var hs-var hs-var hs-var">calcWeight</span></a></span></span><span> </span><span class="annot"><span class="annottext">Proxy GrevlexStrategy
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679386000"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679386000"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679385999"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385999"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-71"></span><span>    </span><span class="annot"><span class="annottext">Proxy Grevlex
+-&gt; OrderedMonomial (MOrder poly) n -&gt; OrderedMonomial Grevlex n
+forall k1 k2 (o&#39; :: k1) (ord :: k2) (n :: Nat).
+Proxy o&#39; -&gt; OrderedMonomial ord n -&gt; OrderedMonomial o&#39; n
+</span><span class="hs-identifier hs-var">changeMonomialOrderProxy</span></span><span> </span><span class="annot"><span class="annottext">Proxy Grevlex
+forall k (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="annot"><span class="annottext">(OrderedMonomial (MOrder poly) n -&gt; OrderedMonomial Grevlex n)
+-&gt; OrderedMonomial (MOrder poly) n -&gt; OrderedMonomial Grevlex n
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-72"></span><span>      </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) n
+-&gt; OrderedMonomial (MOrder poly) n
+-&gt; OrderedMonomial (MOrder poly) n
+forall k (n :: Nat) (ord :: k).
+KnownNat n =&gt;
+OrderedMonomial ord n
+-&gt; OrderedMonomial ord n -&gt; OrderedMonomial ord n
+</span><span class="hs-identifier hs-var">lcmMonomial</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+forall poly.
+IsOrderedPolynomial poly =&gt;
+poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+</span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679386000"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+forall poly.
+IsOrderedPolynomial poly =&gt;
+poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+</span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385999"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#calcWeight"><span class="hs-pragma hs-type">calcWeight</span></a></span><span> </span><span class="hs-pragma">#-}</span></span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="hs-keyword">data</span><span> </span><span id="GradedStrategy"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#GradedStrategy"><span class="hs-identifier hs-var">GradedStrategy</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="GradedStrategy"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#GradedStrategy"><span class="hs-identifier hs-var">GradedStrategy</span></a></span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679385988"><span id="local-6989586621679385990"><span id="local-6989586621679385992"><span id="local-6989586621679385994"><span class="annot"><span class="annottext">ReadPrec [GradedStrategy]
+ReadPrec GradedStrategy
+Int -&gt; ReadS GradedStrategy
+ReadS [GradedStrategy]
+(Int -&gt; ReadS GradedStrategy)
+-&gt; ReadS [GradedStrategy]
+-&gt; ReadPrec GradedStrategy
+-&gt; ReadPrec [GradedStrategy]
+-&gt; Read GradedStrategy
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+readListPrec :: ReadPrec [GradedStrategy]
+$creadListPrec :: ReadPrec [GradedStrategy]
+readPrec :: ReadPrec GradedStrategy
+$creadPrec :: ReadPrec GradedStrategy
+readList :: ReadS [GradedStrategy]
+$creadList :: ReadS [GradedStrategy]
+readsPrec :: Int -&gt; ReadS GradedStrategy
+$creadsPrec :: Int -&gt; ReadS GradedStrategy
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679385982"><span id="local-6989586621679385984"><span id="local-6989586621679385986"><span class="annot"><span class="annottext">Int -&gt; GradedStrategy -&gt; ShowS
+[GradedStrategy] -&gt; ShowS
+GradedStrategy -&gt; String
+(Int -&gt; GradedStrategy -&gt; ShowS)
+-&gt; (GradedStrategy -&gt; String)
+-&gt; ([GradedStrategy] -&gt; ShowS)
+-&gt; Show GradedStrategy
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [GradedStrategy] -&gt; ShowS
+$cshowList :: [GradedStrategy] -&gt; ShowS
+show :: GradedStrategy -&gt; String
+$cshow :: GradedStrategy -&gt; String
+showsPrec :: Int -&gt; GradedStrategy -&gt; ShowS
+$cshowsPrec :: Int -&gt; GradedStrategy -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679385978"><span id="local-6989586621679385980"><span class="annot"><span class="annottext">GradedStrategy -&gt; GradedStrategy -&gt; Bool
+(GradedStrategy -&gt; GradedStrategy -&gt; Bool)
+-&gt; (GradedStrategy -&gt; GradedStrategy -&gt; Bool) -&gt; Eq GradedStrategy
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: GradedStrategy -&gt; GradedStrategy -&gt; Bool
+$c/= :: GradedStrategy -&gt; GradedStrategy -&gt; Bool
+== :: GradedStrategy -&gt; GradedStrategy -&gt; Bool
+$c== :: GradedStrategy -&gt; GradedStrategy -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679385963"><span id="local-6989586621679385965"><span id="local-6989586621679385967"><span id="local-6989586621679385969"><span id="local-6989586621679385971"><span id="local-6989586621679385973"><span id="local-6989586621679385975"><span class="annot"><span class="annottext">Eq GradedStrategy
+Eq GradedStrategy
+-&gt; (GradedStrategy -&gt; GradedStrategy -&gt; Ordering)
+-&gt; (GradedStrategy -&gt; GradedStrategy -&gt; Bool)
+-&gt; (GradedStrategy -&gt; GradedStrategy -&gt; Bool)
+-&gt; (GradedStrategy -&gt; GradedStrategy -&gt; Bool)
+-&gt; (GradedStrategy -&gt; GradedStrategy -&gt; Bool)
+-&gt; (GradedStrategy -&gt; GradedStrategy -&gt; GradedStrategy)
+-&gt; (GradedStrategy -&gt; GradedStrategy -&gt; GradedStrategy)
+-&gt; Ord GradedStrategy
+GradedStrategy -&gt; GradedStrategy -&gt; Bool
+GradedStrategy -&gt; GradedStrategy -&gt; Ordering
+GradedStrategy -&gt; GradedStrategy -&gt; GradedStrategy
+forall a.
+Eq a
+-&gt; (a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+min :: GradedStrategy -&gt; GradedStrategy -&gt; GradedStrategy
+$cmin :: GradedStrategy -&gt; GradedStrategy -&gt; GradedStrategy
+max :: GradedStrategy -&gt; GradedStrategy -&gt; GradedStrategy
+$cmax :: GradedStrategy -&gt; GradedStrategy -&gt; GradedStrategy
+&gt;= :: GradedStrategy -&gt; GradedStrategy -&gt; Bool
+$c&gt;= :: GradedStrategy -&gt; GradedStrategy -&gt; Bool
+&gt; :: GradedStrategy -&gt; GradedStrategy -&gt; Bool
+$c&gt; :: GradedStrategy -&gt; GradedStrategy -&gt; Bool
+&lt;= :: GradedStrategy -&gt; GradedStrategy -&gt; Bool
+$c&lt;= :: GradedStrategy -&gt; GradedStrategy -&gt; Bool
+&lt; :: GradedStrategy -&gt; GradedStrategy -&gt; Bool
+$c&lt; :: GradedStrategy -&gt; GradedStrategy -&gt; Bool
+compare :: GradedStrategy -&gt; GradedStrategy -&gt; Ordering
+$ccompare :: GradedStrategy -&gt; GradedStrategy -&gt; Ordering
+$cp1Ord :: Eq GradedStrategy
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- | Choose the pair with the least LCM(LT(f), LT(g)) w.r.t. graded current ordering.</span><span>
+</span><span id="line-78"></span><span id="local-6989586621679385962"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#SelectionStrategy"><span class="hs-identifier hs-type">SelectionStrategy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385962"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#GradedStrategy"><span class="hs-identifier hs-type">GradedStrategy</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="Weight"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#Weight"><span class="hs-identifier hs-var">Weight</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679385962"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#GradedStrategy"><span class="hs-identifier hs-type">GradedStrategy</span></a></span><span> </span><span id="local-6989586621679385960"><span class="annot"><a href="#local-6989586621679385960"><span class="hs-identifier hs-type hs-type">ord</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OrderedMonomial</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Graded</span></span><span> </span><span class="annot"><a href="#local-6989586621679385960"><span class="hs-identifier hs-type">ord</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679385962"><span class="hs-identifier hs-type">n</span></a></span><span>
+</span><span id="line-80"></span><span>  </span><span id="local-6989586621679385959"><span class="annot"><span class="annottext">calcWeight :: Proxy GradedStrategy
+-&gt; poly -&gt; poly -&gt; Weight n GradedStrategy (MOrder poly)
+</span><a href="#local-6989586621679385959"><span class="hs-identifier hs-var hs-var hs-var hs-var">calcWeight</span></a></span></span><span> </span><span class="annot"><span class="annottext">Proxy GradedStrategy
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679385958"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385958"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679385957"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385957"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-81"></span><span>    </span><span class="annot"><span class="annottext">Proxy (Graded (MOrder poly))
+-&gt; OrderedMonomial (MOrder poly) n
+-&gt; OrderedMonomial (Graded (MOrder poly)) n
+forall k1 k2 (o&#39; :: k1) (ord :: k2) (n :: Nat).
+Proxy o&#39; -&gt; OrderedMonomial ord n -&gt; OrderedMonomial o&#39; n
+</span><span class="hs-identifier hs-var">changeMonomialOrderProxy</span></span><span> </span><span class="annot"><span class="annottext">Proxy (Graded (MOrder poly))
+forall k (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="annot"><span class="annottext">(OrderedMonomial (MOrder poly) n
+ -&gt; OrderedMonomial (Graded (MOrder poly)) n)
+-&gt; OrderedMonomial (MOrder poly) n
+-&gt; OrderedMonomial (Graded (MOrder poly)) n
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-82"></span><span>      </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) n
+-&gt; OrderedMonomial (MOrder poly) n
+-&gt; OrderedMonomial (MOrder poly) n
+forall k (n :: Nat) (ord :: k).
+KnownNat n =&gt;
+OrderedMonomial ord n
+-&gt; OrderedMonomial ord n -&gt; OrderedMonomial ord n
+</span><span class="hs-identifier hs-var">lcmMonomial</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+forall poly.
+IsOrderedPolynomial poly =&gt;
+poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+</span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385958"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+forall poly.
+IsOrderedPolynomial poly =&gt;
+poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+</span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385957"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#calcWeight"><span class="hs-pragma hs-type">calcWeight</span></a></span><span> </span><span class="hs-pragma">#-}</span></span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- | Sugar strategy. This chooses the pair with the least phantom homogenized degree and then break the tie with the given strategy (say @s@).</span><span>
+</span><span id="line-86"></span><span class="hs-keyword">newtype</span><span> </span><span id="SugarStrategy"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#SugarStrategy"><span class="hs-identifier hs-var">SugarStrategy</span></a></span></span><span> </span><span id="local-6989586621679385956"><span class="annot"><a href="#local-6989586621679385956"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="SugarStrategy"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#SugarStrategy"><span class="hs-identifier hs-var">SugarStrategy</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679385956"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679385947"><span id="local-6989586621679385949"><span id="local-6989586621679385951"><span id="local-6989586621679385953"><span class="annot"><span class="annottext">ReadPrec [SugarStrategy s]
+ReadPrec (SugarStrategy s)
+Int -&gt; ReadS (SugarStrategy s)
+ReadS [SugarStrategy s]
+(Int -&gt; ReadS (SugarStrategy s))
+-&gt; ReadS [SugarStrategy s]
+-&gt; ReadPrec (SugarStrategy s)
+-&gt; ReadPrec [SugarStrategy s]
+-&gt; Read (SugarStrategy s)
+forall s. Read s =&gt; ReadPrec [SugarStrategy s]
+forall s. Read s =&gt; ReadPrec (SugarStrategy s)
+forall s. Read s =&gt; Int -&gt; ReadS (SugarStrategy s)
+forall s. Read s =&gt; ReadS [SugarStrategy s]
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+readListPrec :: ReadPrec [SugarStrategy s]
+$creadListPrec :: forall s. Read s =&gt; ReadPrec [SugarStrategy s]
+readPrec :: ReadPrec (SugarStrategy s)
+$creadPrec :: forall s. Read s =&gt; ReadPrec (SugarStrategy s)
+readList :: ReadS [SugarStrategy s]
+$creadList :: forall s. Read s =&gt; ReadS [SugarStrategy s]
+readsPrec :: Int -&gt; ReadS (SugarStrategy s)
+$creadsPrec :: forall s. Read s =&gt; Int -&gt; ReadS (SugarStrategy s)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679385941"><span id="local-6989586621679385943"><span id="local-6989586621679385945"><span class="annot"><span class="annottext">Int -&gt; SugarStrategy s -&gt; ShowS
+[SugarStrategy s] -&gt; ShowS
+SugarStrategy s -&gt; String
+(Int -&gt; SugarStrategy s -&gt; ShowS)
+-&gt; (SugarStrategy s -&gt; String)
+-&gt; ([SugarStrategy s] -&gt; ShowS)
+-&gt; Show (SugarStrategy s)
+forall s. Show s =&gt; Int -&gt; SugarStrategy s -&gt; ShowS
+forall s. Show s =&gt; [SugarStrategy s] -&gt; ShowS
+forall s. Show s =&gt; SugarStrategy s -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [SugarStrategy s] -&gt; ShowS
+$cshowList :: forall s. Show s =&gt; [SugarStrategy s] -&gt; ShowS
+show :: SugarStrategy s -&gt; String
+$cshow :: forall s. Show s =&gt; SugarStrategy s -&gt; String
+showsPrec :: Int -&gt; SugarStrategy s -&gt; ShowS
+$cshowsPrec :: forall s. Show s =&gt; Int -&gt; SugarStrategy s -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679385937"><span id="local-6989586621679385939"><span class="annot"><span class="annottext">SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+(SugarStrategy s -&gt; SugarStrategy s -&gt; Bool)
+-&gt; (SugarStrategy s -&gt; SugarStrategy s -&gt; Bool)
+-&gt; Eq (SugarStrategy s)
+forall s. Eq s =&gt; SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+$c/= :: forall s. Eq s =&gt; SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+== :: SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+$c== :: forall s. Eq s =&gt; SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679385922"><span id="local-6989586621679385924"><span id="local-6989586621679385926"><span id="local-6989586621679385928"><span id="local-6989586621679385930"><span id="local-6989586621679385932"><span id="local-6989586621679385934"><span class="annot"><span class="annottext">Eq (SugarStrategy s)
+Eq (SugarStrategy s)
+-&gt; (SugarStrategy s -&gt; SugarStrategy s -&gt; Ordering)
+-&gt; (SugarStrategy s -&gt; SugarStrategy s -&gt; Bool)
+-&gt; (SugarStrategy s -&gt; SugarStrategy s -&gt; Bool)
+-&gt; (SugarStrategy s -&gt; SugarStrategy s -&gt; Bool)
+-&gt; (SugarStrategy s -&gt; SugarStrategy s -&gt; Bool)
+-&gt; (SugarStrategy s -&gt; SugarStrategy s -&gt; SugarStrategy s)
+-&gt; (SugarStrategy s -&gt; SugarStrategy s -&gt; SugarStrategy s)
+-&gt; Ord (SugarStrategy s)
+SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+SugarStrategy s -&gt; SugarStrategy s -&gt; Ordering
+SugarStrategy s -&gt; SugarStrategy s -&gt; SugarStrategy s
+forall a.
+Eq a
+-&gt; (a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall s. Ord s =&gt; Eq (SugarStrategy s)
+forall s. Ord s =&gt; SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+forall s. Ord s =&gt; SugarStrategy s -&gt; SugarStrategy s -&gt; Ordering
+forall s.
+Ord s =&gt;
+SugarStrategy s -&gt; SugarStrategy s -&gt; SugarStrategy s
+min :: SugarStrategy s -&gt; SugarStrategy s -&gt; SugarStrategy s
+$cmin :: forall s.
+Ord s =&gt;
+SugarStrategy s -&gt; SugarStrategy s -&gt; SugarStrategy s
+max :: SugarStrategy s -&gt; SugarStrategy s -&gt; SugarStrategy s
+$cmax :: forall s.
+Ord s =&gt;
+SugarStrategy s -&gt; SugarStrategy s -&gt; SugarStrategy s
+&gt;= :: SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+$c&gt;= :: forall s. Ord s =&gt; SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+&gt; :: SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+$c&gt; :: forall s. Ord s =&gt; SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+&lt;= :: SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+$c&lt;= :: forall s. Ord s =&gt; SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+&lt; :: SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+$c&lt; :: forall s. Ord s =&gt; SugarStrategy s -&gt; SugarStrategy s -&gt; Bool
+compare :: SugarStrategy s -&gt; SugarStrategy s -&gt; Ordering
+$ccompare :: forall s. Ord s =&gt; SugarStrategy s -&gt; SugarStrategy s -&gt; Ordering
+$cp1Ord :: forall s. Ord s =&gt; Eq (SugarStrategy s)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span id="local-6989586621679385920"><span id="local-6989586621679385921"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#SelectionStrategy"><span class="hs-identifier hs-type">SelectionStrategy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385921"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385920"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#SelectionStrategy"><span class="hs-identifier hs-type">SelectionStrategy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385921"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#SugarStrategy"><span class="hs-identifier hs-type">SugarStrategy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385920"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-89"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="Weight"><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#Weight"><span class="hs-identifier hs-var">Weight</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679385921"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#SugarStrategy"><span class="hs-identifier hs-type">SugarStrategy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385920"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679385918"><span class="annot"><a href="#local-6989586621679385918"><span class="hs-identifier hs-type hs-type">ord</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#Weight"><span class="hs-identifier hs-type">Weight</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385921"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385920"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385918"><span class="hs-identifier hs-type">ord</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span>  </span><span id="local-6989586621679385917"><span class="annot"><span class="annottext">calcWeight :: Proxy (SugarStrategy s)
+-&gt; poly -&gt; poly -&gt; Weight n (SugarStrategy s) (MOrder poly)
+</span><a href="#local-6989586621679385917"><span class="hs-identifier hs-var hs-var hs-var hs-var">calcWeight</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Proxy (SugarStrategy s)
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proxy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#SugarStrategy"><span class="hs-identifier hs-type">SugarStrategy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385920"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span id="local-6989586621679385916"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385916"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679385915"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385915"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679385914"><span class="hs-identifier hs-var">sugar</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Proxy s -&gt; poly -&gt; poly -&gt; Weight n s (MOrder poly)
+forall k (n :: Nat) (s :: k) poly.
+(SelectionStrategy n s, IsOrderedPolynomial poly,
+ n ~ Arity poly) =&gt;
+Proxy s -&gt; poly -&gt; poly -&gt; Weight n s (MOrder poly)
+</span><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#calcWeight"><span class="hs-identifier hs-var">calcWeight</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Proxy s
+forall k (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proxy</span></span><span> </span><span class="annot"><a href="#local-6989586621679385920"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385916"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385915"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-92"></span><span>      </span><span id="local-6989586621679385913"><span class="annot"><span class="annottext">deg&#39; :: poly -&gt; Int
+</span><a href="#local-6989586621679385913"><span class="hs-identifier hs-var hs-var">deg&#39;</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Int
+forall (t :: * -&gt; *) a. (Foldable t, Ord a) =&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">maximum</span></span><span> </span><span class="annot"><span class="annottext">([Int] -&gt; Int) -&gt; (poly -&gt; [Int]) -&gt; poly -&gt; Int
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(OrderedMonomial (MOrder poly) (Arity poly) -&gt; Int)
+-&gt; [OrderedMonomial (MOrder poly) (Arity poly)] -&gt; [Int]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly) -&gt; Int
+forall k (ord :: k) (n :: Nat). OrderedMonomial ord n -&gt; Int
+</span><span class="hs-identifier hs-var">totalDegree</span></span><span> </span><span class="annot"><span class="annottext">([OrderedMonomial (MOrder poly) (Arity poly)] -&gt; [Int])
+-&gt; (poly -&gt; [OrderedMonomial (MOrder poly) (Arity poly)])
+-&gt; poly
+-&gt; [Int]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Set (OrderedMonomial (MOrder poly) (Arity poly))
+-&gt; [OrderedMonomial (MOrder poly) (Arity poly)]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">(Set (OrderedMonomial (MOrder poly) (Arity poly))
+ -&gt; [OrderedMonomial (MOrder poly) (Arity poly)])
+-&gt; (poly -&gt; Set (OrderedMonomial (MOrder poly) (Arity poly)))
+-&gt; poly
+-&gt; [OrderedMonomial (MOrder poly) (Arity poly)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">poly -&gt; Set (OrderedMonomial (MOrder poly) (Arity poly))
+forall poly.
+IsOrderedPolynomial poly =&gt;
+poly -&gt; Set (OrderedMonomial (MOrder poly) (Arity poly))
+</span><span class="hs-identifier hs-var">orderedMonomials</span></span><span>
+</span><span id="line-93"></span><span>      </span><span id="local-6989586621679385906"><span class="annot"><span class="annottext">tsgr :: poly -&gt; Int
+</span><a href="#local-6989586621679385906"><span class="hs-identifier hs-var hs-var">tsgr</span></a></span></span><span> </span><span id="local-6989586621679385905"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385905"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">poly -&gt; Int
+</span><a href="#local-6989586621679385913"><span class="hs-identifier hs-var">deg&#39;</span></a></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385905"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall r. Group r =&gt; r -&gt; r -&gt; r
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) n -&gt; Int
+forall k (ord :: k) (n :: Nat). OrderedMonomial ord n -&gt; Int
+</span><span class="hs-identifier hs-var">totalDegree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+forall poly.
+IsOrderedPolynomial poly =&gt;
+poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+</span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385905"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-94"></span><span>      </span><span id="local-6989586621679385914"><span class="annot"><span class="annottext">sugar :: Int
+</span><a href="#local-6989586621679385914"><span class="hs-identifier hs-var hs-var">sugar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Ord a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">max</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly -&gt; Int
+</span><a href="#local-6989586621679385906"><span class="hs-identifier hs-var">tsgr</span></a></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385916"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly -&gt; Int
+</span><a href="#local-6989586621679385906"><span class="hs-identifier hs-var">tsgr</span></a></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385915"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall r. Additive r =&gt; r -&gt; r -&gt; r
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) n -&gt; Int
+forall k (ord :: k) (n :: Nat). OrderedMonomial ord n -&gt; Int
+</span><span class="hs-identifier hs-var">totalDegree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) n
+-&gt; OrderedMonomial (MOrder poly) n
+-&gt; OrderedMonomial (MOrder poly) n
+forall k (n :: Nat) (ord :: k).
+KnownNat n =&gt;
+OrderedMonomial ord n
+-&gt; OrderedMonomial ord n -&gt; OrderedMonomial ord n
+</span><span class="hs-identifier hs-var">lcmMonomial</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+forall poly.
+IsOrderedPolynomial poly =&gt;
+poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+</span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385916"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+forall poly.
+IsOrderedPolynomial poly =&gt;
+poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+</span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679385915"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.SelectionStrategy.html#calcWeight"><span class="hs-pragma hs-type">calcWeight</span></a></span><span> </span><span class="hs-pragma">#-}</span></span></span><span>
+</span><span id="line-96"></span></pre></body></html>

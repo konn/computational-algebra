@@ -1,60 +1,357 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds, DeriveTraversable, ExistentialQuantification #-}</span><span>
-</span><a name="line-2"></a><span class="hs-pragma">{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs              #-}</span><span>
-</span><a name="line-3"></a><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses       #-}</span><span>
-</span><a name="line-4"></a><span class="hs-pragma">{-# LANGUAGE TypeSynonymInstances, UndecidableInstances              #-}</span><span>
-</span><a name="line-5"></a><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-orphans #-}</span><span>
-</span><a name="line-6"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra.Ring.Ideal</span><span> </span><span class="hs-special">(</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Ideal.html#addToIdeal"><span class="hs-identifier hs-var">addToIdeal</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Ideal.html#toIdeal"><span class="hs-identifier hs-var">toIdeal</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Ideal.html#appendIdeal"><span class="hs-identifier hs-var">appendIdeal</span></a><span>
-</span><a name="line-7"></a><span>                          </span><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Ideal.html#generators"><span class="hs-identifier hs-var">generators</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Ideal.html#filterIdeal"><span class="hs-identifier hs-var">filterIdeal</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Ideal.html#mapIdeal"><span class="hs-identifier hs-var">mapIdeal</span></a><span>
-</span><a name="line-8"></a><span>                          </span><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Ideal.html#principalIdeal"><span class="hs-identifier hs-var">principalIdeal</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Ideal.html#isEmptyIdeal"><span class="hs-identifier hs-var">isEmptyIdeal</span></a><span>
-</span><a name="line-9"></a><span>                          </span><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Ideal.html#someSizedIdeal"><span class="hs-identifier hs-var">someSizedIdeal</span></a><span>
-</span><a name="line-10"></a><span>                          </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><a name="line-11"></a><span class="hs-keyword">import</span><span> </span><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra.Internal</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Nat</span><span class="hs-special">)</span><span>
-</span><a name="line-12"></a><span>
-</span><a name="line-13"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">AlgebraicPrelude</span><span>
-</span><a name="line-14"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Control.DeepSeq</span><span>
-</span><a name="line-15"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data.Foldable</span><span>      </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">F</span><span>
-</span><a name="line-16"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data.Sequence</span><span>      </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Seq</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-operator hs-var">&lt;|</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-operator hs-var">&gt;&lt;</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><a name="line-17"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data.Sequence</span><span>      </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">Seq</span><span>
-</span><a name="line-18"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data.Sized.Builtin</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">S</span><span>
-</span><a name="line-19"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data.Vector</span><span>        </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">V</span><span>
-</span><a name="line-20"></a><span>
-</span><a name="line-21"></a><span class="hs-keyword">newtype</span><span> </span><a name="Ideal"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier">Ideal</span></a></a><span> </span><a name="local-6989586621679301582"><a href="#local-6989586621679301582"><span class="hs-identifier">r</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a name="Ideal"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier">Ideal</span></a></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Seq</span><span> </span><a href="#local-6989586621679301582"><span class="hs-identifier hs-type">r</span></a><span class="hs-special">)</span><span>
-</span><a name="line-22"></a><span>                  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Hashable</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">NFData</span><span class="hs-special">,</span><span>
-</span><a name="line-23"></a><span>                            </span><span class="hs-identifier hs-type">Foldable</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Traversable</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Functor</span><span class="hs-special">)</span><span>
-</span><a name="line-24"></a><span>
-</span><a name="line-25"></a><span class="hs-identifier">isEmptyIdeal</span><span> </span><span class="hs-glyph">::</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301942"><span class="hs-identifier hs-type">t</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Bool</span><span>
-</span><a name="line-26"></a><a name="isEmptyIdeal"><a href="Algebra.Ring.Ideal.html#isEmptyIdeal"><span class="hs-identifier">isEmptyIdeal</span></a></a><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><a name="local-6989586621679301943"><a href="#local-6989586621679301943"><span class="hs-identifier">t</span></a></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">Seq.null</span><span> </span><a href="#local-6989586621679301943"><span class="hs-identifier hs-var">t</span></a><span>
-</span><a name="line-27"></a><span>
-</span><a name="line-28"></a><span class="hs-keyword">instance</span><span> </span><span class="hs-identifier hs-type">Show</span><span> </span><a href="#local-6989586621679301931"><span class="hs-identifier hs-type">r</span></a><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Show</span><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301931"><span class="hs-identifier hs-type">r</span></a><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><a name="line-29"></a><span>  </span><a name="local-8214565720323785174"><span class="hs-identifier">showsPrec</span></a><span> </span><a name="local-6989586621679301932"><a href="#local-6989586621679301932"><span class="hs-identifier">d</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">showsPrec</span><span> </span><a href="#local-6989586621679301932"><span class="hs-identifier hs-var">d</span></a><span> </span><span class="hs-operator hs-var">.</span><span> </span><a href="Algebra.Ring.Ideal.html#generators"><span class="hs-identifier hs-var">generators</span></a><span>
-</span><a name="line-30"></a><span>
-</span><a name="line-31"></a><span class="hs-identifier">addToIdeal</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Monoidal</span><span> </span><a href="#local-6989586621679301941"><span class="hs-identifier hs-type">r</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">DecidableZero</span><span> </span><a href="#local-6989586621679301941"><span class="hs-identifier hs-type">r</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><a href="#local-6989586621679301941"><span class="hs-identifier hs-type">r</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301941"><span class="hs-identifier hs-type">r</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301941"><span class="hs-identifier hs-type">r</span></a><span>
-</span><a name="line-32"></a><a name="addToIdeal"><a href="Algebra.Ring.Ideal.html#addToIdeal"><span class="hs-identifier">addToIdeal</span></a></a><span> </span><a name="local-6989586621679301944"><a href="#local-6989586621679301944"><span class="hs-identifier">i</span></a></a><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><a name="local-6989586621679301945"><a href="#local-6989586621679301945"><span class="hs-identifier">is</span></a></a><span class="hs-special">)</span><span>
-</span><a name="line-33"></a><span>    </span><span class="hs-glyph">|</span><span> </span><span class="hs-identifier hs-var">isZero</span><span> </span><a href="#local-6989586621679301944"><span class="hs-identifier hs-var">i</span></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><a href="#local-6989586621679301945"><span class="hs-identifier hs-var">is</span></a><span>
-</span><a name="line-34"></a><span>    </span><span class="hs-glyph">|</span><span> </span><span class="hs-identifier hs-var">otherwise</span><span> </span><span class="hs-glyph">=</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><span class="hs-special">(</span><a href="#local-6989586621679301944"><span class="hs-identifier hs-var">i</span></a><span> </span><span class="hs-operator hs-var">&lt;|</span><span> </span><a href="#local-6989586621679301945"><span class="hs-identifier hs-var">is</span></a><span class="hs-special">)</span><span>
-</span><a name="line-35"></a><span>
-</span><a name="line-36"></a><span class="hs-keyword">infixr</span><span> </span><span class="hs-special">`</span><span class="hs-identifier">addToIdeal</span><span class="hs-special">`</span><span>
-</span><a name="line-37"></a><span>
-</span><a name="line-38"></a><span class="hs-identifier">toIdeal</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">DecidableZero</span><span> </span><a href="#local-6989586621679301940"><span class="hs-identifier hs-type">r</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Monoidal</span><span> </span><a href="#local-6989586621679301940"><span class="hs-identifier hs-type">r</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><a href="#local-6989586621679301940"><span class="hs-identifier hs-type">r</span></a><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301940"><span class="hs-identifier hs-type">r</span></a><span>
-</span><a name="line-39"></a><a name="toIdeal"><a href="Algebra.Ring.Ideal.html#toIdeal"><span class="hs-identifier">toIdeal</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">foldr</span><span> </span><a href="Algebra.Ring.Ideal.html#addToIdeal"><span class="hs-identifier hs-var">addToIdeal</span></a><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><span class="hs-identifier hs-var">Seq.empty</span><span class="hs-special">)</span><span>
-</span><a name="line-40"></a><span>
-</span><a name="line-41"></a><span class="hs-identifier">appendIdeal</span><span> </span><span class="hs-glyph">::</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301939"><span class="hs-identifier hs-type">r</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301939"><span class="hs-identifier hs-type">r</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301939"><span class="hs-identifier hs-type">r</span></a><span>
-</span><a name="line-42"></a><a name="appendIdeal"><a href="Algebra.Ring.Ideal.html#appendIdeal"><span class="hs-identifier">appendIdeal</span></a></a><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><a name="local-6989586621679301946"><a href="#local-6989586621679301946"><span class="hs-identifier">is</span></a></a><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><a name="local-6989586621679301947"><a href="#local-6989586621679301947"><span class="hs-identifier">js</span></a></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><span class="hs-special">(</span><a href="#local-6989586621679301946"><span class="hs-identifier hs-var">is</span></a><span> </span><span class="hs-operator hs-var">&gt;&lt;</span><span> </span><a href="#local-6989586621679301947"><span class="hs-identifier hs-var">js</span></a><span class="hs-special">)</span><span>
-</span><a name="line-43"></a><span>
-</span><a name="line-44"></a><span class="hs-identifier">generators</span><span> </span><span class="hs-glyph">::</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301938"><span class="hs-identifier hs-type">r</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><a href="#local-6989586621679301938"><span class="hs-identifier hs-type">r</span></a><span class="hs-special">]</span><span>
-</span><a name="line-45"></a><a name="generators"><a href="Algebra.Ring.Ideal.html#generators"><span class="hs-identifier">generators</span></a></a><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><a name="local-6989586621679301948"><a href="#local-6989586621679301948"><span class="hs-identifier">is</span></a></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">F.toList</span><span> </span><a href="#local-6989586621679301948"><span class="hs-identifier hs-var">is</span></a><span>
-</span><a name="line-46"></a><span>
-</span><a name="line-47"></a><span class="hs-identifier">filterIdeal</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><a href="#local-6989586621679301937"><span class="hs-identifier hs-type">r</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Bool</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301937"><span class="hs-identifier hs-type">r</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301937"><span class="hs-identifier hs-type">r</span></a><span>
-</span><a name="line-48"></a><a name="filterIdeal"><a href="Algebra.Ring.Ideal.html#filterIdeal"><span class="hs-identifier">filterIdeal</span></a></a><span> </span><a name="local-6989586621679301949"><a href="#local-6989586621679301949"><span class="hs-identifier">p</span></a></a><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><a name="local-6989586621679301950"><a href="#local-6989586621679301950"><span class="hs-identifier">i</span></a></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">Seq.filter</span><span> </span><a href="#local-6989586621679301949"><span class="hs-identifier hs-var">p</span></a><span> </span><a href="#local-6989586621679301950"><span class="hs-identifier hs-var">i</span></a><span>
-</span><a name="line-49"></a><span>
-</span><a name="line-50"></a><span class="hs-identifier">principalIdeal</span><span> </span><span class="hs-glyph">::</span><span> </span><a href="#local-6989586621679301936"><span class="hs-identifier hs-type">r</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301936"><span class="hs-identifier hs-type">r</span></a><span>
-</span><a name="line-51"></a><a name="principalIdeal"><a href="Algebra.Ring.Ideal.html#principalIdeal"><span class="hs-identifier">principalIdeal</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-identifier hs-var">Seq.singleton</span><span>
-</span><a name="line-52"></a><span>
-</span><a name="line-53"></a><span class="hs-identifier">mapIdeal</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><a href="#local-6989586621679301934"><span class="hs-identifier hs-type">r</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="#local-6989586621679301935"><span class="hs-identifier hs-type">r'</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301934"><span class="hs-identifier hs-type">r</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301935"><span class="hs-identifier hs-type">r'</span></a><span>
-</span><a name="line-54"></a><a name="mapIdeal"><a href="Algebra.Ring.Ideal.html#mapIdeal"><span class="hs-identifier">mapIdeal</span></a></a><span> </span><a name="local-6989586621679301951"><a href="#local-6989586621679301951"><span class="hs-identifier">fun</span></a></a><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><a name="local-6989586621679301952"><a href="#local-6989586621679301952"><span class="hs-identifier">xs</span></a></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">fmap</span><span> </span><a href="#local-6989586621679301951"><span class="hs-identifier hs-var">fun</span></a><span> </span><a href="#local-6989586621679301952"><span class="hs-identifier hs-var">xs</span></a><span>
-</span><a name="line-55"></a><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">[</span><span class="hs-pragma">1</span><span class="hs-pragma">]</span><span> </span><span class="hs-pragma">mapIdeal</span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><a name="line-56"></a><span>
-</span><a name="line-57"></a><span class="hs-identifier">someSizedIdeal</span><span> </span><span class="hs-glyph">::</span><span> </span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a><span> </span><a href="#local-6989586621679301933"><span class="hs-identifier hs-type">r</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">S.SomeSized</span><span> </span><span class="hs-identifier hs-type">Vector</span><span> </span><span class="hs-identifier hs-type">Nat</span><span> </span><a href="#local-6989586621679301933"><span class="hs-identifier hs-type">r</span></a><span>
-</span><a name="line-58"></a><a name="someSizedIdeal"><a href="Algebra.Ring.Ideal.html#someSizedIdeal"><span class="hs-identifier">someSizedIdeal</span></a></a><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a><span> </span><a name="local-6989586621679301953"><a href="#local-6989586621679301953"><span class="hs-identifier">xs</span></a></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
-</span><a name="line-59"></a><span>  </span><span class="hs-identifier hs-var">S.toSomeSized</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">V.fromList</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">F.toList</span><span> </span><a href="#local-6989586621679301953"><span class="hs-identifier hs-var">xs</span></a><span>
-</span><a name="line-60"></a></pre></body></html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveTraversable #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE ExistentialQuantification #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE FlexibleInstances #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE GADTs #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses #-}</span><span>
+</span><span id="line-9"></span><span class="hs-pragma">{-# LANGUAGE TypeSynonymInstances #-}</span><span>
+</span><span id="line-10"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-11"></span><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-orphans #-}</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra.Ring.Ideal</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier">Ideal</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Ideal.html#addToIdeal"><span class="hs-identifier">addToIdeal</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Ideal.html#toIdeal"><span class="hs-identifier">toIdeal</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Ideal.html#appendIdeal"><span class="hs-identifier">appendIdeal</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Ideal.html#generators"><span class="hs-identifier">generators</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Ideal.html#filterIdeal"><span class="hs-identifier">filterIdeal</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Ideal.html#mapIdeal"><span class="hs-identifier">mapIdeal</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-21"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Ideal.html#principalIdeal"><span class="hs-identifier">principalIdeal</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-22"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Ideal.html#isEmptyIdeal"><span class="hs-identifier">isEmptyIdeal</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-23"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Ideal.html#someSizedIdeal"><span class="hs-identifier">someSizedIdeal</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra.Internal</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">AlgebraicPrelude</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sequence</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(&lt;|)</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-operator">(&gt;&lt;)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sequence</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Seq</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sized</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">S</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">newtype</span><span> </span><span id="Ideal"><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a></span></span><span> </span><span id="local-6989586621679377443"><span class="annot"><a href="#local-6989586621679377443"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Ideal"><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679377443"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-keyword">deriving</span><span>
+</span><span id="line-38"></span><span>    </span><span class="hs-special">(</span><span> </span><span id="local-6989586621679377402"><span id="local-6989586621679377404"><span class="annot"><span class="annottext">Int -&gt; Ideal r -&gt; Int
+Ideal r -&gt; Int
+(Int -&gt; Ideal r -&gt; Int) -&gt; (Ideal r -&gt; Int) -&gt; Hashable (Ideal r)
+forall r. Hashable r =&gt; Int -&gt; Ideal r -&gt; Int
+forall r. Hashable r =&gt; Ideal r -&gt; Int
+forall a. (Int -&gt; a -&gt; Int) -&gt; (a -&gt; Int) -&gt; Hashable a
+hash :: Ideal r -&gt; Int
+$chash :: forall r. Hashable r =&gt; Ideal r -&gt; Int
+hashWithSalt :: Int -&gt; Ideal r -&gt; Int
+$chashWithSalt :: forall r. Hashable r =&gt; Int -&gt; Ideal r -&gt; Int
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Hashable</span></span></span></span><span>
+</span><span id="line-39"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679377399"><span class="annot"><span class="annottext">Ideal r -&gt; ()
+(Ideal r -&gt; ()) -&gt; NFData (Ideal r)
+forall r. NFData r =&gt; Ideal r -&gt; ()
+forall a. (a -&gt; ()) -&gt; NFData a
+rnf :: Ideal r -&gt; ()
+$crnf :: forall r. NFData r =&gt; Ideal r -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></span></span><span>
+</span><span id="line-40"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679377364"><span id="local-6989586621679377366"><span id="local-6989586621679377368"><span id="local-6989586621679377370"><span id="local-6989586621679377372"><span id="local-6989586621679377374"><span id="local-6989586621679377376"><span id="local-6989586621679377378"><span id="local-6989586621679377380"><span id="local-6989586621679377382"><span id="local-6989586621679377384"><span id="local-6989586621679377386"><span id="local-6989586621679377388"><span id="local-6989586621679377390"><span id="local-6989586621679377392"><span id="local-6989586621679377394"><span id="local-6989586621679377396"><span class="annot"><span class="annottext">a -&gt; Ideal a -&gt; Bool
+Ideal m -&gt; m
+Ideal a -&gt; [a]
+Ideal a -&gt; Bool
+Ideal a -&gt; Int
+Ideal a -&gt; a
+Ideal a -&gt; a
+Ideal a -&gt; a
+Ideal a -&gt; a
+(a -&gt; m) -&gt; Ideal a -&gt; m
+(a -&gt; m) -&gt; Ideal a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; Ideal a -&gt; b
+(a -&gt; b -&gt; b) -&gt; b -&gt; Ideal a -&gt; b
+(b -&gt; a -&gt; b) -&gt; b -&gt; Ideal a -&gt; b
+(b -&gt; a -&gt; b) -&gt; b -&gt; Ideal a -&gt; b
+(a -&gt; a -&gt; a) -&gt; Ideal a -&gt; a
+(a -&gt; a -&gt; a) -&gt; Ideal a -&gt; a
+(forall m. Monoid m =&gt; Ideal m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Ideal a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Ideal a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Ideal a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Ideal a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Ideal a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Ideal a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Ideal a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Ideal a -&gt; a)
+-&gt; (forall a. Ideal a -&gt; [a])
+-&gt; (forall a. Ideal a -&gt; Bool)
+-&gt; (forall a. Ideal a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Ideal a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Ideal a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Ideal a -&gt; a)
+-&gt; (forall a. Num a =&gt; Ideal a -&gt; a)
+-&gt; (forall a. Num a =&gt; Ideal a -&gt; a)
+-&gt; Foldable Ideal
+forall a. Eq a =&gt; a -&gt; Ideal a -&gt; Bool
+forall a. Num a =&gt; Ideal a -&gt; a
+forall a. Ord a =&gt; Ideal a -&gt; a
+forall m. Monoid m =&gt; Ideal m -&gt; m
+forall a. Ideal a -&gt; Bool
+forall a. Ideal a -&gt; Int
+forall a. Ideal a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Ideal a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Ideal a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Ideal a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Ideal a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: Ideal a -&gt; a
+$cproduct :: forall a. Num a =&gt; Ideal a -&gt; a
+sum :: Ideal a -&gt; a
+$csum :: forall a. Num a =&gt; Ideal a -&gt; a
+minimum :: Ideal a -&gt; a
+$cminimum :: forall a. Ord a =&gt; Ideal a -&gt; a
+maximum :: Ideal a -&gt; a
+$cmaximum :: forall a. Ord a =&gt; Ideal a -&gt; a
+elem :: a -&gt; Ideal a -&gt; Bool
+$celem :: forall a. Eq a =&gt; a -&gt; Ideal a -&gt; Bool
+length :: Ideal a -&gt; Int
+$clength :: forall a. Ideal a -&gt; Int
+null :: Ideal a -&gt; Bool
+$cnull :: forall a. Ideal a -&gt; Bool
+toList :: Ideal a -&gt; [a]
+$ctoList :: forall a. Ideal a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; Ideal a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Ideal a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; Ideal a -&gt; a
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Ideal a -&gt; a
+foldl&#39; :: (b -&gt; a -&gt; b) -&gt; b -&gt; Ideal a -&gt; b
+$cfoldl&#39; :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Ideal a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; Ideal a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Ideal a -&gt; b
+foldr&#39; :: (a -&gt; b -&gt; b) -&gt; b -&gt; Ideal a -&gt; b
+$cfoldr&#39; :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Ideal a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; Ideal a -&gt; b
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Ideal a -&gt; b
+foldMap&#39; :: (a -&gt; m) -&gt; Ideal a -&gt; m
+$cfoldMap&#39; :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Ideal a -&gt; m
+foldMap :: (a -&gt; m) -&gt; Ideal a -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Ideal a -&gt; m
+fold :: Ideal m -&gt; m
+$cfold :: forall m. Monoid m =&gt; Ideal m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span>
+</span><span id="line-41"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679377353"><span id="local-6989586621679377355"><span id="local-6989586621679377357"><span id="local-6989586621679377359"><span class="annot"><span class="annottext">Functor Ideal
+Foldable Ideal
+Functor Ideal
+-&gt; Foldable Ideal
+-&gt; (forall (f :: * -&gt; *) a b.
+    Applicative f =&gt;
+    (a -&gt; f b) -&gt; Ideal a -&gt; f (Ideal b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    Ideal (f a) -&gt; f (Ideal a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; Ideal a -&gt; m (Ideal b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; Ideal (m a) -&gt; m (Ideal a))
+-&gt; Traversable Ideal
+(a -&gt; f b) -&gt; Ideal a -&gt; f (Ideal b)
+forall (t :: * -&gt; *).
+Functor t
+-&gt; Foldable t
+-&gt; (forall (f :: * -&gt; *) a b.
+    Applicative f =&gt;
+    (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a. Monad m =&gt; Ideal (m a) -&gt; m (Ideal a)
+forall (f :: * -&gt; *) a. Applicative f =&gt; Ideal (f a) -&gt; f (Ideal a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Ideal a -&gt; m (Ideal b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Ideal a -&gt; f (Ideal b)
+sequence :: Ideal (m a) -&gt; m (Ideal a)
+$csequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Ideal (m a) -&gt; m (Ideal a)
+mapM :: (a -&gt; m b) -&gt; Ideal a -&gt; m (Ideal b)
+$cmapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Ideal a -&gt; m (Ideal b)
+sequenceA :: Ideal (f a) -&gt; f (Ideal a)
+$csequenceA :: forall (f :: * -&gt; *) a. Applicative f =&gt; Ideal (f a) -&gt; f (Ideal a)
+traverse :: (a -&gt; f b) -&gt; Ideal a -&gt; f (Ideal b)
+$ctraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Ideal a -&gt; f (Ideal b)
+$cp2Traversable :: Foldable Ideal
+$cp1Traversable :: Functor Ideal
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span>
+</span><span id="line-42"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679377348"><span id="local-6989586621679377350"><span class="annot"><span class="annottext">a -&gt; Ideal b -&gt; Ideal a
+(a -&gt; b) -&gt; Ideal a -&gt; Ideal b
+(forall a b. (a -&gt; b) -&gt; Ideal a -&gt; Ideal b)
+-&gt; (forall a b. a -&gt; Ideal b -&gt; Ideal a) -&gt; Functor Ideal
+forall a b. a -&gt; Ideal b -&gt; Ideal a
+forall a b. (a -&gt; b) -&gt; Ideal a -&gt; Ideal b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; Ideal b -&gt; Ideal a
+$c&lt;$ :: forall a b. a -&gt; Ideal b -&gt; Ideal a
+fmap :: (a -&gt; b) -&gt; Ideal a -&gt; Ideal b
+$cfmap :: forall a b. (a -&gt; b) -&gt; Ideal a -&gt; Ideal b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span>
+</span><span id="line-43"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span id="local-6989586621679377346"><span class="annot"><a href="Algebra.Ring.Ideal.html#isEmptyIdeal"><span class="hs-identifier hs-type">isEmptyIdeal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377346"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-46"></span><span id="isEmptyIdeal"><span class="annot"><span class="annottext">isEmptyIdeal :: Ideal t -&gt; Bool
+</span><a href="Algebra.Ring.Ideal.html#isEmptyIdeal"><span class="hs-identifier hs-var hs-var">isEmptyIdeal</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span id="local-6989586621679377345"><span class="annot"><span class="annottext">Seq t
+</span><a href="#local-6989586621679377345"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq t -&gt; Bool
+forall a. Seq a -&gt; Bool
+</span><span class="hs-identifier hs-var">Seq.null</span></span><span> </span><span class="annot"><span class="annottext">Seq t
+</span><a href="#local-6989586621679377345"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span id="local-6989586621679377343"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679377338"><span id="local-6989586621679377340"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679377343"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377343"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-49"></span><span>  </span><span id="local-6989586621679377336"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; Ideal r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span id="local-6989586621679377334"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679377334"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [r] -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679377334"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">([r] -&gt; ShowS) -&gt; (Ideal r -&gt; [r]) -&gt; Ideal r -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Ideal r -&gt; [r]
+forall a. Ideal a -&gt; [a]
+</span><a href="Algebra.Ring.Ideal.html#generators"><span class="hs-identifier hs-var">generators</span></a></span></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span id="local-6989586621679377440"><span class="annot"><a href="Algebra.Ring.Ideal.html#addToIdeal"><span class="hs-identifier hs-type">addToIdeal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Monoidal</span></span><span> </span><span class="annot"><a href="#local-6989586621679377440"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DecidableZero</span></span><span> </span><span class="annot"><a href="#local-6989586621679377440"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679377440"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377440"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377440"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-52"></span><span id="addToIdeal"><span class="annot"><span class="annottext">addToIdeal :: r -&gt; Ideal r -&gt; Ideal r
+</span><a href="Algebra.Ring.Ideal.html#addToIdeal"><span class="hs-identifier hs-var hs-var">addToIdeal</span></a></span></span><span> </span><span id="local-6989586621679377332"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679377332"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span id="local-6989586621679377331"><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377331"><span class="hs-identifier hs-var">is</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r -&gt; Bool
+forall r. DecidableZero r =&gt; r -&gt; Bool
+</span><span class="hs-identifier hs-var">isZero</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679377332"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq r -&gt; Ideal r
+forall r. Seq r -&gt; Ideal r
+</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a></span><span> </span><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377331"><span class="hs-identifier hs-var">is</span></a></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq r -&gt; Ideal r
+forall r. Seq r -&gt; Ideal r
+</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679377332"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; Seq r -&gt; Seq r
+forall a. a -&gt; Seq a -&gt; Seq a
+</span><span class="hs-operator hs-var">&lt;|</span></span><span> </span><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377331"><span class="hs-identifier hs-var">is</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-keyword">infixr</span><span> </span><span class="hs-number">9</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#addToIdeal"><span class="hs-operator hs-type">`addToIdeal`</span></a></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span id="local-6989586621679377329"><span class="annot"><a href="Algebra.Ring.Ideal.html#toIdeal"><span class="hs-identifier hs-type">toIdeal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DecidableZero</span></span><span> </span><span class="annot"><a href="#local-6989586621679377329"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoidal</span></span><span> </span><span class="annot"><a href="#local-6989586621679377329"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679377329"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377329"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-59"></span><span id="toIdeal"><span class="annot"><span class="annottext">toIdeal :: [r] -&gt; Ideal r
+</span><a href="Algebra.Ring.Ideal.html#toIdeal"><span class="hs-identifier hs-var hs-var">toIdeal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(r -&gt; Ideal r -&gt; Ideal r) -&gt; Ideal r -&gt; [r] -&gt; Ideal r
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; Ideal r -&gt; Ideal r
+forall r. (Monoidal r, DecidableZero r) =&gt; r -&gt; Ideal r -&gt; Ideal r
+</span><a href="Algebra.Ring.Ideal.html#addToIdeal"><span class="hs-identifier hs-var">addToIdeal</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Seq r -&gt; Ideal r
+forall r. Seq r -&gt; Ideal r
+</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a></span><span> </span><span class="annot"><span class="annottext">Seq r
+forall a. Seq a
+</span><span class="hs-identifier hs-var">Seq.empty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span id="local-6989586621679377326"><span class="annot"><a href="Algebra.Ring.Ideal.html#appendIdeal"><span class="hs-identifier hs-type">appendIdeal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377326"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377326"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377326"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-62"></span><span id="appendIdeal"><span class="annot"><span class="annottext">appendIdeal :: Ideal r -&gt; Ideal r -&gt; Ideal r
+</span><a href="Algebra.Ring.Ideal.html#appendIdeal"><span class="hs-identifier hs-var hs-var">appendIdeal</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span id="local-6989586621679377325"><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377325"><span class="hs-identifier hs-var">is</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span id="local-6989586621679377324"><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377324"><span class="hs-identifier hs-var">js</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq r -&gt; Ideal r
+forall r. Seq r -&gt; Ideal r
+</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377325"><span class="hs-identifier hs-var">is</span></a></span><span> </span><span class="annot"><span class="annottext">Seq r -&gt; Seq r -&gt; Seq r
+forall a. Seq a -&gt; Seq a -&gt; Seq a
+</span><span class="hs-operator hs-var">&gt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377324"><span class="hs-identifier hs-var">js</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span id="local-6989586621679377323"><span class="annot"><a href="Algebra.Ring.Ideal.html#generators"><span class="hs-identifier hs-type">generators</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377323"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679377323"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-65"></span><span id="generators"><span class="annot"><span class="annottext">generators :: Ideal r -&gt; [r]
+</span><a href="Algebra.Ring.Ideal.html#generators"><span class="hs-identifier hs-var hs-var">generators</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span id="local-6989586621679377322"><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377322"><span class="hs-identifier hs-var">is</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq r -&gt; [r]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377322"><span class="hs-identifier hs-var">is</span></a></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span id="local-6989586621679377320"><span class="annot"><a href="Algebra.Ring.Ideal.html#filterIdeal"><span class="hs-identifier hs-type">filterIdeal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679377320"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377320"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377320"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-68"></span><span id="filterIdeal"><span class="annot"><span class="annottext">filterIdeal :: (r -&gt; Bool) -&gt; Ideal r -&gt; Ideal r
+</span><a href="Algebra.Ring.Ideal.html#filterIdeal"><span class="hs-identifier hs-var hs-var">filterIdeal</span></a></span></span><span> </span><span id="local-6989586621679377319"><span class="annot"><span class="annottext">r -&gt; Bool
+</span><a href="#local-6989586621679377319"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span id="local-6989586621679377318"><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377318"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq r -&gt; Ideal r
+forall r. Seq r -&gt; Ideal r
+</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a></span><span> </span><span class="annot"><span class="annottext">(Seq r -&gt; Ideal r) -&gt; Seq r -&gt; Ideal r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(r -&gt; Bool) -&gt; Seq r -&gt; Seq r
+forall a. (a -&gt; Bool) -&gt; Seq a -&gt; Seq a
+</span><span class="hs-identifier hs-var">Seq.filter</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; Bool
+</span><a href="#local-6989586621679377319"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377318"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span id="local-6989586621679377316"><span class="annot"><a href="Algebra.Ring.Ideal.html#principalIdeal"><span class="hs-identifier hs-type">principalIdeal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679377316"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377316"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-71"></span><span id="principalIdeal"><span class="annot"><span class="annottext">principalIdeal :: r -&gt; Ideal r
+</span><a href="Algebra.Ring.Ideal.html#principalIdeal"><span class="hs-identifier hs-var hs-var">principalIdeal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq r -&gt; Ideal r
+forall r. Seq r -&gt; Ideal r
+</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a></span><span> </span><span class="annot"><span class="annottext">(Seq r -&gt; Ideal r) -&gt; (r -&gt; Seq r) -&gt; r -&gt; Ideal r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; Seq r
+forall a. a -&gt; Seq a
+</span><span class="hs-identifier hs-var">Seq.singleton</span></span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span id="local-6989586621679377313"><span id="local-6989586621679377314"><span class="annot"><a href="Algebra.Ring.Ideal.html#mapIdeal"><span class="hs-identifier hs-type">mapIdeal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679377314"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679377313"><span class="hs-identifier hs-type">r&#39;</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377314"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377313"><span class="hs-identifier hs-type">r&#39;</span></a></span></span></span><span>
+</span><span id="line-74"></span><span id="mapIdeal"><span class="annot"><span class="annottext">mapIdeal :: (r -&gt; r&#39;) -&gt; Ideal r -&gt; Ideal r&#39;
+</span><a href="Algebra.Ring.Ideal.html#mapIdeal"><span class="hs-identifier hs-var hs-var">mapIdeal</span></a></span></span><span> </span><span id="local-6989586621679377312"><span class="annot"><span class="annottext">r -&gt; r&#39;
+</span><a href="#local-6989586621679377312"><span class="hs-identifier hs-var">fun</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span id="local-6989586621679377311"><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377311"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq r&#39; -&gt; Ideal r&#39;
+forall r. Seq r -&gt; Ideal r
+</span><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-var">Ideal</span></a></span><span> </span><span class="annot"><span class="annottext">(Seq r&#39; -&gt; Ideal r&#39;) -&gt; Seq r&#39; -&gt; Ideal r&#39;
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(r -&gt; r&#39;) -&gt; Seq r -&gt; Seq r&#39;
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r&#39;
+</span><a href="#local-6989586621679377312"><span class="hs-identifier hs-var">fun</span></a></span><span> </span><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377311"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-75"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">[</span><span class="hs-pragma">1</span><span class="hs-pragma">]</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#mapIdeal"><span class="hs-pragma hs-type">mapIdeal</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span id="local-6989586621679377310"><span class="annot"><a href="Algebra.Ring.Ideal.html#someSizedIdeal"><span class="hs-identifier hs-type">someSizedIdeal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377310"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.SomeSized</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679377310"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-78"></span><span id="someSizedIdeal"><span class="annot"><span class="annottext">someSizedIdeal :: Ideal r -&gt; SomeSized Vector r
+</span><a href="Algebra.Ring.Ideal.html#someSizedIdeal"><span class="hs-identifier hs-var hs-var">someSizedIdeal</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Ideal.html#Ideal"><span class="hs-identifier hs-type">Ideal</span></a></span><span> </span><span id="local-6989586621679377309"><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377309"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-79"></span><span>  </span><span class="annot"><span class="annottext">Vector r -&gt; SomeSized Vector r
+forall (f :: * -&gt; *) a.
+(Dom f a, CFoldable f) =&gt;
+f a -&gt; SomeSized f a
+</span><span class="hs-identifier hs-var">S.toSomeSized</span></span><span> </span><span class="annot"><span class="annottext">(Vector r -&gt; SomeSized Vector r) -&gt; Vector r -&gt; SomeSized Vector r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[r] -&gt; Vector r
+forall a. [a] -&gt; Vector a
+</span><span class="hs-identifier hs-var">V.fromList</span></span><span> </span><span class="annot"><span class="annottext">([r] -&gt; Vector r) -&gt; [r] -&gt; Vector r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Seq r -&gt; [r]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">Seq r
+</span><a href="#local-6989586621679377309"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-80"></span></pre></body></html>

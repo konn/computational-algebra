@@ -1,0 +1,410 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24con2tag_88kA695aJfiDqIHlwXKqNi"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Heap.Spray</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Spray.html#Spray"><span class="hs-identifier">Spray</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Spray.html#spraySort"><span class="hs-identifier">spraySort</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Heap.Class.html"><span class="hs-identifier">Data.Heap.Class</span></a></span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">data</span><span> </span><span id="Spray"><span class="annot"><a href="Data.Heap.Spray.html#Spray"><span class="hs-identifier hs-var">Spray</span></a></span></span><span> </span><span id="local-6989586621679043069"><span class="annot"><a href="#local-6989586621679043069"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Empty"><span class="annot"><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Branch"><span class="annot"><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-var">Branch</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Spray.html#Spray"><span class="hs-identifier hs-type">Spray</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679043069"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679043069"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Spray.html#Spray"><span class="hs-identifier hs-type">Spray</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679043069"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679043033"><span id="local-6989586621679043035"><span id="local-6989586621679043037"><span id="local-6989586621679043039"><span class="annot"><span class="annottext">ReadPrec [Spray a]
+ReadPrec (Spray a)
+Int -&gt; ReadS (Spray a)
+ReadS [Spray a]
+(Int -&gt; ReadS (Spray a))
+-&gt; ReadS [Spray a]
+-&gt; ReadPrec (Spray a)
+-&gt; ReadPrec [Spray a]
+-&gt; Read (Spray a)
+forall a. Read a =&gt; ReadPrec [Spray a]
+forall a. Read a =&gt; ReadPrec (Spray a)
+forall a. Read a =&gt; Int -&gt; ReadS (Spray a)
+forall a. Read a =&gt; ReadS [Spray a]
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+readListPrec :: ReadPrec [Spray a]
+$creadListPrec :: forall a. Read a =&gt; ReadPrec [Spray a]
+readPrec :: ReadPrec (Spray a)
+$creadPrec :: forall a. Read a =&gt; ReadPrec (Spray a)
+readList :: ReadS [Spray a]
+$creadList :: forall a. Read a =&gt; ReadS [Spray a]
+readsPrec :: Int -&gt; ReadS (Spray a)
+$creadsPrec :: forall a. Read a =&gt; Int -&gt; ReadS (Spray a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679043026"><span id="local-6989586621679043028"><span id="local-6989586621679043030"><span class="annot"><span class="annottext">Int -&gt; Spray a -&gt; ShowS
+[Spray a] -&gt; ShowS
+Spray a -&gt; String
+(Int -&gt; Spray a -&gt; ShowS)
+-&gt; (Spray a -&gt; String) -&gt; ([Spray a] -&gt; ShowS) -&gt; Show (Spray a)
+forall a. Show a =&gt; Int -&gt; Spray a -&gt; ShowS
+forall a. Show a =&gt; [Spray a] -&gt; ShowS
+forall a. Show a =&gt; Spray a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [Spray a] -&gt; ShowS
+$cshowList :: forall a. Show a =&gt; [Spray a] -&gt; ShowS
+show :: Spray a -&gt; String
+$cshow :: forall a. Show a =&gt; Spray a -&gt; String
+showsPrec :: Int -&gt; Spray a -&gt; ShowS
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; Spray a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679043021"><span id="local-6989586621679043023"><span class="annot"><span class="annottext">Spray a -&gt; Spray a -&gt; Bool
+(Spray a -&gt; Spray a -&gt; Bool)
+-&gt; (Spray a -&gt; Spray a -&gt; Bool) -&gt; Eq (Spray a)
+forall a. Eq a =&gt; Spray a -&gt; Spray a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: Spray a -&gt; Spray a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; Spray a -&gt; Spray a -&gt; Bool
+== :: Spray a -&gt; Spray a -&gt; Bool
+$c== :: forall a. Eq a =&gt; Spray a -&gt; Spray a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679043005"><span id="local-6989586621679043007"><span id="local-6989586621679043009"><span id="local-6989586621679043011"><span id="local-6989586621679043013"><span id="local-6989586621679043015"><span id="local-6989586621679043017"><span class="annot"><span class="annottext">Eq (Spray a)
+Eq (Spray a)
+-&gt; (Spray a -&gt; Spray a -&gt; Ordering)
+-&gt; (Spray a -&gt; Spray a -&gt; Bool)
+-&gt; (Spray a -&gt; Spray a -&gt; Bool)
+-&gt; (Spray a -&gt; Spray a -&gt; Bool)
+-&gt; (Spray a -&gt; Spray a -&gt; Bool)
+-&gt; (Spray a -&gt; Spray a -&gt; Spray a)
+-&gt; (Spray a -&gt; Spray a -&gt; Spray a)
+-&gt; Ord (Spray a)
+Spray a -&gt; Spray a -&gt; Bool
+Spray a -&gt; Spray a -&gt; Ordering
+Spray a -&gt; Spray a -&gt; Spray a
+forall a.
+Eq a
+-&gt; (a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall a. Ord a =&gt; Eq (Spray a)
+forall a. Ord a =&gt; Spray a -&gt; Spray a -&gt; Bool
+forall a. Ord a =&gt; Spray a -&gt; Spray a -&gt; Ordering
+forall a. Ord a =&gt; Spray a -&gt; Spray a -&gt; Spray a
+min :: Spray a -&gt; Spray a -&gt; Spray a
+$cmin :: forall a. Ord a =&gt; Spray a -&gt; Spray a -&gt; Spray a
+max :: Spray a -&gt; Spray a -&gt; Spray a
+$cmax :: forall a. Ord a =&gt; Spray a -&gt; Spray a -&gt; Spray a
+&gt;= :: Spray a -&gt; Spray a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; Spray a -&gt; Spray a -&gt; Bool
+&gt; :: Spray a -&gt; Spray a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; Spray a -&gt; Spray a -&gt; Bool
+&lt;= :: Spray a -&gt; Spray a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; Spray a -&gt; Spray a -&gt; Bool
+&lt; :: Spray a -&gt; Spray a -&gt; Bool
+$c&lt; :: forall a. Ord a =&gt; Spray a -&gt; Spray a -&gt; Bool
+compare :: Spray a -&gt; Spray a -&gt; Ordering
+$ccompare :: forall a. Ord a =&gt; Spray a -&gt; Spray a -&gt; Ordering
+$cp1Ord :: forall a. Ord a =&gt; Eq (Spray a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679042989"><span id="local-6989586621679042992"><span id="local-6989586621679042994"><span id="local-6989586621679042996"><span class="annot"><a href="Data.Heap.Class.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="Data.Heap.Spray.html#Spray"><span class="hs-identifier hs-type">Spray</span></a></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-8"></span><span>  </span><span id="local-6989586621679042987"><span class="annot"><span class="annottext">empty :: Spray a
+</span><a href="Data.Heap.Class.html#empty"><span class="hs-identifier hs-var hs-var hs-var hs-var">empty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Spray a
+forall a. Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Heap.Class.html#empty"><span class="hs-pragma hs-type">empty</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span>  </span><span id="local-6989586621679042985"><span class="annot"><span class="annottext">null :: Spray a -&gt; Bool
+</span><a href="Data.Heap.Class.html#null"><span class="hs-identifier hs-var hs-var hs-var hs-var">null</span></a></span></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-12"></span><span>  </span><span class="annot"><a href="Data.Heap.Class.html#null"><span class="hs-identifier hs-var">null</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><span class="hs-identifier">_</span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Heap.Class.html#null"><span class="hs-pragma hs-type">null</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span>  </span><span id="local-6989586621679042983"><span class="annot"><span class="annottext">insert :: a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Class.html#insert"><span class="hs-identifier hs-var hs-var hs-var hs-var">insert</span></a></span></span><span> </span><span id="local-6989586621679042981"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042981"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679042980"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042980"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-16"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679042979"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042979"><span class="hs-identifier hs-var">small</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679042978"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042978"><span class="hs-identifier hs-var">big</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Spray a -&gt; (Spray a, Spray a)
+forall a. Ord a =&gt; a -&gt; Spray a -&gt; (Spray a, Spray a)
+</span><a href="Data.Heap.Spray.html#partite"><span class="hs-identifier hs-var">partite</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042981"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042980"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-17"></span><span>    </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+forall a. Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-var">Branch</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042979"><span class="hs-identifier hs-var">small</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042981"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042978"><span class="hs-identifier hs-var">big</span></a></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Heap.Class.html#insert"><span class="hs-pragma hs-type">insert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span>  </span><span id="local-6989586621679042976"><span class="annot"><span class="annottext">findMin :: Spray a -&gt; Maybe a
+</span><a href="Data.Heap.Class.html#findMin"><span class="hs-identifier hs-var hs-var hs-var hs-var">findMin</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-type">Branch</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span> </span><span id="local-6989586621679042974"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042974"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Maybe a
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042974"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="annot"><a href="Data.Heap.Class.html#findMin"><span class="hs-identifier hs-var">findMin</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-type">Branch</span></a></span><span> </span><span id="local-6989586621679042973"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042973"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; Maybe a
+forall (f :: * -&gt; *) a. (Heap f, Ord a) =&gt; f a -&gt; Maybe a
+</span><a href="Data.Heap.Class.html#findMin"><span class="hs-identifier hs-var">findMin</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042973"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="annot"><a href="Data.Heap.Class.html#findMin"><span class="hs-identifier hs-var">findMin</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe a
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span>  </span><span id="local-6989586621679042972"><span class="annot"><span class="annottext">deleteMin :: Spray a -&gt; Maybe (Spray a)
+</span><a href="Data.Heap.Class.html#deleteMin"><span class="hs-identifier hs-var hs-var hs-var hs-var">deleteMin</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-type">Branch</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679042970"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042970"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; Maybe (Spray a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042970"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="annot"><a href="Data.Heap.Class.html#deleteMin"><span class="hs-identifier hs-var">deleteMin</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-type">Branch</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-type">Branch</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679042969"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042969"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679042968"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042968"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679042967"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042967"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; Maybe (Spray a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Spray a -&gt; Maybe (Spray a)) -&gt; Spray a -&gt; Maybe (Spray a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+forall a. Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-var">Branch</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042969"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042968"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042967"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-26"></span><span>  </span><span class="annot"><a href="Data.Heap.Class.html#deleteMin"><span class="hs-identifier hs-var">deleteMin</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-type">Branch</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-type">Branch</span></a></span><span> </span><span id="local-6989586621679042966"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042966"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679042965"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042965"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679042964"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042964"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679042963"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042963"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679042962"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042962"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-27"></span><span>    </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679042961"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042961"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+forall a. Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-var">Branch</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042961"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042965"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+forall a. Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-var">Branch</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042964"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042963"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042962"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Spray a -&gt; Spray a) -&gt; Maybe (Spray a) -&gt; Maybe (Spray a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; Maybe (Spray a)
+forall (f :: * -&gt; *) a. (Heap f, Ord a) =&gt; f a -&gt; Maybe (f a)
+</span><a href="Data.Heap.Class.html#deleteMin"><span class="hs-identifier hs-var">deleteMin</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042966"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-28"></span><span>  </span><span class="annot"><a href="Data.Heap.Class.html#deleteMin"><span class="hs-identifier hs-var">deleteMin</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Spray a)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span>  </span><span id="local-6989586621679042959"><span class="annot"><span class="annottext">merge :: Spray a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Class.html#merge"><span class="hs-identifier hs-var hs-var hs-var hs-var">merge</span></a></span></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span> </span><span id="local-6989586621679042957"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042957"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042957"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-31"></span><span>  </span><span class="annot"><a href="Data.Heap.Class.html#merge"><span class="hs-identifier hs-var">merge</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-type">Branch</span></a></span><span> </span><span id="local-6989586621679042956"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042956"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679042955"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042955"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679042954"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042954"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679042953"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042953"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-32"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679042952"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042952"><span class="hs-identifier hs-var">ta</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679042951"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042951"><span class="hs-identifier hs-var">tb</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Spray a -&gt; (Spray a, Spray a)
+forall a. Ord a =&gt; a -&gt; Spray a -&gt; (Spray a, Spray a)
+</span><a href="Data.Heap.Spray.html#partite"><span class="hs-identifier hs-var">partite</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042955"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042953"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-33"></span><span>    </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+forall a. Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-var">Branch</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Spray a -&gt; Spray a -&gt; Spray a
+forall (f :: * -&gt; *) a. (Heap f, Ord a) =&gt; f a -&gt; f a -&gt; f a
+</span><a href="Data.Heap.Class.html#merge"><span class="hs-identifier hs-var">merge</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042952"><span class="hs-identifier hs-var">ta</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042956"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042955"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Spray a -&gt; Spray a -&gt; Spray a
+forall (f :: * -&gt; *) a. (Heap f, Ord a) =&gt; f a -&gt; f a -&gt; f a
+</span><a href="Data.Heap.Class.html#merge"><span class="hs-identifier hs-var">merge</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042951"><span class="hs-identifier hs-var">tb</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042954"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span>  </span><span id="local-6989586621679042950"><span class="annot"><span class="annottext">toList :: Spray a -&gt; [a]
+</span><a href="Data.Heap.Class.html#toList"><span class="hs-identifier hs-var hs-var hs-var hs-var">toList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">([a] -&gt; [a]) -&gt; [a] -&gt; [a]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(([a] -&gt; [a]) -&gt; [a]) -&gt; (Spray a -&gt; [a] -&gt; [a]) -&gt; Spray a -&gt; [a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; [a] -&gt; [a]
+forall a. Spray a -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679042947"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-36"></span><span>    </span><span id="local-6989586621679042947"><span class="annot"><span class="annottext">go :: Spray a -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679042947"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a]
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-37"></span><span>    </span><span class="annot"><a href="#local-6989586621679042947"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-type">Branch</span></a></span><span> </span><span id="local-6989586621679042945"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042945"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679042944"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042944"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679042943"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042943"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679042947"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042945"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [a]) -&gt; ([a] -&gt; [a]) -&gt; [a] -&gt; [a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042944"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [a]) -&gt; ([a] -&gt; [a]) -&gt; [a] -&gt; [a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679042947"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042943"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Heap.Class.html#toList"><span class="hs-pragma hs-type">toList</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span id="local-6989586621679043066"><span class="annot"><a href="Data.Heap.Spray.html#partite"><span class="hs-identifier hs-type">partite</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679043066"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679043066"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Spray.html#Spray"><span class="hs-identifier hs-type">Spray</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679043066"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Spray.html#Spray"><span class="hs-identifier hs-type">Spray</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679043066"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Spray.html#Spray"><span class="hs-identifier hs-type">Spray</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679043066"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-41"></span><span id="partite"><span class="annot"><span class="annottext">partite :: a -&gt; Spray a -&gt; (Spray a, Spray a)
+</span><a href="Data.Heap.Spray.html#partite"><span class="hs-identifier hs-var hs-var">partite</span></a></span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Spray a
+forall a. Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Spray a
+forall a. Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span class="annot"><a href="Data.Heap.Spray.html#partite"><span class="hs-identifier hs-var">partite</span></a></span><span> </span><span id="local-6989586621679042942"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042942"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679042941"><span class="annot"><span class="annottext">t :: Spray a
+</span><a href="#local-6989586621679042941"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-type">Branch</span></a></span><span> </span><span id="local-6989586621679042940"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042940"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679042939"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042939"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679042938"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042938"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042939"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042942"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-44"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042938"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-45"></span><span>      </span><span class="annot"><span class="annottext">Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042941"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Spray a
+forall a. Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>      </span><span class="annot"><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-type">Branch</span></a></span><span> </span><span id="local-6989586621679042936"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042936"><span class="hs-identifier hs-var">b1</span></a></span></span><span> </span><span id="local-6989586621679042935"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042935"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679042934"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042934"><span class="hs-identifier hs-var">b2</span></a></span></span><span>
+</span><span id="line-47"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042935"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042942"><span class="hs-identifier hs-var">p</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-48"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679042933"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042933"><span class="hs-identifier hs-var">small</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679042932"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042932"><span class="hs-identifier hs-var">big</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Spray a -&gt; (Spray a, Spray a)
+forall a. Ord a =&gt; a -&gt; Spray a -&gt; (Spray a, Spray a)
+</span><a href="Data.Heap.Spray.html#partite"><span class="hs-identifier hs-var">partite</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042942"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042934"><span class="hs-identifier hs-var">b2</span></a></span><span>
+</span><span id="line-49"></span><span>          </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+forall a. Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-var">Branch</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+forall a. Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-var">Branch</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042940"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042939"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042936"><span class="hs-identifier hs-var">b1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042935"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042933"><span class="hs-identifier hs-var">small</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042932"><span class="hs-identifier hs-var">big</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-51"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679042931"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042931"><span class="hs-identifier hs-var">small</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679042930"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042930"><span class="hs-identifier hs-var">big</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Spray a -&gt; (Spray a, Spray a)
+forall a. Ord a =&gt; a -&gt; Spray a -&gt; (Spray a, Spray a)
+</span><a href="Data.Heap.Spray.html#partite"><span class="hs-identifier hs-var">partite</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042942"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042936"><span class="hs-identifier hs-var">b1</span></a></span><span>
+</span><span id="line-52"></span><span>          </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+forall a. Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-var">Branch</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042940"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042939"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042931"><span class="hs-identifier hs-var">small</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+forall a. Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-var">Branch</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042930"><span class="hs-identifier hs-var">big</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042935"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042934"><span class="hs-identifier hs-var">b2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-55"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042940"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-56"></span><span>      </span><span class="annot"><span class="annottext">Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Spray a
+forall a. Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042941"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>      </span><span class="annot"><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-type">Branch</span></a></span><span> </span><span id="local-6989586621679042929"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042929"><span class="hs-identifier hs-var">a1</span></a></span></span><span> </span><span id="local-6989586621679042928"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042928"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679042927"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042927"><span class="hs-identifier hs-var">a2</span></a></span></span><span>
+</span><span id="line-58"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042928"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042942"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-59"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679042926"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042926"><span class="hs-identifier hs-var">small</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679042925"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042925"><span class="hs-identifier hs-var">big</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Spray a -&gt; (Spray a, Spray a)
+forall a. Ord a =&gt; a -&gt; Spray a -&gt; (Spray a, Spray a)
+</span><a href="Data.Heap.Spray.html#partite"><span class="hs-identifier hs-var">partite</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042942"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042927"><span class="hs-identifier hs-var">a2</span></a></span><span>
+</span><span id="line-60"></span><span>          </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+forall a. Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-var">Branch</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042929"><span class="hs-identifier hs-var">a1</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042928"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042926"><span class="hs-identifier hs-var">small</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+forall a. Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-var">Branch</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042925"><span class="hs-identifier hs-var">big</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042939"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042938"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-62"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679042924"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042924"><span class="hs-identifier hs-var">small</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679042923"><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042923"><span class="hs-identifier hs-var">big</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Spray a -&gt; (Spray a, Spray a)
+forall a. Ord a =&gt; a -&gt; Spray a -&gt; (Spray a, Spray a)
+</span><a href="Data.Heap.Spray.html#partite"><span class="hs-identifier hs-var">partite</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042942"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042929"><span class="hs-identifier hs-var">a1</span></a></span><span>
+</span><span id="line-63"></span><span>          </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042924"><span class="hs-identifier hs-var">small</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+forall a. Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-var">Branch</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042923"><span class="hs-identifier hs-var">big</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042928"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+forall a. Spray a -&gt; a -&gt; Spray a -&gt; Spray a
+</span><a href="Data.Heap.Spray.html#Branch"><span class="hs-identifier hs-var">Branch</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042927"><span class="hs-identifier hs-var">a2</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042939"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+</span><a href="#local-6989586621679042938"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span id="local-6989586621679042922"><span class="annot"><a href="Data.Heap.Spray.html#spraySort"><span class="hs-identifier hs-type">spraySort</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679042922"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679042922"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679042922"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-66"></span><span id="spraySort"><span class="annot"><span class="annottext">spraySort :: [a] -&gt; [a]
+</span><a href="Data.Heap.Spray.html#spraySort"><span class="hs-identifier hs-var hs-var">spraySort</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Spray a -&gt; [a]
+forall (f :: * -&gt; *) a. (Heap f, Ord a) =&gt; f a -&gt; [a]
+</span><a href="Data.Heap.Class.html#toList"><span class="hs-identifier hs-var">toList</span></a></span><span> </span><span class="annot"><span class="annottext">(Spray a -&gt; [a]) -&gt; ([a] -&gt; Spray a) -&gt; [a] -&gt; [a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Spray a -&gt; Spray a) -&gt; Spray a -&gt; [a] -&gt; Spray a
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Spray a -&gt; Spray a
+forall (f :: * -&gt; *) a. (Heap f, Ord a) =&gt; a -&gt; f a -&gt; f a
+</span><a href="Data.Heap.Class.html#insert"><span class="hs-identifier hs-var">insert</span></a></span><span> </span><span class="annot"><span class="annottext">Spray a
+forall a. Spray a
+</span><a href="Data.Heap.Spray.html#Empty"><span class="hs-identifier hs-var">Empty</span></a></span><span>
+</span><span id="line-67"></span></pre></body></html>

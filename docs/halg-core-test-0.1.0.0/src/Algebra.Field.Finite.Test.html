@@ -1,30 +1,178 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs              #-}</span><span>
-</span><a name="line-2"></a><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction        #-}</span><span>
-</span><a name="line-3"></a><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances #-}</span><span>
-</span><a name="line-4"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra.Field.Finite.Test</span><span>
-</span><a name="line-5"></a><span>       </span><span class="hs-special">(</span><a href="Algebra.Field.Finite.Test.html#WrapFiniteField"><span class="hs-identifier hs-type">WrapFiniteField</span></a><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><a href="Algebra.Field.Finite.Test.html#arbitraryFiniteField"><span class="hs-identifier hs-var">arbitraryFiniteField</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Field.Finite.Test.html#seriesFiniteField"><span class="hs-identifier hs-var">seriesFiniteField</span></a><span>
-</span><a name="line-6"></a><span>       </span><span class="hs-special">)</span><span class="hs-keyword">where</span><span>
-</span><a name="line-7"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Algebra.Field.Finite</span><span>   </span><span class="hs-special">(</span><span class="hs-identifier hs-type">FiniteField</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><a name="line-8"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Algebra.Field.Finite</span><span>   </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">FF</span><span>
-</span><a name="line-9"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data.Coerce</span><span>            </span><span class="hs-special">(</span><span class="hs-identifier hs-var">coerce</span><span class="hs-special">)</span><span>
-</span><a name="line-10"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Prelude</span><span>
-</span><a name="line-11"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Test.QuickCheck</span><span>        </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Arbitrary</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Gen</span><span class="hs-special">)</span><span>
-</span><a name="line-12"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Test.QuickCheck</span><span>        </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">QC</span><span>
-</span><a name="line-13"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Test.SmallCheck.Series</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Serial</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Series</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">generate</span><span class="hs-special">)</span><span>
-</span><a name="line-14"></a><span>
-</span><a name="line-15"></a><span class="hs-keyword">newtype</span><span> </span><a name="WrapFiniteField"><a href="Algebra.Field.Finite.Test.html#WrapFiniteField"><span class="hs-identifier">WrapFiniteField</span></a></a><span> </span><a name="local-6989586621679060916"><a href="#local-6989586621679060916"><span class="hs-identifier">k</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a name="WrapFiniteField"><a href="Algebra.Field.Finite.Test.html#WrapFiniteField"><span class="hs-identifier">WrapFiniteField</span></a></a><span> </span><span class="hs-special">{</span><span> </span><a name="runWrapFiniteField"><a href="Algebra.Field.Finite.Test.html#runWrapFiniteField"><span class="hs-identifier">runWrapFiniteField</span></a></a><span> </span><span class="hs-glyph">::</span><span> </span><a href="#local-6989586621679060916"><span class="hs-identifier hs-type">k</span></a><span> </span><span class="hs-special">}</span><span>
-</span><a name="line-16"></a><span>                            </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Read</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Show</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Eq</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Ord</span><span class="hs-special">)</span><span>
-</span><a name="line-17"></a><span>
-</span><a name="line-18"></a><span class="hs-keyword">instance</span><span> </span><span class="hs-identifier hs-type">FiniteField</span><span> </span><a href="#local-6989586621679066801"><span class="hs-identifier hs-type">k</span></a><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Arbitrary</span><span> </span><span class="hs-special">(</span><a href="Algebra.Field.Finite.Test.html#WrapFiniteField"><span class="hs-identifier hs-type">WrapFiniteField</span></a><span> </span><a href="#local-6989586621679066801"><span class="hs-identifier hs-type">k</span></a><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><a name="line-19"></a><span>  </span><a name="local-8214565720323819189"><span class="hs-identifier">arbitrary</span></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">coerce</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">QC.elements</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">FF.elements</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><a href="#local-6989586621679066801"><span class="hs-identifier hs-type">k</span></a><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><a name="line-20"></a><span>
-</span><a name="line-21"></a><span class="hs-identifier">arbitraryFiniteField</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">FiniteField</span><span> </span><a href="#local-6989586621679067091"><span class="hs-identifier hs-type">k</span></a><span> </span><span class="hs-glyph">=&gt;</span><span> </span><a href="#local-6989586621679067092"><span class="hs-identifier hs-type">proxy</span></a><span> </span><a href="#local-6989586621679067091"><span class="hs-identifier hs-type">k</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Gen</span><span> </span><a href="#local-6989586621679067091"><span class="hs-identifier hs-type">k</span></a><span>
-</span><a name="line-22"></a><a name="arbitraryFiniteField"><a href="Algebra.Field.Finite.Test.html#arbitraryFiniteField"><span class="hs-identifier">arbitraryFiniteField</span></a></a><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">runWrapFiniteField</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">arbitrary</span><span>
-</span><a name="line-23"></a><span>
-</span><a name="line-24"></a><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Monad</span><span> </span><a href="#local-6989586621679066612"><span class="hs-identifier hs-type">m</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">FiniteField</span><span> </span><a href="#local-6989586621679066613"><span class="hs-identifier hs-type">k</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Serial</span><span> </span><a href="#local-6989586621679066612"><span class="hs-identifier hs-type">m</span></a><span> </span><span class="hs-special">(</span><a href="Algebra.Field.Finite.Test.html#WrapFiniteField"><span class="hs-identifier hs-type">WrapFiniteField</span></a><span> </span><a href="#local-6989586621679066613"><span class="hs-identifier hs-type">k</span></a><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><a name="line-25"></a><span>  </span><a name="local-8214565720323819333"><span class="hs-identifier">series</span></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">generate</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-glyph">\</span><a name="local-6989586621679066614"><a href="#local-6989586621679066614"><span class="hs-identifier">n</span></a></a><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><a name="line-26"></a><span>    </span><span class="hs-identifier hs-var">coerce</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">take</span><span> </span><a href="#local-6989586621679066614"><span class="hs-identifier hs-var">n</span></a><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">FF.elements</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><a href="#local-6989586621679066613"><span class="hs-identifier hs-type">k</span></a><span class="hs-special">]</span><span class="hs-special">)</span><span>
-</span><a name="line-27"></a><span>
-</span><a name="line-28"></a><span class="hs-identifier">seriesFiniteField</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">FiniteField</span><span> </span><a href="#local-6989586621679066980"><span class="hs-identifier hs-type">k</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Monad</span><span> </span><a href="#local-6989586621679066981"><span class="hs-identifier hs-type">m</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><a href="#local-6989586621679066982"><span class="hs-identifier hs-type">proxy</span></a><span> </span><a href="#local-6989586621679066980"><span class="hs-identifier hs-type">k</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Series</span><span> </span><a href="#local-6989586621679066981"><span class="hs-identifier hs-type">m</span></a><span> </span><a href="#local-6989586621679066980"><span class="hs-identifier hs-type">k</span></a><span>
-</span><a name="line-29"></a><a name="seriesFiniteField"><a href="Algebra.Field.Finite.Test.html#seriesFiniteField"><span class="hs-identifier">seriesFiniteField</span></a></a><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">runWrapFiniteField</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">series</span><span>
-</span><a name="line-30"></a></pre></body></html>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction        #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables, TypeFamilies, UndecidableInstances #-}</span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra.Field.Finite.Test</span><span>
+</span><span id="line-5"></span><span>       </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Field.Finite.Test.html#WrapFiniteField"><span class="hs-identifier">WrapFiniteField</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algebra.Field.Finite.Test.html#arbitraryFiniteField"><span class="hs-identifier">arbitraryFiniteField</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algebra.Field.Finite.Test.html#seriesFiniteField"><span class="hs-identifier">seriesFiniteField</span></a></span><span>
+</span><span id="line-6"></span><span>       </span><span class="hs-special">)</span><span class="hs-keyword">where</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Algebra.Field.Finite</span></span><span>   </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">FiniteField</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Algebra.Field.Finite</span></span><span>   </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">FF</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">coerce</span></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Test.QuickCheck</span></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Gen</span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Test.QuickCheck</span></span><span>        </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">QC</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Test.SmallCheck.Series</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Serial</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Series</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">generate</span></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">newtype</span><span> </span><span id="WrapFiniteField"><span class="annot"><a href="Algebra.Field.Finite.Test.html#WrapFiniteField"><span class="hs-identifier hs-var">WrapFiniteField</span></a></span></span><span> </span><span id="local-6989586621679243856"><span class="annot"><a href="#local-6989586621679243856"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="WrapFiniteField"><span class="annot"><a href="Algebra.Field.Finite.Test.html#WrapFiniteField"><span class="hs-identifier hs-var">WrapFiniteField</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="runWrapFiniteField"><span class="annot"><span class="annottext">WrapFiniteField k -&gt; k
+</span><a href="Algebra.Field.Finite.Test.html#runWrapFiniteField"><span class="hs-identifier hs-var hs-var">runWrapFiniteField</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679243856"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-16"></span><span>                            </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679243828"><span id="local-6989586621679243830"><span id="local-6989586621679243832"><span id="local-6989586621679243834"><span class="annot"><span class="annottext">ReadPrec [WrapFiniteField k]
+ReadPrec (WrapFiniteField k)
+Int -&gt; ReadS (WrapFiniteField k)
+ReadS [WrapFiniteField k]
+(Int -&gt; ReadS (WrapFiniteField k))
+-&gt; ReadS [WrapFiniteField k]
+-&gt; ReadPrec (WrapFiniteField k)
+-&gt; ReadPrec [WrapFiniteField k]
+-&gt; Read (WrapFiniteField k)
+forall k. Read k =&gt; ReadPrec [WrapFiniteField k]
+forall k. Read k =&gt; ReadPrec (WrapFiniteField k)
+forall k. Read k =&gt; Int -&gt; ReadS (WrapFiniteField k)
+forall k. Read k =&gt; ReadS [WrapFiniteField k]
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+readListPrec :: ReadPrec [WrapFiniteField k]
+$creadListPrec :: forall k. Read k =&gt; ReadPrec [WrapFiniteField k]
+readPrec :: ReadPrec (WrapFiniteField k)
+$creadPrec :: forall k. Read k =&gt; ReadPrec (WrapFiniteField k)
+readList :: ReadS [WrapFiniteField k]
+$creadList :: forall k. Read k =&gt; ReadS [WrapFiniteField k]
+readsPrec :: Int -&gt; ReadS (WrapFiniteField k)
+$creadsPrec :: forall k. Read k =&gt; Int -&gt; ReadS (WrapFiniteField k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679243821"><span id="local-6989586621679243823"><span id="local-6989586621679243825"><span class="annot"><span class="annottext">Int -&gt; WrapFiniteField k -&gt; ShowS
+[WrapFiniteField k] -&gt; ShowS
+WrapFiniteField k -&gt; String
+(Int -&gt; WrapFiniteField k -&gt; ShowS)
+-&gt; (WrapFiniteField k -&gt; String)
+-&gt; ([WrapFiniteField k] -&gt; ShowS)
+-&gt; Show (WrapFiniteField k)
+forall k. Show k =&gt; Int -&gt; WrapFiniteField k -&gt; ShowS
+forall k. Show k =&gt; [WrapFiniteField k] -&gt; ShowS
+forall k. Show k =&gt; WrapFiniteField k -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [WrapFiniteField k] -&gt; ShowS
+$cshowList :: forall k. Show k =&gt; [WrapFiniteField k] -&gt; ShowS
+show :: WrapFiniteField k -&gt; String
+$cshow :: forall k. Show k =&gt; WrapFiniteField k -&gt; String
+showsPrec :: Int -&gt; WrapFiniteField k -&gt; ShowS
+$cshowsPrec :: forall k. Show k =&gt; Int -&gt; WrapFiniteField k -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679243816"><span id="local-6989586621679243818"><span class="annot"><span class="annottext">WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+(WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool)
+-&gt; (WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool)
+-&gt; Eq (WrapFiniteField k)
+forall k. Eq k =&gt; WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+$c/= :: forall k. Eq k =&gt; WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+== :: WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+$c== :: forall k. Eq k =&gt; WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679243800"><span id="local-6989586621679243802"><span id="local-6989586621679243804"><span id="local-6989586621679243806"><span id="local-6989586621679243808"><span id="local-6989586621679243810"><span id="local-6989586621679243812"><span class="annot"><span class="annottext">Eq (WrapFiniteField k)
+Eq (WrapFiniteField k)
+-&gt; (WrapFiniteField k -&gt; WrapFiniteField k -&gt; Ordering)
+-&gt; (WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool)
+-&gt; (WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool)
+-&gt; (WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool)
+-&gt; (WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool)
+-&gt; (WrapFiniteField k -&gt; WrapFiniteField k -&gt; WrapFiniteField k)
+-&gt; (WrapFiniteField k -&gt; WrapFiniteField k -&gt; WrapFiniteField k)
+-&gt; Ord (WrapFiniteField k)
+WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+WrapFiniteField k -&gt; WrapFiniteField k -&gt; Ordering
+WrapFiniteField k -&gt; WrapFiniteField k -&gt; WrapFiniteField k
+forall a.
+Eq a
+-&gt; (a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall k. Ord k =&gt; Eq (WrapFiniteField k)
+forall k. Ord k =&gt; WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+forall k.
+Ord k =&gt;
+WrapFiniteField k -&gt; WrapFiniteField k -&gt; Ordering
+forall k.
+Ord k =&gt;
+WrapFiniteField k -&gt; WrapFiniteField k -&gt; WrapFiniteField k
+min :: WrapFiniteField k -&gt; WrapFiniteField k -&gt; WrapFiniteField k
+$cmin :: forall k.
+Ord k =&gt;
+WrapFiniteField k -&gt; WrapFiniteField k -&gt; WrapFiniteField k
+max :: WrapFiniteField k -&gt; WrapFiniteField k -&gt; WrapFiniteField k
+$cmax :: forall k.
+Ord k =&gt;
+WrapFiniteField k -&gt; WrapFiniteField k -&gt; WrapFiniteField k
+&gt;= :: WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+$c&gt;= :: forall k. Ord k =&gt; WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+&gt; :: WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+$c&gt; :: forall k. Ord k =&gt; WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+&lt;= :: WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+$c&lt;= :: forall k. Ord k =&gt; WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+&lt; :: WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+$c&lt; :: forall k. Ord k =&gt; WrapFiniteField k -&gt; WrapFiniteField k -&gt; Bool
+compare :: WrapFiniteField k -&gt; WrapFiniteField k -&gt; Ordering
+$ccompare :: forall k.
+Ord k =&gt;
+WrapFiniteField k -&gt; WrapFiniteField k -&gt; Ordering
+$cp1Ord :: forall k. Ord k =&gt; Eq (WrapFiniteField k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span id="local-6989586621679243798"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679243795"><span class="annot"><span class="hs-identifier hs-type">FiniteField</span></span><span> </span><span class="annot"><a href="#local-6989586621679243798"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Field.Finite.Test.html#WrapFiniteField"><span class="hs-identifier hs-type">WrapFiniteField</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679243798"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-19"></span><span>  </span><span id="local-6989586621679243793"><span class="annot"><span class="annottext">arbitrary :: Gen (WrapFiniteField k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen k -&gt; Gen (WrapFiniteField k)
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">(Gen k -&gt; Gen (WrapFiniteField k))
+-&gt; Gen k -&gt; Gen (WrapFiniteField k)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[k] -&gt; Gen k
+forall a. [a] -&gt; Gen a
+</span><span class="hs-identifier hs-var">QC.elements</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[k] -&gt; [k]
+forall k (proxy :: * -&gt; *). FiniteField k =&gt; proxy k -&gt; [k]
+</span><span class="hs-identifier hs-var">FF.elements</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679243798"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span id="local-6989586621679243788"><span id="local-6989586621679243789"><span class="annot"><a href="Algebra.Field.Finite.Test.html#arbitraryFiniteField"><span class="hs-identifier hs-type">arbitraryFiniteField</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FiniteField</span></span><span> </span><span class="annot"><a href="#local-6989586621679243789"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679243788"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679243789"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gen</span></span><span> </span><span class="annot"><a href="#local-6989586621679243789"><span class="hs-identifier hs-type">k</span></a></span></span></span><span>
+</span><span id="line-22"></span><span id="arbitraryFiniteField"><span class="annot"><span class="annottext">arbitraryFiniteField :: proxy k -&gt; Gen k
+</span><a href="Algebra.Field.Finite.Test.html#arbitraryFiniteField"><span class="hs-identifier hs-var hs-var">arbitraryFiniteField</span></a></span></span><span> </span><span class="annot"><span class="annottext">proxy k
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WrapFiniteField k -&gt; k
+forall k. WrapFiniteField k -&gt; k
+</span><a href="Algebra.Field.Finite.Test.html#runWrapFiniteField"><span class="hs-identifier hs-var hs-var">runWrapFiniteField</span></a></span><span> </span><span class="annot"><span class="annottext">(WrapFiniteField k -&gt; k) -&gt; Gen (WrapFiniteField k) -&gt; Gen k
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen (WrapFiniteField k)
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span id="local-6989586621679243785"><span id="local-6989586621679243786"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679243786"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FiniteField</span></span><span> </span><span class="annot"><a href="#local-6989586621679243785"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Serial</span></span><span> </span><span class="annot"><a href="#local-6989586621679243786"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Field.Finite.Test.html#WrapFiniteField"><span class="hs-identifier hs-type">WrapFiniteField</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679243785"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>  </span><span id="local-6989586621679243781"><span class="annot"><span class="annottext">series :: Series m (WrapFiniteField k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">series</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; [WrapFiniteField k]) -&gt; Series m (WrapFiniteField k)
+forall a (m :: * -&gt; *). (Int -&gt; [a]) -&gt; Series m a
+</span><span class="hs-identifier hs-var">generate</span></span><span> </span><span class="annot"><span class="annottext">((Int -&gt; [WrapFiniteField k]) -&gt; Series m (WrapFiniteField k))
+-&gt; (Int -&gt; [WrapFiniteField k]) -&gt; Series m (WrapFiniteField k)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679243779"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679243779"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-26"></span><span>    </span><span class="annot"><span class="annottext">[k] -&gt; [WrapFiniteField k]
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">([k] -&gt; [WrapFiniteField k]) -&gt; [k] -&gt; [WrapFiniteField k]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [k] -&gt; [k]
+forall a. Int -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">take</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679243779"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">([k] -&gt; [k]) -&gt; [k] -&gt; [k]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[k] -&gt; [k]
+forall k (proxy :: * -&gt; *). FiniteField k =&gt; proxy k -&gt; [k]
+</span><span class="hs-identifier hs-var">FF.elements</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679243785"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span id="local-6989586621679243775"><span id="local-6989586621679243776"><span id="local-6989586621679243777"><span class="annot"><a href="Algebra.Field.Finite.Test.html#seriesFiniteField"><span class="hs-identifier hs-type">seriesFiniteField</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FiniteField</span></span><span> </span><span class="annot"><a href="#local-6989586621679243777"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679243776"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679243775"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679243777"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Series</span></span><span> </span><span class="annot"><a href="#local-6989586621679243776"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679243777"><span class="hs-identifier hs-type">k</span></a></span></span></span></span><span>
+</span><span id="line-29"></span><span id="seriesFiniteField"><span class="annot"><span class="annottext">seriesFiniteField :: proxy k -&gt; Series m k
+</span><a href="Algebra.Field.Finite.Test.html#seriesFiniteField"><span class="hs-identifier hs-var hs-var">seriesFiniteField</span></a></span></span><span> </span><span class="annot"><span class="annottext">proxy k
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WrapFiniteField k -&gt; k
+forall k. WrapFiniteField k -&gt; k
+</span><a href="Algebra.Field.Finite.Test.html#runWrapFiniteField"><span class="hs-identifier hs-var hs-var">runWrapFiniteField</span></a></span><span> </span><span class="annot"><span class="annottext">(WrapFiniteField k -&gt; k)
+-&gt; Series m (WrapFiniteField k) -&gt; Series m k
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Series m (WrapFiniteField k)
+forall (m :: * -&gt; *) a. Serial m a =&gt; Series m a
+</span><span class="hs-identifier hs-var">series</span></span><span>
+</span><span id="line-30"></span></pre></body></html>

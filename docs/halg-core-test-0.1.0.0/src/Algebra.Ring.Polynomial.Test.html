@@ -1,56 +1,476 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE FlexibleContexts, FlexibleInstances, GADTs                   #-}</span><span>
-</span><a name="line-2"></a><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses            #-}</span><span>
-</span><a name="line-3"></a><span class="hs-pragma">{-# LANGUAGE NoMonomorphismRestriction, ScopedTypeVariables, TypeFamilies #-}</span><span>
-</span><a name="line-4"></a><span class="hs-pragma">{-# LANGUAGE UndecidableInstances                                         #-}</span><span>
-</span><a name="line-5"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra.Ring.Polynomial.Test</span><span>
-</span><a name="line-6"></a><span>       </span><span class="hs-special">(</span><span> </span><span class="hs-keyword">module</span><span> </span><a href="Algebra.Ring.Polynomial.Monomial.Test.html"><span class="hs-identifier">Algebra.Ring.Polynomial.Monomial.Test</span></a><span>
-</span><a name="line-7"></a><span>       </span><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Test.html#WrapPolynomial"><span class="hs-identifier hs-type">WrapPolynomial</span></a><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Test.html#arbitraryPolynomial"><span class="hs-identifier hs-var">arbitraryPolynomial</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Test.html#seriesPolynomial"><span class="hs-identifier hs-var">seriesPolynomial</span></a><span>
-</span><a name="line-8"></a><span>       </span><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Test.html#HomogPoly"><span class="hs-identifier hs-type">HomogPoly</span></a><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Test.html#arbitraryHomogeneousPolynomial"><span class="hs-identifier hs-var">arbitraryHomogeneousPolynomial</span></a><span>
-</span><a name="line-9"></a><span>       </span><span class="hs-special">)</span><span>
-</span><a name="line-10"></a><span>       </span><span class="hs-keyword">where</span><span>
-</span><a name="line-11"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Algebra.Internal</span><span>                      </span><span class="hs-special">(</span><span class="hs-identifier hs-type">SNat</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">sing</span><span class="hs-special">,</span><span>
-</span><a name="line-12"></a><span>                                                        </span><span class="hs-identifier hs-var">withKnownNat</span><span class="hs-special">)</span><span>
-</span><a name="line-13"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Algebra.Ring.Polynomial.Class</span><span>         </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Arity</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Coefficient</span><span class="hs-special">,</span><span>
-</span><a name="line-14"></a><span>                                                        </span><span class="hs-identifier hs-type">IsOrderedPolynomial</span><span class="hs-special">,</span><span>
-</span><a name="line-15"></a><span>                                                        </span><span class="hs-identifier hs-var">polynomial</span><span class="hs-special">)</span><span>
-</span><a name="line-16"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Algebra.Ring.Polynomial.Monomial</span><span>      </span><span class="hs-special">(</span><span class="hs-identifier hs-type">OrderedMonomial</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><a name="line-17"></a><span class="hs-keyword">import</span><span>           </span><a href="Algebra.Ring.Polynomial.Monomial.Test.html"><span class="hs-identifier">Algebra.Ring.Polynomial.Monomial.Test</span></a><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomialOfSum"><span class="hs-identifier hs-var">arbitraryMonomialOfSum</span></a><span class="hs-special">)</span><span>
-</span><a name="line-18"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data.Map</span><span>                              </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">M</span><span>
-</span><a name="line-19"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Prelude</span><span>
-</span><a name="line-20"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Test.QuickCheck</span><span>                       </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Arbitrary</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Gen</span><span class="hs-special">,</span><span>
-</span><a name="line-21"></a><span>                                                        </span><span class="hs-identifier hs-var">elements</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">listOf1</span><span class="hs-special">,</span><span>
-</span><a name="line-22"></a><span>                                                        </span><span class="hs-identifier hs-var">sized</span><span class="hs-special">)</span><span>
-</span><a name="line-23"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Test.SmallCheck.Series</span><span>                </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Serial</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Series</span><span class="hs-special">)</span><span>
-</span><a name="line-24"></a><span>
-</span><a name="line-25"></a><span class="hs-keyword">newtype</span><span> </span><a name="WrapPolynomial"><a href="Algebra.Ring.Polynomial.Test.html#WrapPolynomial"><span class="hs-identifier">WrapPolynomial</span></a></a><span> </span><a name="local-6989586621679127168"><a href="#local-6989586621679127168"><span class="hs-identifier">polyn</span></a></a><span> </span><span class="hs-glyph">=</span><span>
-</span><a name="line-26"></a><span>  </span><a name="WrapPolynomial"><a href="Algebra.Ring.Polynomial.Test.html#WrapPolynomial"><span class="hs-identifier">WrapPolynomial</span></a></a><span> </span><span class="hs-special">{</span><span> </span><a name="runWrapPolynomial"><a href="Algebra.Ring.Polynomial.Test.html#runWrapPolynomial"><span class="hs-identifier">runWrapPolynomial</span></a></a><span> </span><span class="hs-glyph">::</span><span> </span><a href="#local-6989586621679127168"><span class="hs-identifier hs-type">polyn</span></a><span> </span><span class="hs-special">}</span><span>
-</span><a name="line-27"></a><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Read</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Show</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Eq</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Ord</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Num</span><span class="hs-special">)</span><span>
-</span><a name="line-28"></a><span>
-</span><a name="line-29"></a><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">IsOrderedPolynomial</span><span> </span><a href="#local-6989586621679127175"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Arbitrary</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Coefficient</span><span> </span><a href="#local-6989586621679127175"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><a name="line-30"></a><span>         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Arbitrary</span><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Polynomial.Test.html#WrapPolynomial"><span class="hs-identifier hs-type">WrapPolynomial</span></a><span> </span><a href="#local-6989586621679127175"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><a name="line-31"></a><span>  </span><a name="local-8214565720323819189"><span class="hs-identifier">arbitrary</span></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="Algebra.Ring.Polynomial.Test.html#WrapPolynomial"><span class="hs-identifier hs-var">WrapPolynomial</span></a><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-identifier hs-var">polynomial</span><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-identifier hs-var">M.fromList</span><span>
-</span><a name="line-32"></a><span>              </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">listOf1</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">arbitrary</span><span> </span><span class="hs-operator hs-var">&lt;*&gt;</span><span> </span><span class="hs-identifier hs-var">arbitrary</span><span class="hs-special">)</span><span>
-</span><a name="line-33"></a><span>
-</span><a name="line-34"></a><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Monad</span><span> </span><a href="#local-6989586621679127173"><span class="hs-identifier hs-type">m</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">IsOrderedPolynomial</span><span> </span><a href="#local-6989586621679127174"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Serial</span><span> </span><a href="#local-6989586621679127173"><span class="hs-identifier hs-type">m</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Coefficient</span><span> </span><a href="#local-6989586621679127174"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><a name="line-35"></a><span>         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Serial</span><span> </span><a href="#local-6989586621679127173"><span class="hs-identifier hs-type">m</span></a><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Polynomial.Test.html#WrapPolynomial"><span class="hs-identifier hs-type">WrapPolynomial</span></a><span> </span><a href="#local-6989586621679127174"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><a name="line-36"></a><span>  </span><a name="local-8214565720323819333"><span class="hs-identifier">series</span></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="Algebra.Ring.Polynomial.Test.html#WrapPolynomial"><span class="hs-identifier hs-var">WrapPolynomial</span></a><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-identifier hs-var">polynomial</span><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-identifier hs-var">M.fromList</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">series</span><span>
-</span><a name="line-37"></a><span>
-</span><a name="line-38"></a><span class="hs-identifier">arbitraryPolynomial</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Arbitrary</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Coefficient</span><span> </span><a href="#local-6989586621679127179"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">IsOrderedPolynomial</span><span> </span><a href="#local-6989586621679127179"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Gen</span><span> </span><a href="#local-6989586621679127179"><span class="hs-identifier hs-type">poly</span></a><span>
-</span><a name="line-39"></a><a name="arbitraryPolynomial"><a href="Algebra.Ring.Polynomial.Test.html#arbitraryPolynomial"><span class="hs-identifier">arbitraryPolynomial</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">runWrapPolynomial</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">arbitrary</span><span>
-</span><a name="line-40"></a><span>
-</span><a name="line-41"></a><span class="hs-identifier">seriesPolynomial</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Serial</span><span> </span><a href="#local-6989586621679127177"><span class="hs-identifier hs-type">m</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Coefficient</span><span> </span><a href="#local-6989586621679127178"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">IsOrderedPolynomial</span><span> </span><a href="#local-6989586621679127178"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Series</span><span> </span><a href="#local-6989586621679127177"><span class="hs-identifier hs-type">m</span></a><span> </span><a href="#local-6989586621679127178"><span class="hs-identifier hs-type">poly</span></a><span>
-</span><a name="line-42"></a><a name="seriesPolynomial"><a href="Algebra.Ring.Polynomial.Test.html#seriesPolynomial"><span class="hs-identifier">seriesPolynomial</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">runWrapPolynomial</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">series</span><span>
-</span><a name="line-43"></a><span>
-</span><a name="line-44"></a><span class="hs-keyword">newtype</span><span> </span><a name="HomogPoly"><a href="Algebra.Ring.Polynomial.Test.html#HomogPoly"><span class="hs-identifier">HomogPoly</span></a></a><span> </span><a name="local-6989586621679127167"><a href="#local-6989586621679127167"><span class="hs-identifier">poly</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a name="HomogPoly"><a href="Algebra.Ring.Polynomial.Test.html#HomogPoly"><span class="hs-identifier">HomogPoly</span></a></a><span> </span><span class="hs-special">{</span><span> </span><a name="getHomogPoly"><a href="Algebra.Ring.Polynomial.Test.html#getHomogPoly"><span class="hs-identifier">getHomogPoly</span></a></a><span> </span><span class="hs-glyph">::</span><span> </span><a href="#local-6989586621679127167"><span class="hs-identifier hs-type">poly</span></a><span> </span><span class="hs-special">}</span><span>
-</span><a name="line-45"></a><span>
-</span><a name="line-46"></a><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">IsOrderedPolynomial</span><span> </span><a href="#local-6989586621679127169"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Arbitrary</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Coefficient</span><span> </span><a href="#local-6989586621679127169"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><a name="line-47"></a><span>      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Arbitrary</span><span> </span><span class="hs-special">(</span><a href="Algebra.Ring.Polynomial.Test.html#HomogPoly"><span class="hs-identifier hs-type">HomogPoly</span></a><span> </span><a href="#local-6989586621679127169"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><a name="line-48"></a><span>  </span><a name="local-8214565720323819189"><span class="hs-identifier">arbitrary</span></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">sized</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-glyph">\</span><a name="local-6989586621679127170"><a href="#local-6989586621679127170"><span class="hs-identifier">s</span></a></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><a name="line-49"></a><span>    </span><span class="hs-keyword">let</span><span> </span><a name="local-6989586621679127171"><a href="#local-6989586621679127171"><span class="hs-identifier">sn</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">sing</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">SNat</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Arity</span><span> </span><a href="#local-6989586621679127169"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span>
-</span><a name="line-50"></a><span>    </span><a name="local-6989586621679127172"><a href="#local-6989586621679127172"><span class="hs-identifier">deg</span></a></a><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier hs-var">elements</span><span> </span><span class="hs-special">[</span><span class="hs-number">0</span><span class="hs-glyph">..</span><a href="#local-6989586621679127170"><span class="hs-identifier hs-var">s</span></a><span class="hs-special">]</span><span>
-</span><a name="line-51"></a><span>    </span><a href="Algebra.Ring.Polynomial.Test.html#HomogPoly"><span class="hs-identifier hs-var">HomogPoly</span></a><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-identifier hs-var">polynomial</span><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-identifier hs-var">M.fromList</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span>
-</span><a name="line-52"></a><span>      </span><span class="hs-identifier hs-var">listOf1</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">OrderedMonomial</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomialOfSum"><span class="hs-identifier hs-var">arbitraryMonomialOfSum</span></a><span> </span><a href="#local-6989586621679127171"><span class="hs-identifier hs-var">sn</span></a><span> </span><a href="#local-6989586621679127172"><span class="hs-identifier hs-var">deg</span></a><span class="hs-special">)</span><span> </span><span class="hs-operator hs-var">&lt;*&gt;</span><span> </span><span class="hs-identifier hs-var">arbitrary</span><span class="hs-special">)</span><span>
-</span><a name="line-53"></a><span>
-</span><a name="line-54"></a><span class="hs-identifier">arbitraryHomogeneousPolynomial</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Arbitrary</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Coefficient</span><span> </span><a href="#local-6989586621679127176"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">IsOrderedPolynomial</span><span> </span><a href="#local-6989586621679127176"><span class="hs-identifier hs-type">poly</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Gen</span><span> </span><a href="#local-6989586621679127176"><span class="hs-identifier hs-type">poly</span></a><span>
-</span><a name="line-55"></a><a name="arbitraryHomogeneousPolynomial"><a href="Algebra.Ring.Polynomial.Test.html#arbitraryHomogeneousPolynomial"><span class="hs-identifier">arbitraryHomogeneousPolynomial</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">getHomogPoly</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">arbitrary</span><span>
-</span><a name="line-56"></a></pre></body></html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE FlexibleInstances #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE GADTs #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-9"></span><span class="hs-pragma">{-# LANGUAGE NoMonomorphismRestriction #-}</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra.Ring.Polynomial.Test</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Algebra.Ring.Polynomial.Monomial.Test.html"><span class="hs-identifier">Algebra.Ring.Polynomial.Monomial.Test</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-13"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#WrapPolynomial"><span class="hs-identifier">WrapPolynomial</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-14"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#arbitraryPolynomial"><span class="hs-identifier">arbitraryPolynomial</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#seriesPolynomial"><span class="hs-identifier">seriesPolynomial</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#HomogPoly"><span class="hs-identifier">HomogPoly</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#arbitraryHomogeneousPolynomial"><span class="hs-identifier">arbitraryHomogeneousPolynomial</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Algebra.Internal</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Algebra.Ring.Polynomial.Class</span></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">Arity</span></span><span class="hs-special">,</span><span>
+</span><span id="line-24"></span><span>    </span><span class="annot"><span class="hs-identifier">Coefficient</span></span><span class="hs-special">,</span><span>
+</span><span id="line-25"></span><span>    </span><span class="annot"><span class="hs-identifier">IsOrderedPolynomial</span></span><span class="hs-special">,</span><span>
+</span><span id="line-26"></span><span>    </span><span class="annot"><span class="hs-identifier">polynomial</span></span><span class="hs-special">,</span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Algebra.Ring.Polynomial.Monomial</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">OrderedMonomial</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Algebra.Ring.Polynomial.Monomial.Test.html"><span class="hs-identifier">Algebra.Ring.Polynomial.Monomial.Test</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomialOfSum"><span class="hs-identifier">arbitraryMonomialOfSum</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">M</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Test.QuickCheck</span></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-33"></span><span>    </span><span class="annot"><span class="hs-identifier">Gen</span></span><span class="hs-special">,</span><span>
+</span><span id="line-34"></span><span>    </span><span class="annot"><span class="hs-identifier">elements</span></span><span class="hs-special">,</span><span>
+</span><span id="line-35"></span><span>    </span><span class="annot"><span class="hs-identifier">listOf1</span></span><span class="hs-special">,</span><span>
+</span><span id="line-36"></span><span>    </span><span class="annot"><span class="hs-identifier">sized</span></span><span class="hs-special">,</span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Test.SmallCheck.Series</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Serial</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Series</span></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">newtype</span><span> </span><span id="WrapPolynomial"><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#WrapPolynomial"><span class="hs-identifier hs-var">WrapPolynomial</span></a></span></span><span> </span><span id="local-6989586621679244374"><span class="annot"><a href="#local-6989586621679244374"><span class="hs-identifier hs-type">polyn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="WrapPolynomial"><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#WrapPolynomial"><span class="hs-identifier hs-var">WrapPolynomial</span></a></span></span><span> </span><span class="hs-special">{</span><span id="runWrapPolynomial"><span class="annot"><span class="annottext">WrapPolynomial polyn -&gt; polyn
+</span><a href="Algebra.Ring.Polynomial.Test.html#runWrapPolynomial"><span class="hs-identifier hs-var hs-var">runWrapPolynomial</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679244374"><span class="hs-identifier hs-type">polyn</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679244311"><span id="local-6989586621679244313"><span id="local-6989586621679244315"><span id="local-6989586621679244317"><span class="annot"><span class="annottext">ReadPrec [WrapPolynomial polyn]
+ReadPrec (WrapPolynomial polyn)
+Int -&gt; ReadS (WrapPolynomial polyn)
+ReadS [WrapPolynomial polyn]
+(Int -&gt; ReadS (WrapPolynomial polyn))
+-&gt; ReadS [WrapPolynomial polyn]
+-&gt; ReadPrec (WrapPolynomial polyn)
+-&gt; ReadPrec [WrapPolynomial polyn]
+-&gt; Read (WrapPolynomial polyn)
+forall polyn. Read polyn =&gt; ReadPrec [WrapPolynomial polyn]
+forall polyn. Read polyn =&gt; ReadPrec (WrapPolynomial polyn)
+forall polyn. Read polyn =&gt; Int -&gt; ReadS (WrapPolynomial polyn)
+forall polyn. Read polyn =&gt; ReadS [WrapPolynomial polyn]
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+readListPrec :: ReadPrec [WrapPolynomial polyn]
+$creadListPrec :: forall polyn. Read polyn =&gt; ReadPrec [WrapPolynomial polyn]
+readPrec :: ReadPrec (WrapPolynomial polyn)
+$creadPrec :: forall polyn. Read polyn =&gt; ReadPrec (WrapPolynomial polyn)
+readList :: ReadS [WrapPolynomial polyn]
+$creadList :: forall polyn. Read polyn =&gt; ReadS [WrapPolynomial polyn]
+readsPrec :: Int -&gt; ReadS (WrapPolynomial polyn)
+$creadsPrec :: forall polyn. Read polyn =&gt; Int -&gt; ReadS (WrapPolynomial polyn)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679244304"><span id="local-6989586621679244306"><span id="local-6989586621679244308"><span class="annot"><span class="annottext">Int -&gt; WrapPolynomial polyn -&gt; ShowS
+[WrapPolynomial polyn] -&gt; ShowS
+WrapPolynomial polyn -&gt; String
+(Int -&gt; WrapPolynomial polyn -&gt; ShowS)
+-&gt; (WrapPolynomial polyn -&gt; String)
+-&gt; ([WrapPolynomial polyn] -&gt; ShowS)
+-&gt; Show (WrapPolynomial polyn)
+forall polyn. Show polyn =&gt; Int -&gt; WrapPolynomial polyn -&gt; ShowS
+forall polyn. Show polyn =&gt; [WrapPolynomial polyn] -&gt; ShowS
+forall polyn. Show polyn =&gt; WrapPolynomial polyn -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [WrapPolynomial polyn] -&gt; ShowS
+$cshowList :: forall polyn. Show polyn =&gt; [WrapPolynomial polyn] -&gt; ShowS
+show :: WrapPolynomial polyn -&gt; String
+$cshow :: forall polyn. Show polyn =&gt; WrapPolynomial polyn -&gt; String
+showsPrec :: Int -&gt; WrapPolynomial polyn -&gt; ShowS
+$cshowsPrec :: forall polyn. Show polyn =&gt; Int -&gt; WrapPolynomial polyn -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679244299"><span id="local-6989586621679244301"><span class="annot"><span class="annottext">WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+(WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool)
+-&gt; (WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool)
+-&gt; Eq (WrapPolynomial polyn)
+forall polyn.
+Eq polyn =&gt;
+WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+$c/= :: forall polyn.
+Eq polyn =&gt;
+WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+== :: WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+$c== :: forall polyn.
+Eq polyn =&gt;
+WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679244283"><span id="local-6989586621679244285"><span id="local-6989586621679244287"><span id="local-6989586621679244289"><span id="local-6989586621679244291"><span id="local-6989586621679244293"><span id="local-6989586621679244295"><span class="annot"><span class="annottext">Eq (WrapPolynomial polyn)
+Eq (WrapPolynomial polyn)
+-&gt; (WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Ordering)
+-&gt; (WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool)
+-&gt; (WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool)
+-&gt; (WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool)
+-&gt; (WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool)
+-&gt; (WrapPolynomial polyn
+    -&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn)
+-&gt; (WrapPolynomial polyn
+    -&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn)
+-&gt; Ord (WrapPolynomial polyn)
+WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Ordering
+WrapPolynomial polyn
+-&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn
+forall a.
+Eq a
+-&gt; (a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall polyn. Ord polyn =&gt; Eq (WrapPolynomial polyn)
+forall polyn.
+Ord polyn =&gt;
+WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+forall polyn.
+Ord polyn =&gt;
+WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Ordering
+forall polyn.
+Ord polyn =&gt;
+WrapPolynomial polyn
+-&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn
+min :: WrapPolynomial polyn
+-&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn
+$cmin :: forall polyn.
+Ord polyn =&gt;
+WrapPolynomial polyn
+-&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn
+max :: WrapPolynomial polyn
+-&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn
+$cmax :: forall polyn.
+Ord polyn =&gt;
+WrapPolynomial polyn
+-&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn
+&gt;= :: WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+$c&gt;= :: forall polyn.
+Ord polyn =&gt;
+WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+&gt; :: WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+$c&gt; :: forall polyn.
+Ord polyn =&gt;
+WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+&lt;= :: WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+$c&lt;= :: forall polyn.
+Ord polyn =&gt;
+WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+&lt; :: WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+$c&lt; :: forall polyn.
+Ord polyn =&gt;
+WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Bool
+compare :: WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Ordering
+$ccompare :: forall polyn.
+Ord polyn =&gt;
+WrapPolynomial polyn -&gt; WrapPolynomial polyn -&gt; Ordering
+$cp1Ord :: forall polyn. Ord polyn =&gt; Eq (WrapPolynomial polyn)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679244268"><span id="local-6989586621679244270"><span id="local-6989586621679244272"><span id="local-6989586621679244274"><span id="local-6989586621679244276"><span id="local-6989586621679244278"><span id="local-6989586621679244280"><span class="annot"><span class="annottext">Integer -&gt; WrapPolynomial polyn
+WrapPolynomial polyn -&gt; WrapPolynomial polyn
+WrapPolynomial polyn
+-&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn
+(WrapPolynomial polyn
+ -&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn)
+-&gt; (WrapPolynomial polyn
+    -&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn)
+-&gt; (WrapPolynomial polyn
+    -&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn)
+-&gt; (WrapPolynomial polyn -&gt; WrapPolynomial polyn)
+-&gt; (WrapPolynomial polyn -&gt; WrapPolynomial polyn)
+-&gt; (WrapPolynomial polyn -&gt; WrapPolynomial polyn)
+-&gt; (Integer -&gt; WrapPolynomial polyn)
+-&gt; Num (WrapPolynomial polyn)
+forall polyn. Num polyn =&gt; Integer -&gt; WrapPolynomial polyn
+forall polyn.
+Num polyn =&gt;
+WrapPolynomial polyn -&gt; WrapPolynomial polyn
+forall polyn.
+Num polyn =&gt;
+WrapPolynomial polyn
+-&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn
+forall a.
+(a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a)
+-&gt; (a -&gt; a)
+-&gt; (a -&gt; a)
+-&gt; (Integer -&gt; a)
+-&gt; Num a
+fromInteger :: Integer -&gt; WrapPolynomial polyn
+$cfromInteger :: forall polyn. Num polyn =&gt; Integer -&gt; WrapPolynomial polyn
+signum :: WrapPolynomial polyn -&gt; WrapPolynomial polyn
+$csignum :: forall polyn.
+Num polyn =&gt;
+WrapPolynomial polyn -&gt; WrapPolynomial polyn
+abs :: WrapPolynomial polyn -&gt; WrapPolynomial polyn
+$cabs :: forall polyn.
+Num polyn =&gt;
+WrapPolynomial polyn -&gt; WrapPolynomial polyn
+negate :: WrapPolynomial polyn -&gt; WrapPolynomial polyn
+$cnegate :: forall polyn.
+Num polyn =&gt;
+WrapPolynomial polyn -&gt; WrapPolynomial polyn
+* :: WrapPolynomial polyn
+-&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn
+$c* :: forall polyn.
+Num polyn =&gt;
+WrapPolynomial polyn
+-&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn
+- :: WrapPolynomial polyn
+-&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn
+$c- :: forall polyn.
+Num polyn =&gt;
+WrapPolynomial polyn
+-&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn
++ :: WrapPolynomial polyn
+-&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn
+$c+ :: forall polyn.
+Num polyn =&gt;
+WrapPolynomial polyn
+-&gt; WrapPolynomial polyn -&gt; WrapPolynomial polyn
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Num</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span id="local-6989586621679244266"><span class="hs-keyword">instance</span><span>
+</span><span id="line-45"></span><span>  </span><span id="local-6989586621679244263"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244266"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679244266"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-46"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#WrapPolynomial"><span class="hs-identifier hs-type">WrapPolynomial</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679244266"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-48"></span><span>  </span><span id="local-6989586621679244261"><span class="annot"><span class="annottext">arbitrary :: Gen (WrapPolynomial poly)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-49"></span><span>    </span><span class="annot"><span class="annottext">poly -&gt; WrapPolynomial poly
+forall polyn. polyn -&gt; WrapPolynomial polyn
+</span><a href="Algebra.Ring.Polynomial.Test.html#WrapPolynomial"><span class="hs-identifier hs-var">WrapPolynomial</span></a></span><span> </span><span class="annot"><span class="annottext">(poly -&gt; WrapPolynomial poly)
+-&gt; ([(OrderedMonomial (MOrder poly) (Arity poly),
+      Coefficient poly)]
+    -&gt; poly)
+-&gt; [(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+-&gt; WrapPolynomial poly
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Map (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
+-&gt; poly
+forall poly.
+IsOrderedPolynomial poly =&gt;
+Map (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
+-&gt; poly
+</span><span class="hs-identifier hs-var">polynomial</span></span><span> </span><span class="annot"><span class="annottext">(Map
+   (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
+ -&gt; poly)
+-&gt; ([(OrderedMonomial (MOrder poly) (Arity poly),
+      Coefficient poly)]
+    -&gt; Map
+         (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly))
+-&gt; [(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+-&gt; poly
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+-&gt; Map
+     (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
+forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
+</span><span class="hs-identifier hs-var">M.fromList</span></span><span>
+</span><span id="line-50"></span><span>      </span><span class="annot"><span class="annottext">([(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+ -&gt; WrapPolynomial poly)
+-&gt; Gen
+     [(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+-&gt; Gen (WrapPolynomial poly)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen (OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)
+-&gt; Gen
+     [(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+forall a. Gen a -&gt; Gen [a]
+</span><span class="hs-identifier hs-var">listOf1</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(OrderedMonomial (MOrder poly) (Arity poly)
+ -&gt; Coefficient poly
+ -&gt; (OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly))
+-&gt; Gen (OrderedMonomial (MOrder poly) (Arity poly))
+-&gt; Gen
+     (Coefficient poly
+      -&gt; (OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly))
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen (OrderedMonomial (MOrder poly) (Arity poly))
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span> </span><span class="annot"><span class="annottext">Gen
+  (Coefficient poly
+   -&gt; (OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly))
+-&gt; Gen (Coefficient poly)
+-&gt; Gen
+     (OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen (Coefficient poly)
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span id="local-6989586621679244255"><span id="local-6989586621679244256"><span class="hs-keyword">instance</span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679244256"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244255"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Serial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244256"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679244255"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-54"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Serial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244256"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#WrapPolynomial"><span class="hs-identifier hs-type">WrapPolynomial</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679244255"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-56"></span><span>  </span><span id="local-6989586621679244251"><span class="annot"><span class="annottext">series :: Series m (WrapPolynomial poly)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">series</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">poly -&gt; WrapPolynomial poly
+forall polyn. polyn -&gt; WrapPolynomial polyn
+</span><a href="Algebra.Ring.Polynomial.Test.html#WrapPolynomial"><span class="hs-identifier hs-var">WrapPolynomial</span></a></span><span> </span><span class="annot"><span class="annottext">(poly -&gt; WrapPolynomial poly)
+-&gt; ([(OrderedMonomial (MOrder poly) (Arity poly),
+      Coefficient poly)]
+    -&gt; poly)
+-&gt; [(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+-&gt; WrapPolynomial poly
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Map (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
+-&gt; poly
+forall poly.
+IsOrderedPolynomial poly =&gt;
+Map (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
+-&gt; poly
+</span><span class="hs-identifier hs-var">polynomial</span></span><span> </span><span class="annot"><span class="annottext">(Map
+   (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
+ -&gt; poly)
+-&gt; ([(OrderedMonomial (MOrder poly) (Arity poly),
+      Coefficient poly)]
+    -&gt; Map
+         (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly))
+-&gt; [(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+-&gt; poly
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+-&gt; Map
+     (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
+forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
+</span><span class="hs-identifier hs-var">M.fromList</span></span><span> </span><span class="annot"><span class="annottext">([(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+ -&gt; WrapPolynomial poly)
+-&gt; Series
+     m [(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+-&gt; Series m (WrapPolynomial poly)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Series
+  m [(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+forall (m :: * -&gt; *) a. Serial m a =&gt; Series m a
+</span><span class="hs-identifier hs-var">series</span></span></span></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span id="local-6989586621679244249"><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#arbitraryPolynomial"><span class="hs-identifier hs-type">arbitraryPolynomial</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679244249"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244249"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gen</span></span><span> </span><span class="annot"><a href="#local-6989586621679244249"><span class="hs-identifier hs-type">poly</span></a></span></span><span>
+</span><span id="line-59"></span><span id="arbitraryPolynomial"><span class="annot"><span class="annottext">arbitraryPolynomial :: Gen poly
+</span><a href="Algebra.Ring.Polynomial.Test.html#arbitraryPolynomial"><span class="hs-identifier hs-var hs-var">arbitraryPolynomial</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WrapPolynomial poly -&gt; poly
+forall polyn. WrapPolynomial polyn -&gt; polyn
+</span><a href="Algebra.Ring.Polynomial.Test.html#runWrapPolynomial"><span class="hs-identifier hs-var hs-var">runWrapPolynomial</span></a></span><span> </span><span class="annot"><span class="annottext">(WrapPolynomial poly -&gt; poly)
+-&gt; Gen (WrapPolynomial poly) -&gt; Gen poly
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen (WrapPolynomial poly)
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span id="local-6989586621679244247"><span id="local-6989586621679244248"><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#seriesPolynomial"><span class="hs-identifier hs-type">seriesPolynomial</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Serial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244248"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679244247"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244247"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Series</span></span><span> </span><span class="annot"><a href="#local-6989586621679244248"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679244247"><span class="hs-identifier hs-type">poly</span></a></span></span></span><span>
+</span><span id="line-62"></span><span id="seriesPolynomial"><span class="annot"><span class="annottext">seriesPolynomial :: Series m poly
+</span><a href="Algebra.Ring.Polynomial.Test.html#seriesPolynomial"><span class="hs-identifier hs-var hs-var">seriesPolynomial</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WrapPolynomial poly -&gt; poly
+forall polyn. WrapPolynomial polyn -&gt; polyn
+</span><a href="Algebra.Ring.Polynomial.Test.html#runWrapPolynomial"><span class="hs-identifier hs-var hs-var">runWrapPolynomial</span></a></span><span> </span><span class="annot"><span class="annottext">(WrapPolynomial poly -&gt; poly)
+-&gt; Series m (WrapPolynomial poly) -&gt; Series m poly
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Series m (WrapPolynomial poly)
+forall (m :: * -&gt; *) a. Serial m a =&gt; Series m a
+</span><span class="hs-identifier hs-var">series</span></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">newtype</span><span> </span><span id="HomogPoly"><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#HomogPoly"><span class="hs-identifier hs-var">HomogPoly</span></a></span></span><span> </span><span id="local-6989586621679244335"><span class="annot"><a href="#local-6989586621679244335"><span class="hs-identifier hs-type">poly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="HomogPoly"><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#HomogPoly"><span class="hs-identifier hs-var">HomogPoly</span></a></span></span><span> </span><span class="hs-special">{</span><span id="getHomogPoly"><span class="annot"><span class="annottext">HomogPoly poly -&gt; poly
+</span><a href="Algebra.Ring.Polynomial.Test.html#getHomogPoly"><span class="hs-identifier hs-var hs-var">getHomogPoly</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679244335"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span id="local-6989586621679244244"><span class="hs-keyword">instance</span><span>
+</span><span id="line-67"></span><span>  </span><span id="local-6989586621679244241"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244244"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679244244"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-68"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#HomogPoly"><span class="hs-identifier hs-type">HomogPoly</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679244244"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-70"></span><span>  </span><span id="local-6989586621679244240"><span class="annot"><span class="annottext">arbitrary :: Gen (HomogPoly poly)
+</span><a href="#local-6989586621679244240"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Gen (HomogPoly poly)) -&gt; Gen (HomogPoly poly)
+forall a. (Int -&gt; Gen a) -&gt; Gen a
+</span><span class="hs-identifier hs-var">sized</span></span><span> </span><span class="annot"><span class="annottext">((Int -&gt; Gen (HomogPoly poly)) -&gt; Gen (HomogPoly poly))
+-&gt; (Int -&gt; Gen (HomogPoly poly)) -&gt; Gen (HomogPoly poly)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679244239"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679244239"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-71"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679244238"><span class="annot"><span class="annottext">sn :: SNat (Arity poly)
+</span><a href="#local-6989586621679244238"><span class="hs-identifier hs-var hs-var">sn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SNat (Arity poly)
+forall (n :: Nat). KnownNat n =&gt; SNat n
+</span><span class="hs-identifier hs-var">sNat</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SNat</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arity</span></span><span> </span><span class="annot"><a href="#local-6989586621679244244"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>    </span><span id="local-6989586621679244236"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679244236"><span class="hs-identifier hs-var">deg</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Gen Int
+forall a. [a] -&gt; Gen a
+</span><span class="hs-identifier hs-var">elements</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">..</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679244239"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-73"></span><span>    </span><span class="annot"><span class="annottext">poly -&gt; HomogPoly poly
+forall poly. poly -&gt; HomogPoly poly
+</span><a href="Algebra.Ring.Polynomial.Test.html#HomogPoly"><span class="hs-identifier hs-var">HomogPoly</span></a></span><span> </span><span class="annot"><span class="annottext">(poly -&gt; HomogPoly poly)
+-&gt; ([(OrderedMonomial (MOrder poly) (Arity poly),
+      Coefficient poly)]
+    -&gt; poly)
+-&gt; [(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+-&gt; HomogPoly poly
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Map (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
+-&gt; poly
+forall poly.
+IsOrderedPolynomial poly =&gt;
+Map (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
+-&gt; poly
+</span><span class="hs-identifier hs-var">polynomial</span></span><span> </span><span class="annot"><span class="annottext">(Map
+   (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
+ -&gt; poly)
+-&gt; ([(OrderedMonomial (MOrder poly) (Arity poly),
+      Coefficient poly)]
+    -&gt; Map
+         (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly))
+-&gt; [(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+-&gt; poly
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+-&gt; Map
+     (OrderedMonomial (MOrder poly) (Arity poly)) (Coefficient poly)
+forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
+</span><span class="hs-identifier hs-var">M.fromList</span></span><span>
+</span><span id="line-74"></span><span>      </span><span class="annot"><span class="annottext">([(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+ -&gt; HomogPoly poly)
+-&gt; Gen
+     [(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+-&gt; Gen (HomogPoly poly)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen (OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)
+-&gt; Gen
+     [(OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)]
+forall a. Gen a -&gt; Gen [a]
+</span><span class="hs-identifier hs-var">listOf1</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(OrderedMonomial (MOrder poly) (Arity poly)
+ -&gt; Coefficient poly
+ -&gt; (OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly))
+-&gt; Gen (OrderedMonomial (MOrder poly) (Arity poly))
+-&gt; Gen
+     (Coefficient poly
+      -&gt; (OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly))
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Monomial (Arity poly) -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+forall k (ordering :: k) (n :: Nat).
+Monomial n -&gt; OrderedMonomial ordering n
+</span><span class="hs-identifier hs-var">OrderedMonomial</span></span><span> </span><span class="annot"><span class="annottext">(Monomial (Arity poly)
+ -&gt; OrderedMonomial (MOrder poly) (Arity poly))
+-&gt; Gen (Monomial (Arity poly))
+-&gt; Gen (OrderedMonomial (MOrder poly) (Arity poly))
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">SNat (Arity poly) -&gt; Int -&gt; Gen (Monomial (Arity poly))
+forall (n :: Nat). SNat n -&gt; Int -&gt; Gen (Monomial n)
+</span><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomialOfSum"><span class="hs-identifier hs-var">arbitraryMonomialOfSum</span></a></span><span> </span><span class="annot"><span class="annottext">SNat (Arity poly)
+</span><a href="#local-6989586621679244238"><span class="hs-identifier hs-var">sn</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679244236"><span class="hs-identifier hs-var">deg</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Gen
+  (Coefficient poly
+   -&gt; (OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly))
+-&gt; Gen (Coefficient poly)
+-&gt; Gen
+     (OrderedMonomial (MOrder poly) (Arity poly), Coefficient poly)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen (Coefficient poly)
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span id="local-6989586621679244234"><span class="annot"><a href="Algebra.Ring.Polynomial.Test.html#arbitraryHomogeneousPolynomial"><span class="hs-identifier hs-type">arbitraryHomogeneousPolynomial</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679244234"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244234"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gen</span></span><span> </span><span class="annot"><a href="#local-6989586621679244234"><span class="hs-identifier hs-type">poly</span></a></span></span><span>
+</span><span id="line-77"></span><span id="arbitraryHomogeneousPolynomial"><span class="annot"><span class="annottext">arbitraryHomogeneousPolynomial :: Gen poly
+</span><a href="Algebra.Ring.Polynomial.Test.html#arbitraryHomogeneousPolynomial"><span class="hs-identifier hs-var hs-var">arbitraryHomogeneousPolynomial</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HomogPoly poly -&gt; poly
+forall poly. HomogPoly poly -&gt; poly
+</span><a href="Algebra.Ring.Polynomial.Test.html#getHomogPoly"><span class="hs-identifier hs-var hs-var">getHomogPoly</span></a></span><span> </span><span class="annot"><span class="annottext">(HomogPoly poly -&gt; poly) -&gt; Gen (HomogPoly poly) -&gt; Gen poly
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen (HomogPoly poly)
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span>
+</span><span id="line-78"></span></pre></body></html>

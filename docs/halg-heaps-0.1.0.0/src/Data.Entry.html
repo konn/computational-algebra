@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DeriveFoldable, DeriveFunctor, DeriveTraversable #-}</span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Entry</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Entry.html#Entry"><span class="hs-identifier">Entry</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Function</span></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">on</span></span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Ord</span></span><span>       </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">comparing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">data</span><span> </span><span id="Entry"><span class="annot"><a href="Data.Entry.html#Entry"><span class="hs-identifier hs-var">Entry</span></a></span></span><span> </span><span id="local-6989586621679042165"><span class="annot"><a href="#local-6989586621679042165"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621679042164"><span class="annot"><a href="#local-6989586621679042164"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Entry"><span class="annot"><a href="Data.Entry.html#Entry"><span class="hs-identifier hs-var">Entry</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="priority"><span class="annot"><span class="annottext">Entry p a -&gt; p
+</span><a href="Data.Entry.html#priority"><span class="hs-identifier hs-var hs-var">priority</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679042165"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">,</span><span> </span><span id="payload"><span class="annot"><span class="annottext">Entry p a -&gt; a
+</span><a href="Data.Entry.html#payload"><span class="hs-identifier hs-var hs-var">payload</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679042164"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679042140"><span id="local-6989586621679042142"><span id="local-6989586621679042144"><span id="local-6989586621679042146"><span class="annot"><span class="annottext">ReadPrec [Entry p a]
+ReadPrec (Entry p a)
+Int -&gt; ReadS (Entry p a)
+ReadS [Entry p a]
+(Int -&gt; ReadS (Entry p a))
+-&gt; ReadS [Entry p a]
+-&gt; ReadPrec (Entry p a)
+-&gt; ReadPrec [Entry p a]
+-&gt; Read (Entry p a)
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+forall p a. (Read p, Read a) =&gt; ReadPrec [Entry p a]
+forall p a. (Read p, Read a) =&gt; ReadPrec (Entry p a)
+forall p a. (Read p, Read a) =&gt; Int -&gt; ReadS (Entry p a)
+forall p a. (Read p, Read a) =&gt; ReadS [Entry p a]
+readListPrec :: ReadPrec [Entry p a]
+$creadListPrec :: forall p a. (Read p, Read a) =&gt; ReadPrec [Entry p a]
+readPrec :: ReadPrec (Entry p a)
+$creadPrec :: forall p a. (Read p, Read a) =&gt; ReadPrec (Entry p a)
+readList :: ReadS [Entry p a]
+$creadList :: forall p a. (Read p, Read a) =&gt; ReadS [Entry p a]
+readsPrec :: Int -&gt; ReadS (Entry p a)
+$creadsPrec :: forall p a. (Read p, Read a) =&gt; Int -&gt; ReadS (Entry p a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679042133"><span id="local-6989586621679042135"><span id="local-6989586621679042137"><span class="annot"><span class="annottext">Int -&gt; Entry p a -&gt; ShowS
+[Entry p a] -&gt; ShowS
+Entry p a -&gt; String
+(Int -&gt; Entry p a -&gt; ShowS)
+-&gt; (Entry p a -&gt; String)
+-&gt; ([Entry p a] -&gt; ShowS)
+-&gt; Show (Entry p a)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall p a. (Show p, Show a) =&gt; Int -&gt; Entry p a -&gt; ShowS
+forall p a. (Show p, Show a) =&gt; [Entry p a] -&gt; ShowS
+forall p a. (Show p, Show a) =&gt; Entry p a -&gt; String
+showList :: [Entry p a] -&gt; ShowS
+$cshowList :: forall p a. (Show p, Show a) =&gt; [Entry p a] -&gt; ShowS
+show :: Entry p a -&gt; String
+$cshow :: forall p a. (Show p, Show a) =&gt; Entry p a -&gt; String
+showsPrec :: Int -&gt; Entry p a -&gt; ShowS
+$cshowsPrec :: forall p a. (Show p, Show a) =&gt; Int -&gt; Entry p a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679042128"><span id="local-6989586621679042130"><span class="annot"><span class="annottext">a -&gt; Entry p b -&gt; Entry p a
+(a -&gt; b) -&gt; Entry p a -&gt; Entry p b
+(forall a b. (a -&gt; b) -&gt; Entry p a -&gt; Entry p b)
+-&gt; (forall a b. a -&gt; Entry p b -&gt; Entry p a) -&gt; Functor (Entry p)
+forall a b. a -&gt; Entry p b -&gt; Entry p a
+forall a b. (a -&gt; b) -&gt; Entry p a -&gt; Entry p b
+forall p a b. a -&gt; Entry p b -&gt; Entry p a
+forall p a b. (a -&gt; b) -&gt; Entry p a -&gt; Entry p b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; Entry p b -&gt; Entry p a
+$c&lt;$ :: forall p a b. a -&gt; Entry p b -&gt; Entry p a
+fmap :: (a -&gt; b) -&gt; Entry p a -&gt; Entry p b
+$cfmap :: forall p a b. (a -&gt; b) -&gt; Entry p a -&gt; Entry p b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679042093"><span id="local-6989586621679042095"><span id="local-6989586621679042097"><span id="local-6989586621679042099"><span id="local-6989586621679042101"><span id="local-6989586621679042103"><span id="local-6989586621679042105"><span id="local-6989586621679042107"><span id="local-6989586621679042109"><span id="local-6989586621679042111"><span id="local-6989586621679042113"><span id="local-6989586621679042115"><span id="local-6989586621679042117"><span id="local-6989586621679042119"><span id="local-6989586621679042121"><span id="local-6989586621679042123"><span id="local-6989586621679042125"><span class="annot"><span class="annottext">Entry p a -&gt; Bool
+(a -&gt; m) -&gt; Entry p a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; Entry p a -&gt; b
+(forall m. Monoid m =&gt; Entry p m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Entry p a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Entry p a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Entry p a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Entry p a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Entry p a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Entry p a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Entry p a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Entry p a -&gt; a)
+-&gt; (forall a. Entry p a -&gt; [a])
+-&gt; (forall a. Entry p a -&gt; Bool)
+-&gt; (forall a. Entry p a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Entry p a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Entry p a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Entry p a -&gt; a)
+-&gt; (forall a. Num a =&gt; Entry p a -&gt; a)
+-&gt; (forall a. Num a =&gt; Entry p a -&gt; a)
+-&gt; Foldable (Entry p)
+forall a. Eq a =&gt; a -&gt; Entry p a -&gt; Bool
+forall a. Num a =&gt; Entry p a -&gt; a
+forall a. Ord a =&gt; Entry p a -&gt; a
+forall m. Monoid m =&gt; Entry p m -&gt; m
+forall a. Entry p a -&gt; Bool
+forall a. Entry p a -&gt; Int
+forall a. Entry p a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Entry p a -&gt; a
+forall p a. Eq a =&gt; a -&gt; Entry p a -&gt; Bool
+forall p a. Num a =&gt; Entry p a -&gt; a
+forall p a. Ord a =&gt; Entry p a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Entry p a -&gt; m
+forall p m. Monoid m =&gt; Entry p m -&gt; m
+forall p a. Entry p a -&gt; Bool
+forall p a. Entry p a -&gt; Int
+forall p a. Entry p a -&gt; [a]
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Entry p a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Entry p a -&gt; b
+forall p a. (a -&gt; a -&gt; a) -&gt; Entry p a -&gt; a
+forall p m a. Monoid m =&gt; (a -&gt; m) -&gt; Entry p a -&gt; m
+forall p b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Entry p a -&gt; b
+forall p a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Entry p a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: Entry p a -&gt; a
+$cproduct :: forall p a. Num a =&gt; Entry p a -&gt; a
+sum :: Entry p a -&gt; a
+$csum :: forall p a. Num a =&gt; Entry p a -&gt; a
+minimum :: Entry p a -&gt; a
+$cminimum :: forall p a. Ord a =&gt; Entry p a -&gt; a
+maximum :: Entry p a -&gt; a
+$cmaximum :: forall p a. Ord a =&gt; Entry p a -&gt; a
+elem :: a -&gt; Entry p a -&gt; Bool
+$celem :: forall p a. Eq a =&gt; a -&gt; Entry p a -&gt; Bool
+length :: Entry p a -&gt; Int
+$clength :: forall p a. Entry p a -&gt; Int
+null :: Entry p a -&gt; Bool
+$cnull :: forall p a. Entry p a -&gt; Bool
+toList :: Entry p a -&gt; [a]
+$ctoList :: forall p a. Entry p a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; Entry p a -&gt; a
+$cfoldl1 :: forall p a. (a -&gt; a -&gt; a) -&gt; Entry p a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; Entry p a -&gt; a
+$cfoldr1 :: forall p a. (a -&gt; a -&gt; a) -&gt; Entry p a -&gt; a
+foldl&#39; :: (b -&gt; a -&gt; b) -&gt; b -&gt; Entry p a -&gt; b
+$cfoldl&#39; :: forall p b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Entry p a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; Entry p a -&gt; b
+$cfoldl :: forall p b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Entry p a -&gt; b
+foldr&#39; :: (a -&gt; b -&gt; b) -&gt; b -&gt; Entry p a -&gt; b
+$cfoldr&#39; :: forall p a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Entry p a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; Entry p a -&gt; b
+$cfoldr :: forall p a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Entry p a -&gt; b
+foldMap&#39; :: (a -&gt; m) -&gt; Entry p a -&gt; m
+$cfoldMap&#39; :: forall p m a. Monoid m =&gt; (a -&gt; m) -&gt; Entry p a -&gt; m
+foldMap :: (a -&gt; m) -&gt; Entry p a -&gt; m
+$cfoldMap :: forall p m a. Monoid m =&gt; (a -&gt; m) -&gt; Entry p a -&gt; m
+fold :: Entry p m -&gt; m
+$cfold :: forall p m. Monoid m =&gt; Entry p m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679042082"><span id="local-6989586621679042084"><span id="local-6989586621679042086"><span id="local-6989586621679042088"><span class="annot"><span class="annottext">Functor (Entry p)
+Foldable (Entry p)
+Functor (Entry p)
+-&gt; Foldable (Entry p)
+-&gt; (forall (f :: * -&gt; *) a b.
+    Applicative f =&gt;
+    (a -&gt; f b) -&gt; Entry p a -&gt; f (Entry p b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    Entry p (f a) -&gt; f (Entry p a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; Entry p a -&gt; m (Entry p b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    Entry p (m a) -&gt; m (Entry p a))
+-&gt; Traversable (Entry p)
+(a -&gt; f b) -&gt; Entry p a -&gt; f (Entry p b)
+forall p. Functor (Entry p)
+forall p. Foldable (Entry p)
+forall p (m :: * -&gt; *) a. Monad m =&gt; Entry p (m a) -&gt; m (Entry p a)
+forall p (f :: * -&gt; *) a.
+Applicative f =&gt;
+Entry p (f a) -&gt; f (Entry p a)
+forall p (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Entry p a -&gt; m (Entry p b)
+forall p (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Entry p a -&gt; f (Entry p b)
+forall (t :: * -&gt; *).
+Functor t
+-&gt; Foldable t
+-&gt; (forall (f :: * -&gt; *) a b.
+    Applicative f =&gt;
+    (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a. Monad m =&gt; Entry p (m a) -&gt; m (Entry p a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Entry p (f a) -&gt; f (Entry p a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Entry p a -&gt; m (Entry p b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Entry p a -&gt; f (Entry p b)
+sequence :: Entry p (m a) -&gt; m (Entry p a)
+$csequence :: forall p (m :: * -&gt; *) a. Monad m =&gt; Entry p (m a) -&gt; m (Entry p a)
+mapM :: (a -&gt; m b) -&gt; Entry p a -&gt; m (Entry p b)
+$cmapM :: forall p (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Entry p a -&gt; m (Entry p b)
+sequenceA :: Entry p (f a) -&gt; f (Entry p a)
+$csequenceA :: forall p (f :: * -&gt; *) a.
+Applicative f =&gt;
+Entry p (f a) -&gt; f (Entry p a)
+traverse :: (a -&gt; f b) -&gt; Entry p a -&gt; f (Entry p b)
+$ctraverse :: forall p (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Entry p a -&gt; f (Entry p b)
+$cp2Traversable :: forall p. Foldable (Entry p)
+$cp1Traversable :: forall p. Functor (Entry p)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679042076"><span id="local-6989586621679042078"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="Data.Entry.html#Entry"><span class="hs-identifier hs-type">Entry</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-12"></span><span>  </span><span id="local-6989586621679042074"><span class="annot"><span class="annottext">bimap :: (a -&gt; b) -&gt; (c -&gt; d) -&gt; Entry a c -&gt; Entry b d
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bimap</span></span></span><span> </span><span id="local-6989586621679042072"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679042072"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679042071"><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679042071"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Entry.html#Entry"><span class="hs-identifier hs-type">Entry</span></a></span><span> </span><span id="local-6989586621679042070"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042070"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679042069"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679042069"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; d -&gt; Entry b d
+forall p a. p -&gt; a -&gt; Entry p a
+</span><a href="Data.Entry.html#Entry"><span class="hs-identifier hs-var">Entry</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679042072"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679042070"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679042071"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679042069"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">bimap</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span id="local-6989586621679042067"><span id="local-6989586621679042068"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679042064"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679042068"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Entry.html#Entry"><span class="hs-identifier hs-type">Entry</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679042068"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679042067"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>  </span><span id="local-6989586621679042062"><span class="annot"><span class="annottext">== :: Entry p a -&gt; Entry p a -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">(==)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p -&gt; p -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(==)</span></span><span> </span><span class="annot"><span class="annottext">(p -&gt; p -&gt; Bool)
+-&gt; (Entry p a -&gt; p) -&gt; Entry p a -&gt; Entry p a -&gt; Bool
+forall b c a. (b -&gt; b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">`on`</span></span><span> </span><span class="annot"><span class="annottext">Entry p a -&gt; p
+forall p a. Entry p a -&gt; p
+</span><a href="Data.Entry.html#priority"><span class="hs-identifier hs-var hs-var">priority</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">==</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span></span></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span id="local-6989586621679042060"><span id="local-6989586621679042061"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679042046"><span id="local-6989586621679042048"><span id="local-6989586621679042050"><span id="local-6989586621679042052"><span id="local-6989586621679042054"><span id="local-6989586621679042056"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679042061"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Entry.html#Entry"><span class="hs-identifier hs-type">Entry</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679042061"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679042060"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-20"></span><span>  </span><span id="local-6989586621679042044"><span class="annot"><span class="annottext">compare :: Entry p a -&gt; Entry p a -&gt; Ordering
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">compare</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Entry p a -&gt; p) -&gt; Entry p a -&gt; Entry p a -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="annot"><span class="annottext">Entry p a -&gt; p
+forall p a. Entry p a -&gt; p
+</span><a href="Data.Entry.html#priority"><span class="hs-identifier hs-var hs-var">priority</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">compare</span></span><span> </span><span class="hs-pragma">#-}</span></span></span><span>
+</span><span id="line-22"></span></pre></body></html>

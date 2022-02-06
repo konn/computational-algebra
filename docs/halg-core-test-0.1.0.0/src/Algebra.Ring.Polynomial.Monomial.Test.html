@@ -1,51 +1,230 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP, DataKinds, ExplicitNamespaces, FlexibleContexts        #-}</span><span>
-</span><a name="line-2"></a><span class="hs-pragma">{-# LANGUAGE FlexibleInstances, GADTs, MultiParamTypeClasses, RankNTypes #-}</span><span>
-</span><a name="line-3"></a><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables, TypeOperators, UndecidableInstances    #-}</span><span>
-</span><a name="line-4"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra.Ring.Polynomial.Monomial.Test</span><span>
-</span><a name="line-5"></a><span>       </span><span class="hs-special">(</span><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomialOfSum"><span class="hs-identifier hs-var">arbitraryMonomialOfSum</span></a><span class="hs-special">,</span><span> </span><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomial"><span class="hs-identifier hs-var">arbitraryMonomial</span></a><span>
-</span><a name="line-6"></a><span>       </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><a name="line-7"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Algebra.Internal</span><span>
-</span><a name="line-8"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Algebra.Ring.Polynomial.Monomial</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Monomial</span><span class="hs-special">,</span><span>
-</span><a name="line-9"></a><span>                                                   </span><span class="hs-identifier hs-type">OrderedMonomial</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><a name="line-10"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data.Sized.Builtin</span><span>               </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">SV</span><span>
-</span><a name="line-11"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">GHC.TypeLits</span><span>                     </span><span class="hs-special">(</span><span class="hs-identifier hs-type">KnownNat</span><span class="hs-special">)</span><span>
-</span><a name="line-12"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Prelude</span><span>
-</span><a name="line-13"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Test.QuickCheck</span><span>                  </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Arbitrary</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Gen</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">arbitrary</span><span class="hs-special">,</span><span>
-</span><a name="line-14"></a><span>                                                   </span><span class="hs-identifier hs-var">arbitrarySizedBoundedIntegral</span><span class="hs-special">,</span><span>
-</span><a name="line-15"></a><span>                                                   </span><span class="hs-identifier hs-var">arbitrarySizedBoundedIntegral</span><span class="hs-special">,</span><span>
-</span><a name="line-16"></a><span>                                                   </span><span class="hs-identifier hs-var">vectorOf</span><span class="hs-special">)</span><span>
-</span><a name="line-17"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Test.QuickCheck</span><span>                  </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">QC</span><span>
-</span><a name="line-18"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Test.SmallCheck.Series</span><span>           </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Serial</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">cons0</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">newtypeCons</span><span class="hs-special">,</span><span>
-</span><a name="line-19"></a><span>                                                   </span><span class="hs-identifier hs-var">series</span><span class="hs-special">)</span><span>
-</span><a name="line-20"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Test.SmallCheck.Series</span><span>           </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">SC</span><span>
-</span><a name="line-21"></a><span>
-</span><a name="line-22"></a><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">KnownNat</span><span> </span><a href="#local-6989586621679120457"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Monad</span><span> </span><a href="#local-6989586621679120458"><span class="hs-identifier hs-type">m</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Serial</span><span> </span><a href="#local-6989586621679120458"><span class="hs-identifier hs-type">m</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Monomial</span><span> </span><a href="#local-6989586621679120457"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><a name="line-23"></a><span>  </span><a name="local-8214565720323819333"><span class="hs-identifier">series</span></a><span> </span><span class="hs-glyph">=</span><span>
-</span><a name="line-24"></a><span>    </span><span class="hs-keyword">case</span><span> </span><span class="hs-identifier hs-var">zeroOrSucc</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">sing</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">SNat</span><span> </span><a href="#local-6989586621679120457"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
-</span><a name="line-25"></a><span>      </span><span class="hs-identifier hs-var">IsZero</span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-var">cons0</span><span> </span><span class="hs-identifier hs-var">SV.empty</span><span>
-</span><a name="line-26"></a><span>      </span><span class="hs-identifier hs-var">IsSucc</span><span> </span><a name="local-6989586621679121066"><a href="#local-6989586621679121066"><span class="hs-identifier">n</span></a></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-var">withKnownNat</span><span> </span><a href="#local-6989586621679121066"><span class="hs-identifier hs-var">n</span></a><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">SV.cons</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">SC.getNonNegative</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">series</span><span class="hs-special">)</span><span> </span><span class="hs-operator hs-var">&lt;*&gt;</span><span> </span><span class="hs-identifier hs-var">series</span><span>
-</span><a name="line-27"></a><span>
-</span><a name="line-28"></a><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Monad</span><span> </span><a href="#local-6989586621679120454"><span class="hs-identifier hs-type">m</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Serial</span><span> </span><a href="#local-6989586621679120454"><span class="hs-identifier hs-type">m</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Monomial</span><span> </span><a href="#local-6989586621679120455"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Serial</span><span> </span><a href="#local-6989586621679120454"><span class="hs-identifier hs-type">m</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">OrderedMonomial</span><span> </span><a href="#local-6989586621679120456"><span class="hs-identifier hs-type">ord</span></a><span> </span><a href="#local-6989586621679120455"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><a name="line-29"></a><span>  </span><a name="local-8214565720323819333"><span class="hs-identifier">series</span></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">newtypeCons</span><span> </span><span class="hs-identifier hs-var">OrderedMonomial</span><span>
-</span><a name="line-30"></a><span>
-</span><a name="line-31"></a><span class="hs-identifier">arbitraryMonomialOfSum</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">SNat</span><span> </span><a href="#local-6989586621679121068"><span class="hs-identifier hs-type">n</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Int</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Gen</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Monomial</span><span> </span><a href="#local-6989586621679121068"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span>
-</span><a name="line-32"></a><a name="arbitraryMonomialOfSum"><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomialOfSum"><span class="hs-identifier">arbitraryMonomialOfSum</span></a></a><span> </span><a name="local-6989586621679121069"><a href="#local-6989586621679121069"><span class="hs-identifier">n</span></a></a><span> </span><a name="local-6989586621679121070"><a href="#local-6989586621679121070"><span class="hs-identifier">k</span></a></a><span> </span><span class="hs-glyph">=</span><span>
-</span><a name="line-33"></a><span>  </span><span class="hs-keyword">case</span><span> </span><span class="hs-identifier hs-var">zeroOrSucc</span><span> </span><a href="#local-6989586621679121069"><span class="hs-identifier hs-var">n</span></a><span> </span><span class="hs-keyword">of</span><span>
-</span><a name="line-34"></a><span>    </span><span class="hs-identifier hs-var">IsZero</span><span> </span><span class="hs-glyph">|</span><span> </span><a href="#local-6989586621679121070"><span class="hs-identifier hs-var">k</span></a><span> </span><span class="hs-operator hs-var">==</span><span> </span><span class="hs-number">0</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-var">QC.elements</span><span> </span><span class="hs-special">[</span><span class="hs-identifier hs-var">SV.empty</span><span class="hs-special">]</span><span>
-</span><a name="line-35"></a><span>           </span><span class="hs-glyph">|</span><span> </span><span class="hs-identifier hs-var">otherwise</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-var">fail</span><span> </span><span class="hs-string">&quot;Empty list with positive sum&quot;</span><span>
-</span><a name="line-36"></a><span>    </span><span class="hs-identifier hs-var">IsSucc</span><span> </span><a name="local-6989586621679121071"><a href="#local-6989586621679121071"><span class="hs-identifier">m</span></a></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-var">withKnownNat</span><span> </span><a href="#local-6989586621679121071"><span class="hs-identifier hs-var">m</span></a><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-keyword">do</span><span>
-</span><a name="line-37"></a><span>      </span><a name="local-6989586621679121072"><a href="#local-6989586621679121072"><span class="hs-identifier">l</span></a></a><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier hs-var">QC.elements</span><span> </span><span class="hs-special">[</span><span class="hs-number">0</span><span class="hs-glyph">..</span><span class="hs-identifier hs-var">abs</span><span> </span><a href="#local-6989586621679121070"><span class="hs-identifier hs-var">k</span></a><span class="hs-special">]</span><span>
-</span><a name="line-38"></a><span>      </span><span class="hs-special">(</span><a href="#local-6989586621679121072"><span class="hs-identifier hs-var">l</span></a><span> </span><span class="hs-operator hs-var">:&lt;</span><span class="hs-special">)</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomialOfSum"><span class="hs-identifier hs-var">arbitraryMonomialOfSum</span></a><span> </span><a href="#local-6989586621679121071"><span class="hs-identifier hs-var">m</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">abs</span><span> </span><a href="#local-6989586621679121070"><span class="hs-identifier hs-var">k</span></a><span> </span><span class="hs-glyph">-</span><span> </span><a href="#local-6989586621679121072"><span class="hs-identifier hs-var">l</span></a><span class="hs-special">)</span><span>
-</span><a name="line-39"></a><span>
-</span><a name="line-40"></a><span class="hs-comment">-- * Instances for QuickCheck.</span><span>
-</span><a name="line-41"></a><span class="hs-keyword">instance</span><span> </span><span class="hs-identifier hs-type">KnownNat</span><span> </span><a href="#local-6989586621679120453"><span class="hs-identifier hs-type">n</span></a><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Arbitrary</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Monomial</span><span> </span><a href="#local-6989586621679120453"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><a name="line-42"></a><span>  </span><a name="local-8214565720323819189"><span class="hs-identifier">arbitrary</span></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomial"><span class="hs-identifier hs-var">arbitraryMonomial</span></a><span>
-</span><a name="line-43"></a><span>
-</span><a name="line-44"></a><span class="hs-identifier">arbitraryMonomial</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><a name="local-6989586621679121067"><a href="#local-6989586621679121067"><span class="hs-identifier">n</span></a></a><span class="hs-operator">.</span><span> </span><span class="hs-identifier hs-type">KnownNat</span><span> </span><a href="#local-6989586621679121067"><span class="hs-identifier hs-type">n</span></a><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Gen</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Monomial</span><span> </span><a href="#local-6989586621679121067"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span>
-</span><a name="line-45"></a><a name="arbitraryMonomial"><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomial"><span class="hs-identifier">arbitraryMonomial</span></a></a><span> </span><span class="hs-glyph">=</span><span>  </span><span class="hs-identifier hs-var">SV.unsafeFromList</span><span> </span><a href="#local-6989586621679121073"><span class="hs-identifier hs-var">len</span></a><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-identifier hs-var">map</span><span> </span><span class="hs-identifier hs-var">abs</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">vectorOf</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">sNatToInt</span><span> </span><a href="#local-6989586621679121073"><span class="hs-identifier hs-var">len</span></a><span class="hs-special">)</span><span> </span><span class="hs-identifier hs-var">arbitrarySizedBoundedIntegral</span><span>
-</span><a name="line-46"></a><span>    </span><span class="hs-keyword">where</span><span>
-</span><a name="line-47"></a><span>      </span><a name="local-6989586621679121073"><a href="#local-6989586621679121073"><span class="hs-identifier">len</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">sing</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">SNat</span><span> </span><a href="#local-6989586621679121067"><span class="hs-identifier hs-type">n</span></a><span>
-</span><a name="line-48"></a><span>
-</span><a name="line-49"></a><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">KnownNat</span><span> </span><a href="#local-6989586621679120451"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">Arbitrary</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">OrderedMonomial</span><span> </span><a href="#local-6989586621679120452"><span class="hs-identifier hs-type">ord</span></a><span> </span><a href="#local-6989586621679120451"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><a name="line-50"></a><span>  </span><a name="local-8214565720323819189"><span class="hs-identifier">arbitrary</span></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">OrderedMonomial</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">arbitrary</span><span>
-</span><a name="line-51"></a></pre></body></html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleInstances #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE GADTs #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-9"></span><span class="hs-pragma">{-# LANGUAGE TypeApplications #-}</span><span>
+</span><span id="line-10"></span><span class="hs-pragma">{-# LANGUAGE TypeOperators #-}</span><span>
+</span><span id="line-11"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-12"></span><span class="hs-pragma">{-# OPTIONS_GHC -fplugin Data.Singletons.TypeNats.Presburger #-}</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra.Ring.Polynomial.Monomial.Test</span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomialOfSum"><span class="hs-identifier">arbitraryMonomialOfSum</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomial"><span class="hs-identifier">arbitraryMonomial</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Algebra.Internal</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Algebra.Ring.Polynomial.Monomial</span></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">Monomial</span></span><span class="hs-special">,</span><span>
+</span><span id="line-23"></span><span>    </span><span class="annot"><span class="hs-identifier">OrderedMonomial</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sized</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">SV</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Equality</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">gcastWith</span></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Natural.Lemma.Arithmetic</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">succAndPlusOneL</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Test.QuickCheck</span></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">Arbitrary</span></span><span class="hs-special">,</span><span>
+</span><span id="line-30"></span><span>    </span><span class="annot"><span class="hs-identifier">Gen</span></span><span class="hs-special">,</span><span>
+</span><span id="line-31"></span><span>    </span><span class="annot"><span class="hs-identifier">arbitrary</span></span><span class="hs-special">,</span><span>
+</span><span id="line-32"></span><span>    </span><span class="annot"><span class="hs-identifier">arbitrarySizedBoundedIntegral</span></span><span class="hs-special">,</span><span>
+</span><span id="line-33"></span><span>    </span><span class="annot"><span class="hs-identifier">vectorOf</span></span><span class="hs-special">,</span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Test.QuickCheck</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">QC</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Test.SmallCheck.Series</span></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">Serial</span></span><span class="hs-special">,</span><span>
+</span><span id="line-38"></span><span>    </span><span class="annot"><span class="hs-identifier">cons0</span></span><span class="hs-special">,</span><span>
+</span><span id="line-39"></span><span>    </span><span class="annot"><span class="hs-identifier">newtypeCons</span></span><span class="hs-special">,</span><span>
+</span><span id="line-40"></span><span>    </span><span class="annot"><span class="hs-identifier">series</span></span><span class="hs-special">,</span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Test.SmallCheck.Series</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">SC</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span id="local-6989586621679244138"><span id="local-6989586621679244139"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679244139"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679244138"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Serial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244138"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Monomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244139"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-46"></span><span>  </span><span id="local-6989586621679244134"><span class="annot"><span class="annottext">series :: Series m (Monomial n)
+</span><a href="#local-6989586621679244134"><span class="hs-identifier hs-var hs-var hs-var hs-var">series</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-47"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; ZeroOrSucc n
+forall (n :: Nat). SNat n -&gt; ZeroOrSucc n
+</span><span class="hs-identifier hs-var">zeroOrSucc</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">KnownNat n =&gt; SNat n
+forall (n :: Nat). KnownNat n =&gt; SNat n
+</span><span class="hs-identifier hs-var">sNat</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="#local-6989586621679244139"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-48"></span><span>      </span><span class="annot"><span class="annottext">ZeroOrSucc n
+</span><span class="hs-identifier hs-var">IsZero</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sized Vector 0 Int -&gt; Series m (Sized Vector 0 Int)
+forall a (m :: * -&gt; *). a -&gt; Series m a
+</span><span class="hs-identifier hs-var">cons0</span></span><span> </span><span class="annot"><span class="annottext">Sized Vector 0 Int
+forall (f :: * -&gt; *) a. (Monoid (f a), Dom f a) =&gt; Sized f 0 a
+</span><span class="hs-identifier hs-var">SV.empty</span></span><span>
+</span><span id="line-49"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">IsSucc</span></span><span> </span><span id="local-6989586621679244128"><span class="annot"><span class="annottext">SNat n1
+</span><a href="#local-6989586621679244128"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-50"></span><span>        </span><span class="annot"><span class="annottext">(n :~: (1 + n1))
+-&gt; ((n ~ (1 + n1)) =&gt; Series m (Monomial n))
+-&gt; Series m (Monomial n)
+forall k (a :: k) (b :: k) r. (a :~: b) -&gt; ((a ~ b) =&gt; r) -&gt; r
+</span><span class="hs-identifier hs-var">gcastWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SNat n1 -&gt; Succ n1 :~: (1 + n1)
+forall (n :: Nat). SNat n -&gt; Succ n :~: (1 + n)
+</span><span class="hs-identifier hs-var">succAndPlusOneL</span></span><span> </span><span class="annot"><span class="annottext">SNat n1
+</span><a href="#local-6989586621679244128"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(((n ~ (1 + n1)) =&gt; Series m (Monomial n))
+ -&gt; Series m (Monomial n))
+-&gt; ((n ~ (1 + n1)) =&gt; Series m (Monomial n))
+-&gt; Series m (Monomial n)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-51"></span><span>          </span><span class="annot"><span class="annottext">SNat n1
+-&gt; (KnownNat n1 =&gt; Series m (Monomial n)) -&gt; Series m (Monomial n)
+forall (n :: Nat) r. SNat n -&gt; (KnownNat n =&gt; r) -&gt; r
+</span><span class="hs-identifier hs-var">withKnownNat</span></span><span> </span><span class="annot"><span class="annottext">SNat n1
+</span><a href="#local-6989586621679244128"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">((KnownNat n1 =&gt; Series m (Monomial n)) -&gt; Series m (Monomial n))
+-&gt; (KnownNat n1 =&gt; Series m (Monomial n)) -&gt; Series m (Monomial n)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Sized Vector n1 Int -&gt; Sized Vector (1 + n1) Int
+forall (f :: * -&gt; *) (n :: Nat) a.
+(CFreeMonoid f, Dom f a) =&gt;
+a -&gt; Sized f n a -&gt; Sized f (1 + n) a
+</span><span class="hs-identifier hs-var">SV.cons</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Sized Vector n1 Int -&gt; Sized Vector (1 + n1) Int)
+-&gt; Series m Int
+-&gt; Series m (Sized Vector n1 Int -&gt; Sized Vector (1 + n1) Int)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonNegative Int -&gt; Int
+forall a. NonNegative a -&gt; a
+</span><span class="hs-identifier hs-var hs-var">SC.getNonNegative</span></span><span> </span><span class="annot"><span class="annottext">(NonNegative Int -&gt; Int)
+-&gt; Series m (NonNegative Int) -&gt; Series m Int
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Series m (NonNegative Int)
+forall (m :: * -&gt; *) a. Serial m a =&gt; Series m a
+</span><span class="hs-identifier hs-var">series</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Series m (Sized Vector n1 Int -&gt; Sized Vector (1 + n1) Int)
+-&gt; Series m (Sized Vector n1 Int)
+-&gt; Series m (Sized Vector (1 + n1) Int)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Series m (Sized Vector n1 Int)
+forall (m :: * -&gt; *) a. Serial m a =&gt; Series m a
+</span><span class="hs-identifier hs-var">series</span></span></span></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span id="local-6989586621679244121"><span id="local-6989586621679244122"><span id="local-6989586621679244123"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679244123"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Serial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244123"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Monomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244122"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Serial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244123"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OrderedMonomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244121"><span class="hs-identifier hs-type">ord</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679244122"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-54"></span><span>  </span><span id="local-6989586621679244118"><span class="annot"><span class="annottext">series :: Series m (OrderedMonomial ord n)
+</span><a href="#local-6989586621679244118"><span class="hs-identifier hs-var hs-var hs-var hs-var">series</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Monomial n -&gt; OrderedMonomial ord n)
+-&gt; Series m (OrderedMonomial ord n)
+forall (m :: * -&gt; *) a b. Serial m a =&gt; (a -&gt; b) -&gt; Series m b
+</span><span class="hs-identifier hs-var">newtypeCons</span></span><span> </span><span class="annot"><span class="annottext">Monomial n -&gt; OrderedMonomial ord n
+forall k (ordering :: k) (n :: Nat).
+Monomial n -&gt; OrderedMonomial ordering n
+</span><span class="hs-identifier hs-var">OrderedMonomial</span></span></span></span></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span id="local-6989586621679244167"><span class="annot"><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomialOfSum"><span class="hs-identifier hs-type">arbitraryMonomialOfSum</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679244167"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Monomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244167"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-57"></span><span id="arbitraryMonomialOfSum"><span class="annot"><span class="annottext">arbitraryMonomialOfSum :: SNat n -&gt; Int -&gt; Gen (Monomial n)
+</span><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomialOfSum"><span class="hs-identifier hs-var hs-var">arbitraryMonomialOfSum</span></a></span></span><span> </span><span id="local-6989586621679244116"><span class="annot"><span class="annottext">SNat n
+</span><a href="#local-6989586621679244116"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679244115"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679244115"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; (KnownNat n =&gt; Gen (Monomial n)) -&gt; Gen (Monomial n)
+forall (n :: Nat) r. SNat n -&gt; (KnownNat n =&gt; r) -&gt; r
+</span><span class="hs-identifier hs-var">withKnownNat</span></span><span> </span><span class="annot"><span class="annottext">SNat n
+</span><a href="#local-6989586621679244116"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">((KnownNat n =&gt; Gen (Monomial n)) -&gt; Gen (Monomial n))
+-&gt; (KnownNat n =&gt; Gen (Monomial n)) -&gt; Gen (Monomial n)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; ZeroOrSucc n
+forall (n :: Nat). SNat n -&gt; ZeroOrSucc n
+</span><span class="hs-identifier hs-var">zeroOrSucc</span></span><span> </span><span class="annot"><span class="annottext">SNat n
+</span><a href="#local-6989586621679244116"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-59"></span><span>    </span><span class="annot"><span class="annottext">ZeroOrSucc n
+</span><span class="hs-identifier hs-var">IsZero</span></span><span>
+</span><span id="line-60"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679244115"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Sized Vector 0 Int] -&gt; Gen (Sized Vector 0 Int)
+forall a. [a] -&gt; Gen a
+</span><span class="hs-identifier hs-var">QC.elements</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Sized Vector 0 Int
+forall (f :: * -&gt; *) a. (Monoid (f a), Dom f a) =&gt; Sized f 0 a
+</span><span class="hs-identifier hs-var">SV.empty</span></span><span class="hs-special">]</span><span>
+</span><span id="line-61"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Gen (Monomial n)
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;Impossible&quot;</span></span><span>
+</span><span id="line-62"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">IsSucc</span></span><span> </span><span id="local-6989586621679244112"><span class="annot"><span class="annottext">SNat n1
+</span><a href="#local-6989586621679244112"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SNat n1 -&gt; (KnownNat n1 =&gt; Gen (Monomial n)) -&gt; Gen (Monomial n)
+forall (n :: Nat) r. SNat n -&gt; (KnownNat n =&gt; r) -&gt; r
+</span><span class="hs-identifier hs-var">withKnownNat</span></span><span> </span><span class="annot"><span class="annottext">SNat n1
+</span><a href="#local-6989586621679244112"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">((KnownNat n1 =&gt; Gen (Monomial n)) -&gt; Gen (Monomial n))
+-&gt; (KnownNat n1 =&gt; Gen (Monomial n)) -&gt; Gen (Monomial n)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-63"></span><span>      </span><span id="local-6989586621679244111"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679244111"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Gen Int
+forall a. [a] -&gt; Gen a
+</span><span class="hs-identifier hs-var">QC.elements</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">..</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679244115"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-64"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679244111"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Sized Vector n1 Int -&gt; Monomial n
+forall (f :: * -&gt; *) a (n :: Nat) (n1 :: Nat).
+(Dom f a, KnownNat n, CFreeMonoid f, n ~ (1 + n1), KnownNat n1) =&gt;
+a -&gt; Sized f n1 a -&gt; Sized f n a
+</span><span class="hs-operator hs-var">:&lt;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Sized Vector n1 Int -&gt; Monomial n)
+-&gt; Gen (Sized Vector n1 Int) -&gt; Gen (Monomial n)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">SNat n1 -&gt; Int -&gt; Gen (Sized Vector n1 Int)
+forall (n :: Nat). SNat n -&gt; Int -&gt; Gen (Monomial n)
+</span><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomialOfSum"><span class="hs-identifier hs-var">arbitraryMonomialOfSum</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n1
+</span><a href="#local-6989586621679244112"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679244115"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679244111"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- * Instances for QuickCheck.</span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span id="local-6989586621679244108"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679244105"><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679244108"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Monomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244108"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-69"></span><span>  </span><span id="local-6989586621679244103"><span class="annot"><span class="annottext">arbitrary :: Gen (Monomial n)
+</span><a href="#local-6989586621679244103"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen (Monomial n)
+forall (n :: Nat). KnownNat n =&gt; Gen (Monomial n)
+</span><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomial"><span class="hs-identifier hs-var">arbitraryMonomial</span></a></span></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="annot"><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomial"><span class="hs-identifier hs-type">arbitraryMonomial</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679244102"><span class="annot"><a href="#local-6989586621679244102"><span class="hs-identifier hs-type">n</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679244102"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Monomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244102"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span id="arbitraryMonomial"><span class="annot"><span class="annottext">arbitraryMonomial :: Gen (Monomial n)
+</span><a href="Algebra.Ring.Polynomial.Monomial.Test.html#arbitraryMonomial"><span class="hs-identifier hs-var hs-var">arbitraryMonomial</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-73"></span><span>  </span><span class="annot"><span class="annottext">SNat n -&gt; [Int] -&gt; Monomial n
+forall (f :: * -&gt; *) (n :: Nat) a.
+(CFreeMonoid f, Dom f a) =&gt;
+SNat n -&gt; [a] -&gt; Sized f n a
+</span><span class="hs-identifier hs-var">SV.unsafeFromList</span></span><span> </span><span class="annot"><span class="annottext">SNat n
+</span><a href="#local-6989586621679244100"><span class="hs-identifier hs-var">len</span></a></span><span> </span><span class="annot"><span class="annottext">([Int] -&gt; Monomial n) -&gt; ([Int] -&gt; [Int]) -&gt; [Int] -&gt; Monomial n
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Int) -&gt; [Int] -&gt; [Int]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">abs</span></span><span>
+</span><span id="line-74"></span><span>    </span><span class="annot"><span class="annottext">([Int] -&gt; Monomial n) -&gt; Gen [Int] -&gt; Gen (Monomial n)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Gen Int -&gt; Gen [Int]
+forall a. Int -&gt; Gen a -&gt; Gen [a]
+</span><span class="hs-identifier hs-var">vectorOf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SNat n -&gt; Int
+forall (n :: Nat). SNat n -&gt; Int
+</span><span class="hs-identifier hs-var">sNatToInt</span></span><span> </span><span class="annot"><span class="annottext">SNat n
+</span><a href="#local-6989586621679244100"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Gen Int
+forall a. (Bounded a, Integral a) =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrarySizedBoundedIntegral</span></span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-76"></span><span>    </span><span id="local-6989586621679244100"><span class="annot"><span class="annottext">len :: SNat n
+</span><a href="#local-6989586621679244100"><span class="hs-identifier hs-var hs-var">len</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SNat n
+forall (n :: Nat). KnownNat n =&gt; SNat n
+</span><span class="hs-identifier hs-var">sNat</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679244102"><span class="hs-identifier hs-type">n</span></a></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span id="local-6989586621679244096"><span id="local-6989586621679244097"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679244093"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679244097"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OrderedMonomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244096"><span class="hs-identifier hs-type">ord</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679244097"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-79"></span><span>  </span><span id="local-6989586621679244092"><span class="annot"><span class="annottext">arbitrary :: Gen (OrderedMonomial ord n)
+</span><a href="#local-6989586621679244092"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Monomial n -&gt; OrderedMonomial ord n
+forall k (ordering :: k) (n :: Nat).
+Monomial n -&gt; OrderedMonomial ordering n
+</span><span class="hs-identifier hs-var">OrderedMonomial</span></span><span> </span><span class="annot"><span class="annottext">(Monomial n -&gt; OrderedMonomial ord n)
+-&gt; Gen (Monomial n) -&gt; Gen (OrderedMonomial ord n)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen (Monomial n)
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span></span></span><span>
+</span><span id="line-80"></span></pre></body></html>
