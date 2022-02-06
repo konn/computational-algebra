@@ -136,7 +136,9 @@ in  { on =
                 ]
               }
 
-        in      lib.makeGhcHeader docsGhcs
+        in      ( (lib.makeGhcHeader docsGhcs)
+                  with env.STACK_YAML = "stack.yaml"
+                )
             /\  { needs = [ "build" ]
                 , name = "Build GitHub Pages for ${lib.current-ghc}"
                 , steps =

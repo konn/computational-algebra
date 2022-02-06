@@ -63,7 +63,7 @@ jobs:
     container: "ghcr.io/konn/computational-algebra/gha:0.7"
     "continue-on-error": "${{matrix.isHead}}"
     env:
-      STACK_YAML: "stack-${{matrix.ghc}}.yaml"
+      STACK_YAML: stack.yaml
     name: "Build GitHub Pages for ${{matrix.ghc}}"
     needs:
     - build
