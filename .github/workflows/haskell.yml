@@ -99,8 +99,8 @@ jobs:
         path: docs/
     - name: Place document in correct place
       run: |
-        if [ "${{steps.test-bins.outputs.download-path}}" != "$(pwd)/docs" ]; then
-          cp -r ${{steps.test-bins.outputs.download-path}} ./docs;
+        if [ "${{steps.docs.outputs.download-path}}" != "$(pwd)/docs" ]; then
+          cp -r ${{steps.docs.outputs.download-path}} ./docs;
         fi
     - name: Generate static site
       run: "stack exec -- site build"

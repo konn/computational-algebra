@@ -168,8 +168,7 @@ in  { on =
                   , lib.action/run
                       { name = "Place document in correct place"
                       , run =
-                          let dl-path =
-                                "\${{steps.test-bins.outputs.download-path}}"
+                          let dl-path = "\${{steps.docs.outputs.download-path}}"
 
                           in  ''
                               if [ "${dl-path}" != "$(pwd)/docs" ]; then
