@@ -1,36 +1,38 @@
-{-# LANGUAGE DeriveDataTypeable, DeriveGeneric, DeriveTraversable  #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, NoMonomorphismRestriction #-}
-{-# LANGUAGE OverloadedStrings, PatternGuards                      #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternGuards #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+
 module Settings where
 
-import           Control.Applicative  (empty)
-import           Control.Arrow        (first)
-import           Data.Binary          (Binary (..))
-import           Data.Default         (Default (..))
-import           Data.HashMap.Strict  (HashMap)
-import qualified Data.HashMap.Strict  as HM
-import           Data.Monoid          ((<>))
-import qualified Data.Text            as T
-import           Data.Typeable        (Typeable)
-import           Data.Yaml
-import           GHC.Generics         (Generic)
-import           Hakyll.Core.Writable (Writable (..))
-
+import Control.Applicative (empty)
+import Control.Arrow (first)
+import Data.Binary (Binary (..))
 import qualified Data.ByteString.Lazy as LBS
-import           Data.Foldable        (toList)
-import           Data.Maybe           (fromMaybe)
-import           Data.String          (fromString)
-import qualified Data.Yaml            as Y
-import           Hakyll               (cached)
-import           Hakyll               (compile)
-import           Hakyll               (match)
-import           Hakyll               (getResourceLBS)
-import           Hakyll               (Rules)
-import           Instances            ()
+import Data.Default (Default (..))
+import Data.Either (fromRight)
+import Data.Foldable (toList)
+import Data.HashMap.Strict (HashMap)
+import qualified Data.HashMap.Strict as HM
+import Data.String (fromString)
+import qualified Data.Text as T
+import Data.Typeable (Typeable)
+import Data.Yaml
+import qualified Data.Yaml as Y
+import GHC.Generics (Generic)
+import Hakyll (Rules, cached, compile, getResourceLBS, match)
+import Hakyll.Core.Writable (Writable (..))
+import Instances ()
 
-data SiteTree = SiteTree { title    :: T.Text
-                         , children :: HashMap FilePath SiteTree
-                         } deriving (Show, Eq, Generic, Typeable)
+data SiteTree = SiteTree
+  { title :: T.Text
+  , children :: HashMap FilePath SiteTree
+  }
+  deriving (Show, Eq, Generic, Typeable)
+
 instance Binary SiteTree
 
 instance Writable SiteTree where
@@ -47,25 +49,46 @@ instance Default SiteTree where
 
 walkTree :: [FilePath] -> SiteTree -> [(FilePath, T.Text)]
 walkTree [] (SiteTree t _) = [("/", t)]
-walkTree (x : xs) (SiteTree t chs) = ("/", t) :
+walkTree (x : xs) (SiteTree t chs) =
+  ("/", t) :
   case HM.lookup x chs of
     Nothing -> []
-    Just st' -> map (first (("/" <> x) <> )) (walkTree xs st')
+    Just st' -> map (first (("/" <> x) <>)) (walkTree xs st')
 
-data Scheme = Scheme { prefix  :: T.Text
-                     , postfix :: Maybe T.Text
-                     } deriving (Typeable, Read, Show, Eq,
-                                 Ord, Generic)
+data Scheme = Scheme
+  { prefix :: T.Text
+  , postfix :: Maybe T.Text
+  }
+  deriving
+    ( Typeable
+    , Read
+    , Show
+    , Eq
+    , Ord
+    , Generic
+    )
 
 instance FromJSON Scheme
+
 instance Binary Scheme
+
 instance ToJSON Scheme
+
 instance Writable Scheme where
   write _ _ = return ()
 
-newtype Schemes  = Schemes { getSchemes :: HashMap T.Text Scheme
-                           } deriving (Typeable, Show, Eq, Generic,
-                                       FromJSON, ToJSON, Binary)
+newtype Schemes = Schemes
+  { getSchemes :: HashMap T.Text Scheme
+  }
+  deriving
+    ( Typeable
+    , Show
+    , Eq
+    , Generic
+    , FromJSON
+    , ToJSON
+    , Binary
+    )
 
 instance Default Schemes where
   def = Schemes HM.empty
@@ -73,13 +96,18 @@ instance Default Schemes where
 instance Writable Schemes where
   write _ _ = return ()
 
-setting :: (Writable a, FromJSON a, Binary a, Typeable a)
-        => String -> a -> Rules ()
-setting name d = match (fromString $ "config/" <> name <> ".yml") $ compile $ cached name $ do
-  fmap (fromMaybe d . Y.decode . LBS.toStrict) <$> getResourceLBS
+setting ::
+  (Writable a, FromJSON a, Binary a, Typeable a) =>
+  String ->
+  a ->
+  Rules ()
+setting name d = match (fromString $ "config/" <> name <> ".yml") $
+  compile $
+    cached name $ do
+      fmap (fromRight d . Y.decodeEither' . LBS.toStrict) <$> getResourceLBS
 
-newtype NavBar  = NavBar { runNavBar :: [(T.Text, String)] }
-                  deriving (Typeable, Generic, Binary)
+newtype NavBar = NavBar {runNavBar :: [(T.Text, String)]}
+  deriving (Typeable, Generic, Binary)
 
 instance Writable NavBar where
   write _ _ = return ()

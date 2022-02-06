@@ -1,44 +1,48 @@
-name:                site
-version:             0.1.0.0
-synopsis:            Simple project template from stack
-description:         Please see README.md
-homepage:            https://github.com/konn/sites#readme
-license:             BSD3
-license-file:        LICENSE
-author:              Hiromi ISHII
-maintainer:          konn.jinro _at_ gmail.com
-copyright:           2015 (c) Hiromi ISHII
-category:            Web
-build-type:          Simple
-cabal-version:       >=1.10
+name:          site
+version:       0.1.0.0
+synopsis:      Simple project template from stack
+description:   Please see README.md
+homepage:      https://github.com/konn/sites#readme
+license:       BSD3
+license-file:  LICENSE
+author:        Hiromi ISHII
+maintainer:    konn.jinro _at_ gmail.com
+copyright:     2015 (c) Hiromi ISHII
+category:      Web
+build-type:    Simple
+cabal-version: >=1.10
 
 executable site
-  hs-source-dirs:      app
-  main-is:             Main.hs
-  other-modules:       Settings
-                     , Instances
-                     , Lenses
-  default-language:    Haskell2010
-  build-depends:       base >= 4.7 && < 5
-                     , binary
-                     , blaze-html
-                     , bytestring
-                     , containers
-                     , data-default
-                     , derive
-                     , hakyll
-                     , hashable
-                     , lens
-                     , mtl
-                     , pandoc
-                     , pandoc-citeproc
-                     , pandoc-types
-                     , shelly
-                     , system-filepath
-                     , tagsoup
-                     , template-haskell
-                     , text
-                     , time
-                     , unordered-containers
-                     , yaml
-  ghc-options:         -Wall -threaded -O2
+  hs-source-dirs:   app
+  main-is:          Main.hs
+  other-modules:
+    Instances
+    Lenses
+    Settings
+
+  default-language: Haskell2010
+  build-depends:
+      base                  >=4.7 && <5
+    , binary
+    , blaze-html
+    , bytestring
+    , citeproc
+    , containers
+    , data-default
+    , directory
+    , filepath
+    , hakyll
+    , hashable
+    , lens
+    , mtl
+    , pandoc
+    , pandoc-types
+    , shelly
+    , tagsoup
+    , template-haskell
+    , text
+    , time
+    , unordered-containers
+    , yaml
+
+  ghc-options:      -Wall -threaded -O2
