@@ -133,7 +133,7 @@ tocOpts =
   writerOpts
     { writerTemplate =
         either (error . show) Just $
-          runPure $ compileDefaultTemplate "$toc$"
+          runIdentity $ compileTemplate "" "$toc$"
     , writerTOCDepth = 4
     , writerTableOfContents = True
     , writerSectionDivs = True
