@@ -28,7 +28,7 @@ import Lenses
 import Settings
 import System.Directory
 import System.Exit (ExitCode (..))
-import System.FilePath (FilePath, isAbsolute, splitDirectories, takeDirectory, (</>))
+import System.FilePath (FilePath, isAbsolute, joinPath, splitDirectories, takeDirectory, (</>))
 import System.Process (callProcess, readProcess)
 import Text.HTML.TagSoup
 import Text.Pandoc hiding (getZonedTime)
@@ -228,7 +228,7 @@ walkPath par child
   | isAbsolute child = T.pack child
   | otherwise = T.pack $ go (splitDirectories child) (reverse $ splitDirectories par)
   where
-    go [] pts = concat $ reverse pts
+    go [] pts = joinPath $ reverse pts
     go ("../" : chs) (r : rs)
       | isDirectory r = go chs rs
       | otherwise = go ("../" : chs) rs
