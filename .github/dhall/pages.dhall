@@ -1,4 +1,6 @@
-let lib = ./lib.dhall
+let lib =
+      ./lib.dhall
+        sha256:91b944152fcbeba7e2303bce839d8685d2feaf7f6decc91a48fe55f34601afaa
 
 let GHA = lib.GHA
 
