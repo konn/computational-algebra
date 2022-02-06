@@ -71,6 +71,14 @@ jobs:
     - uses: "actions/checkout@v2"
       with:
         ref: "gh-pages-devel"
+    - name: Cache _cache
+      uses: "actions/cache@v2"
+      with:
+        key: "${{runner.os}}-site-${{matrix.ghc}}-${{ hashFiles('index.md','stylesheets/**/*','templates/**/*','katex/**/*','javascripts/**/*','images/**/*') }}"
+        path: _cache
+        "restore-keys": "${{runner.os}}-site-${{matrix.ghc}}-"
+    - name: "Installs dependency (node)"
+      run: npm insall jsdom
     - id: docs
       uses: "actions/download-artifact@v2"
       with:

@@ -181,6 +181,23 @@ in  { on =
                 , steps =
                   [ GHA.steps.actions/checkout
                     with `with` = Some (toMap { ref = "gh-pages-devel" })
+                  , lib.action/cache
+                      { base-key = "\${{runner.os}}-site-${lib.current-ghc}"
+                      , key-files =
+                        [ [ "'index.md'"
+                          , "'stylesheets/**/*'"
+                          , "'templates/**/*'"
+                          , "'katex/**/*'"
+                          , "'javascripts/**/*'"
+                          , "'images/**/*'"
+                          ]
+                        ]
+                      , path = "_cache"
+                      }
+                  , lib.action/run
+                      { name = "Installs dependency (node)"
+                      , run = "npm insall jsdom"
+                      }
                   , GHA.Step::{
                     , uses = Some "actions/download-artifact@v2"
                     , id = Some docs-id
