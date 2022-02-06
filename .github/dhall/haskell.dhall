@@ -196,7 +196,7 @@ in  { on =
                       }
                   , lib.action/run
                       { name = "Installs dependency (node)"
-                      , run = "npm insall jsdom"
+                      , run = "npm install jsdom"
                       }
                   , GHA.Step::{
                     , uses = Some "actions/download-artifact@v2"

@@ -78,7 +78,7 @@ jobs:
         path: _cache
         "restore-keys": "${{runner.os}}-site-${{matrix.ghc}}-"
     - name: "Installs dependency (node)"
-      run: npm insall jsdom
+      run: npm install jsdom
     - id: docs
       uses: "actions/download-artifact@v2"
       with:
