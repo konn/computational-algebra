@@ -13,7 +13,7 @@ This library provides many functionality for computational algebra, especially i
 Thanks to Haskell's powerful language features, this library achieves the following goals:
 
 Type-Safety
-:   Haskell's static type system enforces **static correctness** and prevents you from violating invariants. 
+:   Haskell's static type system enforces **static correctness** and prevents you from violating invariants.
 
 Flexibility
 :   With the powerful type-system of Haskell,
@@ -28,7 +28,7 @@ This package currently provides the following functionalities:
 * Groebner basis calculation w.r.t. arbitrary monomial ordering
     * Currently using Buchberger's algorithm with some optimization
     * Faugere's $F_4$ algorithms is experimentally implemented,
-	  but currently not as fast as Buchberger's algorithm 
+	  but currently not as fast as Buchberger's algorithm
 * Computation in the (multivariate) polynomial ring over arbitarary field and its quotient ring
     * Ideal membership problem
     * Ideal operations such as intersection, saturation and so on.
@@ -152,7 +152,7 @@ The type for the polynomials and operations are defined in [`Algebra.Ring.Polyno
 
 [`OrderedPolynomial r ord n`{.haskell}](doc:Algebra-Ring-Polynomial.html#t:OrderedPolynomial) represents
 
-* the $n$-variate polynomial ring, 
+* the $n$-variate polynomial ring,
 * over the coefficient ring `r`{.haskell},
 * with terms sorted w.r.t. [*the monomial ordering*](http://en.wikipedia.org/wiki/Monomial_order) `ord`{.haskell}.
 
@@ -228,11 +228,11 @@ This class provide the interfaces to retrieve information related to monomial or
 
 By default, `computational-algebra` provides the following monomial orderings:
 
-* [`Lex`{.haskell}](doc:Algebra-Ring-Polynomial-Monomial.html#t:Lex), the lexicographical order, 
+* [`Lex`{.haskell}](doc:Algebra-Ring-Polynomial-Monomial.html#t:Lex), the lexicographical order,
 * [`Grlex`{.haskell}](doc:Algebra-Ring-Polynomial-Monomial.html#t:Grlex), the graded lex order, and
 * [`Grevlex`{.haskell}](doc:Algebra-Ring-Polynomial-Monomial.html#t:Grevlex), the graded reversed lex order.
 
-In addition to the basic monomial orders listed above, we can construct new monomial orderings from existing ones with following: 
+In addition to the basic monomial orders listed above, we can construct new monomial orderings from existing ones with following:
 
 * [`Graded ord`{.haskell}](doc:Algebra-Ring-Polynomial-Monomial.html#t:Graded), the graded order which first compares the grade (i.e. total degree)
   and break the tie with `ord`{.haskell},
@@ -341,7 +341,7 @@ There are several polynomial types shipped with this library other than `Ordered
   For example the following type-checks and we can get what we wanted:
 
     <pre class="sourceCode haskell"><code class="sourceCode haskell">#x <span class="fu">*</span> #y <span class="fu">-</span> <span class="dv">5</span> <span class="fu">*</span> #a<span class="fu">^</span><span class="dv">2</span><span class="ot"> ::</span> <span class="dt">LabPolynomial'</span> <span class="dt">Rational</span> <span class="dt">Grevlex</span> <span class="ch">'[&quot;a&quot;, &quot;x&quot;, &quot;y&quot;]</span></code></pre>
-  
+
     And <code class="sourceCode haskell"><span class="ot">#z ::</span> <span class="dt">LabUnipol</span>  <span class="dt">Rational</span> <span class="ch">&quot;x&quot;</span></code>
   is statically rejected by compiler at compile-time.
   One limitation is that we can only use `#<var>` syntax only for variables starting with small alphabet and whithout any white-spaces.
@@ -482,9 +482,6 @@ hence we haven't include such "proof requirement" to class.
 Another reason is that, it makes difficult to treat *dynamically generated orderings*,
 which occurs in some applications such as integer programming.
 
-[apis]: ./docs
+[apis]: ./docs/index.html
 
 [paper]: https://arxiv.org/abs/1807.01456
-
-
-
