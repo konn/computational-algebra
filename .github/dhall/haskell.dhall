@@ -126,12 +126,11 @@ in  { on =
         , lib.action/run
             { name = "Build static site generator", run = "stack build --fast" }
         , lib.action/run
-            { name = "Correct bins"
+            { name = "Collect bins"
             , run =
                 ''
                 mkdir -p "${site-bin-artifact.path}"
-                cp "$(stack path --dist-dir)/build/site/site" \ 
-                   "${site-bin-artifact.path}"
+                cp "$(stack path --dist-dir)/build/site/site" "${site-bin-artifact.path}"
                 ''
             }
         , lib.action/upload site-bin-artifact

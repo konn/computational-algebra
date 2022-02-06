@@ -134,11 +134,10 @@ jobs:
         "stack-version": '2.7.3'
     - name: Build static site generator
       run: "stack build --fast"
-    - name: Correct bins
+    - name: Collect bins
       run: |
         mkdir -p "site-bin"
-        cp "$(stack path --dist-dir)/build/site/site" \ 
-           "site-bin"
+        cp "$(stack path --dist-dir)/build/site/site" "site-bin"
     - name: "Upload site-bin-artifact"
       uses: "actions/upload-artifact@v2.2.3"
       with:

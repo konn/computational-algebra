@@ -4,21 +4,6 @@ let lib =
 
 let GHA = lib.GHA
 
-let global-stack-cache =
-      { base-key = "document-global-stack"
-      , path = "~/.stack"
-      , key-files = [ [ "'package.yaml'", "'**/*.cabal'", "'stack.yaml'" ] ]
-      }
-
-let local-stack-cache =
-      { base-key = "document-local-stack"
-      , path = "**/.stack-work"
-      , key-files =
-        [ [ "'package.yaml'", "'**/*.cabal'", "'stack.yaml'" ]
-        , [ "'**/*.hs'" ]
-        ]
-      }
-
 let docGhcVersion = "8.10.7"
 
 let pages-artifact = lib.pages-artifact-for docGhcVersion
