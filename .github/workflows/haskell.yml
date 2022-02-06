@@ -61,12 +61,54 @@ jobs:
         - false
   "build-pages":
     "continue-on-error": "${{matrix.isHead}}"
-    env:
-      STACK_YAML: stack.yaml
+    env: {}
     name: "Build GitHub Pages for ${{matrix.ghc}}"
     needs:
     - build
+    - "build-site-generator"
     "runs-on": "ubuntu-latest"
+    steps:
+    - uses: "actions/checkout@v2"
+      with:
+        ref: "gh-pages-devel"
+    - id: docs
+      uses: "actions/download-artifact@v2"
+      with:
+        name: "doc-artifacts-${{matrix.ghc}}"
+        path: docs/
+    - name: Place document in correct place
+      run: |
+        if [ "${{steps.docs.outputs.download-path}}" != "$(pwd)/docs" ]; then
+          cp -r ${{steps.docs.outputs.download-path}} ./docs;
+        fi
+    - id: "site-bin"
+      name: Download site generator
+      uses: "actions/download-artifact@v2"
+      with:
+        name: "site-bin-artifact"
+        path: "site-bin"
+    - name: Locate bin
+      run: |
+        cp -r ${{steps.docs.outputs.download-path}}/site ./
+        chmod +x ./site
+    - name: Generate static site
+      run: ./site build
+    - name: "Upload pages-artifacts-${{matrix.ghc}}"
+      uses: "actions/upload-artifact@v2.2.3"
+      with:
+        name: "pages-artifacts-${{matrix.ghc}}"
+        path: _site/
+    strategy:
+      "fail-fast": false
+      matrix:
+        ghc:
+        - '8.10.7'
+        include: []
+        isHead:
+        - false
+  "build-site-generator":
+    name: Build Site Generator
+    "runs-on": "ubuntu-20.04"
     steps:
     - uses: "actions/checkout@v2"
       with:
@@ -92,31 +134,16 @@ jobs:
         "stack-version": '2.7.3'
     - name: Build static site generator
       run: "stack build --fast"
-    - id: docs
-      uses: "actions/download-artifact@v2"
-      with:
-        name: "doc-artifacts-${{matrix.ghc}}"
-        path: docs/
-    - name: Place document in correct place
+    - name: Correct bins
       run: |
-        if [ "${{steps.docs.outputs.download-path}}" != "$(pwd)/docs" ]; then
-          cp -r ${{steps.docs.outputs.download-path}} ./docs;
-        fi
-    - name: Generate static site
-      run: "stack exec -- site build"
-    - name: "Upload pages-artifacts-${{matrix.ghc}}"
+        mkdir -p "site-bin"
+        cp "$(stack path --dist-dir)/build/site/site" \ 
+           "site-bin"
+    - name: "Upload site-bin-artifact"
       uses: "actions/upload-artifact@v2.2.3"
       with:
-        name: "pages-artifacts-${{matrix.ghc}}"
-        path: _site/
-    strategy:
-      "fail-fast": false
-      matrix:
-        ghc:
-        - '8.10.7'
-        include: []
-        isHead:
-        - false
+        name: "site-bin-artifact"
+        path: "site-bin"
   test:
     container: "ghcr.io/konn/computational-algebra/gha:0.7"
     "continue-on-error": "${{matrix.isHead}}"
