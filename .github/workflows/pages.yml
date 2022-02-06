@@ -48,7 +48,7 @@ jobs:
           let fs = require('fs');
           fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/docs.zip`, Buffer.from(download.data));
     - name: Extract artifacts
-      run: unzip docs.zip
+      run: "unzip docs.zip -d ./docs"
     - name: Generate static site
       run: "stack exec -- site build"
     - name: Deploy GitHub Pages

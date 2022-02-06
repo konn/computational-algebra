@@ -76,7 +76,9 @@ in  { name = "Update Documentation"
                   )
               }
             , lib.action/run
-                { name = "Extract artifacts", run = "unzip ${docs-zip}" }
+                { name = "Extract artifacts"
+                , run = "unzip ${docs-zip} -d ./docs"
+                }
             , lib.action/run
                 { name = "Generate static site"
                 , run = "stack exec -- site build"
