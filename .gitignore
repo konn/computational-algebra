@@ -25,7 +25,7 @@ cabal.sandbox.config
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
 
 # Thumbnails
 ._*
@@ -94,3 +94,4 @@ halg-matrices
 halg-polyn-parser
 halg-polynomials
 computational-algebra
+docs

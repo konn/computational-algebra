@@ -2,14 +2,18 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 
 module Main where
 
+import Control.Applicative
+import Control.Exception (SomeException, handle)
 import Control.Lens hiding (setting)
-import Control.Monad ((<=<))
+import Control.Monad (guard, (<=<))
 import Control.Monad.Error.Class
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Maybe
 import Data.Default
 import Data.Foldable
 import Data.Maybe
@@ -22,10 +26,10 @@ import Data.Time.LocalTime
 import Hakyll hiding (renderTags)
 import Lenses
 import Settings
-import Shelly (FilePath)
-import Shelly hiding (FilePath)
+import System.Directory
 import System.Exit (ExitCode (..))
-import System.FilePath (isAbsolute, splitDirectories, takeDirectory)
+import System.FilePath (FilePath, isAbsolute, splitDirectories, takeDirectory, (</>))
+import System.Process (callProcess, readProcess)
 import Text.HTML.TagSoup
 import Text.Pandoc hiding (getZonedTime)
 import Text.Pandoc.Highlighting (pygments, styleToCss)
@@ -144,24 +148,21 @@ testIgnore fp =
   fp `elem` excluded || ignoreFile def fp
 
 deploy :: Configuration -> IO ExitCode
-deploy cnf = shelly $
-  handleany_sh (const $ return $ ExitFailure 1) $ do
-    dest <- canonicalize $ fromText $ T.pack $ destinationDirectory cnf
-    mkdir_p dest
-    cd dest
+deploy cnf = handle (const @_ @SomeException $ pure $ ExitFailure 1) $ do
+  dest <- makeAbsolute $ destinationDirectory cnf
+  createDirectoryIfMissing True dest
+  msgZ <- withCurrentDirectory dest $ do
     timeStamp <- formatTime defaultTimeLocale "%c" <$> liftIO getZonedTime
     let msg = "Updated (" ++ timeStamp ++ ")"
-        msgOpt = "-m" <> T.pack msg
-    cd dest
-    run_ "git" ["add", "."]
-    run_ "git" ["commit", "-a", msgOpt, "--edit"]
-    run_ "git" ["push", "-f", "github", "gh-pages"]
-    msgZ <- cmd "git" "log" "HEAD" "--format=%s" "-n1"
-    cd ".."
-    run_ "git" ["add", "."]
-    run_ "git" $ ["commit", "-m"] ++ take 1 (T.lines msgZ)
-    run_ "git" ["push", "github", "gh-pages-devel"]
-    return ExitSuccess
+        msgOpt = "-m" <> msg
+    callProcess "git" ["add", "."]
+    callProcess "git" ["commit", "-a", msgOpt, "--edit"]
+    callProcess "git" ["push", "-f", "github", "gh-pages"]
+    readProcess "git" ["log", "HEAD", "--format=%s", "-n1"] ""
+  callProcess "git" ["add", "."]
+  callProcess "git" $ ["commit", "-m"] ++ take 1 (lines msgZ)
+  callProcess "git" ["push", "github", "gh-pages-devel"]
+  return ExitSuccess
 
 conf :: Configuration
 conf =
@@ -177,17 +178,31 @@ procSchemes = bottomUpM (procSchemes0 <=< unsafeCompiler . procDoc)
 
 procDoc :: MonadIO m => Inline -> m Inline
 procDoc inl
-  | Just pth <- T.stripPrefix "doc:" =<< (inl ^? linkUrl) =
-    shelly $
-      let (url, frag) = splitFragment pth
-          pat =
-            foldr1 (.||.) $
-              map (fromGlob . (++ ('/' : T.unpack url))) algpacks
-          chk fp = return $ pat `matches` fromString fp
-       in findWhen chk "docs" >>= \case
-            [] -> return inl
-            (a : _) -> return $ inl & linkUrl .~ (T.pack a <> frag)
+  | Just pth <- T.stripPrefix "doc:" =<< (inl ^? linkUrl) = do
+    let (url, frag) = splitFragment pth
+        pat =
+          foldr1 (.||.) $
+            map (fromGlob . (++ ('/' : T.unpack url))) algpacks
+        chk fp = pat `matches` fromString fp
+    liftIO (listDirectoryRecursiveWhen chk "docs") >>= \case
+      Nothing -> return inl
+      Just a -> return $ inl & linkUrl .~ (T.pack a <> frag)
 procDoc inl = return inl
+
+listDirectoryRecursiveWhen :: (FilePath -> Bool) -> FilePath -> IO (Maybe FilePath)
+listDirectoryRecursiveWhen chk = runMaybeT . loop
+  where
+    loop fp = do
+      isDir <- liftIO $ doesDirectoryExist fp
+      isFile <- liftIO $ doesFileExist fp
+      if isDir
+        then do
+          chs <- liftIO $ listDirectory fp
+          asum $ map (loop . (fp </>)) chs
+        else
+          if isFile
+            then guard (chk fp) >> pure fp
+            else empty
 
 procSchemes0 :: Inline -> Compiler Inline
 procSchemes0 inl =
@@ -244,22 +259,21 @@ haddockExternal i = do
         , not ("://" `T.isInfixOf` ref)
         , (targ, frag) <- splitFragment ref
         , not $ T.null targ =
-        unsafeCompiler $
-          shelly $ do
-            let targFP = walkPath (takeDirectory $ T.unpack fp) $ T.unpack targ
-            let (pkg, rest) = T.breakOn "/" $ fromJust $ T.stripPrefix "docs/" targFP
-            known <- test_e $ T.unpack targFP
-            if known && foldr1 (.||.) (map fromGlob algpacks) `matches` fromString (T.unpack ("docs/" <> pkg))
-              then return t
-              else do
-                let href =
-                      T.concat
-                        [ "https://hackage.haskell.org/package/"
-                        , pkg
-                        , "/docs"
-                        , rest
-                        , frag
-                        ]
-                return $
-                  TagOpen "a" $ ("href", href) : filter ((/= "href") . fst) atts
+        unsafeCompiler $ do
+          let targFP = walkPath (takeDirectory $ T.unpack fp) $ T.unpack targ
+          let (pkg, rest) = T.breakOn "/" $ fromJust $ T.stripPrefix "docs/" targFP
+          known <- doesFileExist $ T.unpack targFP
+          if known && foldr1 (.||.) (map fromGlob algpacks) `matches` fromString (T.unpack ("docs/" <> pkg))
+            then return t
+            else do
+              let href =
+                    T.concat
+                      [ "https://hackage.haskell.org/package/"
+                      , pkg
+                      , "/docs"
+                      , rest
+                      , frag
+                      ]
+              return $
+                TagOpen "a" $ ("href", href) : filter ((/= "href") . fst) atts
     rewriter _ t = return t

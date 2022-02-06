@@ -24,10 +24,7 @@ executable site
   build-depends:
       base                  >=4.7 && <5
     , binary
-    , blaze-html
     , bytestring
-    , citeproc
-    , containers
     , data-default
     , directory
     , filepath
@@ -37,12 +34,13 @@ executable site
     , mtl
     , pandoc
     , pandoc-types
-    , shelly
+    , process
     , tagsoup
     , template-haskell
     , text
     , time
+    , transformers
     , unordered-containers
     , yaml
 
-  ghc-options:      -Wall -threaded -O2
+  ghc-options:      -Wall -threaded -O2 -Wunused-packages
