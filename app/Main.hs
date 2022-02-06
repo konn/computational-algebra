@@ -28,7 +28,7 @@ import Lenses
 import Settings
 import System.Directory
 import System.Exit (ExitCode (..))
-import System.FilePath (FilePath, isAbsolute, joinPath, splitDirectories, takeDirectory, (</>))
+import System.FilePath (FilePath, isAbsolute, joinPath, splitDirectories, splitPath, takeDirectory, (</>))
 import System.Process (callProcess, readProcess)
 import Text.HTML.TagSoup
 import Text.Pandoc hiding (getZonedTime)
@@ -145,7 +145,9 @@ excluded = ["app", "sites.cabal", "TAGS", "stack.yaml"]
 
 testIgnore :: String -> Bool
 testIgnore fp =
-  fp `elem` excluded || ignoreFile def fp
+  "node_modules" `elem` splitPath fp
+    || fp `elem` excluded
+    || ignoreFile def fp
 
 deploy :: Configuration -> IO ExitCode
 deploy cnf = handle (const @_ @SomeException $ pure $ ExitFailure 1) $ do
