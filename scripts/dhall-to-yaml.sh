@@ -16,7 +16,7 @@ WORKFLOWS="${GITHUB_DIR}/workflows"
 DHALLS="${GITHUB_DIR}/dhall"
 
 for BASE in haskell pages build-site-generator; do
-  YAML_PATH="${WORKFLOWS}/${BASE}.yaml"
+  YAML_PATH="${WORKFLOWS}/${BASE}.yml"
   DHALL_PATH="${DHALLS}/${BASE}.dhall"
   NEW="$("${DHALL_TO_YAML}" --file "${DHALL_PATH}" --generated-comment)"
   if diff <(echo "${NEW}") <(cat "${YAML_PATH}") >/dev/null ; then
