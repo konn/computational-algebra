@@ -57,7 +57,7 @@ import Data.Type.Natural.Lemma.Arithmetic (plusSuccR)
 infixl 7 *<, >*, *|<, >|*, !*
 
 -- | Constraint synonym for rings that can be used as polynomial coefficient.
-class    (DecidableZero r, Ring r, Commutative r, Eq r) => CoeffRing r
+class    (DecidableZero r, Ring r, Commutative r, Eq r, Module (Scalar r) (Scalar r)) => CoeffRing r
 instance (DecidableZero r, Ring r, Commutative r, Eq r) => CoeffRing r
 
 -- | Polynomial in terms of free associative commutative algebra generated
