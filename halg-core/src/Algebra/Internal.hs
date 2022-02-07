@@ -18,7 +18,6 @@
 #if __GLASGOW_HASKELL__ >= 806
 {-# LANGUAGE NoStarIsType #-}
 #endif
-
 module Algebra.Internal
   ( (:~:) (..),
     withRefl,
@@ -30,8 +29,6 @@ where
 
 import Algebra.Instances ()
 import AlgebraicPrelude
-import Control.Lens (_Unwrapping)
-import qualified Control.Lens as Lens
 import qualified Data.Foldable as F
 import Data.Kind (Type)
 import Data.Proxy (KProxy (..), Proxy (..), asProxyTypeOf)
@@ -69,7 +66,7 @@ import Data.Sized as Algebra.Internal
   )
 import qualified Data.Sized as S
 import qualified Data.Sized.Flipped as Flipped (Flipped (..))
-import Data.Type.Equality ((:~:) (..))
+import Data.Type.Equality (gcastWith, (:~:) (..))
 import Data.Type.Natural as Algebra.Internal hiding ((%~))
 import Data.Type.Natural.Lemma.Arithmetic (plusComm)
 import Data.Type.Natural.Lemma.Order (geqToMax, leqToMax, minusPlus, notLeqToLeq)
@@ -105,7 +102,9 @@ singToSNat :: Sing n -> SNat n
 singToSNat sn = Sing.withKnownNat sn sNat
 
 coerceLength :: n :~: m -> S.Sized f n a -> S.Sized f m a
-coerceLength eql = _Unwrapping Flipped.Flipped Lens.%~ coerce eql
+{-# ANN coerceLength "HLint: ignore Avoid lambda" #-}
+{-# ANN coerceLength "HLint: ignore Redundant lambda" #-}
+coerceLength = \eql x -> gcastWith eql x
 
 sizedLength :: (KnownNat n, S.DomC f a) => S.Sized f n a -> SNat n
 sizedLength = S.sLength

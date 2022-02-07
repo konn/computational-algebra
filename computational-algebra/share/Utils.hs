@@ -229,7 +229,7 @@ genLM :: forall n. SNat n -> QC.Gen [Polynomial (Fraction Integer) n]
 genLM m = withKnownNat m $ case zeroOrSucc m of
   IsZero -> return []
   IsSucc n -> withKnownNat n $ do
-    fs <- map (coerce (plusComm sOne n) . shiftR sOne) <$> genLM n
+    fs <- map (gcastWith (plusComm sOne n) . shiftR sOne) <$> genLM n
     QC.NonNegative deg <- arbitrary
     coef <- arbitraryRational `suchThat` (/= 0)
     xf <- arbitrary :: QC.Gen (Polynomial (Fraction Integer) n)
