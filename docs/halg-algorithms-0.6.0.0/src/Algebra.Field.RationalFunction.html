@@ -15,8 +15,8 @@
 </span><span id="line-15"></span><span class="hs-comment">--</span><span>
 </span><span id="line-16"></span><span class="hs-comment">--  With @OverloadedLabels@ extension, you can use @&#39;IsLabel&#39;@ instance</span><span>
 </span><span id="line-17"></span><span class="hs-comment">--  to write variable as @#x@; for example @1 / (#x - 2) ^ n@.</span><span>
-</span><span id="line-18"></span><span class="hs-keyword">newtype</span><span> </span><span id="RationalFunction"><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-var">RationalFunction</span></a></span></span><span> </span><span id="local-6989586621679370072"><span class="annot"><a href="#local-6989586621679370072"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="RF"><span class="annot"><a href="Algebra.Field.RationalFunction.html#RF"><span class="hs-identifier hs-var">RF</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679370072"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-19"></span><span>                             </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370023"><span id="local-6989586621679370025"><span class="annot"><span class="annottext">RationalFunction k -&gt; RationalFunction k -&gt; Bool
+</span><span id="line-18"></span><span class="hs-keyword">newtype</span><span> </span><span id="RationalFunction"><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-var">RationalFunction</span></a></span></span><span> </span><span id="local-6989586621679377129"><span class="annot"><a href="#local-6989586621679377129"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="RF"><span class="annot"><a href="Algebra.Field.RationalFunction.html#RF"><span class="hs-identifier hs-var">RF</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679377129"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span>                             </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679377080"><span id="local-6989586621679377082"><span class="annot"><span class="annottext">RationalFunction k -&gt; RationalFunction k -&gt; Bool
 (RationalFunction k -&gt; RationalFunction k -&gt; Bool)
 -&gt; (RationalFunction k -&gt; RationalFunction k -&gt; Bool)
 -&gt; Eq (RationalFunction k)
@@ -32,7 +32,7 @@ RationalFunction k -&gt; RationalFunction k -&gt; Bool
 $c== :: forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 RationalFunction k -&gt; RationalFunction k -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370007"><span id="local-6989586621679370009"><span id="local-6989586621679370011"><span id="local-6989586621679370013"><span id="local-6989586621679370015"><span id="local-6989586621679370017"><span id="local-6989586621679370019"><span class="annot"><span class="annottext">Eq (RationalFunction k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679377064"><span id="local-6989586621679377066"><span id="local-6989586621679377068"><span id="local-6989586621679377070"><span id="local-6989586621679377072"><span id="local-6989586621679377074"><span id="local-6989586621679377076"><span class="annot"><span class="annottext">Eq (RationalFunction k)
 Eq (RationalFunction k)
 -&gt; (RationalFunction k -&gt; RationalFunction k -&gt; Ordering)
 -&gt; (RationalFunction k -&gt; RationalFunction k -&gt; Bool)
@@ -98,7 +98,7 @@ RationalFunction k -&gt; RationalFunction k -&gt; Ordering
 $cp1Ord :: forall k.
 (Euclidean k, Division k, Ord k) =&gt;
 Eq (RationalFunction k)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369992"><span id="local-6989586621679369994"><span id="local-6989586621679369996"><span id="local-6989586621679369998"><span id="local-6989586621679370000"><span id="local-6989586621679370002"><span id="local-6989586621679370004"><span class="annot"><span class="annottext">Integer -&gt; RationalFunction k
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679377049"><span id="local-6989586621679377051"><span id="local-6989586621679377053"><span id="local-6989586621679377055"><span id="local-6989586621679377057"><span id="local-6989586621679377059"><span id="local-6989586621679377061"><span class="annot"><span class="annottext">Integer -&gt; RationalFunction k
 RationalFunction k -&gt; RationalFunction k
 RationalFunction k -&gt; RationalFunction k -&gt; RationalFunction k
 (RationalFunction k -&gt; RationalFunction k -&gt; RationalFunction k)
@@ -155,7 +155,7 @@ RationalFunction k -&gt; RationalFunction k -&gt; RationalFunction k
 $c+ :: forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 RationalFunction k -&gt; RationalFunction k -&gt; RationalFunction k
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Num</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369982"><span id="local-6989586621679369984"><span id="local-6989586621679369986"><span id="local-6989586621679369988"><span class="annot"><span class="annottext">Unital (RationalFunction k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Num</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679377039"><span id="local-6989586621679377041"><span id="local-6989586621679377043"><span id="local-6989586621679377045"><span class="annot"><span class="annottext">Unital (RationalFunction k)
 Unital (RationalFunction k)
 -&gt; (RationalFunction k -&gt; RationalFunction k)
 -&gt; (RationalFunction k -&gt; RationalFunction k -&gt; RationalFunction k)
@@ -234,7 +234,7 @@ Abelian (RationalFunction k)
 $cp1Semiring :: forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 Additive (RationalFunction k)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">Semiring</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369973"><span class="annot"><span class="annottext">Rng (RationalFunction k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">Semiring</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679377030"><span class="annot"><span class="annottext">Rng (RationalFunction k)
 Rig (RationalFunction k)
 Integer -&gt; RationalFunction k
 Rig (RationalFunction k)
@@ -261,7 +261,7 @@ Rng (RationalFunction k)
 $cp1Ring :: forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 Rig (RationalFunction k)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Ring</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369967"><span class="annot"><span class="annottext">Unital (RationalFunction k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Ring</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679377024"><span class="annot"><span class="annottext">Unital (RationalFunction k)
 Semiring (RationalFunction k)
 Monoidal (RationalFunction k)
 Natural -&gt; RationalFunction k
@@ -298,7 +298,7 @@ $cp1Rig :: forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 Semiring (RationalFunction k)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Rig</span></span></span><span class="hs-special">,</span><span>
-</span><span id="line-20"></span><span>                                       </span><span id="local-6989586621679369960"><span id="local-6989586621679369962"><span id="local-6989586621679369964"><span class="annot"><span class="annottext">Natural -&gt; RationalFunction k -&gt; RationalFunction k
+</span><span id="line-20"></span><span>                                       </span><span id="local-6989586621679377017"><span id="local-6989586621679377019"><span id="local-6989586621679377021"><span class="annot"><span class="annottext">Natural -&gt; RationalFunction k -&gt; RationalFunction k
 RationalFunction k -&gt; RationalFunction k -&gt; RationalFunction k
 (a -&gt; RationalFunction k) -&gt; f a -&gt; RationalFunction k
 (RationalFunction k -&gt; RationalFunction k -&gt; RationalFunction k)
@@ -336,7 +336,7 @@ Natural -&gt; RationalFunction k -&gt; RationalFunction k
 $c+ :: forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 RationalFunction k -&gt; RationalFunction k -&gt; RationalFunction k
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Additive</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369953"><span id="local-6989586621679369955"><span id="local-6989586621679369957"><span class="annot"><span class="annottext">RationalFunction k -&gt; Natural -&gt; RationalFunction k
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Additive</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679377010"><span id="local-6989586621679377012"><span id="local-6989586621679377014"><span class="annot"><span class="annottext">RationalFunction k -&gt; Natural -&gt; RationalFunction k
 RationalFunction k -&gt; RationalFunction k -&gt; RationalFunction k
 (a -&gt; RationalFunction k) -&gt; f a -&gt; RationalFunction k
 (RationalFunction k -&gt; RationalFunction k -&gt; RationalFunction k)
@@ -374,7 +374,7 @@ RationalFunction k -&gt; Natural -&gt; RationalFunction k
 $c* :: forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 RationalFunction k -&gt; RationalFunction k -&gt; RationalFunction k
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Multiplicative</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369945"><span id="local-6989586621679369947"><span id="local-6989586621679369949"><span class="annot"><span class="annottext">Multiplicative (RationalFunction k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Multiplicative</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679377002"><span id="local-6989586621679377004"><span id="local-6989586621679377006"><span class="annot"><span class="annottext">Multiplicative (RationalFunction k)
 RationalFunction k
 Multiplicative (RationalFunction k)
 -&gt; RationalFunction k
@@ -418,7 +418,7 @@ $cp1Unital :: forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 Multiplicative (RationalFunction k)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Unital</span></span></span></span></span><span class="hs-special">,</span><span>
-</span><span id="line-21"></span><span>                                       </span><span id="local-6989586621679369936"><span id="local-6989586621679369938"><span id="local-6989586621679369940"><span class="annot"><span class="annottext">RightModule Natural (RationalFunction k)
+</span><span id="line-21"></span><span>                                       </span><span id="local-6989586621679376993"><span id="local-6989586621679376995"><span id="local-6989586621679376997"><span class="annot"><span class="annottext">RightModule Natural (RationalFunction k)
 LeftModule Natural (RationalFunction k)
 RationalFunction k
 Natural -&gt; RationalFunction k -&gt; RationalFunction k
@@ -477,7 +477,7 @@ forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 Multiplicative (RationalFunction k)
 forall r. Multiplicative r -&gt; Commutative r
-</span><span class="hs-identifier hs-var hs-var hs-var">Commutative</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369922"><span id="local-6989586621679369924"><span id="local-6989586621679369926"><span id="local-6989586621679369928"><span class="annot"><span class="annottext">RightModule Integer (RationalFunction k)
+</span><span class="hs-identifier hs-var hs-var hs-var">Commutative</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679376979"><span id="local-6989586621679376981"><span id="local-6989586621679376983"><span id="local-6989586621679376985"><span class="annot"><span class="annottext">RightModule Integer (RationalFunction k)
 Monoidal (RationalFunction k)
 LeftModule Integer (RationalFunction k)
 n -&gt; RationalFunction k -&gt; RationalFunction k
@@ -555,9 +555,9 @@ forall k.
 Additive (RationalFunction k)
 forall r. Additive r -&gt; Abelian r
 </span><span class="hs-identifier hs-var hs-var hs-var">Abelian</span></span><span class="hs-special">,</span><span>
-</span><span id="line-22"></span><span>                                       </span><span id="local-6989586621679369915"><span class="annot"><span class="hs-identifier hs-type">LeftModule</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369910"><span class="annot"><span class="hs-identifier hs-type">RightModule</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span></span><span class="hs-special">,</span><span>
-</span><span id="line-23"></span><span>                                       </span><span id="local-6989586621679369905"><span class="annot"><span class="hs-identifier hs-type">LeftModule</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369901"><span class="annot"><span class="hs-identifier hs-type">RightModule</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span></span><span class="hs-special">,</span><span>
-</span><span id="line-24"></span><span>                                       </span><span id="local-6989586621679369892"><span id="local-6989586621679369894"><span id="local-6989586621679369896"><span class="annot"><span class="annottext">IntegralDomain (RationalFunction k)
+</span><span id="line-22"></span><span>                                       </span><span id="local-6989586621679376972"><span class="annot"><span class="hs-identifier hs-type">LeftModule</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679376967"><span class="annot"><span class="hs-identifier hs-type">RightModule</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span></span><span class="hs-special">,</span><span>
+</span><span id="line-23"></span><span>                                       </span><span id="local-6989586621679376962"><span class="annot"><span class="hs-identifier hs-type">LeftModule</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679376958"><span class="annot"><span class="hs-identifier hs-type">RightModule</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span></span><span class="hs-special">,</span><span>
+</span><span id="line-24"></span><span>                                       </span><span id="local-6989586621679376949"><span id="local-6989586621679376951"><span id="local-6989586621679376953"><span class="annot"><span class="annottext">IntegralDomain (RationalFunction k)
 UnitNormalForm (RationalFunction k)
 DecidableZero (RationalFunction k)
 IntegralDomain (RationalFunction k)
@@ -618,7 +618,7 @@ UnitNormalForm (RationalFunction k)
 $cp1GCDDomain :: forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 IntegralDomain (RationalFunction k)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">GCDDomain</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369888"><span class="annot"><span class="annottext">UFD (RationalFunction k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">GCDDomain</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679376945"><span class="annot"><span class="annottext">UFD (RationalFunction k)
 UFD (RationalFunction k)
 -&gt; (RationalFunction k
     -&gt; RationalFunction k
@@ -653,7 +653,7 @@ forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 GCDDomain (RationalFunction k)
 forall d. GCDDomain d -&gt; UFD d
-</span><span class="hs-identifier hs-var hs-var hs-var">UFD</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369876"><span id="local-6989586621679369878"><span id="local-6989586621679369880"><span id="local-6989586621679369882"><span class="annot"><span class="annottext">PID (RationalFunction k)
+</span><span class="hs-identifier hs-var hs-var hs-var">UFD</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679376933"><span id="local-6989586621679376935"><span id="local-6989586621679376937"><span id="local-6989586621679376939"><span class="annot"><span class="annottext">PID (RationalFunction k)
 PID (RationalFunction k)
 -&gt; (RationalFunction k -&gt; Maybe Natural)
 -&gt; (RationalFunction k
@@ -706,7 +706,7 @@ RationalFunction k -&gt; Maybe Natural
 $cp1Euclidean :: forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 PID (RationalFunction k)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Euclidean</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369869"><span id="local-6989586621679369871"><span class="annot"><span class="annottext">Domain (RationalFunction k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Euclidean</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679376926"><span id="local-6989586621679376928"><span class="annot"><span class="annottext">Domain (RationalFunction k)
 Commutative (RationalFunction k)
 Domain (RationalFunction k)
 -&gt; Commutative (RationalFunction k)
@@ -771,7 +771,7 @@ Semiring (RationalFunction k)
 $cp1ZeroProductSemiring :: forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 Monoidal (RationalFunction k)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">ZeroProductSemiring</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369862"><span class="annot"><span class="annottext">Unital (RationalFunction k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">ZeroProductSemiring</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679376919"><span class="annot"><span class="annottext">Unital (RationalFunction k)
 Unital (RationalFunction k)
 -&gt; (RationalFunction k -&gt; RationalFunction k -&gt; Bool)
 -&gt; DecidableAssociates (RationalFunction k)
@@ -791,7 +791,7 @@ $cp1DecidableAssociates :: forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 Unital (RationalFunction k)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">DecidableAssociates</span></span></span><span class="hs-special">,</span><span>
-</span><span id="line-26"></span><span>                                       </span><span id="local-6989586621679369854"><span id="local-6989586621679369856"><span id="local-6989586621679369858"><span class="annot"><span class="annottext">Unital (RationalFunction k)
+</span><span id="line-26"></span><span>                                       </span><span id="local-6989586621679376911"><span id="local-6989586621679376913"><span id="local-6989586621679376915"><span class="annot"><span class="annottext">Unital (RationalFunction k)
 Unital (RationalFunction k)
 -&gt; (RationalFunction k -&gt; Maybe (RationalFunction k))
 -&gt; (RationalFunction k -&gt; Bool)
@@ -838,7 +838,7 @@ RationalFunction k -&gt; Maybe (RationalFunction k)
 $cp1DecidableUnits :: forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 Unital (RationalFunction k)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">DecidableUnits</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369850"><span class="annot"><span class="annottext">Monoidal (RationalFunction k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">DecidableUnits</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679376907"><span class="annot"><span class="annottext">Monoidal (RationalFunction k)
 Monoidal (RationalFunction k)
 -&gt; (RationalFunction k -&gt; Bool)
 -&gt; DecidableZero (RationalFunction k)
@@ -857,7 +857,7 @@ RationalFunction k -&gt; Bool
 $cp1DecidableZero :: forall k.
 (Eq k, Euclidean k, Division k) =&gt;
 Monoidal (RationalFunction k)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">DecidableZero</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679369845"><span class="annot"><span class="annottext">DecidableUnits (RationalFunction k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">DecidableZero</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679376902"><span class="annot"><span class="annottext">DecidableUnits (RationalFunction k)
 DecidableAssociates (RationalFunction k)
 DecidableUnits (RationalFunction k)
 -&gt; DecidableAssociates (RationalFunction k)
@@ -889,13 +889,13 @@ DecidableUnits (RationalFunction k)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">UnitNormalForm</span></span></span><span>
 </span><span id="line-27"></span><span>                                      </span><span class="hs-special">)</span><span>
 </span><span id="line-28"></span><span>
-</span><span id="line-29"></span><span id="local-6989586621679369843"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679369838"><span id="local-6989586621679369840"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679369843"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PrettyCoeff</span></span><span> </span><span class="annot"><a href="#local-6989586621679369843"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679369843"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-30"></span><span>  </span><span id="local-6989586621679369836"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; RationalFunction k -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span id="local-6989586621679369834"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679369834"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RF"><span class="hs-identifier hs-type">RF</span></a></span><span> </span><span id="local-6989586621679369833"><span class="annot"><span class="annottext">Fraction (Unipol k)
-</span><a href="#local-6989586621679369833"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
+</span><span id="line-29"></span><span id="local-6989586621679376900"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679376895"><span id="local-6989586621679376897"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679376900"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PrettyCoeff</span></span><span> </span><span class="annot"><a href="#local-6989586621679376900"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679376900"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-30"></span><span>  </span><span id="local-6989586621679376893"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; RationalFunction k -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span id="local-6989586621679376891"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679376891"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RF"><span class="hs-identifier hs-type">RF</span></a></span><span> </span><span id="local-6989586621679376890"><span class="annot"><span class="annottext">Fraction (Unipol k)
+</span><a href="#local-6989586621679376890"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
 </span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679369834"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679376891"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">10</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; ShowS) -&gt; ShowS -&gt; ShowS
@@ -907,7 +907,7 @@ forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
 </span><span class="hs-number">11</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Fraction (Unipol k) -&gt; Unipol k
 forall t. Fraction t -&gt; t
 </span><span class="hs-identifier hs-var">numerator</span></span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k)
-</span><a href="#local-6989586621679369833"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+</span><a href="#local-6989586621679376890"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
@@ -919,11 +919,11 @@ forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
 </span><span class="hs-number">11</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Fraction (Unipol k) -&gt; Unipol k
 forall t. Fraction t -&gt; t
 </span><span class="hs-identifier hs-var">denominator</span></span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k)
-</span><a href="#local-6989586621679369833"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><a href="#local-6989586621679376890"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span></span><span>
 </span><span id="line-32"></span><span>
-</span><span id="line-33"></span><span id="local-6989586621679369826"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679369826"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679369826"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsLabel</span></span><span> </span><span class="annot"><span class="hs-string">&quot;x&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679369826"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span class="hs-cpp">
+</span><span id="line-33"></span><span id="local-6989586621679376883"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679376883"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679376883"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsLabel</span></span><span> </span><span class="annot"><span class="hs-string">&quot;x&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679376883"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span class="hs-cpp">
 #if defined(__GLASGOW_HASKELL__) &amp;&amp; __GLASGOW_HASKELL__ &gt;= 802
-</span><span>  </span><span id="local-6989586621679369823"><span class="annot"><span class="annottext">fromLabel :: RationalFunction k
+</span><span>  </span><span id="local-6989586621679376880"><span class="annot"><span class="annottext">fromLabel :: RationalFunction k
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromLabel</span></span></span><span class="hs-cpp"> 
 #else
 </span><span>  </span><span class="hs-identifier">fromLabel</span><span> </span><span class="hs-identifier">_</span><span class="hs-cpp">
@@ -932,37 +932,37 @@ forall t. Fraction t -&gt; t
 forall k. Fraction (Unipol k) -&gt; RationalFunction k
 </span><a href="Algebra.Field.RationalFunction.html#RF"><span class="hs-identifier hs-var">RF</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IsLabel &quot;x&quot; (Unipol k)
 Unipol k
-</span><a href="#local-6989586621679369821"><span class="hs-var">#x</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k -&gt; Fraction (Unipol k)
+</span><a href="#local-6989586621679376878"><span class="hs-var">#x</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k -&gt; Fraction (Unipol k)
 forall d. GCDDomain d =&gt; d -&gt; d -&gt; Fraction d
 </span><span class="hs-operator hs-var">NA.%</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
 forall r. Unital r =&gt; r
 </span><span class="hs-identifier hs-var">one</span></span><span class="hs-special">)</span></span><span>
 </span><span id="line-40"></span><span>
-</span><span id="line-41"></span><span id="local-6989586621679370046"><span class="annot"><a href="Algebra.Field.RationalFunction.html#evalRationalFunctionOnField"><span class="hs-identifier hs-type">evalRationalFunctionOnField</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679370046"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679370046"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679370046"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679370046"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679370046"><span class="hs-identifier hs-type">k</span></a></span></span><span>
+</span><span id="line-41"></span><span id="local-6989586621679377103"><span class="annot"><a href="Algebra.Field.RationalFunction.html#evalRationalFunctionOnField"><span class="hs-identifier hs-type">evalRationalFunctionOnField</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679377103"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679377103"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377103"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679377103"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679377103"><span class="hs-identifier hs-type">k</span></a></span></span><span>
 </span><span id="line-42"></span><span id="evalRationalFunctionOnField"><span class="annot"><span class="annottext">evalRationalFunctionOnField :: RationalFunction k -&gt; k -&gt; k
-</span><a href="Algebra.Field.RationalFunction.html#evalRationalFunctionOnField"><span class="hs-identifier hs-var hs-var">evalRationalFunctionOnField</span></a></span></span><span> </span><span id="local-6989586621679369818"><span class="annot"><span class="annottext">RationalFunction k
-</span><a href="#local-6989586621679369818"><span class="hs-identifier hs-var">rat</span></a></span></span><span> </span><span id="local-6989586621679369817"><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679369817"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-43"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679369816"><span class="annot"><span class="annottext">d :: Fraction k
-</span><a href="#local-6989586621679369816"><span class="hs-identifier hs-var hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RationalFunction k -&gt; k -&gt; Fraction k
+</span><a href="Algebra.Field.RationalFunction.html#evalRationalFunctionOnField"><span class="hs-identifier hs-var hs-var">evalRationalFunctionOnField</span></a></span></span><span> </span><span id="local-6989586621679376875"><span class="annot"><span class="annottext">RationalFunction k
+</span><a href="#local-6989586621679376875"><span class="hs-identifier hs-var">rat</span></a></span></span><span> </span><span id="local-6989586621679376874"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679376874"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679376873"><span class="annot"><span class="annottext">d :: Fraction k
+</span><a href="#local-6989586621679376873"><span class="hs-identifier hs-var hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RationalFunction k -&gt; k -&gt; Fraction k
 forall r.
 (GCDDomain r, CoeffRing r) =&gt;
 RationalFunction r -&gt; r -&gt; Fraction r
 </span><a href="Algebra.Field.RationalFunction.html#evalRationalFunction"><span class="hs-identifier hs-var">evalRationalFunction</span></a></span><span> </span><span class="annot"><span class="annottext">RationalFunction k
-</span><a href="#local-6989586621679369818"><span class="hs-identifier hs-var">rat</span></a></span><span> </span><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679369817"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><a href="#local-6989586621679376875"><span class="hs-identifier hs-var">rat</span></a></span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679376874"><span class="hs-identifier hs-var">k</span></a></span><span>
 </span><span id="line-44"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Fraction k -&gt; k
 forall t. Fraction t -&gt; t
 </span><span class="hs-identifier hs-var">numerator</span></span><span> </span><span class="annot"><span class="annottext">Fraction k
-</span><a href="#local-6989586621679369816"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; k -&gt; k
+</span><a href="#local-6989586621679376873"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; k -&gt; k
 forall r. Division r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Fraction k -&gt; k
 forall t. Fraction t -&gt; t
 </span><span class="hs-identifier hs-var">denominator</span></span><span> </span><span class="annot"><span class="annottext">Fraction k
-</span><a href="#local-6989586621679369816"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><a href="#local-6989586621679376873"><span class="hs-identifier hs-var">d</span></a></span><span>
 </span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span id="local-6989586621679369814"><span class="annot"><a href="Algebra.Field.RationalFunction.html#fromPolynomial"><span class="hs-identifier hs-type">fromPolynomial</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679369814"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arity</span></span><span> </span><span class="annot"><a href="#local-6989586621679369814"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679369814"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-47"></span><span>               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679369814"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679369814"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-46"></span><span id="local-6989586621679376871"><span class="annot"><a href="Algebra.Field.RationalFunction.html#fromPolynomial"><span class="hs-identifier hs-type">fromPolynomial</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679376871"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arity</span></span><span> </span><span class="annot"><a href="#local-6989586621679376871"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679376871"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679376871"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679376871"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span></span><span>
 </span><span id="line-48"></span><span id="fromPolynomial"><span class="annot"><span class="annottext">fromPolynomial :: poly -&gt; RationalFunction (Coefficient poly)
 </span><a href="Algebra.Field.RationalFunction.html#fromPolynomial"><span class="hs-identifier hs-var hs-var">fromPolynomial</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol (Coefficient poly))
 -&gt; RationalFunction (Coefficient poly)
@@ -1001,19 +1001,19 @@ IsPolynomial poly =&gt;
 poly -&gt; Map (Monomial (Arity poly)) (Coefficient poly)
 </span><span class="hs-identifier hs-var">terms&#39;</span></span><span>
 </span><span id="line-49"></span><span>
-</span><span id="line-50"></span><span id="local-6989586621679369811"><span class="annot"><a href="Algebra.Field.RationalFunction.html#variable"><span class="hs-identifier hs-type">variable</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679369811"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679369811"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679369811"><span class="hs-identifier hs-type">k</span></a></span></span><span>
+</span><span id="line-50"></span><span id="local-6989586621679376868"><span class="annot"><a href="Algebra.Field.RationalFunction.html#variable"><span class="hs-identifier hs-type">variable</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679376868"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679376868"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679376868"><span class="hs-identifier hs-type">k</span></a></span></span><span>
 </span><span id="line-51"></span><span id="variable"><span class="annot"><span class="annottext">variable :: RationalFunction k
 </span><a href="Algebra.Field.RationalFunction.html#variable"><span class="hs-identifier hs-var hs-var">variable</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IsLabel &quot;x&quot; (RationalFunction k)
 RationalFunction k
-</span><a href="#local-6989586621679369810"><span class="hs-var">#x</span></a></span><span>
+</span><a href="#local-6989586621679376867"><span class="hs-var">#x</span></a></span><span>
 </span><span id="line-52"></span><span>
-</span><span id="line-53"></span><span id="local-6989586621679370069"><span class="annot"><a href="Algebra.Field.RationalFunction.html#evalRationalFunction"><span class="hs-identifier hs-type">evalRationalFunction</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">GCDDomain</span></span><span> </span><span class="annot"><a href="#local-6989586621679370069"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679370069"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679370069"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679370069"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="annot"><a href="#local-6989586621679370069"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-53"></span><span id="local-6989586621679377126"><span class="annot"><a href="Algebra.Field.RationalFunction.html#evalRationalFunction"><span class="hs-identifier hs-type">evalRationalFunction</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">GCDDomain</span></span><span> </span><span class="annot"><a href="#local-6989586621679377126"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679377126"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377126"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679377126"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="annot"><a href="#local-6989586621679377126"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-54"></span><span id="evalRationalFunction"><span class="annot"><span class="annottext">evalRationalFunction :: RationalFunction r -&gt; r -&gt; Fraction r
-</span><a href="Algebra.Field.RationalFunction.html#evalRationalFunction"><span class="hs-identifier hs-var hs-var">evalRationalFunction</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RF"><span class="hs-identifier hs-type">RF</span></a></span><span> </span><span id="local-6989586621679369809"><span class="annot"><span class="annottext">Fraction (Unipol r)
-</span><a href="#local-6989586621679369809"><span class="hs-identifier hs-var">rat</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679369808"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679369808"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-55"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679369807"><span class="annot"><span class="annottext">p :: Coefficient (Unipol r)
-</span><a href="#local-6989586621679369807"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Ordinal (Arity (Unipol r)) -&gt; Coefficient (Unipol r))
+</span><a href="Algebra.Field.RationalFunction.html#evalRationalFunction"><span class="hs-identifier hs-var hs-var">evalRationalFunction</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RF"><span class="hs-identifier hs-type">RF</span></a></span><span> </span><span id="local-6989586621679376866"><span class="annot"><span class="annottext">Fraction (Unipol r)
+</span><a href="#local-6989586621679376866"><span class="hs-identifier hs-var">rat</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679376865"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679376865"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679376864"><span class="annot"><span class="annottext">p :: Coefficient (Unipol r)
+</span><a href="#local-6989586621679376864"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Ordinal (Arity (Unipol r)) -&gt; Coefficient (Unipol r))
 -&gt; Unipol r -&gt; Coefficient (Unipol r)
 forall poly.
 IsPolynomial poly =&gt;
@@ -1022,15 +1022,15 @@ IsPolynomial poly =&gt;
 </span><span class="hs-identifier hs-var">liftMapCoeff</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; Ordinal 1 -&gt; r
 forall a b. a -&gt; b -&gt; a
 </span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679369808"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Unipol r -&gt; Coefficient (Unipol r))
+</span><a href="#local-6989586621679376865"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Unipol r -&gt; Coefficient (Unipol r))
 -&gt; Unipol r -&gt; Coefficient (Unipol r)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol r) -&gt; Unipol r
 forall t. Fraction t -&gt; t
 </span><span class="hs-identifier hs-var">numerator</span></span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol r)
-</span><a href="#local-6989586621679369809"><span class="hs-identifier hs-var">rat</span></a></span><span>
-</span><span id="line-56"></span><span>      </span><span id="local-6989586621679369804"><span class="annot"><span class="annottext">q :: Coefficient (Unipol r)
-</span><a href="#local-6989586621679369804"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Ordinal (Arity (Unipol r)) -&gt; Coefficient (Unipol r))
+</span><a href="#local-6989586621679376866"><span class="hs-identifier hs-var">rat</span></a></span><span>
+</span><span id="line-56"></span><span>      </span><span id="local-6989586621679376861"><span class="annot"><span class="annottext">q :: Coefficient (Unipol r)
+</span><a href="#local-6989586621679376861"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Ordinal (Arity (Unipol r)) -&gt; Coefficient (Unipol r))
 -&gt; Unipol r -&gt; Coefficient (Unipol r)
 forall poly.
 IsPolynomial poly =&gt;
@@ -1039,43 +1039,43 @@ IsPolynomial poly =&gt;
 </span><span class="hs-identifier hs-var">liftMapCoeff</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; Ordinal 1 -&gt; r
 forall a b. a -&gt; b -&gt; a
 </span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679369808"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Unipol r -&gt; Coefficient (Unipol r))
+</span><a href="#local-6989586621679376865"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Unipol r -&gt; Coefficient (Unipol r))
 -&gt; Unipol r -&gt; Coefficient (Unipol r)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol r) -&gt; Unipol r
 forall t. Fraction t -&gt; t
 </span><span class="hs-identifier hs-var">denominator</span></span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol r)
-</span><a href="#local-6989586621679369809"><span class="hs-identifier hs-var">rat</span></a></span><span>
+</span><a href="#local-6989586621679376866"><span class="hs-identifier hs-var">rat</span></a></span><span>
 </span><span id="line-57"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">r
 Coefficient (Unipol r)
-</span><a href="#local-6989586621679369807"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Fraction r
+</span><a href="#local-6989586621679376864"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Fraction r
 forall d. GCDDomain d =&gt; d -&gt; d -&gt; Fraction d
 </span><span class="hs-operator hs-var">NA.%</span></span><span> </span><span class="annot"><span class="annottext">r
 Coefficient (Unipol r)
-</span><a href="#local-6989586621679369804"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><a href="#local-6989586621679376861"><span class="hs-identifier hs-var">q</span></a></span><span>
 </span><span id="line-58"></span><span>
 </span><span id="line-59"></span><span class="hs-comment">-- | Formal differentiation</span><span>
-</span><span id="line-60"></span><span id="local-6989586621679370044"><span class="annot"><a href="Algebra.Field.RationalFunction.html#diffRF"><span class="hs-identifier hs-type">diffRF</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679370044"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679370044"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679370044"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679370044"><span class="hs-identifier hs-type">k</span></a></span></span><span>
+</span><span id="line-60"></span><span id="local-6989586621679377101"><span class="annot"><a href="Algebra.Field.RationalFunction.html#diffRF"><span class="hs-identifier hs-type">diffRF</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679377101"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679377101"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377101"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679377101"><span class="hs-identifier hs-type">k</span></a></span></span><span>
 </span><span id="line-61"></span><span id="diffRF"><span class="annot"><span class="annottext">diffRF :: RationalFunction k -&gt; RationalFunction k
-</span><a href="Algebra.Field.RationalFunction.html#diffRF"><span class="hs-identifier hs-var hs-var">diffRF</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RF"><span class="hs-identifier hs-type">RF</span></a></span><span> </span><span id="local-6989586621679369803"><span class="annot"><span class="annottext">Fraction (Unipol k)
-</span><a href="#local-6989586621679369803"><span class="hs-identifier hs-var">pq</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-62"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679369802"><span class="annot"><span class="annottext">f :: Unipol k
-</span><a href="#local-6989586621679369802"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k) -&gt; Unipol k
+</span><a href="Algebra.Field.RationalFunction.html#diffRF"><span class="hs-identifier hs-var hs-var">diffRF</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RF"><span class="hs-identifier hs-type">RF</span></a></span><span> </span><span id="local-6989586621679376860"><span class="annot"><span class="annottext">Fraction (Unipol k)
+</span><a href="#local-6989586621679376860"><span class="hs-identifier hs-var">pq</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679376859"><span class="annot"><span class="annottext">f :: Unipol k
+</span><a href="#local-6989586621679376859"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k) -&gt; Unipol k
 forall t. Fraction t -&gt; t
 </span><span class="hs-identifier hs-var">numerator</span></span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k)
-</span><a href="#local-6989586621679369803"><span class="hs-identifier hs-var">pq</span></a></span><span>
-</span><span id="line-63"></span><span>      </span><span id="local-6989586621679369801"><span class="annot"><span class="annottext">g :: Unipol k
-</span><a href="#local-6989586621679369801"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k) -&gt; Unipol k
+</span><a href="#local-6989586621679376860"><span class="hs-identifier hs-var">pq</span></a></span><span>
+</span><span id="line-63"></span><span>      </span><span id="local-6989586621679376858"><span class="annot"><span class="annottext">g :: Unipol k
+</span><a href="#local-6989586621679376858"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k) -&gt; Unipol k
 forall t. Fraction t -&gt; t
 </span><span class="hs-identifier hs-var">denominator</span></span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k)
-</span><a href="#local-6989586621679369803"><span class="hs-identifier hs-var">pq</span></a></span><span>
+</span><a href="#local-6989586621679376860"><span class="hs-identifier hs-var">pq</span></a></span><span>
 </span><span id="line-64"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k) -&gt; RationalFunction k
 forall k. Fraction (Unipol k) -&gt; RationalFunction k
 </span><a href="Algebra.Field.RationalFunction.html#RF"><span class="hs-identifier hs-var">RF</span></a></span><span> </span><span class="annot"><span class="annottext">(Fraction (Unipol k) -&gt; RationalFunction k)
 -&gt; Fraction (Unipol k) -&gt; RationalFunction k
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679369801"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k -&gt; Unipol k
+</span><a href="#local-6989586621679376858"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k -&gt; Unipol k
 forall r. Multiplicative r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Ordinal (Arity (Unipol k)) -&gt; Unipol k -&gt; Unipol k
 forall poly.
@@ -1083,7 +1083,7 @@ IsOrderedPolynomial poly =&gt;
 Ordinal (Arity poly) -&gt; poly -&gt; poly
 </span><span class="hs-identifier hs-var">diff</span></span><span> </span><span class="annot"><span class="annottext">Ordinal (Arity (Unipol k))
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679369802"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k -&gt; Unipol k
+</span><a href="#local-6989586621679376859"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k -&gt; Unipol k
 forall r. Group r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Ordinal (Arity (Unipol k)) -&gt; Unipol k -&gt; Unipol k
 forall poly.
@@ -1091,73 +1091,73 @@ IsOrderedPolynomial poly =&gt;
 Ordinal (Arity poly) -&gt; poly -&gt; poly
 </span><span class="hs-identifier hs-var">diff</span></span><span> </span><span class="annot"><span class="annottext">Ordinal (Arity (Unipol k))
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679369801"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k -&gt; Unipol k
+</span><a href="#local-6989586621679376858"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k -&gt; Unipol k
 forall r. Multiplicative r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679369802"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k -&gt; Fraction (Unipol k)
+</span><a href="#local-6989586621679376859"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k -&gt; Fraction (Unipol k)
 forall d. GCDDomain d =&gt; d -&gt; d -&gt; Fraction d
 </span><span class="hs-operator hs-var">NA.%</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679369801"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Natural -&gt; Unipol k
+</span><a href="#local-6989586621679376858"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Natural -&gt; Unipol k
 forall r. Unital r =&gt; r -&gt; Natural -&gt; r
 </span><span class="hs-operator hs-var">^</span></span><span> </span><span class="annot"><span class="annottext">Natural
 </span><span class="hs-number">2</span></span><span class="hs-special">)</span><span>
 </span><span id="line-65"></span><span>
 </span><span id="line-66"></span><span class="hs-comment">-- | Formal Taylor expansion</span><span>
-</span><span id="line-67"></span><span id="local-6989586621679369796"><span class="annot"><a href="Algebra.Field.RationalFunction.html#taylor"><span class="hs-identifier hs-type">taylor</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679369796"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679369796"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679369796"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679369796"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-67"></span><span id="local-6989586621679376853"><span class="annot"><a href="Algebra.Field.RationalFunction.html#taylor"><span class="hs-identifier hs-type">taylor</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679376853"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679376853"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679376853"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679376853"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">]</span></span><span>
 </span><span id="line-68"></span><span id="taylor"><span class="annot"><span class="annottext">taylor :: RationalFunction k -&gt; [k]
 </span><a href="Algebra.Field.RationalFunction.html#taylor"><span class="hs-identifier hs-var hs-var">taylor</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; k -&gt; RationalFunction k -&gt; [k]
 forall k.
 (Division k, Eq k, Euclidean k) =&gt;
 Integer -&gt; k -&gt; RationalFunction k -&gt; [k]
-</span><a href="#local-6989586621679369795"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679376852"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">k
 forall r. Unital r =&gt; r
 </span><span class="hs-identifier hs-var">one</span></span><span>
 </span><span id="line-69"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-70"></span><span>    </span><span id="local-6989586621679369795"><span class="annot"><span class="annottext">go :: Integer -&gt; k -&gt; RationalFunction k -&gt; [k]
-</span><a href="#local-6989586621679369795"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679369794"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679369794"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679369793"><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679369793"><span class="hs-identifier hs-var">acc</span></a></span></span><span> </span><span id="local-6989586621679369792"><span class="annot"><span class="annottext">RationalFunction k
-</span><a href="#local-6989586621679369792"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-71"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679369791"><span class="annot"><span class="annottext">acc&#39; :: k
-</span><a href="#local-6989586621679369791"><span class="hs-identifier hs-var hs-var">acc&#39;</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679369793"><span class="hs-identifier hs-var">acc</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; k -&gt; k
+</span><span id="line-70"></span><span>    </span><span id="local-6989586621679376852"><span class="annot"><span class="annottext">go :: Integer -&gt; k -&gt; RationalFunction k -&gt; [k]
+</span><a href="#local-6989586621679376852"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679376851"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679376851"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679376850"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679376850"><span class="hs-identifier hs-var">acc</span></a></span></span><span> </span><span id="local-6989586621679376849"><span class="annot"><span class="annottext">RationalFunction k
+</span><a href="#local-6989586621679376849"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-71"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679376848"><span class="annot"><span class="annottext">acc&#39; :: k
+</span><a href="#local-6989586621679376848"><span class="hs-identifier hs-var hs-var">acc&#39;</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679376850"><span class="hs-identifier hs-var">acc</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; k -&gt; k
 forall r. Division r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; k
 forall r. Ring r =&gt; Integer -&gt; r
 </span><span class="hs-identifier hs-var">fromInteger&#39;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679369794"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
+</span><a href="#local-6989586621679376851"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
 </span><span id="line-72"></span><span>      </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">RationalFunction k -&gt; k -&gt; k
 forall k. (Eq k, Field k) =&gt; RationalFunction k -&gt; k -&gt; k
 </span><a href="Algebra.Field.RationalFunction.html#evalRationalFunctionOnField"><span class="hs-identifier hs-var">evalRationalFunctionOnField</span></a></span><span> </span><span class="annot"><span class="annottext">RationalFunction k
-</span><a href="#local-6989586621679369792"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679376849"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">k
 forall m. Monoidal m =&gt; m
 </span><span class="hs-identifier hs-var">zero</span></span><span> </span><span class="annot"><span class="annottext">k -&gt; k -&gt; k
 forall r. Multiplicative r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679369793"><span class="hs-identifier hs-var">acc</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; [k] -&gt; [k]
+</span><a href="#local-6989586621679376850"><span class="hs-identifier hs-var">acc</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; [k] -&gt; [k]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; k -&gt; RationalFunction k -&gt; [k]
-</span><a href="#local-6989586621679369795"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679369794"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
+</span><a href="#local-6989586621679376852"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679376851"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679369791"><span class="hs-identifier hs-var">acc&#39;</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RationalFunction k -&gt; RationalFunction k
+</span><a href="#local-6989586621679376848"><span class="hs-identifier hs-var">acc&#39;</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RationalFunction k -&gt; RationalFunction k
 forall k.
 (Eq k, Field k) =&gt;
 RationalFunction k -&gt; RationalFunction k
 </span><a href="Algebra.Field.RationalFunction.html#diffRF"><span class="hs-identifier hs-var">diffRF</span></a></span><span> </span><span class="annot"><span class="annottext">RationalFunction k
-</span><a href="#local-6989586621679369792"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679376849"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-73"></span><span>
-</span><span id="line-74"></span><span id="local-6989586621679369787"><span class="annot"><a href="Algebra.Field.RationalFunction.html#taylorCoeff"><span class="hs-identifier hs-type">taylorCoeff</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679369787"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679369787"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679369787"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679369787"><span class="hs-identifier hs-type">k</span></a></span></span><span>
+</span><span id="line-74"></span><span id="local-6989586621679376844"><span class="annot"><a href="Algebra.Field.RationalFunction.html#taylorCoeff"><span class="hs-identifier hs-type">taylorCoeff</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679376844"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679376844"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Field.RationalFunction.html#RationalFunction"><span class="hs-identifier hs-type">RationalFunction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679376844"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679376844"><span class="hs-identifier hs-type">k</span></a></span></span><span>
 </span><span id="line-75"></span><span id="taylorCoeff"><span class="annot"><span class="annottext">taylorCoeff :: Int -&gt; RationalFunction k -&gt; k
-</span><a href="Algebra.Field.RationalFunction.html#taylorCoeff"><span class="hs-identifier hs-var hs-var">taylorCoeff</span></a></span></span><span> </span><span id="local-6989586621679369786"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679369786"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679369785"><span class="annot"><span class="annottext">RationalFunction k
-</span><a href="#local-6989586621679369785"><span class="hs-identifier hs-var">rf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Algebra.Field.RationalFunction.html#taylorCoeff"><span class="hs-identifier hs-var hs-var">taylorCoeff</span></a></span></span><span> </span><span id="local-6989586621679376843"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679376843"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679376842"><span class="annot"><span class="annottext">RationalFunction k
+</span><a href="#local-6989586621679376842"><span class="hs-identifier hs-var">rf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-76"></span><span>    </span><span class="annot"><span class="annottext">RationalFunction k -&gt; k -&gt; k
 forall k. (Eq k, Field k) =&gt; RationalFunction k -&gt; k -&gt; k
 </span><a href="Algebra.Field.RationalFunction.html#evalRationalFunctionOnField"><span class="hs-identifier hs-var">evalRationalFunctionOnField</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((RationalFunction k -&gt; RationalFunction k)
@@ -1183,12 +1183,12 @@ forall a. a -&gt; a
 -&gt; [RationalFunction k -&gt; RationalFunction k]
 forall a. Int -&gt; a -&gt; [a]
 </span><span class="hs-identifier hs-var">replicate</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679369786"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">RationalFunction k -&gt; RationalFunction k
+</span><a href="#local-6989586621679376843"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">RationalFunction k -&gt; RationalFunction k
 forall k.
 (Eq k, Field k) =&gt;
 RationalFunction k -&gt; RationalFunction k
 </span><a href="Algebra.Field.RationalFunction.html#diffRF"><span class="hs-identifier hs-var">diffRF</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">RationalFunction k
-</span><a href="#local-6989586621679369785"><span class="hs-identifier hs-var">rf</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679376842"><span class="hs-identifier hs-var">rf</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">k
 forall m. Monoidal m =&gt; m
 </span><span class="hs-identifier hs-var">zero</span></span><span>
 </span><span id="line-77"></span><span>  </span><span class="annot"><span class="annottext">k -&gt; k -&gt; k
@@ -1201,5 +1201,5 @@ forall (f :: * -&gt; *) r. (Foldable f, Unital r) =&gt; f r -&gt; r
 </span><span class="hs-number">1</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int -&gt; Integer
 forall a. Integral a =&gt; a -&gt; Integer
 </span><span class="hs-identifier hs-var">toInteger</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679369786"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679376843"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
 </span><span id="line-78"></span></pre></body></html>

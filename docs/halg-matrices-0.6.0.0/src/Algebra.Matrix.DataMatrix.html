@@ -19,107 +19,107 @@
 </span><span id="line-19"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Row"><span class="annot"><a href="Algebra.Matrix.Generic.Base.html#Row"><span class="hs-identifier hs-var">Row</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DM.Matrix</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span>
 </span><span id="line-20"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Column"><span class="annot"><a href="Algebra.Matrix.Generic.Base.html#Column"><span class="hs-identifier hs-var">Column</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DM.Matrix</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span>
 </span><span id="line-21"></span><span>
-</span><span id="line-22"></span><span id="local-6989586621679358118"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679358086"><span id="local-6989586621679358090"><span id="local-6989586621679358092"><span id="local-6989586621679358102"><span id="local-6989586621679358107"><span id="local-6989586621679358109"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">UnitNormalForm</span></span><span> </span><span class="annot"><a href="#local-6989586621679358118"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ring</span></span><span> </span><span class="annot"><a href="#local-6989586621679358118"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Matrix.Generic.html#Matrix"><span class="hs-identifier hs-type">Matrix</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DM.Matrix</span></span><span> </span><span class="annot"><a href="#local-6989586621679358118"><span class="hs-identifier hs-type">a</span></a></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-23"></span><span>  </span><span id="local-6989586621679358084"><span class="annot"><span class="annottext">basicRowCount :: Matrix a -&gt; Size
+</span><span id="line-22"></span><span id="local-6989586621679358659"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679358627"><span id="local-6989586621679358631"><span id="local-6989586621679358633"><span id="local-6989586621679358643"><span id="local-6989586621679358648"><span id="local-6989586621679358650"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">UnitNormalForm</span></span><span> </span><span class="annot"><a href="#local-6989586621679358659"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ring</span></span><span> </span><span class="annot"><a href="#local-6989586621679358659"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Matrix.Generic.html#Matrix"><span class="hs-identifier hs-type">Matrix</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DM.Matrix</span></span><span> </span><span class="annot"><a href="#local-6989586621679358659"><span class="hs-identifier hs-type">a</span></a></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-23"></span><span>  </span><span id="local-6989586621679358625"><span class="annot"><span class="annottext">basicRowCount :: Matrix a -&gt; Size
 </span><a href="Algebra.Matrix.Generic.html#basicRowCount"><span class="hs-identifier hs-var hs-var hs-var hs-var">basicRowCount</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Matrix a -&gt; Size
 forall a. Matrix a -&gt; Size
 </span><span class="hs-identifier hs-var hs-var">DM.nrows</span></span><span>
-</span><span id="line-24"></span><span>  </span><span id="local-6989586621679358081"><span class="annot"><span class="annottext">basicColumnCount :: Matrix a -&gt; Size
+</span><span id="line-24"></span><span>  </span><span id="local-6989586621679358622"><span class="annot"><span class="annottext">basicColumnCount :: Matrix a -&gt; Size
 </span><a href="Algebra.Matrix.Generic.html#basicColumnCount"><span class="hs-identifier hs-var hs-var hs-var hs-var">basicColumnCount</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Matrix a -&gt; Size
 forall a. Matrix a -&gt; Size
 </span><span class="hs-identifier hs-var hs-var">DM.ncols</span></span><span>
-</span><span id="line-25"></span><span>  </span><span id="local-6989586621679358078"><span class="annot"><span class="annottext">basicUnsafeIndexM :: Matrix a -&gt; Size -&gt; Size -&gt; m a
-</span><a href="Algebra.Matrix.Generic.html#basicUnsafeIndexM"><span class="hs-identifier hs-var hs-var hs-var hs-var">basicUnsafeIndexM</span></a></span></span><span> </span><span id="local-6989586621679358076"><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358076"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679358075"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358075"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679358074"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358074"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; m a
+</span><span id="line-25"></span><span>  </span><span id="local-6989586621679358619"><span class="annot"><span class="annottext">basicUnsafeIndexM :: Matrix a -&gt; Size -&gt; Size -&gt; m a
+</span><a href="Algebra.Matrix.Generic.html#basicUnsafeIndexM"><span class="hs-identifier hs-var hs-var hs-var hs-var">basicUnsafeIndexM</span></a></span></span><span> </span><span id="local-6989586621679358617"><span class="annot"><span class="annottext">Matrix a
+</span><a href="#local-6989586621679358617"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679358616"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358616"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679358615"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358615"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; m a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; m a) -&gt; a -&gt; m a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Matrix a -&gt; a
 forall a. Size -&gt; Size -&gt; Matrix a -&gt; a
 </span><span class="hs-identifier hs-var">DM.unsafeGet</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358075"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><a href="#local-6989586621679358616"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358074"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><a href="#local-6989586621679358615"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358076"><span class="hs-identifier hs-var">m</span></a></span><span>
-</span><span id="line-26"></span><span>  </span><span id="local-6989586621679358071"><span class="annot"><span class="annottext">basicUnsafeGetRowM :: Matrix a -&gt; Size -&gt; m (Row Matrix a)
-</span><a href="Algebra.Matrix.Generic.html#basicUnsafeGetRowM"><span class="hs-identifier hs-var hs-var hs-var hs-var">basicUnsafeGetRowM</span></a></span></span><span> </span><span id="local-6989586621679358069"><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358069"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679358068"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358068"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; m (Vector a)
+</span><a href="#local-6989586621679358617"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-26"></span><span>  </span><span id="local-6989586621679358612"><span class="annot"><span class="annottext">basicUnsafeGetRowM :: Matrix a -&gt; Size -&gt; m (Row Matrix a)
+</span><a href="Algebra.Matrix.Generic.html#basicUnsafeGetRowM"><span class="hs-identifier hs-var hs-var hs-var hs-var">basicUnsafeGetRowM</span></a></span></span><span> </span><span id="local-6989586621679358610"><span class="annot"><span class="annottext">Matrix a
+</span><a href="#local-6989586621679358610"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679358609"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358609"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; m (Vector a)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Vector a -&gt; m (Vector a)) -&gt; Vector a -&gt; m (Vector a)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Size -&gt; Matrix a -&gt; Vector a
 forall a. Size -&gt; Matrix a -&gt; Vector a
 </span><span class="hs-identifier hs-var">DM.getRow</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358068"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><a href="#local-6989586621679358609"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358069"><span class="hs-identifier hs-var">m</span></a></span><span>
-</span><span id="line-27"></span><span>  </span><span id="local-6989586621679358066"><span class="annot"><span class="annottext">basicUnsafeGetColumnM :: Matrix a -&gt; Size -&gt; m (Column Matrix a)
-</span><a href="Algebra.Matrix.Generic.html#basicUnsafeGetColumnM"><span class="hs-identifier hs-var hs-var hs-var hs-var">basicUnsafeGetColumnM</span></a></span></span><span> </span><span id="local-6989586621679358064"><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358064"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679358063"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358063"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; m (Vector a)
+</span><a href="#local-6989586621679358610"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span id="local-6989586621679358607"><span class="annot"><span class="annottext">basicUnsafeGetColumnM :: Matrix a -&gt; Size -&gt; m (Column Matrix a)
+</span><a href="Algebra.Matrix.Generic.html#basicUnsafeGetColumnM"><span class="hs-identifier hs-var hs-var hs-var hs-var">basicUnsafeGetColumnM</span></a></span></span><span> </span><span id="local-6989586621679358605"><span class="annot"><span class="annottext">Matrix a
+</span><a href="#local-6989586621679358605"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679358604"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358604"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; m (Vector a)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Vector a -&gt; m (Vector a)) -&gt; Vector a -&gt; m (Vector a)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Size -&gt; Matrix a -&gt; Vector a
 forall a. Size -&gt; Matrix a -&gt; Vector a
 </span><span class="hs-identifier hs-var">DM.getCol</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358063"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><a href="#local-6989586621679358604"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358064"><span class="hs-identifier hs-var">m</span></a></span><span>
-</span><span id="line-28"></span><span>  </span><span id="local-6989586621679358061"><span class="annot"><span class="annottext">unsafeGenerate :: Size -&gt; Size -&gt; (Size -&gt; Size -&gt; a) -&gt; Matrix a
-</span><a href="Algebra.Matrix.Generic.html#unsafeGenerate"><span class="hs-identifier hs-var hs-var hs-var hs-var">unsafeGenerate</span></a></span></span><span> </span><span id="local-6989586621679358059"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358059"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621679358058"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358058"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679358057"><span class="annot"><span class="annottext">Size -&gt; Size -&gt; a
-</span><a href="#local-6989586621679358057"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; ((Size, Size) -&gt; a) -&gt; Matrix a
+</span><a href="#local-6989586621679358605"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-28"></span><span>  </span><span id="local-6989586621679358602"><span class="annot"><span class="annottext">unsafeGenerate :: Size -&gt; Size -&gt; (Size -&gt; Size -&gt; a) -&gt; Matrix a
+</span><a href="Algebra.Matrix.Generic.html#unsafeGenerate"><span class="hs-identifier hs-var hs-var hs-var hs-var">unsafeGenerate</span></a></span></span><span> </span><span id="local-6989586621679358600"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358600"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621679358599"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358599"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679358598"><span class="annot"><span class="annottext">Size -&gt; Size -&gt; a
+</span><a href="#local-6989586621679358598"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; ((Size, Size) -&gt; a) -&gt; Matrix a
 forall a. Size -&gt; Size -&gt; ((Size, Size) -&gt; a) -&gt; Matrix a
 </span><span class="hs-identifier hs-var">DM.matrix</span></span><span> </span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358059"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358058"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">(((Size, Size) -&gt; a) -&gt; Matrix a)
+</span><a href="#local-6989586621679358600"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358599"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">(((Size, Size) -&gt; a) -&gt; Matrix a)
 -&gt; ((Size, Size) -&gt; a) -&gt; Matrix a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679358055"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358055"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679358054"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358054"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; a
-</span><a href="#local-6989586621679358057"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358055"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679358596"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358596"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679358595"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358595"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; a
+</span><a href="#local-6989586621679358598"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358596"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Group r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358054"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><a href="#local-6989586621679358595"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Group r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
-</span><span id="line-29"></span><span>  </span><span id="local-6989586621679358052"><span class="annot"><span class="annottext">unsafeWrite :: Matrix a -&gt; Size -&gt; Size -&gt; a -&gt; Matrix a
-</span><a href="Algebra.Matrix.Generic.html#unsafeWrite"><span class="hs-identifier hs-var hs-var hs-var hs-var">unsafeWrite</span></a></span></span><span> </span><span id="local-6989586621679358050"><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358050"><span class="hs-identifier hs-var">mat</span></a></span></span><span> </span><span id="local-6989586621679358049"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358049"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679358048"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358048"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span id="local-6989586621679358047"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679358047"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; (Size, Size) -&gt; Matrix a -&gt; Matrix a
+</span><span id="line-29"></span><span>  </span><span id="local-6989586621679358593"><span class="annot"><span class="annottext">unsafeWrite :: Matrix a -&gt; Size -&gt; Size -&gt; a -&gt; Matrix a
+</span><a href="Algebra.Matrix.Generic.html#unsafeWrite"><span class="hs-identifier hs-var hs-var hs-var hs-var">unsafeWrite</span></a></span></span><span> </span><span id="local-6989586621679358591"><span class="annot"><span class="annottext">Matrix a
+</span><a href="#local-6989586621679358591"><span class="hs-identifier hs-var">mat</span></a></span></span><span> </span><span id="local-6989586621679358590"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358590"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679358589"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358589"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span id="local-6989586621679358588"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679358588"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; (Size, Size) -&gt; Matrix a -&gt; Matrix a
 forall a. a -&gt; (Size, Size) -&gt; Matrix a -&gt; Matrix a
 </span><span class="hs-identifier hs-var">DM.unsafeSet</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679358047"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358049"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><a href="#local-6989586621679358588"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358590"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358048"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><a href="#local-6989586621679358589"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358050"><span class="hs-identifier hs-var">mat</span></a></span><span>
-</span><span id="line-30"></span><span>  </span><span id="local-6989586621679358045"><span class="annot"><span class="annottext">unsafeFromRows :: [Row Matrix a] -&gt; Matrix a
+</span><a href="#local-6989586621679358591"><span class="hs-identifier hs-var">mat</span></a></span><span>
+</span><span id="line-30"></span><span>  </span><span id="local-6989586621679358586"><span class="annot"><span class="annottext">unsafeFromRows :: [Row Matrix a] -&gt; Matrix a
 </span><a href="Algebra.Matrix.Generic.html#unsafeFromRows"><span class="hs-identifier hs-var hs-var hs-var hs-var">unsafeFromRows</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Matrix a -&gt; Matrix a -&gt; Matrix a) -&gt; [Matrix a] -&gt; Matrix a
 forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; a -&gt; a) -&gt; t a -&gt; a
 </span><span class="hs-identifier hs-var">foldr1</span></span><span> </span><span class="annot"><span class="annottext">Matrix a -&gt; Matrix a -&gt; Matrix a
@@ -132,7 +132,7 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; Matrix a
 forall a. Vector a -&gt; Matrix a
 </span><span class="hs-identifier hs-var">DM.rowVector</span></span><span>
-</span><span id="line-31"></span><span>  </span><span id="local-6989586621679358038"><span class="annot"><span class="annottext">unsafeFromColumns :: [Column Matrix a] -&gt; Matrix a
+</span><span id="line-31"></span><span>  </span><span id="local-6989586621679358579"><span class="annot"><span class="annottext">unsafeFromColumns :: [Column Matrix a] -&gt; Matrix a
 </span><a href="Algebra.Matrix.Generic.html#unsafeFromColumns"><span class="hs-identifier hs-var hs-var hs-var hs-var">unsafeFromColumns</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Matrix a -&gt; Matrix a -&gt; Matrix a) -&gt; [Matrix a] -&gt; Matrix a
 forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; a -&gt; a) -&gt; t a -&gt; a
 </span><span class="hs-identifier hs-var">foldr1</span></span><span> </span><span class="annot"><span class="annottext">Matrix a -&gt; Matrix a -&gt; Matrix a
@@ -146,52 +146,52 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 forall a. Vector a -&gt; Matrix a
 </span><span class="hs-identifier hs-var">DM.colVector</span></span><span>
 </span><span id="line-32"></span><span>
-</span><span id="line-33"></span><span>  </span><span id="local-6989586621679358034"><span class="annot"><span class="annottext">toRows :: Matrix a -&gt; [Row Matrix a]
-</span><a href="Algebra.Matrix.Generic.html#toRows"><span class="hs-identifier hs-var hs-var hs-var hs-var">toRows</span></a></span></span><span> </span><span id="local-6989586621679358032"><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358032"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Size -&gt; Vector a) -&gt; [Size] -&gt; [Vector a]
+</span><span id="line-33"></span><span>  </span><span id="local-6989586621679358575"><span class="annot"><span class="annottext">toRows :: Matrix a -&gt; [Row Matrix a]
+</span><a href="Algebra.Matrix.Generic.html#toRows"><span class="hs-identifier hs-var hs-var hs-var hs-var">toRows</span></a></span></span><span> </span><span id="local-6989586621679358573"><span class="annot"><span class="annottext">Matrix a
+</span><a href="#local-6989586621679358573"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Size -&gt; Vector a) -&gt; [Size] -&gt; [Vector a]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size -&gt; Matrix a -&gt; Vector a
 forall a. Size -&gt; Matrix a -&gt; Vector a
 </span><span class="hs-operator hs-var">`DM.getRow`</span></span><span> </span><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358032"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358573"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Matrix a -&gt; Size
 forall a. Matrix a -&gt; Size
 </span><span class="hs-identifier hs-var hs-var">DM.nrows</span></span><span> </span><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358032"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-34"></span><span>  </span><span id="local-6989586621679358031"><span class="annot"><span class="annottext">toColumns :: Matrix a -&gt; [Column Matrix a]
-</span><a href="Algebra.Matrix.Generic.html#toColumns"><span class="hs-identifier hs-var hs-var hs-var hs-var">toColumns</span></a></span></span><span> </span><span id="local-6989586621679358029"><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358029"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Size -&gt; Vector a) -&gt; [Size] -&gt; [Vector a]
+</span><a href="#local-6989586621679358573"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-34"></span><span>  </span><span id="local-6989586621679358572"><span class="annot"><span class="annottext">toColumns :: Matrix a -&gt; [Column Matrix a]
+</span><a href="Algebra.Matrix.Generic.html#toColumns"><span class="hs-identifier hs-var hs-var hs-var hs-var">toColumns</span></a></span></span><span> </span><span id="local-6989586621679358570"><span class="annot"><span class="annottext">Matrix a
+</span><a href="#local-6989586621679358570"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Size -&gt; Vector a) -&gt; [Size] -&gt; [Vector a]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size -&gt; Matrix a -&gt; Vector a
 forall a. Size -&gt; Matrix a -&gt; Vector a
 </span><span class="hs-operator hs-var">`DM.getCol`</span></span><span> </span><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358029"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358570"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Matrix a -&gt; Size
 forall a. Matrix a -&gt; Size
 </span><span class="hs-identifier hs-var hs-var">DM.ncols</span></span><span> </span><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358029"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679358570"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-35"></span><span>
-</span><span id="line-36"></span><span>  </span><span id="local-6989586621679358028"><span class="annot"><span class="annottext">swapRows :: Matrix a -&gt; Size -&gt; Size -&gt; Matrix a
-</span><a href="Algebra.Matrix.Generic.html#swapRows"><span class="hs-identifier hs-var hs-var hs-var hs-var">swapRows</span></a></span></span><span> </span><span id="local-6989586621679358026"><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358026"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679358025"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358025"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679358024"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358024"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Matrix a -&gt; Matrix a
+</span><span id="line-36"></span><span>  </span><span id="local-6989586621679358569"><span class="annot"><span class="annottext">swapRows :: Matrix a -&gt; Size -&gt; Size -&gt; Matrix a
+</span><a href="Algebra.Matrix.Generic.html#swapRows"><span class="hs-identifier hs-var hs-var hs-var hs-var">swapRows</span></a></span></span><span> </span><span id="local-6989586621679358567"><span class="annot"><span class="annottext">Matrix a
+</span><a href="#local-6989586621679358567"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679358566"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358566"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679358565"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358565"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Matrix a -&gt; Matrix a
 forall a. Size -&gt; Size -&gt; Matrix a -&gt; Matrix a
 </span><span class="hs-identifier hs-var">DM.switchRows</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358025"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><a href="#local-6989586621679358566"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358024"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><a href="#local-6989586621679358565"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358026"><span class="hs-identifier hs-var">m</span></a></span><span>
-</span><span id="line-37"></span><span>  </span><span id="local-6989586621679358022"><span class="annot"><span class="annottext">scaleRow :: Matrix a -&gt; Size -&gt; a -&gt; Matrix a
-</span><a href="Algebra.Matrix.Generic.html#scaleRow"><span class="hs-identifier hs-var hs-var hs-var hs-var">scaleRow</span></a></span></span><span> </span><span id="local-6989586621679358020"><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358020"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679358019"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358019"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679358018"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679358018"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Matrix (WrapAlgebra a) -&gt; Matrix a
+</span><a href="#local-6989586621679358567"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-37"></span><span>  </span><span id="local-6989586621679358563"><span class="annot"><span class="annottext">scaleRow :: Matrix a -&gt; Size -&gt; a -&gt; Matrix a
+</span><a href="Algebra.Matrix.Generic.html#scaleRow"><span class="hs-identifier hs-var hs-var hs-var hs-var">scaleRow</span></a></span></span><span> </span><span id="local-6989586621679358561"><span class="annot"><span class="annottext">Matrix a
+</span><a href="#local-6989586621679358561"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679358560"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358560"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679358559"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679358559"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Matrix (WrapAlgebra a) -&gt; Matrix a
 </span><span class="hs-identifier hs-var">DC.coerce</span></span><span> </span><span class="annot"><span class="annottext">(Matrix (WrapAlgebra a) -&gt; Matrix a)
 -&gt; Matrix (WrapAlgebra a) -&gt; Matrix a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
@@ -201,36 +201,36 @@ forall a. Num a =&gt; a -&gt; Size -&gt; Matrix a -&gt; Matrix a
 </span><span class="hs-identifier hs-var">DM.scaleRow</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; WrapAlgebra a
 forall a. a -&gt; WrapAlgebra a
 </span><span class="hs-identifier hs-var">WrapAlgebra</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679358018"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358019"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><a href="#local-6989586621679358559"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358560"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Matrix a -&gt; Matrix (WrapAlgebra a)
 </span><span class="hs-identifier hs-var">DC.coerce</span></span><span> </span><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358020"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DM.Matrix</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">WrapAlgebra</span></span><span> </span><span class="annot"><a href="#local-6989586621679358118"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-38"></span><span>  </span><span id="local-6989586621679358015"><span class="annot"><span class="annottext">unsafeIMapRow :: Matrix a -&gt; Size -&gt; (Size -&gt; a -&gt; a) -&gt; Matrix a
-</span><a href="Algebra.Matrix.Generic.html#unsafeIMapRow"><span class="hs-identifier hs-var hs-var hs-var hs-var">unsafeIMapRow</span></a></span></span><span> </span><span id="local-6989586621679358013"><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358013"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679358012"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358012"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679358011"><span class="annot"><span class="annottext">Size -&gt; a -&gt; a
-</span><a href="#local-6989586621679358011"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Size -&gt; a -&gt; a) -&gt; Size -&gt; Matrix a -&gt; Matrix a
+</span><a href="#local-6989586621679358561"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DM.Matrix</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">WrapAlgebra</span></span><span> </span><span class="annot"><a href="#local-6989586621679358659"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span>  </span><span id="local-6989586621679358556"><span class="annot"><span class="annottext">unsafeIMapRow :: Matrix a -&gt; Size -&gt; (Size -&gt; a -&gt; a) -&gt; Matrix a
+</span><a href="Algebra.Matrix.Generic.html#unsafeIMapRow"><span class="hs-identifier hs-var hs-var hs-var hs-var">unsafeIMapRow</span></a></span></span><span> </span><span id="local-6989586621679358554"><span class="annot"><span class="annottext">Matrix a
+</span><a href="#local-6989586621679358554"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679358553"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358553"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679358552"><span class="annot"><span class="annottext">Size -&gt; a -&gt; a
+</span><a href="#local-6989586621679358552"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Size -&gt; a -&gt; a) -&gt; Size -&gt; Matrix a -&gt; Matrix a
 forall a. (Size -&gt; a -&gt; a) -&gt; Size -&gt; Matrix a -&gt; Matrix a
-</span><span class="hs-identifier hs-var">DM.mapRow</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679358009"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358009"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Size -&gt; a -&gt; a
-</span><a href="#local-6989586621679358011"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358009"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><span class="hs-identifier hs-var">DM.mapRow</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679358550"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358550"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Size -&gt; a -&gt; a
+</span><a href="#local-6989586621679358552"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358550"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Group r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358012"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><a href="#local-6989586621679358553"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Matrix a
-</span><a href="#local-6989586621679358013"><span class="hs-identifier hs-var">m</span></a></span><span>
-</span><span id="line-39"></span><span>  </span><span id="local-6989586621679358008"><span class="annot"><span class="annottext">combineRows :: Size -&gt; a -&gt; Size -&gt; Matrix a -&gt; Matrix a
-</span><a href="Algebra.Matrix.Generic.html#combineRows"><span class="hs-identifier hs-var hs-var hs-var hs-var">combineRows</span></a></span></span><span> </span><span id="local-6989586621679358006"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358006"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679358005"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679358005"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679358004"><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358004"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Matrix (WrapAlgebra a) -&gt; Matrix (WrapAlgebra a))
+</span><a href="#local-6989586621679358554"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-39"></span><span>  </span><span id="local-6989586621679358549"><span class="annot"><span class="annottext">combineRows :: Size -&gt; a -&gt; Size -&gt; Matrix a -&gt; Matrix a
+</span><a href="Algebra.Matrix.Generic.html#combineRows"><span class="hs-identifier hs-var hs-var hs-var hs-var">combineRows</span></a></span></span><span> </span><span id="local-6989586621679358547"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358547"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679358546"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679358546"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679358545"><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358545"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Matrix (WrapAlgebra a) -&gt; Matrix (WrapAlgebra a))
 -&gt; Matrix a -&gt; Matrix a
 </span><span class="hs-identifier hs-var">DC.coerce</span></span><span> </span><span class="annot"><span class="annottext">((Matrix (WrapAlgebra a) -&gt; Matrix (WrapAlgebra a))
  -&gt; Matrix a -&gt; Matrix a)
@@ -245,14 +245,14 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 -&gt; Matrix (WrapAlgebra a)
 forall a. Num a =&gt; Size -&gt; a -&gt; Size -&gt; Matrix a -&gt; Matrix a
 </span><span class="hs-identifier hs-var">DM.combineRows</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358006"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><a href="#local-6989586621679358547"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; WrapAlgebra a
 forall a. a -&gt; WrapAlgebra a
 </span><span class="hs-identifier hs-var">WrapAlgebra</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679358005"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
-</span><a href="#local-6989586621679358004"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
+</span><a href="#local-6989586621679358546"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Size
+</span><a href="#local-6989586621679358545"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Size -&gt; Size -&gt; Size
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Size
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span></span><span>

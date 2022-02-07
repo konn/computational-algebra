@@ -10,26 +10,26 @@
 </span><span id="line-10"></span><span class="annot"><a href="Algebra.Field.Fraction.Test.html#arbitraryRational"><span class="hs-identifier hs-type">arbitraryRational</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span class="hs-special">)</span><span>
 </span><span id="line-11"></span><span id="arbitraryRational"><span class="annot"><span class="annottext">arbitraryRational :: Gen (Fraction Integer)
 </span><a href="Algebra.Field.Fraction.Test.html#arbitraryRational"><span class="hs-identifier hs-var hs-var">arbitraryRational</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-12"></span><span>  </span><span id="local-6989586621679243936"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679243936"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Gen Integer
+</span><span id="line-12"></span><span>  </span><span id="local-6989586621679244297"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679244297"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Gen Integer
 forall a. Integral a =&gt; Gen a
 </span><span class="hs-identifier hs-var">arbitrarySizedIntegral</span></span><span>
-</span><span id="line-13"></span><span>  </span><span id="local-6989586621679243935"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679243935"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Gen Integer
+</span><span id="line-13"></span><span>  </span><span id="local-6989586621679244296"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679244296"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Gen Integer
 forall a. Integral a =&gt; Gen a
 </span><span class="hs-identifier hs-var">arbitrarySizedIntegral</span></span><span> </span><span class="annot"><span class="annottext">Gen Integer -&gt; (Integer -&gt; Bool) -&gt; Gen Integer
 forall a. Gen a -&gt; (a -&gt; Bool) -&gt; Gen a
-</span><span class="hs-operator hs-var">`suchThat`</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679243934"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679243934"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
+</span><span class="hs-operator hs-var">`suchThat`</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679244295"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679244295"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
 forall d. GCDDomain d =&gt; d -&gt; d -&gt; d
 </span><span class="hs-identifier hs-var">gcd</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679243936"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679243934"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
+</span><a href="#local-6989586621679244297"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679244295"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679243934"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
+</span><a href="#local-6989586621679244295"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">0</span></span><span>
@@ -39,31 +39,31 @@ forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 -&gt; Fraction Integer -&gt; Gen (Fraction Integer)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679243936"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Fraction Integer
+</span><a href="#local-6989586621679244297"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Fraction Integer
 forall d. GCDDomain d =&gt; d -&gt; d -&gt; Fraction d
 </span><span class="hs-operator hs-var">%</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer
 forall a. Num a =&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679243935"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><a href="#local-6989586621679244296"><span class="hs-identifier hs-var">b</span></a></span><span>
 </span><span id="line-15"></span><span>
-</span><span id="line-16"></span><span id="local-6989586621679243928"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679243925"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">GCDDomain</span></span><span> </span><span class="annot"><a href="#local-6989586621679243928"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679243928"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679243928"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="annot"><a href="#local-6989586621679243928"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-17"></span><span>  </span><span id="local-6989586621679243923"><span class="annot"><span class="annottext">arbitrary :: Gen (Fraction r)
+</span><span id="line-16"></span><span id="local-6989586621679244289"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679244286"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">GCDDomain</span></span><span> </span><span class="annot"><a href="#local-6989586621679244289"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679244289"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679244289"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="annot"><a href="#local-6989586621679244289"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-17"></span><span>  </span><span id="local-6989586621679244284"><span class="annot"><span class="annottext">arbitrary :: Gen (Fraction r)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-18"></span><span>    </span><span id="local-6989586621679243921"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679243921"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Gen r
+</span><span id="line-18"></span><span>    </span><span id="local-6989586621679244282"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679244282"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Gen r
 forall a. Arbitrary a =&gt; Gen a
 </span><span class="hs-identifier hs-var">arbitrary</span></span><span>
-</span><span id="line-19"></span><span>    </span><span id="local-6989586621679243920"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679243920"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Gen r
+</span><span id="line-19"></span><span>    </span><span id="local-6989586621679244281"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679244281"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Gen r
 forall a. Arbitrary a =&gt; Gen a
 </span><span class="hs-identifier hs-var">arbitrary</span></span><span> </span><span class="annot"><span class="annottext">Gen r -&gt; (r -&gt; Bool) -&gt; Gen r
 forall a. Gen a -&gt; (a -&gt; Bool) -&gt; Gen a
-</span><span class="hs-operator hs-var">`suchThat`</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679243919"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679243919"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+</span><span class="hs-operator hs-var">`suchThat`</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679244280"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679244280"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
 forall d. GCDDomain d =&gt; d -&gt; d -&gt; d
 </span><span class="hs-identifier hs-var">gcd</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679243921"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679243919"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+</span><a href="#local-6989586621679244282"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679244280"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">r
 forall r. Unital r =&gt; r
@@ -72,50 +72,50 @@ forall r. Unital r =&gt; r
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; Bool
 forall r. DecidableZero r =&gt; r -&gt; Bool
 </span><span class="hs-identifier hs-var">isZero</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679243919"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679244280"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-20"></span><span>    </span><span class="annot"><span class="annottext">Fraction r -&gt; Gen (Fraction r)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Fraction r -&gt; Gen (Fraction r)) -&gt; Fraction r -&gt; Gen (Fraction r)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679243921"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Fraction r
+</span><a href="#local-6989586621679244282"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Fraction r
 forall d. GCDDomain d =&gt; d -&gt; d -&gt; Fraction d
 </span><span class="hs-operator hs-var">%</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679243920"><span class="hs-identifier hs-var">b</span></a></span></span><span>
+</span><a href="#local-6989586621679244281"><span class="hs-identifier hs-var">b</span></a></span></span><span>
 </span><span id="line-21"></span><span>
-</span><span id="line-22"></span><span class="hs-keyword">instance</span><span> </span><span class="hs-pragma">{-# OVERLAPPING</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span id="local-6989586621679243913"><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-23"></span><span>  </span><span id="local-6989586621679243912"><span class="annot"><span class="annottext">arbitrary :: Gen (Fraction Integer)
-</span><a href="#local-6989586621679243912"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen (Fraction Integer)
+</span><span id="line-22"></span><span class="hs-keyword">instance</span><span> </span><span class="hs-pragma">{-# OVERLAPPING</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span id="local-6989586621679244274"><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-23"></span><span>  </span><span id="local-6989586621679244273"><span class="annot"><span class="annottext">arbitrary :: Gen (Fraction Integer)
+</span><a href="#local-6989586621679244273"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen (Fraction Integer)
 </span><a href="Algebra.Field.Fraction.Test.html#arbitraryRational"><span class="hs-identifier hs-var">arbitraryRational</span></a></span><span>
 </span><span id="line-24"></span><span>
-</span><span id="line-25"></span><span id="local-6989586621679243910"><span id="local-6989586621679243911"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Euclidean</span></span><span> </span><span class="annot"><a href="#local-6989586621679243911"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integral</span></span><span> </span><span class="annot"><a href="#local-6989586621679243911"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Serial</span></span><span> </span><span class="annot"><a href="#local-6989586621679243910"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679243911"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Serial</span></span><span> </span><span class="annot"><a href="#local-6989586621679243910"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="annot"><a href="#local-6989586621679243911"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-26"></span><span>  </span><span id="local-6989586621679243906"><span class="annot"><span class="annottext">series :: Series m (Fraction i)
+</span><span id="line-25"></span><span id="local-6989586621679244271"><span id="local-6989586621679244272"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Euclidean</span></span><span> </span><span class="annot"><a href="#local-6989586621679244272"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integral</span></span><span> </span><span class="annot"><a href="#local-6989586621679244272"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Serial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244271"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679244272"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Serial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244271"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="annot"><a href="#local-6989586621679244272"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-26"></span><span>  </span><span id="local-6989586621679244267"><span class="annot"><span class="annottext">series :: Series m (Fraction i)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">series</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(i, Positive i) -&gt; Fraction i
 forall d. GCDDomain d =&gt; (d, Positive d) -&gt; Fraction d
-</span><a href="#local-6989586621679243904"><span class="hs-identifier hs-var">pairToRatio</span></a></span><span> </span><span class="annot"><span class="annottext">((i, Positive i) -&gt; Fraction i)
+</span><a href="#local-6989586621679244265"><span class="hs-identifier hs-var">pairToRatio</span></a></span><span> </span><span class="annot"><span class="annottext">((i, Positive i) -&gt; Fraction i)
 -&gt; Series m (i, Positive i) -&gt; Series m (Fraction i)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Series m (i, Positive i)
 forall (m :: * -&gt; *) a. Serial m a =&gt; Series m a
 </span><span class="hs-identifier hs-var">series</span></span><span>
 </span><span id="line-27"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-28"></span><span>      </span><span id="local-6989586621679243904"><span class="annot"><span class="annottext">pairToRatio :: (d, Positive d) -&gt; Fraction d
-</span><a href="#local-6989586621679243904"><span class="hs-identifier hs-var hs-var">pairToRatio</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679243902"><span class="annot"><span class="annottext">d
-</span><a href="#local-6989586621679243902"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SC.Positive</span></span><span> </span><span id="local-6989586621679243900"><span class="annot"><span class="annottext">d
-</span><a href="#local-6989586621679243900"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">d
-</span><a href="#local-6989586621679243902"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">d -&gt; d -&gt; Fraction d
+</span><span id="line-28"></span><span>      </span><span id="local-6989586621679244265"><span class="annot"><span class="annottext">pairToRatio :: (d, Positive d) -&gt; Fraction d
+</span><a href="#local-6989586621679244265"><span class="hs-identifier hs-var hs-var">pairToRatio</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679244263"><span class="annot"><span class="annottext">d
+</span><a href="#local-6989586621679244263"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SC.Positive</span></span><span> </span><span id="local-6989586621679244261"><span class="annot"><span class="annottext">d
+</span><a href="#local-6989586621679244261"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">d
+</span><a href="#local-6989586621679244263"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">d -&gt; d -&gt; Fraction d
 forall d. GCDDomain d =&gt; d -&gt; d -&gt; Fraction d
 </span><span class="hs-operator hs-var">%</span></span><span> </span><span class="annot"><span class="annottext">d
-</span><a href="#local-6989586621679243900"><span class="hs-identifier hs-var">d</span></a></span></span></span><span>
+</span><a href="#local-6989586621679244261"><span class="hs-identifier hs-var">d</span></a></span></span></span><span>
 </span><span id="line-29"></span><span>
-</span><span id="line-30"></span><span id="local-6989586621679243898"><span id="local-6989586621679243899"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CoSerial</span></span><span> </span><span class="annot"><a href="#local-6989586621679243899"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679243898"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoSerial</span></span><span> </span><span class="annot"><a href="#local-6989586621679243899"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="annot"><a href="#local-6989586621679243898"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-31"></span><span>  </span><span id="local-6989586621679243894"><span class="annot"><span class="annottext">coseries :: Series m b -&gt; Series m (Fraction i -&gt; b)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">coseries</span></span></span><span> </span><span id="local-6989586621679243892"><span class="annot"><span class="annottext">Series m b
-</span><a href="#local-6989586621679243892"><span class="hs-identifier hs-var">rs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((i, i) -&gt; b) -&gt; (Fraction i -&gt; (i, i)) -&gt; Fraction i -&gt; b
+</span><span id="line-30"></span><span id="local-6989586621679244259"><span id="local-6989586621679244260"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CoSerial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244260"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679244259"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoSerial</span></span><span> </span><span class="annot"><a href="#local-6989586621679244260"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="annot"><a href="#local-6989586621679244259"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-31"></span><span>  </span><span id="local-6989586621679244255"><span class="annot"><span class="annottext">coseries :: Series m b -&gt; Series m (Fraction i -&gt; b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">coseries</span></span></span><span> </span><span id="local-6989586621679244253"><span class="annot"><span class="annottext">Series m b
+</span><a href="#local-6989586621679244253"><span class="hs-identifier hs-var">rs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((i, i) -&gt; b) -&gt; (Fraction i -&gt; (i, i)) -&gt; Fraction i -&gt; b
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Fraction i -&gt; (i, i)
 forall b. Fraction b -&gt; (b, b)
-</span><a href="#local-6989586621679243890"><span class="hs-identifier hs-var">ratioToPair</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(((i, i) -&gt; b) -&gt; Fraction i -&gt; b)
+</span><a href="#local-6989586621679244251"><span class="hs-identifier hs-var">ratioToPair</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(((i, i) -&gt; b) -&gt; Fraction i -&gt; b)
 -&gt; Series m ((i, i) -&gt; b) -&gt; Series m (Fraction i -&gt; b)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Series m b -&gt; Series m ((i, i) -&gt; b)
@@ -123,15 +123,15 @@ forall (m :: * -&gt; *) a b.
 CoSerial m a =&gt;
 Series m b -&gt; Series m (a -&gt; b)
 </span><span class="hs-identifier hs-var">coseries</span></span><span> </span><span class="annot"><span class="annottext">Series m b
-</span><a href="#local-6989586621679243892"><span class="hs-identifier hs-var">rs</span></a></span><span>
+</span><a href="#local-6989586621679244253"><span class="hs-identifier hs-var">rs</span></a></span><span>
 </span><span id="line-32"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-33"></span><span>      </span><span id="local-6989586621679243890"><span class="annot"><span class="annottext">ratioToPair :: Fraction b -&gt; (b, b)
-</span><a href="#local-6989586621679243890"><span class="hs-identifier hs-var hs-var">ratioToPair</span></a></span></span><span> </span><span id="local-6989586621679243889"><span class="annot"><span class="annottext">Fraction b
-</span><a href="#local-6989586621679243889"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Fraction b -&gt; b
+</span><span id="line-33"></span><span>      </span><span id="local-6989586621679244251"><span class="annot"><span class="annottext">ratioToPair :: Fraction b -&gt; (b, b)
+</span><a href="#local-6989586621679244251"><span class="hs-identifier hs-var hs-var">ratioToPair</span></a></span></span><span> </span><span id="local-6989586621679244250"><span class="annot"><span class="annottext">Fraction b
+</span><a href="#local-6989586621679244250"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Fraction b -&gt; b
 forall t. Fraction t -&gt; t
 </span><span class="hs-identifier hs-var">numerator</span></span><span> </span><span class="annot"><span class="annottext">Fraction b
-</span><a href="#local-6989586621679243889"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Fraction b -&gt; b
+</span><a href="#local-6989586621679244250"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Fraction b -&gt; b
 forall t. Fraction t -&gt; t
 </span><span class="hs-identifier hs-var">denominator</span></span><span> </span><span class="annot"><span class="annottext">Fraction b
-</span><a href="#local-6989586621679243889"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><a href="#local-6989586621679244250"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-34"></span></pre></body></html>

@@ -18,227 +18,212 @@
 #if __GLASGOW_HASKELL__ &gt;= 806
 </span><span class="hs-pragma">{-# LANGUAGE NoStarIsType #-}</span><span class="hs-cpp">
 #endif
-</span><span>
-</span><span id="line-22"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra.Internal</span><span>
-</span><span id="line-23"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-operator">(:~:)</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-24"></span><span>    </span><span class="annot"><span class="hs-identifier">withRefl</span></span><span class="hs-special">,</span><span>
-</span><span id="line-25"></span><span>    </span><span class="hs-keyword">module</span><span> </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span class="hs-special">,</span><span>
-</span><span id="line-26"></span><span>    </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra.Internal</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-27"></span><span>    </span><span class="hs-keyword">module</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Ordinal</span></span><span class="hs-special">,</span><span>
-</span><span id="line-28"></span><span>  </span><span class="hs-special">)</span><span>
-</span><span id="line-29"></span><span class="hs-keyword">where</span><span>
-</span><span id="line-30"></span><span>
-</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Algebra.Instances.html"><span class="hs-identifier">Algebra.Instances</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">AlgebraicPrelude</span></span><span>
-</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">_Unwrapping</span></span><span class="hs-special">)</span><span>
-</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Lens</span></span><span>
-</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
-</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Kind</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Type</span></span><span class="hs-special">)</span><span>
-</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">KProxy</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Proxy</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">asProxyTypeOf</span></span><span class="hs-special">)</span><span>
-</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sequence</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Seq</span></span><span class="hs-cpp">
+</span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algebra.Internal</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-operator">(:~:)</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-23"></span><span>    </span><span class="annot"><span class="hs-identifier">withRefl</span></span><span class="hs-special">,</span><span>
+</span><span id="line-24"></span><span>    </span><span class="hs-keyword">module</span><span> </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span class="hs-special">,</span><span>
+</span><span id="line-25"></span><span>    </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra.Internal</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-26"></span><span>    </span><span class="hs-keyword">module</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Ordinal</span></span><span class="hs-special">,</span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Algebra.Instances.html"><span class="hs-identifier">Algebra.Instances</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">AlgebraicPrelude</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Kind</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Type</span></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">KProxy</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Proxy</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">asProxyTypeOf</span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sequence</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Seq</span></span><span class="hs-cpp">
 #if MIN_VERSION_singletons(3,0,0)
 </span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Singletons</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">Algebra.Internal</span><span>
-</span><span id="line-41"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="hs-identifier">Sing</span><span class="hs-special">,</span><span>
-</span><span id="line-42"></span><span>    </span><span class="hs-identifier">SingI</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-43"></span><span>    </span><span class="hs-identifier">SingKind</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-44"></span><span>    </span><span class="hs-identifier">SomeSing</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-45"></span><span>    </span><span class="hs-identifier">withSingI</span><span class="hs-special">,</span><span>
-</span><span id="line-46"></span><span>  </span><span class="hs-special">)</span><span>
-</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">GHC.TypeLits.Singletons</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">Sing</span><span class="hs-cpp">
+</span><span id="line-38"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="hs-identifier">Sing</span><span class="hs-special">,</span><span>
+</span><span id="line-39"></span><span>    </span><span class="hs-identifier">SingI</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-40"></span><span>    </span><span class="hs-identifier">SingKind</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-41"></span><span>    </span><span class="hs-identifier">SomeSing</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-42"></span><span>    </span><span class="hs-identifier">withSingI</span><span class="hs-special">,</span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">GHC.TypeLits.Singletons</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">Sing</span><span class="hs-cpp">
 #else
 </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Singletons.Prelude</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra.Internal</span></a></span><span>
-</span><span id="line-50"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">Sing</span></span><span class="hs-special">,</span><span>
-</span><span id="line-51"></span><span>    </span><span class="annot"><span class="hs-identifier">SingI</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-52"></span><span>    </span><span class="annot"><span class="hs-identifier">SingKind</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-53"></span><span>    </span><span class="annot"><span class="hs-identifier">SomeSing</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-54"></span><span>    </span><span class="annot"><span class="hs-identifier">withSingI</span></span><span class="hs-special">,</span><span>
-</span><span id="line-55"></span><span>  </span><span class="hs-special">)</span><span>
-</span><span id="line-56"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Singletons.TypeLits</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Sing</span></span><span class="hs-cpp">
+</span><span id="line-47"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">Sing</span></span><span class="hs-special">,</span><span>
+</span><span id="line-48"></span><span>    </span><span class="annot"><span class="hs-identifier">SingI</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-49"></span><span>    </span><span class="annot"><span class="hs-identifier">SingKind</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-50"></span><span>    </span><span class="annot"><span class="hs-identifier">SomeSing</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-51"></span><span>    </span><span class="annot"><span class="hs-identifier">withSingI</span></span><span class="hs-special">,</span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Singletons.TypeLits</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Sing</span></span><span class="hs-cpp">
 #endif
 </span><span>
-</span><span id="line-59"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sized</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra.Internal</span></a></span><span>
-</span><span id="line-60"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">generate</span></span><span class="hs-special">,</span><span>
-</span><span id="line-61"></span><span>    </span><span class="annot"><span class="hs-identifier">sIndex</span></span><span class="hs-special">,</span><span>
-</span><span id="line-62"></span><span>    </span><span class="annot"><span class="hs-identifier">singleton</span></span><span class="hs-special">,</span><span>
-</span><span id="line-63"></span><span>    </span><span class="annot"><span class="hs-identifier">unsafeFromList</span></span><span class="hs-special">,</span><span>
-</span><span id="line-64"></span><span>    </span><span class="annot"><span class="hs-identifier">unsafeFromList&#39;</span></span><span class="hs-special">,</span><span>
-</span><span id="line-65"></span><span>    </span><span class="annot"><span class="hs-identifier">zipWithSame</span></span><span class="hs-special">,</span><span>
-</span><span id="line-66"></span><span>    </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><span class="hs-identifier">Nil</span></span><span class="hs-special">,</span><span>
-</span><span id="line-67"></span><span>    </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><span class="hs-operator">(:&lt;)</span></span><span class="hs-special">,</span><span>
-</span><span id="line-68"></span><span>    </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><span class="hs-operator">(:&gt;)</span></span><span class="hs-special">,</span><span>
-</span><span id="line-69"></span><span>  </span><span class="hs-special">)</span><span>
-</span><span id="line-70"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sized</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">S</span></span><span>
-</span><span id="line-71"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sized.Flipped</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Flipped</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Flipped</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-72"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Equality</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(:~:)</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-73"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Natural</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra.Internal</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(%~)</span></span><span class="hs-special">)</span><span>
-</span><span id="line-74"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Natural.Lemma.Arithmetic</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">plusComm</span></span><span class="hs-special">)</span><span>
-</span><span id="line-75"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Natural.Lemma.Order</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">geqToMax</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">leqToMax</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">minusPlus</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">notLeqToLeq</span></span><span class="hs-special">)</span><span>
-</span><span id="line-76"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Ordinal</span></span><span>
-</span><span id="line-77"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">DV</span></span><span>
-</span><span id="line-78"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Unboxed</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">UV</span></span><span>
-</span><span id="line-79"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Proof.Equational</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">coerce</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">withRefl</span></span><span class="hs-special">)</span><span>
-</span><span id="line-80"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Proof.Equational</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra.Internal</span></a></span><span>
-</span><span id="line-81"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">because</span></span><span class="hs-special">,</span><span>
-</span><span id="line-82"></span><span>    </span><span class="annot"><span class="hs-identifier">coerce</span></span><span class="hs-special">,</span><span>
-</span><span id="line-83"></span><span>    </span><span class="annot"><span class="hs-identifier">start</span></span><span class="hs-special">,</span><span>
-</span><span id="line-84"></span><span>    </span><span class="annot"><span class="hs-operator">(===)</span></span><span class="hs-special">,</span><span>
-</span><span id="line-85"></span><span>    </span><span class="annot"><span class="hs-operator">(=~=)</span></span><span class="hs-special">,</span><span>
-</span><span id="line-86"></span><span>  </span><span class="hs-special">)</span><span>
-</span><span id="line-87"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Proof.Propositional</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra.Internal</span></a></span><span>
-</span><span id="line-88"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">IsTrue</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-89"></span><span>    </span><span class="annot"><span class="hs-identifier">withWitness</span></span><span class="hs-special">,</span><span>
-</span><span id="line-90"></span><span>  </span><span class="hs-special">)</span><span>
-</span><span id="line-91"></span><span>
-</span><span id="line-92"></span><span id="local-6989586621679374335"><span class="annot"><a href="Algebra.Internal.html#toProxy"><span class="hs-identifier hs-type">toProxy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679374335"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proxy</span></span><span> </span><span class="annot"><a href="#local-6989586621679374335"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-93"></span><span id="toProxy"><span class="annot"><span class="annottext">toProxy :: a -&gt; Proxy a
+</span><span id="line-56"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sized</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra.Internal</span></a></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">generate</span></span><span class="hs-special">,</span><span>
+</span><span id="line-58"></span><span>    </span><span class="annot"><span class="hs-identifier">sIndex</span></span><span class="hs-special">,</span><span>
+</span><span id="line-59"></span><span>    </span><span class="annot"><span class="hs-identifier">singleton</span></span><span class="hs-special">,</span><span>
+</span><span id="line-60"></span><span>    </span><span class="annot"><span class="hs-identifier">unsafeFromList</span></span><span class="hs-special">,</span><span>
+</span><span id="line-61"></span><span>    </span><span class="annot"><span class="hs-identifier">unsafeFromList&#39;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-62"></span><span>    </span><span class="annot"><span class="hs-identifier">zipWithSame</span></span><span class="hs-special">,</span><span>
+</span><span id="line-63"></span><span>    </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><span class="hs-identifier">Nil</span></span><span class="hs-special">,</span><span>
+</span><span id="line-64"></span><span>    </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><span class="hs-operator">(:&lt;)</span></span><span class="hs-special">,</span><span>
+</span><span id="line-65"></span><span>    </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><span class="hs-operator">(:&gt;)</span></span><span class="hs-special">,</span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sized</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">S</span></span><span>
+</span><span id="line-68"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sized.Flipped</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Flipped</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Flipped</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Equality</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">gcastWith</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-operator">(:~:)</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Natural</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra.Internal</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(%~)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Natural.Lemma.Arithmetic</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">plusComm</span></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Natural.Lemma.Order</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">geqToMax</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">leqToMax</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">minusPlus</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">notLeqToLeq</span></span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Ordinal</span></span><span>
+</span><span id="line-74"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">DV</span></span><span>
+</span><span id="line-75"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Unboxed</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">UV</span></span><span>
+</span><span id="line-76"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Proof.Equational</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">coerce</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">withRefl</span></span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Proof.Equational</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra.Internal</span></a></span><span>
+</span><span id="line-78"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">because</span></span><span class="hs-special">,</span><span>
+</span><span id="line-79"></span><span>    </span><span class="annot"><span class="hs-identifier">coerce</span></span><span class="hs-special">,</span><span>
+</span><span id="line-80"></span><span>    </span><span class="annot"><span class="hs-identifier">start</span></span><span class="hs-special">,</span><span>
+</span><span id="line-81"></span><span>    </span><span class="annot"><span class="hs-operator">(===)</span></span><span class="hs-special">,</span><span>
+</span><span id="line-82"></span><span>    </span><span class="annot"><span class="hs-operator">(=~=)</span></span><span class="hs-special">,</span><span>
+</span><span id="line-83"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Proof.Propositional</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><a href="Algebra.Internal.html"><span class="hs-identifier">Algebra.Internal</span></a></span><span>
+</span><span id="line-85"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">IsTrue</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-86"></span><span>    </span><span class="annot"><span class="hs-identifier">withWitness</span></span><span class="hs-special">,</span><span>
+</span><span id="line-87"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span id="local-6989586621679379793"><span class="annot"><a href="Algebra.Internal.html#toProxy"><span class="hs-identifier hs-type">toProxy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679379793"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proxy</span></span><span> </span><span class="annot"><a href="#local-6989586621679379793"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-90"></span><span id="toProxy"><span class="annot"><span class="annottext">toProxy :: a -&gt; Proxy a
 </span><a href="Algebra.Internal.html#toProxy"><span class="hs-identifier hs-var hs-var">toProxy</span></a></span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Proxy a
 forall k (t :: k). Proxy t
 </span><span class="hs-identifier hs-var">Proxy</span></span><span>
-</span><span id="line-94"></span><span>
-</span><span id="line-95"></span><span class="hs-keyword">type</span><span> </span><span id="USized"><span class="annot"><a href="Algebra.Internal.html#USized"><span class="hs-identifier hs-var">USized</span></a></span></span><span> </span><span id="local-6989586621679374332"><span class="annot"><a href="#local-6989586621679374332"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span id="local-6989586621679374331"><span class="annot"><a href="#local-6989586621679374331"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Sized</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">UV.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679374332"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374331"><span class="hs-identifier hs-type">a</span></a></span><span>
-</span><span id="line-96"></span><span>
-</span><span id="line-97"></span><span class="hs-keyword">type</span><span> </span><span id="Sized"><span class="annot"><a href="Algebra.Internal.html#Sized"><span class="hs-identifier hs-var">Sized</span></a></span></span><span> </span><span id="local-6989586621679374329"><span class="annot"><a href="#local-6989586621679374329"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span id="local-6989586621679374328"><span class="annot"><a href="#local-6989586621679374328"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Sized</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DV.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679374329"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374328"><span class="hs-identifier hs-type">a</span></a></span><span>
-</span><span id="line-98"></span><span>
-</span><span id="line-99"></span><span class="hs-keyword">type</span><span> </span><span id="Sized%27"><span class="annot"><a href="Algebra.Internal.html#Sized%27"><span class="hs-identifier hs-var">Sized&#39;</span></a></span></span><span> </span><span id="local-6989586621679374325"><span class="annot"><a href="#local-6989586621679374325"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span id="local-6989586621679374324"><span class="annot"><a href="#local-6989586621679374324"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Sized</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679374325"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374324"><span class="hs-identifier hs-type">a</span></a></span><span>
-</span><span id="line-100"></span><span>
-</span><span id="line-101"></span><span id="local-6989586621679374323"><span class="annot"><a href="Algebra.Internal.html#sNatToSingleton"><span class="hs-identifier hs-type">sNatToSingleton</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679374323"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Sing</span></span><span> </span><span class="annot"><a href="#local-6989586621679374323"><span class="hs-identifier hs-type">n</span></a></span></span><span>
-</span><span id="line-102"></span><span id="sNatToSingleton"><span class="annot"><span class="annottext">sNatToSingleton :: SNat n -&gt; Sing n
-</span><a href="Algebra.Internal.html#sNatToSingleton"><span class="hs-identifier hs-var hs-var">sNatToSingleton</span></a></span></span><span> </span><span id="local-6989586621679374321"><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374321"><span class="hs-identifier hs-var">sn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; (KnownNat n =&gt; SNat n) -&gt; SNat n
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="hs-keyword">type</span><span> </span><span id="USized"><span class="annot"><a href="Algebra.Internal.html#USized"><span class="hs-identifier hs-var">USized</span></a></span></span><span> </span><span id="local-6989586621679379790"><span class="annot"><a href="#local-6989586621679379790"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span id="local-6989586621679379789"><span class="annot"><a href="#local-6989586621679379789"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Sized</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">UV.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679379790"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379789"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span class="hs-keyword">type</span><span> </span><span id="Sized"><span class="annot"><a href="Algebra.Internal.html#Sized"><span class="hs-identifier hs-var">Sized</span></a></span></span><span> </span><span id="local-6989586621679379787"><span class="annot"><a href="#local-6989586621679379787"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span id="local-6989586621679379786"><span class="annot"><a href="#local-6989586621679379786"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Sized</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DV.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679379787"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379786"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="hs-keyword">type</span><span> </span><span id="Sized%27"><span class="annot"><a href="Algebra.Internal.html#Sized%27"><span class="hs-identifier hs-var">Sized&#39;</span></a></span></span><span> </span><span id="local-6989586621679379783"><span class="annot"><a href="#local-6989586621679379783"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span id="local-6989586621679379782"><span class="annot"><a href="#local-6989586621679379782"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Sized</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679379783"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379782"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span id="local-6989586621679379781"><span class="annot"><a href="Algebra.Internal.html#sNatToSingleton"><span class="hs-identifier hs-type">sNatToSingleton</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679379781"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Sing</span></span><span> </span><span class="annot"><a href="#local-6989586621679379781"><span class="hs-identifier hs-type">n</span></a></span></span><span>
+</span><span id="line-99"></span><span id="sNatToSingleton"><span class="annot"><span class="annottext">sNatToSingleton :: SNat n -&gt; Sing n
+</span><a href="Algebra.Internal.html#sNatToSingleton"><span class="hs-identifier hs-var hs-var">sNatToSingleton</span></a></span></span><span> </span><span id="local-6989586621679379779"><span class="annot"><span class="annottext">SNat n
+</span><a href="#local-6989586621679379779"><span class="hs-identifier hs-var">sn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; (KnownNat n =&gt; SNat n) -&gt; SNat n
 forall (n :: Nat) r. SNat n -&gt; (KnownNat n =&gt; r) -&gt; r
 </span><span class="hs-identifier hs-var">withKnownNat</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374321"><span class="hs-identifier hs-var">sn</span></a></span><span> </span><span class="annot"><span class="annottext">KnownNat n =&gt; SNat n
+</span><a href="#local-6989586621679379779"><span class="hs-identifier hs-var">sn</span></a></span><span> </span><span class="annot"><span class="annottext">KnownNat n =&gt; SNat n
 forall k (a :: k). SingI a =&gt; Sing a
 </span><span class="hs-identifier hs-var">sing</span></span><span>
-</span><span id="line-103"></span><span>
-</span><span id="line-104"></span><span id="local-6989586621679374318"><span class="annot"><a href="Algebra.Internal.html#singToSNat"><span class="hs-identifier hs-type">singToSNat</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Sing</span></span><span> </span><span class="annot"><a href="#local-6989586621679374318"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679374318"><span class="hs-identifier hs-type">n</span></a></span></span><span>
-</span><span id="line-105"></span><span id="singToSNat"><span class="annot"><span class="annottext">singToSNat :: Sing n -&gt; SNat n
-</span><a href="Algebra.Internal.html#singToSNat"><span class="hs-identifier hs-var hs-var">singToSNat</span></a></span></span><span> </span><span id="local-6989586621679374316"><span class="annot"><span class="annottext">Sing n
-</span><a href="#local-6989586621679374316"><span class="hs-identifier hs-var">sn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing n -&gt; (KnownNat n =&gt; SNat n) -&gt; SNat n
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span id="local-6989586621679379776"><span class="annot"><a href="Algebra.Internal.html#singToSNat"><span class="hs-identifier hs-type">singToSNat</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Sing</span></span><span> </span><span class="annot"><a href="#local-6989586621679379776"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679379776"><span class="hs-identifier hs-type">n</span></a></span></span><span>
+</span><span id="line-102"></span><span id="singToSNat"><span class="annot"><span class="annottext">singToSNat :: Sing n -&gt; SNat n
+</span><a href="Algebra.Internal.html#singToSNat"><span class="hs-identifier hs-var hs-var">singToSNat</span></a></span></span><span> </span><span id="local-6989586621679379774"><span class="annot"><span class="annottext">Sing n
+</span><a href="#local-6989586621679379774"><span class="hs-identifier hs-var">sn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sing n -&gt; (KnownNat n =&gt; SNat n) -&gt; SNat n
 forall (n :: Nat) r. Sing n -&gt; (KnownNat n =&gt; r) -&gt; r
 </span><span class="hs-identifier hs-var">Sing.withKnownNat</span></span><span> </span><span class="annot"><span class="annottext">Sing n
-</span><a href="#local-6989586621679374316"><span class="hs-identifier hs-var">sn</span></a></span><span> </span><span class="annot"><span class="annottext">KnownNat n =&gt; SNat n
+</span><a href="#local-6989586621679379774"><span class="hs-identifier hs-var">sn</span></a></span><span> </span><span class="annot"><span class="annottext">KnownNat n =&gt; SNat n
 forall (n :: Nat). KnownNat n =&gt; SNat n
 </span><span class="hs-identifier hs-var">sNat</span></span><span>
-</span><span id="line-106"></span><span>
-</span><span id="line-107"></span><span id="local-6989586621679374403"><span id="local-6989586621679374404"><span id="local-6989586621679374405"><span id="local-6989586621679374406"><span class="annot"><a href="Algebra.Internal.html#coerceLength"><span class="hs-identifier hs-type">coerceLength</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679374406"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:~:</span></span><span> </span><span class="annot"><a href="#local-6989586621679374405"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Sized</span></span><span> </span><span class="annot"><a href="#local-6989586621679374404"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374406"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374403"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Sized</span></span><span> </span><span class="annot"><a href="#local-6989586621679374404"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374405"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374403"><span class="hs-identifier hs-type">a</span></a></span></span></span></span></span><span>
-</span><span id="line-108"></span><span id="coerceLength"><span class="annot"><span class="annottext">coerceLength :: (n :~: m) -&gt; Sized f n a -&gt; Sized f m a
-</span><a href="Algebra.Internal.html#coerceLength"><span class="hs-identifier hs-var hs-var">coerceLength</span></a></span></span><span> </span><span id="local-6989586621679374312"><span class="annot"><span class="annottext">n :~: m
-</span><a href="#local-6989586621679374312"><span class="hs-identifier hs-var">eql</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Unwrapped (Flipped f a m) -&gt; Flipped f a m)
--&gt; Iso
-     (Unwrapped (Flipped f a n))
-     (Unwrapped (Flipped f a m))
-     (Flipped f a n)
-     (Flipped f a m)
-forall s t.
-Rewrapping s t =&gt;
-(Unwrapped s -&gt; s) -&gt; Iso (Unwrapped t) (Unwrapped s) t s
-</span><span class="hs-identifier hs-var">_Unwrapping</span></span><span> </span><span class="annot"><span class="annottext">Unwrapped (Flipped f a m) -&gt; Flipped f a m
-forall (f :: Type -&gt; Type) a (n :: Nat).
-Sized f n a -&gt; Flipped f a n
-</span><span class="hs-identifier hs-var">Flipped.Flipped</span></span><span> </span><span class="annot"><span class="annottext">((Flipped f a n -&gt; Identity (Flipped f a m))
- -&gt; Sized f n a -&gt; Identity (Sized f m a))
--&gt; (Flipped f a n -&gt; Flipped f a m) -&gt; Sized f n a -&gt; Sized f m a
-forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
-</span><span class="hs-operator hs-var">Lens.%~</span></span><span> </span><span class="annot"><span class="annottext">(n :~: m) -&gt; Flipped f a n -&gt; Flipped f a m
-forall k (a :: k) (b :: k) (f :: k -&gt; Type).
-(a :=: b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">n :~: m
-</span><a href="#local-6989586621679374312"><span class="hs-identifier hs-var">eql</span></a></span><span>
-</span><span id="line-109"></span><span>
-</span><span id="line-110"></span><span id="local-6989586621679374307"><span id="local-6989586621679374308"><span id="local-6989586621679374309"><span class="annot"><a href="Algebra.Internal.html#sizedLength"><span class="hs-identifier hs-type">sizedLength</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679374309"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.DomC</span></span><span> </span><span class="annot"><a href="#local-6989586621679374308"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374307"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Sized</span></span><span> </span><span class="annot"><a href="#local-6989586621679374308"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374309"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374307"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679374309"><span class="hs-identifier hs-type">n</span></a></span></span></span></span><span>
-</span><span id="line-111"></span><span id="sizedLength"><span class="annot"><span class="annottext">sizedLength :: Sized f n a -&gt; SNat n
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span id="local-6989586621679379862"><span id="local-6989586621679379863"><span id="local-6989586621679379864"><span id="local-6989586621679379865"><span class="annot"><a href="Algebra.Internal.html#coerceLength"><span class="hs-identifier hs-type">coerceLength</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679379865"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:~:</span></span><span> </span><span class="annot"><a href="#local-6989586621679379864"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Sized</span></span><span> </span><span class="annot"><a href="#local-6989586621679379863"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379865"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379862"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Sized</span></span><span> </span><span class="annot"><a href="#local-6989586621679379863"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379864"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379862"><span class="hs-identifier hs-type">a</span></a></span></span></span></span></span><span>
+</span><span id="line-105"></span><span class="hs-pragma">{-# ANN</span><span> </span><span class="annot"><a href="Algebra.Internal.html#coerceLength"><span class="hs-pragma hs-type">coerceLength</span></a></span><span> </span><span class="annot"><span class="hs-pragma">&quot;HLint: ignore Avoid lambda&quot;</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-106"></span><span class="hs-pragma">{-# ANN</span><span> </span><span class="annot"><a href="Algebra.Internal.html#coerceLength"><span class="hs-pragma hs-type">coerceLength</span></a></span><span> </span><span class="annot"><span class="hs-pragma">&quot;HLint: ignore Redundant lambda&quot;</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-107"></span><span id="coerceLength"><span class="annot"><span class="annottext">coerceLength :: (n :~: m) -&gt; Sized f n a -&gt; Sized f m a
+</span><a href="Algebra.Internal.html#coerceLength"><span class="hs-identifier hs-var hs-var">coerceLength</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679379770"><span class="annot"><span class="annottext">n :~: m
+</span><a href="#local-6989586621679379770"><span class="hs-identifier hs-var">eql</span></a></span></span><span> </span><span id="local-6989586621679379769"><span class="annot"><span class="annottext">Sized f n a
+</span><a href="#local-6989586621679379769"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(n :~: m) -&gt; ((n ~ m) =&gt; Sized f m a) -&gt; Sized f m a
+forall k (a :: k) (b :: k) r. (a :~: b) -&gt; ((a ~ b) =&gt; r) -&gt; r
+</span><span class="hs-identifier hs-var">gcastWith</span></span><span> </span><span class="annot"><span class="annottext">n :~: m
+</span><a href="#local-6989586621679379770"><span class="hs-identifier hs-var">eql</span></a></span><span> </span><span class="annot"><span class="annottext">Sized f n a
+(n ~ m) =&gt; Sized f m a
+</span><a href="#local-6989586621679379769"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span id="local-6989586621679379766"><span id="local-6989586621679379767"><span id="local-6989586621679379768"><span class="annot"><a href="Algebra.Internal.html#sizedLength"><span class="hs-identifier hs-type">sizedLength</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679379768"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.DomC</span></span><span> </span><span class="annot"><a href="#local-6989586621679379767"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379766"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Sized</span></span><span> </span><span class="annot"><a href="#local-6989586621679379767"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379768"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379766"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679379768"><span class="hs-identifier hs-type">n</span></a></span></span></span></span><span>
+</span><span id="line-110"></span><span id="sizedLength"><span class="annot"><span class="annottext">sizedLength :: Sized f n a -&gt; SNat n
 </span><a href="Algebra.Internal.html#sizedLength"><span class="hs-identifier hs-var hs-var">sizedLength</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sized f n a -&gt; SNat n
 forall (f :: Type -&gt; Type) (n :: Nat) a.
 (Dom f a, KnownNat n) =&gt;
 Sized f n a -&gt; SNat n
 </span><span class="hs-identifier hs-var">S.sLength</span></span><span>
-</span><span id="line-112"></span><span>
-</span><span id="line-113"></span><span class="annot"><a href="Algebra.Internal.html#padVecs"><span class="hs-identifier hs-type">padVecs</span></a></span><span> </span><span class="hs-glyph">::</span><span>
-</span><span id="line-114"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679374302"><span class="annot"><a href="#local-6989586621679374302"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679374301"><span class="annot"><a href="#local-6989586621679374301"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span id="local-6989586621679374300"><span class="annot"><a href="#local-6989586621679374300"><span class="hs-identifier hs-type">m</span></a></span></span><span class="hs-operator">.</span><span>
-</span><span id="line-115"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unbox</span></span><span> </span><span class="annot"><a href="#local-6989586621679374302"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679374301"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679374300"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
-</span><span id="line-116"></span><span>  </span><span class="annot"><a href="#local-6989586621679374302"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-117"></span><span>  </span><span class="annot"><a href="Algebra.Internal.html#USized"><span class="hs-identifier hs-type">USized</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374301"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374302"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-118"></span><span>  </span><span class="annot"><a href="Algebra.Internal.html#USized"><span class="hs-identifier hs-type">USized</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374300"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374302"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-119"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SNat</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Max</span></span><span> </span><span class="annot"><a href="#local-6989586621679374301"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374300"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algebra.Internal.html#USized"><span class="hs-identifier hs-type">USized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Max</span></span><span> </span><span class="annot"><a href="#local-6989586621679374301"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374300"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679374302"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algebra.Internal.html#USized"><span class="hs-identifier hs-type">USized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Max</span></span><span> </span><span class="annot"><a href="#local-6989586621679374301"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374300"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679374302"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-120"></span><span id="padVecs"><span class="annot"><span class="annottext">padVecs :: a
+</span><span id="line-111"></span><span>
+</span><span id="line-112"></span><span class="annot"><a href="Algebra.Internal.html#padVecs"><span class="hs-identifier hs-type">padVecs</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-113"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679379761"><span class="annot"><a href="#local-6989586621679379761"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679379760"><span class="annot"><a href="#local-6989586621679379760"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span id="local-6989586621679379759"><span class="annot"><a href="#local-6989586621679379759"><span class="hs-identifier hs-type">m</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-114"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unbox</span></span><span> </span><span class="annot"><a href="#local-6989586621679379761"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679379760"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679379759"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-115"></span><span>  </span><span class="annot"><a href="#local-6989586621679379761"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-116"></span><span>  </span><span class="annot"><a href="Algebra.Internal.html#USized"><span class="hs-identifier hs-type">USized</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379760"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379761"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-117"></span><span>  </span><span class="annot"><a href="Algebra.Internal.html#USized"><span class="hs-identifier hs-type">USized</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379759"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379761"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-118"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SNat</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Max</span></span><span> </span><span class="annot"><a href="#local-6989586621679379760"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379759"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algebra.Internal.html#USized"><span class="hs-identifier hs-type">USized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Max</span></span><span> </span><span class="annot"><a href="#local-6989586621679379760"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379759"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679379761"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algebra.Internal.html#USized"><span class="hs-identifier hs-type">USized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Max</span></span><span> </span><span class="annot"><a href="#local-6989586621679379760"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379759"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679379761"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-119"></span><span id="padVecs"><span class="annot"><span class="annottext">padVecs :: a
 -&gt; USized n a
 -&gt; USized m a
 -&gt; (SNat (Max n m), USized (Max n m) a, USized (Max n m) a)
-</span><a href="Algebra.Internal.html#padVecs"><span class="hs-identifier hs-var hs-var">padVecs</span></a></span></span><span> </span><span id="local-6989586621679374298"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679374298"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679374297"><span class="annot"><span class="annottext">USized n a
-</span><a href="#local-6989586621679374297"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span id="local-6989586621679374296"><span class="annot"><span class="annottext">USized m a
-</span><a href="#local-6989586621679374296"><span class="hs-identifier hs-var">ys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-121"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679374295"><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679374294"><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">USized n a -&gt; SNat n
+</span><a href="Algebra.Internal.html#padVecs"><span class="hs-identifier hs-var hs-var">padVecs</span></a></span></span><span> </span><span id="local-6989586621679379757"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679379757"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679379756"><span class="annot"><span class="annottext">USized n a
+</span><a href="#local-6989586621679379756"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span id="local-6989586621679379755"><span class="annot"><span class="annottext">USized m a
+</span><a href="#local-6989586621679379755"><span class="hs-identifier hs-var">ys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-120"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679379754"><span class="annot"><span class="annottext">SNat n
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679379753"><span class="annot"><span class="annottext">SNat m
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">USized n a -&gt; SNat n
 forall (f :: Type -&gt; Type) (n :: Nat) a.
 (Dom f a, KnownNat n) =&gt;
 Sized f n a -&gt; SNat n
 </span><span class="hs-identifier hs-var">S.sLength</span></span><span> </span><span class="annot"><span class="annottext">USized n a
-</span><a href="#local-6989586621679374297"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">USized m a -&gt; SNat m
+</span><a href="#local-6989586621679379756"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">USized m a -&gt; SNat m
 forall (f :: Type -&gt; Type) (n :: Nat) a.
 (Dom f a, KnownNat n) =&gt;
 Sized f n a -&gt; SNat n
 </span><span class="hs-identifier hs-var">S.sLength</span></span><span> </span><span class="annot"><span class="annottext">USized m a
-</span><a href="#local-6989586621679374296"><span class="hs-identifier hs-var">ys</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-122"></span><span>      </span><span id="local-6989586621679374293"><span class="annot"><span class="annottext">l :: SNat (Max n m)
-</span><a href="#local-6989586621679374293"><span class="hs-identifier hs-var hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; SNat (Max n m)
+</span><a href="#local-6989586621679379755"><span class="hs-identifier hs-var">ys</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span>      </span><span id="local-6989586621679379752"><span class="annot"><span class="annottext">l :: SNat (Max n m)
+</span><a href="#local-6989586621679379752"><span class="hs-identifier hs-var hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; SNat (Max n m)
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (Max n m)
 </span><span class="hs-identifier hs-var">sMax</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span>
-</span><span id="line-123"></span><span>   </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; SBool (n &lt;=? m)
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-122"></span><span>   </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">SNat n
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; SBool (n &lt;=? m)
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SBool (n &lt;=? m)
 </span><span class="hs-operator hs-var">%&lt;=?</span></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-124"></span><span>        </span><span class="annot"><span class="annottext">SBool (n &lt;=? m)
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-123"></span><span>        </span><span class="annot"><span class="annottext">SBool (n &lt;=? m)
 </span><span class="hs-identifier hs-var">STrue</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-125"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679374289"><span class="annot"><span class="annottext">maxISm :: Max n m :~: m
-</span><a href="#local-6989586621679374289"><span class="hs-identifier hs-var hs-var">maxISm</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; IsTrue (n &lt;=? m) -&gt; Max n m :~: m
+</span><span id="line-124"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679379748"><span class="annot"><span class="annottext">maxISm :: Max n m :~: m
+</span><a href="#local-6989586621679379748"><span class="hs-identifier hs-var hs-var">maxISm</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; IsTrue (n &lt;=? m) -&gt; Max n m :~: m
 forall (n :: Nat) (m :: Nat).
 SNat n -&gt; SNat m -&gt; IsTrue (n &lt;=? m) -&gt; Max n m :~: m
 </span><span class="hs-identifier hs-var">leqToMax</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">IsTrue (n &lt;=? m)
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">IsTrue (n &lt;=? m)
 IsTrue &#39;True
 </span><span class="hs-identifier hs-var">Witness</span></span><span>
-</span><span id="line-126"></span><span>              </span><span id="local-6989586621679374287"><span class="annot"><span class="annottext">k :: SNat (m - n)
-</span><a href="#local-6989586621679374287"><span class="hs-identifier hs-var hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m -&gt; SNat n -&gt; SNat (m - n)
+</span><span id="line-125"></span><span>              </span><span id="local-6989586621679379746"><span class="annot"><span class="annottext">k :: SNat (m - n)
+</span><a href="#local-6989586621679379746"><span class="hs-identifier hs-var hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SNat m
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m -&gt; SNat n -&gt; SNat (m - n)
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (n - m)
 </span><span class="hs-operator hs-var">%-</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span>
-</span><span id="line-127"></span><span>              </span><span id="local-6989586621679374285"><span class="annot"><span class="annottext">nPLUSk :: (n + (m - n)) :~: m
-</span><a href="#local-6989586621679374285"><span class="hs-identifier hs-var hs-var">nPLUSk</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-128"></span><span>                </span><span class="annot"><span class="annottext">SNat (n + (m - n)) -&gt; (n + (m - n)) :~: (n + (m - n))
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-126"></span><span>              </span><span id="local-6989586621679379744"><span class="annot"><span class="annottext">nPLUSk :: (n + (m - n)) :~: m
+</span><a href="#local-6989586621679379744"><span class="hs-identifier hs-var hs-var">nPLUSk</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-127"></span><span>                </span><span class="annot"><span class="annottext">SNat (n + (m - n)) -&gt; (n + (m - n)) :~: (n + (m - n))
 forall k (eq :: k -&gt; k -&gt; Type) (proxy :: k -&gt; Type) (a :: k).
 Preorder eq =&gt;
 proxy a -&gt; eq a a
 </span><span class="hs-identifier hs-var">start</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat (m - n) -&gt; SNat (n + (m - n))
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat (m - n) -&gt; SNat (n + (m - n))
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (n + m)
 </span><span class="hs-operator hs-var">%+</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m -&gt; SNat n -&gt; SNat (m - n)
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m -&gt; SNat n -&gt; SNat (m - n)
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (n - m)
 </span><span class="hs-operator hs-var">%-</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-129"></span><span>                  </span><span class="annot"><span class="annottext">((n + (m - n)) :~: (n + (m - n)))
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>                  </span><span class="annot"><span class="annottext">((n + (m - n)) :~: (n + (m - n)))
 -&gt; Reason (:~:) (n + (m - n)) ((m - n) + n)
 -&gt; (n + (m - n)) :~: ((m - n) + n)
 forall k (eq :: k -&gt; k -&gt; Type) (x :: k) (y :: k) (z :: k).
 Equality eq =&gt;
 eq x y -&gt; Reason eq y z -&gt; eq x z
 </span><span class="hs-operator hs-var">===</span></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m -&gt; SNat n -&gt; SNat (m - n)
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m -&gt; SNat n -&gt; SNat (m - n)
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (n - m)
 </span><span class="hs-operator hs-var">%-</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat (m - n) -&gt; SNat n -&gt; SNat ((m - n) + n)
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat (m - n) -&gt; SNat n -&gt; SNat ((m - n) + n)
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (n + m)
 </span><span class="hs-operator hs-var">%+</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat ((m - n) + n)
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat ((m - n) + n)
 -&gt; ((n + (m - n)) :~: ((m - n) + n))
 -&gt; Reason (:~:) (n + (m - n)) ((m - n) + n)
 forall k1 k2 (proxy :: k1 -&gt; Type) (y :: k1)
@@ -248,18 +233,18 @@ proxy y -&gt; eq x y -&gt; Reason eq x y
 forall (n :: Nat) (m :: Nat).
 SNat n -&gt; SNat m -&gt; (n + m) :~: (m + n)
 </span><span class="hs-identifier hs-var">plusComm</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m -&gt; SNat n -&gt; SNat (m - n)
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SNat m
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m -&gt; SNat n -&gt; SNat (m - n)
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (n - m)
 </span><span class="hs-operator hs-var">%-</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-130"></span><span>                  </span><span class="annot"><span class="annottext">((n + (m - n)) :~: ((m - n) + n))
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-129"></span><span>                  </span><span class="annot"><span class="annottext">((n + (m - n)) :~: ((m - n) + n))
 -&gt; Reason (:~:) ((m - n) + n) m -&gt; (n + (m - n)) :~: m
 forall k (eq :: k -&gt; k -&gt; Type) (x :: k) (y :: k) (z :: k).
 Equality eq =&gt;
 eq x y -&gt; Reason eq y z -&gt; eq x z
 </span><span class="hs-operator hs-var">===</span></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m -&gt; (((m - n) + n) :~: m) -&gt; Reason (:~:) ((m - n) + n) m
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m -&gt; (((m - n) + n) :~: m) -&gt; Reason (:~:) ((m - n) + n) m
 forall k1 k2 (proxy :: k1 -&gt; Type) (y :: k1)
        (eq :: k2 -&gt; k1 -&gt; Type) (x :: k2).
 proxy y -&gt; eq x y -&gt; Reason eq x y
@@ -267,33 +252,33 @@ proxy y -&gt; eq x y -&gt; Reason eq x y
 forall (n :: Nat) (m :: Nat).
 SNat n -&gt; SNat m -&gt; IsTrue (m &lt;=? n) -&gt; ((n - m) + m) :~: n
 </span><span class="hs-identifier hs-var">minusPlus</span></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">IsTrue (n &lt;=? m)
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">IsTrue (n &lt;=? m)
 IsTrue &#39;True
 </span><span class="hs-identifier hs-var">Witness</span></span><span>
-</span><span id="line-131"></span><span>                  </span><span class="annot"><span class="annottext">((n + (m - n)) :~: m) -&gt; Reason (:~:) m m -&gt; (n + (m - n)) :~: m
+</span><span id="line-130"></span><span>                  </span><span class="annot"><span class="annottext">((n + (m - n)) :~: m) -&gt; Reason (:~:) m m -&gt; (n + (m - n)) :~: m
 forall k (eq :: k -&gt; k -&gt; Type) (x :: k) (y :: k) (z :: k).
 Equality eq =&gt;
 eq x y -&gt; Reason eq y z -&gt; eq x z
 </span><span class="hs-operator hs-var">===</span></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; SNat (Max n m)
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (Max n m)
 </span><span class="hs-identifier hs-var">sMax</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m -&gt; (m :~: m) -&gt; Reason (:~:) m m
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m -&gt; (m :~: m) -&gt; Reason (:~:) m m
 forall k1 k2 (proxy :: k1 -&gt; Type) (y :: k1)
        (eq :: k2 -&gt; k1 -&gt; Type) (x :: k2).
 proxy y -&gt; eq x y -&gt; Reason eq x y
 </span><span class="hs-operator hs-var">`because`</span></span><span> </span><span class="annot"><span class="annottext">m :~: m
 Max n m :~: m
-</span><a href="#local-6989586621679374289"><span class="hs-identifier hs-var">maxISm</span></a></span><span>
-</span><span id="line-132"></span><span>           </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">SNat (Max n m)
-</span><a href="#local-6989586621679374293"><span class="hs-identifier hs-var">l</span></a></span><span>
-</span><span id="line-133"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">((n + (m - n)) :~: m) -&gt; Sized Vector (n + (m - n)) a -&gt; USized m a
+</span><a href="#local-6989586621679379748"><span class="hs-identifier hs-var">maxISm</span></a></span><span>
+</span><span id="line-131"></span><span>           </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">SNat (Max n m)
+</span><a href="#local-6989586621679379752"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-132"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">((n + (m - n)) :~: m) -&gt; Sized Vector (n + (m - n)) a -&gt; USized m a
 forall (n :: Nat) (m :: Nat) (f :: Type -&gt; Type) a.
 (n :~: m) -&gt; Sized f n a -&gt; Sized f m a
 </span><a href="Algebra.Internal.html#coerceLength"><span class="hs-identifier hs-var">coerceLength</span></a></span><span> </span><span class="annot"><span class="annottext">(n + (m - n)) :~: m
-</span><a href="#local-6989586621679374285"><span class="hs-identifier hs-var">nPLUSk</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">USized n a
-</span><a href="#local-6989586621679374297"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">USized n a
+</span><a href="#local-6989586621679379744"><span class="hs-identifier hs-var">nPLUSk</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">USized n a
+</span><a href="#local-6989586621679379756"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">USized n a
 -&gt; Sized Vector (m - n) a -&gt; Sized Vector (n + (m - n)) a
 forall (f :: Type -&gt; Type) (n :: Nat) (m :: Nat) a.
 (CFreeMonoid f, Dom f a) =&gt;
@@ -303,19 +288,19 @@ forall (f :: Type -&gt; Type) (n :: Nat) a.
 (CFreeMonoid f, Dom f a) =&gt;
 SNat n -&gt; a -&gt; Sized f n a
 </span><span class="hs-identifier hs-var">S.replicate</span></span><span> </span><span class="annot"><span class="annottext">SNat (m - n)
-</span><a href="#local-6989586621679374287"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679374298"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-134"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(m :~: m) -&gt; USized m a -&gt; USized m a
+</span><a href="#local-6989586621679379746"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679379757"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(m :~: m) -&gt; USized m a -&gt; USized m a
 forall (n :: Nat) (m :: Nat) (f :: Type -&gt; Type) a.
 (n :~: m) -&gt; Sized f n a -&gt; Sized f m a
 </span><a href="Algebra.Internal.html#coerceLength"><span class="hs-identifier hs-var">coerceLength</span></a></span><span> </span><span class="annot"><span class="annottext">m :~: m
 Max n m :~: m
-</span><a href="#local-6989586621679374289"><span class="hs-identifier hs-var">maxISm</span></a></span><span> </span><span class="annot"><span class="annottext">USized m a
-</span><a href="#local-6989586621679374296"><span class="hs-identifier hs-var">ys</span></a></span><span>
-</span><span id="line-135"></span><span>              </span><span class="hs-special">)</span><span>
-</span><span id="line-136"></span><span>        </span><span class="annot"><span class="annottext">SBool (n &lt;=? m)
+</span><a href="#local-6989586621679379748"><span class="hs-identifier hs-var">maxISm</span></a></span><span> </span><span class="annot"><span class="annottext">USized m a
+</span><a href="#local-6989586621679379755"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><span id="line-134"></span><span>              </span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>        </span><span class="annot"><span class="annottext">SBool (n &lt;=? m)
 </span><span class="hs-identifier hs-var">SFalse</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-137"></span><span>          </span><span class="annot"><span class="annottext">IsTrue (m &lt;=? n)
+</span><span id="line-136"></span><span>          </span><span class="annot"><span class="annottext">IsTrue (m &lt;=? n)
 -&gt; (((m &lt;=? n) ~ &#39;True) =&gt;
     (SNat (Max n m), USized (Max n m) a, USized (Max n m) a))
 -&gt; (SNat (Max n m), USized (Max n m) a, USized (Max n m) a)
@@ -325,8 +310,8 @@ forall (n :: Nat) (m :: Nat).
 ((n &lt;=? m) ~ &#39;False) =&gt;
 SNat n -&gt; SNat m -&gt; IsTrue (m &lt;=? n)
 </span><span class="hs-identifier hs-var">notLeqToLeq</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((((m &lt;=? n) ~ &#39;True) =&gt;
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((((m &lt;=? n) ~ &#39;True) =&gt;
   (SNat (Max n m), USized (Max n m) a, USized (Max n m) a))
  -&gt; (SNat (Max n m), USized (Max n m) a, USized (Max n m) a))
 -&gt; (((m &lt;=? n) ~ &#39;True) =&gt;
@@ -334,44 +319,44 @@ SNat n -&gt; SNat m -&gt; IsTrue (m &lt;=? n)
 -&gt; (SNat (Max n m), USized (Max n m) a, USized (Max n m) a)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
-</span><span id="line-138"></span><span>            </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679374280"><span class="annot"><span class="annottext">maxISn :: Max n m :~: n
-</span><a href="#local-6989586621679374280"><span class="hs-identifier hs-var hs-var">maxISn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; IsTrue (m &lt;=? n) -&gt; Max n m :~: n
+</span><span id="line-137"></span><span>            </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679379739"><span class="annot"><span class="annottext">maxISn :: Max n m :~: n
+</span><a href="#local-6989586621679379739"><span class="hs-identifier hs-var hs-var">maxISn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; IsTrue (m &lt;=? n) -&gt; Max n m :~: n
 forall (n :: Nat) (m :: Nat).
 SNat n -&gt; SNat m -&gt; IsTrue (m &lt;=? n) -&gt; Max n m :~: n
 </span><span class="hs-identifier hs-var">geqToMax</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">IsTrue (m &lt;=? n)
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">IsTrue (m &lt;=? n)
 IsTrue &#39;True
 </span><span class="hs-identifier hs-var">Witness</span></span><span>
-</span><span id="line-139"></span><span>                </span><span class="annot"><a href="#local-6989586621679374279"><span class="hs-identifier hs-type">mPLUSk</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679374300"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">+</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679374301"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">-</span></span><span> </span><span class="annot"><a href="#local-6989586621679374300"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">:~:</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Max</span></span><span> </span><span class="annot"><a href="#local-6989586621679374301"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374300"><span class="hs-identifier hs-type">m</span></a></span><span>
-</span><span id="line-140"></span><span>                </span><span id="local-6989586621679374279"><span class="annot"><span class="annottext">mPLUSk :: (m + (n - m)) :~: Max n m
-</span><a href="#local-6989586621679374279"><span class="hs-identifier hs-var hs-var">mPLUSk</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-141"></span><span>                  </span><span class="annot"><span class="annottext">SNat (m + (n - m)) -&gt; (m + (n - m)) :~: (m + (n - m))
+</span><span id="line-138"></span><span>                </span><span class="annot"><a href="#local-6989586621679379738"><span class="hs-identifier hs-type">mPLUSk</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679379759"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">+</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679379760"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">-</span></span><span> </span><span class="annot"><a href="#local-6989586621679379759"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">:~:</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Max</span></span><span> </span><span class="annot"><a href="#local-6989586621679379760"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379759"><span class="hs-identifier hs-type">m</span></a></span><span>
+</span><span id="line-139"></span><span>                </span><span id="local-6989586621679379738"><span class="annot"><span class="annottext">mPLUSk :: (m + (n - m)) :~: Max n m
+</span><a href="#local-6989586621679379738"><span class="hs-identifier hs-var hs-var">mPLUSk</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-140"></span><span>                  </span><span class="annot"><span class="annottext">SNat (m + (n - m)) -&gt; (m + (n - m)) :~: (m + (n - m))
 forall k (eq :: k -&gt; k -&gt; Type) (proxy :: k -&gt; Type) (a :: k).
 Preorder eq =&gt;
 proxy a -&gt; eq a a
 </span><span class="hs-identifier hs-var">start</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m -&gt; SNat (n - m) -&gt; SNat (m + (n - m))
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m -&gt; SNat (n - m) -&gt; SNat (m + (n - m))
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (n + m)
 </span><span class="hs-operator hs-var">%+</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; SNat (n - m)
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; SNat (n - m)
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (n - m)
 </span><span class="hs-operator hs-var">%-</span></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-142"></span><span>                    </span><span class="annot"><span class="annottext">((m + (n - m)) :~: (m + (n - m)))
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-141"></span><span>                    </span><span class="annot"><span class="annottext">((m + (n - m)) :~: (m + (n - m)))
 -&gt; Reason (:~:) (m + (n - m)) ((n - m) + m)
 -&gt; (m + (n - m)) :~: ((n - m) + m)
 forall k (eq :: k -&gt; k -&gt; Type) (x :: k) (y :: k) (z :: k).
 Equality eq =&gt;
 eq x y -&gt; Reason eq y z -&gt; eq x z
 </span><span class="hs-operator hs-var">===</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; SNat (n - m)
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; SNat (n - m)
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (n - m)
 </span><span class="hs-operator hs-var">%-</span></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat (n - m) -&gt; SNat m -&gt; SNat ((n - m) + m)
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat (n - m) -&gt; SNat m -&gt; SNat ((n - m) + m)
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (n + m)
 </span><span class="hs-operator hs-var">%+</span></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat ((n - m) + m)
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat ((n - m) + m)
 -&gt; ((m + (n - m)) :~: ((n - m) + m))
 -&gt; Reason (:~:) (m + (n - m)) ((n - m) + m)
 forall k1 k2 (proxy :: k1 -&gt; Type) (y :: k1)
@@ -381,18 +366,18 @@ proxy y -&gt; eq x y -&gt; Reason eq x y
 forall (n :: Nat) (m :: Nat).
 SNat n -&gt; SNat m -&gt; (n + m) :~: (m + n)
 </span><span class="hs-identifier hs-var">plusComm</span></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; SNat (n - m)
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SNat n
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; SNat (n - m)
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (n - m)
 </span><span class="hs-operator hs-var">%-</span></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-143"></span><span>                    </span><span class="annot"><span class="annottext">((m + (n - m)) :~: ((n - m) + m))
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-142"></span><span>                    </span><span class="annot"><span class="annottext">((m + (n - m)) :~: ((n - m) + m))
 -&gt; Reason (:~:) ((n - m) + m) n -&gt; (m + (n - m)) :~: n
 forall k (eq :: k -&gt; k -&gt; Type) (x :: k) (y :: k) (z :: k).
 Equality eq =&gt;
 eq x y -&gt; Reason eq y z -&gt; eq x z
 </span><span class="hs-operator hs-var">===</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; (((n - m) + m) :~: n) -&gt; Reason (:~:) ((n - m) + m) n
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; (((n - m) + m) :~: n) -&gt; Reason (:~:) ((n - m) + m) n
 forall k1 k2 (proxy :: k1 -&gt; Type) (y :: k1)
        (eq :: k2 -&gt; k1 -&gt; Type) (x :: k2).
 proxy y -&gt; eq x y -&gt; Reason eq x y
@@ -400,45 +385,45 @@ proxy y -&gt; eq x y -&gt; Reason eq x y
 forall (n :: Nat) (m :: Nat).
 SNat n -&gt; SNat m -&gt; IsTrue (m &lt;=? n) -&gt; ((n - m) + m) :~: n
 </span><span class="hs-identifier hs-var">minusPlus</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">IsTrue (m &lt;=? n)
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">IsTrue (m &lt;=? n)
 IsTrue &#39;True
 </span><span class="hs-identifier hs-var">Witness</span></span><span>
-</span><span id="line-144"></span><span>                    </span><span class="annot"><span class="annottext">((m + (n - m)) :~: n) -&gt; Reason (:~:) n n -&gt; (m + (n - m)) :~: n
+</span><span id="line-143"></span><span>                    </span><span class="annot"><span class="annottext">((m + (n - m)) :~: n) -&gt; Reason (:~:) n n -&gt; (m + (n - m)) :~: n
 forall k (eq :: k -&gt; k -&gt; Type) (x :: k) (y :: k) (z :: k).
 Equality eq =&gt;
 eq x y -&gt; Reason eq y z -&gt; eq x z
 </span><span class="hs-operator hs-var">===</span></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; SNat (Max n m)
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (Max n m)
 </span><span class="hs-identifier hs-var">sMax</span></span><span> </span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; (n :~: n) -&gt; Reason (:~:) n n
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat m
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; (n :~: n) -&gt; Reason (:~:) n n
 forall k1 k2 (proxy :: k1 -&gt; Type) (y :: k1)
        (eq :: k2 -&gt; k1 -&gt; Type) (x :: k2).
 proxy y -&gt; eq x y -&gt; Reason eq x y
 </span><span class="hs-operator hs-var">`because`</span></span><span> </span><span class="annot"><span class="annottext">n :~: n
 Max n m :~: n
-</span><a href="#local-6989586621679374280"><span class="hs-identifier hs-var">maxISn</span></a></span><span>
-</span><span id="line-145"></span><span>             </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">SNat n
+</span><a href="#local-6989586621679379739"><span class="hs-identifier hs-var">maxISn</span></a></span><span>
+</span><span id="line-144"></span><span>             </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">SNat n
 SNat (Max n m)
-</span><a href="#local-6989586621679374293"><span class="hs-identifier hs-var">l</span></a></span><span>
-</span><span id="line-146"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(n :~: n) -&gt; USized n a -&gt; USized n a
+</span><a href="#local-6989586621679379752"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-145"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(n :~: n) -&gt; USized n a -&gt; USized n a
 forall (n :: Nat) (m :: Nat) (f :: Type -&gt; Type) a.
 (n :~: m) -&gt; Sized f n a -&gt; Sized f m a
 </span><a href="Algebra.Internal.html#coerceLength"><span class="hs-identifier hs-var">coerceLength</span></a></span><span> </span><span class="annot"><span class="annottext">n :~: n
 Max n m :~: n
-</span><a href="#local-6989586621679374280"><span class="hs-identifier hs-var">maxISn</span></a></span><span> </span><span class="annot"><span class="annottext">USized n a
-</span><a href="#local-6989586621679374297"><span class="hs-identifier hs-var">xs</span></a></span><span>
-</span><span id="line-147"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">((m + (n - m)) :~: n) -&gt; Sized Vector (m + (n - m)) a -&gt; USized n a
+</span><a href="#local-6989586621679379739"><span class="hs-identifier hs-var">maxISn</span></a></span><span> </span><span class="annot"><span class="annottext">USized n a
+</span><a href="#local-6989586621679379756"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-146"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">((m + (n - m)) :~: n) -&gt; Sized Vector (m + (n - m)) a -&gt; USized n a
 forall (n :: Nat) (m :: Nat) (f :: Type -&gt; Type) a.
 (n :~: m) -&gt; Sized f n a -&gt; Sized f m a
 </span><a href="Algebra.Internal.html#coerceLength"><span class="hs-identifier hs-var">coerceLength</span></a></span><span> </span><span class="annot"><span class="annottext">(m + (n - m)) :~: n
 (m + (n - m)) :~: Max n m
-</span><a href="#local-6989586621679374279"><span class="hs-identifier hs-var">mPLUSk</span></a></span><span> </span><span class="annot"><span class="annottext">(Sized Vector (m + (n - m)) a -&gt; USized n a)
+</span><a href="#local-6989586621679379738"><span class="hs-identifier hs-var">mPLUSk</span></a></span><span> </span><span class="annot"><span class="annottext">(Sized Vector (m + (n - m)) a -&gt; USized n a)
 -&gt; Sized Vector (m + (n - m)) a -&gt; USized n a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">USized m a
-</span><a href="#local-6989586621679374296"><span class="hs-identifier hs-var">ys</span></a></span><span> </span><span class="annot"><span class="annottext">USized m a
+</span><a href="#local-6989586621679379755"><span class="hs-identifier hs-var">ys</span></a></span><span> </span><span class="annot"><span class="annottext">USized m a
 -&gt; Sized Vector (n - m) a -&gt; Sized Vector (m + (n - m)) a
 forall (f :: Type -&gt; Type) (n :: Nat) (m :: Nat) a.
 (CFreeMonoid f, Dom f a) =&gt;
@@ -448,24 +433,24 @@ forall (f :: Type -&gt; Type) (n :: Nat) a.
 (CFreeMonoid f, Dom f a) =&gt;
 SNat n -&gt; a -&gt; Sized f n a
 </span><span class="hs-identifier hs-var">S.replicate</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SNat n
-</span><a href="#local-6989586621679374295"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; SNat (n - m)
+</span><a href="#local-6989586621679379754"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SNat n -&gt; SNat m -&gt; SNat (n - m)
 forall (n :: Nat) (m :: Nat). SNat n -&gt; SNat m -&gt; SNat (n - m)
 </span><span class="hs-operator hs-var">%-</span></span><span> </span><span class="annot"><span class="annottext">SNat m
-</span><a href="#local-6989586621679374294"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679374298"><span class="hs-identifier hs-var">d</span></a></span><span>
-</span><span id="line-148"></span><span>                </span><span class="hs-special">)</span><span>
-</span><span id="line-149"></span><span>
-</span><span id="line-150"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">family</span><span> </span><span id="Flipped"><span class="annot"><a href="Algebra.Internal.html#Flipped"><span class="hs-identifier hs-var">Flipped</span></a></span></span><span> </span><span id="local-6989586621679374278"><span class="annot"><a href="#local-6989586621679374278"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679374277"><span class="annot"><a href="#local-6989586621679374277"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-151"></span><span>  </span><span id="Flipped"><span class="annot"><a href="Algebra.Internal.html#Flipped"><span class="hs-identifier hs-var">Flipped</span></a></span></span><span> </span><span id="local-6989586621679374276"><span class="annot"><a href="#local-6989586621679374276"><span class="hs-identifier hs-type hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679374275"><span class="annot"><a href="#local-6989586621679374275"><span class="hs-identifier hs-type hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Flipped.Flipped</span></span><span> </span><span class="annot"><a href="#local-6989586621679374276"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374275"><span class="hs-identifier hs-type">a</span></a></span><span>
-</span><span id="line-152"></span><span>
-</span><span id="line-153"></span><span id="local-6989586621679374382"><span id="local-6989586621679374383"><span id="local-6989586621679374384"><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Algebra.Internal.html#Flipped"><span class="hs-identifier hs-type">Flipped</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Sized</span></span><span> </span><span class="annot"><a href="#local-6989586621679374384"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374382"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374383"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Internal.html#Flipped"><span class="hs-identifier hs-type">Flipped</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374384"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374383"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374382"><span class="hs-identifier hs-type">n</span></a></span></span></span></span><span>
-</span><span id="line-154"></span><span class="hs-keyword">pattern</span><span> </span><span id="%24bFlipped"><span id="%24mFlipped"><span id="Flipped"><span class="annot"><span class="annottext">$bFlipped :: Sized f n a -&gt; Flipped f a n
+</span><a href="#local-6989586621679379753"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679379757"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-147"></span><span>                </span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">family</span><span> </span><span id="Flipped"><span class="annot"><a href="Algebra.Internal.html#Flipped"><span class="hs-identifier hs-var">Flipped</span></a></span></span><span> </span><span id="local-6989586621679379737"><span class="annot"><a href="#local-6989586621679379737"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679379736"><span class="annot"><a href="#local-6989586621679379736"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-150"></span><span>  </span><span id="Flipped"><span class="annot"><a href="Algebra.Internal.html#Flipped"><span class="hs-identifier hs-var">Flipped</span></a></span></span><span> </span><span id="local-6989586621679379735"><span class="annot"><a href="#local-6989586621679379735"><span class="hs-identifier hs-type hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679379734"><span class="annot"><a href="#local-6989586621679379734"><span class="hs-identifier hs-type hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Flipped.Flipped</span></span><span> </span><span class="annot"><a href="#local-6989586621679379735"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379734"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span id="local-6989586621679379841"><span id="local-6989586621679379842"><span id="local-6989586621679379843"><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Algebra.Internal.html#Flipped"><span class="hs-identifier hs-type">Flipped</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S.Sized</span></span><span> </span><span class="annot"><a href="#local-6989586621679379843"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379841"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379842"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Internal.html#Flipped"><span class="hs-identifier hs-type">Flipped</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379843"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379842"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679379841"><span class="hs-identifier hs-type">n</span></a></span></span></span></span><span>
+</span><span id="line-153"></span><span class="hs-keyword">pattern</span><span> </span><span id="%24bFlipped"><span id="%24mFlipped"><span id="Flipped"><span class="annot"><span class="annottext">$bFlipped :: Sized f n a -&gt; Flipped f a n
 $mFlipped :: forall r (f :: Type -&gt; Type) (n :: Nat) a.
 Flipped f a n -&gt; (Sized f n a -&gt; r) -&gt; (Void# -&gt; r) -&gt; r
-</span><a href="Algebra.Internal.html#%24bFlipped"><span class="hs-identifier hs-var hs-var hs-var">Flipped</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679374271"><span class="hs-identifier hs-type">xs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Flipped.Flipped</span></span><span> </span><span id="local-6989586621679374271"><span class="annot"><a href="#local-6989586621679374271"><span class="hs-identifier hs-var">xs</span></a></span></span><span>
-</span><span id="line-155"></span><span>
-</span><span id="line-156"></span><span id="local-6989586621679374270"><span class="annot"><a href="Algebra.Internal.html#sNatToInt"><span class="hs-identifier hs-type">sNatToInt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679374270"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span></span><span>
-</span><span id="line-157"></span><span id="sNatToInt"><span class="annot"><span class="annottext">sNatToInt :: SNat n -&gt; Int
+</span><a href="Algebra.Internal.html#%24bFlipped"><span class="hs-identifier hs-var hs-var hs-var">Flipped</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679379730"><span class="hs-identifier hs-type">xs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Flipped.Flipped</span></span><span> </span><span id="local-6989586621679379730"><span class="annot"><a href="#local-6989586621679379730"><span class="hs-identifier hs-var">xs</span></a></span></span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span id="local-6989586621679379728"><span class="annot"><a href="Algebra.Internal.html#sNatToInt"><span class="hs-identifier hs-type">sNatToInt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679379728"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span></span><span>
+</span><span id="line-156"></span><span id="sNatToInt"><span class="annot"><span class="annottext">sNatToInt :: SNat n -&gt; Int
 </span><a href="Algebra.Internal.html#sNatToInt"><span class="hs-identifier hs-var hs-var">sNatToInt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Natural -&gt; Int
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">(Natural -&gt; Int) -&gt; (SNat n -&gt; Natural) -&gt; SNat n -&gt; Int
@@ -475,13 +460,13 @@ forall (n :: Nat). SNat n -&gt; Natural
 </span><span class="hs-identifier hs-var">toNatural</span></span><span class="hs-cpp">
 
 #if !MIN_VERSION_hashable(1,3,4)
-</span><span id="local-6989586621679374266"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679374263"><span class="annot"><span class="hs-identifier hs-type">Hashable</span></span><span> </span><span class="annot"><a href="#local-6989586621679374266"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Hashable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679374266"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-161"></span><span>  </span><span id="local-6989586621679374261"><span class="annot"><span class="annottext">hashWithSalt :: Int -&gt; Seq a -&gt; Int
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">hashWithSalt</span></span></span><span> </span><span id="local-6989586621679374259"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679374259"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [a] -&gt; Int
+</span><span id="local-6989586621679379724"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679379721"><span class="annot"><span class="hs-identifier hs-type">Hashable</span></span><span> </span><span class="annot"><a href="#local-6989586621679379724"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Hashable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679379724"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-160"></span><span>  </span><span id="local-6989586621679379719"><span class="annot"><span class="annottext">hashWithSalt :: Int -&gt; Seq a -&gt; Int
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">hashWithSalt</span></span></span><span> </span><span id="local-6989586621679379717"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679379717"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [a] -&gt; Int
 forall a. Hashable a =&gt; Int -&gt; a -&gt; Int
 </span><span class="hs-identifier hs-var">hashWithSalt</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679374259"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; Int) -&gt; (Seq a -&gt; [a]) -&gt; Seq a -&gt; Int
+</span><a href="#local-6989586621679379717"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; Int) -&gt; (Seq a -&gt; [a]) -&gt; Seq a -&gt; Int
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Seq a -&gt; [a]
 forall (t :: Type -&gt; Type) a. Foldable t =&gt; t a -&gt; [a]
