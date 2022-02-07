@@ -29,6 +29,7 @@ import qualified Data.Matrix as M hiding (fromList)
 import Data.Ord
 import Data.Reflection
 import Data.Sized (fromListWithDefault)
+import Data.Type.Equality
 import Data.Type.Natural.Lemma.Arithmetic
 import qualified Data.Vector as V
 import qualified Numeric.Algebra as NA
@@ -88,10 +89,11 @@ instance
   arbitrary = modIdeal <$> arbitrary
 
 genLM :: forall n. SNat n -> QC.Gen [Polynomial (Fraction Integer) n]
+{-# ANN genLM "HLint: ignore Avoid lambda" #-}
 genLM m = withKnownNat m $ case zeroOrSucc m of
   IsZero -> return []
   IsSucc n -> withKnownNat n $ do
-    fs <- map (gcastWith (plusComm sOne n) . shiftR sOne) <$> genLM n
+    fs <- map (\x -> gcastWith (plusComm sOne n) $ shiftR sOne x) <$> genLM n
     QC.NonNegative deg <- arbitrary
     coef <- arbitraryRational `suchThat` (/= 0)
     xf <- arbitrary :: QC.Gen (Polynomial (Fraction Integer) n)
