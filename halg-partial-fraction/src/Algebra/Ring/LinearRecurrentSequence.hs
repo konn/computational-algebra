@@ -195,6 +195,7 @@ data Recurrence a where
   Recurrence ::
     { recCoefficients_ :: Sized n a
     , initialValues_ :: Sized n a
+    , constant :: a
     } ->
     Recurrence a
 
@@ -217,12 +218,12 @@ Where initial values \(a_0, \ldots, a_{k - 1}\) are given.
 
 Fibonacci \(a0 = 0, a1 = 1, a(n+2) = an + a(n+1)\):
 
->>> generatingFunction $ Recurrence (1 :< 1 :< Nil) (0 :< (1 :: Rational) :< Nil)
+>>> generatingFunction $ Recurrence (1 :< 1 :< Nil) (0 :< (1 :: Rational) :< Nil) 0
 -x / x^2 + x - 1
 
 Tribonacci:
 
->>> generatingFunction $ Recurrence (1 :< 1 :< 1 :< Nil) (0 :< 1 :< (1 :: Rational) :< Nil)
+>>> generatingFunction $ Recurrence (1 :< 1 :< 1 :< Nil) (0 :< 1 :< (1 :: Rational) :< Nil) 0
 -x / x^3 + x^2 + x - 1
 -}
 generatingFunction ::
@@ -240,7 +241,7 @@ generatingFunction recs =
           sum (V.zipWith (*) (V.drop (i + 1) coeffs) inis)
             .*. #x ^ fromIntegral (k - 1 - i)
       num = ok - runAdd (ifoldMap (\i ci -> Add $ ci .*. #x ^ fromIntegral i) inis)
-   in num F.% den
+   in (num F.% 1 + (constant recs .*. #x ^ fromIntegral k) F.% (#x - 1)) / (den F.% 1)
   where
     k = recurrenceSize recs
     coeffs = recCoefficients recs
@@ -250,7 +251,7 @@ generatingFunction recs =
 
 * Example: Fibonacci sequence
 
->>> fib <- evalRandIO $ solveTernaryRecurrence (1 :< 1 :< Nil) (0 :< 1 :< Nil)
+>>> fib <- evalRandIO $ solveTernaryRecurrence (1 :< 1 :< Nil) (0 :< 1 :< Nil) 0
 >>> fib
 ((2 / 5)*Root(x^2 + x - 1) + (1 / 5)) * (Root(x^2 + x - 1) + 1) ^ n + (-(2 / 5)*Root(x^2 + x - 1) - (1 / 5)) * (-Root(x^2 + x - 1)) ^ n
 
@@ -263,9 +264,11 @@ solveTernaryRecurrence ::
   Sized 2 Rational ->
   -- | Initial values
   Sized 2 Rational ->
+  -- | Constant term
+  Rational ->
   m (GeneralTerm Rational)
-solveTernaryRecurrence coes iniVals =
-  solveRationalRecurrence (Recurrence coes iniVals)
+solveTernaryRecurrence coes iniVals c =
+  solveRationalRecurrence (Recurrence coes iniVals c)
 
 {- |
 Solves general (n+1)-ary linear recurrent sequence.
@@ -274,7 +277,7 @@ Solves general (n+1)-ary linear recurrent sequence.
 T_{n+3} = T_n + T_{n+1} + T_{n+2}
 T_0 = 0, T_1 = 0, T_2 = 1
 
->>> trib <- evalRandIO $ solveRationalRecurrence $ Recurrence (1 :< 1 :< 1 :< Nil) (0 :< 0 :< 1 :< Nil)
+>>> trib <- evalRandIO $ solveRationalRecurrence $ Recurrence (1 :< 1 :< 1 :< Nil) (0 :< 0 :< 1 :< Nil) 0
 >>> trib
 ((5 / 22)*Root(x^3 + x^2 + x - 1)^2 + (1 / 22)*Root(x^3 + x^2 + x - 1) + (1 / 11)) * (Root(x^3 + x^2 + x - 1)^2 + Root(x^3 + x^2 + x - 1) + 1) ^ n + (-(5 / 22)*Root(x^3 + x^2 + x - 1) - (2 / 11)*Root(1*x^2 + Root(x^3 + x^2 + x - 1) + 1*x + Root(x^3 + x^2 + x - 1)^2 + Root(x^3 + x^2 + x - 1) + 1) + -(5 / 22)*Root(x^3 + x^2 + x - 1)^2 - (5 / 22)*Root(x^3 + x^2 + x - 1) - (3 / 22)) * (-Root(x^3 + x^2 + x - 1)*Root(1*x^2 + Root(x^3 + x^2 + x - 1) + 1*x + Root(x^3 + x^2 + x - 1)^2 + Root(x^3 + x^2 + x - 1) + 1) + -Root(x^3 + x^2 + x - 1)^2 - Root(x^3 + x^2 + x - 1)) ^ n + ((5 / 22)*Root(x^3 + x^2 + x - 1) + (2 / 11)*Root(1*x^2 + Root(x^3 + x^2 + x - 1) + 1*x + Root(x^3 + x^2 + x - 1)^2 + Root(x^3 + x^2 + x - 1) + 1) + (2 / 11)*Root(x^3 + x^2 + x - 1) + (1 / 22)) * (Root(x^3 + x^2 + x - 1)*Root(1*x^2 + Root(x^3 + x^2 + x - 1) + 1*x + Root(x^3 + x^2 + x - 1)^2 + Root(x^3 + x^2 + x - 1) + 1)) ^ n
 >>> map (evalGeneralTerm trib) [0..12]
@@ -284,7 +287,7 @@ T_0 = 0, T_1 = 0, T_2 = 1
 T_{n+4} = T_n + T_{n+1} + T_{n+2} + T_{n+3}
 T_0 = 0, T_1 = 0, T_2 = 0, T_3 = 1
 
->>> tet <- evalRandIO $ solveRationalRecurrence $ Recurrence (1 :< 1 :< 1 :< 1 :< Nil) (0 :< 0 :< 0 :< 1 :< Nil)
+>>> tet <- evalRandIO $ solveRationalRecurrence $ Recurrence (1 :< 1 :< 1 :< 1 :< Nil) (0 :< 0 :< 0 :< 1 :< Nil) 0
 >>> tet
 >>> map (evalGeneralTerm tet) [0..12]
 [0,0,0,1,1,2,4,8,15,29,56,108,208]
@@ -316,7 +319,7 @@ Solves linear recurrent sequence over finite fields.
 ** Example1: Fibonacci sequence over F_{17}.
 >>> import Numeric.Field.Prime
 >>> :set -XDataKinds
->>> fibF17 <- evalRandIO $ solveFiniteFieldRecurrence $ Recurrence (1 :< 1 :< Nil) (0 :< (1 :: F 17) :< Nil)
+>>> fibF17 <- evalRandIO $ solveFiniteFieldRecurrence $ Recurrence (1 :< 1 :< Nil) (0 :< (1 :: F 17) :< Nil) 0
 >>> fibF17
 (14*Root(x^2 + x + 16) + 7) * (Root(x^2 + x + 16) + 1) ^ n + (3*Root(x^2 + x + 16) + 10) * (16*Root(x^2 + x + 16)) ^ n
 
@@ -324,7 +327,7 @@ Solves linear recurrent sequence over finite fields.
 [0,1,1,2,3,5,8,13,4,0,4,4,8,12,3,15,1,16,0,16,16]
 
 ** Example2: Tetrabonacci over F_{17}
->>> tetF17 <- evalRandIO $ solveFiniteFieldRecurrence $ Recurrence ((1 :: F 17) :< 1 :< 1 :< 1 :< Nil) (0 :< 0 :< 0 :< 1 :< Nil)tion
+>>> tetF17 <- evalRandIO $ solveFiniteFieldRecurrence $ Recurrence ((1 :: F 17) :< 1 :< 1 :< 1 :< Nil) (0 :< 0 :< 0 :< 1 :< Nil) 0
 >>> map (evalGeneralTerm tetF17) [0..20]
 [0,0,0,1,1,2,4,8,15,12,5,6,4,10,8,11,16,11,12,16,4]
 
@@ -334,7 +337,7 @@ T_{n+3} = T_n + T_{n+1} + T_{n+2}
 T_0 = 1, T_1 = ξ, T_2 = ξ^2,
 where ξ is a primitive element of GF_{5^3}.
 
->>> triGF53 <- evalRandIO $ solveFiniteFieldRecurrence $ Recurrence (1 :< (1 :: GF 5 3) :< 1 :< Nil) ( 1 :< primitive :< (primitive ^ 2) :< Nil)
+>>> triGF53 <- evalRandIO $ solveFiniteFieldRecurrence $ Recurrence (1 :< (1 :: GF 5 3) :< 1 :< Nil) ( 1 :< primitive :< (primitive ^ 2) :< Nil) 0
 >>> triGF53
 <ξ^2 + ξ + 1> * <3*ξ + 2> ^ n + <ξ^2 + ξ + 1> * <4*ξ^2> ^ n + <3*ξ^2 + 3*ξ + 4> * <ξ^2 + 2*ξ + 4> ^ n
 
@@ -634,7 +637,7 @@ a_{n + 2} = 1 a_n + 1 a_{n + 1}
 a_0 = 0
 a_1 = 1
 
->>> fib <- evalRandIO $ solveTernaryRecurrence (1 :< 1 :< Nil) (0 :< 1 :< Nil)
+>>> fib <- evalRandIO $ solveTernaryRecurrence (1 :< 1 :< Nil) (0 :< 1 :< Nil) 0
 >>> evalGeneralTerm fib 12
 144
 -}
