@@ -35,8 +35,7 @@ import qualified Data.Vector as V
 
 newtype Ideal r = Ideal (Seq r)
   deriving
-    ( Hashable
-    , NFData
+    ( NFData
     , Foldable
     , Traversable
     , Functor

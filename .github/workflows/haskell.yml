@@ -55,7 +55,7 @@ jobs:
         - '8.10.7'
         - '9.0.2'
         include:
-        - ghc: '9.2.1'
+        - ghc: '9.2.2'
           isHead: true
         isHead:
         - false
@@ -183,7 +183,7 @@ jobs:
         - '8.10.7'
         - '9.0.2'
         include:
-        - ghc: '9.2.1'
+        - ghc: '9.2.2'
           isHead: true
         isHead:
         - false

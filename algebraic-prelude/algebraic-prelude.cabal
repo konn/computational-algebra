@@ -36,7 +36,7 @@ library
   build-depends:
       base >=4.7 && <5
     , basic-prelude
-    , lens >=4.0 && <5.1
+    , lens >=4.0 && <5.2
     , semigroups
   if impl(ghc >=8.4)
     build-depends:

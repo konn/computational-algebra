@@ -14,7 +14,7 @@ let versions =
       [ (ghc "8.10.7")
         with generate-page = True
       , ghc "9.0.2"
-      , lib.ghcHead "9.2.1"
+      , lib.ghcHead "9.2.2"
       ]
 
 let ghcHeaders = lib.makeGhcHeader versions
