@@ -21,19 +21,19 @@
 </span><span id="line-21"></span><span class="hs-comment">-- | Selection strategy assigning each pair of polynomials of type @f@,</span><span>
 </span><span id="line-22"></span><span class="hs-comment">--   to some @&#39;Ord&#39;@ered rank @w@. F_4 Algorithm will take care of pairs</span><span>
 </span><span id="line-23"></span><span class="hs-comment">--   in ascending order in rank.</span><span>
-</span><span id="line-24"></span><span class="hs-keyword">type</span><span> </span><span id="Strategy"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#Strategy"><span class="hs-identifier hs-var">Strategy</span></a></span></span><span> </span><span id="local-6989586621679380211"><span class="annot"><a href="#local-6989586621679380211"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679380210"><span class="annot"><a href="#local-6989586621679380210"><span class="hs-identifier hs-type">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679380211"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380211"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380210"><span class="hs-identifier hs-type">w</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">type</span><span> </span><span id="Strategy"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#Strategy"><span class="hs-identifier hs-var">Strategy</span></a></span></span><span> </span><span id="local-6989586621679380209"><span class="annot"><a href="#local-6989586621679380209"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679380208"><span class="annot"><a href="#local-6989586621679380208"><span class="hs-identifier hs-type">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679380209"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380209"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380208"><span class="hs-identifier hs-type">w</span></a></span><span>
 </span><span id="line-25"></span><span>
-</span><span id="line-26"></span><span id="local-6989586621679380209"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#normalStrategy"><span class="hs-identifier hs-type">normalStrategy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380209"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380209"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380209"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span></span><span>
+</span><span id="line-26"></span><span id="local-6989586621679380207"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#normalStrategy"><span class="hs-identifier hs-type">normalStrategy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380207"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380207"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380207"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span></span><span>
 </span><span id="line-27"></span><span id="normalStrategy"><span class="annot"><span class="annottext">normalStrategy :: poly -&gt; poly -&gt; Int
 </span><a href="Algebra.Algorithms.Groebner.F4.html#normalStrategy"><span class="hs-identifier hs-var hs-var">normalStrategy</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">poly -&gt; poly -&gt; Int
 forall poly. IsOrderedPolynomial poly =&gt; poly -&gt; poly -&gt; Int
 </span><a href="Algebra.Algorithms.Groebner.F4.html#degPair"><span class="hs-identifier hs-var">degPair</span></a></span><span>
 </span><span id="line-28"></span><span>
-</span><span id="line-29"></span><span id="local-6989586621679380414"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#degPair"><span class="hs-identifier hs-type">degPair</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380414"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380414"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380414"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span></span><span>
+</span><span id="line-29"></span><span id="local-6989586621679380412"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#degPair"><span class="hs-identifier hs-type">degPair</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380412"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380412"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380412"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span></span><span>
 </span><span id="line-30"></span><span id="degPair"><span class="annot"><span class="annottext">degPair :: poly -&gt; poly -&gt; Int
-</span><a href="Algebra.Algorithms.Groebner.F4.html#degPair"><span class="hs-identifier hs-var hs-var">degPair</span></a></span></span><span> </span><span id="local-6989586621679380207"><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380207"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679380206"><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380206"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly) -&gt; Int
+</span><a href="Algebra.Algorithms.Groebner.F4.html#degPair"><span class="hs-identifier hs-var hs-var">degPair</span></a></span></span><span> </span><span id="local-6989586621679380205"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380205"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679380204"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380204"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly) -&gt; Int
 forall k (ord :: k) (n :: Nat). OrderedMonomial ord n -&gt; Int
 </span><span class="hs-identifier hs-var">totalDegree</span></span><span> </span><span class="annot"><span class="annottext">(OrderedMonomial (MOrder poly) (Arity poly) -&gt; Int)
 -&gt; OrderedMonomial (MOrder poly) (Arity poly) -&gt; Int
@@ -43,15 +43,15 @@ forall poly.
 IsOrderedPolynomial poly =&gt;
 poly -&gt; poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 </span><a href="Algebra.Algorithms.Groebner.F4.html#lcmLeadingMonomial"><span class="hs-identifier hs-var">lcmLeadingMonomial</span></a></span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380207"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380206"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><a href="#local-6989586621679380205"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380204"><span class="hs-identifier hs-var">g</span></a></span><span>
 </span><span id="line-31"></span><span>
-</span><span id="line-32"></span><span id="local-6989586621679380402"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#lcmLeadingMonomial"><span class="hs-identifier hs-type">lcmLeadingMonomial</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380402"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-33"></span><span>                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380402"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380402"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OrderedMonomial</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MOrder</span></span><span> </span><span class="annot"><a href="#local-6989586621679380402"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arity</span></span><span> </span><span class="annot"><a href="#local-6989586621679380402"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-32"></span><span id="local-6989586621679380400"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#lcmLeadingMonomial"><span class="hs-identifier hs-type">lcmLeadingMonomial</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380400"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380400"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380400"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OrderedMonomial</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MOrder</span></span><span> </span><span class="annot"><a href="#local-6989586621679380400"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arity</span></span><span> </span><span class="annot"><a href="#local-6989586621679380400"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span></span><span>
 </span><span id="line-34"></span><span id="lcmLeadingMonomial"><span class="annot"><span class="annottext">lcmLeadingMonomial :: poly -&gt; poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
-</span><a href="Algebra.Algorithms.Groebner.F4.html#lcmLeadingMonomial"><span class="hs-identifier hs-var hs-var">lcmLeadingMonomial</span></a></span></span><span> </span><span id="local-6989586621679380203"><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380203"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679380202"><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380202"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
+</span><a href="Algebra.Algorithms.Groebner.F4.html#lcmLeadingMonomial"><span class="hs-identifier hs-var hs-var">lcmLeadingMonomial</span></a></span></span><span> </span><span id="local-6989586621679380201"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380201"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679380200"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380200"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
 -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 forall k (n :: Nat) (ord :: k).
@@ -63,23 +63,23 @@ forall poly.
 IsOrderedPolynomial poly =&gt;
 poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 </span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380203"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+</span><a href="#local-6989586621679380201"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 forall poly.
 IsOrderedPolynomial poly =&gt;
 poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 </span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380202"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679380200"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-35"></span><span>
-</span><span id="line-36"></span><span id="local-6989586621679380321"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#viewMins"><span class="hs-identifier hs-type">viewMins</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679380321"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">H.Heap</span></span><span> </span><span class="annot"><a href="#local-6989586621679380321"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">H.Heap</span></span><span> </span><span class="annot"><a href="#local-6989586621679380321"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">H.Heap</span></span><span> </span><span class="annot"><a href="#local-6989586621679380321"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-36"></span><span id="local-6989586621679380319"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#viewMins"><span class="hs-identifier hs-type">viewMins</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679380319"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">H.Heap</span></span><span> </span><span class="annot"><a href="#local-6989586621679380319"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">H.Heap</span></span><span> </span><span class="annot"><a href="#local-6989586621679380319"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">H.Heap</span></span><span> </span><span class="annot"><a href="#local-6989586621679380319"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span></span><span>
 </span><span id="line-37"></span><span id="viewMins"><span class="annot"><span class="annottext">viewMins :: Heap w -&gt; Maybe (Heap w, Heap w)
-</span><a href="Algebra.Algorithms.Groebner.F4.html#viewMins"><span class="hs-identifier hs-var hs-var">viewMins</span></a></span></span><span> </span><span id="local-6989586621679380198"><span class="annot"><span class="annottext">Heap w
-</span><a href="#local-6989586621679380198"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-38"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679380197"><span class="annot"><span class="annottext">w
-</span><a href="#local-6989586621679380197"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Heap w
+</span><a href="Algebra.Algorithms.Groebner.F4.html#viewMins"><span class="hs-identifier hs-var hs-var">viewMins</span></a></span></span><span> </span><span id="local-6989586621679380196"><span class="annot"><span class="annottext">Heap w
+</span><a href="#local-6989586621679380196"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679380195"><span class="annot"><span class="annottext">w
+</span><a href="#local-6989586621679380195"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Heap w
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Heap w -&gt; Maybe (w, Heap w)
 forall a. Heap a -&gt; Maybe (a, Heap a)
 </span><span class="hs-identifier hs-var">H.viewMin</span></span><span> </span><span class="annot"><span class="annottext">Heap w
-</span><a href="#local-6989586621679380198"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><a href="#local-6989586621679380196"><span class="hs-identifier hs-var">h</span></a></span><span>
 </span><span id="line-39"></span><span>  </span><span class="annot"><span class="annottext">(Heap w, Heap w) -&gt; Maybe (Heap w, Heap w)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">((Heap w, Heap w) -&gt; Maybe (Heap w, Heap w))
@@ -90,12 +90,12 @@ forall a. (a -&gt; Bool) -&gt; Heap a -&gt; (Heap a, Heap a)
 </span><span class="hs-identifier hs-var">H.span</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">w -&gt; w -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">w
-</span><a href="#local-6989586621679380197"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Heap w
-</span><a href="#local-6989586621679380198"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><a href="#local-6989586621679380195"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Heap w
+</span><a href="#local-6989586621679380196"><span class="hs-identifier hs-var">h</span></a></span><span>
 </span><span id="line-40"></span><span>
-</span><span id="line-41"></span><span id="local-6989586621679380194"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#f4"><span class="hs-identifier hs-type">f4</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380194"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380194"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-42"></span><span>       </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380194"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Normed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380194"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-43"></span><span>   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ideal</span></span><span> </span><span class="annot"><a href="#local-6989586621679380194"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380194"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-41"></span><span id="local-6989586621679380192"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#f4"><span class="hs-identifier hs-type">f4</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380192"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380192"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-42"></span><span>       </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380192"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Normed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380192"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ideal</span></span><span> </span><span class="annot"><a href="#local-6989586621679380192"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380192"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">]</span></span><span>
 </span><span id="line-44"></span><span id="f4"><span class="annot"><span class="annottext">f4 :: Ideal poly -&gt; [poly]
 </span><a href="Algebra.Algorithms.Groebner.F4.html#f4"><span class="hs-identifier hs-var hs-var">f4</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Proxy DMatrix -&gt; Ideal poly -&gt; [poly]
 forall poly (mat :: * -&gt; *) (proxy :: (* -&gt; *) -&gt; *).
@@ -106,81 +106,81 @@ proxy mat -&gt; Ideal poly -&gt; [poly]
 forall k (t :: k). Proxy t
 </span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proxy</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DMatrix</span></span><span class="hs-special">)</span><span>
 </span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span id="local-6989586621679380379"><span id="local-6989586621679380381"><span id="local-6989586621679380385"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#f4%27"><span class="hs-identifier hs-type">f4&#39;</span></a></span><span> </span><span class="hs-glyph">::</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Normed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380385"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-47"></span><span>       </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380385"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-48"></span><span>       </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380385"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-49"></span><span>       </span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><a href="#local-6989586621679380381"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380385"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-50"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380379"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380381"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ideal</span></span><span> </span><span class="annot"><a href="#local-6989586621679380385"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380385"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-46"></span><span id="local-6989586621679380377"><span id="local-6989586621679380379"><span id="local-6989586621679380383"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#f4%27"><span class="hs-identifier hs-type">f4&#39;</span></a></span><span> </span><span class="hs-glyph">::</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Normed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380383"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-47"></span><span>       </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380383"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-48"></span><span>       </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380383"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-49"></span><span>       </span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><a href="#local-6989586621679380379"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380383"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380377"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380379"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ideal</span></span><span> </span><span class="annot"><a href="#local-6989586621679380383"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380383"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">]</span></span></span></span><span>
 </span><span id="line-51"></span><span id="f4%27"><span class="annot"><span class="annottext">f4&#39; :: proxy mat -&gt; Ideal poly -&gt; [poly]
-</span><a href="Algebra.Algorithms.Groebner.F4.html#f4%27"><span class="hs-identifier hs-var hs-var">f4&#39;</span></a></span></span><span> </span><span id="local-6989586621679380192"><span class="annot"><span class="annottext">proxy mat
-</span><a href="#local-6989586621679380192"><span class="hs-identifier hs-var">pxy</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy mat -&gt; Strategy poly Int -&gt; Ideal poly -&gt; [poly]
+</span><a href="Algebra.Algorithms.Groebner.F4.html#f4%27"><span class="hs-identifier hs-var hs-var">f4&#39;</span></a></span></span><span> </span><span id="local-6989586621679380190"><span class="annot"><span class="annottext">proxy mat
+</span><a href="#local-6989586621679380190"><span class="hs-identifier hs-var">pxy</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy mat -&gt; Strategy poly Int -&gt; Ideal poly -&gt; [poly]
 forall poly w (mat :: * -&gt; *) (proxy :: (* -&gt; *) -&gt; *).
 (Normed (Coefficient poly), Ord w, IsOrderedPolynomial poly,
  Field (Coefficient poly), Matrix mat (Coefficient poly)) =&gt;
 proxy mat -&gt; Strategy poly w -&gt; Ideal poly -&gt; [poly]
 </span><a href="Algebra.Algorithms.Groebner.F4.html#f4WithStrategy%27"><span class="hs-identifier hs-var">f4WithStrategy&#39;</span></a></span><span>  </span><span class="annot"><span class="annottext">proxy mat
-</span><a href="#local-6989586621679380192"><span class="hs-identifier hs-var">pxy</span></a></span><span> </span><span class="annot"><span class="annottext">Strategy poly Int
+</span><a href="#local-6989586621679380190"><span class="hs-identifier hs-var">pxy</span></a></span><span> </span><span class="annot"><span class="annottext">Strategy poly Int
 forall poly. IsOrderedPolynomial poly =&gt; poly -&gt; poly -&gt; Int
 </span><a href="Algebra.Algorithms.Groebner.F4.html#normalStrategy"><span class="hs-identifier hs-var">normalStrategy</span></a></span><span>
 </span><span id="line-52"></span><span>
 </span><span id="line-53"></span><span class="hs-comment">-- | Computes Gröbner Basis for the given ideal by F_4 algorithm, with specified</span><span>
 </span><span id="line-54"></span><span class="hs-comment">--   internal representation of matrix.</span><span>
-</span><span id="line-55"></span><span id="local-6989586621679380369"><span id="local-6989586621679380370"><span id="local-6989586621679380371"><span id="local-6989586621679380372"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#f4WithStrategy%27"><span class="hs-identifier hs-type">f4WithStrategy&#39;</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Normed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380372"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-56"></span><span>                    </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679380371"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380372"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-57"></span><span>                    </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380372"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-58"></span><span>                    </span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><a href="#local-6989586621679380370"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380372"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-59"></span><span>                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380369"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380370"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#Strategy"><span class="hs-identifier hs-type">Strategy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380372"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380371"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ideal</span></span><span> </span><span class="annot"><a href="#local-6989586621679380372"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380372"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">]</span></span></span></span></span><span>
+</span><span id="line-55"></span><span id="local-6989586621679380367"><span id="local-6989586621679380368"><span id="local-6989586621679380369"><span id="local-6989586621679380370"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#f4WithStrategy%27"><span class="hs-identifier hs-type">f4WithStrategy&#39;</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Normed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380370"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-56"></span><span>                    </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679380369"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380370"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-57"></span><span>                    </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380370"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-58"></span><span>                    </span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><a href="#local-6989586621679380368"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380370"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-59"></span><span>                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380367"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380368"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#Strategy"><span class="hs-identifier hs-type">Strategy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380370"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380369"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ideal</span></span><span> </span><span class="annot"><a href="#local-6989586621679380370"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380370"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">]</span></span></span></span></span><span>
 </span><span id="line-60"></span><span id="f4WithStrategy%27"><span class="annot"><span class="annottext">f4WithStrategy&#39; :: proxy mat -&gt; Strategy poly w -&gt; Ideal poly -&gt; [poly]
-</span><a href="Algebra.Algorithms.Groebner.F4.html#f4WithStrategy%27"><span class="hs-identifier hs-var hs-var">f4WithStrategy&#39;</span></a></span></span><span> </span><span id="local-6989586621679380191"><span class="annot"><span class="annottext">proxy mat
-</span><a href="#local-6989586621679380191"><span class="hs-identifier hs-var">mrep</span></a></span></span><span> </span><span id="local-6989586621679380190"><span class="annot"><span class="annottext">Strategy poly w
-</span><a href="#local-6989586621679380190"><span class="hs-identifier hs-var">select</span></a></span></span><span> </span><span id="local-6989586621679380189"><span class="annot"><span class="annottext">Ideal poly
-</span><a href="#local-6989586621679380189"><span class="hs-identifier hs-var">ideal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s [poly]) -&gt; [poly]
+</span><a href="Algebra.Algorithms.Groebner.F4.html#f4WithStrategy%27"><span class="hs-identifier hs-var hs-var">f4WithStrategy&#39;</span></a></span></span><span> </span><span id="local-6989586621679380189"><span class="annot"><span class="annottext">proxy mat
+</span><a href="#local-6989586621679380189"><span class="hs-identifier hs-var">mrep</span></a></span></span><span> </span><span id="local-6989586621679380188"><span class="annot"><span class="annottext">Strategy poly w
+</span><a href="#local-6989586621679380188"><span class="hs-identifier hs-var">select</span></a></span></span><span> </span><span id="local-6989586621679380187"><span class="annot"><span class="annottext">Ideal poly
+</span><a href="#local-6989586621679380187"><span class="hs-identifier hs-var">ideal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s [poly]) -&gt; [poly]
 forall a. (forall s. ST s a) -&gt; a
 </span><span class="hs-identifier hs-var">runST</span></span><span> </span><span class="annot"><span class="annottext">((forall s. ST s [poly]) -&gt; [poly])
 -&gt; (forall s. ST s [poly]) -&gt; [poly]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-61"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679380187"><span class="annot"><span class="annottext">is0 :: Vector poly
-</span><a href="#local-6989586621679380187"><span class="hs-identifier hs-var hs-var">is0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[poly] -&gt; Vector poly
+</span><span id="line-61"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679380185"><span class="annot"><span class="annottext">is0 :: Vector poly
+</span><a href="#local-6989586621679380185"><span class="hs-identifier hs-var hs-var">is0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[poly] -&gt; Vector poly
 forall a. [a] -&gt; Vector a
 </span><span class="hs-identifier hs-var">V.fromList</span></span><span> </span><span class="annot"><span class="annottext">([poly] -&gt; Vector poly) -&gt; [poly] -&gt; Vector poly
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Ideal poly -&gt; [poly]
 forall r. Ideal r -&gt; [r]
 </span><span class="hs-identifier hs-var">generators</span></span><span> </span><span class="annot"><span class="annottext">Ideal poly
-</span><a href="#local-6989586621679380189"><span class="hs-identifier hs-var">ideal</span></a></span><span>
-</span><span id="line-62"></span><span>      </span><span id="local-6989586621679380184"><span class="annot"><span class="annottext">buildHeap :: Vector poly -&gt; [Int] -&gt; Heap (Entry w (Int, Int))
-</span><a href="#local-6989586621679380184"><span class="hs-identifier hs-var hs-var">buildHeap</span></a></span></span><span> </span><span id="local-6989586621679380183"><span class="annot"><span class="annottext">Vector poly
-</span><a href="#local-6989586621679380183"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span id="local-6989586621679380182"><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679380182"><span class="hs-identifier hs-var">is</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621679380187"><span class="hs-identifier hs-var">ideal</span></a></span><span>
+</span><span id="line-62"></span><span>      </span><span id="local-6989586621679380182"><span class="annot"><span class="annottext">buildHeap :: Vector poly -&gt; [Int] -&gt; Heap (Entry w (Int, Int))
+</span><a href="#local-6989586621679380182"><span class="hs-identifier hs-var hs-var">buildHeap</span></a></span></span><span> </span><span id="local-6989586621679380181"><span class="annot"><span class="annottext">Vector poly
+</span><a href="#local-6989586621679380181"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span id="local-6989586621679380180"><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621679380180"><span class="hs-identifier hs-var">is</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-63"></span><span>        </span><span class="annot"><span class="annottext">[Entry w (Int, Int)] -&gt; Heap (Entry w (Int, Int))
 forall a. Ord a =&gt; [a] -&gt; Heap a
 </span><span class="hs-identifier hs-var">H.fromList</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">w -&gt; (Int, Int) -&gt; Entry w (Int, Int)
 forall p a. p -&gt; a -&gt; Entry p a
 </span><span class="hs-identifier hs-var">H.Entry</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Strategy poly w
-</span><a href="#local-6989586621679380190"><span class="hs-identifier hs-var">select</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector poly
-</span><a href="#local-6989586621679380183"><span class="hs-identifier hs-var">fs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector poly -&gt; Int -&gt; poly
+</span><a href="#local-6989586621679380188"><span class="hs-identifier hs-var">select</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector poly
+</span><a href="#local-6989586621679380181"><span class="hs-identifier hs-var">fs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector poly -&gt; Int -&gt; poly
 forall a. Vector a -&gt; Int -&gt; a
 </span><span class="hs-operator hs-var">V.!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380178"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector poly
-</span><a href="#local-6989586621679380183"><span class="hs-identifier hs-var">fs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector poly -&gt; Int -&gt; poly
+</span><a href="#local-6989586621679380176"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector poly
+</span><a href="#local-6989586621679380181"><span class="hs-identifier hs-var">fs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector poly -&gt; Int -&gt; poly
 forall a. Vector a -&gt; Int -&gt; a
 </span><span class="hs-operator hs-var">V.!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380177"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380178"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380177"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-64"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679380177"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380177"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679380182"><span class="hs-identifier hs-var">is</span></a></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679380178"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380178"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380175"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380176"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380175"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679380175"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380175"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621679380180"><span class="hs-identifier hs-var">is</span></a></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679380176"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380176"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380177"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679380175"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall r. Group r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">]</span><span>
 </span><span id="line-65"></span><span>                   </span><span class="hs-special">]</span><span>
-</span><span id="line-66"></span><span>  </span><span id="local-6989586621679380175"><span class="annot"><span class="annottext">STRef s (MVector s poly)
-</span><a href="#local-6989586621679380175"><span class="hs-identifier hs-var">gs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector s poly -&gt; ST s (STRef s (MVector s poly))
+</span><span id="line-66"></span><span>  </span><span id="local-6989586621679380173"><span class="annot"><span class="annottext">STRef s (MVector s poly)
+</span><a href="#local-6989586621679380173"><span class="hs-identifier hs-var">gs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector s poly -&gt; ST s (STRef s (MVector s poly))
 forall a s. a -&gt; ST s (STRef s a)
 </span><span class="hs-identifier hs-var">newSTRef</span></span><span> </span><span class="annot"><span class="annottext">(MVector s poly -&gt; ST s (STRef s (MVector s poly)))
 -&gt; ST s (MVector s poly) -&gt; ST s (STRef s (MVector s poly))
@@ -190,9 +190,9 @@ forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 Vector a -&gt; m (MVector (PrimState m) a)
 </span><span class="hs-identifier hs-var">V.unsafeThaw</span></span><span> </span><span class="annot"><span class="annottext">Vector poly
-</span><a href="#local-6989586621679380187"><span class="hs-identifier hs-var">is0</span></a></span><span>
-</span><span id="line-67"></span><span>  </span><span id="local-6989586621679380171"><span class="annot"><span class="annottext">STRef s (Heap (Entry w (Int, Int)))
-</span><a href="#local-6989586621679380171"><span class="hs-identifier hs-var">bs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Heap (Entry w (Int, Int))
+</span><a href="#local-6989586621679380185"><span class="hs-identifier hs-var">is0</span></a></span><span>
+</span><span id="line-67"></span><span>  </span><span id="local-6989586621679380169"><span class="annot"><span class="annottext">STRef s (Heap (Entry w (Int, Int)))
+</span><a href="#local-6989586621679380169"><span class="hs-identifier hs-var">bs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Heap (Entry w (Int, Int))
 -&gt; ST s (STRef s (Heap (Entry w (Int, Int))))
 forall a s. a -&gt; ST s (STRef s a)
 </span><span class="hs-identifier hs-var">newSTRef</span></span><span> </span><span class="annot"><span class="annottext">(Heap (Entry w (Int, Int))
@@ -201,58 +201,58 @@ forall a s. a -&gt; ST s (STRef s a)
 -&gt; ST s (STRef s (Heap (Entry w (Int, Int))))
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector poly -&gt; [Int] -&gt; Heap (Entry w (Int, Int))
-</span><a href="#local-6989586621679380184"><span class="hs-identifier hs-var">buildHeap</span></a></span><span> </span><span class="annot"><span class="annottext">Vector poly
-</span><a href="#local-6989586621679380187"><span class="hs-identifier hs-var">is0</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380182"><span class="hs-identifier hs-var">buildHeap</span></a></span><span> </span><span class="annot"><span class="annottext">Vector poly
+</span><a href="#local-6989586621679380185"><span class="hs-identifier hs-var">is0</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span> </span><span class="annot"><span class="annottext">Vector poly -&gt; Int
 forall a. Vector a -&gt; Int
 </span><span class="hs-identifier hs-var">V.length</span></span><span> </span><span class="annot"><span class="annottext">Vector poly
-</span><a href="#local-6989586621679380187"><span class="hs-identifier hs-var">is0</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679380185"><span class="hs-identifier hs-var">is0</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall r. Group r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">]</span><span>
-</span><span id="line-68"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679380169"><span class="annot"><span class="annottext">cancel :: Int -&gt; Int -&gt; ST s [poly]
-</span><a href="#local-6989586621679380169"><span class="hs-identifier hs-var hs-var">cancel</span></a></span></span><span> </span><span id="local-6989586621679380168"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380168"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679380167"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380167"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-69"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621679380166"><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380166"><span class="hs-identifier hs-var">fi</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679380165"><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380165"><span class="hs-identifier hs-var">fj</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(poly -&gt; poly -&gt; (poly, poly))
+</span><span id="line-68"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679380167"><span class="annot"><span class="annottext">cancel :: Int -&gt; Int -&gt; ST s [poly]
+</span><a href="#local-6989586621679380167"><span class="hs-identifier hs-var hs-var">cancel</span></a></span></span><span> </span><span id="local-6989586621679380166"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380166"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679380165"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380165"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-69"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621679380164"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380164"><span class="hs-identifier hs-var">fi</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679380163"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380163"><span class="hs-identifier hs-var">fj</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(poly -&gt; poly -&gt; (poly, poly))
 -&gt; ST s poly -&gt; ST s (poly -&gt; (poly, poly))
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly)
-</span><a href="#local-6989586621679380175"><span class="hs-identifier hs-var">gs</span></a></span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly) -&gt; Int -&gt; ST s poly
+</span><a href="#local-6989586621679380173"><span class="hs-identifier hs-var">gs</span></a></span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly) -&gt; Int -&gt; ST s poly
 forall s a. ArrayRef s a -&gt; Int -&gt; ST s a
 </span><a href="Control.Monad.ST.Combinators.html#%25%21"><span class="hs-operator hs-var">%!</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380168"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">ST s (poly -&gt; (poly, poly)) -&gt; ST s poly -&gt; ST s (poly, poly)
+</span><a href="#local-6989586621679380166"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">ST s (poly -&gt; (poly, poly)) -&gt; ST s poly -&gt; ST s (poly, poly)
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly)
-</span><a href="#local-6989586621679380175"><span class="hs-identifier hs-var">gs</span></a></span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly) -&gt; Int -&gt; ST s poly
+</span><a href="#local-6989586621679380173"><span class="hs-identifier hs-var">gs</span></a></span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly) -&gt; Int -&gt; ST s poly
 forall s a. ArrayRef s a -&gt; Int -&gt; ST s a
 </span><a href="Control.Monad.ST.Combinators.html#%25%21"><span class="hs-operator hs-var">%!</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380167"><span class="hs-identifier hs-var">j</span></a></span><span>
-</span><span id="line-70"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679380162"><span class="annot"><span class="annottext">l :: OrderedMonomial (MOrder poly) (Arity poly)
-</span><a href="#local-6989586621679380162"><span class="hs-identifier hs-var hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">poly -&gt; poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
+</span><a href="#local-6989586621679380165"><span class="hs-identifier hs-var">j</span></a></span><span>
+</span><span id="line-70"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679380160"><span class="annot"><span class="annottext">l :: OrderedMonomial (MOrder poly) (Arity poly)
+</span><a href="#local-6989586621679380160"><span class="hs-identifier hs-var hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">poly -&gt; poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 forall poly.
 IsOrderedPolynomial poly =&gt;
 poly -&gt; poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 </span><a href="Algebra.Algorithms.Groebner.F4.html#lcmLeadingMonomial"><span class="hs-identifier hs-var">lcmLeadingMonomial</span></a></span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380166"><span class="hs-identifier hs-var">fi</span></a></span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380165"><span class="hs-identifier hs-var">fj</span></a></span><span>
+</span><a href="#local-6989586621679380164"><span class="hs-identifier hs-var">fi</span></a></span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380163"><span class="hs-identifier hs-var">fj</span></a></span><span>
 </span><span id="line-71"></span><span>        </span><span class="annot"><span class="annottext">[poly] -&gt; ST s [poly]
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">([poly] -&gt; ST s [poly]) -&gt; [poly] -&gt; ST s [poly]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(poly -&gt; poly) -&gt; [poly] -&gt; [poly]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679380160"><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380160"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">poly -&gt; poly
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679380158"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380158"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">poly -&gt; poly
 forall poly.
 (Field (Coefficient poly), IsOrderedPolynomial poly) =&gt;
 poly -&gt; poly
 </span><span class="hs-identifier hs-var">monoize</span></span><span> </span><span class="annot"><span class="annottext">(poly -&gt; poly) -&gt; poly -&gt; poly
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
-</span><a href="#local-6989586621679380162"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
+</span><a href="#local-6989586621679380160"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
 -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 forall r. Division r =&gt; r -&gt; r -&gt; r
@@ -261,14 +261,14 @@ forall poly.
 IsOrderedPolynomial poly =&gt;
 poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 </span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380160"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly) -&gt; poly -&gt; poly
+</span><a href="#local-6989586621679380158"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly) -&gt; poly -&gt; poly
 forall poly.
 IsOrderedPolynomial poly =&gt;
 OrderedMonomial (MOrder poly) (Arity poly) -&gt; poly -&gt; poly
 </span><span class="hs-operator hs-var">&gt;*</span></span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380160"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380166"><span class="hs-identifier hs-var">fi</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380165"><span class="hs-identifier hs-var">fj</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679380158"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380164"><span class="hs-identifier hs-var">fi</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380163"><span class="hs-identifier hs-var">fj</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-72"></span><span>  </span><span class="annot"><span class="annottext">ST s (Maybe (Heap (Entry w (Int, Int)), Heap (Entry w (Int, Int))))
 -&gt; ((Heap (Entry w (Int, Int)), Heap (Entry w (Int, Int)))
     -&gt; ST s ())
@@ -289,29 +289,29 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 -&gt; ST s (Heap (Entry w (Int, Int)))
 forall s a. STRef s a -&gt; ST s a
 </span><span class="hs-identifier hs-var">readSTRef</span></span><span> </span><span class="annot"><span class="annottext">STRef s (Heap (Entry w (Int, Int)))
-</span><a href="#local-6989586621679380171"><span class="hs-identifier hs-var">bs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(((Heap (Entry w (Int, Int)), Heap (Entry w (Int, Int)))
+</span><a href="#local-6989586621679380169"><span class="hs-identifier hs-var">bs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(((Heap (Entry w (Int, Int)), Heap (Entry w (Int, Int)))
   -&gt; ST s ())
  -&gt; ST s ())
 -&gt; ((Heap (Entry w (Int, Int)), Heap (Entry w (Int, Int)))
     -&gt; ST s ())
 -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679380154"><span class="annot"><span class="annottext">Heap (Entry w (Int, Int))
-</span><a href="#local-6989586621679380154"><span class="hs-identifier hs-var">cur</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679380153"><span class="annot"><span class="annottext">Heap (Entry w (Int, Int))
-</span><a href="#local-6989586621679380153"><span class="hs-identifier hs-var">bs&#39;</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679380152"><span class="annot"><span class="annottext">Heap (Entry w (Int, Int))
+</span><a href="#local-6989586621679380152"><span class="hs-identifier hs-var">cur</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679380151"><span class="annot"><span class="annottext">Heap (Entry w (Int, Int))
+</span><a href="#local-6989586621679380151"><span class="hs-identifier hs-var">bs&#39;</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-73"></span><span>    </span><span class="annot"><span class="annottext">STRef s (Heap (Entry w (Int, Int)))
-</span><a href="#local-6989586621679380171"><span class="hs-identifier hs-var">bs</span></a></span><span> </span><span class="annot"><span class="annottext">STRef s (Heap (Entry w (Int, Int)))
+</span><a href="#local-6989586621679380169"><span class="hs-identifier hs-var">bs</span></a></span><span> </span><span class="annot"><span class="annottext">STRef s (Heap (Entry w (Int, Int)))
 -&gt; Heap (Entry w (Int, Int)) -&gt; ST s ()
 forall s a. STRef s a -&gt; a -&gt; ST s ()
 </span><a href="Control.Monad.ST.Combinators.html#.%3D"><span class="hs-operator hs-var">.=</span></a></span><span> </span><span class="annot"><span class="annottext">Heap (Entry w (Int, Int))
-</span><a href="#local-6989586621679380153"><span class="hs-identifier hs-var">bs&#39;</span></a></span><span>
-</span><span id="line-74"></span><span>    </span><span id="local-6989586621679380151"><span class="annot"><span class="annottext">[poly]
-</span><a href="#local-6989586621679380151"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly) -&gt; ST s [poly]
+</span><a href="#local-6989586621679380151"><span class="hs-identifier hs-var">bs&#39;</span></a></span><span>
+</span><span id="line-74"></span><span>    </span><span id="local-6989586621679380149"><span class="annot"><span class="annottext">[poly]
+</span><a href="#local-6989586621679380149"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly) -&gt; ST s [poly]
 forall s a. ArrayRef s a -&gt; ST s [a]
 </span><a href="Control.Monad.ST.Combinators.html#arrayToList"><span class="hs-identifier hs-var">arrayToList</span></a></span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly)
-</span><a href="#local-6989586621679380175"><span class="hs-identifier hs-var">gs</span></a></span><span>
-</span><span id="line-75"></span><span>    </span><span id="local-6989586621679380149"><span class="annot"><span class="annottext">[poly]
-</span><a href="#local-6989586621679380149"><span class="hs-identifier hs-var">ls</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[[poly]] -&gt; [poly]
+</span><a href="#local-6989586621679380173"><span class="hs-identifier hs-var">gs</span></a></span><span>
+</span><span id="line-75"></span><span>    </span><span id="local-6989586621679380147"><span class="annot"><span class="annottext">[poly]
+</span><a href="#local-6989586621679380147"><span class="hs-identifier hs-var">ls</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[[poly]] -&gt; [poly]
 forall w. Monoid w =&gt; [w] -&gt; w
 </span><span class="hs-identifier hs-var">concat</span></span><span> </span><span class="annot"><span class="annottext">([[poly]] -&gt; [poly]) -&gt; ST s [[poly]] -&gt; ST s [poly]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
@@ -323,7 +323,7 @@ forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 </span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Int -&gt; Int -&gt; ST s [poly]) -&gt; (Int, Int) -&gt; ST s [poly]
 forall a b c. (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
 </span><span class="hs-identifier hs-var">uncurry</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; ST s [poly]
-</span><a href="#local-6989586621679380169"><span class="hs-identifier hs-var">cancel</span></a></span><span> </span><span class="annot"><span class="annottext">((Int, Int) -&gt; ST s [poly])
+</span><a href="#local-6989586621679380167"><span class="hs-identifier hs-var">cancel</span></a></span><span> </span><span class="annot"><span class="annottext">((Int, Int) -&gt; ST s [poly])
 -&gt; (Entry w (Int, Int) -&gt; (Int, Int))
 -&gt; Entry w (Int, Int)
 -&gt; ST s [poly]
@@ -333,10 +333,10 @@ forall p a. Entry p a -&gt; a
 </span><span class="hs-identifier hs-var hs-var">H.payload</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Heap (Entry w (Int, Int)) -&gt; [Entry w (Int, Int)]
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
 </span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">Heap (Entry w (Int, Int))
-</span><a href="#local-6989586621679380154"><span class="hs-identifier hs-var">cur</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-76"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679380142"><span class="annot"><span class="annottext">Vector (OrderedMonomial (MOrder poly) (Arity poly))
-</span><a href="#local-6989586621679380142"><span class="hs-identifier hs-var">labs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679380141"><span class="annot"><span class="annottext">mat (Coefficient poly)
-</span><a href="#local-6989586621679380141"><span class="hs-identifier hs-var">mat</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy mat
+</span><a href="#local-6989586621679380152"><span class="hs-identifier hs-var">cur</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679380140"><span class="annot"><span class="annottext">Vector (OrderedMonomial (MOrder poly) (Arity poly))
+</span><a href="#local-6989586621679380140"><span class="hs-identifier hs-var">labs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679380139"><span class="annot"><span class="annottext">mat (Coefficient poly)
+</span><a href="#local-6989586621679380139"><span class="hs-identifier hs-var">mat</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy mat
 -&gt; [poly]
 -&gt; [poly]
 -&gt; (Vector (OrderedMonomial (MOrder poly) (Arity poly)),
@@ -350,17 +350,17 @@ proxy mat
 -&gt; (Vector (OrderedMonomial (MOrder poly) (Arity poly)),
     mat (Coefficient poly))
 </span><a href="Algebra.Algorithms.Groebner.F4.html#computeMatrix"><span class="hs-identifier hs-var">computeMatrix</span></a></span><span> </span><span class="annot"><span class="annottext">proxy mat
-</span><a href="#local-6989586621679380191"><span class="hs-identifier hs-var">mrep</span></a></span><span> </span><span class="annot"><span class="annottext">[poly]
-</span><a href="#local-6989586621679380149"><span class="hs-identifier hs-var">ls</span></a></span><span> </span><span class="annot"><span class="annottext">[poly]
-</span><a href="#local-6989586621679380151"><span class="hs-identifier hs-var">g</span></a></span><span>
-</span><span id="line-77"></span><span>        </span><span id="local-6989586621679380139"><span class="annot"><span class="annottext">ms :: [OrderedMonomial (MOrder poly) (Arity poly)]
-</span><a href="#local-6989586621679380139"><span class="hs-identifier hs-var hs-var">ms</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Row (Mutable mat) (Coefficient poly)
+</span><a href="#local-6989586621679380189"><span class="hs-identifier hs-var">mrep</span></a></span><span> </span><span class="annot"><span class="annottext">[poly]
+</span><a href="#local-6989586621679380147"><span class="hs-identifier hs-var">ls</span></a></span><span> </span><span class="annot"><span class="annottext">[poly]
+</span><a href="#local-6989586621679380149"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-77"></span><span>        </span><span id="local-6989586621679380137"><span class="annot"><span class="annottext">ms :: [OrderedMonomial (MOrder poly) (Arity poly)]
+</span><a href="#local-6989586621679380137"><span class="hs-identifier hs-var hs-var">ms</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Row (Mutable mat) (Coefficient poly)
  -&gt; Maybe (OrderedMonomial (MOrder poly) (Arity poly)))
 -&gt; [Row (Mutable mat) (Coefficient poly)]
 -&gt; [OrderedMonomial (MOrder poly) (Arity poly)]
 forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679380137"><span class="annot"><span class="annottext">Row (Mutable mat) (Coefficient poly)
-</span><a href="#local-6989586621679380137"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">First (OrderedMonomial (MOrder poly) (Arity poly))
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679380135"><span class="annot"><span class="annottext">Row (Mutable mat) (Coefficient poly)
+</span><a href="#local-6989586621679380135"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">First (OrderedMonomial (MOrder poly) (Arity poly))
 -&gt; Maybe (OrderedMonomial (MOrder poly) (Arity poly))
 forall a. First a -&gt; Maybe a
 </span><span class="hs-identifier hs-var hs-var">getFirst</span></span><span> </span><span class="annot"><span class="annottext">(First (OrderedMonomial (MOrder poly) (Arity poly))
@@ -376,9 +376,9 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall i (f :: * -&gt; *) m a.
 (FoldableWithIndex i f, Monoid m) =&gt;
 (i -&gt; a -&gt; m) -&gt; f a -&gt; m
-</span><span class="hs-identifier hs-var">ifoldMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679380134"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380134"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679380133"><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
-</span><a href="#local-6989586621679380133"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (OrderedMonomial (MOrder poly) (Arity poly))
+</span><span class="hs-identifier hs-var">ifoldMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679380132"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380132"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679380131"><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
+</span><a href="#local-6989586621679380131"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (OrderedMonomial (MOrder poly) (Arity poly))
 -&gt; First (OrderedMonomial (MOrder poly) (Arity poly))
 forall a. Maybe a -&gt; First a
 </span><span class="hs-identifier hs-var">First</span></span><span> </span><span class="annot"><span class="annottext">(Maybe (OrderedMonomial (MOrder poly) (Arity poly))
@@ -390,10 +390,10 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span id="line-78"></span><span>                                                    </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Coefficient poly -&gt; Bool
 forall r. DecidableZero r =&gt; r -&gt; Bool
 </span><span class="hs-identifier hs-var">isZero</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Row (Mutable mat) (Coefficient poly)
-</span><a href="#local-6989586621679380137"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">Row (Mutable mat) (Coefficient poly) -&gt; Int -&gt; Coefficient poly
+</span><a href="#local-6989586621679380135"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">Row (Mutable mat) (Coefficient poly) -&gt; Int -&gt; Coefficient poly
 forall (v :: * -&gt; *) a. Vector v a =&gt; v a -&gt; Int -&gt; a
 </span><span class="hs-operator hs-var">GV.!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380134"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679380132"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-79"></span><span>                                                    </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Maybe (OrderedMonomial (MOrder poly) (Arity poly))
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
@@ -401,9 +401,9 @@ forall a. Maybe a
 -&gt; Maybe (OrderedMonomial (MOrder poly) (Arity poly))
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
-</span><a href="#local-6989586621679380133"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679380131"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-81"></span><span>                        </span><span class="annot"><span class="annottext">Vector (OrderedMonomial (MOrder poly) (Arity poly))
-</span><a href="#local-6989586621679380142"><span class="hs-identifier hs-var">labs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Row (Mutable mat) (Coefficient poly)]
+</span><a href="#local-6989586621679380140"><span class="hs-identifier hs-var">labs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Row (Mutable mat) (Coefficient poly)]
  -&gt; [OrderedMonomial (MOrder poly) (Arity poly)])
 -&gt; [Row (Mutable mat) (Coefficient poly)]
 -&gt; [OrderedMonomial (MOrder poly) (Arity poly)]
@@ -411,9 +411,9 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">mat (Coefficient poly) -&gt; [Row mat (Coefficient poly)]
 forall (mat :: * -&gt; *) a. Matrix mat a =&gt; mat a -&gt; [Row mat a]
 </span><span class="hs-identifier hs-var">toRows</span></span><span> </span><span class="annot"><span class="annottext">mat (Coefficient poly)
-</span><a href="#local-6989586621679380141"><span class="hs-identifier hs-var">mat</span></a></span><span>
-</span><span id="line-82"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621679380128"><span class="annot"><span class="annottext">mat (Coefficient poly)
-</span><a href="#local-6989586621679380128"><span class="hs-identifier hs-var">red</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">mat (Coefficient poly)
+</span><a href="#local-6989586621679380139"><span class="hs-identifier hs-var">mat</span></a></span><span>
+</span><span id="line-82"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621679380126"><span class="annot"><span class="annottext">mat (Coefficient poly)
+</span><a href="#local-6989586621679380126"><span class="hs-identifier hs-var">red</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">mat (Coefficient poly)
 </span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Coefficient poly
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">mat (Coefficient poly)
 -&gt; (mat (Coefficient poly), mat (Coefficient poly),
@@ -422,12 +422,12 @@ forall (mat :: * -&gt; *) a.
 (Matrix mat a, Eq a, Normed a, Field a) =&gt;
 mat a -&gt; (mat a, mat a, a)
 </span><span class="hs-identifier hs-var">gaussReduction</span></span><span> </span><span class="annot"><span class="annottext">mat (Coefficient poly)
-</span><a href="#local-6989586621679380141"><span class="hs-identifier hs-var">mat</span></a></span><span>
-</span><span id="line-83"></span><span>        </span><span id="local-6989586621679380126"><span class="annot"><span class="annottext">ps :: [poly]
-</span><a href="#local-6989586621679380126"><span class="hs-identifier hs-var hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(poly -&gt; Bool) -&gt; [poly] -&gt; [poly]
+</span><a href="#local-6989586621679380139"><span class="hs-identifier hs-var">mat</span></a></span><span>
+</span><span id="line-83"></span><span>        </span><span id="local-6989586621679380124"><span class="annot"><span class="annottext">ps :: [poly]
+</span><a href="#local-6989586621679380124"><span class="hs-identifier hs-var hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(poly -&gt; Bool) -&gt; [poly] -&gt; [poly]
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
-</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679380125"><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380125"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(OrderedMonomial (MOrder poly) (Arity poly) -&gt; Bool)
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679380123"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380123"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(OrderedMonomial (MOrder poly) (Arity poly) -&gt; Bool)
 -&gt; [OrderedMonomial (MOrder poly) (Arity poly)] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">all</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Bool
@@ -446,8 +446,8 @@ forall poly.
 IsOrderedPolynomial poly =&gt;
 poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 </span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380125"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[OrderedMonomial (MOrder poly) (Arity poly)]
-</span><a href="#local-6989586621679380139"><span class="hs-identifier hs-var">ms</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([poly] -&gt; [poly]) -&gt; [poly] -&gt; [poly]
+</span><a href="#local-6989586621679380123"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[OrderedMonomial (MOrder poly) (Arity poly)]
+</span><a href="#local-6989586621679380137"><span class="hs-identifier hs-var">ms</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([poly] -&gt; [poly]) -&gt; [poly] -&gt; [poly]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
 </span><span id="line-84"></span><span>             </span><span class="annot"><span class="annottext">Vector (OrderedMonomial (MOrder poly) (Arity poly))
@@ -456,51 +456,51 @@ forall (mat :: * -&gt; *) poly.
 (Matrix mat (Coefficient poly), IsOrderedPolynomial poly) =&gt;
 Vector (OMonom poly) -&gt; mat (Coefficient poly) -&gt; [poly]
 </span><a href="Algebra.Algorithms.Groebner.F4.html#decodeMatrix"><span class="hs-identifier hs-var">decodeMatrix</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (OrderedMonomial (MOrder poly) (Arity poly))
-</span><a href="#local-6989586621679380142"><span class="hs-identifier hs-var">labs</span></a></span><span> </span><span class="annot"><span class="annottext">mat (Coefficient poly)
-</span><a href="#local-6989586621679380128"><span class="hs-identifier hs-var">red</span></a></span><span>
+</span><a href="#local-6989586621679380140"><span class="hs-identifier hs-var">labs</span></a></span><span> </span><span class="annot"><span class="annottext">mat (Coefficient poly)
+</span><a href="#local-6989586621679380126"><span class="hs-identifier hs-var">red</span></a></span><span>
 </span><span id="line-85"></span><span>    </span><span class="annot"><span class="annottext">Bool -&gt; ST s () -&gt; ST s ()
 forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
 </span><span class="hs-identifier hs-var">unless</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[poly] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[poly]
-</span><a href="#local-6989586621679380126"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ST s () -&gt; ST s ()) -&gt; ST s () -&gt; ST s ()
+</span><a href="#local-6989586621679380124"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ST s () -&gt; ST s ()) -&gt; ST s () -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-86"></span><span>      </span><span id="local-6989586621679380118"><span class="annot"><span class="annottext">MVector s poly
-</span><a href="#local-6989586621679380118"><span class="hs-identifier hs-var">g0</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly) -&gt; ST s (MVector s poly)
+</span><span id="line-86"></span><span>      </span><span id="local-6989586621679380116"><span class="annot"><span class="annottext">MVector s poly
+</span><a href="#local-6989586621679380116"><span class="hs-identifier hs-var">g0</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly) -&gt; ST s (MVector s poly)
 forall s a. STRef s a -&gt; ST s a
 </span><span class="hs-identifier hs-var">readSTRef</span></span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly)
-</span><a href="#local-6989586621679380175"><span class="hs-identifier hs-var">gs</span></a></span><span>
-</span><span id="line-87"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679380117"><span class="annot"><span class="annottext">len0 :: Int
-</span><a href="#local-6989586621679380117"><span class="hs-identifier hs-var hs-var">len0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector s poly -&gt; Int
+</span><a href="#local-6989586621679380173"><span class="hs-identifier hs-var">gs</span></a></span><span>
+</span><span id="line-87"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679380115"><span class="annot"><span class="annottext">len0 :: Int
+</span><a href="#local-6989586621679380115"><span class="hs-identifier hs-var hs-var">len0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector s poly -&gt; Int
 forall s a. MVector s a -&gt; Int
 </span><span class="hs-identifier hs-var">MV.length</span></span><span> </span><span class="annot"><span class="annottext">MVector s poly
-</span><a href="#local-6989586621679380118"><span class="hs-identifier hs-var">g0</span></a></span><span>
-</span><span id="line-88"></span><span>          </span><span id="local-6989586621679380115"><span class="annot"><span class="annottext">ps&#39; :: Vector poly
-</span><a href="#local-6989586621679380115"><span class="hs-identifier hs-var hs-var">ps&#39;</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[poly] -&gt; Vector poly
+</span><a href="#local-6989586621679380116"><span class="hs-identifier hs-var">g0</span></a></span><span>
+</span><span id="line-88"></span><span>          </span><span id="local-6989586621679380113"><span class="annot"><span class="annottext">ps&#39; :: Vector poly
+</span><a href="#local-6989586621679380113"><span class="hs-identifier hs-var hs-var">ps&#39;</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[poly] -&gt; Vector poly
 forall a. [a] -&gt; Vector a
 </span><span class="hs-identifier hs-var">V.fromList</span></span><span> </span><span class="annot"><span class="annottext">[poly]
-</span><a href="#local-6989586621679380126"><span class="hs-identifier hs-var">ps</span></a></span><span>
-</span><span id="line-89"></span><span>          </span><span id="local-6989586621679380114"><span class="annot"><span class="annottext">size :: Int
-</span><a href="#local-6989586621679380114"><span class="hs-identifier hs-var hs-var">size</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector poly -&gt; Int
+</span><a href="#local-6989586621679380124"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><span id="line-89"></span><span>          </span><span id="local-6989586621679380112"><span class="annot"><span class="annottext">size :: Int
+</span><a href="#local-6989586621679380112"><span class="hs-identifier hs-var hs-var">size</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector poly -&gt; Int
 forall a. Vector a -&gt; Int
 </span><span class="hs-identifier hs-var">V.length</span></span><span> </span><span class="annot"><span class="annottext">Vector poly
-</span><a href="#local-6989586621679380115"><span class="hs-identifier hs-var">ps&#39;</span></a></span><span>
-</span><span id="line-90"></span><span>      </span><span id="local-6989586621679380113"><span class="annot"><span class="annottext">MVector s poly
-</span><a href="#local-6989586621679380113"><span class="hs-identifier hs-var">mv&#39;</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) poly
+</span><a href="#local-6989586621679380113"><span class="hs-identifier hs-var">ps&#39;</span></a></span><span>
+</span><span id="line-90"></span><span>      </span><span id="local-6989586621679380111"><span class="annot"><span class="annottext">MVector s poly
+</span><a href="#local-6989586621679380111"><span class="hs-identifier hs-var">mv&#39;</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) poly
 -&gt; Int -&gt; ST s (MVector (PrimState (ST s)) poly)
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; m (MVector (PrimState m) a)
 </span><span class="hs-identifier hs-var">MV.unsafeGrow</span></span><span> </span><span class="annot"><span class="annottext">MVector s poly
 MVector (PrimState (ST s)) poly
-</span><a href="#local-6989586621679380118"><span class="hs-identifier hs-var">g0</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380114"><span class="hs-identifier hs-var">size</span></a></span><span>
+</span><a href="#local-6989586621679380116"><span class="hs-identifier hs-var">g0</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380112"><span class="hs-identifier hs-var">size</span></a></span><span>
 </span><span id="line-91"></span><span>      </span><span class="annot"><span class="annottext">STRef s (MVector s poly)
-</span><a href="#local-6989586621679380175"><span class="hs-identifier hs-var">gs</span></a></span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly) -&gt; MVector s poly -&gt; ST s ()
+</span><a href="#local-6989586621679380173"><span class="hs-identifier hs-var">gs</span></a></span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly) -&gt; MVector s poly -&gt; ST s ()
 forall s a. STRef s a -&gt; a -&gt; ST s ()
 </span><a href="Control.Monad.ST.Combinators.html#.%3D"><span class="hs-operator hs-var">.=</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s poly
-</span><a href="#local-6989586621679380113"><span class="hs-identifier hs-var">mv&#39;</span></a></span><span>
+</span><a href="#local-6989586621679380111"><span class="hs-identifier hs-var">mv&#39;</span></a></span><span>
 </span><span id="line-92"></span><span>      </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) poly
 -&gt; MVector (PrimState (ST s)) poly -&gt; ST s ()
 forall (m :: * -&gt; *) a.
@@ -509,26 +509,26 @@ MVector (PrimState m) a -&gt; MVector (PrimState m) a -&gt; m ()
 </span><span class="hs-identifier hs-var">MV.copy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; MVector s poly -&gt; MVector s poly
 forall s a. Int -&gt; Int -&gt; MVector s a -&gt; MVector s a
 </span><span class="hs-identifier hs-var">MV.slice</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380117"><span class="hs-identifier hs-var">len0</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380114"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s poly
-</span><a href="#local-6989586621679380113"><span class="hs-identifier hs-var">mv&#39;</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(MVector s poly -&gt; ST s ()) -&gt; ST s (MVector s poly) -&gt; ST s ()
+</span><a href="#local-6989586621679380115"><span class="hs-identifier hs-var">len0</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380112"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s poly
+</span><a href="#local-6989586621679380111"><span class="hs-identifier hs-var">mv&#39;</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(MVector s poly -&gt; ST s ()) -&gt; ST s (MVector s poly) -&gt; ST s ()
 forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
 </span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Vector poly -&gt; ST s (MVector (PrimState (ST s)) poly)
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 Vector a -&gt; m (MVector (PrimState m) a)
 </span><span class="hs-identifier hs-var">V.unsafeThaw</span></span><span> </span><span class="annot"><span class="annottext">Vector poly
-</span><a href="#local-6989586621679380115"><span class="hs-identifier hs-var">ps&#39;</span></a></span><span>
-</span><span id="line-93"></span><span>      </span><span id="local-6989586621679380109"><span class="annot"><span class="annottext">Vector poly
-</span><a href="#local-6989586621679380109"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) poly -&gt; ST s (Vector poly)
+</span><a href="#local-6989586621679380113"><span class="hs-identifier hs-var">ps&#39;</span></a></span><span>
+</span><span id="line-93"></span><span>      </span><span id="local-6989586621679380107"><span class="annot"><span class="annottext">Vector poly
+</span><a href="#local-6989586621679380107"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) poly -&gt; ST s (Vector poly)
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 MVector (PrimState m) a -&gt; m (Vector a)
 </span><span class="hs-identifier hs-var">V.unsafeFreeze</span></span><span> </span><span class="annot"><span class="annottext">MVector s poly
 MVector (PrimState (ST s)) poly
-</span><a href="#local-6989586621679380113"><span class="hs-identifier hs-var">mv&#39;</span></a></span><span>
+</span><a href="#local-6989586621679380111"><span class="hs-identifier hs-var">mv&#39;</span></a></span><span>
 </span><span id="line-94"></span><span>      </span><span class="annot"><span class="annottext">STRef s (Heap (Entry w (Int, Int)))
-</span><a href="#local-6989586621679380171"><span class="hs-identifier hs-var">bs</span></a></span><span> </span><span class="annot"><span class="annottext">STRef s (Heap (Entry w (Int, Int)))
+</span><a href="#local-6989586621679380169"><span class="hs-identifier hs-var">bs</span></a></span><span> </span><span class="annot"><span class="annottext">STRef s (Heap (Entry w (Int, Int)))
 -&gt; (Heap (Entry w (Int, Int)) -&gt; Heap (Entry w (Int, Int)))
 -&gt; ST s ()
 forall s a. STRef s a -&gt; (a -&gt; a) -&gt; ST s ()
@@ -536,29 +536,29 @@ forall s a. STRef s a -&gt; (a -&gt; a) -&gt; ST s ()
 -&gt; Heap (Entry w (Int, Int)) -&gt; Heap (Entry w (Int, Int))
 forall a. Heap a -&gt; Heap a -&gt; Heap a
 </span><span class="hs-identifier hs-var">H.union</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector poly -&gt; [Int] -&gt; Heap (Entry w (Int, Int))
-</span><a href="#local-6989586621679380184"><span class="hs-identifier hs-var">buildHeap</span></a></span><span> </span><span class="annot"><span class="annottext">Vector poly
-</span><a href="#local-6989586621679380109"><span class="hs-identifier hs-var">fs</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380117"><span class="hs-identifier hs-var">len0</span></a></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380117"><span class="hs-identifier hs-var">len0</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679380182"><span class="hs-identifier hs-var">buildHeap</span></a></span><span> </span><span class="annot"><span class="annottext">Vector poly
+</span><a href="#local-6989586621679380107"><span class="hs-identifier hs-var">fs</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380115"><span class="hs-identifier hs-var">len0</span></a></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380115"><span class="hs-identifier hs-var">len0</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380114"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679380112"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall r. Group r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
 </span><span id="line-95"></span><span>  </span><span class="annot"><span class="annottext">STRef s (MVector s poly) -&gt; ST s [poly]
 forall s a. ArrayRef s a -&gt; ST s [a]
 </span><a href="Control.Monad.ST.Combinators.html#arrayToList"><span class="hs-identifier hs-var">arrayToList</span></a></span><span> </span><span class="annot"><span class="annottext">STRef s (MVector s poly)
-</span><a href="#local-6989586621679380175"><span class="hs-identifier hs-var">gs</span></a></span><span>
+</span><a href="#local-6989586621679380173"><span class="hs-identifier hs-var">gs</span></a></span><span>
 </span><span id="line-96"></span><span>
-</span><span id="line-97"></span><span id="local-6989586621679380270"><span id="local-6989586621679380271"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#decodeMatrix"><span class="hs-identifier hs-type">decodeMatrix</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><a href="#local-6989586621679380271"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380270"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380270"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-98"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OMonom</span></span><span> </span><span class="annot"><a href="#local-6989586621679380270"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-99"></span><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380271"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380270"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-100"></span><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380270"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-97"></span><span id="local-6989586621679380268"><span id="local-6989586621679380269"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#decodeMatrix"><span class="hs-identifier hs-type">decodeMatrix</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><a href="#local-6989586621679380269"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380268"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380268"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-98"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OMonom</span></span><span> </span><span class="annot"><a href="#local-6989586621679380268"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380269"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380268"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-100"></span><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380268"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">]</span></span></span><span>
 </span><span id="line-101"></span><span id="decodeMatrix"><span class="annot"><span class="annottext">decodeMatrix :: Vector (OMonom poly) -&gt; mat (Coefficient poly) -&gt; [poly]
-</span><a href="Algebra.Algorithms.Groebner.F4.html#decodeMatrix"><span class="hs-identifier hs-var hs-var">decodeMatrix</span></a></span></span><span> </span><span id="local-6989586621679380104"><span class="annot"><span class="annottext">Vector (OMonom poly)
-</span><a href="#local-6989586621679380104"><span class="hs-identifier hs-var">labs</span></a></span></span><span> </span><span id="local-6989586621679380103"><span class="annot"><span class="annottext">mat (Coefficient poly)
-</span><a href="#local-6989586621679380103"><span class="hs-identifier hs-var">mat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Algebra.Algorithms.Groebner.F4.html#decodeMatrix"><span class="hs-identifier hs-var hs-var">decodeMatrix</span></a></span></span><span> </span><span id="local-6989586621679380102"><span class="annot"><span class="annottext">Vector (OMonom poly)
+</span><a href="#local-6989586621679380102"><span class="hs-identifier hs-var">labs</span></a></span></span><span> </span><span id="local-6989586621679380101"><span class="annot"><span class="annottext">mat (Coefficient poly)
+</span><a href="#local-6989586621679380101"><span class="hs-identifier hs-var">mat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-102"></span><span>  </span><span class="annot"><span class="annottext">(poly -&gt; Bool) -&gt; [poly] -&gt; [poly]
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Bool
@@ -577,23 +577,23 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 forall (v :: * -&gt; *) a b.
 Vector v a =&gt;
 (Int -&gt; a -&gt; b -&gt; b) -&gt; b -&gt; v a -&gt; b
-</span><span class="hs-identifier hs-var">GV.ifoldr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679380101"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380101"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span id="local-6989586621679380100"><span class="annot"><span class="annottext">Coefficient poly
-</span><a href="#local-6989586621679380100"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679380099"><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380099"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Coefficient poly, OMonom poly) -&gt; poly
+</span><span class="hs-identifier hs-var">GV.ifoldr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679380099"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380099"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span id="local-6989586621679380098"><span class="annot"><span class="annottext">Coefficient poly
+</span><a href="#local-6989586621679380098"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679380097"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380097"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Coefficient poly, OMonom poly) -&gt; poly
 forall poly.
 IsOrderedPolynomial poly =&gt;
 (Coefficient poly, OrderedMonomial (MOrder poly) (Arity poly))
 -&gt; poly
 </span><span class="hs-identifier hs-var">toPolynomial</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Coefficient poly
-</span><a href="#local-6989586621679380100"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Vector (OMonom poly)
-</span><a href="#local-6989586621679380104"><span class="hs-identifier hs-var">labs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (OMonom poly) -&gt; Int -&gt; OMonom poly
+</span><a href="#local-6989586621679380098"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Vector (OMonom poly)
+</span><a href="#local-6989586621679380102"><span class="hs-identifier hs-var">labs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (OMonom poly) -&gt; Int -&gt; OMonom poly
 forall a. Vector a -&gt; Int -&gt; a
 </span><span class="hs-operator hs-var">V.!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380101"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">poly -&gt; poly -&gt; poly
+</span><a href="#local-6989586621679380099"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">poly -&gt; poly -&gt; poly
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380099"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380097"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">poly
 forall m. Monoidal m =&gt; m
 </span><span class="hs-identifier hs-var">zero</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Row (Mutable mat) (Coefficient poly)] -&gt; [poly])
 -&gt; [Row (Mutable mat) (Coefficient poly)] -&gt; [poly]
@@ -602,15 +602,15 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span id="line-104"></span><span>  </span><span class="annot"><span class="annottext">mat (Coefficient poly) -&gt; [Row mat (Coefficient poly)]
 forall (mat :: * -&gt; *) a. Matrix mat a =&gt; mat a -&gt; [Row mat a]
 </span><span class="hs-identifier hs-var">toRows</span></span><span> </span><span class="annot"><span class="annottext">mat (Coefficient poly)
-</span><a href="#local-6989586621679380103"><span class="hs-identifier hs-var">mat</span></a></span><span>
+</span><a href="#local-6989586621679380101"><span class="hs-identifier hs-var">mat</span></a></span><span>
 </span><span id="line-105"></span><span>
 </span><span id="line-106"></span><span class="hs-comment">-- | F_4 algorithm, using parallel array as an internal representation</span><span>
-</span><span id="line-107"></span><span id="local-6989586621679380095"><span id="local-6989586621679380096"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#f4WithStrategy"><span class="hs-identifier hs-type">f4WithStrategy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380096"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-108"></span><span>                   </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380096"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-109"></span><span>                   </span><span class="annot"><span class="hs-identifier hs-type">Normed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380096"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-110"></span><span>                   </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380096"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-111"></span><span>                   </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679380095"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-112"></span><span>   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#Strategy"><span class="hs-identifier hs-type">Strategy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380096"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380095"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ideal</span></span><span> </span><span class="annot"><a href="#local-6989586621679380096"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380096"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-107"></span><span id="local-6989586621679380093"><span id="local-6989586621679380094"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#f4WithStrategy"><span class="hs-identifier hs-type">f4WithStrategy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380094"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-108"></span><span>                   </span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380094"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-109"></span><span>                   </span><span class="annot"><span class="hs-identifier hs-type">Normed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380094"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-110"></span><span>                   </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380094"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-111"></span><span>                   </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679380093"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#Strategy"><span class="hs-identifier hs-type">Strategy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380094"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380093"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ideal</span></span><span> </span><span class="annot"><a href="#local-6989586621679380094"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380094"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">]</span></span></span><span>
 </span><span id="line-113"></span><span id="f4WithStrategy"><span class="annot"><span class="annottext">f4WithStrategy :: Strategy poly w -&gt; Ideal poly -&gt; [poly]
 </span><a href="Algebra.Algorithms.Groebner.F4.html#f4WithStrategy"><span class="hs-identifier hs-var hs-var">f4WithStrategy</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Proxy DMatrix -&gt; Strategy poly w -&gt; Ideal poly -&gt; [poly]
 forall poly w (mat :: * -&gt; *) (proxy :: (* -&gt; *) -&gt; *).
@@ -621,21 +621,21 @@ proxy mat -&gt; Strategy poly w -&gt; Ideal poly -&gt; [poly]
 forall k (t :: k). Proxy t
 </span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proxy</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DMatrix</span></span><span class="hs-special">)</span><span>
 </span><span id="line-114"></span><span>
-</span><span id="line-115"></span><span id="local-6989586621679380297"><span id="local-6989586621679380298"><span id="local-6989586621679380299"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#computeMatrix"><span class="hs-identifier hs-type">computeMatrix</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380299"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-116"></span><span>                  </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380299"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-117"></span><span>                  </span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><a href="#local-6989586621679380298"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380299"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-115"></span><span id="local-6989586621679380295"><span id="local-6989586621679380296"><span id="local-6989586621679380297"><span class="annot"><a href="Algebra.Algorithms.Groebner.F4.html#computeMatrix"><span class="hs-identifier hs-type">computeMatrix</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsOrderedPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679380297"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-116"></span><span>                  </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380297"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-117"></span><span>                  </span><span class="annot"><span class="hs-identifier hs-type">Matrix</span></span><span> </span><span class="annot"><a href="#local-6989586621679380296"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380297"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-118"></span><span>                 </span><span class="hs-special">)</span><span>
-</span><span id="line-119"></span><span>              </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380297"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380298"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380299"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380299"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-120"></span><span>              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OrderedMonomial</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MOrder</span></span><span> </span><span class="annot"><a href="#local-6989586621679380299"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arity</span></span><span> </span><span class="annot"><a href="#local-6989586621679380299"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679380298"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380299"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-119"></span><span>              </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679380295"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380296"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380297"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380297"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-120"></span><span>              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OrderedMonomial</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MOrder</span></span><span> </span><span class="annot"><a href="#local-6989586621679380297"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arity</span></span><span> </span><span class="annot"><a href="#local-6989586621679380297"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679380296"><span class="hs-identifier hs-type">mat</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679380297"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span></span><span>
 </span><span id="line-121"></span><span id="computeMatrix"><span class="annot"><span class="annottext">computeMatrix :: proxy mat
 -&gt; [poly]
 -&gt; [poly]
 -&gt; (Vector (OrderedMonomial (MOrder poly) (Arity poly)),
     mat (Coefficient poly))
 </span><a href="Algebra.Algorithms.Groebner.F4.html#computeMatrix"><span class="hs-identifier hs-var hs-var">computeMatrix</span></a></span></span><span> </span><span class="annot"><span class="annottext">proxy mat
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679380094"><span class="annot"><span class="annottext">[poly]
-</span><a href="#local-6989586621679380094"><span class="hs-identifier hs-var">ls</span></a></span></span><span> </span><span id="local-6989586621679380093"><span class="annot"><span class="annottext">[poly]
-</span><a href="#local-6989586621679380093"><span class="hs-identifier hs-var">gs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s.
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679380092"><span class="annot"><span class="annottext">[poly]
+</span><a href="#local-6989586621679380092"><span class="hs-identifier hs-var">ls</span></a></span></span><span> </span><span id="local-6989586621679380091"><span class="annot"><span class="annottext">[poly]
+</span><a href="#local-6989586621679380091"><span class="hs-identifier hs-var">gs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s.
  ST
    s
    (Vector (OrderedMonomial (MOrder poly) (Arity poly)),
@@ -659,13 +659,13 @@ forall a. (forall s. ST s a) -&gt; a
     mat (Coefficient poly))
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-122"></span><span>  </span><span id="local-6989586621679380092"><span class="annot"><span class="annottext">STRef s [poly]
-</span><a href="#local-6989586621679380092"><span class="hs-identifier hs-var">hs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[poly] -&gt; ST s (STRef s [poly])
+</span><span id="line-122"></span><span>  </span><span id="local-6989586621679380090"><span class="annot"><span class="annottext">STRef s [poly]
+</span><a href="#local-6989586621679380090"><span class="hs-identifier hs-var">hs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[poly] -&gt; ST s (STRef s [poly])
 forall a s. a -&gt; ST s (STRef s a)
 </span><span class="hs-identifier hs-var">newSTRef</span></span><span> </span><span class="annot"><span class="annottext">[poly]
-</span><a href="#local-6989586621679380094"><span class="hs-identifier hs-var">ls</span></a></span><span>
-</span><span id="line-123"></span><span>  </span><span id="local-6989586621679380091"><span class="annot"><span class="annottext">STRef s (Set (OrderedMonomial (MOrder poly) (Arity poly)))
-</span><a href="#local-6989586621679380091"><span class="hs-identifier hs-var">done</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Set (OrderedMonomial (MOrder poly) (Arity poly))
+</span><a href="#local-6989586621679380092"><span class="hs-identifier hs-var">ls</span></a></span><span>
+</span><span id="line-123"></span><span>  </span><span id="local-6989586621679380089"><span class="annot"><span class="annottext">STRef s (Set (OrderedMonomial (MOrder poly) (Arity poly)))
+</span><a href="#local-6989586621679380089"><span class="hs-identifier hs-var">done</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Set (OrderedMonomial (MOrder poly) (Arity poly))
 -&gt; ST
      s (STRef s (Set (OrderedMonomial (MOrder poly) (Arity poly))))
 forall a s. a -&gt; ST s (STRef s a)
@@ -692,9 +692,9 @@ forall poly.
 IsOrderedPolynomial poly =&gt;
 poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 </span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">[poly]
-</span><a href="#local-6989586621679380094"><span class="hs-identifier hs-var">ls</span></a></span><span>
-</span><span id="line-124"></span><span>  </span><span id="local-6989586621679380089"><span class="annot"><span class="annottext">STRef s (Heap (Down (OrderedMonomial (MOrder poly) (Arity poly))))
-</span><a href="#local-6989586621679380089"><span class="hs-identifier hs-var">monHs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Heap (Down (OrderedMonomial (MOrder poly) (Arity poly)))
+</span><a href="#local-6989586621679380092"><span class="hs-identifier hs-var">ls</span></a></span><span>
+</span><span id="line-124"></span><span>  </span><span id="local-6989586621679380087"><span class="annot"><span class="annottext">STRef s (Heap (Down (OrderedMonomial (MOrder poly) (Arity poly))))
+</span><a href="#local-6989586621679380087"><span class="hs-identifier hs-var">monHs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Heap (Down (OrderedMonomial (MOrder poly) (Arity poly)))
 -&gt; ST
      s
      (STRef
@@ -760,42 +760,42 @@ forall poly.
 IsOrderedPolynomial poly =&gt;
 poly -&gt; Set (OrderedMonomial (MOrder poly) (Arity poly))
 </span><span class="hs-identifier hs-var">orderedMonomials</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[poly]
-</span><a href="#local-6989586621679380094"><span class="hs-identifier hs-var">ls</span></a></span><span>
-</span><span id="line-126"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679380083"><span class="annot"><span class="annottext">ins :: poly -&gt; ST s ()
-</span><a href="#local-6989586621679380083"><span class="hs-identifier hs-var hs-var">ins</span></a></span></span><span> </span><span id="local-6989586621679380082"><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380082"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="#local-6989586621679380092"><span class="hs-identifier hs-var">ls</span></a></span><span>
+</span><span id="line-126"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679380081"><span class="annot"><span class="annottext">ins :: poly -&gt; ST s ()
+</span><a href="#local-6989586621679380081"><span class="hs-identifier hs-var hs-var">ins</span></a></span></span><span> </span><span id="local-6989586621679380080"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380080"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-127"></span><span>        </span><span class="annot"><span class="annottext">STRef s [poly] -&gt; ([poly] -&gt; [poly]) -&gt; ST s ()
 forall s a. STRef s a -&gt; (a -&gt; a) -&gt; ST s ()
 </span><span class="hs-identifier hs-var">modifySTRef&#39;</span></span><span> </span><span class="annot"><span class="annottext">STRef s [poly]
-</span><a href="#local-6989586621679380092"><span class="hs-identifier hs-var">hs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380082"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">poly -&gt; [poly] -&gt; [poly]
+</span><a href="#local-6989586621679380090"><span class="hs-identifier hs-var">hs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380080"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">poly -&gt; [poly] -&gt; [poly]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span class="hs-special">)</span><span>
-</span><span id="line-128"></span><span>        </span><span id="local-6989586621679380080"><span class="annot"><span class="annottext">Set (OrderedMonomial (MOrder poly) (Arity poly))
-</span><a href="#local-6989586621679380080"><span class="hs-identifier hs-var">del</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">STRef s (Set (OrderedMonomial (MOrder poly) (Arity poly)))
+</span><span id="line-128"></span><span>        </span><span id="local-6989586621679380078"><span class="annot"><span class="annottext">Set (OrderedMonomial (MOrder poly) (Arity poly))
+</span><a href="#local-6989586621679380078"><span class="hs-identifier hs-var">del</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">STRef s (Set (OrderedMonomial (MOrder poly) (Arity poly)))
 -&gt; ST s (Set (OrderedMonomial (MOrder poly) (Arity poly)))
 forall s a. STRef s a -&gt; ST s a
 </span><span class="hs-identifier hs-var">readSTRef</span></span><span> </span><span class="annot"><span class="annottext">STRef s (Set (OrderedMonomial (MOrder poly) (Arity poly)))
-</span><a href="#local-6989586621679380091"><span class="hs-identifier hs-var">done</span></a></span><span>
-</span><span id="line-129"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679380079"><span class="annot"><span class="annottext">ms :: Set (OrderedMonomial (MOrder poly) (Arity poly))
-</span><a href="#local-6989586621679380079"><span class="hs-identifier hs-var hs-var">ms</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">poly -&gt; Set (OrderedMonomial (MOrder poly) (Arity poly))
+</span><a href="#local-6989586621679380089"><span class="hs-identifier hs-var">done</span></a></span><span>
+</span><span id="line-129"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679380077"><span class="annot"><span class="annottext">ms :: Set (OrderedMonomial (MOrder poly) (Arity poly))
+</span><a href="#local-6989586621679380077"><span class="hs-identifier hs-var hs-var">ms</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">poly -&gt; Set (OrderedMonomial (MOrder poly) (Arity poly))
 forall poly.
 IsOrderedPolynomial poly =&gt;
 poly -&gt; Set (OrderedMonomial (MOrder poly) (Arity poly))
 </span><span class="hs-identifier hs-var">orderedMonomials</span></span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380082"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Set (OrderedMonomial (MOrder poly) (Arity poly))
+</span><a href="#local-6989586621679380080"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Set (OrderedMonomial (MOrder poly) (Arity poly))
 -&gt; Set (OrderedMonomial (MOrder poly) (Arity poly))
 -&gt; Set (OrderedMonomial (MOrder poly) (Arity poly))
 forall a. Ord a =&gt; Set a -&gt; Set a -&gt; Set a
 </span><span class="hs-operator hs-var">S.\\</span></span><span> </span><span class="annot"><span class="annottext">Set (OrderedMonomial (MOrder poly) (Arity poly))
-</span><a href="#local-6989586621679380080"><span class="hs-identifier hs-var">del</span></a></span><span>
+</span><a href="#local-6989586621679380078"><span class="hs-identifier hs-var">del</span></a></span><span>
 </span><span id="line-130"></span><span>        </span><span class="annot"><span class="annottext">STRef s (Heap (Down (OrderedMonomial (MOrder poly) (Arity poly))))
 -&gt; (Heap (Down (OrderedMonomial (MOrder poly) (Arity poly)))
     -&gt; Heap (Down (OrderedMonomial (MOrder poly) (Arity poly))))
 -&gt; ST s ()
 forall s a. STRef s a -&gt; (a -&gt; a) -&gt; ST s ()
 </span><span class="hs-identifier hs-var">modifySTRef&#39;</span></span><span> </span><span class="annot"><span class="annottext">STRef s (Heap (Down (OrderedMonomial (MOrder poly) (Arity poly))))
-</span><a href="#local-6989586621679380089"><span class="hs-identifier hs-var">monHs</span></a></span><span> </span><span class="annot"><span class="annottext">((Heap (Down (OrderedMonomial (MOrder poly) (Arity poly)))
+</span><a href="#local-6989586621679380087"><span class="hs-identifier hs-var">monHs</span></a></span><span> </span><span class="annot"><span class="annottext">((Heap (Down (OrderedMonomial (MOrder poly) (Arity poly)))
   -&gt; Heap (Down (OrderedMonomial (MOrder poly) (Arity poly))))
  -&gt; ST s ())
 -&gt; (Heap (Down (OrderedMonomial (MOrder poly) (Arity poly)))
@@ -838,7 +838,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 -&gt; [OrderedMonomial (MOrder poly) (Arity poly)]
 forall a. Set a -&gt; [a]
 </span><span class="hs-identifier hs-var">S.toList</span></span><span> </span><span class="annot"><span class="annottext">Set (OrderedMonomial (MOrder poly) (Arity poly))
-</span><a href="#local-6989586621679380079"><span class="hs-identifier hs-var">ms</span></a></span><span>
+</span><a href="#local-6989586621679380077"><span class="hs-identifier hs-var">ms</span></a></span><span>
 </span><span id="line-131"></span><span>  </span><span class="annot"><span class="annottext">ST
   s
   (Maybe
@@ -871,7 +871,7 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 -&gt; ST s (Heap (Down (OrderedMonomial (MOrder poly) (Arity poly))))
 forall s a. STRef s a -&gt; ST s a
 </span><span class="hs-identifier hs-var">readSTRef</span></span><span> </span><span class="annot"><span class="annottext">STRef s (Heap (Down (OrderedMonomial (MOrder poly) (Arity poly))))
-</span><a href="#local-6989586621679380089"><span class="hs-identifier hs-var">monHs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(((Down (OrderedMonomial (MOrder poly) (Arity poly)),
+</span><a href="#local-6989586621679380087"><span class="hs-identifier hs-var">monHs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(((Down (OrderedMonomial (MOrder poly) (Arity poly)),
    Heap (Down (OrderedMonomial (MOrder poly) (Arity poly))))
   -&gt; ST s ())
  -&gt; ST s ())
@@ -880,18 +880,18 @@ forall s a. STRef s a -&gt; ST s a
     -&gt; ST s ())
 -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Down</span></span><span> </span><span id="local-6989586621679380077"><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
-</span><a href="#local-6989586621679380077"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679380076"><span class="annot"><span class="annottext">Heap (Down (OrderedMonomial (MOrder poly) (Arity poly)))
-</span><a href="#local-6989586621679380076"><span class="hs-identifier hs-var">mHS&#39;</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Down</span></span><span> </span><span id="local-6989586621679380075"><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
+</span><a href="#local-6989586621679380075"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679380074"><span class="annot"><span class="annottext">Heap (Down (OrderedMonomial (MOrder poly) (Arity poly)))
+</span><a href="#local-6989586621679380074"><span class="hs-identifier hs-var">mHS&#39;</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-132"></span><span>    </span><span class="annot"><span class="annottext">STRef s (Heap (Down (OrderedMonomial (MOrder poly) (Arity poly))))
-</span><a href="#local-6989586621679380089"><span class="hs-identifier hs-var">monHs</span></a></span><span>  </span><span class="annot"><span class="annottext">STRef s (Heap (Down (OrderedMonomial (MOrder poly) (Arity poly))))
+</span><a href="#local-6989586621679380087"><span class="hs-identifier hs-var">monHs</span></a></span><span>  </span><span class="annot"><span class="annottext">STRef s (Heap (Down (OrderedMonomial (MOrder poly) (Arity poly))))
 -&gt; Heap (Down (OrderedMonomial (MOrder poly) (Arity poly)))
 -&gt; ST s ()
 forall s a. STRef s a -&gt; a -&gt; ST s ()
 </span><a href="Control.Monad.ST.Combinators.html#.%3D"><span class="hs-operator hs-var">.=</span></a></span><span> </span><span class="annot"><span class="annottext">Heap (Down (OrderedMonomial (MOrder poly) (Arity poly)))
-</span><a href="#local-6989586621679380076"><span class="hs-identifier hs-var">mHS&#39;</span></a></span><span>
+</span><a href="#local-6989586621679380074"><span class="hs-identifier hs-var">mHS&#39;</span></a></span><span>
 </span><span id="line-133"></span><span>    </span><span class="annot"><span class="annottext">STRef s (Set (OrderedMonomial (MOrder poly) (Arity poly)))
-</span><a href="#local-6989586621679380091"><span class="hs-identifier hs-var">done</span></a></span><span>  </span><span class="annot"><span class="annottext">STRef s (Set (OrderedMonomial (MOrder poly) (Arity poly)))
+</span><a href="#local-6989586621679380089"><span class="hs-identifier hs-var">done</span></a></span><span>  </span><span class="annot"><span class="annottext">STRef s (Set (OrderedMonomial (MOrder poly) (Arity poly)))
 -&gt; (Set (OrderedMonomial (MOrder poly) (Arity poly))
     -&gt; Set (OrderedMonomial (MOrder poly) (Arity poly)))
 -&gt; ST s ()
@@ -901,7 +901,7 @@ forall s a. STRef s a -&gt; (a -&gt; a) -&gt; ST s ()
 -&gt; Set (OrderedMonomial (MOrder poly) (Arity poly))
 forall a. Ord a =&gt; a -&gt; Set a -&gt; Set a
 </span><span class="hs-identifier hs-var">S.insert</span></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
-</span><a href="#local-6989586621679380077"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><a href="#local-6989586621679380075"><span class="hs-identifier hs-var">m</span></a></span><span>
 </span><span id="line-134"></span><span>    </span><span class="annot"><span class="annottext">Maybe poly -&gt; (poly -&gt; ST s ()) -&gt; ST s ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
@@ -914,7 +914,7 @@ forall k (n :: Nat) (ord :: k).
 KnownNat n =&gt;
 OrderedMonomial ord n -&gt; OrderedMonomial ord n -&gt; Bool
 </span><span class="hs-operator hs-var">`divs`</span></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
-</span><a href="#local-6989586621679380077"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">(OrderedMonomial (MOrder poly) (Arity poly) -&gt; Bool)
+</span><a href="#local-6989586621679380075"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">(OrderedMonomial (MOrder poly) (Arity poly) -&gt; Bool)
 -&gt; (poly -&gt; OrderedMonomial (MOrder poly) (Arity poly))
 -&gt; poly
 -&gt; Bool
@@ -924,15 +924,15 @@ forall poly.
 IsOrderedPolynomial poly =&gt;
 poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 </span><span class="hs-identifier hs-var">leadingMonomial</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[poly]
-</span><a href="#local-6989586621679380093"><span class="hs-identifier hs-var">gs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((poly -&gt; ST s ()) -&gt; ST s ()) -&gt; (poly -&gt; ST s ()) -&gt; ST s ()
+</span><a href="#local-6989586621679380091"><span class="hs-identifier hs-var">gs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((poly -&gt; ST s ()) -&gt; ST s ()) -&gt; (poly -&gt; ST s ()) -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679380072"><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380072"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679380070"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380070"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-135"></span><span>      </span><span class="annot"><span class="annottext">poly -&gt; ST s ()
-</span><a href="#local-6989586621679380083"><span class="hs-identifier hs-var">ins</span></a></span><span> </span><span class="annot"><span class="annottext">(poly -&gt; ST s ()) -&gt; poly -&gt; ST s ()
+</span><a href="#local-6989586621679380081"><span class="hs-identifier hs-var">ins</span></a></span><span> </span><span class="annot"><span class="annottext">(poly -&gt; ST s ()) -&gt; poly -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
-</span><a href="#local-6989586621679380077"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
+</span><a href="#local-6989586621679380075"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
 -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 forall r. Division r =&gt; r -&gt; r -&gt; r
@@ -941,14 +941,14 @@ forall poly.
 IsOrderedPolynomial poly =&gt;
 poly -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 </span><span class="hs-identifier hs-var">leadingMonomial</span></span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380072"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly) -&gt; poly -&gt; poly
+</span><a href="#local-6989586621679380070"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly) -&gt; poly -&gt; poly
 forall poly.
 IsOrderedPolynomial poly =&gt;
 OrderedMonomial (MOrder poly) (Arity poly) -&gt; poly -&gt; poly
 </span><span class="hs-operator hs-var">&gt;*</span></span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380072"><span class="hs-identifier hs-var">g</span></a></span><span>
-</span><span id="line-136"></span><span>  </span><span id="local-6989586621679380071"><span class="annot"><span class="annottext">Vector (OrderedMonomial (MOrder poly) (Arity poly))
-</span><a href="#local-6989586621679380071"><span class="hs-identifier hs-var">labs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[OrderedMonomial (MOrder poly) (Arity poly)]
+</span><a href="#local-6989586621679380070"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-136"></span><span>  </span><span id="local-6989586621679380069"><span class="annot"><span class="annottext">Vector (OrderedMonomial (MOrder poly) (Arity poly))
+</span><a href="#local-6989586621679380069"><span class="hs-identifier hs-var">labs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[OrderedMonomial (MOrder poly) (Arity poly)]
 -&gt; Vector (OrderedMonomial (MOrder poly) (Arity poly))
 forall a. [a] -&gt; Vector a
 </span><span class="hs-identifier hs-var">V.fromList</span></span><span> </span><span class="annot"><span class="annottext">([OrderedMonomial (MOrder poly) (Arity poly)]
@@ -970,14 +970,14 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 -&gt; ST s (Set (OrderedMonomial (MOrder poly) (Arity poly)))
 forall s a. STRef s a -&gt; ST s a
 </span><span class="hs-identifier hs-var">readSTRef</span></span><span> </span><span class="annot"><span class="annottext">STRef s (Set (OrderedMonomial (MOrder poly) (Arity poly)))
-</span><a href="#local-6989586621679380091"><span class="hs-identifier hs-var">done</span></a></span><span>
-</span><span id="line-137"></span><span>  </span><span id="local-6989586621679380069"><span class="annot"><span class="annottext">[poly]
-</span><a href="#local-6989586621679380069"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">STRef s [poly] -&gt; ST s [poly]
+</span><a href="#local-6989586621679380089"><span class="hs-identifier hs-var">done</span></a></span><span>
+</span><span id="line-137"></span><span>  </span><span id="local-6989586621679380067"><span class="annot"><span class="annottext">[poly]
+</span><a href="#local-6989586621679380067"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">STRef s [poly] -&gt; ST s [poly]
 forall s a. STRef s a -&gt; ST s a
 </span><span class="hs-identifier hs-var">readSTRef</span></span><span> </span><span class="annot"><span class="annottext">STRef s [poly]
-</span><a href="#local-6989586621679380092"><span class="hs-identifier hs-var">hs</span></a></span><span>
-</span><span id="line-138"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679380068"><span class="annot"><span class="annottext">mat :: mat (Coefficient poly)
-</span><a href="#local-6989586621679380068"><span class="hs-identifier hs-var hs-var">mat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Row mat (Coefficient poly)] -&gt; mat (Coefficient poly)
+</span><a href="#local-6989586621679380090"><span class="hs-identifier hs-var">hs</span></a></span><span>
+</span><span id="line-138"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679380066"><span class="annot"><span class="annottext">mat :: mat (Coefficient poly)
+</span><a href="#local-6989586621679380066"><span class="hs-identifier hs-var hs-var">mat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Row mat (Coefficient poly)] -&gt; mat (Coefficient poly)
 forall (mat :: * -&gt; *) a. Matrix mat a =&gt; [Row mat a] -&gt; mat a
 </span><span class="hs-identifier hs-var">fromRows</span></span><span> </span><span class="annot"><span class="annottext">([Row mat (Coefficient poly)] -&gt; mat (Coefficient poly))
 -&gt; [Row mat (Coefficient poly)] -&gt; mat (Coefficient poly)
@@ -986,33 +986,33 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span id="line-139"></span><span>            </span><span class="annot"><span class="annottext">(poly -&gt; Row (Mutable mat) (Coefficient poly))
 -&gt; [poly] -&gt; [Row (Mutable mat) (Coefficient poly)]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679380066"><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380066"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679380064"><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380064"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; (Int -&gt; Coefficient poly)
 -&gt; Row (Mutable mat) (Coefficient poly)
 forall (v :: * -&gt; *) a. Vector v a =&gt; Int -&gt; (Int -&gt; a) -&gt; v a
 </span><span class="hs-identifier hs-var">GV.generate</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (OrderedMonomial (MOrder poly) (Arity poly)) -&gt; Int
 forall a. Vector a -&gt; Int
 </span><span class="hs-identifier hs-var">V.length</span></span><span> </span><span class="annot"><span class="annottext">Vector (OrderedMonomial (MOrder poly) (Arity poly))
-</span><a href="#local-6989586621679380071"><span class="hs-identifier hs-var">labs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Int -&gt; Coefficient poly) -&gt; Row (Mutable mat) (Coefficient poly))
+</span><a href="#local-6989586621679380069"><span class="hs-identifier hs-var">labs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Int -&gt; Coefficient poly) -&gt; Row (Mutable mat) (Coefficient poly))
 -&gt; (Int -&gt; Coefficient poly)
 -&gt; Row (Mutable mat) (Coefficient poly)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679380064"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380064"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679380062"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679380062"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">OrderedMonomial (MOrder poly) (Arity poly)
 -&gt; poly -&gt; Coefficient poly
 forall poly.
 IsOrderedPolynomial poly =&gt;
 OrderedMonomial (MOrder poly) (Arity poly)
 -&gt; poly -&gt; Coefficient poly
 </span><span class="hs-identifier hs-var">coeff</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (OrderedMonomial (MOrder poly) (Arity poly))
-</span><a href="#local-6989586621679380071"><span class="hs-identifier hs-var">labs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (OrderedMonomial (MOrder poly) (Arity poly))
+</span><a href="#local-6989586621679380069"><span class="hs-identifier hs-var">labs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (OrderedMonomial (MOrder poly) (Arity poly))
 -&gt; Int -&gt; OrderedMonomial (MOrder poly) (Arity poly)
 forall (v :: * -&gt; *) a. Vector v a =&gt; v a -&gt; Int -&gt; a
 </span><span class="hs-operator hs-var">GV.!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679380064"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">poly
-</span><a href="#local-6989586621679380066"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[poly]
-</span><a href="#local-6989586621679380069"><span class="hs-identifier hs-var">fs</span></a></span><span>
+</span><a href="#local-6989586621679380062"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">poly
+</span><a href="#local-6989586621679380064"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[poly]
+</span><a href="#local-6989586621679380067"><span class="hs-identifier hs-var">fs</span></a></span><span>
 </span><span id="line-140"></span><span>  </span><span class="annot"><span class="annottext">(Vector (OrderedMonomial (MOrder poly) (Arity poly)),
  mat (Coefficient poly))
 -&gt; ST
@@ -1021,6 +1021,6 @@ forall (v :: * -&gt; *) a. Vector v a =&gt; v a -&gt; Int -&gt; a
       mat (Coefficient poly))
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (OrderedMonomial (MOrder poly) (Arity poly))
-</span><a href="#local-6989586621679380071"><span class="hs-identifier hs-var">labs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">mat (Coefficient poly)
-</span><a href="#local-6989586621679380068"><span class="hs-identifier hs-var">mat</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679380069"><span class="hs-identifier hs-var">labs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">mat (Coefficient poly)
+</span><a href="#local-6989586621679380066"><span class="hs-identifier hs-var">mat</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-141"></span></pre></body></html>

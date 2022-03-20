@@ -24,31 +24,31 @@
 </span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">AlgebraicPrelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">lex</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-operator">(%)</span></span><span class="hs-special">)</span><span>
 </span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bits</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Bits</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">FiniteBits</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-26"></span><span>
-</span><span id="line-27"></span><span id="local-6989586621679394955"><span class="annot"><a href="Algebra.Prelude.Core.html#%25"><span class="hs-operator hs-type">(%)</span></a></span><span> </span><span class="hs-glyph">::</span><span>
-</span><span id="line-28"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679394955"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Division</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679394955"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
-</span><span id="line-29"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679394955"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-30"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679394955"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-31"></span><span>  </span><span class="annot"><a href="#local-6989586621679394955"><span class="hs-identifier hs-type">poly</span></a></span></span><span>
-</span><span id="line-32"></span><span id="local-6989586621679394954"><span class="annot"><span class="annottext">Coefficient poly
-</span><a href="#local-6989586621679394954"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="%25"><span class="annot"><span class="annottext">% :: Coefficient poly -&gt; Coefficient poly -&gt; poly
-</span><a href="Algebra.Prelude.Core.html#%25"><span class="hs-operator hs-var hs-var">%</span></a></span></span><span> </span><span id="local-6989586621679394953"><span class="annot"><span class="annottext">Coefficient poly
-</span><a href="#local-6989586621679394953"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Coefficient poly -&gt; poly
+</span><span id="line-27"></span><span id="local-6989586621679394986"><span class="annot"><a href="Algebra.Prelude.Core.html#%25"><span class="hs-operator hs-type">(%)</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IsPolynomial</span></span><span> </span><span class="annot"><a href="#local-6989586621679394986"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Division</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679394986"><span class="hs-identifier hs-type">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-29"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679394986"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-30"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Coefficient</span></span><span> </span><span class="annot"><a href="#local-6989586621679394986"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-31"></span><span>  </span><span class="annot"><a href="#local-6989586621679394986"><span class="hs-identifier hs-type">poly</span></a></span></span><span>
+</span><span id="line-32"></span><span id="local-6989586621679394985"><span class="annot"><span class="annottext">Coefficient poly
+</span><a href="#local-6989586621679394985"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="%25"><span class="annot"><span class="annottext">% :: Coefficient poly -&gt; Coefficient poly -&gt; poly
+</span><a href="Algebra.Prelude.Core.html#%25"><span class="hs-operator hs-var hs-var">%</span></a></span></span><span> </span><span id="local-6989586621679394984"><span class="annot"><span class="annottext">Coefficient poly
+</span><a href="#local-6989586621679394984"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Coefficient poly -&gt; poly
 forall poly. IsPolynomial poly =&gt; Coefficient poly -&gt; poly
 </span><span class="hs-identifier hs-var">injectCoeff</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Coefficient poly
-</span><a href="#local-6989586621679394954"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Coefficient poly -&gt; Coefficient poly -&gt; Coefficient poly
+</span><a href="#local-6989586621679394985"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Coefficient poly -&gt; Coefficient poly -&gt; Coefficient poly
 forall r. Division r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Coefficient poly
-</span><a href="#local-6989586621679394953"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679394984"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-33"></span><span>
 </span><span id="line-34"></span><span class="hs-keyword">infixl</span><span> </span><span class="hs-number">7</span><span> </span><span class="annot"><a href="Algebra.Prelude.Core.html#%25"><span class="hs-operator hs-type">%</span></a></span><span>
 </span><span id="line-35"></span><span>
 </span><span id="line-36"></span><span class="annot"><a href="Algebra.Prelude.Core.html#logBase2"><span class="hs-identifier hs-type">logBase2</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
 </span><span id="line-37"></span><span id="logBase2"><span class="annot"><span class="annottext">logBase2 :: Int -&gt; Int
-</span><a href="Algebra.Prelude.Core.html#logBase2"><span class="hs-identifier hs-var hs-var">logBase2</span></a></span></span><span> </span><span id="local-6989586621679394950"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679394950"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
+</span><a href="Algebra.Prelude.Core.html#logBase2"><span class="hs-identifier hs-var hs-var">logBase2</span></a></span></span><span> </span><span id="local-6989586621679394981"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679394981"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
 forall b. FiniteBits b =&gt; b -&gt; Int
 </span><span class="hs-identifier hs-var">finiteBitSize</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679394950"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679394981"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall r. Group r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
@@ -56,26 +56,26 @@ forall r. Group r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
 forall b. FiniteBits b =&gt; b -&gt; Int
 </span><span class="hs-identifier hs-var">countLeadingZeros</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679394950"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><a href="#local-6989586621679394981"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-38"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Algebra.Prelude.Core.html#logBase2"><span class="hs-pragma hs-type">logBase2</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-39"></span><span>
 </span><span id="line-40"></span><span class="annot"><a href="Algebra.Prelude.Core.html#ceilingLogBase2"><span class="hs-identifier hs-type">ceilingLogBase2</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
 </span><span id="line-41"></span><span id="ceilingLogBase2"><span class="annot"><span class="annottext">ceilingLogBase2 :: Int -&gt; Int
-</span><a href="Algebra.Prelude.Core.html#ceilingLogBase2"><span class="hs-identifier hs-var hs-var">ceilingLogBase2</span></a></span></span><span> </span><span id="local-6989586621679394946"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679394946"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Algebra.Prelude.Core.html#ceilingLogBase2"><span class="hs-identifier hs-var hs-var">ceilingLogBase2</span></a></span></span><span> </span><span id="local-6989586621679394977"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679394977"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-42"></span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; Int
 </span><span class="hs-identifier hs-var">popCount</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679394946"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679394977"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span>
 </span><span id="line-43"></span><span>    </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
 </span><a href="Algebra.Prelude.Core.html#logBase2"><span class="hs-identifier hs-var">logBase2</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679394946"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><a href="#local-6989586621679394977"><span class="hs-identifier hs-var">n</span></a></span><span>
 </span><span id="line-44"></span><span>    </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
 </span><a href="Algebra.Prelude.Core.html#logBase2"><span class="hs-identifier hs-var">logBase2</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679394946"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679394977"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span>

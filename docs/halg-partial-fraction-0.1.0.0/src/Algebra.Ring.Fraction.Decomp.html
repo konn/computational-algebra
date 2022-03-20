@@ -15,13 +15,13 @@
 </span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Dual</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-17"></span><span>
-</span><span id="line-18"></span><span class="hs-keyword">data</span><span> </span><span id="PartialFractionDecomp"><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#PartialFractionDecomp"><span class="hs-identifier hs-var">PartialFractionDecomp</span></a></span></span><span> </span><span id="local-6989586621679250910"><span class="annot"><a href="#local-6989586621679250910"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PartialFraction"><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#PartialFraction"><span class="hs-identifier hs-var">PartialFraction</span></a></span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">data</span><span> </span><span id="PartialFractionDecomp"><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#PartialFractionDecomp"><span class="hs-identifier hs-var">PartialFractionDecomp</span></a></span></span><span> </span><span id="local-6989586621679250908"><span class="annot"><a href="#local-6989586621679250908"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PartialFraction"><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#PartialFraction"><span class="hs-identifier hs-var">PartialFraction</span></a></span></span><span>
 </span><span id="line-19"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="residualPoly"><span class="annot"><span class="annottext">PartialFractionDecomp k -&gt; Unipol k
-</span><a href="Algebra.Ring.Fraction.Decomp.html#residualPoly"><span class="hs-identifier hs-var hs-var">residualPoly</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250910"><span class="hs-identifier hs-type">k</span></a></span><span>
+</span><a href="Algebra.Ring.Fraction.Decomp.html#residualPoly"><span class="hs-identifier hs-var hs-var">residualPoly</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250908"><span class="hs-identifier hs-type">k</span></a></span><span>
 </span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="partialFracs"><span class="annot"><span class="annottext">PartialFractionDecomp k -&gt; NonEmpty (Unipol k, IntMap (Unipol k))
-</span><a href="Algebra.Ring.Fraction.Decomp.html#partialFracs"><span class="hs-identifier hs-var hs-var">partialFracs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250910"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IntMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250910"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="Algebra.Ring.Fraction.Decomp.html#partialFracs"><span class="hs-identifier hs-var hs-var">partialFracs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250908"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IntMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250908"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-21"></span><span>  </span><span class="hs-special">}</span><span>
-</span><span id="line-22"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679250828"><span id="local-6989586621679250830"><span id="local-6989586621679250832"><span class="annot"><span class="annottext">Int -&gt; PartialFractionDecomp k -&gt; ShowS
+</span><span id="line-22"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679250826"><span id="local-6989586621679250828"><span id="local-6989586621679250830"><span class="annot"><span class="annottext">Int -&gt; PartialFractionDecomp k -&gt; ShowS
 [PartialFractionDecomp k] -&gt; ShowS
 PartialFractionDecomp k -&gt; String
 (Int -&gt; PartialFractionDecomp k -&gt; ShowS)
@@ -51,7 +51,7 @@ showsPrec :: Int -&gt; PartialFractionDecomp k -&gt; ShowS
 $cshowsPrec :: forall k.
 (DecidableZero k, Ring k, Commutative k, Eq k, PrettyCoeff k) =&gt;
 Int -&gt; PartialFractionDecomp k -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250823"><span id="local-6989586621679250825"><span class="annot"><span class="annottext">PartialFractionDecomp k -&gt; PartialFractionDecomp k -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250821"><span id="local-6989586621679250823"><span class="annot"><span class="annottext">PartialFractionDecomp k -&gt; PartialFractionDecomp k -&gt; Bool
 (PartialFractionDecomp k -&gt; PartialFractionDecomp k -&gt; Bool)
 -&gt; (PartialFractionDecomp k -&gt; PartialFractionDecomp k -&gt; Bool)
 -&gt; Eq (PartialFractionDecomp k)
@@ -67,7 +67,7 @@ PartialFractionDecomp k -&gt; PartialFractionDecomp k -&gt; Bool
 $c== :: forall k.
 (Eq k, DecidableZero k) =&gt;
 PartialFractionDecomp k -&gt; PartialFractionDecomp k -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250807"><span id="local-6989586621679250809"><span id="local-6989586621679250811"><span id="local-6989586621679250813"><span id="local-6989586621679250815"><span id="local-6989586621679250817"><span id="local-6989586621679250819"><span class="annot"><span class="annottext">Eq (PartialFractionDecomp k)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250805"><span id="local-6989586621679250807"><span id="local-6989586621679250809"><span id="local-6989586621679250811"><span id="local-6989586621679250813"><span id="local-6989586621679250815"><span id="local-6989586621679250817"><span class="annot"><span class="annottext">Eq (PartialFractionDecomp k)
 Eq (PartialFractionDecomp k)
 -&gt; (PartialFractionDecomp k -&gt; PartialFractionDecomp k -&gt; Ordering)
 -&gt; (PartialFractionDecomp k -&gt; PartialFractionDecomp k -&gt; Bool)
@@ -139,58 +139,58 @@ PartialFractionDecomp k -&gt; PartialFractionDecomp k -&gt; Ordering
 $cp1Ord :: forall k. (Ord k, DecidableZero k) =&gt; Eq (PartialFractionDecomp k)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-23"></span><span>
-</span><span id="line-24"></span><span id="local-6989586621679250804"><span id="local-6989586621679250805"><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#partialFractionDecomposition"><span class="hs-identifier hs-type">partialFractionDecomposition</span></a></span><span> </span><span class="hs-glyph">::</span><span>
-</span><span id="line-25"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679250805"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679250805"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679250804"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
-</span><span id="line-26"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250805"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679250804"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679250805"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250805"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-27"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250805"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-28"></span><span>  </span><span class="annot"><a href="#local-6989586621679250804"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#PartialFractionDecomp"><span class="hs-identifier hs-type">PartialFractionDecomp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679250805"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-24"></span><span id="local-6989586621679250802"><span id="local-6989586621679250803"><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#partialFractionDecomposition"><span class="hs-identifier hs-type">partialFractionDecomposition</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679250803"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679250803"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679250802"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250803"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679250802"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679250803"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250803"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-27"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Fraction</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250803"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-28"></span><span>  </span><span class="annot"><a href="#local-6989586621679250802"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#PartialFractionDecomp"><span class="hs-identifier hs-type">PartialFractionDecomp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679250803"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-29"></span><span id="partialFractionDecomposition"><span class="annot"><span class="annottext">partialFractionDecomposition :: (Unipol k -&gt; m (k, NonEmpty (Unipol k, Natural)))
 -&gt; Fraction (Unipol k) -&gt; m (PartialFractionDecomp k)
-</span><a href="Algebra.Ring.Fraction.Decomp.html#partialFractionDecomposition"><span class="hs-identifier hs-var hs-var">partialFractionDecomposition</span></a></span></span><span> </span><span id="local-6989586621679250802"><span class="annot"><span class="annottext">Unipol k -&gt; m (k, NonEmpty (Unipol k, Natural))
-</span><a href="#local-6989586621679250802"><span class="hs-identifier hs-var">factor</span></a></span></span><span> </span><span id="local-6989586621679250801"><span class="annot"><span class="annottext">Fraction (Unipol k)
-</span><a href="#local-6989586621679250801"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-30"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679250800"><span class="annot"><span class="annottext">g0 :: Unipol k
-</span><a href="#local-6989586621679250800"><span class="hs-identifier hs-var hs-var">g0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k) -&gt; Unipol k
+</span><a href="Algebra.Ring.Fraction.Decomp.html#partialFractionDecomposition"><span class="hs-identifier hs-var hs-var">partialFractionDecomposition</span></a></span></span><span> </span><span id="local-6989586621679250800"><span class="annot"><span class="annottext">Unipol k -&gt; m (k, NonEmpty (Unipol k, Natural))
+</span><a href="#local-6989586621679250800"><span class="hs-identifier hs-var">factor</span></a></span></span><span> </span><span id="local-6989586621679250799"><span class="annot"><span class="annottext">Fraction (Unipol k)
+</span><a href="#local-6989586621679250799"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679250798"><span class="annot"><span class="annottext">g0 :: Unipol k
+</span><a href="#local-6989586621679250798"><span class="hs-identifier hs-var hs-var">g0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k) -&gt; Unipol k
 forall t. Fraction t -&gt; t
 </span><span class="hs-identifier hs-var">numerator</span></span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k)
-</span><a href="#local-6989586621679250801"><span class="hs-identifier hs-var">q</span></a></span><span>
-</span><span id="line-31"></span><span>      </span><span id="local-6989586621679250798"><span class="annot"><span class="annottext">f0 :: Unipol k
-</span><a href="#local-6989586621679250798"><span class="hs-identifier hs-var hs-var">f0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k) -&gt; Unipol k
+</span><a href="#local-6989586621679250799"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-31"></span><span>      </span><span id="local-6989586621679250796"><span class="annot"><span class="annottext">f0 :: Unipol k
+</span><a href="#local-6989586621679250796"><span class="hs-identifier hs-var hs-var">f0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k) -&gt; Unipol k
 forall t. Fraction t -&gt; t
 </span><span class="hs-identifier hs-var">denominator</span></span><span> </span><span class="annot"><span class="annottext">Fraction (Unipol k)
-</span><a href="#local-6989586621679250801"><span class="hs-identifier hs-var">q</span></a></span><span>
-</span><span id="line-32"></span><span>      </span><span id="local-6989586621679250796"><span class="annot"><span class="annottext">g :: Unipol k
-</span><a href="#local-6989586621679250796"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">k -&gt; k
+</span><a href="#local-6989586621679250799"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-32"></span><span>      </span><span id="local-6989586621679250794"><span class="annot"><span class="annottext">g :: Unipol k
+</span><a href="#local-6989586621679250794"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">k -&gt; k
 forall r. Division r =&gt; r -&gt; r
 </span><span class="hs-identifier hs-var">recip</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Unipol k -&gt; Coefficient (Unipol k)
 forall poly. IsOrderedPolynomial poly =&gt; poly -&gt; Coefficient poly
 </span><span class="hs-identifier hs-var">leadingCoeff</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250798"><span class="hs-identifier hs-var">f0</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">k -&gt; Unipol k -&gt; Unipol k
+</span><a href="#local-6989586621679250796"><span class="hs-identifier hs-var">f0</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">k -&gt; Unipol k -&gt; Unipol k
 forall r m. Module (Scalar r) m =&gt; r -&gt; m -&gt; m
 </span><span class="hs-operator hs-var">.*.</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250800"><span class="hs-identifier hs-var">g0</span></a></span><span>
-</span><span id="line-33"></span><span>      </span><span id="local-6989586621679250792"><span class="annot"><span class="annottext">f :: Unipol k
-</span><a href="#local-6989586621679250792"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k
+</span><a href="#local-6989586621679250798"><span class="hs-identifier hs-var">g0</span></a></span><span>
+</span><span id="line-33"></span><span>      </span><span id="local-6989586621679250790"><span class="annot"><span class="annottext">f :: Unipol k
+</span><a href="#local-6989586621679250790"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k
 forall poly.
 (Field (Coefficient poly), IsOrderedPolynomial poly) =&gt;
 poly -&gt; poly
 </span><span class="hs-identifier hs-var">monoize</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250798"><span class="hs-identifier hs-var">f0</span></a></span><span>
+</span><a href="#local-6989586621679250796"><span class="hs-identifier hs-var">f0</span></a></span><span>
 </span><span id="line-34"></span><span>   </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; m (k, NonEmpty (Unipol k, Natural))
-</span><a href="#local-6989586621679250802"><span class="hs-identifier hs-var">factor</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250792"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">m (k, NonEmpty (Unipol k, Natural))
+</span><a href="#local-6989586621679250800"><span class="hs-identifier hs-var">factor</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250790"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">m (k, NonEmpty (Unipol k, Natural))
 -&gt; ((k, NonEmpty (Unipol k, Natural)) -&gt; PartialFractionDecomp k)
 -&gt; m (PartialFractionDecomp k)
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; (a -&gt; b) -&gt; f b
-</span><span class="hs-operator hs-var">&lt;&amp;&gt;</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679250790"><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679250790"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250789"><span class="annot"><span class="annottext">NonEmpty (Unipol k, Natural)
-</span><a href="#local-6989586621679250789"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">&lt;&amp;&gt;</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679250788"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679250788"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250787"><span class="annot"><span class="annottext">NonEmpty (Unipol k, Natural)
+</span><a href="#local-6989586621679250787"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-35"></span><span>        </span><span class="annot"><span class="annottext">k -&gt; PartialFractionDecomp k -&gt; PartialFractionDecomp k
 forall k.
 CoeffRing k =&gt;
 k -&gt; PartialFractionDecomp k -&gt; PartialFractionDecomp k
 </span><a href="Algebra.Ring.Fraction.Decomp.html#scalePF"><span class="hs-identifier hs-var">scalePF</span></a></span><span> </span><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679250790"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">(PartialFractionDecomp k -&gt; PartialFractionDecomp k)
+</span><a href="#local-6989586621679250788"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">(PartialFractionDecomp k -&gt; PartialFractionDecomp k)
 -&gt; PartialFractionDecomp k -&gt; PartialFractionDecomp k
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; NonEmpty (Unipol k, Natural) -&gt; PartialFractionDecomp k
@@ -198,14 +198,14 @@ forall k.
 (CoeffRing k, Field k) =&gt;
 Unipol k -&gt; NonEmpty (Unipol k, Natural) -&gt; PartialFractionDecomp k
 </span><a href="Algebra.Ring.Fraction.Decomp.html#partialFractionDecompositionWith"><span class="hs-identifier hs-var">partialFractionDecompositionWith</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250796"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Unipol k, Natural)
-</span><a href="#local-6989586621679250789"><span class="hs-identifier hs-var">fs</span></a></span><span>
+</span><a href="#local-6989586621679250794"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Unipol k, Natural)
+</span><a href="#local-6989586621679250787"><span class="hs-identifier hs-var">fs</span></a></span><span>
 </span><span id="line-36"></span><span>
-</span><span id="line-37"></span><span id="local-6989586621679250917"><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#scalePF"><span class="hs-identifier hs-type">scalePF</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679250917"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679250917"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#PartialFractionDecomp"><span class="hs-identifier hs-type">PartialFractionDecomp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679250917"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#PartialFractionDecomp"><span class="hs-identifier hs-type">PartialFractionDecomp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679250917"><span class="hs-identifier hs-type">k</span></a></span></span><span>
+</span><span id="line-37"></span><span id="local-6989586621679250915"><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#scalePF"><span class="hs-identifier hs-type">scalePF</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679250915"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679250915"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#PartialFractionDecomp"><span class="hs-identifier hs-type">PartialFractionDecomp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679250915"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#PartialFractionDecomp"><span class="hs-identifier hs-type">PartialFractionDecomp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679250915"><span class="hs-identifier hs-type">k</span></a></span></span><span>
 </span><span id="line-38"></span><span id="scalePF"><span class="annot"><span class="annottext">scalePF :: k -&gt; PartialFractionDecomp k -&gt; PartialFractionDecomp k
-</span><a href="Algebra.Ring.Fraction.Decomp.html#scalePF"><span class="hs-identifier hs-var hs-var">scalePF</span></a></span></span><span> </span><span id="local-6989586621679250786"><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679250786"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679250785"><span class="annot"><span class="annottext">PartialFractionDecomp k
-</span><a href="#local-6989586621679250785"><span class="hs-identifier hs-var">pf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Algebra.Ring.Fraction.Decomp.html#scalePF"><span class="hs-identifier hs-var hs-var">scalePF</span></a></span></span><span> </span><span id="local-6989586621679250784"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679250784"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679250783"><span class="annot"><span class="annottext">PartialFractionDecomp k
+</span><a href="#local-6989586621679250783"><span class="hs-identifier hs-var">pf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-39"></span><span>  </span><span class="annot"><span class="annottext">PartialFraction :: forall k.
 Unipol k
 -&gt; NonEmpty (Unipol k, IntMap (Unipol k))
@@ -213,12 +213,12 @@ Unipol k
 </span><a href="Algebra.Ring.Fraction.Decomp.html#PartialFraction"><span class="hs-identifier hs-type">PartialFraction</span></a></span><span>
 </span><span id="line-40"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">residualPoly :: Unipol k
 </span><a href="Algebra.Ring.Fraction.Decomp.html#residualPoly"><span class="hs-identifier hs-var">residualPoly</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679250786"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; Unipol k -&gt; Unipol k
+</span><a href="#local-6989586621679250784"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; Unipol k -&gt; Unipol k
 forall r m. Module (Scalar r) m =&gt; r -&gt; m -&gt; m
 </span><span class="hs-operator hs-var">.*.</span></span><span> </span><span class="annot"><span class="annottext">PartialFractionDecomp k -&gt; Unipol k
 forall k. PartialFractionDecomp k -&gt; Unipol k
 </span><a href="Algebra.Ring.Fraction.Decomp.html#residualPoly"><span class="hs-identifier hs-var hs-var">residualPoly</span></a></span><span> </span><span class="annot"><span class="annottext">PartialFractionDecomp k
-</span><a href="#local-6989586621679250785"><span class="hs-identifier hs-var">pf</span></a></span><span>
+</span><a href="#local-6989586621679250783"><span class="hs-identifier hs-var">pf</span></a></span><span>
 </span><span id="line-41"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">partialFracs :: NonEmpty (Unipol k, IntMap (Unipol k))
 </span><a href="Algebra.Ring.Fraction.Decomp.html#partialFracs"><span class="hs-identifier hs-var">partialFracs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(IntMap (Unipol k) -&gt; IntMap (Unipol k))
 -&gt; (Unipol k, IntMap (Unipol k)) -&gt; (Unipol k, IntMap (Unipol k))
@@ -228,7 +228,7 @@ a b c -&gt; a (d, b) (d, c)
 </span><span class="hs-identifier hs-var">second</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Unipol k -&gt; Unipol k) -&gt; IntMap (Unipol k) -&gt; IntMap (Unipol k)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679250786"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; Unipol k -&gt; Unipol k
+</span><a href="#local-6989586621679250784"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; Unipol k -&gt; Unipol k
 forall r m. Module (Scalar r) m =&gt; r -&gt; m -&gt; m
 </span><span class="hs-operator hs-var">.*.</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Unipol k, IntMap (Unipol k)) -&gt; (Unipol k, IntMap (Unipol k)))
 -&gt; NonEmpty (Unipol k, IntMap (Unipol k))
@@ -238,7 +238,7 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 forall k.
 PartialFractionDecomp k -&gt; NonEmpty (Unipol k, IntMap (Unipol k))
 </span><a href="Algebra.Ring.Fraction.Decomp.html#partialFracs"><span class="hs-identifier hs-var hs-var">partialFracs</span></a></span><span> </span><span class="annot"><span class="annottext">PartialFractionDecomp k
-</span><a href="#local-6989586621679250785"><span class="hs-identifier hs-var">pf</span></a></span><span>
+</span><a href="#local-6989586621679250783"><span class="hs-identifier hs-var">pf</span></a></span><span>
 </span><span id="line-42"></span><span>    </span><span class="hs-special">}</span><span>
 </span><span id="line-43"></span><span>
 </span><span id="line-44"></span><span class="hs-comment">{- | Calculates the partial fraction decomposition
@@ -248,21 +248,21 @@ monic factorisation of the denominator.
 &gt;&gt;&gt; partialFractionDecompositionWith (#x ^ 3 + 4 * #x^2 - #x - 2 :: Unipol Rational) ((#x, 2) :| [(#x - 1, 1), (#x + 1, 1)])
 (x,fromList [(1,1),(2,2)]) :| [(x - 1,fromList [(1,1)]),(x + 1,fromList [(1,-1)])]
 -}</span><span>
-</span><span id="line-51"></span><span id="local-6989586621679250912"><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#partialFractionDecompositionWith"><span class="hs-identifier hs-type">partialFractionDecompositionWith</span></a></span><span> </span><span class="hs-glyph">::</span><span>
-</span><span id="line-52"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679250912"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679250912"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-51"></span><span id="local-6989586621679250910"><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#partialFractionDecompositionWith"><span class="hs-identifier hs-type">partialFractionDecompositionWith</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679250910"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679250910"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
 </span><span id="line-53"></span><span>  </span><span class="hs-comment">-- | Numerator</span><span>
-</span><span id="line-54"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250912"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-54"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250910"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-55"></span><span>  </span><span class="hs-comment">-- | Pairwise coprime (partial) factorisation of</span><span>
 </span><span id="line-56"></span><span>  </span><span class="hs-comment">-- denominator \(f = \sum_i f_i^{e_i}\) with each</span><span>
 </span><span id="line-57"></span><span>  </span><span class="hs-comment">-- \(f_i\) monic and non-constant.</span><span>
-</span><span id="line-58"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250912"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-59"></span><span>  </span><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#PartialFractionDecomp"><span class="hs-identifier hs-type">PartialFractionDecomp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679250912"><span class="hs-identifier hs-type">k</span></a></span></span><span>
+</span><span id="line-58"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250910"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-59"></span><span>  </span><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#PartialFractionDecomp"><span class="hs-identifier hs-type">PartialFractionDecomp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679250910"><span class="hs-identifier hs-type">k</span></a></span></span><span>
 </span><span id="line-60"></span><span id="partialFractionDecompositionWith"><span class="annot"><span class="annottext">partialFractionDecompositionWith :: Unipol k -&gt; NonEmpty (Unipol k, Natural) -&gt; PartialFractionDecomp k
-</span><a href="Algebra.Ring.Fraction.Decomp.html#partialFractionDecompositionWith"><span class="hs-identifier hs-var hs-var">partialFractionDecompositionWith</span></a></span></span><span> </span><span id="local-6989586621679250782"><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250782"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679250781"><span class="annot"><span class="annottext">NonEmpty (Unipol k, Natural)
-</span><a href="#local-6989586621679250781"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-61"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679250780"><span class="annot"><span class="annottext">f :: Unipol k
-</span><a href="#local-6989586621679250780"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mult (Unipol k) -&gt; Unipol k
+</span><a href="Algebra.Ring.Fraction.Decomp.html#partialFractionDecompositionWith"><span class="hs-identifier hs-var hs-var">partialFractionDecompositionWith</span></a></span></span><span> </span><span id="local-6989586621679250780"><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250780"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679250779"><span class="annot"><span class="annottext">NonEmpty (Unipol k, Natural)
+</span><a href="#local-6989586621679250779"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679250778"><span class="annot"><span class="annottext">f :: Unipol k
+</span><a href="#local-6989586621679250778"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mult (Unipol k) -&gt; Unipol k
 forall a. Mult a -&gt; a
 </span><span class="hs-identifier hs-var hs-var">runMult</span></span><span> </span><span class="annot"><span class="annottext">(Mult (Unipol k) -&gt; Unipol k) -&gt; Mult (Unipol k) -&gt; Unipol k
 forall a b. (a -&gt; b) -&gt; a -&gt; b
@@ -284,32 +284,32 @@ forall a b c. (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
 </span><span class="hs-identifier hs-var">uncurry</span></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Natural -&gt; Unipol k
 forall r. Unital r =&gt; r -&gt; Natural -&gt; r
 </span><span class="hs-operator hs-var">(^)</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Unipol k, Natural)
-</span><a href="#local-6989586621679250781"><span class="hs-identifier hs-var">fs</span></a></span><span>
-</span><span id="line-62"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679250773"><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250773"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250772"><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250772"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679250779"><span class="hs-identifier hs-var">fs</span></a></span><span>
+</span><span id="line-62"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679250771"><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250771"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250770"><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250770"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-63"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Maybe Natural
 forall d. Euclidean d =&gt; d -&gt; Maybe Natural
 </span><span class="hs-identifier hs-var">degree</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250782"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Natural -&gt; Maybe Natural -&gt; Bool
+</span><a href="#local-6989586621679250780"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Natural -&gt; Maybe Natural -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Maybe Natural
 forall d. Euclidean d =&gt; d -&gt; Maybe Natural
 </span><span class="hs-identifier hs-var">degree</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250780"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250778"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Unipol k
 forall m. Monoidal m =&gt; m
 </span><span class="hs-identifier hs-var">zero</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250782"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679250780"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-64"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250782"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k -&gt; (Unipol k, Unipol k)
+</span><a href="#local-6989586621679250780"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k -&gt; (Unipol k, Unipol k)
 forall r.
 (CoeffRing r, Field r) =&gt;
 Unipol r -&gt; Unipol r -&gt; (Unipol r, Unipol r)
 </span><span class="hs-operator hs-var">`divModUnipol`</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250780"><span class="hs-identifier hs-var">f</span></a></span><span>
-</span><span id="line-65"></span><span>      </span><span id="local-6989586621679250767"><span class="annot"><span class="annottext">pf :: NonEmpty ((Unipol k, Natural), Unipol k)
-</span><a href="#local-6989586621679250767"><span class="hs-identifier hs-var hs-var">pf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250778"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-65"></span><span>      </span><span id="local-6989586621679250765"><span class="annot"><span class="annottext">pf :: NonEmpty ((Unipol k, Natural), Unipol k)
+</span><a href="#local-6989586621679250765"><span class="hs-identifier hs-var hs-var">pf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unipol k
 -&gt; NonEmpty (Unipol k, Natural)
 -&gt; NonEmpty ((Unipol k, Natural), Unipol k)
 forall k.
@@ -318,27 +318,27 @@ Unipol k
 -&gt; NonEmpty (Unipol k, Natural)
 -&gt; NonEmpty ((Unipol k, Natural), Unipol k)
 </span><a href="Algebra.Ring.Fraction.Decomp.html#poweredPartialFraction"><span class="hs-identifier hs-var">poweredPartialFraction</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250772"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Unipol k, Natural)
-</span><a href="#local-6989586621679250781"><span class="hs-identifier hs-var">fs</span></a></span><span>
-</span><span id="line-66"></span><span>      </span><span id="local-6989586621679250765"><span class="annot"><span class="annottext">pows :: NonEmpty (Unipol k, IntMap (Unipol k))
-</span><a href="#local-6989586621679250765"><span class="hs-identifier hs-var hs-var">pows</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621679250770"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Unipol k, Natural)
+</span><a href="#local-6989586621679250779"><span class="hs-identifier hs-var">fs</span></a></span><span>
+</span><span id="line-66"></span><span>      </span><span id="local-6989586621679250763"><span class="annot"><span class="annottext">pows :: NonEmpty (Unipol k, IntMap (Unipol k))
+</span><a href="#local-6989586621679250763"><span class="hs-identifier hs-var hs-var">pows</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-67"></span><span>        </span><span class="annot"><span class="annottext">NonEmpty ((Unipol k, Natural), Unipol k)
-</span><a href="#local-6989586621679250767"><span class="hs-identifier hs-var">pf</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty ((Unipol k, Natural), Unipol k)
+</span><a href="#local-6989586621679250765"><span class="hs-identifier hs-var">pf</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty ((Unipol k, Natural), Unipol k)
 -&gt; (((Unipol k, Natural), Unipol k)
     -&gt; (Unipol k, IntMap (Unipol k)))
 -&gt; NonEmpty (Unipol k, IntMap (Unipol k))
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; (a -&gt; b) -&gt; f b
-</span><span class="hs-operator hs-var">&lt;&amp;&gt;</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679250764"><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250764"><span class="hs-identifier hs-var">fi</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250763"><span class="annot"><span class="annottext">Natural
-</span><a href="#local-6989586621679250763"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250762"><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250762"><span class="hs-identifier hs-var">gi</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">&lt;&amp;&gt;</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679250762"><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250762"><span class="hs-identifier hs-var">fi</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250761"><span class="annot"><span class="annottext">Natural
+</span><a href="#local-6989586621679250761"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250760"><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250760"><span class="hs-identifier hs-var">gi</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-68"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250764"><span class="hs-identifier hs-var">fi</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Int) -&gt; IntMap (Unipol k) -&gt; IntMap (Unipol k)
+</span><a href="#local-6989586621679250762"><span class="hs-identifier hs-var">fi</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Int) -&gt; IntMap (Unipol k) -&gt; IntMap (Unipol k)
 forall a. (Int -&gt; Int) -&gt; IntMap a -&gt; IntMap a
 </span><span class="hs-identifier hs-var">IM.mapKeys</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Natural -&gt; Int
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Natural
-</span><a href="#local-6989586621679250763"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679250761"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall r. Group r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-glyph hs-var">-</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(IntMap (Unipol k) -&gt; IntMap (Unipol k))
 -&gt; IntMap (Unipol k) -&gt; IntMap (Unipol k)
@@ -348,8 +348,8 @@ forall k.
 (Field k, CoeffRing k) =&gt;
 Unipol k -&gt; Unipol k -&gt; IntMap (Unipol k)
 </span><a href="Algebra.Ring.Fraction.Decomp.html#pAdicExpansion"><span class="hs-identifier hs-var">pAdicExpansion</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250762"><span class="hs-identifier hs-var">gi</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250764"><span class="hs-identifier hs-var">fi</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679250760"><span class="hs-identifier hs-var">gi</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250762"><span class="hs-identifier hs-var">fi</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-69"></span><span>   </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Unipol k
 -&gt; NonEmpty (Unipol k, IntMap (Unipol k))
 -&gt; PartialFractionDecomp k
@@ -358,8 +358,8 @@ Unipol k
 -&gt; NonEmpty (Unipol k, IntMap (Unipol k))
 -&gt; PartialFractionDecomp k
 </span><a href="Algebra.Ring.Fraction.Decomp.html#PartialFraction"><span class="hs-identifier hs-var">PartialFraction</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250773"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Unipol k, IntMap (Unipol k))
-</span><a href="#local-6989586621679250765"><span class="hs-identifier hs-var">pows</span></a></span><span>
+</span><a href="#local-6989586621679250771"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Unipol k, IntMap (Unipol k))
+</span><a href="#local-6989586621679250763"><span class="hs-identifier hs-var">pows</span></a></span><span>
 </span><span id="line-70"></span><span>
 </span><span id="line-71"></span><span class="hs-comment">{- | @&#39;pAdicExpansion&#39; f p@ gives a @p@-adic expansion of @f@ by a monic nonconstant polynomial @p@; i.e. \(a_i \in k[X]\) such that \(\deg a_i &lt; \deg p\)_{i &lt; k}, \(\deg f &lt; km\), and:
 
@@ -370,113 +370,113 @@ Unipol k
 &gt;&gt;&gt; pAdicExpansion (#x + 2 :: Unipol Rational) #x
 fromList [(0,2),(1,1)]
 -}</span><span>
-</span><span id="line-80"></span><span id="local-6989586621679250872"><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#pAdicExpansion"><span class="hs-identifier hs-type">pAdicExpansion</span></a></span><span> </span><span class="hs-glyph">::</span><span>
-</span><span id="line-81"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679250872"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679250872"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
-</span><span id="line-82"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250872"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-83"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250872"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-84"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">IntMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250872"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-80"></span><span id="local-6989586621679250870"><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#pAdicExpansion"><span class="hs-identifier hs-type">pAdicExpansion</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679250870"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679250870"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-82"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250870"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-83"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250870"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-84"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">IntMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250870"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span><span>
 </span><span id="line-85"></span><span id="pAdicExpansion"><span class="annot"><span class="annottext">pAdicExpansion :: Unipol k -&gt; Unipol k -&gt; IntMap (Unipol k)
-</span><a href="Algebra.Ring.Fraction.Decomp.html#pAdicExpansion"><span class="hs-identifier hs-var hs-var">pAdicExpansion</span></a></span></span><span> </span><span id="local-6989586621679250758"><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250758"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679250757"><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250757"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Unipol k -&gt; IntMap (Unipol k) -&gt; IntMap (Unipol k)
-</span><a href="#local-6989586621679250756"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="Algebra.Ring.Fraction.Decomp.html#pAdicExpansion"><span class="hs-identifier hs-var hs-var">pAdicExpansion</span></a></span></span><span> </span><span id="local-6989586621679250756"><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250756"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679250755"><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250755"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Unipol k -&gt; IntMap (Unipol k) -&gt; IntMap (Unipol k)
+</span><a href="#local-6989586621679250754"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250758"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">IntMap (Unipol k)
+</span><a href="#local-6989586621679250756"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">IntMap (Unipol k)
 forall a. IntMap a
 </span><span class="hs-identifier hs-var">IM.empty</span></span><span>
 </span><span id="line-86"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-87"></span><span>    </span><span class="hs-glyph">!</span><span id="local-6989586621679250754"><span class="annot"><span class="annottext">degp :: Maybe Natural
-</span><a href="#local-6989586621679250754"><span class="hs-identifier hs-var hs-var">degp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Maybe Natural
+</span><span id="line-87"></span><span>    </span><span class="hs-glyph">!</span><span id="local-6989586621679250752"><span class="annot"><span class="annottext">degp :: Maybe Natural
+</span><a href="#local-6989586621679250752"><span class="hs-identifier hs-var hs-var">degp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Maybe Natural
 forall d. Euclidean d =&gt; d -&gt; Maybe Natural
 </span><span class="hs-identifier hs-var">degree</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250757"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-88"></span><span>    </span><span id="local-6989586621679250756"><span class="annot"><span class="annottext">loop :: Int -&gt; Unipol k -&gt; IntMap (Unipol k) -&gt; IntMap (Unipol k)
-</span><a href="#local-6989586621679250756"><span class="hs-identifier hs-var hs-var">loop</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679250753"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679250753"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679250752"><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250752"><span class="hs-identifier hs-var">ai</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679250751"><span class="annot"><span class="annottext">IntMap (Unipol k)
-</span><a href="#local-6989586621679250751"><span class="hs-identifier hs-var">acc</span></a></span></span><span>
+</span><a href="#local-6989586621679250755"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-88"></span><span>    </span><span id="local-6989586621679250754"><span class="annot"><span class="annottext">loop :: Int -&gt; Unipol k -&gt; IntMap (Unipol k) -&gt; IntMap (Unipol k)
+</span><a href="#local-6989586621679250754"><span class="hs-identifier hs-var hs-var">loop</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679250751"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679250751"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679250750"><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250750"><span class="hs-identifier hs-var">ai</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679250749"><span class="annot"><span class="annottext">IntMap (Unipol k)
+</span><a href="#local-6989586621679250749"><span class="hs-identifier hs-var">acc</span></a></span></span><span>
 </span><span id="line-89"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Maybe Natural
 forall d. Euclidean d =&gt; d -&gt; Maybe Natural
 </span><span class="hs-identifier hs-var">degree</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250752"><span class="hs-identifier hs-var">ai</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Natural -&gt; Maybe Natural -&gt; Bool
+</span><a href="#local-6989586621679250750"><span class="hs-identifier hs-var">ai</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Natural -&gt; Maybe Natural -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Maybe Natural
-</span><a href="#local-6989586621679250754"><span class="hs-identifier hs-var">degp</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621679250752"><span class="hs-identifier hs-var">degp</span></a></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-90"></span><span>        </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Bool
 forall r. DecidableZero r =&gt; r -&gt; Bool
 </span><span class="hs-identifier hs-var">isZero</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250752"><span class="hs-identifier hs-var">ai</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">IntMap (Unipol k)
-</span><a href="#local-6989586621679250751"><span class="hs-identifier hs-var">acc</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Unipol k -&gt; IntMap (Unipol k) -&gt; IntMap (Unipol k)
+</span><a href="#local-6989586621679250750"><span class="hs-identifier hs-var">ai</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">IntMap (Unipol k)
+</span><a href="#local-6989586621679250749"><span class="hs-identifier hs-var">acc</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Unipol k -&gt; IntMap (Unipol k) -&gt; IntMap (Unipol k)
 forall a. Int -&gt; a -&gt; IntMap a -&gt; IntMap a
 </span><span class="hs-identifier hs-var">IM.insert</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679250753"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250752"><span class="hs-identifier hs-var">ai</span></a></span><span> </span><span class="annot"><span class="annottext">IntMap (Unipol k)
-</span><a href="#local-6989586621679250751"><span class="hs-identifier hs-var">acc</span></a></span><span>
+</span><a href="#local-6989586621679250751"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250750"><span class="hs-identifier hs-var">ai</span></a></span><span> </span><span class="annot"><span class="annottext">IntMap (Unipol k)
+</span><a href="#local-6989586621679250749"><span class="hs-identifier hs-var">acc</span></a></span><span>
 </span><span id="line-91"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-92"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679250748"><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250748"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250747"><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250747"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250752"><span class="hs-identifier hs-var">ai</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k -&gt; (Unipol k, Unipol k)
+</span><span id="line-92"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679250746"><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250746"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250745"><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250745"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250750"><span class="hs-identifier hs-var">ai</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Unipol k -&gt; (Unipol k, Unipol k)
 forall r.
 (CoeffRing r, Field r) =&gt;
 Unipol r -&gt; Unipol r -&gt; (Unipol r, Unipol r)
 </span><span class="hs-operator hs-var">`divModUnipol`</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250757"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-93"></span><span>            </span><span class="hs-glyph">!</span><span id="local-6989586621679250746"><span class="annot"><span class="annottext">acc&#39; :: IntMap (Unipol k)
-</span><a href="#local-6989586621679250746"><span class="hs-identifier hs-var hs-var">acc&#39;</span></a></span></span><span>
+</span><a href="#local-6989586621679250755"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-93"></span><span>            </span><span class="hs-glyph">!</span><span id="local-6989586621679250744"><span class="annot"><span class="annottext">acc&#39; :: IntMap (Unipol k)
+</span><a href="#local-6989586621679250744"><span class="hs-identifier hs-var hs-var">acc&#39;</span></a></span></span><span>
 </span><span id="line-94"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Bool
 forall r. DecidableZero r =&gt; r -&gt; Bool
 </span><span class="hs-identifier hs-var">isZero</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250747"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IntMap (Unipol k)
-</span><a href="#local-6989586621679250751"><span class="hs-identifier hs-var">acc</span></a></span><span>
+</span><a href="#local-6989586621679250745"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IntMap (Unipol k)
+</span><a href="#local-6989586621679250749"><span class="hs-identifier hs-var">acc</span></a></span><span>
 </span><span id="line-95"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Unipol k -&gt; IntMap (Unipol k) -&gt; IntMap (Unipol k)
 forall a. Int -&gt; a -&gt; IntMap a -&gt; IntMap a
 </span><span class="hs-identifier hs-var">IM.insert</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679250753"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250747"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">IntMap (Unipol k)
-</span><a href="#local-6989586621679250751"><span class="hs-identifier hs-var">acc</span></a></span><span>
+</span><a href="#local-6989586621679250751"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250745"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">IntMap (Unipol k)
+</span><a href="#local-6989586621679250749"><span class="hs-identifier hs-var">acc</span></a></span><span>
 </span><span id="line-96"></span><span>         </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Unipol k -&gt; IntMap (Unipol k) -&gt; IntMap (Unipol k)
-</span><a href="#local-6989586621679250756"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679250753"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679250754"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679250751"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall r. Additive r =&gt; r -&gt; r -&gt; r
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250748"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">IntMap (Unipol k)
-</span><a href="#local-6989586621679250746"><span class="hs-identifier hs-var">acc&#39;</span></a></span><span>
+</span><a href="#local-6989586621679250746"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">IntMap (Unipol k)
+</span><a href="#local-6989586621679250744"><span class="hs-identifier hs-var">acc&#39;</span></a></span><span>
 </span><span id="line-97"></span><span>
 </span><span id="line-98"></span><span class="hs-comment">-- &gt;&gt;&gt; poweredPartialFraction (#x ^ 3 + 4 * #x^2 - #x - 2 :: Unipol Rational) ((#x, 2) :| [(#x - 1, 1), (#x + 1, 1)])</span><span>
 </span><span id="line-99"></span><span class="hs-comment">-- ((x,2),x + 2) :| [((x - 1,1),1),((x + 1,1),-1)]</span><span>
 </span><span id="line-100"></span><span>
 </span><span id="line-101"></span><span class="hs-comment">-- | Pseudo-partial fraction decomposition</span><span>
 </span><span id="line-102"></span><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#poweredPartialFraction"><span class="hs-identifier hs-type">poweredPartialFraction</span></a></span><span> </span><span class="hs-glyph">::</span><span>
-</span><span id="line-103"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679250878"><span class="annot"><a href="#local-6989586621679250878"><span class="hs-identifier hs-type">k</span></a></span></span><span class="hs-operator">.</span><span>
-</span><span id="line-104"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679250878"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679250878"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-103"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679250876"><span class="annot"><a href="#local-6989586621679250876"><span class="hs-identifier hs-type">k</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-104"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Field</span></span><span> </span><span class="annot"><a href="#local-6989586621679250876"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoeffRing</span></span><span> </span><span class="annot"><a href="#local-6989586621679250876"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
 </span><span id="line-105"></span><span>  </span><span class="hs-comment">-- | Numerator @g@ with \(\deg g &lt; \deg f).</span><span>
-</span><span id="line-106"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250878"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-106"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250876"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-107"></span><span>  </span><span class="hs-comment">-- | Pairwise coprime (partial) factorisation of</span><span>
 </span><span id="line-108"></span><span>  </span><span class="hs-comment">-- denominator \(f = \sum_i f_i^{e_i}\) with each</span><span>
 </span><span id="line-109"></span><span>  </span><span class="hs-comment">-- \(f_i\) monic and non-constant.</span><span>
-</span><span id="line-110"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250878"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-111"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250878"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250878"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-110"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250876"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-111"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250876"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Unipol</span></span><span> </span><span class="annot"><a href="#local-6989586621679250876"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-112"></span><span id="poweredPartialFraction"><span class="annot"><span class="annottext">poweredPartialFraction :: Unipol k
 -&gt; NonEmpty (Unipol k, Natural)
 -&gt; NonEmpty ((Unipol k, Natural), Unipol k)
-</span><a href="Algebra.Ring.Fraction.Decomp.html#poweredPartialFraction"><span class="hs-identifier hs-var hs-var">poweredPartialFraction</span></a></span></span><span> </span><span id="local-6989586621679250744"><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250744"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Unipol k, Natural)
+</span><a href="Algebra.Ring.Fraction.Decomp.html#poweredPartialFraction"><span class="hs-identifier hs-var hs-var">poweredPartialFraction</span></a></span></span><span> </span><span id="local-6989586621679250742"><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250742"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Unipol k, Natural)
  -&gt; [(Unipol k, Natural)] -&gt; ((Unipol k, Natural), Unipol k))
 -&gt; NonEmpty (Unipol k, Natural)
 -&gt; NonEmpty ((Unipol k, Natural), Unipol k)
 forall a b. (NonEmpty a -&gt; [a] -&gt; b) -&gt; NonEmpty a -&gt; NonEmpty b
 </span><a href="Algebra.Ring.Fraction.Decomp.html#scanZipper"><span class="hs-identifier hs-var">scanZipper</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Unipol k, Natural)
 -&gt; [(Unipol k, Natural)] -&gt; ((Unipol k, Natural), Unipol k)
-</span><a href="#local-6989586621679250742"><span class="hs-identifier hs-var">ci</span></a></span><span>
+</span><a href="#local-6989586621679250740"><span class="hs-identifier hs-var">ci</span></a></span><span>
 </span><span id="line-113"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-114"></span><span>    </span><span id="local-6989586621679250741"><span class="annot"><span class="annottext">invert :: (a, Natural) -&gt; Quotient r a
-</span><a href="#local-6989586621679250741"><span class="hs-identifier hs-var hs-var">invert</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679250740"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679250740"><span class="hs-identifier hs-var">fi</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250739"><span class="annot"><span class="annottext">Natural
-</span><a href="#local-6989586621679250739"><span class="hs-identifier hs-var">ei</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-114"></span><span>    </span><span id="local-6989586621679250739"><span class="annot"><span class="annottext">invert :: (a, Natural) -&gt; Quotient r a
+</span><a href="#local-6989586621679250739"><span class="hs-identifier hs-var hs-var">invert</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679250738"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679250738"><span class="hs-identifier hs-var">fi</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250737"><span class="annot"><span class="annottext">Natural
+</span><a href="#local-6989586621679250737"><span class="hs-identifier hs-var">ei</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-115"></span><span>      </span><span class="annot"><span class="annottext">Quotient r a -&gt; Maybe (Quotient r a) -&gt; Quotient r a
 forall a. a -&gt; Maybe a -&gt; a
 </span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Quotient r a
@@ -492,26 +492,26 @@ forall k (r :: k) a.
 (Reifies r a, Euclidean a) =&gt;
 a -&gt; Quotient r a
 </span><span class="hs-identifier hs-var">quotient</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679250740"><span class="hs-identifier hs-var">fi</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Quotient r a -&gt; Natural -&gt; Quotient r a
+</span><a href="#local-6989586621679250738"><span class="hs-identifier hs-var">fi</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Quotient r a -&gt; Natural -&gt; Quotient r a
 forall r. Unital r =&gt; r -&gt; Natural -&gt; r
 </span><span class="hs-operator hs-var">^</span></span><span> </span><span class="annot"><span class="annottext">Natural
-</span><a href="#local-6989586621679250739"><span class="hs-identifier hs-var">ei</span></a></span><span>
-</span><span id="line-116"></span><span>    </span><span id="local-6989586621679250742"><span class="annot"><span class="annottext">ci :: NonEmpty (Unipol k, Natural)
+</span><a href="#local-6989586621679250737"><span class="hs-identifier hs-var">ei</span></a></span><span>
+</span><span id="line-116"></span><span>    </span><span id="local-6989586621679250740"><span class="annot"><span class="annottext">ci :: NonEmpty (Unipol k, Natural)
 -&gt; [(Unipol k, Natural)] -&gt; ((Unipol k, Natural), Unipol k)
-</span><a href="#local-6989586621679250742"><span class="hs-identifier hs-var hs-var">ci</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679250734"><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250734"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250733"><span class="annot"><span class="annottext">Natural
-</span><a href="#local-6989586621679250733"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679250731"><span class="annot"><span class="annottext">[(Unipol k, Natural)]
-</span><a href="#local-6989586621679250731"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679250730"><span class="annot"><span class="annottext">[(Unipol k, Natural)]
-</span><a href="#local-6989586621679250730"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-117"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679250729"><span class="annot"><span class="annottext">fe :: Unipol k
-</span><a href="#local-6989586621679250729"><span class="hs-identifier hs-var hs-var">fe</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250734"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Natural -&gt; Unipol k
+</span><a href="#local-6989586621679250740"><span class="hs-identifier hs-var hs-var">ci</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679250732"><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250732"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679250731"><span class="annot"><span class="annottext">Natural
+</span><a href="#local-6989586621679250731"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679250729"><span class="annot"><span class="annottext">[(Unipol k, Natural)]
+</span><a href="#local-6989586621679250729"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679250728"><span class="annot"><span class="annottext">[(Unipol k, Natural)]
+</span><a href="#local-6989586621679250728"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-117"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679250727"><span class="annot"><span class="annottext">fe :: Unipol k
+</span><a href="#local-6989586621679250727"><span class="hs-identifier hs-var hs-var">fe</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unipol k
+</span><a href="#local-6989586621679250732"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Unipol k -&gt; Natural -&gt; Unipol k
 forall r. Unital r =&gt; r -&gt; Natural -&gt; r
 </span><span class="hs-operator hs-var">^</span></span><span> </span><span class="annot"><span class="annottext">Natural
-</span><a href="#local-6989586621679250733"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><a href="#local-6989586621679250731"><span class="hs-identifier hs-var">e</span></a></span><span>
 </span><span id="line-118"></span><span>       </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250734"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Natural
-</span><a href="#local-6989586621679250733"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679250732"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Natural
+</span><a href="#local-6989586621679250731"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-119"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Unipol k
 -&gt; (forall r. Reifies r (Unipol k) =&gt; Quotient r (Unipol k))
 -&gt; Unipol k
@@ -519,7 +519,7 @@ forall a.
 Euclidean a =&gt;
 a -&gt; (forall r. Reifies r a =&gt; Quotient r a) -&gt; a
 </span><span class="hs-identifier hs-var">withQuotient</span></span><span> </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250729"><span class="hs-identifier hs-var">fe</span></a></span><span> </span><span class="annot"><span class="annottext">((forall r. Reifies r (Unipol k) =&gt; Quotient r (Unipol k))
+</span><a href="#local-6989586621679250727"><span class="hs-identifier hs-var">fe</span></a></span><span> </span><span class="annot"><span class="annottext">((forall r. Reifies r (Unipol k) =&gt; Quotient r (Unipol k))
  -&gt; Unipol k)
 -&gt; (forall r. Reifies r (Unipol k) =&gt; Quotient r (Unipol k))
 -&gt; Unipol k
@@ -531,7 +531,7 @@ forall k (r :: k) a.
 a -&gt; Quotient r a
 </span><span class="hs-identifier hs-var">quotient</span></span><span>
 </span><span id="line-121"></span><span>                </span><span class="annot"><span class="annottext">Unipol k
-</span><a href="#local-6989586621679250744"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><a href="#local-6989586621679250742"><span class="hs-identifier hs-var">g</span></a></span><span>
 </span><span id="line-122"></span><span>                </span><span class="annot"><span class="annottext">Quotient r (Unipol k)
 -&gt; Quotient r (Unipol k) -&gt; Quotient r (Unipol k)
 forall r. Multiplicative r =&gt; r -&gt; r -&gt; r
@@ -563,8 +563,8 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall a r.
 (Euclidean a, Reifies r a) =&gt;
 (a, Natural) -&gt; Quotient r a
-</span><a href="#local-6989586621679250741"><span class="hs-identifier hs-var">invert</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Unipol k, Natural)]
-</span><a href="#local-6989586621679250730"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679250739"><span class="hs-identifier hs-var">invert</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Unipol k, Natural)]
+</span><a href="#local-6989586621679250728"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-123"></span><span>                </span><span class="annot"><span class="annottext">Quotient r (Unipol k)
 -&gt; Quotient r (Unipol k) -&gt; Quotient r (Unipol k)
 forall r. Multiplicative r =&gt; r -&gt; r -&gt; r
@@ -586,47 +586,47 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall a r.
 (Euclidean a, Reifies r a) =&gt;
 (a, Natural) -&gt; Quotient r a
-</span><a href="#local-6989586621679250741"><span class="hs-identifier hs-var">invert</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Unipol k, Natural)]
-</span><a href="#local-6989586621679250731"><span class="hs-identifier hs-var">fs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679250739"><span class="hs-identifier hs-var">invert</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Unipol k, Natural)]
+</span><a href="#local-6989586621679250729"><span class="hs-identifier hs-var">fs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-124"></span><span>          </span><span class="hs-special">)</span><span>
 </span><span id="line-125"></span><span>
-</span><span id="line-126"></span><span id="local-6989586621679250863"><span id="local-6989586621679250864"><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#scanZipper"><span class="hs-identifier hs-type">scanZipper</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679250864"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679250864"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679250863"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679250864"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679250863"><span class="hs-identifier hs-type">b</span></a></span></span></span><span>
+</span><span id="line-126"></span><span id="local-6989586621679250861"><span id="local-6989586621679250862"><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#scanZipper"><span class="hs-identifier hs-type">scanZipper</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679250862"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679250862"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679250861"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679250862"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679250861"><span class="hs-identifier hs-type">b</span></a></span></span></span><span>
 </span><span id="line-127"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Algebra.Ring.Fraction.Decomp.html#scanZipper"><span class="hs-pragma hs-type">scanZipper</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-128"></span><span id="scanZipper"><span class="annot"><span class="annottext">scanZipper :: (NonEmpty a -&gt; [a] -&gt; b) -&gt; NonEmpty a -&gt; NonEmpty b
-</span><a href="Algebra.Ring.Fraction.Decomp.html#scanZipper"><span class="hs-identifier hs-var hs-var">scanZipper</span></a></span></span><span> </span><span id="local-6989586621679250724"><span class="annot"><span class="annottext">NonEmpty a -&gt; [a] -&gt; b
-</span><a href="#local-6989586621679250724"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679250723"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679250723"><span class="hs-identifier hs-var">x0</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679250722"><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679250722"><span class="hs-identifier hs-var">ini</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty a -&gt; [a] -&gt; b
-</span><a href="#local-6989586621679250724"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679250723"><span class="hs-identifier hs-var">x0</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; NonEmpty a
+</span><a href="Algebra.Ring.Fraction.Decomp.html#scanZipper"><span class="hs-identifier hs-var hs-var">scanZipper</span></a></span></span><span> </span><span id="local-6989586621679250722"><span class="annot"><span class="annottext">NonEmpty a -&gt; [a] -&gt; b
+</span><a href="#local-6989586621679250722"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679250721"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679250721"><span class="hs-identifier hs-var">x0</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679250720"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679250720"><span class="hs-identifier hs-var">ini</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty a -&gt; [a] -&gt; b
+</span><a href="#local-6989586621679250722"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679250721"><span class="hs-identifier hs-var">x0</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; NonEmpty a
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679250722"><span class="hs-identifier hs-var">ini</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">b -&gt; [b] -&gt; NonEmpty b
+</span><a href="#local-6989586621679250720"><span class="hs-identifier hs-var">ini</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">b -&gt; [b] -&gt; NonEmpty b
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a] -&gt; [b]
-</span><a href="#local-6989586621679250721"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679250722"><span class="hs-identifier hs-var">ini</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679250723"><span class="hs-identifier hs-var">x0</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679250719"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679250720"><span class="hs-identifier hs-var">ini</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679250721"><span class="hs-identifier hs-var">x0</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-129"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-130"></span><span>    </span><span id="local-6989586621679250721"><span class="annot"><span class="annottext">go :: [a] -&gt; [a] -&gt; [b]
-</span><a href="#local-6989586621679250721"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><span id="line-130"></span><span>    </span><span id="local-6989586621679250719"><span class="annot"><span class="annottext">go :: [a] -&gt; [a] -&gt; [b]
+</span><a href="#local-6989586621679250719"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[a]
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-131"></span><span>    </span><span class="annot"><a href="#local-6989586621679250721"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679250720"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679250720"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679250719"><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679250719"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679250718"><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679250718"><span class="hs-identifier hs-var">rest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty a -&gt; [a] -&gt; b
-</span><a href="#local-6989586621679250724"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679250720"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; NonEmpty a
+</span><span id="line-131"></span><span>    </span><span class="annot"><a href="#local-6989586621679250719"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679250718"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679250718"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679250717"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679250717"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679250716"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679250716"><span class="hs-identifier hs-var">rest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty a -&gt; [a] -&gt; b
+</span><a href="#local-6989586621679250722"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679250718"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; NonEmpty a
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679250719"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679250718"><span class="hs-identifier hs-var">rest</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; [b] -&gt; [b]
+</span><a href="#local-6989586621679250717"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679250716"><span class="hs-identifier hs-var">rest</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; [b] -&gt; [b]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a] -&gt; [b]
-</span><a href="#local-6989586621679250721"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679250719"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679250720"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679250719"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679250717"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679250718"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679250718"><span class="hs-identifier hs-var">rest</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679250716"><span class="hs-identifier hs-var">rest</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-132"></span></pre></body></html>
