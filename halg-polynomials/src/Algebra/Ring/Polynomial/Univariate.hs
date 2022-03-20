@@ -53,7 +53,7 @@ newtype Unipol r = Unipol {runUnipol :: IM.IntMap r}
 
 type role Unipol representational
 
-instance Hashable r => Hashable (Unipol r) where
+instance (DecidableZero r, Hashable r) => Hashable (Unipol r) where
   hashWithSalt p = hashWithSalt p . IM.toList . runUnipol
 
 {- | By this instance, you can use @#x@ for
