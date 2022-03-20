@@ -36,6 +36,7 @@ library
       Algebra.Prelude.Core
       Algebra.Ring.Polynomial
       Algebra.Ring.Polynomial.Labeled
+      Algebra.Ring.Polynomial.List
       Algebra.Ring.Polynomial.Quotient
       Algebra.Ring.Polynomial.Univariate
   other-modules:
@@ -74,6 +75,7 @@ library
     , reflection
     , singletons-presburger
     , sized
+    , strict
     , text
     , type-natural
     , unamb

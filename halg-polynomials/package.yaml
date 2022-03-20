@@ -58,6 +58,7 @@ library:
   - deepseq
   - equational-reasoning
   - ghc-typelits-knownnat
+  - strict
   - singletons-presburger
   - hashable
   - heaps
