@@ -1,5 +1,4 @@
-resolver: nightly-2022-01-27
-compiler-check: match-exact
+resolver: lts-19.0
 
 build:
   haddock-deps: false
@@ -22,6 +21,5 @@ packages:
 - 'halg-polynomials'
 
 extra-deps:
-- algebra-4.3.1
 - control-monad-loop-0.1
 - unamb-0.2.7
