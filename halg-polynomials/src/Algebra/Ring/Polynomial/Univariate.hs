@@ -27,6 +27,9 @@ module Algebra.Ring.Polynomial.Univariate
     liftMapUnipol,
     module Algebra.Ring.Polynomial.Class,
     module Algebra.Ring.Polynomial.Monomial,
+
+    -- * Internal utilities
+    isNormalForm,
   )
 where
 
@@ -49,7 +52,7 @@ import qualified Prelude as P
    please consider using other represntation.
 -}
 newtype Unipol r = Unipol {runUnipol :: IM.IntMap r}
-  deriving (NFData, Foldable)
+  deriving (Eq, NFData, Foldable)
 
 type role Unipol representational
 
@@ -176,10 +179,6 @@ instance CoeffRing r => P.Num (Unipol r) where
 varUnipol :: Unital r => Ordinal 1 -> Unipol r
 varUnipol _ = Unipol $ IM.singleton 1 one
 {-# NOINLINE [1] varUnipol #-}
-
-instance (Eq r, DecidableZero r) => Eq (Unipol r) where
-  (==) = (==) `on` IM.filter (not . isZero) . runUnipol
-  (/=) = (/=) `on` IM.filter (not . isZero) . runUnipol
 
 instance (Ord r, DecidableZero r) => Ord (Unipol r) where
   compare = comparing runUnipol
@@ -418,7 +417,7 @@ liftMapUnipol g f@(Unipol dic) =
    in foldr
         (\a b -> a .*. one + b * u)
         (IM.findWithDefault zero n dic .*. one)
-        [IM.findWithDefault zero k dic | k <- [0 .. n -1]]
+        [IM.findWithDefault zero k dic | k <- [0 .. n - 1]]
 {-# INLINE liftMapUnipol #-}
 
 substWithUnipol ::
@@ -433,7 +432,7 @@ substWithUnipol (|*) g f@(Unipol dic) =
    in foldr
         (\a b -> (a |* one) + (b * u))
         (IM.findWithDefault zero n dic |* one)
-        [IM.findWithDefault zero k dic | k <- [0 .. n -1]]
+        [IM.findWithDefault zero k dic | k <- [0 .. n - 1]]
 {-# INLINE substWithUnipol #-}
 
 -- | The list of coefficients, in ascending order.
@@ -441,7 +440,7 @@ coeffList :: Monoidal k => Unipol k -> [k]
 coeffList (Unipol dic) =
   F.toList $
     IM.unionWith (+) dic $
-      IM.fromList [(n, zero) | n <- [0 .. maybe (- 1) (fst . fst) (IM.maxViewWithKey dic)]]
+      IM.fromList [(n, zero) | n <- [0 .. maybe (-1) (fst . fst) (IM.maxViewWithKey dic)]]
 
 {- | @'cutoff m f@ gives the polynomial \(f\) but with terms
    degree strictly less than \(m\); i.e. \(\sum_{0 \leq i < m} a_i X^i\) for
@@ -453,3 +452,8 @@ cutoff n = C.coerce (fst . IM.split (fromIntegral n) :: IM.IntMap k -> IM.IntMap
 termsUnipol ::
   Unipol k -> IM.IntMap k
 termsUnipol = C.coerce
+
+-- | Checks if all the term is non-zero. Utility function for testing purpose.
+isNormalForm :: DecidableZero k => Unipol k -> Bool
+{-# INLINE isNormalForm #-}
+isNormalForm = all (not . isZero) . runUnipol

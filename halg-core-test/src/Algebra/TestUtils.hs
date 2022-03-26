@@ -33,10 +33,13 @@ import qualified Test.QuickCheck as QC
 import Test.QuickCheck.Instances ()
 import Prelude (($))
 
-liftSNat :: (forall n. KnownNat (n :: Nat) => SNat n -> Property) -> Natural -> Property
+liftSNat :: (forall n. KnownNat (n :: Nat) => SNat n -> x) -> Natural -> x
 liftSNat f i =
   case toSomeSNat i of
     SomeSNat sn -> withKnownNat sn $ f sn
 
-checkForTypeNat :: [Natural] -> (forall n. KnownNat (n :: Nat) => SNat n -> Property) -> Property
+checkForTypeNat ::
+  [Natural] ->
+  (forall n. KnownNat (n :: Nat) => SNat n -> Property) ->
+  Property
 checkForTypeNat as test = forAll (QC.elements as) $ liftSNat test

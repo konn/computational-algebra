@@ -36,6 +36,7 @@ library
       Algebra.Prelude.Core
       Algebra.Ring.Polynomial
       Algebra.Ring.Polynomial.Labeled
+      Algebra.Ring.Polynomial.List
       Algebra.Ring.Polynomial.Quotient
       Algebra.Ring.Polynomial.Univariate
   other-modules:
@@ -74,6 +75,7 @@ library
     , reflection
     , singletons-presburger
     , sized
+    , strict
     , text
     , type-natural
     , unamb
@@ -92,11 +94,13 @@ test-suite halg-polynomials-spec
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      GroebnerSpec
-      PolynomialSpec
-      UnivariateSpec
-      QuotientSpec
+      Algebra.Algorithms.GroebnerSpec
+      Algebra.Ring.Polynomial.ListSpec
+      Algebra.Ring.Polynomial.QuotientSpec
+      Algebra.Ring.Polynomial.UnivariateSpec
+      Algebra.Ring.PolynomialSpec
       Utils
+      Paths_halg_polynomials
   hs-source-dirs:
       test
   default-extensions:
@@ -112,6 +116,8 @@ test-suite halg-polynomials-spec
       TypeInType
       UndecidableInstances
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-tool-depends:
+      tasty-discover:tasty-discover
   build-depends:
       QuickCheck
     , algebra
@@ -121,9 +127,11 @@ test-suite halg-polynomials-spec
     , halg-core
     , halg-core-test
     , halg-polynomials
-    , hspec
-    , hspec-discover
     , matrix
     , sized
+    , tasty
+    , tasty-expected-failure
+    , tasty-hunit
+    , tasty-quickcheck
     , vector
   default-language: Haskell2010

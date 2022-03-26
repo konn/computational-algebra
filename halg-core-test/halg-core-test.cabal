@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9e31175e35b0b93f2f915aa2ec9fcd5a447c3a05722120d942aa470640d42279
+-- hash: 2775958dc78ed62c1a1ec0e22067ce1381c763d699bb7bdd0a3e3095bb179b02
 
 name:           halg-core-test
 version:        0.1.0.0
@@ -53,6 +53,7 @@ library
       Algebra.Field.Finite.Test
       Algebra.Field.Fraction.Test
       Algebra.Field.Prime.Test
+      Algebra.Ring.Euclidean.Quotient.Test
       Algebra.Ring.Ideal.Test
       Algebra.Ring.Polynomial.Monomial.Test
       Algebra.Ring.Polynomial.Test
