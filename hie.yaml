@@ -1,6 +1,6 @@
 cradle:
   stack:
-    stackYaml: stack-8.10.7.yaml
+    stackYaml: stack-9.0.2.yaml
     components:
     - path: "halg-algebraic/src"
       component: "halg-algebraic:lib"

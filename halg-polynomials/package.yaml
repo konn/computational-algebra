@@ -101,23 +101,21 @@ tests:
   halg-polynomials-spec:
     main:                Spec.hs
     source-dirs:         test
-    other-modules:
-    - GroebnerSpec
-    - PolynomialSpec
-    - UnivariateSpec
-    - QuotientSpec
-    - Utils
     ghc-options:
     - -Wall
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    build-tools:
+    - tasty-discover
     dependencies:
     - QuickCheck
     - containers
     - halg-core-test
     - halg-polynomials
-    - hspec
-    - hspec-discover
+    - tasty
+    - tasty-expected-failure
+    - tasty-hunit
+    - tasty-quickcheck
     - matrix
     - vector

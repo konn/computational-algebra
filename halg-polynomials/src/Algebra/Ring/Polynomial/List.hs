@@ -10,6 +10,9 @@
 -- | Multivariate polynomials, expressed as a list of terms with decreasing monomials.
 module Algebra.Ring.Polynomial.List
   ( ListPoly (),
+
+    -- * Internal utility function for testing
+    isNormalForm,
   )
 where
 
@@ -394,3 +397,11 @@ instance
     SV.generate' $ \i ->
       "X_" <> show (ordToNatural i)
   {-# INLINE showsPrec #-}
+
+isNormalForm ::
+  (CoeffRing r, IsMonomialOrder n ord) =>
+  ListPoly r ord n ->
+  Bool
+isNormalForm (ListPoly ts) =
+  not (any (isZero . STuple.fst) ts)
+    && and (zipWith ((>) `on` STuple.snd) ts (drop 1 ts))
