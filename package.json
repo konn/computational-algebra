@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "jsdom": "^23.1.0"
+    "jsdom": "^23.2.0"
   }
 }
